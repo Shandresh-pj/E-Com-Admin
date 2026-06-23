@@ -1,0 +1,74 @@
+
+import { Routes } from '@angular/router';
+
+import { BlankComponent } from './layouts/blank/blank.component';
+import { FullComponent } from './layouts/full/full.component';
+
+import { AuthGuard } from './Securities/Guard/auth.guard';
+import { NonAuthGuard } from './Securities/Guard/nonauth.guard';
+
+export const routes: Routes = [
+
+  // default
+  {
+    path: '',
+    redirectTo: 'authentication/login',
+    pathMatch: 'full'
+  },
+
+  // Public pages
+  {
+    path: 'authentication',
+    component: BlankComponent,
+    canMatch: [NonAuthGuard],
+
+    loadChildren: () =>
+      import('./pages/authentication/authentication.routes')
+      .then(m => m.AuthenticationRoutes)
+  },
+
+  // Protected pages
+  {
+    path: '',
+    component: FullComponent,
+    canMatch: [AuthGuard],
+
+    children: [
+
+      {
+        path:'dashboard',
+        loadChildren:() =>
+          import('./pages/pages.routes')
+          .then(m => m.PagesRoutes)
+      },
+
+      {
+        path:'ui-components',
+        loadChildren:() =>
+          import('./pages/ui-components/ui-components.routes')
+          .then(m => m.UiComponentsRoutes)
+      },
+
+      {
+        path:'extra',
+        loadChildren:() =>
+          import('./pages/extra/extra.routes')
+          .then(m => m.ExtraRoutes)
+      },
+
+      {
+        path:'components',
+        loadChildren:() =>
+          import('./components/components.routes')
+          .then(m => m.ComponentsRoutes)
+      }
+
+    ]
+  },
+
+  {
+    path:'**',
+    redirectTo:'authentication/login'
+  }
+
+];

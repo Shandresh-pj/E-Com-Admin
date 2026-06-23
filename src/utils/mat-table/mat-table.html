@@ -1,0 +1,84 @@
+<div class="mat-elevation-z8">
+
+  <table mat-table [dataSource]="dataSource" matSort>
+
+    @for (
+    column of columns;
+    track column.columnDef
+    ) {
+
+    <ng-container [matColumnDef]="column.columnDef">
+
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>
+        {{column.header}}
+      </th>
+
+      <td mat-cell *matCellDef="let row">
+        {{row[column.columnDef]}}
+      </td>
+
+    </ng-container>
+
+    }
+    @if(Extra_Column){
+      <ng-container matColumnDef="Companies">
+    
+        <th mat-header-cell *matHeaderCellDef>
+          Company
+        </th>
+        <td mat-cell *matCellDef="let row">
+        <button mat-icon-button color="primary" (click)="Add(row)">
+          <mat-icon class="Icons text-primary">
+            account_circle
+          </mat-icon>
+        </button>
+        <button mat-icon-button color="primary" (click)="View(row)">
+          <mat-icon class="Icons text-success">
+            visibility
+          </mat-icon>
+        </button>
+        </td>
+    
+      </ng-container>
+    }
+
+
+    @if(showAction){
+
+    <ng-container matColumnDef="action">
+
+      <th mat-header-cell *matHeaderCellDef>
+        Action
+      </th>
+
+      <td mat-cell *matCellDef="let row">
+
+        <button mat-icon-button color="primary" (click)="edit(row)">
+          <mat-icon class="Icons text-primary">
+            edit
+          </mat-icon>
+        </button>
+
+        <button mat-icon-button color="warn" (click)="delete(row)">
+          <mat-icon class="Icons text-danger">
+            delete
+          </mat-icon>
+        </button>
+
+      </td>
+
+    </ng-container>
+
+    }
+
+
+    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+
+    <tr mat-row *matRowDef="let row; columns:displayedColumns"></tr>
+
+  </table>
+
+  <mat-paginator [pageSizeOptions]="[10,25,100]" showFirstLastButtons>
+  </mat-paginator>
+
+</div>

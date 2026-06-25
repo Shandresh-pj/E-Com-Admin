@@ -64,7 +64,7 @@ this.dataSource.data=value || [];
 
 
 @Output()deleteClick=new EventEmitter<any>();
-
+@Input() extraColumnHeader: string = '';
 displayedColumns:string[]=[];
 dataSource=new MatTableDataSource<any>();
 

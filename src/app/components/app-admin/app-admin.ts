@@ -62,6 +62,7 @@ export class AppAdmin {
   Companies_Form : boolean = false;
 
   Update_Button : boolean = false;
+
   SelectedComapanyId: any;
 
 constructor(private fb: FormBuilder, 
@@ -77,8 +78,17 @@ constructor(private fb: FormBuilder,
     email : ['', [Validators.required, Validators.email]],
     phone : ['',Validators.required],
     address : [''],
-    gst_number : ['']
+    gst_number : [''],
+    role_id:[2]
   })
+
+  // this.BranchForm = fb.group({
+  //   company_id : ['', Validators.required],
+  //   name : ['', Validators.required],
+  //   phone : ['',Validators.required],
+  //   email : ['', [Validators.required,Validators.email]],
+  //   location : ['']
+  // })
 }
 
 ngOnInit() {
@@ -113,6 +123,7 @@ getUser(){
 }
 
 
+
 editUser(user: any) {
   this.Companies_Form = true;
   this.Update_Button = true;
@@ -128,18 +139,13 @@ console.log("user",user)
   this.SelectedComapanyId = user?.id
   console.log("id",this.SelectedComapanyId )
 
-  // this.commonService.putApi('companies/{user?.id}',payload).subscribe({
-  //   next:(res:any)=>{
-  //     this.alert.success("Comapany Updated Successfully")
-  //   }
-  // })
 }
 
 deleteUser(user: any) {
   console.log('Delete User', user);
   this.SelectedComapanyId = user?.id
   this.commonService
-    .deleteApi(`auth/delete/${this.SelectedComapanyId}`)
+    .deleteApi(`companies/${this.SelectedComapanyId}`)
     .subscribe({
 
       next: (res: any) => {

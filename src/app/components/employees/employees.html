@@ -5,14 +5,14 @@
         <div class="header-container">
 
             <mat-card-title class="m-b-0">
-                Branch Access
+                Employees Access
             </mat-card-title>
 
-            @if (!Branch_Forms) {
+            @if (!Employee_Forms) {
 
             <button mat-flat-button color="primary" (click)="AddNewUser()">
 
-                Add New
+                Add New Employees
 
             </button>
 
@@ -22,11 +22,11 @@
 
     </mat-card-header>
 
-    @if (!Branch_Forms) {
+    @if (!Employee_Forms) {
 
     <mat-card-content class="b-t-1">
 
-        <app-mat-table [columns]="tableColumns" [tableData]="Branch" [showAction]="true" [Extra_Column]="false"
+        <app-mat-table [columns]="tableColumns" [tableData]="Employees" [showAction]="true" [Extra_Column]="false"
             (editClick)="editUser($event)" (deleteClick)="deleteUser($event)">
         </app-mat-table>
 
@@ -38,7 +38,7 @@
 
     <mat-card-content class="b-t-1">
 
-        <form [formGroup]="BranchForm">
+        <form [formGroup]="EmployeeForm">
 
             <div class="row">
                 <div class="col-lg-4">
@@ -52,10 +52,32 @@
                     </mat-form-field>
                   </div>
 
+                  <div class="col-lg-4">
+                    <mat-label class="f-w-600 m-b-8 d-block">Branch</mat-label>
+                    <mat-form-field appearance="outline" class="w-100">
+                      <mat-select formControlName="branch_id" placeholder="Select Your Branch">
+                        @for(option of Branch; track option.id) {
+                        <mat-option [value]="option.id">{{option.name}}</mat-option>
+                        }
+                      </mat-select>
+                    </mat-form-field>
+                  </div>
+
+                  <div class="col-lg-4">
+                    <mat-label class="f-w-600 m-b-8 d-block">Role</mat-label>
+                    <mat-form-field appearance="outline" class="w-100">
+                      <mat-select formControlName="role_id" placeholder="Select Your Role">
+                        @for(option of Roles; track option.id) {
+                        <mat-option [value]="option.id">{{option.name}}</mat-option>
+                        }
+                      </mat-select>
+                    </mat-form-field>
+                  </div>
+
                 <div class="col-lg-4">
 
                     <mat-label class="f-w-600 m-b-8 d-block">
-                        Branch Name
+                        Employee Name
                     </mat-label>
 
                     <mat-form-field appearance="outline" class="w-100">
@@ -74,7 +96,7 @@
 
                     <mat-form-field appearance="outline" class="w-100">
 
-                        <input matInput formControlName="phone" placeholder="Enter Mobile Number">
+                        <input matInput formControlName="mobilenumber" placeholder="Enter Mobile Number">
 
                     </mat-form-field>
 
@@ -94,20 +116,6 @@
 
                 </div>
 
-                <div class="col-lg-4">
-
-                    <mat-label class="f-w-600 m-b-8 d-block">
-                        Address
-                    </mat-label>
-
-                    <mat-form-field appearance="outline" class="w-100">
-
-                        <input matInput formControlName="location" placeholder="Enter Your Address">
-
-                    </mat-form-field>
-
-                </div>
-
             </div>
 
             <div class="m-t-12">
@@ -118,9 +126,9 @@
 
                 </button>
 
-                <button mat-flat-button color="primary" (click)="submit(BranchForm)">
+                <button mat-flat-button color="primary" (click)="submit(EmployeeForm)">
 
-                    {{Update_button ? 'Update' : 'Submit'}}
+                    {{UpdateButton ? 'Update' : 'Submit'}}
 
                 </button>
 

@@ -2,6 +2,7 @@ import { Routes } from '@angular/router';
 import { ForgetPassword } from './forget-password/forget-password';
 import { AppAdmin } from './app-admin/app-admin';
 import { Branch } from './branch/branch';
+import { Employees } from './employees/employees';
 
 export const ComponentsRoutes: Routes = [
   {
@@ -36,4 +37,15 @@ export const ComponentsRoutes: Routes = [
         ],
       },
   },
+  {
+    path: 'employees',
+    component: Employees,
+    data: {
+        title: 'Employees',
+        urls: [
+          { title: 'Employees', url: '/components/employees' },
+        ],
+      },
+  },
+ 
 ];

@@ -7,6 +7,13 @@ import { Roles } from './roles/roles';
 import { RoleAccess } from './role-access/role-access';
 import { Profile } from './profile/profile';
 import { MenuBar } from './menu-bar/menu-bar';
+import { Status } from './status/status';
+import { ProductAttribute } from './product-attribute/product-attribute';
+import { AttributeValue } from './attribute-value/attribute-value';
+import { Category } from './category/category';
+import { Product } from './product/product';
+import { Order } from './order/order';
+import { ChangePassword } from './change-password/change-password';
 
 export const ComponentsRoutes: Routes = [
   {
@@ -91,5 +98,75 @@ export const ComponentsRoutes: Routes = [
         ],
       },
   },
- 
+  {
+    path: 'status',
+    component: Status,
+    data: {
+        title: 'Status',
+        urls: [
+          { title: 'Status', url: '/components/status' },
+        ],
+      },
+  },
+  {
+    path: 'product-attribute',
+    component: ProductAttribute,
+    data: {
+        title: 'Product Attribute',
+        urls: [
+          { title: 'Product Attribute', url: '/components/product-attribute' },
+        ],
+      },
+  },
+  {
+    path: 'attribute-value',
+    component: AttributeValue,
+    data: {
+        title: 'Attribute Value',
+        urls: [
+          { title: 'Attribute Value', url: '/components/attribute-value' },
+        ],
+      },
+  },
+  {
+    path: 'category',
+    component: Category,
+    data: {
+        title: 'Category',
+        urls: [
+          { title: 'Category', url: '/components/category' },
+        ],
+      },
+  },
+  {
+    path: 'product',
+    component: Product,
+    data: {
+        title: 'Product',
+        urls: [
+          { title: 'Product', url: '/components/product' },
+        ],
+      },
+  },
+  {
+    path: 'order',
+    component: Order,
+    data: {
+        title: 'Order',
+        urls: [
+          { title: 'Order', url: '/components/order' },
+        ],
+      },
+  },
+  {
+    path: 'change-password',
+    component: ChangePassword,
+    data: {
+        title: 'Change Password',
+        urls: [
+          { title: 'Change Password', url: '/components/change-password' },
+        ],
+      },
+  },
+
 ];

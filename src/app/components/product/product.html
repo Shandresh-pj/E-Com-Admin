@@ -1,0 +1,230 @@
+<mat-card class="cardWithShadow theme-card">
+
+    <mat-card-header>
+
+        <div class="header-container">
+
+            <mat-card-title class="m-b-0">
+                Products
+            </mat-card-title>
+
+            @if (!Product_Forms) {
+            <button mat-flat-button color="primary" (click)="AddNewUser()">
+                Add New Product
+            </button>
+            }
+
+        </div>
+
+    </mat-card-header>
+
+    @if (!Product_Forms) {
+    <mat-card-content class="b-t-1">
+
+        <app-mat-table [columns]="tableColumns" [tableData]="Products" [showAction]="true" [Extra_Column]="false"
+            (editClick)="editUser($event)" (deleteClick)="deleteUser($event)">
+        </app-mat-table>
+
+    </mat-card-content>
+    }
+    @else {
+    <mat-card-content class="b-t-1">
+
+        <form [formGroup]="ProductForm">
+            <div class="row">
+                <div class="col-lg-4">
+                    <mat-label class="f-w-600 m-b-8 d-block">Product Name</mat-label>
+                    <mat-form-field appearance="outline" class="w-100">
+                        <input matInput formControlName="name" placeholder="Enter Product Name">
+                    </mat-form-field>
+                </div>
+
+                <div class="col-lg-4">
+                    <mat-label class="f-w-600 m-b-8 d-block">Category</mat-label>
+                    <mat-form-field appearance="outline" class="w-100">
+                        <mat-select formControlName="category" placeholder="Select Category">
+                            @for(option of Categories; track option.id) {
+                            <mat-option [value]="option.name">{{option.name}}</mat-option>
+                            }
+                        </mat-select>
+                    </mat-form-field>
+                </div>
+
+                <div class="col-lg-4">
+                    <mat-label class="f-w-600 m-b-8 d-block">Product Type</mat-label>
+                    <mat-form-field appearance="outline" class="w-100">
+                        <mat-select formControlName="product_type" (selectionChange)="onProductTypeChange($event.value)">
+                            <mat-option value="simple">Simple</mat-option>
+                            <mat-option value="variant">Variant</mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                </div>
+
+                <div class="col-lg-4">
+                    <mat-label class="f-w-600 m-b-8 d-block">Price</mat-label>
+                    <mat-form-field appearance="outline" class="w-100">
+                        <input matInput type="number" formControlName="price" placeholder="Enter Price">
+                    </mat-form-field>
+                </div>
+
+                <div class="col-lg-4">
+                    <mat-label class="f-w-600 m-b-8 d-block">Stock</mat-label>
+                    <mat-form-field appearance="outline" class="w-100">
+                        <input matInput type="number" formControlName="stock_in_hand" placeholder="Enter Stock">
+                    </mat-form-field>
+                </div>
+
+                <div class="col-lg-4">
+                    <mat-label class="f-w-600 m-b-8 d-block">Barcode</mat-label>
+                    <mat-form-field appearance="outline" class="w-100">
+                        <input matInput formControlName="barcode" placeholder="Enter Barcode">
+                    </mat-form-field>
+                </div>
+
+                <div class="col-lg-4">
+                    <mat-label class="f-w-600 m-b-8 d-block">Status</mat-label>
+                    <mat-form-field appearance="outline" class="w-100">
+                        <mat-select formControlName="status" placeholder="Select Status">
+                            @for(option of Statuses; track option.Id) {
+                            <mat-option [value]="option.StatusCode">{{option.StatusCode}}</mat-option>
+                            }
+                        </mat-select>
+                    </mat-form-field>
+                </div>
+
+                <div class="col-lg-8">
+                    <mat-label class="f-w-600 m-b-8 d-block">Description</mat-label>
+                    <mat-form-field appearance="outline" class="w-100">
+                        <textarea matInput formControlName="description" placeholder="Enter Description" rows="3"></textarea>
+                    </mat-form-field>
+                </div>
+
+                <div class="col-lg-4">
+                    <mat-label class="f-w-600 m-b-8 d-block">Main Image</mat-label>
+                    <input type="file" accept="image/*" (change)="detectImage($event)">
+                    @if (imagePreviewUrl || existingImageUrl) {
+                    <div class="m-t-8">
+                        <img [src]="imagePreviewUrl || existingImageUrl" alt="Product Image" style="max-width: 100px; max-height: 100px;">
+                        <button mat-icon-button color="warn" (click)="removeImage()" type="button">
+                            <mat-icon>delete</mat-icon>
+                        </button>
+                    </div>
+                    }
+                </div>
+
+                <div class="col-lg-4">
+                    <mat-label class="f-w-600 m-b-8 d-block">Gallery Images</mat-label>
+                    <input type="file" accept="image/*" multiple (change)="detectGalleryFiles($event)">
+                    <div class="m-t-8 d-flex" style="gap: 8px; flex-wrap: wrap;">
+                        @for(img of ExistingGalleryImages; track $index) {
+                        <div>
+                            <img [src]="img" alt="Gallery Image" style="max-width: 80px; max-height: 80px;">
+                            <button mat-icon-button color="warn" (click)="removeExistingGalleryImage($index)" type="button">
+                                <mat-icon>delete</mat-icon>
+                            </button>
+                        </div>
+                        }
+                        @for(img of GalleryPreviews; track $index) {
+                        <div>
+                            <img [src]="img" alt="New Gallery Image" style="max-width: 80px; max-height: 80px;">
+                            <button mat-icon-button color="warn" (click)="removeNewGalleryImage($index)" type="button">
+                                <mat-icon>delete</mat-icon>
+                            </button>
+                        </div>
+                        }
+                    </div>
+                </div>
+
+                <div class="col-lg-4">
+                    <mat-label class="f-w-600 m-b-8 d-block">Video</mat-label>
+                    <input type="file" accept="video/*" (change)="detectVideo($event)">
+                    @if (videoPreviewUrl || existingVideoUrl) {
+                    <div class="m-t-8">
+                        <video [src]="videoPreviewUrl || existingVideoUrl" controls style="max-width: 160px;"></video>
+                        <button mat-icon-button color="warn" (click)="removeVideo()" type="button">
+                            <mat-icon>delete</mat-icon>
+                        </button>
+                    </div>
+                    }
+                </div>
+            </div>
+
+            @if (ProductForm.get('product_type')?.value === 'variant') {
+            <div class="m-t-16">
+                <div class="header-container">
+                    <mat-label class="f-w-600">Variants</mat-label>
+                    <button mat-stroked-button type="button" (click)="addVariant()">Add Variant</button>
+                </div>
+
+                <div formArrayName="variants">
+                    @for(variant of variants.controls; track $index) {
+                    <div class="row" [formGroupName]="$index">
+                        <div class="col-lg-3">
+                            <mat-label class="f-w-600 m-b-8 d-block">Attribute</mat-label>
+                            <mat-form-field appearance="outline" class="w-100">
+                                <mat-select formControlName="ProductAttributeId"
+                                    (selectionChange)="getAttributeValuesForRow($event.value, $index)">
+                                    @for(option of ProductAttributes; track option.Id) {
+                                    <mat-option [value]="option.Id">{{option.Name}}</mat-option>
+                                    }
+                                </mat-select>
+                            </mat-form-field>
+                        </div>
+
+                        <div class="col-lg-3">
+                            <mat-label class="f-w-600 m-b-8 d-block">Value</mat-label>
+                            <mat-form-field appearance="outline" class="w-100">
+                                <mat-select formControlName="ProductAttributeValueId">
+                                    @for(option of AttributeValuesByRow[$index]; track option.Id) {
+                                    <mat-option [value]="option.Id">{{option.Name}}</mat-option>
+                                    }
+                                </mat-select>
+                            </mat-form-field>
+                        </div>
+
+                        <div class="col-lg-2">
+                            <mat-label class="f-w-600 m-b-8 d-block">Price</mat-label>
+                            <mat-form-field appearance="outline" class="w-100">
+                                <input matInput type="number" formControlName="Price">
+                            </mat-form-field>
+                        </div>
+
+                        <div class="col-lg-2">
+                            <mat-label class="f-w-600 m-b-8 d-block">Stock</mat-label>
+                            <mat-form-field appearance="outline" class="w-100">
+                                <input matInput type="number" formControlName="Stock">
+                            </mat-form-field>
+                        </div>
+
+                        <div class="col-lg-1">
+                            <mat-label class="f-w-600 m-b-8 d-block">Barcode</mat-label>
+                            <mat-form-field appearance="outline" class="w-100">
+                                <input matInput formControlName="Barcode">
+                            </mat-form-field>
+                        </div>
+
+                        <div class="col-lg-1 d-flex align-items-center">
+                            <button mat-icon-button color="warn" (click)="removeVariant($index)" type="button">
+                                <mat-icon>delete</mat-icon>
+                            </button>
+                        </div>
+                    </div>
+                    }
+                </div>
+            </div>
+            }
+
+            <div class="m-t-12">
+                <button mat-stroked-button class="me-3 Cancel_Button" (click)="cancelProduct()">
+                    Cancel
+                </button>
+                <button mat-flat-button color="primary" (click)="submit(ProductForm)">
+                    {{Update_button ? 'Update' : 'Submit'}}
+                </button>
+            </div>
+        </form>
+
+    </mat-card-content>
+    }
+
+</mat-card>

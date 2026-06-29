@@ -1,0 +1,63 @@
+<mat-card class="cardWithShadow theme-card">
+
+    <mat-card-header>
+
+        <div class="header-container">
+
+            <mat-card-title class="m-b-0">
+                Product Attributes
+            </mat-card-title>
+
+            @if (!ProductAttribute_Forms) {
+            <button mat-flat-button color="primary" (click)="AddNewUser()">
+                Add New Attribute
+            </button>
+            }
+
+        </div>
+
+    </mat-card-header>
+
+    @if (!ProductAttribute_Forms) {
+    <mat-card-content class="b-t-1">
+
+        <app-mat-table [columns]="tableColumns" [tableData]="ProductAttributes" [showAction]="true" [Extra_Column]="false"
+            (editClick)="editUser($event)" (deleteClick)="deleteUser($event)">
+        </app-mat-table>
+
+    </mat-card-content>
+    }
+    @else {
+    <mat-card-content class="b-t-1">
+
+        <form [formGroup]="ProductAttributeForm">
+            <div class="row">
+                <div class="col-lg-4">
+                    <mat-label class="f-w-600 m-b-8 d-block">Attribute Code</mat-label>
+                    <mat-form-field appearance="outline" class="w-100">
+                        <input matInput formControlName="AttributeNameCode" placeholder="Enter Attribute Code">
+                    </mat-form-field>
+                </div>
+
+                <div class="col-lg-4">
+                    <mat-label class="f-w-600 m-b-8 d-block">Name</mat-label>
+                    <mat-form-field appearance="outline" class="w-100">
+                        <input matInput formControlName="Name" placeholder="Enter Attribute Name">
+                    </mat-form-field>
+                </div>
+            </div>
+
+            <div class="m-t-12">
+                <button mat-stroked-button class="me-3 Cancel_Button" (click)="cancelProductAttribute()">
+                    Cancel
+                </button>
+                <button mat-flat-button color="primary" (click)="submit(ProductAttributeForm)">
+                    {{Update_button ? 'Update' : 'Submit'}}
+                </button>
+            </div>
+        </form>
+
+    </mat-card-content>
+    }
+
+</mat-card>

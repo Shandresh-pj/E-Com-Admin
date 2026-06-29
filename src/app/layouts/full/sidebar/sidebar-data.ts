@@ -47,6 +47,54 @@ export const navItems: NavItem[] = [
     bgcolor: 'success',
   },
 
+  { navCap: 'Catalog' },
+  {
+    displayName: 'Product Attribute',
+    iconName: 'tag',
+    route: '/components/product-attribute',
+    bgcolor: 'primary',
+  },
+  {
+    displayName: 'Attribute Value',
+    iconName: 'list-details',
+    route: '/components/attribute-value',
+    bgcolor: 'warning',
+  },
+  {
+    displayName: 'Category',
+    iconName: 'category',
+    route: '/components/category',
+    bgcolor: 'success',
+  },
+  {
+    displayName: 'Product',
+    iconName: 'box',
+    route: '/components/product',
+    bgcolor: 'error',
+  },
+
+  { navCap: 'Sales' },
+  {
+    displayName: 'Order',
+    iconName: 'shopping-cart',
+    route: '/components/order',
+    bgcolor: 'primary',
+  },
+
+  { navCap: 'Settings' },
+  {
+    displayName: 'Status',
+    iconName: 'list-check',
+    route: '/components/status',
+    bgcolor: 'warning',
+  },
+  {
+    displayName: 'Change Password',
+    iconName: 'lock',
+    route: '/components/change-password',
+    bgcolor: 'success',
+  },
+
 //   {
 //     navCap: 'Apps',
 //   },

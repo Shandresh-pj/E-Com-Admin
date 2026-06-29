@@ -1,0 +1,61 @@
+<mat-card class="cardWithShadow theme-card">
+
+    <mat-card-header>
+        <div class="header-container">
+
+            <mat-card-title class="m-b-0">
+                Profile
+            </mat-card-title>
+        </div>
+    </mat-card-header>
+    <mat-card-content class="b-t-1">
+    <form [formGroup]="ProfileForm">
+        <div class="row">
+            <div class="col-lg-4 col-md-6">
+                <mat-label class="f-w-600 m-b-8 d-block">
+                     Name
+                </mat-label>
+                <mat-form-field appearance="outline" class="w-100">
+                    <input matInput formControlName="name" placeholder="Enter Name">
+                </mat-form-field>
+            </div>
+
+            <div class="col-lg-4 col-md-6">
+                <mat-label class="f-w-600 m-b-8 d-block">
+                    Email
+                </mat-label>
+                <mat-form-field appearance="outline" class="w-100">
+                    <input matInput formControlName="email" placeholder="Enter Email">
+                </mat-form-field>
+            </div>
+
+            <div class="col-lg-4 col-md-6">
+                <mat-label class="f-w-600 m-b-8 d-block">
+                    Mobile Number
+                </mat-label>
+                <mat-form-field appearance="outline" class="w-100">
+                    <input matInput formControlName="mobilenumber" placeholder="Enter Mobile Number">
+                </mat-form-field>
+            </div>
+
+            <div class="col-lg-4 col-md-6">
+                <mat-label class="f-w-600 m-b-8 d-block">
+                    User Type
+                </mat-label>
+                <mat-form-field appearance="outline" class="w-100">
+                    <input matInput formControlName="userType" placeholder="Enter User Type">
+                </mat-form-field>
+            </div>
+
+            <div class="col-lg-4 col-md-6">
+                <mat-label class="f-w-600 m-b-8 d-block">
+                    Address
+                </mat-label>
+                <mat-form-field appearance="outline" class="w-100">
+                    <input matInput formControlName="address" placeholder="Enter Address">
+                </mat-form-field>
+            </div>
+        </div>
+    </form>
+</mat-card-content>
+</mat-card>

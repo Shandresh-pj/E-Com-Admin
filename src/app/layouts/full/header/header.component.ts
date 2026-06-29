@@ -41,4 +41,8 @@ export class HeaderComponent {
     this.authService.logout();
     this.router.navigate(['/authentication/login']);
   }
+
+  ProfilePage(){
+    this.router.navigate(['/components/profile']);
+  }
 }

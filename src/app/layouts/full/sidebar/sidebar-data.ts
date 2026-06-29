@@ -38,6 +38,22 @@ export const navItems: NavItem[] = [
     route: '/components/employees',
     bgcolor: 'success',
   },
+  {
+    navCap: 'Roles',
+  },
+  {
+    displayName: 'App Role Access',
+    iconName: 'Badge',
+    route: '/components/role-access',
+    bgcolor: 'warning',
+  },
+  {
+    displayName: 'App Roles',
+    iconName: 'Badge',
+    route: '/components/roles',
+    bgcolor: 'success',
+  },
+ 
 
   { navCap: 'Forgot Password'},
   {

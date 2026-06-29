@@ -91,5 +91,25 @@ export const ComponentsRoutes: Routes = [
         ],
       },
   },
+  {
+    path: 'roles',
+    component: MenuBar,
+    data: {
+        title: 'Roles',
+        urls: [
+          { title: 'Roles', url: '/components/roles' },
+        ],
+      },
+  },
+  {
+    path: 'role-access',
+    component: MenuBar,
+    data: {
+        title: 'Role Access',
+        urls: [
+          { title: 'Role Access', url: '/components/role-access' },
+        ],
+      },
+  },
  
 ];

@@ -76,6 +76,12 @@
 
     <tr mat-row *matRowDef="let row; columns:displayedColumns"></tr>
 
+    <tr class="mat-no-data-row" *matNoDataRow>
+      <td class="no-data-cell" [attr.colspan]="displayedColumns.length">
+        No records found
+      </td>
+    </tr>
+
   </table>
 
   <mat-paginator [pageSizeOptions]="[10,25,100]" showFirstLastButtons>

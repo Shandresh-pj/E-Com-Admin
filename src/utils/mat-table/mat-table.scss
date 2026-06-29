@@ -121,3 +121,10 @@
     border: 1px solid blue;
     border-radius: 10px;
   }
+
+  .no-data-cell {
+    text-align: center;
+    padding: 24px 16px;
+    color: rgba(0, 0, 0, 0.5);
+    font-style: italic;
+  }

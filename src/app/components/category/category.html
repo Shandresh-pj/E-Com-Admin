@@ -1,0 +1,101 @@
+<mat-card class="cardWithShadow theme-card">
+
+    <mat-card-header>
+
+        <div class="header-container">
+
+            <mat-card-title class="m-b-0">
+                Categories
+            </mat-card-title>
+
+            @if (!Category_Forms) {
+            <button mat-flat-button color="primary" (click)="AddNewUser()">
+                Add New Category
+            </button>
+            }
+
+        </div>
+
+    </mat-card-header>
+
+    @if (!Category_Forms) {
+    <mat-card-content class="b-t-1">
+
+        <app-mat-table [columns]="tableColumns" [tableData]="Categories" [showAction]="true" [Extra_Column]="false"
+            (editClick)="editUser($event)" (deleteClick)="deleteUser($event)">
+        </app-mat-table>
+
+    </mat-card-content>
+    }
+    @else {
+    <mat-card-content class="b-t-1">
+
+        <form [formGroup]="CategoryForm">
+            <div class="row">
+                <div class="col-lg-4">
+                    <mat-label class="f-w-600 m-b-8 d-block">Category Name</mat-label>
+                    <mat-form-field appearance="outline" class="w-100">
+                        <input matInput formControlName="name" placeholder="Enter Category Name">
+                    </mat-form-field>
+                </div>
+
+                <div class="col-lg-4">
+                    <mat-label class="f-w-600 m-b-8 d-block">Parent Category</mat-label>
+                    <mat-form-field appearance="outline" class="w-100">
+                        <mat-select formControlName="parent_id" placeholder="Select Parent Category (optional)">
+                            <mat-option [value]="null">No Parent</mat-option>
+                            @for(option of Categories; track option.id) {
+                            @if(option.id !== SelectedCategoryId) {
+                            <mat-option [value]="option.id">{{option.name}}</mat-option>
+                            }
+                            }
+                        </mat-select>
+                    </mat-form-field>
+                </div>
+
+                <div class="col-lg-4">
+                    <mat-label class="f-w-600 m-b-8 d-block">Status</mat-label>
+                    <mat-form-field appearance="outline" class="w-100">
+                        <mat-select formControlName="StatusId" placeholder="Select Status">
+                            @for(option of Statuses; track option.Id) {
+                            <mat-option [value]="option.Id">{{option.StatusCode}}</mat-option>
+                            }
+                        </mat-select>
+                    </mat-form-field>
+                </div>
+
+                <div class="col-lg-8">
+                    <mat-label class="f-w-600 m-b-8 d-block">Description</mat-label>
+                    <mat-form-field appearance="outline" class="w-100">
+                        <textarea matInput formControlName="description" placeholder="Enter Description" rows="3"></textarea>
+                    </mat-form-field>
+                </div>
+
+                <div class="col-lg-4">
+                    <mat-label class="f-w-600 m-b-8 d-block">Category Image</mat-label>
+                    <input type="file" accept="image/*" (change)="detectFiles($event)">
+                    @if (imagePreviewUrl || existingImageUrl) {
+                    <div class="m-t-8">
+                        <img [src]="imagePreviewUrl || existingImageUrl" alt="Category Image" style="max-width: 120px; max-height: 120px;">
+                        <button mat-icon-button color="warn" (click)="removeImage()" type="button">
+                            <mat-icon>delete</mat-icon>
+                        </button>
+                    </div>
+                    }
+                </div>
+            </div>
+
+            <div class="m-t-12">
+                <button mat-stroked-button class="me-3 Cancel_Button" (click)="cancelCategory()">
+                    Cancel
+                </button>
+                <button mat-flat-button color="primary" (click)="submit(CategoryForm)">
+                    {{Update_button ? 'Update' : 'Submit'}}
+                </button>
+            </div>
+        </form>
+
+    </mat-card-content>
+    }
+
+</mat-card>

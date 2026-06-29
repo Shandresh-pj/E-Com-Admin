@@ -1,5 +1,6 @@
 import {
   AfterViewInit,
+  ChangeDetectorRef,
   Component,
   EventEmitter,
   Input,
@@ -14,7 +15,7 @@ import {MatPaginator,MatPaginatorModule} from '@angular/material/paginator';
 
 import {MatSort,MatSortModule} from '@angular/material/sort';
 
-import {MatTableDataSource,MatTableModule} from '@angular/material/table';
+import {MatTableDataSource,MatTableModule,MatTable as MatTableDirective} from '@angular/material/table';
 
 import {MatButtonModule} from '@angular/material/button';
 
@@ -55,7 +56,12 @@ export class MatTable implements OnInit,AfterViewInit{
 
 @Input() set tableData( value:any[]){
 this.dataSource.data=value || [];
+this.refreshView();
 }
+
+@ViewChild(MatTableDirective) table!: MatTableDirective<any>;
+
+constructor(private cdr: ChangeDetectorRef) {}
 
 @Output()editClick=new EventEmitter<any>();
 
@@ -91,6 +97,19 @@ this.dataSource.paginator=
 this.paginator;
 this.dataSource.sort=
 this.sort;
+this.refreshView();
+}
+
+private refreshView(){
+this.cdr.markForCheck();
+setTimeout(()=>{
+try{
+this.table?.renderRows();
+this.cdr.detectChanges();
+}catch{
+this.cdr.markForCheck();
+}
+});
 }
 
 

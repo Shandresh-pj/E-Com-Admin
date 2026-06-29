@@ -61,6 +61,13 @@ import {
                 'Resource not found'
               );
               break;
+
+            case 422:
+              this.alert.error(
+                this.formatValidationErrors(error.error),
+                'Validation Failed'
+              );
+              break;
   
             case 429:
               this.alert.warning(
@@ -88,9 +95,20 @@ import {
           }
   
           return throwError(() => error);
-  
+
         })
-  
+
       );
+    }
+
+    private formatValidationErrors(body: any): string {
+      const errors = body?.errors;
+      if (!errors) {
+        return body?.message || 'Validation Failed';
+      }
+
+      return Object.values(errors)
+        .flat()
+        .join('\n');
     }
   }

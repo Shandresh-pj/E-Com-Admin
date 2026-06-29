@@ -6,10 +6,12 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatIconModule } from '@angular/material/icon';
+import { MatDialog } from '@angular/material/dialog';
 import { AlertService } from 'src/app/Securities/Services/alert.service';
 import { CommonService } from 'src/app/Securities/Services/common.service';
 import { MatTable } from 'src/utils/mat-table/mat-table';
-import { environment } from 'src/environment/environment';
+import { toFileUrl } from 'src/utils/file-url';
+import { ViewDetailsDialog } from 'src/utils/view-details-dialog/view-details-dialog';
 
 @Component({
   selector: 'app-category',
@@ -49,7 +51,8 @@ export class Category {
     private fb: FormBuilder,
     private commonService: CommonService,
     private alert: AlertService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private dialog: MatDialog
   ) {
     this.CategoryForm = fb.group({
       name: ['', Validators.required],
@@ -91,6 +94,7 @@ export class Category {
       const reader = new FileReader();
       reader.onload = () => {
         this.imagePreviewUrl = reader.result as string;
+        this.cdr.detectChanges();
       };
       reader.readAsDataURL(file);
     }
@@ -110,7 +114,7 @@ export class Category {
     this.SelectedCategoryId = category?.id;
     this.Category_Forms = true;
     this.Update_button = true;
-    this.existingImageUrl = category?.image ? `${environment.apiUrl}/${category.image}` : null;
+    this.existingImageUrl = toFileUrl(category?.image);
     this.imagePreviewUrl = null;
     this.ImageFile = null;
     this.CategoryForm.patchValue({
@@ -118,6 +122,28 @@ export class Category {
       description: category?.description,
       parent_id: category?.parent_id,
       StatusId: category?.StatusId
+    });
+  }
+
+  viewItem(category: any) {
+    this.commonService.getApi(`categories/${category?.id}`).subscribe({
+      next: (res: any) => {
+        const data = res?.data;
+        const status = this.Statuses?.find((s: any) => s.Id === data?.StatusId);
+        this.dialog.open(ViewDetailsDialog, {
+          width: '600px',
+          data: {
+            title: 'Category Details',
+            fields: [
+              { label: 'Name', value: data?.name },
+              { label: 'Description', value: data?.description },
+              { label: 'Parent Category', value: data?.parent?.name },
+              { label: 'Status', value: status?.StatusCode },
+              { label: 'Image', value: toFileUrl(data?.image), isImage: true },
+            ],
+          },
+        });
+      }
     });
   }
 

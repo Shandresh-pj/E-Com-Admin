@@ -5,10 +5,12 @@ import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
+import { MatDialog } from '@angular/material/dialog';
 import { AlertService } from 'src/app/Securities/Services/alert.service';
 import { AuthService } from 'src/app/Securities/Services/auth.service';
 import { CommonService } from 'src/app/Securities/Services/common.service';
 import { MatTable } from 'src/utils/mat-table/mat-table';
+import { ViewDetailsDialog } from 'src/utils/view-details-dialog/view-details-dialog';
 
 @Component({
   selector: 'app-attribute-value',
@@ -46,7 +48,8 @@ export class AttributeValue {
     private authService: AuthService,
     private commonService: CommonService,
     private alert: AlertService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private dialog: MatDialog
   ) {
     this.AttributeValueForm = fb.group({
       ProductAttributeId: ['', Validators.required],
@@ -62,7 +65,8 @@ export class AttributeValue {
 
   getCompanyId() {
     const user = this.authService.getUser();
-    return user?.company_id || user?.CompanyId || user?.userRoles?.[0]?.company?.id;
+    const roles = this.authService.getRoles();
+    return user?.company_id || user?.CompanyId || roles?.[0]?.company?.id;
   }
 
   getProductAttributes() {
@@ -100,6 +104,28 @@ export class AttributeValue {
       ProductAttributeId: value?.ProductAttributeId,
       AttributeValueCode: value?.AttributeValueCode,
       Name: value?.Name
+    });
+  }
+
+  viewItem(value: any) {
+    this.commonService.getApi(`ProductAttributeValue/Detail/${value?.Id}`).subscribe({
+      next: (res: any) => {
+        const data = res?.data;
+        const attributeName = this.ProductAttributes?.find((attr: any) => attr.Id === data?.ProductAttributeId)?.Name;
+        this.dialog.open(ViewDetailsDialog, {
+          width: '600px',
+          data: {
+            title: 'Attribute Value Details',
+            fields: [
+              { label: 'Attribute', value: attributeName },
+              { label: 'Value Code', value: data?.AttributeValueCode },
+              { label: 'Name', value: data?.Name },
+              { label: 'Created At', value: data?.CreatedAt },
+              { label: 'Updated At', value: data?.UpdatedAt },
+            ],
+          },
+        });
+      }
     });
   }
 

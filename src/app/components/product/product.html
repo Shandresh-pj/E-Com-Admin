@@ -21,8 +21,8 @@
     @if (!Product_Forms) {
     <mat-card-content class="b-t-1">
 
-        <app-mat-table [columns]="tableColumns" [tableData]="Products" [showAction]="true" [Extra_Column]="false"
-            (editClick)="editUser($event)" (deleteClick)="deleteUser($event)">
+        <app-mat-table [columns]="tableColumns" [tableData]="Products" [showAction]="true" [showView]="true" [Extra_Column]="false"
+            (editClick)="editUser($event)" (deleteClick)="deleteUser($event)" (ViewClick)="viewItem($event)">
         </app-mat-table>
 
     </mat-card-content>
@@ -36,6 +36,7 @@
                     <mat-label class="f-w-600 m-b-8 d-block">Product Name</mat-label>
                     <mat-form-field appearance="outline" class="w-100">
                         <input matInput formControlName="name" placeholder="Enter Product Name">
+                        <mat-error *ngIf="ProductForm.get('name')?.hasError('required')">Product name is required</mat-error>
                     </mat-form-field>
                 </div>
 
@@ -54,7 +55,7 @@
                     <mat-label class="f-w-600 m-b-8 d-block">Product Type</mat-label>
                     <mat-form-field appearance="outline" class="w-100">
                         <mat-select formControlName="product_type" (selectionChange)="onProductTypeChange($event.value)">
-                            <mat-option value="simple">Simple</mat-option>
+                            <mat-option value="single">Single</mat-option>
                             <mat-option value="variant">Variant</mat-option>
                         </mat-select>
                     </mat-form-field>
@@ -64,6 +65,7 @@
                     <mat-label class="f-w-600 m-b-8 d-block">Price</mat-label>
                     <mat-form-field appearance="outline" class="w-100">
                         <input matInput type="number" formControlName="price" placeholder="Enter Price">
+                        <mat-error *ngIf="ProductForm.get('price')?.hasError('required')">Price is required</mat-error>
                     </mat-form-field>
                 </div>
 
@@ -71,13 +73,15 @@
                     <mat-label class="f-w-600 m-b-8 d-block">Stock</mat-label>
                     <mat-form-field appearance="outline" class="w-100">
                         <input matInput type="number" formControlName="stock_in_hand" placeholder="Enter Stock">
+                        <mat-error *ngIf="ProductForm.get('stock_in_hand')?.hasError('required')">Stock is required</mat-error>
                     </mat-form-field>
                 </div>
 
                 <div class="col-lg-4">
                     <mat-label class="f-w-600 m-b-8 d-block">Barcode</mat-label>
                     <mat-form-field appearance="outline" class="w-100">
-                        <input matInput formControlName="barcode" placeholder="Enter Barcode">
+                        <input matInput formControlName="barcode" placeholder="Enter Barcode (8-14 digits)">
+                        <mat-error *ngIf="ProductForm.get('barcode')?.hasError('pattern')">Barcode must be 8-14 digits</mat-error>
                     </mat-form-field>
                 </div>
 
@@ -85,10 +89,10 @@
                     <mat-label class="f-w-600 m-b-8 d-block">Status</mat-label>
                     <mat-form-field appearance="outline" class="w-100">
                         <mat-select formControlName="status" placeholder="Select Status">
-                            @for(option of Statuses; track option.Id) {
-                            <mat-option [value]="option.StatusCode">{{option.StatusCode}}</mat-option>
-                            }
+                            <mat-option value="active">Active</mat-option>
+                            <mat-option value="inactive">Inactive</mat-option>
                         </mat-select>
+                        <mat-error *ngIf="ProductForm.get('status')?.hasError('required')">Status is required</mat-error>
                     </mat-form-field>
                 </div>
 
@@ -118,7 +122,7 @@
                     <div class="m-t-8 d-flex" style="gap: 8px; flex-wrap: wrap;">
                         @for(img of ExistingGalleryImages; track $index) {
                         <div>
-                            <img [src]="img" alt="Gallery Image" style="max-width: 80px; max-height: 80px;">
+                            <img [src]="toFileUrl(img)" alt="Gallery Image" style="max-width: 80px; max-height: 80px;">
                             <button mat-icon-button color="warn" (click)="removeExistingGalleryImage($index)" type="button">
                                 <mat-icon>delete</mat-icon>
                             </button>
@@ -151,34 +155,41 @@
 
             @if (ProductForm.get('product_type')?.value === 'variant') {
             <div class="m-t-16">
-                <div class="header-container">
-                    <mat-label class="f-w-600">Variants</mat-label>
-                    <button mat-stroked-button type="button" (click)="addVariant()">Add Variant</button>
+
+                <!-- Multiselect per attribute -->
+                <div class="row">
+                    @for(attr of ProductAttributes; track attr.Id) {
+                    <div class="col-lg-4">
+                        <mat-label class="f-w-600 m-b-8 d-block">{{attr.Name}}</mat-label>
+                        <mat-form-field appearance="outline" class="w-100">
+                            <mat-select multiple
+                                [value]="getSelectedValuesForAttr(attr.Id)"
+                                (selectionChange)="onAttrValueChange(attr.Id, $event.value)">
+                                @for(option of AttributeValuesByAttr[attr.Id]; track option.Id) {
+                                <mat-option [value]="option.Id">{{option.Name}}</mat-option>
+                                }
+                            </mat-select>
+                        </mat-form-field>
+                    </div>
+                    }
                 </div>
 
-                <div formArrayName="variants">
+                <!-- Generated variant rows with Price / Stock / Barcode -->
+                @if (variants.length > 0) {
+                <div formArrayName="variants" class="m-t-8">
                     @for(variant of variants.controls; track $index) {
                     <div class="row" [formGroupName]="$index">
                         <div class="col-lg-3">
                             <mat-label class="f-w-600 m-b-8 d-block">Attribute</mat-label>
                             <mat-form-field appearance="outline" class="w-100">
-                                <mat-select formControlName="ProductAttributeId"
-                                    (selectionChange)="getAttributeValuesForRow($event.value, $index)">
-                                    @for(option of ProductAttributes; track option.Id) {
-                                    <mat-option [value]="option.Id">{{option.Name}}</mat-option>
-                                    }
-                                </mat-select>
+                                <input matInput [value]="getAttrName(variant.get('ProductAttributeId')?.value)" readonly>
                             </mat-form-field>
                         </div>
 
                         <div class="col-lg-3">
                             <mat-label class="f-w-600 m-b-8 d-block">Value</mat-label>
                             <mat-form-field appearance="outline" class="w-100">
-                                <mat-select formControlName="ProductAttributeValueId">
-                                    @for(option of AttributeValuesByRow[$index]; track option.Id) {
-                                    <mat-option [value]="option.Id">{{option.Name}}</mat-option>
-                                    }
-                                </mat-select>
+                                <input matInput [value]="getAttrValueName(variant.get('ProductAttributeId')?.value, variant.get('ProductAttributeValueId')?.value)" readonly>
                             </mat-form-field>
                         </div>
 
@@ -196,21 +207,57 @@
                             </mat-form-field>
                         </div>
 
-                        <div class="col-lg-1">
+                        <div class="col-lg-2">
                             <mat-label class="f-w-600 m-b-8 d-block">Barcode</mat-label>
                             <mat-form-field appearance="outline" class="w-100">
                                 <input matInput formControlName="Barcode">
                             </mat-form-field>
                         </div>
+                    </div>
+                    }
+                </div>
+                }
 
-                        <div class="col-lg-1 d-flex align-items-center">
-                            <button mat-icon-button color="warn" (click)="removeVariant($index)" type="button">
+            </div>
+            }
+
+            @if (ProductForm.get('product_type')?.value === 'single') {
+            <div class="m-t-16">
+                <div formArrayName="attributeValues">
+                    @for(av of attributeValues.controls; track av) {
+                    <div class="row" [formGroupName]="$index">
+                        <div class="col-lg-5">
+                            <mat-label class="f-w-600 m-b-8 d-block">Attribute</mat-label>
+                            <mat-form-field appearance="outline" class="w-100">
+                                <mat-select formControlName="ProductAttributeId"
+                                    (selectionChange)="onSingleAttrRowChange($event.value, $index)">
+                                    @for(option of ProductAttributes; track option.Id) {
+                                    <mat-option [value]="option.Id">{{option.Name}}</mat-option>
+                                    }
+                                </mat-select>
+                            </mat-form-field>
+                        </div>
+                        <div class="col-lg-5">
+                            <mat-label class="f-w-600 m-b-8 d-block">Value</mat-label>
+                            <mat-form-field appearance="outline" class="w-100">
+                                <mat-select formControlName="ProductAttributeValueId">
+                                    @for(option of SingleAttrValuesByRow[$index]; track option.Id) {
+                                    <mat-option [value]="option.Id">{{option.Name}}</mat-option>
+                                    }
+                                </mat-select>
+                            </mat-form-field>
+                        </div>
+                        <div class="col-lg-2 d-flex align-items-center">
+                            <button mat-icon-button color="warn" (click)="removeAttrValueRow($index)" type="button">
                                 <mat-icon>delete</mat-icon>
                             </button>
                         </div>
                     </div>
                     }
                 </div>
+                <button mat-flat-button color="primary" type="button" (click)="addAttrValueRow()" class="m-t-8">
+                    + Add Attribute
+                </button>
             </div>
             }
 

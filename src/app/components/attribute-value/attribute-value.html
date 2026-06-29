@@ -21,8 +21,8 @@
     @if (!AttributeValue_Forms) {
     <mat-card-content class="b-t-1">
 
-        <app-mat-table [columns]="tableColumns" [tableData]="AttributeValues" [showAction]="true" [Extra_Column]="false"
-            (editClick)="editUser($event)" (deleteClick)="deleteUser($event)">
+        <app-mat-table [columns]="tableColumns" [tableData]="AttributeValues" [showAction]="true" [showView]="true" [Extra_Column]="false"
+            (editClick)="editUser($event)" (deleteClick)="deleteUser($event)" (ViewClick)="viewItem($event)">
         </app-mat-table>
 
     </mat-card-content>

@@ -1,4 +1,5 @@
 import { ChangeDetectorRef, Component } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormsModule, FormGroup, FormArray, FormBuilder, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
@@ -6,16 +7,19 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatIconModule } from '@angular/material/icon';
+import { MatDialog } from '@angular/material/dialog';
 import { AlertService } from 'src/app/Securities/Services/alert.service';
 import { AuthService } from 'src/app/Securities/Services/auth.service';
 import { CommonService } from 'src/app/Securities/Services/common.service';
 import { MatTable } from 'src/utils/mat-table/mat-table';
-import { environment } from 'src/environment/environment';
+import { toFileUrl } from 'src/utils/file-url';
+import { ViewDetailsDialog } from 'src/utils/view-details-dialog/view-details-dialog';
 
 @Component({
   selector: 'app-product',
   standalone: true,
   imports: [
+    CommonModule,
     ReactiveFormsModule,
     FormsModule,
     MatFormFieldModule,
@@ -44,9 +48,11 @@ export class Product {
   Update_button: boolean = false;
   Products: any;
   Categories: any;
-  Statuses: any;
   ProductAttributes: any;
-  AttributeValuesByRow: { [index: number]: any[] } = {};
+  AttributeValuesByAttr: { [attributeId: number]: any[] } = {};
+  SelectedAttrValues: { [attributeId: number]: number[] } = {};
+  SavedVariantDataMap: { [key: string]: any } = {};
+  SingleAttrValuesByRow: { [index: number]: any[] } = {};
   SelectedProductId: any;
 
   ImageFile: File | null = null;
@@ -66,7 +72,8 @@ export class Product {
     private authService: AuthService,
     private commonService: CommonService,
     private alert: AlertService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private dialog: MatDialog
   ) {
     this.ProductForm = fb.group({
       name: ['', Validators.required],
@@ -74,17 +81,17 @@ export class Product {
       category: [''],
       price: ['', Validators.required],
       stock_in_hand: ['', Validators.required],
-      barcode: [''],
-      product_type: ['simple', Validators.required],
+      barcode: ['', [Validators.pattern(/^\d{8,14}$/)]],
+      product_type: ['single', Validators.required],
       status: ['', Validators.required],
-      variants: this.fb.array([])
+      variants: this.fb.array([]),
+      attributeValues: this.fb.array([]),
     });
   }
 
   ngOnInit() {
     this.getProducts();
     this.getCategories();
-    this.getStatuses();
     this.getProductAttributes();
   }
 
@@ -92,9 +99,18 @@ export class Product {
     return this.ProductForm.get('variants') as FormArray;
   }
 
-  getCompanyId() {
+  get attributeValues(): FormArray {
+    return this.ProductForm.get('attributeValues') as FormArray;
+  }
+
+
+  toFileUrl(path: string | null | undefined): string | null {
+    return toFileUrl(path);
+  }
+
+  getRegistrationId() {
     const user = this.authService.getUser();
-    return user?.company_id || user?.CompanyId || user?.userRoles?.[0]?.company?.id;
+    return user?.id;
   }
 
   getProducts(onLoaded?: () => void) {
@@ -116,15 +132,6 @@ export class Product {
     });
   }
 
-  getStatuses() {
-    this.commonService.getApi(`Status/All`, { StatusFor: 'PRODUCT' }).subscribe({
-      next: (res: any) => {
-        this.Statuses = res?.data?.data;
-        this.cdr.detectChanges();
-      }
-    });
-  }
-
   getProductAttributes() {
     this.commonService.getApi(`ProductAttribute/All`).subscribe({
       next: (res: any) => {
@@ -134,51 +141,110 @@ export class Product {
     });
   }
 
-  getAttributeValuesForRow(attributeId: number, rowIndex: number) {
-    if (!attributeId) {
-      this.AttributeValuesByRow[rowIndex] = [];
-      return;
+
+  loadAllAttributeValues() {
+    if (!this.ProductAttributes?.length) return;
+    this.ProductAttributes.forEach((attr: any) => {
+      if (this.AttributeValuesByAttr[attr.Id]) return;
+      this.commonService.getApi(`ProductAttributeValue/All`, { ProductAttributeId: attr.Id }).subscribe({
+        next: (res: any) => {
+          this.AttributeValuesByAttr[attr.Id] = res?.data?.data || [];
+          this.cdr.detectChanges();
+        }
+      });
+    });
+  }
+
+  getSelectedValuesForAttr(attributeId: number): number[] {
+    return this.SelectedAttrValues[attributeId] || [];
+  }
+
+  onAttrValueChange(attributeId: number, selectedIds: number[]) {
+    this.SelectedAttrValues[attributeId] = selectedIds;
+    if (this.ProductForm.get('product_type')?.value === 'variant') {
+      this.regenerateVariantsFromSelection();
     }
-    this.commonService.getApi(`ProductAttributeValue/All`, { ProductAttributeId: attributeId }).subscribe({
+  }
+
+  onSingleAttrRowChange(attrId: number, rowIndex: number) {
+    const row = this.attributeValues.at(rowIndex);
+    row?.get('ProductAttributeValueId')?.setValue(null);
+    this.SingleAttrValuesByRow[rowIndex] = [];
+    if (!attrId) return;
+    this.commonService.getApi(`ProductAttributeValue/All`, { ProductAttributeId: attrId }).subscribe({
       next: (res: any) => {
-        this.AttributeValuesByRow[rowIndex] = res?.data?.data || [];
+        this.SingleAttrValuesByRow[rowIndex] = res?.data?.data || [];
         this.cdr.detectChanges();
       }
     });
   }
 
-  onProductTypeChange(value: string) {
-    if (value === 'variant') {
-      if (this.variants.length === 0) {
-        this.addVariant();
-      }
-    } else {
-      this.variants.clear();
-      this.AttributeValuesByRow = {};
-    }
+  addAttrValueRow() {
+    const index = this.attributeValues.length;
+    this.attributeValues.push(this.fb.group({
+      ProductAttributeId: [null],
+      ProductAttributeValueId: [null]
+    }));
+    this.SingleAttrValuesByRow[index] = [];
+    this.cdr.detectChanges();
   }
 
-  createVariant(data?: any): FormGroup {
-    return this.fb.group({
-      Id: [data?.Id || null],
-      ProductAttributeId: [data?.ProductAttributeId || '', Validators.required],
-      ProductAttributeValueId: [data?.ProductAttributeValueId || '', Validators.required],
-      Barcode: [data?.Barcode || ''],
-      Price: [data?.Price || '', Validators.required],
-      Stock: [data?.Stock || '', Validators.required]
+  removeAttrValueRow(index: number) {
+    this.attributeValues.removeAt(index);
+    delete this.SingleAttrValuesByRow[index];
+    // Re-index remaining rows
+    const newMap: { [index: number]: any[] } = {};
+    Object.entries(this.SingleAttrValuesByRow).forEach(([k, v]) => {
+      const i = Number(k);
+      newMap[i > index ? i - 1 : i] = v;
+    });
+    this.SingleAttrValuesByRow = newMap;
+    this.cdr.detectChanges();
+  }
+
+  regenerateVariantsFromSelection() {
+    this.variants.clear();
+    Object.entries(this.SelectedAttrValues).forEach(([attrId, valueIds]) => {
+      (valueIds as number[]).forEach((valueId: number) => {
+        const key = `${attrId}_${valueId}`;
+        const saved = this.SavedVariantDataMap[key];
+        this.variants.push(this.fb.group({
+          Id: [saved?.Id || null],
+          ProductAttributeId: [Number(attrId), Validators.required],
+          ProductAttributeValueId: [valueId, Validators.required],
+          Barcode: [saved?.Barcode || ''],
+          Price: [saved?.Price ?? '', Validators.required],
+          Stock: [saved?.Stock ?? '', Validators.required]
+        }));
+      });
     });
   }
 
-  addVariant() {
-    const index = this.variants.length;
-    this.variants.push(this.createVariant());
-    this.AttributeValuesByRow[index] = [];
+  getAttrName(attrId: number): string {
+    return this.ProductAttributes?.find((a: any) => a.Id === attrId)?.Name || '';
   }
 
-  removeVariant(index: number) {
-    this.variants.removeAt(index);
-    delete this.AttributeValuesByRow[index];
+  getAttrValueName(attrId: number, valueId: number): string {
+    return this.AttributeValuesByAttr[attrId]?.find((v: any) => v.Id === valueId)?.Name || '';
   }
+
+  onProductTypeChange(value: string) {
+    if (value === 'variant') {
+      this.variants.clear();
+      this.SelectedAttrValues = {};
+      this.SavedVariantDataMap = {};
+      this.attributeValues.clear();
+      this.SingleAttrValuesByRow = {};
+      this.loadAllAttributeValues();
+    } else {
+      this.variants.clear();
+      this.SelectedAttrValues = {};
+      this.attributeValues.clear();
+      this.SingleAttrValuesByRow = {};
+      this.addAttrValueRow();
+    }
+  }
+
 
   detectImage(event: Event) {
     const input = event.target as HTMLInputElement;
@@ -186,7 +252,10 @@ export class Product {
     if (file) {
       this.ImageFile = file;
       const reader = new FileReader();
-      reader.onload = () => { this.imagePreviewUrl = reader.result as string; };
+      reader.onload = () => {
+        this.imagePreviewUrl = reader.result as string;
+        this.cdr.detectChanges();
+      };
       reader.readAsDataURL(file);
     }
   }
@@ -203,7 +272,10 @@ export class Product {
     files.forEach((file) => {
       this.GalleryFiles.push(file);
       const reader = new FileReader();
-      reader.onload = () => { this.GalleryPreviews.push(reader.result as string); };
+      reader.onload = () => {
+        this.GalleryPreviews.push(reader.result as string);
+        this.cdr.detectChanges();
+      };
       reader.readAsDataURL(file);
     });
   }
@@ -234,6 +306,11 @@ export class Product {
 
   AddNewUser() {
     this.Product_Forms = true;
+    if (this.ProductForm.get('product_type')?.value === 'single') {
+      this.addAttrValueRow();
+    } else {
+      this.loadAllAttributeValues();
+    }
   }
 
   editUser(product: any) {
@@ -242,11 +319,11 @@ export class Product {
     this.Update_button = true;
 
     this.variants.clear();
-    this.AttributeValuesByRow = {};
+    this.SelectedAttrValues = {};
 
-    this.existingImageUrl = product?.image ? `${environment.apiUrl}/${product.image}` : null;
+    this.existingImageUrl = toFileUrl(product?.image);
     this.ExistingGalleryImages = product?.images || [];
-    this.existingVideoUrl = product?.video ? `${environment.apiUrl}/${product.video}` : null;
+    this.existingVideoUrl = toFileUrl(product?.video);
     this.ImageFile = null;
     this.imagePreviewUrl = null;
     this.GalleryFiles = [];
@@ -266,11 +343,78 @@ export class Product {
     });
 
     if (product?.product_type === 'variant' && product?.variants?.length) {
-      product.variants.forEach((variant: any, index: number) => {
-        this.variants.push(this.createVariant(variant));
-        this.getAttributeValuesForRow(variant?.ProductAttributeId, index);
+      // Rebuild SelectedAttrValues and SavedVariantDataMap from existing variants
+      this.SavedVariantDataMap = {};
+      product.variants.forEach((v: any) => {
+        const attrId = v?.ProductAttributeId;
+        const valId = v?.ProductAttributeValueId;
+        if (!attrId || !valId) return;
+        const key = `${attrId}_${valId}`;
+        this.SavedVariantDataMap[key] = { Id: v.Id, Price: v.Price, Stock: v.Stock, Barcode: v.Barcode };
+        if (!this.SelectedAttrValues[attrId]) {
+          this.SelectedAttrValues[attrId] = [];
+        }
+        this.SelectedAttrValues[attrId].push(valId);
       });
+      this.loadAllAttributeValues();
+      this.regenerateVariantsFromSelection();
     }
+
+    if (product?.product_type === 'single' && product?.attribute_values?.length) {
+      product.attribute_values.forEach((av: any, index: number) => {
+        this.attributeValues.push(this.fb.group({
+          ProductAttributeId: [av?.ProductAttributeId || null],
+          ProductAttributeValueId: [av?.ProductAttributeValueId || null]
+        }));
+        this.SingleAttrValuesByRow[index] = [];
+        if (av?.ProductAttributeId) {
+          this.onSingleAttrRowChange(av.ProductAttributeId, index);
+          // restore selected value after values load
+          const restoreValId = av?.ProductAttributeValueId;
+          const row = this.attributeValues.at(index);
+          setTimeout(() => { row?.get('ProductAttributeValueId')?.setValue(restoreValId); this.cdr.detectChanges(); }, 300);
+        }
+      });
+    } else if (product?.product_type === 'single') {
+      this.addAttrValueRow();
+    }
+  }
+
+  viewItem(product: any) {
+    this.commonService.getApi(`products/${product?.id}`).subscribe({
+      next: (res: any) => {
+        const data = res?.data;
+        const galleryUrls = (data?.images || []).map((img: string) => toFileUrl(img));
+        const variantsSummary = (data?.variants || [])
+          .map((v: any) => `${v?.ProductAttribute?.Name ?? ''}: ${v?.ProductAttributeValue?.Name ?? ''} (Stock ${v?.Stock ?? 0}, Price ${v?.Price ?? 0})`)
+          .join(' | ');
+        const attributesSummary = (data?.attribute_values || [])
+          .map((a: any) => `${a?.ProductAttribute?.Name ?? ''}: ${a?.ProductAttributeValue?.Name ?? ''}`)
+          .join(' | ');
+
+        this.dialog.open(ViewDetailsDialog, {
+          width: '700px',
+          data: {
+            title: 'Product Details',
+            fields: [
+              { label: 'Name', value: data?.name },
+              { label: 'Description', value: data?.description },
+              { label: 'Category', value: data?.category },
+              { label: 'Price', value: data?.price },
+              { label: 'Stock In Hand', value: data?.stock_in_hand },
+              { label: 'Barcode', value: data?.barcode },
+              { label: 'Product Type', value: data?.product_type },
+              { label: 'Status', value: data?.status },
+              { label: 'Variants', value: variantsSummary || undefined },
+              { label: 'Attributes', value: attributesSummary || undefined },
+              { label: 'Image', value: toFileUrl(data?.image), isImage: true },
+              { label: 'Gallery Images', value: galleryUrls, isImageList: true },
+              { label: 'Video', value: toFileUrl(data?.video), isVideo: true },
+            ],
+          },
+        });
+      }
+    });
   }
 
   deleteUser(product: any) {
@@ -286,7 +430,10 @@ export class Product {
     this.Product_Forms = false;
     this.Update_button = false;
     this.variants.clear();
-    this.AttributeValuesByRow = {};
+    this.attributeValues.clear();
+    this.SelectedAttrValues = {};
+    this.SavedVariantDataMap = {};
+    this.SingleAttrValuesByRow = {};
     this.ImageFile = null;
     this.imagePreviewUrl = null;
     this.existingImageUrl = null;
@@ -296,10 +443,15 @@ export class Product {
     this.VideoFile = null;
     this.videoPreviewUrl = null;
     this.existingVideoUrl = null;
-    this.ProductForm.reset({ product_type: 'simple' });
+    this.ProductForm.reset({ product_type: 'single' });
   }
 
   submit(form: FormGroup) {
+    if (form.invalid) {
+      form.markAllAsTouched();
+      return;
+    }
+
     const value = form.value;
     const formData = new FormData();
     formData.append('name', value.name);
@@ -311,11 +463,23 @@ export class Product {
     formData.append('barcode', value.barcode || '');
     formData.append('product_type', value.product_type);
     formData.append('status', value.status);
-    formData.append('registration_id', this.getCompanyId() || '');
+    formData.append('registration_id', this.getRegistrationId() || '');
 
-    if (value.product_type === 'variant') {
-      formData.append('variants', JSON.stringify(value.variants));
+    formData.append('variants', JSON.stringify(value.product_type === 'variant' ? value.variants : []));
+
+    // Build attribute_values from FormArray for single product type
+    const attrValuePairs: { ProductAttributeId: number; ProductAttributeValueId: number }[] = [];
+    if (value.product_type === 'single') {
+      (value.attributeValues || []).forEach((av: any) => {
+        if (av?.ProductAttributeId && av?.ProductAttributeValueId) {
+          attrValuePairs.push({
+            ProductAttributeId: av.ProductAttributeId,
+            ProductAttributeValueId: av.ProductAttributeValueId
+          });
+        }
+      });
     }
+    formData.append('attribute_values', JSON.stringify(attrValuePairs));
 
     if (this.ImageFile) {
       formData.append('image', this.ImageFile);

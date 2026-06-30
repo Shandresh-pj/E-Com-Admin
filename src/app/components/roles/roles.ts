@@ -44,7 +44,7 @@ export class Roles {
     private auth:AuthService,
     private alert:AlertService
   ){
-    this.RolesForm = fb.group({
+    this.RolesForm = this.fb.group({
       name : ['', Validators.required],
       isActive : [true, Validators.required]
     })

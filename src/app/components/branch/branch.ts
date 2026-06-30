@@ -46,7 +46,7 @@ export class Branch {
       header: 'Mobile Number'
     },
     {
-      columnDef: 'isActive',
+      columnDef: 'status',
       header: 'Status',
     },
   ];
@@ -57,6 +57,9 @@ export class Branch {
   Branch: any;
   Companies: any;
   SelectedBranchId: any;
+  Roles: any;
+  Roleid: any;
+  defaultRole: any;
   constructor(
     private fb:FormBuilder,
     private authService:AuthService,
@@ -69,19 +72,36 @@ export class Branch {
       email : ['',[Validators.required, Validators.email]],
       phone : ['', Validators.required],
       location : [''],
-      role_id:[4]
+      role_id:[{value:'', disabled:true},Validators.required]
     })
   }
 
   ngOnInit(){
+    this.getRoles();
     this.getBranches();
     this.getCompanies();
+  }
+  getRoles(){
+    this.commonService.getApi(`roles`).subscribe({
+      next:(res:any)=> {
+        this.Roles = res?.data
+       this.defaultRole = this.Roles.find(
+          (x:any)=>x.name==="Branch"
+        );
+        if (this.defaultRole) {
+          this.BranchForm.get('role_id')?.setValue(this.defaultRole.id);
+        }
+      }
+    })
   }
 
   getBranches(){
     this.commonService.getApi(`branches`).subscribe({
       next:(res:any)=> {
-        this.Branch = res?.data
+        this.Branch = res?.data.map((item: any) => ({
+          ...item,
+          status: item.userRoles?.[0]?.user?.status || '-'
+        }));
       }
     })
   }
@@ -100,18 +120,23 @@ export class Branch {
 
   AddNewUser(){
     this.Branch_Forms =true
+    this.getRoles();
   }
   editUser(user:any){
-    console.log(user);
+    console.log("user",user);
     this.SelectedBranchId = user?.id
     this.Branch_Forms =true
     this.Update_button =true
+    this.Roleid = user?.userRoles[0]?.role?.id
+    console.log("roleid",this.Roleid);
+
     this.BranchForm.patchValue({
-      company_id : user?.company_id,
-      name: user?.name,
+      company_id : user?.company?.id,
+      name: user?.userRoles[0]?.user?.name,
       email: user?.email,
       phone : user?.phone,
-      location: user?.location
+      location: user?.location,
+      role_id: this.Roleid
     })
   }
 
@@ -127,10 +152,11 @@ export class Branch {
   cancelBranch(){
     this.Branch_Forms = false;
     this.Update_button =false;
-    this.BranchForm.reset()
+    this.BranchForm.reset();
+    // this.getRoles();
   }
   submit(form: FormGroup){
-    const payload = form.value;
+    const payload = form.getRawValue();
     console.log('Resss',payload)
     if(!this.Update_button){
     this.commonService.postApi(`branches`, payload).subscribe({
@@ -139,6 +165,7 @@ export class Branch {
           this.alert.success("Branch Create Successfully")
           this.Branch_Forms = false;
           this.BranchForm.reset();
+          this.cancelBranch();
           this.getBranches();
         
       },
@@ -153,6 +180,7 @@ export class Branch {
         this.alert.success("Branch Create Successfully")
         this.Branch_Forms = false;
         this.BranchForm.reset();
+        this.cancelBranch();
           this.getBranches();
       }
     })

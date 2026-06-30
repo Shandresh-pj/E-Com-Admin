@@ -43,10 +43,10 @@ export class Employees {
       columnDef: 'mobilenumber',
       header: 'Mobile Number'
     },
-    {
-      columnDef: 'userType',
-      header: 'Status',
-    },
+    // {
+    //   columnDef: 'userType',
+    //   header: 'Status',
+    // },
   ];
 
   EmployeeForm:FormGroup;
@@ -69,19 +69,28 @@ export class Employees {
       mobilenumber:['',Validators.required],
       company_id:['',Validators.required],
       branch_id:['',Validators.required],
-      role_id:[{value:5, disabled: true},Validators.required]
+      role_id:[{value:'', disabled: true},Validators.required]
     })
   }
 
   ngOnInit(){
     this.getRoles();
     this.getCompany();
-    this.getBranch();
-    this.getEmployees();
+    // this.getBranch();
+    // this.getEmployees();
+
+    this.EmployeeForm.get('company_id')?.valueChanges.subscribe(
+      (companyId) => {
+        this.onCompanyChange(companyId);
+      }
+    );
   }
+
+
   AddNewUser(){
     this.Employee_Forms =true
   }
+
   editUser(user:any){
 
     console.log(user);
@@ -116,55 +125,96 @@ export class Employees {
     this.commonService.deleteApi(`delete/${this.SelectedEmployessId}`).subscribe({
       next:(res: any)=> {
         this.alert.confirm("Delete the Branch");
-        this.getEmployees();
+        this.getCompany();
 
       }
     })
   }
+
   cancelBranch(){
     this.Employee_Forms = false;
     this.UpdateButton =false;
     this.EmployeeForm.reset()
   }
+
+  
   getRoles(){
     this.commonService.getApi(`roles`).subscribe({
-      next:(res:any) => {
+      next:(res:any)=> {
         this.Roles = res?.data
+        const defaultRole = this.Roles.find(
+          (x:any)=>x.name==="Employee"
+        );
+        if(defaultRole){
+          this.EmployeeForm.patchValue({
+            role_id: defaultRole.id
+          });
+        }
       }
     })
   }
 
-  getCompany(){
-    this.commonService.getApi(`companies`).subscribe({
-      next:(res:any) => {
-        this.Companies = res?.data
+  getCompany() {
+    this.commonService.getApi('companies').subscribe({
+      next: (res: any) => {
+        this.Companies = res?.data || []
+        this.Employees = this.Companies.flatMap(
+          (company: any) =>
+            company.userRoles
+              ?.filter(
+                (role: any) => role.role?.name === 'Employee'
+              )
+              .map((role: any) => ({
+                id: role.user?.id,
+                name: role.user?.name,
+                email: role.user?.email,
+                mobilenumber: role.user?.mobilenumber,
+                companyId: company.id,
+                companyName: company.name,
+                branchId: role.branch?.id,
+                branchName: role.branch?.name
+              }))
+        ) || [];
       }
-    })
+    });
+  }
+  
+  onCompanyChange(companyId: number) {
+    const company = this.Companies.find(
+      (      x: { id: number; }) => x.id === companyId
+    );
+  
+    this.Branch = company?.branches || [];
+  
+    // clear old branch selection
+    this.EmployeeForm.patchValue({
+      branch_id: ''
+    });
   }
 
-  getBranch(){
-    this.commonService.getApi(`branches`).subscribe({
-      next:(res:any) => {
-        this.Branch = res?.data
-      }
-    })
-  }
-  getEmployees(){
-    this.commonService.getApi(`employees`).subscribe({
-      next:(res:any) => {
-        this.Employees = res?.data
-      }
-    })
-  }
+  // getBranch(){
+  //   this.commonService.getApi(`branches`).subscribe({
+  //     next:(res:any) => {
+  //       this.Branch = res?.data
+  //     }
+  //   })
+  // }
+  // getEmployees(){
+  //   this.commonService.getApi(`employees`).subscribe({
+  //     next:(res:any) => {
+  //       this.Employees = res?.data
+  //     }
+  //   })
+  // }
 
   submit(form:FormGroup){
-    const payload = form?.value
+    const payload = form?.getRawValue();
     console.log("payload",payload);
     if(!this.UpdateButton){
     this.commonService.postApi(`employees`,payload).subscribe({
       next:(res:any)=>{ 
         this.alert.success("Employees Create Successfully")
-        this.getEmployees();
+        this.getCompany();
         this.EmployeeForm.reset()
         this.Employee_Forms = false;
         this.UpdateButton =false;
@@ -174,7 +224,7 @@ export class Employees {
     this.commonService.putApi(`employees/${this.SelectedEmployessId}`,payload).subscribe({
       next: (res:any) => {
         this.alert.success("Employees Details Updated Successfully")
-        this.getEmployees();
+        this.getCompany();
         this.EmployeeForm.reset()
         this.Employee_Forms = false;
         this.UpdateButton =false;

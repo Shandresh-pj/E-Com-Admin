@@ -64,6 +64,8 @@ export class AppAdmin {
   Update_Button : boolean = false;
 
   SelectedComapanyId: any;
+  Roles: any;
+  Roleid: any;
 
 constructor(private fb: FormBuilder, 
   private authService:AuthService,
@@ -79,23 +81,17 @@ constructor(private fb: FormBuilder,
     phone : ['',Validators.required],
     address : [''],
     gst_number : [''],
-    role_id:[2]
+    role_id:[{value:'', disabled:true},Validators.required]
   })
-
-  // this.BranchForm = fb.group({
-  //   company_id : ['', Validators.required],
-  //   name : ['', Validators.required],
-  //   phone : ['',Validators.required],
-  //   email : ['', [Validators.required,Validators.email]],
-  //   location : ['']
-  // })
 }
 
 ngOnInit() {
   this.getUser();
+  this.getRoles();
 }
 
 AddNewUser(){
+  this.getRoles();
   this.Companies_Form = true;
   this.Update_Button = false;
 }
@@ -122,18 +118,35 @@ getUser(){
   })
 }
 
+getRoles(){
+  this.commonService.getApi(`roles`).subscribe({
+    next:(res:any)=> {
+      this.Roles = res?.data
+      const defaultRole = this.Roles.find(
+        (x:any)=>x.name==="Admin"
+      );
+      if(defaultRole && !this.CompanyForm.get('role_id')?.value){
+        this.CompanyForm.patchValue({
+          role_id: defaultRole.id
+        });
+      }
+    }
+  })
+}
 
 
 editUser(user: any) {
   this.Companies_Form = true;
   this.Update_Button = true;
+  this.Roleid = user?.userRoles[0]?.role?.id
 console.log("user",user)
   this.CompanyForm.patchValue({
     name: user?.name,
     email: user?.email,
     phone: user?.phone,
     address: user?.address,
-    gst_number : user?.gst_number
+    gst_number : user?.gst_number,
+    role_id : this.Roleid
   });
 
   this.SelectedComapanyId = user?.id
@@ -154,6 +167,7 @@ deleteUser(user: any) {
           "Admin deleted successfully"
         );
         this.getUser();
+        this.getRoles();
       },
       error: (err: any) => {
         console.log(err);
@@ -173,21 +187,10 @@ submit(form: FormGroup) {
 
   console.log(payload);
 
-  if (this.Update_Button) {
-
-    this.commonService
-      .putApi(
-        `companies/${this.SelectedComapanyId}`,
-        payload
-      )
-      .subscribe({
-
-        next: (res: any) => {
-
-          this.alert.success(
-            "Company Updated Successfully"
-          );
+  if (this.Update_Button) {this.commonService.putApi(`companies/${this.SelectedComapanyId}`,payload).subscribe({
+next: (res: any) => {this.alert.success("Company Updated Successfully");
           this.getUser();
+          this.getRoles();
 
           this.Update_Button = false;
 
@@ -197,29 +200,20 @@ submit(form: FormGroup) {
 
         },
 
-        error: (err: any) => {
-          console.log(err);
-        }
+        error: (err: any) => {console.log(err);}
 
       });
 
-  }
-  else {
+  } else {
 
-    this.commonService
-      .postApi(
-        'companies',
-        payload
-      )
-      .subscribe({
-
+    this.commonService.postApi('companies',payload).subscribe({
         next: (res: any) => {
 
-          this.alert.success(
-            "Company Created Successfully"
-          );
+          this.alert.success("Company Created Successfully");
 
           this.CompanyForm.reset();
+          this.getRoles();
+          this.getUser();
 
           this.Companies_Form = false;
 

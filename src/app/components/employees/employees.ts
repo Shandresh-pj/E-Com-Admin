@@ -157,7 +157,8 @@ export class Employees {
   getCompany() {
     this.commonService.getApi('companies').subscribe({
       next: (res: any) => {
-        this.Companies = res?.data || []
+        this.Companies = res?.data || [];
+  
         this.Employees = this.Companies.flatMap(
           (company: any) =>
             company.userRoles
@@ -179,14 +180,28 @@ export class Employees {
     });
   }
   
+  
   onCompanyChange(companyId: number) {
     const company = this.Companies.find(
-      (      x: { id: number; }) => x.id === companyId
+      (x: any) => x.id === companyId
     );
   
-    this.Branch = company?.branches || [];
+    if (company) {
+      // Get unique branches only
+      this.Branch = company.userRoles
+        ?.filter((role: any) => role.branch)
+        .map((role: any) => ({
+          id: role.branch.id,
+          name: role.branch.name
+        }))
+        .filter(
+          (branch: any, index: number, self: any[]) =>
+            index === self.findIndex(
+              (b: any) => b.id === branch.id
+            )
+        ) || [];
+    }
   
-    // clear old branch selection
     this.EmployeeForm.patchValue({
       branch_id: ''
     });

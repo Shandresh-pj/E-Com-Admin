@@ -13,16 +13,19 @@
         <div class="row">
             <div class="col-lg-4 col-md-6">
                 <mat-label class="f-w-600 m-b-8 d-block">
-                     Name
+                    Name <span class="text-danger">*</span>
                 </mat-label>
                 <mat-form-field appearance="outline" class="w-100">
                     <input matInput formControlName="name" placeholder="Enter Name">
+                    @if (ProfileForm.get('name')?.hasError('required')) {
+                    <mat-error>Name is required</mat-error>
+                    }
                 </mat-form-field>
             </div>
 
             <div class="col-lg-4 col-md-6">
                 <mat-label class="f-w-600 m-b-8 d-block">
-                    Email
+                    Email <span class="text-danger">*</span>
                 </mat-label>
                 <mat-form-field appearance="outline" class="w-100">
                     <input matInput formControlName="email" placeholder="Enter Email">
@@ -31,7 +34,7 @@
 
             <div class="col-lg-4 col-md-6">
                 <mat-label class="f-w-600 m-b-8 d-block">
-                    Mobile Number
+                    Mobile Number <span class="text-danger">*</span>
                 </mat-label>
                 <mat-form-field appearance="outline" class="w-100">
                     <input matInput formControlName="mobilenumber" placeholder="Enter Mobile Number">
@@ -40,7 +43,7 @@
 
             <div class="col-lg-4 col-md-6">
                 <mat-label class="f-w-600 m-b-8 d-block">
-                    User Type
+                    User Type <span class="text-danger">*</span>
                 </mat-label>
                 <mat-form-field appearance="outline" class="w-100">
                     <input matInput formControlName="userType" placeholder="Enter User Type">
@@ -49,12 +52,24 @@
 
             <div class="col-lg-4 col-md-6">
                 <mat-label class="f-w-600 m-b-8 d-block">
-                    Address
+                    Address <span class="text-danger">*</span>
                 </mat-label>
                 <mat-form-field appearance="outline" class="w-100">
                     <input matInput formControlName="address" placeholder="Enter Address">
+                    @if (ProfileForm.get('address')?.hasError('required')) {
+                    <mat-error>Address is required</mat-error>
+                    }
                 </mat-form-field>
             </div>
+        </div>
+
+        <div class="m-t-12">
+            <button mat-stroked-button class="me-3 Cancel_Button" type="button" (click)="ProfileForm.reset()">
+                Cancel
+            </button>
+            <button mat-flat-button color="primary" type="button" (click)="onSubmit(ProfileForm)">
+                Update
+            </button>
         </div>
     </form>
 </mat-card-content>

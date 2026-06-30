@@ -42,78 +42,81 @@
 
             <div class="row">
                 <div class="col-lg-4">
-                    <mat-label class="f-w-600 m-b-8 d-block">Comapny</mat-label>
+                    <mat-label class="f-w-600 m-b-8 d-block">Company <span class="text-danger">*</span></mat-label>
                     <mat-form-field appearance="outline" class="w-100">
                       <mat-select formControlName="company_id" placeholder="Select Your Company">
                         @for(option of Companies; track option.id) {
                         <mat-option [value]="option.id">{{option.name}}</mat-option>
                         }
                       </mat-select>
+                      @if (EmployeeForm.get('company_id')?.hasError('required')) {
+                        <mat-error>Company is required</mat-error>
+                      }
                     </mat-form-field>
                   </div>
 
                   <div class="col-lg-4">
-                    <mat-label class="f-w-600 m-b-8 d-block">Branch</mat-label>
+                    <mat-label class="f-w-600 m-b-8 d-block">Branch <span class="text-danger">*</span></mat-label>
                     <mat-form-field appearance="outline" class="w-100">
                       <mat-select formControlName="branch_id" placeholder="Select Your Branch">
                         @for(option of Branch; track option.id) {
                         <mat-option [value]="option.id">{{option.name}}</mat-option>
                         }
                       </mat-select>
+                      @if (EmployeeForm.get('branch_id')?.hasError('required')) {
+                        <mat-error>Branch is required</mat-error>
+                      }
                     </mat-form-field>
                   </div>
 
                   <div class="col-lg-4">
-                    <mat-label class="f-w-600 m-b-8 d-block">Role</mat-label>
+                    <mat-label class="f-w-600 m-b-8 d-block">Role <span class="text-danger">*</span></mat-label>
                     <mat-form-field appearance="outline" class="w-100">
                       <mat-select formControlName="role_id" placeholder="Select Your Role">
                         @for(option of Roles; track option.id) {
                         <mat-option [value]="option.id">{{option.name}}</mat-option>
                         }
                       </mat-select>
+                      @if (EmployeeForm.get('role_id')?.hasError('required')) {
+                        <mat-error>Role is required</mat-error>
+                      }
                     </mat-form-field>
                   </div>
 
                 <div class="col-lg-4">
-
-                    <mat-label class="f-w-600 m-b-8 d-block">
-                        Employee Name
-                    </mat-label>
-
+                    <mat-label class="f-w-600 m-b-8 d-block">Employee Name <span class="text-danger">*</span></mat-label>
                     <mat-form-field appearance="outline" class="w-100">
-
-                        <input matInput formControlName="name" placeholder="Enter Branch Name">
-
+                        <input matInput formControlName="name" placeholder="Enter Employee Name">
+                        @if (EmployeeForm.get('name')?.hasError('required')) {
+                          <mat-error>Employee name is required</mat-error>
+                        } @else if (EmployeeForm.get('name')?.hasError('maxlength')) {
+                          <mat-error>Employee name cannot exceed 100 characters</mat-error>
+                        }
                     </mat-form-field>
-
                 </div>
 
                 <div class="col-lg-4">
-
-                    <mat-label class="f-w-600 m-b-8 d-block">
-                        Mobile Number
-                    </mat-label>
-
+                    <mat-label class="f-w-600 m-b-8 d-block">Mobile Number <span class="text-danger">*</span></mat-label>
                     <mat-form-field appearance="outline" class="w-100">
-
-                        <input matInput formControlName="mobilenumber" placeholder="Enter Mobile Number">
-
+                        <input matInput formControlName="mobilenumber" placeholder="Enter 10-digit Mobile Number">
+                        @if (EmployeeForm.get('mobilenumber')?.hasError('required')) {
+                          <mat-error>Mobile number is required</mat-error>
+                        } @else if (EmployeeForm.get('mobilenumber')?.hasError('pattern')) {
+                          <mat-error>Enter a valid 10-digit mobile number</mat-error>
+                        }
                     </mat-form-field>
-
                 </div>
 
                 <div class="col-lg-4">
-
-                    <mat-label class="f-w-600 m-b-8 d-block">
-                        Email
-                    </mat-label>
-
+                    <mat-label class="f-w-600 m-b-8 d-block">Email <span class="text-danger">*</span></mat-label>
                     <mat-form-field appearance="outline" class="w-100">
-
                         <input matInput formControlName="email" placeholder="Enter Email">
-
+                        @if (EmployeeForm.get('email')?.hasError('required')) {
+                          <mat-error>Email is required</mat-error>
+                        } @else if (EmployeeForm.get('email')?.hasError('email')) {
+                          <mat-error>Enter a valid email address</mat-error>
+                        }
                     </mat-form-field>
-
                 </div>
 
             </div>

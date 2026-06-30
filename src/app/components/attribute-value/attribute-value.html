@@ -21,8 +21,8 @@
     @if (!AttributeValue_Forms) {
     <mat-card-content class="b-t-1">
 
-        <app-mat-table [columns]="tableColumns" [tableData]="AttributeValues" [showAction]="true" [Extra_Column]="false"
-            (editClick)="editUser($event)" (deleteClick)="deleteUser($event)">
+        <app-mat-table [columns]="tableColumns" [tableData]="AttributeValues" [showAction]="true" [showView]="true" [Extra_Column]="false"
+            (editClick)="editUser($event)" (deleteClick)="deleteUser($event)" (ViewClick)="viewItem($event)">
         </app-mat-table>
 
     </mat-card-content>
@@ -33,27 +33,40 @@
         <form [formGroup]="AttributeValueForm">
             <div class="row">
                 <div class="col-lg-4">
-                    <mat-label class="f-w-600 m-b-8 d-block">Attribute</mat-label>
+                    <mat-label class="f-w-600 m-b-8 d-block">Attribute <span class="text-danger">*</span></mat-label>
                     <mat-form-field appearance="outline" class="w-100">
                         <mat-select formControlName="ProductAttributeId" placeholder="Select Attribute">
                             @for(option of ProductAttributes; track option.Id) {
                             <mat-option [value]="option.Id">{{option.Name}}</mat-option>
                             }
                         </mat-select>
+                        @if (AttributeValueForm.get('ProductAttributeId')?.hasError('required')) {
+                          <mat-error>Attribute is required</mat-error>
+                        }
                     </mat-form-field>
                 </div>
 
                 <div class="col-lg-4">
-                    <mat-label class="f-w-600 m-b-8 d-block">Value Code</mat-label>
+                    <mat-label class="f-w-600 m-b-8 d-block">Value Code <span class="text-danger">*</span></mat-label>
                     <mat-form-field appearance="outline" class="w-100">
                         <input matInput formControlName="AttributeValueCode" placeholder="Enter Value Code">
+                        @if (AttributeValueForm.get('AttributeValueCode')?.hasError('required')) {
+                          <mat-error>Value code is required</mat-error>
+                        } @else if (AttributeValueForm.get('AttributeValueCode')?.hasError('maxlength')) {
+                          <mat-error>Value code cannot exceed 50 characters</mat-error>
+                        }
                     </mat-form-field>
                 </div>
 
                 <div class="col-lg-4">
-                    <mat-label class="f-w-600 m-b-8 d-block">Name</mat-label>
+                    <mat-label class="f-w-600 m-b-8 d-block">Name <span class="text-danger">*</span></mat-label>
                     <mat-form-field appearance="outline" class="w-100">
                         <input matInput formControlName="Name" placeholder="Enter Value Name">
+                        @if (AttributeValueForm.get('Name')?.hasError('required')) {
+                          <mat-error>Name is required</mat-error>
+                        } @else if (AttributeValueForm.get('Name')?.hasError('maxlength')) {
+                          <mat-error>Name cannot exceed 100 characters</mat-error>
+                        }
                     </mat-form-field>
                 </div>
             </div>

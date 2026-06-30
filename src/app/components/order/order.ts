@@ -59,10 +59,14 @@ export class Order {
   }
 
   deleteOrder(order: any) {
-    this.commonService.deleteApi(`orders/${order?.id}`).subscribe({
-      next: (res: any) => {
-        this.alert.success("Order deleted successfully");
-        this.getOrders();
+    this.alert.confirm("Are you sure you want to delete this order?").then((result) => {
+      if (result.isConfirmed) {
+        this.commonService.deleteApi(`orders/${order?.id}`).subscribe({
+          next: (res: any) => {
+            this.alert.success("Order deleted successfully");
+            this.getOrders();
+          }
+        });
       }
     });
   }

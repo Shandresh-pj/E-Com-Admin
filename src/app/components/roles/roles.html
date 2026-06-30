@@ -21,17 +21,15 @@
             <div class="row">
 
                 <div class="col-lg-4">
-
-                    <mat-label class="f-w-600 m-b-8 d-block">
-                        Roles Name
-                    </mat-label>
-
+                    <mat-label class="f-w-600 m-b-8 d-block">Roles Name <span class="text-danger">*</span></mat-label>
                     <mat-form-field appearance="outline" class="w-100">
-
-                        <input matInput formControlName="name" placeholder="Enter Roles Name">
-
+                        <input matInput formControlName="name" placeholder="Enter Role Name">
+                        @if (RolesForm.get('name')?.hasError('required')) {
+                          <mat-error>Role name is required</mat-error>
+                        } @else if (RolesForm.get('name')?.hasError('maxlength')) {
+                          <mat-error>Role name cannot exceed 100 characters</mat-error>
+                        }
                     </mat-form-field>
-
                 </div>
 
             </div>

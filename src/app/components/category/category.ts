@@ -6,10 +6,12 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatIconModule } from '@angular/material/icon';
+import { MatDialog } from '@angular/material/dialog';
 import { AlertService } from 'src/app/Securities/Services/alert.service';
 import { CommonService } from 'src/app/Securities/Services/common.service';
 import { MatTable } from 'src/utils/mat-table/mat-table';
-import { environment } from 'src/environment/environment';
+import { toFileUrl } from 'src/utils/file-url';
+import { ViewDetailsDialog } from 'src/utils/view-details-dialog/view-details-dialog';
 
 @Component({
   selector: 'app-category',
@@ -49,11 +51,12 @@ export class Category {
     private fb: FormBuilder,
     private commonService: CommonService,
     private alert: AlertService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private dialog: MatDialog
   ) {
     this.CategoryForm = fb.group({
-      name: ['', Validators.required],
-      description: [''],
+      name: ['', [Validators.required, Validators.maxLength(100)]],
+      description: ['', [Validators.maxLength(500)]],
       parent_id: [null],
       StatusId: ['', Validators.required]
     });
@@ -91,15 +94,20 @@ export class Category {
       const reader = new FileReader();
       reader.onload = () => {
         this.imagePreviewUrl = reader.result as string;
+        this.cdr.detectChanges();
       };
       reader.readAsDataURL(file);
     }
   }
 
   removeImage() {
-    this.ImageFile = null;
-    this.imagePreviewUrl = null;
-    this.existingImageUrl = null;
+    this.alert.confirm("Are you sure you want to remove the category image?").then((result) => {
+      if (result.isConfirmed) {
+        this.ImageFile = null;
+        this.imagePreviewUrl = null;
+        this.existingImageUrl = null;
+      }
+    });
   }
 
   AddNewUser() {
@@ -110,7 +118,7 @@ export class Category {
     this.SelectedCategoryId = category?.id;
     this.Category_Forms = true;
     this.Update_button = true;
-    this.existingImageUrl = category?.image ? `${environment.apiUrl}/${category.image}` : null;
+    this.existingImageUrl = toFileUrl(category?.image);
     this.imagePreviewUrl = null;
     this.ImageFile = null;
     this.CategoryForm.patchValue({
@@ -121,11 +129,37 @@ export class Category {
     });
   }
 
-  deleteUser(category: any) {
-    this.commonService.deleteApi(`categories/${category?.id}`).subscribe({
+  viewItem(category: any) {
+    this.commonService.getApi(`categories/${category?.id}`).subscribe({
       next: (res: any) => {
-        this.alert.success("Category deleted successfully");
-        this.getCategories();
+        const data = res?.data;
+        const status = this.Statuses?.find((s: any) => s.Id === data?.StatusId);
+        this.dialog.open(ViewDetailsDialog, {
+          width: '600px',
+          data: {
+            title: 'Category Details',
+            fields: [
+              { label: 'Name', value: data?.name },
+              { label: 'Description', value: data?.description },
+              { label: 'Parent Category', value: data?.parent?.name },
+              { label: 'Status', value: status?.StatusCode },
+              { label: 'Image', value: toFileUrl(data?.image), isImage: true },
+            ],
+          },
+        });
+      }
+    });
+  }
+
+  deleteUser(category: any) {
+    this.alert.confirm("Are you sure you want to delete this category?").then((result) => {
+      if (result.isConfirmed) {
+        this.commonService.deleteApi(`categories/${category?.id}`).subscribe({
+          next: (res: any) => {
+            this.alert.success("Category deleted successfully");
+            this.getCategories();
+          }
+        });
       }
     });
   }
@@ -140,6 +174,10 @@ export class Category {
   }
 
   submit(form: FormGroup) {
+    if (form.invalid) {
+      form.markAllAsTouched();
+      return;
+    }
     const value = form.value;
     const formData = new FormData();
     formData.append('name', value.name);

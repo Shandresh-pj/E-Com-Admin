@@ -21,8 +21,8 @@
     @if (!Category_Forms) {
     <mat-card-content class="b-t-1">
 
-        <app-mat-table [columns]="tableColumns" [tableData]="Categories" [showAction]="true" [Extra_Column]="false"
-            (editClick)="editUser($event)" (deleteClick)="deleteUser($event)">
+        <app-mat-table [columns]="tableColumns" [tableData]="Categories" [showAction]="true" [showView]="true" [Extra_Column]="false"
+            (editClick)="editUser($event)" (deleteClick)="deleteUser($event)" (ViewClick)="viewItem($event)">
         </app-mat-table>
 
     </mat-card-content>
@@ -33,9 +33,14 @@
         <form [formGroup]="CategoryForm">
             <div class="row">
                 <div class="col-lg-4">
-                    <mat-label class="f-w-600 m-b-8 d-block">Category Name</mat-label>
+                    <mat-label class="f-w-600 m-b-8 d-block">Category Name <span class="text-danger">*</span></mat-label>
                     <mat-form-field appearance="outline" class="w-100">
                         <input matInput formControlName="name" placeholder="Enter Category Name">
+                        @if (CategoryForm.get('name')?.hasError('required')) {
+                          <mat-error>Category name is required</mat-error>
+                        } @else if (CategoryForm.get('name')?.hasError('maxlength')) {
+                          <mat-error>Category name cannot exceed 100 characters</mat-error>
+                        }
                     </mat-form-field>
                 </div>
 
@@ -54,13 +59,16 @@
                 </div>
 
                 <div class="col-lg-4">
-                    <mat-label class="f-w-600 m-b-8 d-block">Status</mat-label>
+                    <mat-label class="f-w-600 m-b-8 d-block">Status <span class="text-danger">*</span></mat-label>
                     <mat-form-field appearance="outline" class="w-100">
                         <mat-select formControlName="StatusId" placeholder="Select Status">
                             @for(option of Statuses; track option.Id) {
                             <mat-option [value]="option.Id">{{option.StatusCode}}</mat-option>
                             }
                         </mat-select>
+                        @if (CategoryForm.get('StatusId')?.hasError('required')) {
+                          <mat-error>Status is required</mat-error>
+                        }
                     </mat-form-field>
                 </div>
 
@@ -68,6 +76,9 @@
                     <mat-label class="f-w-600 m-b-8 d-block">Description</mat-label>
                     <mat-form-field appearance="outline" class="w-100">
                         <textarea matInput formControlName="description" placeholder="Enter Description" rows="3"></textarea>
+                        @if (CategoryForm.get('description')?.hasError('maxlength')) {
+                          <mat-error>Description cannot exceed 500 characters</mat-error>
+                        }
                     </mat-form-field>
                 </div>
 

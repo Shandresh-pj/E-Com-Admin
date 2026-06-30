@@ -9,6 +9,7 @@ import { MatSelect, MatSelectModule } from '@angular/material/select';
 import { AlertService } from 'src/app/Securities/Services/alert.service';
 import { AuthService } from 'src/app/Securities/Services/auth.service';
 import { CommonService } from 'src/app/Securities/Services/common.service';
+import { PHONE_PATTERN, GST_PATTERN } from 'src/utils/app-validators';
 import { MatTable } from 'src/utils/mat-table/mat-table';
 
 @Component({
@@ -156,32 +157,36 @@ console.log("user",user)
 
 deleteUser(user: any) {
   console.log('Delete User', user);
-  this.SelectedComapanyId = user?.id
-  this.commonService
-    .deleteApi(`companies/${this.SelectedComapanyId}`)
-    .subscribe({
-
-      next: (res: any) => {
-
-        this.alert.success(
-          "Admin deleted successfully"
-        );
-        this.getUser();
-        this.getRoles();
-      },
-      error: (err: any) => {
-        console.log(err);
-        this.alert.error("Failed to delete admin");
-      }
-    });
- 
-}
+  const id = user?.id || this.SelectedComapanyId;
+  this.alert.confirm("Are you sure you want to delete this admin/company?").then((result) => {
+    if (result.isConfirmed) {
+      this.commonService
+        .deleteApi(`companies/${id}`)
+        .subscribe({
+          next: (res: any) => {
+            this.alert.success(
+              "Admin deleted successfully"
+            );
+            this.getUser();
+          },
+          error: (err: any) => {
+            console.log(err);
+            this.alert.error("Failed to delete admin");
+          }
+        });
+    }
+  });
+} 
 
 
 
 
 
 submit(form: FormGroup) {
+  if (form.invalid) {
+    form.markAllAsTouched();
+    return;
+  }
 
   const payload = form.getRawValue();
 

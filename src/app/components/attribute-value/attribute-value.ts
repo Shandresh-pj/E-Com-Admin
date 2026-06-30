@@ -5,10 +5,12 @@ import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
+import { MatDialog } from '@angular/material/dialog';
 import { AlertService } from 'src/app/Securities/Services/alert.service';
 import { AuthService } from 'src/app/Securities/Services/auth.service';
 import { CommonService } from 'src/app/Securities/Services/common.service';
 import { MatTable } from 'src/utils/mat-table/mat-table';
+import { ViewDetailsDialog } from 'src/utils/view-details-dialog/view-details-dialog';
 
 @Component({
   selector: 'app-attribute-value',
@@ -46,12 +48,13 @@ export class AttributeValue {
     private authService: AuthService,
     private commonService: CommonService,
     private alert: AlertService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private dialog: MatDialog
   ) {
     this.AttributeValueForm = fb.group({
       ProductAttributeId: ['', Validators.required],
-      AttributeValueCode: ['', Validators.required],
-      Name: ['', Validators.required]
+      AttributeValueCode: ['', [Validators.required, Validators.maxLength(50)]],
+      Name: ['', [Validators.required, Validators.maxLength(100)]]
     });
   }
 
@@ -62,7 +65,8 @@ export class AttributeValue {
 
   getCompanyId() {
     const user = this.authService.getUser();
-    return user?.company_id || user?.CompanyId || user?.userRoles?.[0]?.company?.id;
+    const roles = this.authService.getRoles();
+    return user?.company_id || user?.CompanyId || roles?.[0]?.company?.id;
   }
 
   getProductAttributes() {
@@ -103,11 +107,37 @@ export class AttributeValue {
     });
   }
 
-  deleteUser(value: any) {
-    this.commonService.deleteApi(`ProductAttributeValue/${value?.Id}`).subscribe({
+  viewItem(value: any) {
+    this.commonService.getApi(`ProductAttributeValue/Detail/${value?.Id}`).subscribe({
       next: (res: any) => {
-        this.alert.success("Attribute Value deleted successfully");
-        this.getAttributeValues();
+        const data = res?.data;
+        const attributeName = this.ProductAttributes?.find((attr: any) => attr.Id === data?.ProductAttributeId)?.Name;
+        this.dialog.open(ViewDetailsDialog, {
+          width: '600px',
+          data: {
+            title: 'Attribute Value Details',
+            fields: [
+              { label: 'Attribute', value: attributeName },
+              { label: 'Value Code', value: data?.AttributeValueCode },
+              { label: 'Name', value: data?.Name },
+              { label: 'Created At', value: data?.CreatedAt },
+              { label: 'Updated At', value: data?.UpdatedAt },
+            ],
+          },
+        });
+      }
+    });
+  }
+
+  deleteUser(value: any) {
+    this.alert.confirm("Are you sure you want to delete this attribute value?").then((result) => {
+      if (result.isConfirmed) {
+        this.commonService.deleteApi(`ProductAttributeValue/${value?.Id}`).subscribe({
+          next: (res: any) => {
+            this.alert.success("Attribute Value deleted successfully");
+            this.getAttributeValues();
+          }
+        });
       }
     });
   }
@@ -119,6 +149,10 @@ export class AttributeValue {
   }
 
   submit(form: FormGroup) {
+    if (form.invalid) {
+      form.markAllAsTouched();
+      return;
+    }
     const payload = {
       ...form.value,
       CompanyId: this.getCompanyId()

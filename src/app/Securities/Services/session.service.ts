@@ -1,107 +1,38 @@
-
 import { Injectable } from '@angular/core';
 
 @Injectable({
-providedIn:'root'
+  providedIn: 'root'
 })
-export class SessionService{
+export class SessionService {
 
-setSession(data:any){
+  setSession(data: any): void {
+    localStorage.setItem('token',        data.token         ?? '');
+    localStorage.setItem('refresh_token',data.refreshToken  ?? '');
+    localStorage.setItem('user',         JSON.stringify(data.user   ?? {}));
+    localStorage.setItem('roles',        JSON.stringify(data.roles  ?? []));
+    localStorage.setItem('permissions',  JSON.stringify(data.permissions ?? []));
+    localStorage.setItem('menus',        JSON.stringify(data.menus  ?? []));
+  }
 
-localStorage.setItem(
-'token',
-data.token
-);
+  getUser(): any {
+    return JSON.parse(localStorage.getItem('user') || '{}');
+  }
 
-localStorage.setItem(
-'user',
-JSON.stringify(data.user)
-);
+  getRoles(): any[] {
+    return JSON.parse(localStorage.getItem('roles') || '[]');
+  }
 
-localStorage.setItem(
-'roles',
-JSON.stringify(data.roles)
-);
+  getPermissions(): any[] {
+    return JSON.parse(localStorage.getItem('permissions') || '[]');
+  }
 
-localStorage.setItem(
-'permissions',
-JSON.stringify(
-data.permissions
-)
-);
+  getMenus(): any[] {
+    return JSON.parse(localStorage.getItem('menus') || '[]');
+  }
 
-localStorage.setItem(
-'menus',
-JSON.stringify(
-data.menus
-)
-);
-
+  clearSession(): void {
+    ['token', 'refresh_token', 'user', 'roles', 'permissions', 'menus'].forEach(
+      key => localStorage.removeItem(key)
+    );
+  }
 }
-
-getUser(){
-
-return JSON.parse(
-localStorage.getItem(
-'user'
-)||'{}'
-);
-
-}
-
-getRoles(){
-
-return JSON.parse(
-localStorage.getItem(
-'roles'
-)||'[]'
-);
-
-}
-
-getPermissions(){
-
-return JSON.parse(
-localStorage.getItem(
-'permissions'
-)||'[]'
-);
-
-}
-
-getMenus(){
-
-return JSON.parse(
-localStorage.getItem(
-'menus'
-)||'[]'
-);
-
-}
-
-clearSession(){
-
-localStorage.removeItem(
-'token'
-);
-
-localStorage.removeItem(
-'user'
-);
-
-localStorage.removeItem(
-'roles'
-);
-
-localStorage.removeItem(
-'permissions'
-);
-
-localStorage.removeItem(
-'menus'
-);
-
-}
-
-}
-

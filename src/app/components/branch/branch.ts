@@ -9,6 +9,7 @@ import { MatSelect, MatSelectModule } from '@angular/material/select';
 import { AlertService } from 'src/app/Securities/Services/alert.service';
 import { AuthService } from 'src/app/Securities/Services/auth.service';
 import { CommonService } from 'src/app/Securities/Services/common.service';
+import { PHONE_PATTERN } from 'src/utils/app-validators';
 import { MatTable } from 'src/utils/mat-table/mat-table';
 
 @Component({
@@ -141,13 +142,17 @@ export class Branch {
   }
 
   deleteUser(user:any){
-    this.commonService.deleteApi(`delete/${this.SelectedBranchId}`).subscribe({
-      next:(res: any)=> {
-        this.alert.confirm("Delete the Branch");
-        this.getBranches();
-
+    const id = user?.id || this.SelectedBranchId;
+    this.alert.confirm("Are you sure you want to delete this branch?").then((result) => {
+      if (result.isConfirmed) {
+        this.commonService.deleteApi(`delete/${id}`).subscribe({
+          next:(res: any)=> {
+            this.alert.success("Branch deleted successfully");
+            this.getBranches();
+          }
+        });
       }
-    })
+    });
   }
   cancelBranch(){
     this.Branch_Forms = false;
@@ -155,9 +160,12 @@ export class Branch {
     this.BranchForm.reset();
     // this.getRoles();
   }
-  submit(form: FormGroup){
-    const payload = form.getRawValue();
-    console.log('Resss',payload)
+  submit(form: FormGroup) {
+    if (form.invalid) {
+      form.markAllAsTouched();
+      return;
+    }
+    const payload = form.value;
     if(!this.Update_button){
     this.commonService.postApi(`branches`, payload).subscribe({
       next:(res:any)=> {

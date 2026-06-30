@@ -1,47 +1,42 @@
-
 import { Injectable } from '@angular/core';
 
 @Injectable({
-providedIn:'root'
+  providedIn: 'root'
 })
 export class TokenService {
 
-private TOKEN='token';
+  private readonly ACCESS_KEY  = 'token';
+  private readonly REFRESH_KEY = 'refresh_token';
 
-setToken(
-token:string
-){
+  // ─── Access token ────────────────────────────────────────────────────────
 
-localStorage.setItem(
-this.TOKEN,
-token
-);
+  setToken(token: string): void {
+    localStorage.setItem(this.ACCESS_KEY, token);
+  }
 
-}
+  getToken(): string | null {
+    return localStorage.getItem(this.ACCESS_KEY);
+  }
 
-getToken():string|null{
+  removeToken(): void {
+    localStorage.removeItem(this.ACCESS_KEY);
+  }
 
-return localStorage.getItem(
-this.TOKEN
-);
+  isLoggedIn(): boolean {
+    return !!this.getToken();
+  }
 
-}
+  // ─── Refresh token ────────────────────────────────────────────────────────
 
-removeToken(){
+  setRefreshToken(token: string): void {
+    localStorage.setItem(this.REFRESH_KEY, token);
+  }
 
-localStorage.removeItem(
-this.TOKEN
-);
+  getRefreshToken(): string | null {
+    return localStorage.getItem(this.REFRESH_KEY);
+  }
 
-}
-
-isLoggedIn():boolean{
-
-const token=
-this.getToken();
-
-return !!token;
-
-}
-
+  removeRefreshToken(): void {
+    localStorage.removeItem(this.REFRESH_KEY);
+  }
 }

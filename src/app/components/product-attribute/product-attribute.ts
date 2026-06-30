@@ -5,10 +5,12 @@ import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
+import { MatDialog } from '@angular/material/dialog';
 import { AlertService } from 'src/app/Securities/Services/alert.service';
 import { AuthService } from 'src/app/Securities/Services/auth.service';
 import { CommonService } from 'src/app/Securities/Services/common.service';
 import { MatTable } from 'src/utils/mat-table/mat-table';
+import { ViewDetailsDialog } from 'src/utils/view-details-dialog/view-details-dialog';
 
 @Component({
   selector: 'app-product-attribute',
@@ -44,11 +46,12 @@ export class ProductAttribute {
     private authService: AuthService,
     private commonService: CommonService,
     private alert: AlertService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private dialog: MatDialog
   ) {
     this.ProductAttributeForm = fb.group({
-      AttributeNameCode: ['', Validators.required],
-      Name: ['', Validators.required]
+      AttributeNameCode: ['', [Validators.required, Validators.maxLength(50)]],
+      Name: ['', [Validators.required, Validators.maxLength(100)]]
     });
   }
 
@@ -58,7 +61,8 @@ export class ProductAttribute {
 
   getCompanyId() {
     const user = this.authService.getUser();
-    return user?.company_id || user?.CompanyId || user?.userRoles?.[0]?.company?.id;
+    const roles = this.authService.getRoles();
+    return user?.company_id || user?.CompanyId || roles?.[0]?.company?.id;
   }
 
   getProductAttributes() {
@@ -84,11 +88,35 @@ export class ProductAttribute {
     });
   }
 
-  deleteUser(attribute: any) {
-    this.commonService.deleteApi(`ProductAttribute/${attribute?.Id}`).subscribe({
+  viewItem(attribute: any) {
+    this.commonService.getApi(`ProductAttribute/Detail/${attribute?.Id}`).subscribe({
       next: (res: any) => {
-        this.alert.success("Product Attribute deleted successfully");
-        this.getProductAttributes();
+        const data = res?.data;
+        this.dialog.open(ViewDetailsDialog, {
+          width: '600px',
+          data: {
+            title: 'Product Attribute Details',
+            fields: [
+              { label: 'Attribute Code', value: data?.AttributeNameCode },
+              { label: 'Name', value: data?.Name },
+              { label: 'Created At', value: data?.CreatedAt },
+              { label: 'Updated At', value: data?.UpdatedAt },
+            ],
+          },
+        });
+      }
+    });
+  }
+
+  deleteUser(attribute: any) {
+    this.alert.confirm("Are you sure you want to delete this product attribute?").then((result) => {
+      if (result.isConfirmed) {
+        this.commonService.deleteApi(`ProductAttribute/${attribute?.Id}`).subscribe({
+          next: (res: any) => {
+            this.alert.success("Product Attribute deleted successfully");
+            this.getProductAttributes();
+          }
+        });
       }
     });
   }
@@ -100,6 +128,10 @@ export class ProductAttribute {
   }
 
   submit(form: FormGroup) {
+    if (form.invalid) {
+      form.markAllAsTouched();
+      return;
+    }
     const payload = {
       ...form.value,
       CompanyId: this.getCompanyId()

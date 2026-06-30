@@ -45,8 +45,8 @@ export class Status {
     private cdr: ChangeDetectorRef
   ) {
     this.StatusForm = fb.group({
-      StatusCode: ['', Validators.required],
-      StatusFor: ['COMMON', Validators.required]
+      StatusCode: ['', [Validators.required, Validators.maxLength(50), Validators.pattern(/^[A-Z0-9_]+$/)]],
+      StatusFor: ['COMMON', [Validators.required, Validators.maxLength(50)]]
     });
   }
 
@@ -78,10 +78,14 @@ export class Status {
   }
 
   deleteUser(status: any) {
-    this.commonService.deleteApi(`Status/${status?.Id}`).subscribe({
-      next: (res: any) => {
-        this.alert.success("Status deleted successfully");
-        this.getStatuses();
+    this.alert.confirm("Are you sure you want to delete this status?").then((result) => {
+      if (result.isConfirmed) {
+        this.commonService.deleteApi(`Status/${status?.Id}`).subscribe({
+          next: (res: any) => {
+            this.alert.success("Status deleted successfully");
+            this.getStatuses();
+          }
+        });
       }
     });
   }
@@ -93,6 +97,10 @@ export class Status {
   }
 
   submit(form: FormGroup) {
+    if (form.invalid) {
+      form.markAllAsTouched();
+      return;
+    }
     const payload = form.value;
     if (!this.Update_button) {
       this.commonService.postApi(`Status/Add`, payload).subscribe({

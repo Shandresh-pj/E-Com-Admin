@@ -7,6 +7,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { AlertService } from 'src/app/Securities/Services/alert.service';
 import { CommonService } from 'src/app/Securities/Services/common.service';
+import { PHONE_PATTERN } from 'src/utils/app-validators';
 import { MatTable } from 'src/utils/mat-table/mat-table';
 
 @Component({
@@ -77,7 +78,7 @@ export class Employees {
     this.getRoles();
     this.getCompany();
     // this.getBranch();
-    // this.getEmployees();
+    this.getEmployees();
 
     this.EmployeeForm.get('company_id')?.valueChanges.subscribe(
       (companyId) => {
@@ -122,13 +123,17 @@ export class Employees {
 
   
   deleteUser(user:any){
-    this.commonService.deleteApi(`delete/${this.SelectedEmployessId}`).subscribe({
-      next:(res: any)=> {
-        this.alert.confirm("Delete the Branch");
-        this.getCompany();
-
+    const id = user?.id || this.SelectedEmployessId;
+    this.alert.confirm("Are you sure you want to delete this employee?").then((result) => {
+      if (result.isConfirmed) {
+        this.commonService.deleteApi(`delete/${id}`).subscribe({
+          next:(res: any)=> {
+            this.alert.success("Employee deleted successfully");
+            this.getEmployees();
+          }
+        });
       }
-    })
+    });
   }
 
   cancelBranch(){
@@ -199,17 +204,20 @@ export class Employees {
   //     }
   //   })
   // }
-  // getEmployees(){
-  //   this.commonService.getApi(`employees`).subscribe({
-  //     next:(res:any) => {
-  //       this.Employees = res?.data
-  //     }
-  //   })
-  // }
+  getEmployees(){
+    this.commonService.getApi(`employees`).subscribe({
+      next:(res:any) => {
+        this.Employees = res?.data
+      }
+    })
+  }
 
-  submit(form:FormGroup){
-    const payload = form?.getRawValue();
-    console.log("payload",payload);
+  submit(form: FormGroup) {
+    if (form.invalid) {
+      form.markAllAsTouched();
+      return;
+    }
+    const payload = form?.value;
     if(!this.UpdateButton){
     this.commonService.postApi(`employees`,payload).subscribe({
       next:(res:any)=>{ 

@@ -1,0 +1,41 @@
+<h2 mat-dialog-title>{{ data.title }}</h2>
+
+<mat-dialog-content>
+    <div class="row">
+        @for (field of data.fields; track field.label) {
+        <div class="col-12 m-b-12" [class.col-lg-6]="!field.isImage && !field.isImageList && !field.isVideo">
+            <div class="f-w-600 text-muted f-s-12">{{ field.label }}</div>
+
+            @if (field.isVideo) {
+                @if (field.value) {
+                <video [src]="field.value" controls style="max-width: 240px; max-height: 160px;" class="m-t-4"></video>
+                } @else {
+                <div class="f-s-14">-</div>
+                }
+            } @else if (field.isImageList) {
+                @if (field.value?.length) {
+                <div class="d-flex m-t-4" style="gap: 8px; flex-wrap: wrap;">
+                    @for (img of field.value; track $index) {
+                    <img [src]="img" [alt]="field.label" style="max-width: 100px; max-height: 100px;">
+                    }
+                </div>
+                } @else {
+                <div class="f-s-14">-</div>
+                }
+            } @else if (field.isImage) {
+                @if (field.value) {
+                <img [src]="field.value" [alt]="field.label" style="max-width: 160px; max-height: 160px;" class="m-t-4">
+                } @else {
+                <div class="f-s-14">-</div>
+                }
+            } @else {
+            <div class="f-s-14">{{ field.value ?? '-' }}</div>
+            }
+        </div>
+        }
+    </div>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+    <button mat-stroked-button (click)="close()">Close</button>
+</mat-dialog-actions>

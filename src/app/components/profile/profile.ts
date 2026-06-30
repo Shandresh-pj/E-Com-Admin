@@ -67,4 +67,20 @@ export class Profile {
       }
     })
   }
+
+  onSubmit(Form: FormGroup) {
+    if (Form.invalid) {
+      Form.markAllAsTouched();
+      return;
+    }
+    const payload = Form.getRawValue();
+    this.commonService.putApi(`profile/${this.ProfileId}`, payload).subscribe({
+      next: () => {
+        this.alert.success('Profile updated successfully');
+      },
+      error: (err: any) => {
+        this.alert.error(err?.error?.message || 'Profile update failed');
+      }
+    });
+  }
 }

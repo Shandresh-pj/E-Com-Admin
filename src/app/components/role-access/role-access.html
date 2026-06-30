@@ -1,1 +1,73 @@
-<p>role-access works!</p>
+<mat-card class="cardWithShadow theme-card">
+
+    <mat-card-header>
+
+        <div class="header-container">
+
+            <mat-card-title class="m-b-0">
+                Roles Access
+            </mat-card-title>
+            @if(!AddNewRoleAccess){
+            <button mat-flat-button color="primary" (click)="AddNewUser()">
+
+                Add New Role Access
+
+            </button>
+        }
+
+        </div>
+
+    </mat-card-header>
+@if(AddNewRoleAccess){
+    <mat-card-content class="b-t-1">
+
+        <form [formGroup]="RoleAccessForm">
+
+            <div class="row">
+
+                <div class="col-lg-4">
+
+                    <mat-label class="f-w-600 m-b-8 d-block">
+                        Roles Name
+                    </mat-label>
+
+                    <mat-form-field appearance="outline" class="w-100">
+
+                        <input matInput formControlName="name" placeholder="Enter Roles Name">
+
+                    </mat-form-field>
+
+                </div>
+
+            </div>
+
+            <div class="m-t-12">
+
+                <button mat-stroked-button class="me-3 Cancel_Button" (click)="cancelRoleAccess()">
+
+                    Cancel
+
+                </button>
+
+                <button mat-flat-button color="primary" (click)="onsubmit(RoleAccessForm)">
+
+                    {{UpdateButton ? 'Update' : 'Submit'}}
+
+                </button>
+
+            </div>
+
+        </form>
+
+    </mat-card-content>
+} @else{
+    <mat-card-content class="b-t-1">
+
+        <app-mat-table [columns]="tableColumns" [tableData]="Roles" [showAction]="false" [Extra_Column]="false">
+        </app-mat-table>
+
+    </mat-card-content>
+}
+
+
+</mat-card>

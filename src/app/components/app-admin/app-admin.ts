@@ -65,6 +65,8 @@ export class AppAdmin {
   Update_Button : boolean = false;
 
   SelectedComapanyId: any;
+  Roles: any;
+  Roleid: any;
 
 constructor(private fb: FormBuilder, 
   private authService:AuthService,
@@ -75,28 +77,22 @@ constructor(private fb: FormBuilder,
   console.log("aaaa-1.1",user)
 
   this.CompanyForm = fb.group({
-    name: ['', [Validators.required, Validators.maxLength(100)]],
-    email: ['', [Validators.required, Validators.email]],
-    phone: ['', [Validators.required, Validators.pattern(PHONE_PATTERN)]],
-    address: ['', Validators.maxLength(500)],
-    gst_number: ['', Validators.pattern(GST_PATTERN)],
-    role_id: [2]
+    name : ['', Validators.required],
+    email : ['', [Validators.required, Validators.email]],
+    phone : ['',Validators.required],
+    address : [''],
+    gst_number : [''],
+    role_id:[{value:'', disabled:true},Validators.required]
   })
-
-  // this.BranchForm = fb.group({
-  //   company_id : ['', Validators.required],
-  //   name : ['', Validators.required],
-  //   phone : ['',Validators.required],
-  //   email : ['', [Validators.required,Validators.email]],
-  //   location : ['']
-  // })
 }
 
 ngOnInit() {
   this.getUser();
+  this.getRoles();
 }
 
 AddNewUser(){
+  this.getRoles();
   this.Companies_Form = true;
   this.Update_Button = false;
 }
@@ -123,18 +119,35 @@ getUser(){
   })
 }
 
+getRoles(){
+  this.commonService.getApi(`roles`).subscribe({
+    next:(res:any)=> {
+      this.Roles = res?.data
+      const defaultRole = this.Roles.find(
+        (x:any)=>x.name==="Admin"
+      );
+      if(defaultRole && !this.CompanyForm.get('role_id')?.value){
+        this.CompanyForm.patchValue({
+          role_id: defaultRole.id
+        });
+      }
+    }
+  })
+}
 
 
 editUser(user: any) {
   this.Companies_Form = true;
   this.Update_Button = true;
+  this.Roleid = user?.userRoles[0]?.role?.id
 console.log("user",user)
   this.CompanyForm.patchValue({
     name: user?.name,
     email: user?.email,
     phone: user?.phone,
     address: user?.address,
-    gst_number : user?.gst_number
+    gst_number : user?.gst_number,
+    role_id : this.Roleid
   });
 
   this.SelectedComapanyId = user?.id
@@ -179,21 +192,10 @@ submit(form: FormGroup) {
 
   console.log(payload);
 
-  if (this.Update_Button) {
-
-    this.commonService
-      .putApi(
-        `companies/${this.SelectedComapanyId}`,
-        payload
-      )
-      .subscribe({
-
-        next: (res: any) => {
-
-          this.alert.success(
-            "Company Updated Successfully"
-          );
+  if (this.Update_Button) {this.commonService.putApi(`companies/${this.SelectedComapanyId}`,payload).subscribe({
+next: (res: any) => {this.alert.success("Company Updated Successfully");
           this.getUser();
+          this.getRoles();
 
           this.Update_Button = false;
 
@@ -203,29 +205,20 @@ submit(form: FormGroup) {
 
         },
 
-        error: (err: any) => {
-          console.log(err);
-        }
+        error: (err: any) => {console.log(err);}
 
       });
 
-  }
-  else {
+  } else {
 
-    this.commonService
-      .postApi(
-        'companies',
-        payload
-      )
-      .subscribe({
-
+    this.commonService.postApi('companies',payload).subscribe({
         next: (res: any) => {
 
-          this.alert.success(
-            "Company Created Successfully"
-          );
+          this.alert.success("Company Created Successfully");
 
           this.CompanyForm.reset();
+          this.getRoles();
+          this.getUser();
 
           this.Companies_Form = false;
 

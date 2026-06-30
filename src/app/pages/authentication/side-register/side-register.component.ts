@@ -13,7 +13,7 @@ import { MaterialModule } from 'src/app/material.module';
 })
 export class AppSideRegisterComponent {
   options = this.settings.getOptions();
-  hidePassword = true;
+  hidePassword : boolean = true;
 
   constructor(private settings: CoreService, private router: Router) {}
 

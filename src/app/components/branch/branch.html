@@ -12,7 +12,7 @@
 
             <button mat-flat-button color="primary" (click)="AddNewUser()">
 
-                Add New
+                Add New Branch
 
             </button>
 
@@ -100,6 +100,17 @@
                         }
                     </mat-form-field>
                 </div>
+
+                <div class="col-lg-4">
+                    <mat-label class="f-w-600 m-b-8 d-block">Role</mat-label>
+                    <mat-form-field appearance="outline" class="w-100">
+                      <mat-select formControlName="role_id" placeholder="Select Your Role" >
+                        @for(option of Roles; track option.id) {
+                        <mat-option [value]="option.id" >{{option.name}}</mat-option>
+                        }
+                      </mat-select>
+                    </mat-form-field>
+                  </div>
 
             </div>
 

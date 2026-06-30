@@ -28,11 +28,26 @@ import { MatTable } from 'src/utils/mat-table/mat-table';
 })
 export class Employees {
   tableColumns = [
-    { columnDef: 'id',           header: 'No'            },
-    { columnDef: 'name',         header: 'Name'          },
-    { columnDef: 'email',        header: 'Email'         },
-    { columnDef: 'mobilenumber', header: 'Mobile Number' },
-    { columnDef: 'userType',     header: 'Employee Type' },
+    {
+      columnDef: 'id',
+      header: 'No'
+    },
+    {
+      columnDef: 'name',
+      header: 'Name'
+    },
+    {
+      columnDef: 'email',
+      header: 'Email'
+    },
+    {
+      columnDef: 'mobilenumber',
+      header: 'Mobile Number'
+    },
+    // {
+    //   columnDef: 'userType',
+    //   header: 'Status',
+    // },
   ];
 
   employeeTypes = [
@@ -70,8 +85,14 @@ export class Employees {
   ngOnInit() {
     this.getRoles();
     this.getCompany();
-    this.getBranch();
+    // this.getBranch();
     this.getEmployees();
+
+    this.EmployeeForm.get('company_id')?.valueChanges.subscribe(
+      (companyId) => {
+        this.onCompanyChange(companyId);
+      }
+    );
   }
 
   AddNewUser() {
@@ -110,34 +131,80 @@ export class Employees {
     });
   }
 
-  cancelBranch() {
+  cancelBranch(){
     this.Employee_Forms = false;
-    this.UpdateButton   = false;
-    this.EmployeeForm.reset();
+    this.UpdateButton =false;
+    this.EmployeeForm.reset()
   }
 
-  getRoles() {
-    this.commonService.getApi('roles').subscribe({
-      next: (res: any) => { this.Roles = res?.data; }
-    });
+  
+  getRoles(){
+    this.commonService.getApi(`roles`).subscribe({
+      next:(res:any)=> {
+        this.Roles = res?.data
+        const defaultRole = this.Roles.find(
+          (x:any)=>x.name==="Employee"
+        );
+        if(defaultRole){
+          this.EmployeeForm.patchValue({
+            role_id: defaultRole.id
+          });
+        }
+      }
+    })
   }
 
   getCompany() {
     this.commonService.getApi('companies').subscribe({
-      next: (res: any) => { this.Companies = res?.data; }
+      next: (res: any) => {
+        this.Companies = res?.data || []
+        this.Employees = this.Companies.flatMap(
+          (company: any) =>
+            company.userRoles
+              ?.filter(
+                (role: any) => role.role?.name === 'Employee'
+              )
+              .map((role: any) => ({
+                id: role.user?.id,
+                name: role.user?.name,
+                email: role.user?.email,
+                mobilenumber: role.user?.mobilenumber,
+                companyId: company.id,
+                companyName: company.name,
+                branchId: role.branch?.id,
+                branchName: role.branch?.name
+              }))
+        ) || [];
+      }
+    });
+  }
+  
+  onCompanyChange(companyId: number) {
+    const company = this.Companies.find(
+      (      x: { id: number; }) => x.id === companyId
+    );
+  
+    this.Branch = company?.branches || [];
+  
+    // clear old branch selection
+    this.EmployeeForm.patchValue({
+      branch_id: ''
     });
   }
 
-  getBranch() {
-    this.commonService.getApi('branches').subscribe({
-      next: (res: any) => { this.Branch = res?.data; }
-    });
-  }
-
-  getEmployees() {
-    this.commonService.getApi('employees').subscribe({
-      next: (res: any) => { this.Employees = res?.data; }
-    });
+  // getBranch(){
+  //   this.commonService.getApi(`branches`).subscribe({
+  //     next:(res:any) => {
+  //       this.Branch = res?.data
+  //     }
+  //   })
+  // }
+  getEmployees(){
+    this.commonService.getApi(`employees`).subscribe({
+      next:(res:any) => {
+        this.Employees = res?.data
+      }
+    })
   }
 
   submit(form: FormGroup) {

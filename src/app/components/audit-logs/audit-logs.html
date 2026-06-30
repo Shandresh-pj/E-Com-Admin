@@ -1,0 +1,21 @@
+<mat-card class="cardWithShadow theme-card">
+
+  <mat-card-header>
+    <div class="header-container">
+      <mat-card-title class="m-b-0">Audit Logs</mat-card-title>
+    </div>
+  </mat-card-header>
+
+  <mat-card-content class="b-t-1">
+    <app-mat-table
+      [columns]="tableColumns"
+      [tableData]="logs"
+      [showAction]="true"
+      [showEdit]="false"
+      [showView]="false"
+      [Extra_Column]="false"
+      (deleteClick)="deleteLog($event)">
+    </app-mat-table>
+  </mat-card-content>
+
+</mat-card>

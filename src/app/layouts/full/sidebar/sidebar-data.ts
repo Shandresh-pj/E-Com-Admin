@@ -97,6 +97,14 @@ export const navItems: NavItem[] = [
     bgcolor: 'primary',
   },
 
+  { navCap: 'Audit' },
+  {
+    displayName: 'Audit Logs',
+    iconName: 'clipboard-list',
+    route: '/components/audit-logs',
+    bgcolor: 'error',
+  },
+
   { navCap: 'Settings' },
   {
     displayName: 'Status',

@@ -1,4 +1,4 @@
-@if (!Companies_Form) {
+@if (!Companies_Form && !View_Mode) {
 
 <mat-card class="cardWithShadow theme-card">
 
@@ -20,14 +20,65 @@
 
     <mat-card-content class="b-t-1">
 
-        <app-mat-table [columns]="tableColumns" 
-        [tableData]="Users" 
-        [showAction]="true" 
+        <app-mat-table [columns]="tableColumns"
+        [tableData]="Users"
+        [showAction]="true"
+        [showView]="true"
         [Extra_Column]="false"
         (editClick)="editUser($event)"
-        (deleteClick)="deleteUser($event)">
+        (deleteClick)="deleteUser($event)"
+        (ViewClick)="viewUser($event)">
         </app-mat-table>
 
+    </mat-card-content>
+
+</mat-card>
+
+} @else if (View_Mode) {
+
+<mat-card class="cardWithShadow theme-card">
+
+    <mat-card-header>
+        <div class="header-container">
+            <mat-card-title class="m-b-0">Admin Details</mat-card-title>
+            <button mat-stroked-button (click)="closeView()">Back to List</button>
+        </div>
+    </mat-card-header>
+
+    <mat-card-content class="b-t-1">
+        <div class="row p-t-16">
+
+            <div class="col-lg-4 m-b-16">
+                <p class="f-w-600 m-b-4 text-muted">Company Name</p>
+                <p class="f-s-16">{{ SelectedCompany?.name || '-' }}</p>
+            </div>
+
+            <div class="col-lg-4 m-b-16">
+                <p class="f-w-600 m-b-4 text-muted">Email</p>
+                <p class="f-s-16">{{ SelectedCompany?.email || '-' }}</p>
+            </div>
+
+            <div class="col-lg-4 m-b-16">
+                <p class="f-w-600 m-b-4 text-muted">Mobile Number</p>
+                <p class="f-s-16">{{ SelectedCompany?.phone || '-' }}</p>
+            </div>
+
+            <div class="col-lg-4 m-b-16">
+                <p class="f-w-600 m-b-4 text-muted">Address</p>
+                <p class="f-s-16">{{ SelectedCompany?.address || '-' }}</p>
+            </div>
+
+            <div class="col-lg-4 m-b-16">
+                <p class="f-w-600 m-b-4 text-muted">GST Number</p>
+                <p class="f-s-16">{{ SelectedCompany?.gst_number || '-' }}</p>
+            </div>
+
+            <div class="col-lg-4 m-b-16">
+                <p class="f-w-600 m-b-4 text-muted">Role</p>
+                <p class="f-s-16">{{ SelectedCompany?.userRoles?.[0]?.role?.name || '-' }}</p>
+            </div>
+
+        </div>
     </mat-card-content>
 
 </mat-card>

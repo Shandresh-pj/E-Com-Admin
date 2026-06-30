@@ -165,7 +165,7 @@ export class Branch {
       form.markAllAsTouched();
       return;
     }
-    const payload = form.value;
+    const payload = form.getRawValue();
     if(!this.Update_button){
     this.commonService.postApi(`branches`, payload).subscribe({
       next:(res:any)=> {

@@ -17,7 +17,7 @@ export class AppSideLoginComponent {
 
   LoginForm: FormGroup;
   isLoading = false;
-  hidePassword = true;
+  hidePassword: boolean = true;
 
   constructor(
     private router: Router,

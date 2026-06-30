@@ -3,23 +3,71 @@
     <mat-card-header>
         <div class="header-container">
             <mat-card-title class="m-b-0">Employees</mat-card-title>
-            @if (!Employee_Forms) {
+            @if (!Employee_Forms && !View_Mode) {
                 <button mat-flat-button color="primary" (click)="AddNewUser()">Add New Employee</button>
             }
         </div>
     </mat-card-header>
 
-    @if (!Employee_Forms) {
+    @if (!Employee_Forms && !View_Mode) {
 
     <mat-card-content class="b-t-1">
         <app-mat-table
             [columns]="tableColumns"
             [tableData]="Employees"
             [showAction]="true"
+            [showView]="true"
             [Extra_Column]="false"
             (editClick)="editUser($event)"
-            (deleteClick)="deleteUser($event)">
+            (deleteClick)="deleteUser($event)"
+            (ViewClick)="viewUser($event)">
         </app-mat-table>
+    </mat-card-content>
+
+    } @else if (View_Mode) {
+
+    <mat-card-content class="b-t-1">
+        <div class="row p-t-16">
+
+            <div class="col-lg-4 m-b-16">
+                <p class="f-w-600 m-b-4 text-muted">Employee Name</p>
+                <p class="f-s-16">{{ SelectedEmployee?.name || '-' }}</p>
+            </div>
+
+            <div class="col-lg-4 m-b-16">
+                <p class="f-w-600 m-b-4 text-muted">Email</p>
+                <p class="f-s-16">{{ SelectedEmployee?.email || '-' }}</p>
+            </div>
+
+            <div class="col-lg-4 m-b-16">
+                <p class="f-w-600 m-b-4 text-muted">Mobile Number</p>
+                <p class="f-s-16">{{ SelectedEmployee?.mobilenumber || '-' }}</p>
+            </div>
+
+            <div class="col-lg-4 m-b-16">
+                <p class="f-w-600 m-b-4 text-muted">Employee Type</p>
+                <p class="f-s-16">{{ SelectedEmployee?.userType?.replace('_', ' ') || '-' }}</p>
+            </div>
+
+            <div class="col-lg-4 m-b-16">
+                <p class="f-w-600 m-b-4 text-muted">Company</p>
+                <p class="f-s-16">{{ SelectedEmployee?.userRoles?.[0]?.company?.name || '-' }}</p>
+            </div>
+
+            <div class="col-lg-4 m-b-16">
+                <p class="f-w-600 m-b-4 text-muted">Branch</p>
+                <p class="f-s-16">{{ SelectedEmployee?.userRoles?.[0]?.branch?.name || '-' }}</p>
+            </div>
+
+            <div class="col-lg-4 m-b-16">
+                <p class="f-w-600 m-b-4 text-muted">Role</p>
+                <p class="f-s-16">{{ SelectedEmployee?.userRoles?.[0]?.role?.name || '-' }}</p>
+            </div>
+
+        </div>
+        <div class="m-t-12">
+            <button mat-stroked-button (click)="closeView()">Back to List</button>
+        </div>
     </mat-card-content>
 
     } @else {

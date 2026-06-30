@@ -8,7 +8,7 @@
                 Branch Access
             </mat-card-title>
 
-            @if (!Branch_Forms) {
+            @if (!Branch_Forms && !View_Mode) {
 
             <button mat-flat-button color="primary" (click)="AddNewUser()">
 
@@ -22,19 +22,63 @@
 
     </mat-card-header>
 
-    @if (!Branch_Forms) {
+    @if (!Branch_Forms && !View_Mode) {
 
     <mat-card-content class="b-t-1">
 
-        <app-mat-table [columns]="tableColumns" [tableData]="Branch" [showAction]="true" [Extra_Column]="false"
-            (editClick)="editUser($event)" (deleteClick)="deleteUser($event)">
+        <app-mat-table [columns]="tableColumns" [tableData]="Branch" [showAction]="true" [showView]="true" [Extra_Column]="false"
+            (editClick)="editUser($event)" (deleteClick)="deleteUser($event)" (ViewClick)="viewUser($event)">
         </app-mat-table>
 
     </mat-card-content>
 
-    }
+    } @else if (View_Mode) {
 
-    @else {
+    <mat-card-content class="b-t-1">
+        <div class="row p-t-16">
+
+            <div class="col-lg-4 m-b-16">
+                <p class="f-w-600 m-b-4 text-muted">Branch Name</p>
+                <p class="f-s-16">{{ SelectedBranch?.userRoles?.[0]?.user?.name || SelectedBranch?.name || '-' }}</p>
+            </div>
+
+            <div class="col-lg-4 m-b-16">
+                <p class="f-w-600 m-b-4 text-muted">Email</p>
+                <p class="f-s-16">{{ SelectedBranch?.email || '-' }}</p>
+            </div>
+
+            <div class="col-lg-4 m-b-16">
+                <p class="f-w-600 m-b-4 text-muted">Mobile Number</p>
+                <p class="f-s-16">{{ SelectedBranch?.phone || '-' }}</p>
+            </div>
+
+            <div class="col-lg-4 m-b-16">
+                <p class="f-w-600 m-b-4 text-muted">Company</p>
+                <p class="f-s-16">{{ SelectedBranch?.company?.name || '-' }}</p>
+            </div>
+
+            <div class="col-lg-4 m-b-16">
+                <p class="f-w-600 m-b-4 text-muted">Location</p>
+                <p class="f-s-16">{{ SelectedBranch?.location || '-' }}</p>
+            </div>
+
+            <div class="col-lg-4 m-b-16">
+                <p class="f-w-600 m-b-4 text-muted">Status</p>
+                <p class="f-s-16">{{ SelectedBranch?.status || '-' }}</p>
+            </div>
+
+            <div class="col-lg-4 m-b-16">
+                <p class="f-w-600 m-b-4 text-muted">Role</p>
+                <p class="f-s-16">{{ SelectedBranch?.userRoles?.[0]?.role?.name || '-' }}</p>
+            </div>
+
+        </div>
+        <div class="m-t-12">
+            <button mat-stroked-button (click)="closeView()">Back to List</button>
+        </div>
+    </mat-card-content>
+
+    } @else {
 
     <mat-card-content class="b-t-1">
 

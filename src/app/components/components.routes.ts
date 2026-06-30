@@ -15,6 +15,7 @@ import { Category } from './category/category';
 import { Product } from './product/product';
 import { Order } from './order/order';
 import { ChangePassword } from './change-password/change-password';
+import { AuditLogs } from './audit-logs/audit-logs';
 
 export const ComponentsRoutes: Routes = [
 
@@ -197,6 +198,17 @@ export const ComponentsRoutes: Routes = [
           title: 'Change Password',
           url: '/components/change-password'
         }
+      ]
+    }
+  },
+
+  {
+    path: 'audit-logs',
+    component: AuditLogs,
+    data: {
+      title: 'Audit Logs',
+      urls: [
+        { title: 'Audit Logs', url: '/components/audit-logs' }
       ]
     }
   }

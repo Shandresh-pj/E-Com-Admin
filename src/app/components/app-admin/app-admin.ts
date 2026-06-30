@@ -61,10 +61,12 @@ export class AppAdmin {
   ];
 
   Companies_Form : boolean = false;
+  View_Mode : boolean = false;
 
   Update_Button : boolean = false;
 
   SelectedComapanyId: any;
+  SelectedCompany: any = null;
   Roles: any;
   Roleid: any;
 
@@ -94,7 +96,19 @@ ngOnInit() {
 AddNewUser(){
   this.getRoles();
   this.Companies_Form = true;
+  this.View_Mode = false;
   this.Update_Button = false;
+}
+
+viewUser(user: any) {
+  this.SelectedCompany = user;
+  this.View_Mode = true;
+  this.Companies_Form = false;
+}
+
+closeView() {
+  this.View_Mode = false;
+  this.SelectedCompany = null;
 }
 
 

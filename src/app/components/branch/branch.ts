@@ -54,10 +54,12 @@ export class Branch {
 
   BranchForm : FormGroup;
   Branch_Forms : boolean = false;
+  View_Mode : boolean = false;
   Update_button : boolean = false;
   Branch: any;
   Companies: any;
   SelectedBranchId: any;
+  SelectedBranch: any = null;
   Roles: any;
   Roleid: any;
   defaultRole: any;
@@ -120,9 +122,22 @@ export class Branch {
   }
 
   AddNewUser(){
-    this.Branch_Forms =true
+    this.Branch_Forms = true;
+    this.View_Mode = false;
     this.getRoles();
   }
+
+  viewUser(user: any) {
+    this.SelectedBranch = user;
+    this.View_Mode = true;
+    this.Branch_Forms = false;
+  }
+
+  closeView() {
+    this.View_Mode = false;
+    this.SelectedBranch = null;
+  }
+
   editUser(user:any){
     console.log("user",user);
     this.SelectedBranchId = user?.id

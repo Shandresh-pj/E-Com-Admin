@@ -64,7 +64,9 @@ export class Employees {
 
   UpdateButton   = false;
   Employee_Forms = false;
+  View_Mode      = false;
   SelectedEmployessId: any;
+  SelectedEmployee: any = null;
 
   constructor(
     private fb: FormBuilder,
@@ -97,6 +99,18 @@ export class Employees {
 
   AddNewUser() {
     this.Employee_Forms = true;
+    this.View_Mode = false;
+  }
+
+  viewUser(user: any) {
+    this.SelectedEmployee = user;
+    this.View_Mode = true;
+    this.Employee_Forms = false;
+  }
+
+  closeView() {
+    this.View_Mode = false;
+    this.SelectedEmployee = null;
   }
 
   editUser(user: any) {

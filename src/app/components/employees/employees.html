@@ -1,120 +1,130 @@
 <mat-card class="cardWithShadow theme-card">
 
     <mat-card-header>
-
         <div class="header-container">
-
-            <mat-card-title class="m-b-0">
-                Employees Access
-            </mat-card-title>
-
+            <mat-card-title class="m-b-0">Employees</mat-card-title>
             @if (!Employee_Forms) {
-
-            <button mat-flat-button color="primary" (click)="AddNewUser()">
-
-                Add New Employees
-
-            </button>
-
+                <button mat-flat-button color="primary" (click)="AddNewUser()">Add New Employee</button>
             }
-
         </div>
-
     </mat-card-header>
 
     @if (!Employee_Forms) {
 
     <mat-card-content class="b-t-1">
-
-        <app-mat-table [columns]="tableColumns" [tableData]="Employees" [showAction]="true" [Extra_Column]="false"
-            (editClick)="editUser($event)" (deleteClick)="deleteUser($event)">
+        <app-mat-table
+            [columns]="tableColumns"
+            [tableData]="Employees"
+            [showAction]="true"
+            [Extra_Column]="false"
+            (editClick)="editUser($event)"
+            (deleteClick)="deleteUser($event)">
         </app-mat-table>
-
     </mat-card-content>
 
-    }
-
-    @else {
+    } @else {
 
     <mat-card-content class="b-t-1">
 
         <form [formGroup]="EmployeeForm">
 
             <div class="row">
+
+                <!-- Company -->
                 <div class="col-lg-4">
                     <mat-label class="f-w-600 m-b-8 d-block">Company <span class="text-danger">*</span></mat-label>
                     <mat-form-field appearance="outline" class="w-100">
-                      <mat-select formControlName="company_id" placeholder="Select Your Company">
-                        @for(option of Companies; track option.id) {
-                        <mat-option [value]="option.id">{{option.name}}</mat-option>
+                        <mat-select formControlName="company_id" placeholder="Select Company">
+                            @for (option of Companies; track option.id) {
+                                <mat-option [value]="option.id">{{ option.name }}</mat-option>
+                            }
+                        </mat-select>
+                        @if (EmployeeForm.get('company_id')?.hasError('required')) {
+                            <mat-error>Company is required</mat-error>
                         }
-                      </mat-select>
-                      @if (EmployeeForm.get('company_id')?.hasError('required')) {
-                        <mat-error>Company is required</mat-error>
-                      }
                     </mat-form-field>
-                  </div>
+                </div>
 
-                  <div class="col-lg-4">
+                <!-- Branch -->
+                <div class="col-lg-4">
                     <mat-label class="f-w-600 m-b-8 d-block">Branch <span class="text-danger">*</span></mat-label>
                     <mat-form-field appearance="outline" class="w-100">
-                      <mat-select formControlName="branch_id" placeholder="Select Your Branch">
-                        @for(option of Branch; track option.id) {
-                        <mat-option [value]="option.id">{{option.name}}</mat-option>
+                        <mat-select formControlName="branch_id" placeholder="Select Branch">
+                            @for (option of Branch; track option.id) {
+                                <mat-option [value]="option.id">{{ option.name }}</mat-option>
+                            }
+                        </mat-select>
+                        @if (EmployeeForm.get('branch_id')?.hasError('required')) {
+                            <mat-error>Branch is required</mat-error>
                         }
-                      </mat-select>
-                      @if (EmployeeForm.get('branch_id')?.hasError('required')) {
-                        <mat-error>Branch is required</mat-error>
-                      }
                     </mat-form-field>
-                  </div>
+                </div>
 
-                  <div class="col-lg-4">
+                <!-- Role -->
+                <div class="col-lg-4">
                     <mat-label class="f-w-600 m-b-8 d-block">Role <span class="text-danger">*</span></mat-label>
                     <mat-form-field appearance="outline" class="w-100">
-                      <mat-select formControlName="role_id" placeholder="Select Your Role">
-                        @for(option of Roles; track option.id) {
-                        <mat-option [value]="option.id">{{option.name}}</mat-option>
+                        <mat-select formControlName="role_id" placeholder="Select Role">
+                            @for (option of Roles; track option.id) {
+                                <mat-option [value]="option.id">{{ option.name }}</mat-option>
+                            }
+                        </mat-select>
+                        @if (EmployeeForm.get('role_id')?.hasError('required')) {
+                            <mat-error>Role is required</mat-error>
                         }
-                      </mat-select>
-                      @if (EmployeeForm.get('role_id')?.hasError('required')) {
-                        <mat-error>Role is required</mat-error>
-                      }
                     </mat-form-field>
-                  </div>
+                </div>
 
+                <!-- Employee Name -->
                 <div class="col-lg-4">
                     <mat-label class="f-w-600 m-b-8 d-block">Employee Name <span class="text-danger">*</span></mat-label>
                     <mat-form-field appearance="outline" class="w-100">
                         <input matInput formControlName="name" placeholder="Enter Employee Name">
                         @if (EmployeeForm.get('name')?.hasError('required')) {
-                          <mat-error>Employee name is required</mat-error>
+                            <mat-error>Employee name is required</mat-error>
                         } @else if (EmployeeForm.get('name')?.hasError('maxlength')) {
-                          <mat-error>Employee name cannot exceed 100 characters</mat-error>
+                            <mat-error>Employee name cannot exceed 100 characters</mat-error>
                         }
                     </mat-form-field>
                 </div>
 
+                <!-- Mobile Number -->
                 <div class="col-lg-4">
                     <mat-label class="f-w-600 m-b-8 d-block">Mobile Number <span class="text-danger">*</span></mat-label>
                     <mat-form-field appearance="outline" class="w-100">
                         <input matInput formControlName="mobilenumber" placeholder="Enter 10-digit Mobile Number">
                         @if (EmployeeForm.get('mobilenumber')?.hasError('required')) {
-                          <mat-error>Mobile number is required</mat-error>
+                            <mat-error>Mobile number is required</mat-error>
                         } @else if (EmployeeForm.get('mobilenumber')?.hasError('pattern')) {
-                          <mat-error>Enter a valid 10-digit mobile number</mat-error>
+                            <mat-error>Enter a valid 10-digit mobile number</mat-error>
                         }
                     </mat-form-field>
                 </div>
 
+                <!-- Email -->
                 <div class="col-lg-4">
                     <mat-label class="f-w-600 m-b-8 d-block">Email <span class="text-danger">*</span></mat-label>
                     <mat-form-field appearance="outline" class="w-100">
                         <input matInput formControlName="email" placeholder="Enter Email">
                         @if (EmployeeForm.get('email')?.hasError('required')) {
-                          <mat-error>Email is required</mat-error>
+                            <mat-error>Email is required</mat-error>
                         } @else if (EmployeeForm.get('email')?.hasError('email')) {
-                          <mat-error>Enter a valid email address</mat-error>
+                            <mat-error>Enter a valid email address</mat-error>
+                        }
+                    </mat-form-field>
+                </div>
+
+                <!-- Employee Type -->
+                <div class="col-lg-4">
+                    <mat-label class="f-w-600 m-b-8 d-block">Employee Type <span class="text-danger">*</span></mat-label>
+                    <mat-form-field appearance="outline" class="w-100">
+                        <mat-select formControlName="userType" placeholder="Select Employee Type">
+                            @for (type of employeeTypes; track type.value) {
+                                <mat-option [value]="type.value">{{ type.label }}</mat-option>
+                            }
+                        </mat-select>
+                        @if (EmployeeForm.get('userType')?.hasError('required')) {
+                            <mat-error>Employee type is required</mat-error>
                         }
                     </mat-form-field>
                 </div>
@@ -122,19 +132,10 @@
             </div>
 
             <div class="m-t-12">
-
-                <button mat-stroked-button class="me-3 Cancel_Button" (click)="cancelBranch()">
-
-                    Cancel
-
-                </button>
-
+                <button mat-stroked-button class="me-3 Cancel_Button" (click)="cancelBranch()">Cancel</button>
                 <button mat-flat-button color="primary" (click)="submit(EmployeeForm)">
-
-                    {{UpdateButton ? 'Update' : 'Submit'}}
-
+                    {{ UpdateButton ? 'Update' : 'Submit' }}
                 </button>
-
             </div>
 
         </form>

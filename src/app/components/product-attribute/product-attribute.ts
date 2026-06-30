@@ -50,8 +50,8 @@ export class ProductAttribute {
     private dialog: MatDialog
   ) {
     this.ProductAttributeForm = fb.group({
-      AttributeNameCode: ['', Validators.required],
-      Name: ['', Validators.required]
+      AttributeNameCode: ['', [Validators.required, Validators.maxLength(50)]],
+      Name: ['', [Validators.required, Validators.maxLength(100)]]
     });
   }
 
@@ -109,10 +109,14 @@ export class ProductAttribute {
   }
 
   deleteUser(attribute: any) {
-    this.commonService.deleteApi(`ProductAttribute/${attribute?.Id}`).subscribe({
-      next: (res: any) => {
-        this.alert.success("Product Attribute deleted successfully");
-        this.getProductAttributes();
+    this.alert.confirm("Are you sure you want to delete this product attribute?").then((result) => {
+      if (result.isConfirmed) {
+        this.commonService.deleteApi(`ProductAttribute/${attribute?.Id}`).subscribe({
+          next: (res: any) => {
+            this.alert.success("Product Attribute deleted successfully");
+            this.getProductAttributes();
+          }
+        });
       }
     });
   }
@@ -124,6 +128,10 @@ export class ProductAttribute {
   }
 
   submit(form: FormGroup) {
+    if (form.invalid) {
+      form.markAllAsTouched();
+      return;
+    }
     const payload = {
       ...form.value,
       CompanyId: this.getCompanyId()

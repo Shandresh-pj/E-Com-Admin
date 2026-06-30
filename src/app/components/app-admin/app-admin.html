@@ -48,74 +48,59 @@
             <div class="row">
 
                 <div class="col-lg-4">
-
-                    <mat-label class="f-w-600 m-b-8 d-block">
-                        Company Name
-                    </mat-label>
-
+                    <mat-label class="f-w-600 m-b-8 d-block">Company Name <span class="text-danger">*</span></mat-label>
                     <mat-form-field appearance="outline" class="w-100">
-
                         <input matInput formControlName="name" placeholder="Enter Company Name">
-
+                        @if (CompanyForm.get('name')?.hasError('required')) {
+                          <mat-error>Company name is required</mat-error>
+                        } @else if (CompanyForm.get('name')?.hasError('maxlength')) {
+                          <mat-error>Company name cannot exceed 100 characters</mat-error>
+                        }
                     </mat-form-field>
-
                 </div>
 
                 <div class="col-lg-4">
-
-                    <mat-label class="f-w-600 m-b-8 d-block">
-                        Mobile Number
-                    </mat-label>
-
+                    <mat-label class="f-w-600 m-b-8 d-block">Mobile Number <span class="text-danger">*</span></mat-label>
                     <mat-form-field appearance="outline" class="w-100">
-
-                        <input matInput formControlName="phone" placeholder="Enter Mobile Number">
-
+                        <input matInput formControlName="phone" placeholder="Enter 10-digit Mobile Number">
+                        @if (CompanyForm.get('phone')?.hasError('required')) {
+                          <mat-error>Mobile number is required</mat-error>
+                        } @else if (CompanyForm.get('phone')?.hasError('pattern')) {
+                          <mat-error>Enter a valid 10-digit mobile number</mat-error>
+                        }
                     </mat-form-field>
-
                 </div>
 
                 <div class="col-lg-4">
-
-                    <mat-label class="f-w-600 m-b-8 d-block">
-                        Email
-                    </mat-label>
-
+                    <mat-label class="f-w-600 m-b-8 d-block">Email <span class="text-danger">*</span></mat-label>
                     <mat-form-field appearance="outline" class="w-100">
-
                         <input matInput formControlName="email" placeholder="Enter Email">
-
+                        @if (CompanyForm.get('email')?.hasError('required')) {
+                          <mat-error>Email is required</mat-error>
+                        } @else if (CompanyForm.get('email')?.hasError('email')) {
+                          <mat-error>Enter a valid email address</mat-error>
+                        }
                     </mat-form-field>
-
                 </div>
 
                 <div class="col-lg-4">
-
-                    <mat-label class="f-w-600 m-b-8 d-block">
-                        Address
-                    </mat-label>
-
+                    <mat-label class="f-w-600 m-b-8 d-block">Address</mat-label>
                     <mat-form-field appearance="outline" class="w-100">
-
                         <input matInput formControlName="address" placeholder="Enter Address">
-
+                        @if (CompanyForm.get('address')?.hasError('maxlength')) {
+                          <mat-error>Address cannot exceed 500 characters</mat-error>
+                        }
                     </mat-form-field>
-
                 </div>
 
-
                 <div class="col-lg-4">
-
-                    <mat-label class="f-w-600 m-b-8 d-block">
-                        GST Number
-                    </mat-label>
-
+                    <mat-label class="f-w-600 m-b-8 d-block">GST Number</mat-label>
                     <mat-form-field appearance="outline" class="w-100">
-
-                        <input matInput formControlName="gst_number" placeholder="Enter GST Number">
-
+                        <input matInput formControlName="gst_number" placeholder="e.g. 33ABCDE1234F1Z5">
+                        @if (CompanyForm.get('gst_number')?.hasError('pattern')) {
+                          <mat-error>Enter a valid GST number (e.g. 33ABCDE1234F1Z5)</mat-error>
+                        }
                     </mat-form-field>
-
                 </div>
 
             </div>

@@ -55,8 +55,8 @@ export class Category {
     private dialog: MatDialog
   ) {
     this.CategoryForm = fb.group({
-      name: ['', Validators.required],
-      description: [''],
+      name: ['', [Validators.required, Validators.maxLength(100)]],
+      description: ['', [Validators.maxLength(500)]],
       parent_id: [null],
       StatusId: ['', Validators.required]
     });
@@ -101,9 +101,13 @@ export class Category {
   }
 
   removeImage() {
-    this.ImageFile = null;
-    this.imagePreviewUrl = null;
-    this.existingImageUrl = null;
+    this.alert.confirm("Are you sure you want to remove the category image?").then((result) => {
+      if (result.isConfirmed) {
+        this.ImageFile = null;
+        this.imagePreviewUrl = null;
+        this.existingImageUrl = null;
+      }
+    });
   }
 
   AddNewUser() {
@@ -148,10 +152,14 @@ export class Category {
   }
 
   deleteUser(category: any) {
-    this.commonService.deleteApi(`categories/${category?.id}`).subscribe({
-      next: (res: any) => {
-        this.alert.success("Category deleted successfully");
-        this.getCategories();
+    this.alert.confirm("Are you sure you want to delete this category?").then((result) => {
+      if (result.isConfirmed) {
+        this.commonService.deleteApi(`categories/${category?.id}`).subscribe({
+          next: (res: any) => {
+            this.alert.success("Category deleted successfully");
+            this.getCategories();
+          }
+        });
       }
     });
   }
@@ -166,6 +174,10 @@ export class Category {
   }
 
   submit(form: FormGroup) {
+    if (form.invalid) {
+      form.markAllAsTouched();
+      return;
+    }
     const value = form.value;
     const formData = new FormData();
     formData.append('name', value.name);

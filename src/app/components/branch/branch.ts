@@ -9,6 +9,7 @@ import { MatSelect, MatSelectModule } from '@angular/material/select';
 import { AlertService } from 'src/app/Securities/Services/alert.service';
 import { AuthService } from 'src/app/Securities/Services/auth.service';
 import { CommonService } from 'src/app/Securities/Services/common.service';
+import { PHONE_PATTERN } from 'src/utils/app-validators';
 import { MatTable } from 'src/utils/mat-table/mat-table';
 
 @Component({
@@ -64,12 +65,12 @@ export class Branch {
     private alert:AlertService
   ){
     this.BranchForm = fb.group({
-      company_id : ['',Validators.required],
-      name : ['',Validators.required],
-      email : ['',[Validators.required, Validators.email]],
-      phone : ['', Validators.required],
-      location : [''],
-      role_id:[4]
+      company_id: ['', Validators.required],
+      name: ['', [Validators.required, Validators.maxLength(100)]],
+      email: ['', [Validators.required, Validators.email]],
+      phone: ['', [Validators.required, Validators.pattern(PHONE_PATTERN)]],
+      location: ['', Validators.maxLength(200)],
+      role_id: [4]
     })
   }
 
@@ -116,22 +117,29 @@ export class Branch {
   }
 
   deleteUser(user:any){
-    this.commonService.deleteApi(`delete/${this.SelectedBranchId}`).subscribe({
-      next:(res: any)=> {
-        this.alert.confirm("Delete the Branch");
-        this.getBranches();
-
+    const id = user?.id || this.SelectedBranchId;
+    this.alert.confirm("Are you sure you want to delete this branch?").then((result) => {
+      if (result.isConfirmed) {
+        this.commonService.deleteApi(`delete/${id}`).subscribe({
+          next:(res: any)=> {
+            this.alert.success("Branch deleted successfully");
+            this.getBranches();
+          }
+        });
       }
-    })
+    });
   }
   cancelBranch(){
     this.Branch_Forms = false;
     this.Update_button =false;
     this.BranchForm.reset()
   }
-  submit(form: FormGroup){
+  submit(form: FormGroup) {
+    if (form.invalid) {
+      form.markAllAsTouched();
+      return;
+    }
     const payload = form.value;
-    console.log('Resss',payload)
     if(!this.Update_button){
     this.commonService.postApi(`branches`, payload).subscribe({
       next:(res:any)=> {

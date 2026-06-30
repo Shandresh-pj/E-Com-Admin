@@ -7,6 +7,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { AlertService } from 'src/app/Securities/Services/alert.service';
 import { CommonService } from 'src/app/Securities/Services/common.service';
+import { PHONE_PATTERN } from 'src/utils/app-validators';
 import { MatTable } from 'src/utils/mat-table/mat-table';
 
 @Component({
@@ -64,12 +65,12 @@ export class Employees {
     private commonService:CommonService
   ){
     this.EmployeeForm = fb.group({
-      name : ['', Validators.required],
-      email: ['',[Validators.required,Validators.email]],
-      mobilenumber:['',Validators.required],
-      company_id:['',Validators.required],
-      branch_id:['',Validators.required],
-      role_id:[{value:5, disabled: true},Validators.required]
+      name: ['', [Validators.required, Validators.maxLength(100)]],
+      email: ['', [Validators.required, Validators.email]],
+      mobilenumber: ['', [Validators.required, Validators.pattern(PHONE_PATTERN)]],
+      company_id: ['', Validators.required],
+      branch_id: ['', Validators.required],
+      role_id: [{ value: 5, disabled: true }, Validators.required]
     })
   }
 
@@ -113,13 +114,17 @@ export class Employees {
 
   
   deleteUser(user:any){
-    this.commonService.deleteApi(`delete/${this.SelectedEmployessId}`).subscribe({
-      next:(res: any)=> {
-        this.alert.confirm("Delete the Branch");
-        this.getEmployees();
-
+    const id = user?.id || this.SelectedEmployessId;
+    this.alert.confirm("Are you sure you want to delete this employee?").then((result) => {
+      if (result.isConfirmed) {
+        this.commonService.deleteApi(`delete/${id}`).subscribe({
+          next:(res: any)=> {
+            this.alert.success("Employee deleted successfully");
+            this.getEmployees();
+          }
+        });
       }
-    })
+    });
   }
   cancelBranch(){
     this.Employee_Forms = false;
@@ -157,9 +162,12 @@ export class Employees {
     })
   }
 
-  submit(form:FormGroup){
-    const payload = form?.value
-    console.log("payload",payload);
+  submit(form: FormGroup) {
+    if (form.invalid) {
+      form.markAllAsTouched();
+      return;
+    }
+    const payload = form?.value;
     if(!this.UpdateButton){
     this.commonService.postApi(`employees`,payload).subscribe({
       next:(res:any)=>{ 

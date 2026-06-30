@@ -33,16 +33,28 @@
         <form [formGroup]="StatusForm">
             <div class="row">
                 <div class="col-lg-4">
-                    <mat-label class="f-w-600 m-b-8 d-block">Status Code</mat-label>
+                    <mat-label class="f-w-600 m-b-8 d-block">Status Code <span class="text-danger">*</span></mat-label>
                     <mat-form-field appearance="outline" class="w-100">
-                        <input matInput formControlName="StatusCode" placeholder="Enter Status Code">
+                        <input matInput formControlName="StatusCode" placeholder="Enter Status Code (e.g. ACTIVE)">
+                        @if (StatusForm.get('StatusCode')?.hasError('required')) {
+                          <mat-error>Status code is required</mat-error>
+                        } @else if (StatusForm.get('StatusCode')?.hasError('maxlength')) {
+                          <mat-error>Status code cannot exceed 50 characters</mat-error>
+                        } @else if (StatusForm.get('StatusCode')?.hasError('pattern')) {
+                          <mat-error>Use uppercase letters, digits, and underscores only (e.g. ACTIVE, IN_STOCK)</mat-error>
+                        }
                     </mat-form-field>
                 </div>
 
                 <div class="col-lg-4">
-                    <mat-label class="f-w-600 m-b-8 d-block">Status For</mat-label>
+                    <mat-label class="f-w-600 m-b-8 d-block">Status For <span class="text-danger">*</span></mat-label>
                     <mat-form-field appearance="outline" class="w-100">
-                        <input matInput formControlName="StatusFor" placeholder="Enter Status For (e.g. COMMON, ORDER, PRODUCT)">
+                        <input matInput formControlName="StatusFor" placeholder="e.g. COMMON, ORDER, PRODUCT">
+                        @if (StatusForm.get('StatusFor')?.hasError('required')) {
+                          <mat-error>Status for is required</mat-error>
+                        } @else if (StatusForm.get('StatusFor')?.hasError('maxlength')) {
+                          <mat-error>Status for cannot exceed 50 characters</mat-error>
+                        }
                     </mat-form-field>
                 </div>
             </div>

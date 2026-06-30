@@ -53,8 +53,8 @@ export class AttributeValue {
   ) {
     this.AttributeValueForm = fb.group({
       ProductAttributeId: ['', Validators.required],
-      AttributeValueCode: ['', Validators.required],
-      Name: ['', Validators.required]
+      AttributeValueCode: ['', [Validators.required, Validators.maxLength(50)]],
+      Name: ['', [Validators.required, Validators.maxLength(100)]]
     });
   }
 
@@ -130,10 +130,14 @@ export class AttributeValue {
   }
 
   deleteUser(value: any) {
-    this.commonService.deleteApi(`ProductAttributeValue/${value?.Id}`).subscribe({
-      next: (res: any) => {
-        this.alert.success("Attribute Value deleted successfully");
-        this.getAttributeValues();
+    this.alert.confirm("Are you sure you want to delete this attribute value?").then((result) => {
+      if (result.isConfirmed) {
+        this.commonService.deleteApi(`ProductAttributeValue/${value?.Id}`).subscribe({
+          next: (res: any) => {
+            this.alert.success("Attribute Value deleted successfully");
+            this.getAttributeValues();
+          }
+        });
       }
     });
   }
@@ -145,6 +149,10 @@ export class AttributeValue {
   }
 
   submit(form: FormGroup) {
+    if (form.invalid) {
+      form.markAllAsTouched();
+      return;
+    }
     const payload = {
       ...form.value,
       CompanyId: this.getCompanyId()

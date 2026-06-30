@@ -25,6 +25,8 @@ import {MatFormFieldModule} from '@angular/material/form-field';
 
 import {MatInputModule} from '@angular/material/input';
 
+import { AlertService } from 'src/app/Securities/Services/alert.service';
+
 
 @Component({
 selector:'app-mat-table',
@@ -63,7 +65,7 @@ this.refreshView();
 
 @ViewChild(MatTableDirective) table!: MatTableDirective<any>;
 
-constructor(private cdr: ChangeDetectorRef) {}
+constructor(private cdr: ChangeDetectorRef, private alert: AlertService) {}
 
 @Output()editClick=new EventEmitter<any>();
 

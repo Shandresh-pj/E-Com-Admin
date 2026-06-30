@@ -13,13 +13,14 @@ import { MaterialModule } from 'src/app/material.module';
 })
 export class AppSideRegisterComponent {
   options = this.settings.getOptions();
+  hidePassword = true;
 
   constructor(private settings: CoreService, private router: Router) {}
 
   form = new FormGroup({
     uname: new FormControl('', [Validators.required, Validators.minLength(6)]),
-    email: new FormControl('', [Validators.required]),
-    password: new FormControl('', [Validators.required]),
+    email: new FormControl('', [Validators.required, Validators.email]),
+    password: new FormControl('', [Validators.required, Validators.minLength(6)]),
   });
 
   get f() {
@@ -27,6 +28,10 @@ export class AppSideRegisterComponent {
   }
 
   submit() {
+    if (this.form.invalid) {
+      this.form.markAllAsTouched();
+      return;
+    }
     // console.log(this.form.value);
     this.router.navigate(['/']);
   }

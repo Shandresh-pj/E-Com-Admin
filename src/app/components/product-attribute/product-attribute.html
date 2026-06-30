@@ -33,16 +33,26 @@
         <form [formGroup]="ProductAttributeForm">
             <div class="row">
                 <div class="col-lg-4">
-                    <mat-label class="f-w-600 m-b-8 d-block">Attribute Code</mat-label>
+                    <mat-label class="f-w-600 m-b-8 d-block">Attribute Code <span class="text-danger">*</span></mat-label>
                     <mat-form-field appearance="outline" class="w-100">
                         <input matInput formControlName="AttributeNameCode" placeholder="Enter Attribute Code">
+                        @if (ProductAttributeForm.get('AttributeNameCode')?.hasError('required')) {
+                          <mat-error>Attribute code is required</mat-error>
+                        } @else if (ProductAttributeForm.get('AttributeNameCode')?.hasError('maxlength')) {
+                          <mat-error>Attribute code cannot exceed 50 characters</mat-error>
+                        }
                     </mat-form-field>
                 </div>
 
                 <div class="col-lg-4">
-                    <mat-label class="f-w-600 m-b-8 d-block">Name</mat-label>
+                    <mat-label class="f-w-600 m-b-8 d-block">Name <span class="text-danger">*</span></mat-label>
                     <mat-form-field appearance="outline" class="w-100">
                         <input matInput formControlName="Name" placeholder="Enter Attribute Name">
+                        @if (ProductAttributeForm.get('Name')?.hasError('required')) {
+                          <mat-error>Attribute name is required</mat-error>
+                        } @else if (ProductAttributeForm.get('Name')?.hasError('maxlength')) {
+                          <mat-error>Attribute name cannot exceed 100 characters</mat-error>
+                        }
                     </mat-form-field>
                 </div>
             </div>

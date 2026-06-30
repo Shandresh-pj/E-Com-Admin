@@ -45,8 +45,8 @@ export class Roles {
     private alert:AlertService
   ){
     this.RolesForm = fb.group({
-      name : ['', Validators.required],
-      isActive : [true, Validators.required]
+      name: ['', [Validators.required, Validators.maxLength(100)]],
+      isActive: [true, Validators.required]
     })
     this.getRoles();
   }
@@ -63,8 +63,12 @@ export class Roles {
 
   }
 
-  onsubmit(Form: FormGroup){
-    const payload = this.RolesForm.getRawValue() 
+  onsubmit(Form: FormGroup) {
+    if (Form.invalid) {
+      Form.markAllAsTouched();
+      return;
+    }
+    const payload = this.RolesForm.getRawValue();
     this.commonService.postApi(`roles`,payload).subscribe({
       next:(res:any) => {
         this.alert.success('Roles Create Successfully')

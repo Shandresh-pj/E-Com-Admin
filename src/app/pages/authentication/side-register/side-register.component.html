@@ -30,24 +30,33 @@
 
           <div class="or-border m-t-30">or sign up with</div>
 
-          <form class="m-t-30">
+          <form class="m-t-30" [formGroup]="form" (ngSubmit)="submit()">
             <mat-label class="f-s-14 f-w-600 m-b-12 d-block">Name</mat-label>
             <mat-form-field appearance="outline" class="w-100" color="primary">
-              <input matInput />
+              <input matInput formControlName="uname" placeholder="Enter your name" />
+              <mat-error *ngIf="f['uname'].hasError('required')">Name is required</mat-error>
+              <mat-error *ngIf="f['uname'].hasError('minlength')">Name must be at least 6 characters</mat-error>
             </mat-form-field>
-            <mat-label class="f-s-14 f-w-600 m-b-12 d-block">Email Adddress</mat-label>
+            <mat-label class="f-s-14 f-w-600 m-b-12 d-block">Email Address</mat-label>
             <mat-form-field appearance="outline" class="w-100" color="primary">
-              <input matInput type="email" />
+              <input matInput type="email" formControlName="email" placeholder="Enter your email" />
+              <mat-error *ngIf="f['email'].hasError('required')">Email is required</mat-error>
+              <mat-error *ngIf="f['email'].hasError('email')">Enter a valid email address</mat-error>
             </mat-form-field>
             <!-- password -->
             <mat-label class="f-s-14 f-w-600 m-b-12 d-block">Password</mat-label>
             <mat-form-field appearance="outline" class="w-100" color="primary">
-              <input matInput type="password" />
+              <input matInput [type]="hidePassword ? 'password' : 'text'" formControlName="password" placeholder="Enter your password" />
+              <button mat-icon-button matSuffix type="button" (click)="hidePassword = !hidePassword">
+                <mat-icon>{{hidePassword ? 'visibility_off' : 'visibility'}}</mat-icon>
+              </button>
+              <mat-error *ngIf="f['password'].hasError('required')">Password is required</mat-error>
+              <mat-error *ngIf="f['password'].hasError('minlength')">Password must be at least 6 characters</mat-error>
             </mat-form-field>
 
-            <a [routerLink]="['/']" mat-flat-button color="primary" class="w-100">
+            <button type="submit" mat-flat-button color="primary" class="w-100">
               Sign Up
-            </a>
+            </button>
             <!-- input -->
           </form>
           <span class="d-block f-w-500 text-center m-t-24">Already have an Account?

@@ -42,70 +42,63 @@
 
             <div class="row">
                 <div class="col-lg-4">
-                    <mat-label class="f-w-600 m-b-8 d-block">Comapny</mat-label>
+                    <mat-label class="f-w-600 m-b-8 d-block">Company <span class="text-danger">*</span></mat-label>
                     <mat-form-field appearance="outline" class="w-100">
                       <mat-select formControlName="company_id" placeholder="Select Your Company">
                         @for(option of Companies; track option.id) {
                         <mat-option [value]="option.id">{{option.name}}</mat-option>
                         }
                       </mat-select>
+                      @if (BranchForm.get('company_id')?.hasError('required')) {
+                        <mat-error>Company is required</mat-error>
+                      }
                     </mat-form-field>
-                  </div>
+                </div>
 
                 <div class="col-lg-4">
-
-                    <mat-label class="f-w-600 m-b-8 d-block">
-                        Branch Name
-                    </mat-label>
-
+                    <mat-label class="f-w-600 m-b-8 d-block">Branch Name <span class="text-danger">*</span></mat-label>
                     <mat-form-field appearance="outline" class="w-100">
-
                         <input matInput formControlName="name" placeholder="Enter Branch Name">
-
+                        @if (BranchForm.get('name')?.hasError('required')) {
+                          <mat-error>Branch name is required</mat-error>
+                        } @else if (BranchForm.get('name')?.hasError('maxlength')) {
+                          <mat-error>Branch name cannot exceed 100 characters</mat-error>
+                        }
                     </mat-form-field>
-
                 </div>
 
                 <div class="col-lg-4">
-
-                    <mat-label class="f-w-600 m-b-8 d-block">
-                        Mobile Number
-                    </mat-label>
-
+                    <mat-label class="f-w-600 m-b-8 d-block">Mobile Number <span class="text-danger">*</span></mat-label>
                     <mat-form-field appearance="outline" class="w-100">
-
-                        <input matInput formControlName="phone" placeholder="Enter Mobile Number">
-
+                        <input matInput formControlName="phone" placeholder="Enter 10-digit Mobile Number">
+                        @if (BranchForm.get('phone')?.hasError('required')) {
+                          <mat-error>Mobile number is required</mat-error>
+                        } @else if (BranchForm.get('phone')?.hasError('pattern')) {
+                          <mat-error>Enter a valid 10-digit mobile number</mat-error>
+                        }
                     </mat-form-field>
-
                 </div>
 
                 <div class="col-lg-4">
-
-                    <mat-label class="f-w-600 m-b-8 d-block">
-                        Email
-                    </mat-label>
-
+                    <mat-label class="f-w-600 m-b-8 d-block">Email <span class="text-danger">*</span></mat-label>
                     <mat-form-field appearance="outline" class="w-100">
-
                         <input matInput formControlName="email" placeholder="Enter Email">
-
+                        @if (BranchForm.get('email')?.hasError('required')) {
+                          <mat-error>Email is required</mat-error>
+                        } @else if (BranchForm.get('email')?.hasError('email')) {
+                          <mat-error>Enter a valid email address</mat-error>
+                        }
                     </mat-form-field>
-
                 </div>
 
                 <div class="col-lg-4">
-
-                    <mat-label class="f-w-600 m-b-8 d-block">
-                        Address
-                    </mat-label>
-
+                    <mat-label class="f-w-600 m-b-8 d-block">Address</mat-label>
                     <mat-form-field appearance="outline" class="w-100">
-
-                        <input matInput formControlName="location" placeholder="Enter Your Address">
-
+                        <input matInput formControlName="location" placeholder="Enter Address">
+                        @if (BranchForm.get('location')?.hasError('maxlength')) {
+                          <mat-error>Address cannot exceed 200 characters</mat-error>
+                        }
                     </mat-form-field>
-
                 </div>
 
             </div>

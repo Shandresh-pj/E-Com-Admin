@@ -1,39 +1,31 @@
 import { inject } from '@angular/core';
 import {
  CanActivateFn,
- ActivatedRouteSnapshot,
  Router
 } from '@angular/router';
 import { SessionService } from '../Services/session.service';
+import { UserType } from '../Models/role-access';
 
+export const RoleGuard: CanActivateFn = (route) => {
+  const router = inject(Router);
+  const session = inject(SessionService);
 
-export const RoleGuard:CanActivateFn=(route)=>{
+  const user = session.getUser();
 
-const router=inject(Router);
+  if (user?.isSuperAdmin || user?.userType === UserType.SUPER_ADMIN) {
+    return true;
+  }
 
-const session=
-inject(SessionService);
+  const expectedRoles: string[] = route.data['roles'] ?? [];
 
-const expectedRoles=
-route.data['roles'];
+  if (!expectedRoles.length) {
+    return true;
+  }
 
-const roles=
-session.getRoles();
+  if (expectedRoles.includes(user?.userType)) {
+    return true;
+  }
 
-const hasAccess=
-roles.some(
-(r:any)=>
-expectedRoles.includes(r.name)
-);
-
-if(hasAccess){
-
-return true;
-
-}
-
-router.navigate(['/unauthorized']);
-
-return false;
-
+  router.navigate(['/unauthorized']);
+  return false;
 };

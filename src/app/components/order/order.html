@@ -16,6 +16,7 @@
     <mat-card-content class="b-t-1">
 
         <app-mat-table [columns]="tableColumns" [tableData]="Orders" [showAction]="true" [Extra_Column]="false"
+            [showDelete]="perm.hasRoleAction('canDelete')"
             (editClick)="viewOrder($event)" (deleteClick)="deleteOrder($event)">
         </app-mat-table>
 

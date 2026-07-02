@@ -8,7 +8,7 @@
                 Product Attributes
             </mat-card-title>
 
-            @if (!ProductAttribute_Forms) {
+            @if (!ProductAttribute_Forms && perm.hasRoleAction('canCreate')) {
             <button mat-flat-button color="primary" (click)="AddNewUser()">
                 Add New Attribute
             </button>
@@ -22,6 +22,7 @@
     <mat-card-content class="b-t-1">
 
         <app-mat-table [columns]="tableColumns" [tableData]="ProductAttributes" [showAction]="true" [showView]="true" [Extra_Column]="false"
+            [showEdit]="perm.hasRoleAction('canUpdate')" [showDelete]="perm.hasRoleAction('canDelete')"
             (editClick)="editUser($event)" (deleteClick)="deleteUser($event)" (ViewClick)="viewItem($event)">
         </app-mat-table>
 

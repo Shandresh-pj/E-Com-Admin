@@ -3,7 +3,7 @@
     <mat-card-header>
         <div class="header-container">
             <mat-card-title class="m-b-0">Employees</mat-card-title>
-            @if (!Employee_Forms && !View_Mode) {
+            @if (!Employee_Forms && !View_Mode && perm.hasRoleAction('canCreate')) {
                 <button mat-flat-button color="primary" (click)="AddNewUser()">Add New Employee</button>
             }
         </div>
@@ -18,6 +18,8 @@
             [showAction]="true"
             [showView]="true"
             [Extra_Column]="false"
+            [showEdit]="perm.hasRoleAction('canUpdate')"
+            [showDelete]="perm.hasRoleAction('canDelete')"
             (editClick)="editUser($event)"
             (deleteClick)="deleteUser($event)"
             (ViewClick)="viewUser($event)">

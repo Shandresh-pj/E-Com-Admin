@@ -8,6 +8,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatDialog } from '@angular/material/dialog';
 import { AlertService } from 'src/app/Securities/Services/alert.service';
 import { AuthService } from 'src/app/Securities/Services/auth.service';
+import { PermissionService } from 'src/app/Securities/Services/permissions.service';
 import { CommonService } from 'src/app/Securities/Services/common.service';
 import { MatTable } from 'src/utils/mat-table/mat-table';
 import { ViewDetailsDialog } from 'src/utils/view-details-dialog/view-details-dialog';
@@ -49,7 +50,8 @@ export class AttributeValue {
     private commonService: CommonService,
     private alert: AlertService,
     private cdr: ChangeDetectorRef,
-    private dialog: MatDialog
+    private dialog: MatDialog,
+    public perm: PermissionService
   ) {
     this.AttributeValueForm = fb.group({
       ProductAttributeId: ['', Validators.required],

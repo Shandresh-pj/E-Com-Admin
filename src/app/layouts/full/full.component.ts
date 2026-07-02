@@ -17,6 +17,7 @@ import { SidebarComponent } from './sidebar/sidebar.component';
 import { AppNavItemComponent } from './sidebar/nav-item/nav-item.component';
 import { navItems } from './sidebar/sidebar-data';
 import { AppTopstripComponent } from './top-strip/topstrip.component';
+import { AuthService } from 'src/app/Securities/Services/auth.service';
 
 
 const MOBILE_VIEW = 'screen and (max-width: 768px)';
@@ -40,7 +41,11 @@ const TABLET_VIEW = 'screen and (min-width: 769px) and (max-width: 1024px)';
   encapsulation: ViewEncapsulation.None
 })
 export class FullComponent implements OnInit {
-  navItems = navItems;
+  navItems = navItems.filter(item => {
+    if (!item.roles || !item.roles.length) return true;
+    if (this.authService.isSuperAdmin()) return true;
+    return item.roles.includes(this.authService.getUserType());
+  });
 
   @ViewChild('leftsidenav')
   public sidenav: MatSidenav;
@@ -63,6 +68,7 @@ export class FullComponent implements OnInit {
     private settings: CoreService,
     private router: Router,
     private breakpointObserver: BreakpointObserver,
+    private authService: AuthService,
   ) {
     this.htmlElement = document.querySelector('html')!;
     this.layoutChangesSubscription = this.breakpointObserver

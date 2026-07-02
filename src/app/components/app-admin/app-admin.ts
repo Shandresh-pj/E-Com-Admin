@@ -8,6 +8,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSelect, MatSelectModule } from '@angular/material/select';
 import { AlertService } from 'src/app/Securities/Services/alert.service';
 import { AuthService } from 'src/app/Securities/Services/auth.service';
+import { PermissionService } from 'src/app/Securities/Services/permissions.service';
 import { CommonService } from 'src/app/Securities/Services/common.service';
 import { PHONE_PATTERN, GST_PATTERN } from 'src/utils/app-validators';
 import { MatTable } from 'src/utils/mat-table/mat-table';
@@ -70,10 +71,11 @@ export class AppAdmin {
   Roles: any;
   Roleid: any;
 
-constructor(private fb: FormBuilder, 
+constructor(private fb: FormBuilder,
   private authService:AuthService,
   private commonService:CommonService,
-  private alert:AlertService
+  private alert:AlertService,
+  public perm: PermissionService
 ){
   const user = this.authService.getUser();
   console.log("aaaa-1.1",user)

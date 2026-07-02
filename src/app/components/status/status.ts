@@ -6,6 +6,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { AlertService } from 'src/app/Securities/Services/alert.service';
+import { PermissionService } from 'src/app/Securities/Services/permissions.service';
 import { CommonService } from 'src/app/Securities/Services/common.service';
 import { MatTable } from 'src/utils/mat-table/mat-table';
 
@@ -42,7 +43,8 @@ export class Status {
     private fb: FormBuilder,
     private commonService: CommonService,
     private alert: AlertService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    public perm: PermissionService
   ) {
     this.StatusForm = fb.group({
       StatusCode: ['', [Validators.required, Validators.maxLength(50), Validators.pattern(/^[A-Z0-9_]+$/)]],

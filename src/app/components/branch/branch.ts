@@ -9,6 +9,7 @@ import { MatSelect, MatSelectModule } from '@angular/material/select';
 import { AlertService } from 'src/app/Securities/Services/alert.service';
 import { AuthService } from 'src/app/Securities/Services/auth.service';
 import { CommonService } from 'src/app/Securities/Services/common.service';
+import { PermissionService } from 'src/app/Securities/Services/permissions.service';
 import { PHONE_PATTERN } from 'src/utils/app-validators';
 import { MatTable } from 'src/utils/mat-table/mat-table';
 
@@ -67,7 +68,8 @@ export class Branch {
     private fb:FormBuilder,
     private authService:AuthService,
     private commonService:CommonService,
-    private alert:AlertService
+    private alert:AlertService,
+    public perm: PermissionService
   ){
     this.BranchForm = fb.group({
       company_id : ['',Validators.required],

@@ -6,6 +6,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { AlertService } from 'src/app/Securities/Services/alert.service';
+import { PermissionService } from 'src/app/Securities/Services/permissions.service';
 import { CommonService } from 'src/app/Securities/Services/common.service';
 import { MatTable } from 'src/utils/mat-table/mat-table';
 
@@ -46,7 +47,8 @@ export class RoleAccess {
 
   constructor(private fb:FormBuilder,
     private alert:AlertService,
-    private commonService:CommonService
+    private commonService:CommonService,
+    public perm: PermissionService
   ){
     this.RoleAccessForm = this.fb.group({
       role_id : ['',Validators.required],

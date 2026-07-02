@@ -4,6 +4,7 @@ import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { AlertService } from 'src/app/Securities/Services/alert.service';
+import { PermissionService } from 'src/app/Securities/Services/permissions.service';
 import { CommonService } from 'src/app/Securities/Services/common.service';
 import { MatTable } from 'src/utils/mat-table/mat-table';
 
@@ -37,7 +38,8 @@ export class Order {
   constructor(
     private commonService: CommonService,
     private alert: AlertService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    public perm: PermissionService
   ) { }
 
   ngOnInit() {

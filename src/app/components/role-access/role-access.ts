@@ -1,126 +1,308 @@
-import { Component } from '@angular/core';
-import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Component, OnInit } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
+import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { CommonModule } from '@angular/common';
 import { AlertService } from 'src/app/Securities/Services/alert.service';
-import { PermissionService } from 'src/app/Securities/Services/permissions.service';
+import { AuthService } from 'src/app/Securities/Services/auth.service';
 import { CommonService } from 'src/app/Securities/Services/common.service';
-import { MatTable } from 'src/utils/mat-table/mat-table';
+
+type AccessLevel = 'global' | 'admin' | 'branch' | 'employee';
 
 @Component({
   selector: 'app-role-access',
-  imports: [ ReactiveFormsModule,
+  standalone: true,
+  imports: [
+    CommonModule,
     FormsModule,
     MatFormFieldModule,
-    MatInputModule,
+    MatSelectModule,
+    MatCheckboxModule,
     MatButtonModule,
     MatCardModule,
-    MatSelectModule,
-    MatTable],
+    MatProgressSpinnerModule,
+    MatTooltipModule,
+  ],
   templateUrl: './role-access.html',
   styleUrl: './role-access.scss',
 })
-export class RoleAccess {
+export class RoleAccess implements OnInit {
 
-  RoleAccessForm : FormGroup;
+  readonly actions = ['READ', 'WRITE', 'UPDATE', 'DELETE', 'APPROVE'];
 
-  tableColumns = [
-    {
-      columnDef: 'id',
-      header: 'No'
-    },
-    {
-      columnDef: 'name',
-      header: 'Roles Name'
-    },
-  ]
-  Roles: any;
-  Menus: any;
-  UpdateButton: boolean = false;
-  AddNewRoleAccess: boolean =false;
-  Companies: any;
-  Branches: any;
-  Employees: any;
+  readonly levels: { value: AccessLevel; label: string; hint: string }[] = [
+    { value: 'global',   label: 'Role (Global)', hint: 'Applies to the role everywhere' },
+    { value: 'admin',    label: 'Admin',         hint: 'Applies to one admin company' },
+    { value: 'branch',   label: 'Branch',        hint: 'Applies to one branch' },
+    { value: 'employee', label: 'Employee',      hint: 'Applies to one employee only' },
+  ];
 
-  constructor(private fb:FormBuilder,
-    private alert:AlertService,
-    private commonService:CommonService,
-    public perm: PermissionService
-  ){
-    this.RoleAccessForm = this.fb.group({
-      role_id : ['',Validators.required],
-      permission_id: ['', Validators.required]
-    })
+  roles: any[] = [];
+  menus: any[] = [];
+  companies: any[] = [];
+  allBranches: any[] = [];
 
+  selectedLevel: AccessLevel | null = null;
+  selectedCompanyId: number | null = null;
+  selectedBranchId: number | null = null;
+  selectedUserId: number | null = null;
+  selectedRoleId: number | null = null;
+
+  /** permission_id → role_permission record id  (used for DELETE) */
+  assignedMap = new Map<number, number>();
+
+  /** permission_ids currently being toggled (debounce + optimistic UI) */
+  pending = new Set<number>();
+
+  loading = false;
+  matrixLoading = false;
+
+  constructor(
+    private commonService: CommonService,
+    private alert: AlertService,
+    public auth: AuthService,
+  ) {}
+
+  ngOnInit(): void {
+    this.loadRoles();
+    this.loadMenus();
+    this.loadCompanies();
+    this.loadBranches();
   }
 
-  ngOnInit(){
-    this.getCompanies()
-    this.getBranches()
-    this.getEmployees()
-    this.getRoles();
-    this.getMenus();
+  // ────────────────────────────── lookups ──────────────────────────────
+
+  loadRoles(): void {
+    this.commonService.getApi('roles').subscribe({
+      next: (res: any) => { this.roles = res?.data ?? []; },
+    });
   }
 
-  getCompanies(){
-    this.commonService.getApi(`companies`).subscribe({
-      next:(res:any)=>{
-        this.Companies = res?.data
+  loadMenus(): void {
+    this.loading = true;
+    this.commonService.getApi('menus').subscribe({
+      next: (res: any) => {
+        this.menus = res?.data ?? [];
+        this.loading = false;
+      },
+      error: () => { this.loading = false; },
+    });
+  }
+
+  loadCompanies(): void {
+    this.commonService.getApi('companies').subscribe({
+      next: (res: any) => { this.companies = res?.data ?? []; },
+    });
+  }
+
+  loadBranches(): void {
+    this.commonService.getApi('branches').subscribe({
+      next: (res: any) => { this.allBranches = res?.data ?? []; },
+    });
+  }
+
+  // ─────────────────────────── derived lists ───────────────────────────
+
+  get companyBranches(): any[] {
+    if (!this.selectedCompanyId) return [];
+    return this.allBranches.filter(b => b.company?.id === this.selectedCompanyId);
+  }
+
+  /** Users assigned to the selected branch (deduped, from branch.userRoles) */
+  get branchUsers(): any[] {
+    const branch = this.allBranches.find(b => b.id === this.selectedBranchId);
+    if (!branch?.userRoles) return [];
+    const seen = new Map<number, any>();
+    for (const ur of branch.userRoles) {
+      if (ur.user && !seen.has(ur.user.id)) {
+        seen.set(ur.user.id, { user: ur.user, role: ur.role });
       }
-    })
-  }
-  
-  getBranches(){
-    this.commonService.getApi(`branches`).subscribe({
-      next:(res:any)=>{
-        this.Branches = res?.data
-      }
-    })
+    }
+    return Array.from(seen.values());
   }
 
-  getEmployees(){
-    this.commonService.getApi(`employees`).subscribe({
-      next:(res:any)=>{
-        this.Employees = res?.data
-      }
-    })
+  get needsCompany(): boolean {
+    return this.selectedLevel === 'admin' || this.selectedLevel === 'branch' || this.selectedLevel === 'employee';
   }
 
-  getRoles(){
-    this.commonService.getApi(`roles`).subscribe({
-      next:(res:any)=> {
-        this.Roles = res?.data
-      }
-    })
+  get needsBranch(): boolean {
+    return this.selectedLevel === 'branch' || this.selectedLevel === 'employee';
   }
 
-  getMenus(){
-    this.commonService.getApi(`menus`).subscribe({
-      next:(res:any)=>{
-        this.Menus = res?.data
-      }
-    })
+  get needsEmployee(): boolean {
+    return this.selectedLevel === 'employee';
   }
 
-  AddNewUser(){
-    this.AddNewRoleAccess = true
+  /** Role is picked automatically from the employee's assignment */
+  get roleLocked(): boolean {
+    return this.selectedLevel === 'employee';
   }
 
-  cancelRoleAccess(){
-    this.RoleAccessForm.reset();
-    this.AddNewRoleAccess = false;
+  get scopeReady(): boolean {
+    if (!this.selectedLevel || !this.selectedRoleId) return false;
+    if (this.needsCompany && !this.selectedCompanyId) return false;
+    if (this.needsBranch && !this.selectedBranchId) return false;
+    if (this.needsEmployee && !this.selectedUserId) return false;
+    return true;
   }
 
-  onsubmit(form:FormGroup){
-    const payload = form.getRawValue();
-    this.commonService.postApi(`role-access`,payload).subscribe({
-      next:(res:any)=>{
-        this.alert.success("Role Access Assigned")
-      }
-    })
+  get scopeSummary(): string {
+    const parts: string[] = [];
+    const role = this.roles.find(r => r.id === this.selectedRoleId)?.name;
+    const company = this.companies.find(c => c.id === this.selectedCompanyId)?.name;
+    const branch = this.companyBranches.find(b => b.id === this.selectedBranchId)?.name;
+    const user = this.branchUsers.find(u => u.user.id === this.selectedUserId)?.user?.name;
+    if (role) parts.push(`Role: ${role}`);
+    if (this.needsCompany && company) parts.push(`Admin: ${company}`);
+    if (this.needsBranch && branch) parts.push(`Branch: ${branch}`);
+    if (this.needsEmployee && user) parts.push(`Employee: ${user}`);
+    return parts.join('  ·  ');
   }
 
+  // ──────────────────────── cascading selection ────────────────────────
+
+  onLevelChange(): void {
+    this.selectedCompanyId = null;
+    this.selectedBranchId = null;
+    this.selectedUserId = null;
+    if (this.selectedLevel === 'employee') this.selectedRoleId = null;
+    this.clearMatrix();
+    this.tryLoadMatrix();
+  }
+
+  onCompanyChange(): void {
+    this.selectedBranchId = null;
+    this.selectedUserId = null;
+    this.clearMatrix();
+
+    // spec: when the admin has only one branch, select it automatically
+    if (this.needsBranch && this.companyBranches.length === 1) {
+      this.selectedBranchId = this.companyBranches[0].id;
+    }
+    this.tryLoadMatrix();
+  }
+
+  onBranchChange(): void {
+    this.selectedUserId = null;
+    this.clearMatrix();
+    this.tryLoadMatrix();
+  }
+
+  onEmployeeChange(): void {
+    // the grant is stored against the employee's own role
+    const entry = this.branchUsers.find(u => u.user.id === this.selectedUserId);
+    this.selectedRoleId = entry?.role?.id ?? null;
+    this.clearMatrix();
+    this.tryLoadMatrix();
+  }
+
+  onRoleChange(): void {
+    this.clearMatrix();
+    this.tryLoadMatrix();
+  }
+
+  private clearMatrix(): void {
+    this.assignedMap.clear();
+    this.pending.clear();
+  }
+
+  // ───────────────────────────── matrix I/O ────────────────────────────
+
+  private scopePayload(): any {
+    const payload: any = {};
+    if (this.needsCompany)  payload.company_id = this.selectedCompanyId;
+    if (this.needsBranch)   payload.branch_id  = this.selectedBranchId;
+    if (this.needsEmployee) payload.user_id    = this.selectedUserId;
+    return payload;
+  }
+
+  tryLoadMatrix(): void {
+    if (!this.scopeReady) return;
+
+    this.matrixLoading = true;
+
+    const params: any = { level: this.selectedLevel };
+    if (this.needsEmployee) {
+      // employee rows are matched by user, whatever the role
+      params.user_id = this.selectedUserId;
+    } else {
+      params.role_id = this.selectedRoleId;
+      if (this.needsCompany) params.company_id = this.selectedCompanyId;
+      if (this.needsBranch)  params.branch_id  = this.selectedBranchId;
+    }
+
+    this.commonService.getApi('role-access', params).subscribe({
+      next: (res: any) => {
+        const assignments: any[] = res?.data ?? [];
+        this.assignedMap.clear();
+        assignments.forEach(a => this.assignedMap.set(a.permission_id, a.id));
+        this.matrixLoading = false;
+      },
+      error: (err: any) => {
+        this.matrixLoading = false;
+        this.alert.error(err?.error?.message ?? 'Failed to load permissions');
+      },
+    });
+  }
+
+  /** Returns the permission object for a given menu + action */
+  getPermission(menu: any, action: string): any {
+    return menu.permissions?.find((p: any) => p.action === action);
+  }
+
+  isAssigned(menu: any, action: string): boolean {
+    const perm = this.getPermission(menu, action);
+    return perm ? this.assignedMap.has(perm.id) : false;
+  }
+
+  isPending(menu: any, action: string): boolean {
+    const perm = this.getPermission(menu, action);
+    return perm ? this.pending.has(perm.id) : false;
+  }
+
+  toggle(menu: any, action: string): void {
+    if (!this.scopeReady) return;
+
+    const perm = this.getPermission(menu, action);
+    if (!perm || this.pending.has(perm.id)) return;
+
+    this.pending.add(perm.id);
+
+    if (this.assignedMap.has(perm.id)) {
+      const recordId = this.assignedMap.get(perm.id)!;
+      this.commonService.deleteApi(`role-access/${recordId}`).subscribe({
+        next: () => {
+          this.assignedMap.delete(perm.id);
+          this.pending.delete(perm.id);
+        },
+        error: (err: any) => {
+          this.alert.error(err?.error?.message ?? 'Failed to revoke permission');
+          this.pending.delete(perm.id);
+          if (err?.status === 404) this.tryLoadMatrix(); // stale state — resync
+        },
+      });
+    } else {
+      this.commonService.postApi('role-access', {
+        role_id: this.selectedRoleId,
+        permission_id: perm.id,
+        canApprove: action === 'APPROVE',
+        ...this.scopePayload(),
+      }).subscribe({
+        next: (res: any) => {
+          this.assignedMap.set(perm.id, res.data.id);
+          this.pending.delete(perm.id);
+        },
+        error: (err: any) => {
+          this.alert.error(err?.error?.message ?? 'Failed to grant permission');
+          this.pending.delete(perm.id);
+          if (err?.status === 409) this.tryLoadMatrix(); // already assigned — resync
+        },
+      });
+    }
+  }
 }

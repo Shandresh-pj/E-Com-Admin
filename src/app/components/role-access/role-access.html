@@ -1,73 +1,170 @@
 <mat-card class="cardWithShadow theme-card">
 
-    <mat-card-header>
+  <mat-card-header>
+    <div class="header-container">
+      <mat-card-title class="m-b-0">Permission Management</mat-card-title>
+    </div>
+  </mat-card-header>
 
-        <div class="header-container">
+  <mat-card-content class="b-t-1">
 
-            <mat-card-title class="m-b-0">
-                Roles Access
-            </mat-card-title>
-            @if(!AddNewRoleAccess && perm.hasRoleAction('canCreate')){
-            <button mat-flat-button color="primary" (click)="AddNewUser()">
+    <!-- Scope selectors -->
+    <div class="row m-b-16">
 
-                Add New Role Access
+      <!-- 1. Access level -->
+      <div class="col-lg-3 col-md-6">
+        <mat-label class="f-w-600 m-b-8 d-block">Access Level</mat-label>
+        <mat-form-field appearance="outline" class="w-100">
+          <mat-select [(ngModel)]="selectedLevel" (ngModelChange)="onLevelChange()"
+            placeholder="Select level">
+            @for (level of levels; track level.value) {
+            <mat-option [value]="level.value" [matTooltip]="level.hint">{{ level.label }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+      </div>
 
-            </button>
+      <!-- 2. Admin (company) -->
+      @if (needsCompany) {
+      <div class="col-lg-3 col-md-6">
+        <mat-label class="f-w-600 m-b-8 d-block">Admin</mat-label>
+        <mat-form-field appearance="outline" class="w-100">
+          <mat-select [(ngModel)]="selectedCompanyId" (ngModelChange)="onCompanyChange()"
+            placeholder="Select admin">
+            @for (company of companies; track company.id) {
+            <mat-option [value]="company.id">{{ company.name }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+      </div>
+      }
+
+      <!-- 3. Branch (auto-selected when only one exists) -->
+      @if (needsBranch && selectedCompanyId) {
+      <div class="col-lg-3 col-md-6">
+        <mat-label class="f-w-600 m-b-8 d-block">Branch</mat-label>
+        <mat-form-field appearance="outline" class="w-100">
+          <mat-select [(ngModel)]="selectedBranchId" (ngModelChange)="onBranchChange()"
+            placeholder="Select branch">
+            @for (branch of companyBranches; track branch.id) {
+            <mat-option [value]="branch.id">{{ branch.name }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+        @if (companyBranches.length === 0) {
+        <p class="f-s-12 text-muted">This admin has no branches yet.</p>
         }
+      </div>
+      }
 
-        </div>
+      <!-- 4. Employee -->
+      @if (needsEmployee && selectedBranchId) {
+      <div class="col-lg-3 col-md-6">
+        <mat-label class="f-w-600 m-b-8 d-block">Employee</mat-label>
+        <mat-form-field appearance="outline" class="w-100">
+          <mat-select [(ngModel)]="selectedUserId" (ngModelChange)="onEmployeeChange()"
+            placeholder="Select employee">
+            @for (entry of branchUsers; track entry.user.id) {
+            <mat-option [value]="entry.user.id">
+              {{ entry.user.name }} ({{ entry.role?.name ?? 'no role' }})
+            </mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+        @if (branchUsers.length === 0) {
+        <p class="f-s-12 text-muted">No users are assigned to this branch.</p>
+        }
+      </div>
+      }
 
-    </mat-card-header>
-@if(AddNewRoleAccess){
-    <mat-card-content class="b-t-1">
+      <!-- 5. Role (locked for employee level — comes from their assignment) -->
+      @if (selectedLevel && !needsEmployee) {
+      <div class="col-lg-3 col-md-6">
+        <mat-label class="f-w-600 m-b-8 d-block">Role</mat-label>
+        <mat-form-field appearance="outline" class="w-100">
+          <mat-select [(ngModel)]="selectedRoleId" (ngModelChange)="onRoleChange()"
+            placeholder="Select role">
+            @for (role of roles; track role.id) {
+            <mat-option [value]="role.id">{{ role.name }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+      </div>
+      }
 
-        <form [formGroup]="RoleAccessForm">
+    </div>
 
-            <div class="row">
+    <!-- Loading menus -->
+    @if (loading) {
+    <div class="d-flex justify-content-center p-24">
+      <mat-spinner diameter="40"></mat-spinner>
+    </div>
+    }
 
-                <div class="col-lg-4">
+    <!-- Incomplete scope -->
+    @else if (!scopeReady) {
+    <div class="text-center text-muted p-24">
+      <p class="f-s-16">Select an access level and complete the selections above to configure permissions.</p>
+    </div>
+    }
 
-                    <mat-label class="f-w-600 m-b-8 d-block">
-                        Roles Name
-                    </mat-label>
+    <!-- Matrix -->
+    @else {
+    <div class="permission-matrix-wrapper">
 
-                    <mat-form-field appearance="outline" class="w-100">
+      @if (matrixLoading) {
+      <div class="matrix-overlay">
+        <mat-spinner diameter="32"></mat-spinner>
+      </div>
+      }
 
-                        <input matInput formControlName="name" placeholder="Enter Roles Name">
+      <p class="f-w-600 m-b-12 f-s-15">
+        Permissions for: <span class="text-primary">{{ scopeSummary }}</span>
+      </p>
 
-                    </mat-form-field>
+      <div class="table-responsive">
+        <table class="permission-table">
+          <thead>
+            <tr>
+              <th class="menu-col">Menu</th>
+              @for (action of actions; track action) {
+              <th class="action-col">{{ action }}</th>
+              }
+            </tr>
+          </thead>
+          <tbody>
+            @for (menu of menus; track menu.id) {
+            <tr>
+              <td class="menu-name">{{ menu.name }}</td>
+              @for (action of actions; track action) {
+              <td class="action-cell">
+                @if (getPermission(menu, action)) {
+                <mat-checkbox
+                  [checked]="isAssigned(menu, action)"
+                  [disabled]="isPending(menu, action)"
+                  (change)="toggle(menu, action)"
+                  color="primary"
+                  [matTooltip]="isAssigned(menu, action) ? 'Revoke ' + action : 'Grant ' + action">
+                </mat-checkbox>
+                } @else {
+                <span class="text-muted">—</span>
+                }
+              </td>
+              }
+            </tr>
+            }
+          </tbody>
+        </table>
+      </div>
 
-                </div>
+      <p class="f-s-12 text-muted m-t-12">
+        More specific levels override broader ones (Employee &gt; Branch &gt; Admin &gt; Global).
+        Changes take effect on the user's next login.
+      </p>
 
-            </div>
+    </div>
+    }
 
-            <div class="m-t-12">
-
-                <button mat-stroked-button class="me-3 Cancel_Button" (click)="cancelRoleAccess()">
-
-                    Cancel
-
-                </button>
-
-                <button mat-flat-button color="primary" (click)="onsubmit(RoleAccessForm)">
-
-                    {{UpdateButton ? 'Update' : 'Submit'}}
-
-                </button>
-
-            </div>
-
-        </form>
-
-    </mat-card-content>
-} @else{
-    <mat-card-content class="b-t-1">
-
-        <app-mat-table [columns]="tableColumns" [tableData]="Roles" [showAction]="false" [Extra_Column]="false">
-        </app-mat-table>
-
-    </mat-card-content>
-}
-
+  </mat-card-content>
 
 </mat-card>

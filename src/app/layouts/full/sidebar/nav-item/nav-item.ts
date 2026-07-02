@@ -8,5 +8,6 @@ export interface NavItem {
     chipContent?: string;
     chipClass?: string;
     external?: boolean;
-    bgcolor?:string;
+    bgcolor?: string;
+    roles?: string[];
 }  

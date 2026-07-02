@@ -13,6 +13,7 @@
       [showAction]="true"
       [showEdit]="false"
       [showView]="false"
+      [showDelete]="perm.hasRoleAction('canDelete')"
       [Extra_Column]="false"
       (deleteClick)="deleteLog($event)">
     </app-mat-table>

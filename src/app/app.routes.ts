@@ -6,6 +6,7 @@ import { FullComponent } from './layouts/full/full.component';
 
 import { AuthGuard } from './Securities/Guard/auth.guard';
 import { NonAuthGuard } from './Securities/Guard/nonauth.guard';
+import { UnauthorizedComponent } from './pages/unauthorized/unauthorized.component';
 
 export const routes: Routes = [
 
@@ -63,6 +64,15 @@ export const routes: Routes = [
           .then(m => m.ComponentsRoutes)
       }
 
+    ]
+  },
+
+  {
+    path: 'unauthorized',
+    component: FullComponent,
+    canMatch: [AuthGuard],
+    children: [
+      { path: '', component: UnauthorizedComponent }
     ]
   },
 

@@ -55,6 +55,8 @@ export class MatTable implements OnInit,AfterViewInit{
 
 @Input() showEdit=true;
 
+@Input() showDelete=true;
+
 @Input() showView=false;
 
 @Input() Extra_Column = true;

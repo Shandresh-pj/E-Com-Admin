@@ -7,7 +7,7 @@
             <mat-card-title class="m-b-0">
                 Roles Access
             </mat-card-title>
-            @if(!AddNewRoleAccess){
+            @if(!AddNewRoleAccess && perm.hasRoleAction('canCreate')){
             <button mat-flat-button color="primary" (click)="AddNewUser()">
 
                 Add New Role Access

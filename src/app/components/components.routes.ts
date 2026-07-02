@@ -1,6 +1,5 @@
 import { Routes } from '@angular/router';
 
-import { ForgetPassword } from './forget-password/forget-password';
 import { AppAdmin } from './app-admin/app-admin';
 import { Branch } from './branch/branch';
 import { Employees } from './employees/employees';
@@ -16,25 +15,23 @@ import { Product } from './product/product';
 import { Order } from './order/order';
 import { ChangePassword } from './change-password/change-password';
 import { AuditLogs } from './audit-logs/audit-logs';
+import { RoleGuard } from '../Securities/Guard/role.guard';
+import { UserType } from '../Securities/Models/role-access';
+
+const SA = UserType.SUPER_ADMIN;
+const A  = UserType.ADMIN;
+const BM = UserType.BRANCH_MANAGER;
+const SK = UserType.SHOPKEEPER;
 
 export const ComponentsRoutes: Routes = [
 
   {
-    path: 'forget-password',
-    component: ForgetPassword,
-    data: {
-      title: 'Forget Password',
-      urls: [
-        { title: 'Forget Password', url: '/components/forget-password' }
-      ]
-    }
-  },
-
-  {
     path: 'admin',
     component: AppAdmin,
+    canActivate: [RoleGuard],
     data: {
       title: 'App Admin',
+      roles: [SA, A],
       urls: [
         { title: 'App Admin', url: '/components/admin' }
       ]
@@ -44,8 +41,10 @@ export const ComponentsRoutes: Routes = [
   {
     path: 'branch',
     component: Branch,
+    canActivate: [RoleGuard],
     data: {
       title: 'Branch',
+      roles: [SA, A],
       urls: [
         { title: 'Branch', url: '/components/branch' }
       ]
@@ -55,8 +54,10 @@ export const ComponentsRoutes: Routes = [
   {
     path: 'employees',
     component: Employees,
+    canActivate: [RoleGuard],
     data: {
       title: 'Employees',
+      roles: [SA, A, BM],
       urls: [
         { title: 'Employees', url: '/components/employees' }
       ]
@@ -66,8 +67,10 @@ export const ComponentsRoutes: Routes = [
   {
     path: 'roles',
     component: Roles,
+    canActivate: [RoleGuard],
     data: {
       title: 'Roles',
+      roles: [SA],
       urls: [
         { title: 'Roles', url: '/components/roles' }
       ]
@@ -77,8 +80,10 @@ export const ComponentsRoutes: Routes = [
   {
     path: 'role-access',
     component: RoleAccess,
+    canActivate: [RoleGuard],
     data: {
       title: 'Role Access',
+      roles: [SA, A],
       urls: [
         { title: 'Role Access', url: '/components/role-access' }
       ]
@@ -99,8 +104,10 @@ export const ComponentsRoutes: Routes = [
   {
     path: 'menubar',
     component: MenuBar,
+    canActivate: [RoleGuard],
     data: {
       title: 'Menu Bar',
+      roles: [SA],
       urls: [
         { title: 'Menu Bar', url: '/components/menubar' }
       ]
@@ -110,8 +117,10 @@ export const ComponentsRoutes: Routes = [
   {
     path: 'status',
     component: Status,
+    canActivate: [RoleGuard],
     data: {
       title: 'Status',
+      roles: [SA, A],
       urls: [
         { title: 'Status', url: '/components/status' }
       ]
@@ -121,8 +130,10 @@ export const ComponentsRoutes: Routes = [
   {
     path: 'product-attribute',
     component: ProductAttribute,
+    canActivate: [RoleGuard],
     data: {
       title: 'Product Attribute',
+      roles: [SA, A, BM],
       urls: [
         {
           title: 'Product Attribute',
@@ -135,8 +146,10 @@ export const ComponentsRoutes: Routes = [
   {
     path: 'attribute-value',
     component: AttributeValue,
+    canActivate: [RoleGuard],
     data: {
       title: 'Attribute Value',
+      roles: [SA, A, BM],
       urls: [
         {
           title: 'Attribute Value',
@@ -149,8 +162,10 @@ export const ComponentsRoutes: Routes = [
   {
     path: 'category',
     component: Category,
+    canActivate: [RoleGuard],
     data: {
       title: 'Category',
+      roles: [SA, A, BM],
       urls: [
         {
           title: 'Category',
@@ -163,8 +178,10 @@ export const ComponentsRoutes: Routes = [
   {
     path: 'product',
     component: Product,
+    canActivate: [RoleGuard],
     data: {
       title: 'Product',
+      roles: [SA, A, BM, SK],
       urls: [
         {
           title: 'Product',
@@ -177,8 +194,10 @@ export const ComponentsRoutes: Routes = [
   {
     path: 'order',
     component: Order,
+    canActivate: [RoleGuard],
     data: {
       title: 'Order',
+      roles: [SA, A, BM, SK],
       urls: [
         {
           title: 'Order',
@@ -205,8 +224,10 @@ export const ComponentsRoutes: Routes = [
   {
     path: 'audit-logs',
     component: AuditLogs,
+    canActivate: [RoleGuard],
     data: {
       title: 'Audit Logs',
+      roles: [SA, A],
       urls: [
         { title: 'Audit Logs', url: '/components/audit-logs' }
       ]

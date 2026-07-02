@@ -8,6 +8,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDialog } from '@angular/material/dialog';
 import { AlertService } from 'src/app/Securities/Services/alert.service';
+import { PermissionService } from 'src/app/Securities/Services/permissions.service';
 import { CommonService } from 'src/app/Securities/Services/common.service';
 import { MatTable } from 'src/utils/mat-table/mat-table';
 import { toFileUrl } from 'src/utils/file-url';
@@ -52,7 +53,8 @@ export class Category {
     private commonService: CommonService,
     private alert: AlertService,
     private cdr: ChangeDetectorRef,
-    private dialog: MatDialog
+    private dialog: MatDialog,
+    public perm: PermissionService
   ) {
     this.CategoryForm = fb.group({
       name: ['', [Validators.required, Validators.maxLength(100)]],

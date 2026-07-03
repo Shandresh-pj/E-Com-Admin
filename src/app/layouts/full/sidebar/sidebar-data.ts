@@ -55,14 +55,14 @@ export const navItems: NavItem[] = [
   },
   {
     navCap: 'Roles',
-    roles: [SA, A],
+    roles: [SA],
   },
   {
     displayName: 'App Role Access',
     iconName: 'Badge',
     route: '/components/role-access',
     bgcolor: 'warning',
-    roles: [SA, A],
+    roles: [SA],
   },
   {
     displayName: 'App Roles',

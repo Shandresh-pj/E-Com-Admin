@@ -41,11 +41,41 @@ const TABLET_VIEW = 'screen and (min-width: 769px) and (max-width: 1024px)';
   encapsulation: ViewEncapsulation.None
 })
 export class FullComponent implements OnInit {
-  navItems = navItems.filter(item => {
-    if (!item.roles || !item.roles.length) return true;
-    if (this.authService.isSuperAdmin()) return true;
-    return item.roles.includes(this.authService.getUserType());
-  });
+  navItems = this.buildNavItems();
+
+  /**
+   * Sidebar items come from two sources, merged:
+   *  1. Menus granted through Permission Management (JWT `menus` — matched by path).
+   *     Granting a menu to an admin/branch/employee makes it appear on their next login.
+   *  2. The static role matrix in sidebar-data.ts (legacy fallback).
+   * Super Admin always sees everything. Captions without any visible item under
+   * them are dropped.
+   */
+  private buildNavItems() {
+    if (this.authService.isSuperAdmin()) return navItems;
+
+    const grantedPaths = new Set(
+      this.authService.getMenus()
+        .filter((m: any) => m && typeof m === 'object' && m.path)
+        .map((m: any) => String(m.path).toLowerCase().replace(/\/+$/, ''))
+    );
+
+    const visible = navItems.filter(item => {
+      if (!item.route) return true; // captions are pruned below
+      if (grantedPaths.has(item.route.toLowerCase().replace(/\/+$/, ''))) return true;
+      if (!item.roles || !item.roles.length) return true; // universal items
+      return item.roles.includes(this.authService.getUserType());
+    });
+
+    return visible.filter((item, i) => {
+      if (!item.navCap) return true;
+      for (let j = i + 1; j < visible.length; j++) {
+        if (visible[j].navCap) break;
+        if (visible[j].displayName) return true;
+      }
+      return false;
+    });
+  }
 
   @ViewChild('leftsidenav')
   public sidenav: MatSidenav;

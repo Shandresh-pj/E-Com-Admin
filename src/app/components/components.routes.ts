@@ -83,7 +83,7 @@ export const ComponentsRoutes: Routes = [
     canActivate: [RoleGuard],
     data: {
       title: 'Role Access',
-      roles: [SA, A],
+      roles: [SA],
       urls: [
         { title: 'Role Access', url: '/components/role-access' }
       ]

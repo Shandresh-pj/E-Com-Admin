@@ -1,7 +1,7 @@
 <mat-card class="cardWithShadow theme-card">
   <mat-card-header>
-    <div class="header-container flex-column flex-sm-row gap-12">
-      <mat-card-title class="m-b-0">Global Stock Ledger</mat-card-title>
+    <div class="header-container flex-column flex-sm-row gap-12 justify-content-between align-items-center w-100 p-24 bg-light-primary">
+      <mat-card-title class="m-b-0">Inventory & Stock Ledger</mat-card-title>
       
       <!-- Tab Controls and Action Button -->
       <div class="d-flex align-items-center gap-12 flex-wrap">
@@ -13,7 +13,7 @@
         </button>
         @if (!showForm && perm.hasRoleAction('canCreate')) {
           <button mat-flat-button color="primary" (click)="toggleForm()">
-            <mat-icon class="icon-16 m-r-4">add</mat-icon> Adjust Inventory
+            <mat-icon class="icon-16 m-r-4">add</mat-icon> Adjust Stock
           </button>
         }
       </div>
@@ -30,7 +30,7 @@
             <mat-form-field appearance="outline" class="w-100">
               <mat-select formControlName="product_id" placeholder="Select Product">
                 @for(p of products; track p.id) {
-                  <mat-option [value]="p.id">{{ p.name }}</mat-option>
+                  <mat-option [value]="p.id">{{ p.name }} (Stock: {{ p.stock }})</mat-option>
                 }
               </mat-select>
             </mat-form-field>
@@ -40,7 +40,7 @@
           <div class="col-lg-4 col-md-6 col-sm-12 m-b-16">
             <mat-label class="f-w-600 m-b-8 d-block">Adjustment Amount <span class="text-danger">*</span></mat-label>
             <mat-form-field appearance="outline" class="w-100">
-              <input matInput type="number" formControlName="quantity" placeholder="Enter count to adjust">
+              <input matInput type="number" formControlName="quantity" placeholder="Enter count to adjust" min="1">
             </mat-form-field>
           </div>
 
@@ -59,32 +59,147 @@
         <div class="m-t-16">
           <button mat-stroked-button class="me-3" (click)="toggleForm()" [disabled]="loading">Cancel</button>
           <button mat-flat-button color="primary" (click)="submitStockUpdate()" [disabled]="loading || stockForm.invalid">
-            Apply Stock Adjustment
+            Submit Stock Adjustment
           </button>
         </div>
       </form>
     </mat-card-content>
   } @else {
-    <mat-card-content class="b-t-1">
-      <div class="table-responsive">
-        @if (viewMode === 'products') {
-          <app-mat-table 
-            [columns]="productColumns" 
-            [tableData]="products" 
-            [showAction]="false" 
-            [showView]="false"
-            [Extra_Column]="false">
-          </app-mat-table>
-        } @else {
-          <app-mat-table 
-            [columns]="logColumns" 
-            [tableData]="stockLogs" 
-            [showAction]="false" 
-            [showView]="false"
-            [Extra_Column]="false">
-          </app-mat-table>
-        }
+    <mat-card-content class="b-t-1 p-24">
+      
+      <!-- Current Inventory Table -->
+      <div *ngIf="viewMode === 'products'" class="table-responsive">
+        <table mat-table [dataSource]="products" class="w-100 text-nowrap">
+          
+          <ng-container matColumnDef="id">
+            <th mat-header-cell *matHeaderCellDef class="f-w-600"> No </th>
+            <td mat-cell *matCellDef="let element; let i = index"> {{ i + 1 }} </td>
+          </ng-container>
+
+          <ng-container matColumnDef="name">
+            <th mat-header-cell *matHeaderCellDef class="f-w-600"> Product Name </th>
+            <td mat-cell *matCellDef="let element"> 
+              <span class="f-w-600">{{ element.name }}</span>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="stock">
+            <th mat-header-cell *matHeaderCellDef class="f-w-600"> Current Stock </th>
+            <td mat-cell *matCellDef="let element">
+              <span [class.text-error]="element.stock <= (element.critical_stock_threshold || 2)" 
+                    [class.text-warning]="element.stock > (element.critical_stock_threshold || 2) && element.stock <= (element.low_stock_threshold || 5)"
+                    class="f-w-600">
+                {{ element.stock }}
+              </span>
+              <span *ngIf="element.stock <= 0" class="badge bg-light-error text-error m-l-8 font-weight-bold">Out of Stock</span>
+              <span *ngIf="element.stock > 0 && element.stock <= (element.critical_stock_threshold || 2)" class="badge bg-light-error text-error m-l-8">Critical Stock</span>
+              <span *ngIf="element.stock > (element.critical_stock_threshold || 2) && element.stock <= (element.low_stock_threshold || 5)" class="badge bg-light-warning text-warning m-l-8">Low Stock</span>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="price">
+            <th mat-header-cell *matHeaderCellDef class="f-w-600"> Price ($) </th>
+            <td mat-cell *matCellDef="let element"> {{ element.price | currency }} </td>
+          </ng-container>
+
+          <ng-container matColumnDef="low_threshold">
+            <th mat-header-cell *matHeaderCellDef class="f-w-600"> Low Threshold </th>
+            <td mat-cell *matCellDef="let element"> {{ element.low_stock_threshold ?? 5 }} </td>
+          </ng-container>
+
+          <ng-container matColumnDef="critical_threshold">
+            <th mat-header-cell *matHeaderCellDef class="f-w-600"> Critical Threshold </th>
+            <td mat-cell *matCellDef="let element"> {{ element.critical_stock_threshold ?? 2 }} </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="['id', 'name', 'stock', 'price', 'low_threshold', 'critical_threshold']"></tr>
+          <tr mat-row *matRowDef="let row; columns: ['id', 'name', 'stock', 'price', 'low_threshold', 'critical_threshold'];"></tr>
+        </table>
       </div>
+
+      <!-- Transaction Logs Table -->
+      <div *ngIf="viewMode === 'logs'" class="table-responsive">
+        <table mat-table [dataSource]="stockLogs" class="w-100 text-nowrap">
+          
+          <ng-container matColumnDef="id">
+            <th mat-header-cell *matHeaderCellDef class="f-w-600"> No </th>
+            <td mat-cell *matCellDef="let element; let i = index"> {{ i + 1 }} </td>
+          </ng-container>
+
+          <ng-container matColumnDef="product_name">
+            <th mat-header-cell *matHeaderCellDef class="f-w-600"> Product </th>
+            <td mat-cell *matCellDef="let element"> {{ element.product_name }} </td>
+          </ng-container>
+
+          <ng-container matColumnDef="old_stock">
+            <th mat-header-cell *matHeaderCellDef class="f-w-600"> Old Stock </th>
+            <td mat-cell *matCellDef="let element"> {{ element.old_stock }} </td>
+          </ng-container>
+
+          <ng-container matColumnDef="added_stock">
+            <th mat-header-cell *matHeaderCellDef class="f-w-600"> Adjusted Qty </th>
+            <td mat-cell *matCellDef="let element"> 
+              <span [class.text-success]="element.action === 'ADD'" [class.text-error]="element.action === 'REMOVE'" class="f-w-600">
+                {{ element.action === 'ADD' ? '+' : '-' }}{{ abs(element.added_stock) }}
+              </span>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="new_stock">
+            <th mat-header-cell *matHeaderCellDef class="f-w-600"> New Stock </th>
+            <td mat-cell *matCellDef="let element"> {{ element.new_stock }} </td>
+          </ng-container>
+
+          <ng-container matColumnDef="action">
+            <th mat-header-cell *matHeaderCellDef class="f-w-600"> Type </th>
+            <td mat-cell *matCellDef="let element"> 
+              <span class="badge" [ngClass]="element.action === 'ADD' ? 'bg-light-success text-success' : 'bg-light-error text-error'">
+                {{ element.action }}
+              </span>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="status">
+            <th mat-header-cell *matHeaderCellDef class="f-w-600"> Status </th>
+            <td mat-cell *matCellDef="let element"> 
+              <span class="badge font-weight-bold" 
+                    [ngClass]="{
+                      'bg-light-warning text-warning': element.status === 'Pending Approval',
+                      'bg-light-success text-success': element.status === 'Approved' || element.status === 'Published',
+                      'bg-light-error text-error': element.status === 'Rejected'
+                    }">
+                {{ element.status }}
+              </span>
+              <span *ngIf="element.status === 'Rejected'" class="d-block text-muted f-s-12 m-t-4" style="max-width: 200px; white-space: normal;">
+                Reason: {{ element.rejection_reason }}
+              </span>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="created_at">
+            <th mat-header-cell *matHeaderCellDef class="f-w-600"> Timestamp </th>
+            <td mat-cell *matCellDef="let element"> {{ element.created_at }} </td>
+          </ng-container>
+
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef class="f-w-600"> Review </th>
+            <td mat-cell *matCellDef="let element">
+              @if (element.status === 'Pending Approval' && isAdmin) {
+                <button mat-icon-button color="primary" (click)="approveAdjustment(element.id, 'APPROVE')" title="Approve">
+                  <mat-icon>done</mat-icon>
+                </button>
+                <button mat-icon-button color="warn" (click)="rejectAdjustment(element.id)" title="Reject">
+                  <mat-icon>close</mat-icon>
+                </button>
+              }
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="['id', 'product_name', 'old_stock', 'added_stock', 'new_stock', 'action', 'status', 'created_at', 'actions']"></tr>
+          <tr mat-row *matRowDef="let row; columns: ['id', 'product_name', 'old_stock', 'added_stock', 'new_stock', 'action', 'status', 'created_at', 'actions'];"></tr>
+        </table>
+      </div>
+
     </mat-card-content>
   }
 </mat-card>

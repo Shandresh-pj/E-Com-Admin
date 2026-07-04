@@ -21,6 +21,8 @@ import { AuthService } from 'src/app/Securities/Services/auth.service';
 import { CommonService } from 'src/app/Securities/Services/common.service';
 import { PermissionService } from 'src/app/Securities/Services/permissions.service';
 import { NavItem } from './sidebar/nav-item/nav-item';
+import { SocketService } from 'src/app/Securities/Services/socket.service';
+import { NotificationService } from 'src/app/services/notification.service';
 
 
 const MOBILE_VIEW = 'screen and (max-width: 768px)';
@@ -97,6 +99,11 @@ export class FullComponent implements OnInit {
   }
 
 
+  private socketSubscription = Subscription.EMPTY;
+  unreadNotificationsCount = 0;
+  pendingApprovalsCount = 0;
+  lowStockAlertsCount = 0;
+
   constructor(
     private settings: CoreService,
     private router: Router,
@@ -104,12 +111,13 @@ export class FullComponent implements OnInit {
     private authService: AuthService,
     private commonService: CommonService,
     private permissionService: PermissionService,
+    private socketService: SocketService,
+    private notificationService: NotificationService,
   ) {
     this.htmlElement = document.querySelector('html')!;
     this.layoutChangesSubscription = this.breakpointObserver
       .observe([MOBILE_VIEW, TABLET_VIEW])
       .subscribe((state) => {
-        // SidenavOpened must be reset true when layout changes
         this.options.sidenavOpened = true;
         this.isMobileScreen = state.breakpoints[MOBILE_VIEW];
         if (this.options.sidenavCollapsed == false) {
@@ -117,13 +125,11 @@ export class FullComponent implements OnInit {
         }
       });
 
-    // Reactively reload menus whenever permissions are updated
     effect(() => {
       this.permissionService.permissionsUpdated();
       this.loadDynamicMenus();
     });
 
-    // This is for scroll to top
     this.router.events
       .pipe(filter((event) => event instanceof NavigationEnd))
       .subscribe((e) => {
@@ -132,12 +138,122 @@ export class FullComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.navItems = this.buildNavItems();
     this.loadDynamicMenus();
+
+    // Subscribe to WebSocket events
+    this.socketService.connect();
+    this.socketSubscription = new Subscription();
+
+    this.socketSubscription.add(
+      this.socketService.on('new-notification').subscribe((notif: any) => {
+        this.unreadNotificationsCount++;
+        this.updateNavBadges();
+      })
+    );
+
+    this.socketSubscription.add(
+      this.socketService.on('low-stock-alert').subscribe((alert: any) => {
+        this.lowStockAlertsCount++;
+        this.updateNavBadges();
+      })
+    );
+
+    this.socketSubscription.add(
+      this.socketService.on('product-approval-update').subscribe(() => {
+        this.fetchBadgeCounts();
+      })
+    );
+
+    this.socketSubscription.add(
+      this.socketService.on('stock-update').subscribe(() => {
+        this.fetchBadgeCounts();
+      })
+    );
+
+    this.socketSubscription.add(
+      this.socketService.on('branch-transfer-update').subscribe(() => {
+        this.fetchBadgeCounts();
+      })
+    );
+
+    this.fetchBadgeCounts();
   }
 
   ngOnDestroy() {
     this.layoutChangesSubscription.unsubscribe();
+    this.socketSubscription.unsubscribe();
+    this.socketService.disconnect();
+  }
+
+  fetchBadgeCounts(): void {
+    this.notificationService.getNotifications().subscribe({
+      next: (res: any) => {
+        const notifs = res?.data || [];
+        this.unreadNotificationsCount = notifs.filter((n: any) => !n.is_read).length;
+        this.updateNavBadges();
+      },
+      error: (err) => {
+        console.error('Failed to load notifications in layout:', err);
+      }
+    });
+
+    this.commonService.getApi('alerts').subscribe({
+      next: (res: any) => {
+        const alerts = res?.data || [];
+        this.lowStockAlertsCount = alerts.length;
+        this.updateNavBadges();
+      },
+      error: (err) => {
+        console.error('Failed to load alerts in layout:', err);
+      }
+    });
+
+    const isAdmin = this.authService.isSuperAdmin() || this.authService.getUserType() === 'Admin';
+    if (isAdmin) {
+      this.commonService.getApi('products', { status: 'Pending Approval', limit: 1 }).subscribe({
+        next: (res: any) => {
+          this.pendingApprovalsCount = res?.total || 0;
+          this.updateNavBadges();
+        },
+        error: (err) => {
+          console.error('Failed to load pending products in layout:', err);
+        }
+      });
+    }
+  }
+
+  updateNavBadges(): void {
+    this.navItems.forEach(item => {
+      if (item.displayName === 'Notifications') {
+        item.chip = this.unreadNotificationsCount > 0;
+        item.chipContent = String(this.unreadNotificationsCount);
+        item.chipClass = 'bg-error text-white';
+      }
+      if (item.displayName === 'Alerts' || item.displayName === 'Low Stock Alerts') {
+        item.chip = this.lowStockAlertsCount > 0;
+        item.chipContent = String(this.lowStockAlertsCount);
+        item.chipClass = 'bg-warning text-dark';
+      }
+      if (item.children) {
+        item.children.forEach(child => {
+          if (child.displayName === 'Pending Approval') {
+            child.chip = this.pendingApprovalsCount > 0;
+            child.chipContent = String(this.pendingApprovalsCount);
+            child.chipClass = 'bg-error text-white';
+          }
+          if (child.displayName === 'Low Stock Alerts') {
+            child.chip = this.lowStockAlertsCount > 0;
+            child.chipContent = String(this.lowStockAlertsCount);
+            child.chipClass = 'bg-warning text-dark';
+          }
+          if (child.displayName === 'Notifications') {
+            child.chip = this.unreadNotificationsCount > 0;
+            child.chipContent = String(this.unreadNotificationsCount);
+            child.chipClass = 'bg-error text-white';
+          }
+        });
+      }
+    });
   }
 
   toggleCollapsed() {
@@ -157,34 +273,50 @@ export class FullComponent implements OnInit {
   onSidenavOpenedChange(isOpened: boolean) {
     this.isCollapsedWidthFixed = !this.isOver;
     this.options.sidenavOpened = isOpened;
-    //this.settings.setOptions(this.options);
   }
 
   loadDynamicMenus(): void {
     const apiMenus = this.authService.getMenus() ?? [];
-    
-    // Filter active menus and those the user has READ permission for
-    const allowedMenus = apiMenus.filter((m: any) => {
-      if (m.isActive === false) return false;
-      return this.permissionService.hasPermission(m.id, 'READ');
-    });
+    const isSuperAdmin = this.authService.isSuperAdmin() || apiMenus.includes('ALL');
 
-    // Now map allowed menus to NavItems
-    let colorToggle = true;
-    const dynamicItems: NavItem[] = allowedMenus.map((m: any) => {
-      const bgcolor = colorToggle ? 'primary' : 'success';
-      colorToggle = !colorToggle;
+    let allowedMenus: any[] = [];
+    if (isSuperAdmin) {
+      allowedMenus = [
+        { id: 1, name: 'App Admin', path: '/components/admin', icon: 'bi-shield-lock-fill', isActive: true },
+        { id: 2, name: 'Branch', path: '/components/branch', icon: 'bi-shop', isActive: true },
+        { id: 3, name: 'Employees', path: '/components/employees', icon: 'bi-people-fill', isActive: true },
+        { id: 4, name: 'Roles', path: '/components/roles', icon: 'bi-key-fill', isActive: true },
+        { id: 5, name: 'Role Access', path: '/components/role-access', icon: 'bi-shield-check', isActive: true },
+        { id: 6, name: 'Profile', path: '/components/profile', icon: 'bi-person-badge-fill', isActive: true },
+        { id: 7, name: 'Menu Bar', path: '/components/menubar', icon: 'bi-list-ul', isActive: true },
+        { id: 8, name: 'Status', path: '/components/status', icon: 'bi-check2-square', isActive: true },
+        { id: 9, name: 'Product Attribute', path: '/components/product-attribute', icon: 'bi-tag-fill', isActive: true },
+        { id: 10, name: 'Attribute Value', path: '/components/attribute-value', icon: 'bi-tags-fill', isActive: true },
+        { id: 11, name: 'Category', path: '/components/category', icon: 'bi-folder-fill', isActive: true },
+        { id: 12, name: 'Product', path: '/components/product', icon: 'bi-box-seam-fill', isActive: true },
+        { id: 13, name: 'Orders', path: '/components/orders', icon: 'bi-cart-fill', isActive: true },
+        { id: 14, name: 'Change Password', path: '/components/change-password', icon: 'bi-lock-fill', isActive: true },
+        { id: 15, name: 'Audit Logs', path: '/components/audit-logs', icon: 'bi-clock-history', isActive: true },
+        { id: 16, name: 'Alerts', path: '/components/alerts', icon: 'bi-exclamation-triangle-fill', isActive: true },
+        { id: 17, name: 'Attendance', path: '/components/attendance', icon: 'bi-calendar-check-fill', isActive: true },
+        { id: 18, name: 'Branch Stocks', path: '/components/branch-stocks', icon: 'bi-house-gear-fill', isActive: true },
+        { id: 19, name: 'Stocks', path: '/components/stocks', icon: 'bi-box2-fill', isActive: true },
+        { id: 20, name: 'Payroll', path: '/components/payroll', icon: 'bi-cash-coin', isActive: true },
+        { id: 21, name: 'Leave', path: '/components/leave', icon: 'bi-airplane-fill', isActive: true },
+        { id: 22, name: 'Delivery Tracking', path: '/components/delivery-tracking', icon: 'bi-truck', isActive: true },
+        { id: 23, name: 'Payments', path: '/components/payments', icon: 'bi-credit-card-2-front-fill', isActive: true },
+        { id: 24, name: 'Notifications', path: '/components/notifications', icon: 'bi-bell-fill', isActive: true }
+      ];
+    } else {
+      allowedMenus = apiMenus.filter((m: any) => {
+        if (!m || typeof m !== 'object') return false;
+        if (m.isActive === false) return false;
+        return this.permissionService.hasPermission(m.id, 'READ');
+      });
+    }
 
-      return {
-        displayName: m.name,
-        route: m.path,
-        iconName: this.mapIcon(m.icon || 'bi-grid-fill'),
-        bgcolor: bgcolor
-      };
-    });
+    const norm = (r?: string) => (r || '').toLowerCase().replace(/\/+$/, '');
 
-    // Build the final navItems list
-    // Always include Dashboard at the top
     const finalItems: NavItem[] = [
       {
         navCap: 'Home',
@@ -197,47 +329,127 @@ export class FullComponent implements OnInit {
       }
     ];
 
-    if (dynamicItems.length > 0) {
+    const hasProductMenu = allowedMenus.some(m => norm(m.path) === '/components/product');
+    const hasStockMenu = allowedMenus.some(m => norm(m.path) === '/components/stocks');
+    const hasBranchStockMenu = allowedMenus.some(m => norm(m.path) === '/components/branch-stocks');
+
+    const isAdmin = this.authService.isSuperAdmin() || this.authService.getUserType() === 'Admin';
+
+    if (hasProductMenu || hasStockMenu || hasBranchStockMenu) {
       finalItems.push({
-        navCap: 'Modules'
+        navCap: 'Inventory'
       });
-      finalItems.push(...dynamicItems);
     }
 
-    // Always include Change Password at the bottom under Settings
+    if (hasProductMenu) {
+      const productChildren: NavItem[] = [
+        { displayName: 'Product List', route: '/components/product', bgcolor: 'primary' },
+        { displayName: 'Published Products', route: '/components/product', bgcolor: 'success' }
+      ];
+      if (isAdmin) {
+        productChildren.splice(1, 0, { displayName: 'Add Product', route: '/components/product', bgcolor: 'warning' });
+        productChildren.splice(2, 0, { displayName: 'Pending Approval', route: '/components/product', bgcolor: 'error' });
+      }
+      finalItems.push({
+        displayName: 'Products',
+        iconName: 'bi-box-seam-fill',
+        bgcolor: 'primary',
+        children: productChildren
+      });
+    }
+
+    if (hasStockMenu) {
+      const stockChildren: NavItem[] = [
+        { displayName: 'Stock List', route: '/components/stocks', bgcolor: 'primary' },
+        { displayName: 'Stock History', route: '/components/stocks', bgcolor: 'success' }
+      ];
+      if (isAdmin) {
+        stockChildren.splice(1, 0, { displayName: 'Add Stock', route: '/components/stocks', bgcolor: 'warning' });
+        stockChildren.push({ displayName: 'Low Stock Alerts', route: '/components/alerts', bgcolor: 'error' });
+      }
+      finalItems.push({
+        displayName: 'Stocks',
+        iconName: 'bi-card-list',
+        bgcolor: 'warning',
+        children: stockChildren
+      });
+    }
+
+    if (hasBranchStockMenu) {
+      finalItems.push({
+        displayName: 'Branch Stocks',
+        iconName: 'bi-shop',
+        bgcolor: 'success',
+        children: [
+          { displayName: 'Branch Inventory', route: '/components/branch-stocks', bgcolor: 'primary' },
+          { displayName: 'Stock Transfer', route: '/components/branch-stocks', bgcolor: 'success' }
+        ]
+      });
+    }
+
+    // Add other allowed modules
+    const processedPaths = new Set([
+      '/components/product',
+      '/components/stocks',
+      '/components/branch-stocks',
+      '/components/alerts',
+      '/alerts'
+    ]);
+
+    let colorToggle = true;
+    const otherItems: NavItem[] = allowedMenus
+      .filter((m: any) => !processedPaths.has(norm(m.path)))
+      .map((m: any) => {
+        const bgcolor = colorToggle ? 'primary' : 'success';
+        colorToggle = !colorToggle;
+        return {
+          displayName: m.name,
+          route: m.path,
+          iconName: this.mapIcon(m.icon || 'bi-grid-fill'),
+          bgcolor: bgcolor
+        };
+      });
+
+    if (otherItems.length > 0) {
+      finalItems.push({
+        navCap: 'Other Modules'
+      });
+      finalItems.push(...otherItems);
+    }
+
+    // Notifications Link
+    finalItems.push({
+      navCap: 'Notifications'
+    });
+    finalItems.push({
+      displayName: 'Notifications',
+      iconName: 'bi-bell-fill',
+      route: '/components/notifications',
+      bgcolor: 'error'
+    });
+
     finalItems.push({
       navCap: 'Settings'
     });
-
-    // Only add the hardcoded "Menu Bar" if the API menus didn't already
-    // supply it, otherwise the sidebar shows two identical entries.
-    const norm = (r?: string) => (r || '').toLowerCase().replace(/\/+$/, '');
-    const hasMenuBar = dynamicItems.some(d => norm(d.route) === '/components/menubar');
-    if (this.authService.isSuperAdmin() && !hasMenuBar) {
-      finalItems.push({
-        displayName: 'Menu Bar',
-        iconName: 'list-check',
-        route: '/components/menubar',
-        bgcolor: 'primary'
-      });
-    }
 
     finalItems.push({
       displayName: 'Change Password',
       iconName: 'lock',
       route: '/components/change-password',
-      bgcolor: colorToggle ? 'primary' : 'success'
+      bgcolor: 'success'
     });
 
-    // Final guard: drop any duplicate routes (keep first occurrence).
+    // Prune duplicates
     const seen = new Set<string>();
     this.navItems = finalItems.filter(it => {
-      if (!it.route) return true; // keep captions
-      const key = norm(it.route);
+      if (!it.route) return true;
+      const key = norm(it.route) + (it.children ? '_parent' : '');
       if (seen.has(key)) return false;
       seen.add(key);
       return true;
     });
+
+    this.updateNavBadges();
   }
 
   private mapIcon(icon: string): string {

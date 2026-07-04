@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormsModule, FormGroup, FormBuilder, Validators } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
@@ -7,10 +7,13 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatIconModule } from '@angular/material/icon';
+import { MatTableModule } from '@angular/material/table';
 import { CommonService } from 'src/app/Securities/Services/common.service';
 import { AlertService } from 'src/app/Securities/Services/alert.service';
 import { PermissionService } from 'src/app/Securities/Services/permissions.service';
-import { MatTable } from 'src/utils/mat-table/mat-table';
+import { AuthService } from 'src/app/Securities/Services/auth.service';
+import { SocketService } from 'src/app/Securities/Services/socket.service';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-stocks',
@@ -25,29 +28,12 @@ import { MatTable } from 'src/utils/mat-table/mat-table';
     MatInputModule,
     MatSelectModule,
     MatIconModule,
-    MatTable
+    MatTableModule
   ],
   templateUrl: './stocks.html',
   styleUrl: './stocks.scss',
 })
-export class Stocks implements OnInit {
-  productColumns = [
-    { columnDef: 'id', header: 'No' },
-    { columnDef: 'name', header: 'Product Name' },
-    { columnDef: 'stock', header: 'Current Stock' },
-    { columnDef: 'price', header: 'Price ($)' }
-  ];
-
-  logColumns = [
-    { columnDef: 'id', header: 'No' },
-    { columnDef: 'product_name', header: 'Product' },
-    { columnDef: 'old_stock', header: 'Old Stock' },
-    { columnDef: 'added_stock', header: 'Adjusted Qty' },
-    { columnDef: 'new_stock', header: 'New Stock' },
-    { columnDef: 'action', header: 'Action' },
-    { columnDef: 'created_at', header: 'Timestamp' }
-  ];
-
+export class Stocks implements OnInit, OnDestroy {
   products: any[] = [];
   stockLogs: any[] = [];
   
@@ -55,11 +41,14 @@ export class Stocks implements OnInit {
   showForm = false;
   viewMode: 'products' | 'logs' = 'products';
   loading = false;
+  private socketSub = new Subscription();
 
   constructor(
     private fb: FormBuilder,
     private commonService: CommonService,
     private alert: AlertService,
+    private authService: AuthService,
+    private socketService: SocketService,
     public perm: PermissionService
   ) {
     this.stockForm = this.fb.group({
@@ -69,9 +58,28 @@ export class Stocks implements OnInit {
     });
   }
 
+  get isAdmin(): boolean {
+    return this.authService.isSuperAdmin() || this.authService.getUserType() === 'Admin';
+  }
+
+  abs(value: number): number {
+    return Math.abs(value);
+  }
+
   ngOnInit() {
     this.loadProducts();
     this.loadStockLogs();
+
+    this.socketSub.add(
+      this.socketService.on('stock-update').subscribe(() => {
+        this.loadProducts();
+        this.loadStockLogs();
+      })
+    );
+  }
+
+  ngOnDestroy() {
+    this.socketSub.unsubscribe();
   }
 
   loadProducts() {
@@ -134,16 +142,55 @@ export class Stocks implements OnInit {
 
     this.commonService.postApi('stock/update', payload).subscribe({
       next: () => {
-        this.alert.success("Global stock updated successfully");
+        this.alert.success("Stock adjustment request submitted successfully");
         this.toggleForm();
         this.loadProducts();
         this.loadStockLogs();
       },
       error: (err) => {
-        console.error('Global stock update failed:', err);
-        this.alert.error("Stock update failed: " + (err.error?.message || "Internal error"));
+        console.error('Stock adjustment failed:', err);
+        this.alert.error("Adjustment failed: " + (err.error?.message || "Internal error"));
         this.loading = false;
       }
     });
+  }
+
+  approveAdjustment(id: number, action: 'APPROVE' | 'REJECT', reason?: string) {
+    this.loading = true;
+    this.commonService.putApi(`stock/logs/${id}/approve`, { action, rejection_reason: reason }).subscribe({
+      next: () => {
+        this.alert.success(`Adjustment ${action.toLowerCase()}d successfully`);
+        this.loadProducts();
+        this.loadStockLogs();
+        this.loading = false;
+      },
+      error: (err) => {
+        this.alert.error(err.error?.message || "Action failed");
+        this.loading = false;
+      }
+    });
+  }
+
+  rejectAdjustment(id: number) {
+    const Swal = (window as any).Swal;
+    if (Swal) {
+      Swal.fire({
+        title: 'Reject Stock Adjustment',
+        input: 'text',
+        inputLabel: 'Provide reason for rejection',
+        inputPlaceholder: 'Enter reason...',
+        showCancelButton: true,
+        inputValidator: (value: string) => {
+          if (!value) {
+            return 'You must enter a reason!';
+          }
+          return null;
+        }
+      }).then((inputResult: any) => {
+        if (inputResult.isConfirmed) {
+          this.approveAdjustment(id, 'REJECT', inputResult.value);
+        }
+      });
+    }
   }
 }

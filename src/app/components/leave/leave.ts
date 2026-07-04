@@ -12,7 +12,7 @@ import { AlertService } from 'src/app/Securities/Services/alert.service';
 import { PermissionService } from 'src/app/Securities/Services/permissions.service';
 import { AuthService } from 'src/app/Securities/Services/auth.service';
 import { MatTableModule } from '@angular/material/table';
-import { MatTable as AppMatTable } from 'src/utils/mat-table/mat-table';
+import { MatTable } from 'src/utils/mat-table/mat-table';
 
 @Component({
   selector: 'app-leave',
@@ -28,7 +28,7 @@ import { MatTable as AppMatTable } from 'src/utils/mat-table/mat-table';
     MatSelectModule,
     MatIconModule,
     MatTableModule,
-    AppMatTable
+    // AppMatTable
   ],
   templateUrl: './leave.html',
   styleUrl: './leave.scss',
@@ -48,7 +48,7 @@ export class Leave implements OnInit {
   employees: any[] = [];
   companies: any[] = [];
   branches: any[] = [];
-  
+
   leaveTypes = ['CASUAL', 'SICK', 'EMERGENCY', 'EARNED'];
   leaveForm: FormGroup;
   showForm = false;
@@ -83,7 +83,7 @@ export class Leave implements OnInit {
 
   loadLookups() {
     this.loading = true;
-    
+
     this.commonService.getApi('companies').subscribe({
       next: (res: any) => { this.companies = res?.data || []; }
     });
@@ -104,7 +104,7 @@ export class Leave implements OnInit {
 
   detectEmployeeMapping() {
     if (!this.currentUser) return;
-    
+
     const mapped = this.employees.find(
       e => e.email?.toLowerCase() === this.currentUser.email?.toLowerCase()
     );
@@ -124,13 +124,13 @@ export class Leave implements OnInit {
     const calcDays = () => {
       const from = this.leaveForm.get('from_date')?.value;
       const to = this.leaveForm.get('to_date')?.value;
-      
+
       if (from && to) {
         const fromDate = new Date(from);
         const toDate = new Date(to);
         const diffTime = toDate.getTime() - fromDate.getTime();
         const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
-        
+
         this.leaveForm.get('total_days')?.setValue(diffDays > 0 ? diffDays : 0);
       } else {
         this.leaveForm.get('total_days')?.setValue(0);

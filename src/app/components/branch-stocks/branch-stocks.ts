@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormsModule, FormGroup, FormBuilder, Validators } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
@@ -7,9 +7,13 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatIconModule } from '@angular/material/icon';
+import { MatTableModule } from '@angular/material/table';
 import { CommonService } from 'src/app/Securities/Services/common.service';
 import { AlertService } from 'src/app/Securities/Services/alert.service';
 import { PermissionService } from 'src/app/Securities/Services/permissions.service';
+import { AuthService } from 'src/app/Securities/Services/auth.service';
+import { SocketService } from 'src/app/Securities/Services/socket.service';
+import { Subscription } from 'rxjs';
 import { MatTable } from 'src/utils/mat-table/mat-table';
 
 @Component({
@@ -25,12 +29,13 @@ import { MatTable } from 'src/utils/mat-table/mat-table';
     MatInputModule,
     MatSelectModule,
     MatIconModule,
+    MatTableModule,
     MatTable
   ],
   templateUrl: './branch-stocks.html',
   styleUrl: './branch-stocks.scss',
 })
-export class BranchStocks implements OnInit {
+export class BranchStocks implements OnInit, OnDestroy {
   tableColumns = [
     { columnDef: 'id', header: 'No' },
     { columnDef: 'branch_name', header: 'Branch Name' },
@@ -40,18 +45,25 @@ export class BranchStocks implements OnInit {
   ];
 
   branchStocks: any[] = [];
+  transfers: any[] = [];
   companies: any[] = [];
   branches: any[] = [];
   products: any[] = [];
   
   stockForm: FormGroup;
+  transferForm: FormGroup;
   showForm = false;
+  showTransferForm = false;
+  viewMode: 'inventory' | 'transfers' = 'inventory';
   loading = false;
+  private socketSub = new Subscription();
 
   constructor(
     private fb: FormBuilder,
     private commonService: CommonService,
     private alert: AlertService,
+    private authService: AuthService,
+    private socketService: SocketService,
     public perm: PermissionService
   ) {
     this.stockForm = this.fb.group({
@@ -61,11 +73,41 @@ export class BranchStocks implements OnInit {
       quantity: ['', [Validators.required, Validators.min(1)]],
       action: ['ADD', Validators.required]
     });
+
+    this.transferForm = this.fb.group({
+      from_branch: ['', Validators.required],
+      to_branch: ['', Validators.required],
+      product_id: ['', Validators.required],
+      quantity: ['', [Validators.required, Validators.min(1)]]
+    });
+  }
+
+  get isAdmin(): boolean {
+    return this.authService.isSuperAdmin() || this.authService.getUserType() === 'Admin';
   }
 
   ngOnInit() {
     this.loadBranchStocks();
     this.loadLookups();
+    this.loadTransfers();
+
+    // Setup Socket Listeners
+    this.socketSub.add(
+      this.socketService.on('branch-stock-update').subscribe(() => {
+        this.loadBranchStocks();
+      })
+    );
+
+    this.socketSub.add(
+      this.socketService.on('branch-transfer-update').subscribe(() => {
+        this.loadTransfers();
+        this.loadBranchStocks();
+      })
+    );
+  }
+
+  ngOnDestroy() {
+    this.socketSub.unsubscribe();
   }
 
   loadBranchStocks() {
@@ -86,6 +128,20 @@ export class BranchStocks implements OnInit {
     });
   }
 
+  loadTransfers() {
+    this.commonService.getApi('branch-stock/transfers').subscribe({
+      next: (res: any) => {
+        this.transfers = (res?.data || []).map((t: any) => ({
+          ...t,
+          product_name: t.product?.name || `Product ID: ${t.product_id}`
+        }));
+      },
+      error: (err) => {
+        console.error('Failed to load transfers:', err);
+      }
+    });
+  }
+
   loadLookups() {
     this.commonService.getApi('companies').subscribe({
       next: (res: any) => { this.companies = res?.data || []; }
@@ -102,8 +158,28 @@ export class BranchStocks implements OnInit {
 
   toggleForm() {
     this.showForm = !this.showForm;
-    if (!this.showForm) {
+    if (this.showForm) {
+      this.showTransferForm = false;
+    } else {
       this.stockForm.reset({ action: 'ADD' });
+    }
+  }
+
+  toggleTransferForm() {
+    this.showTransferForm = !this.showTransferForm;
+    if (this.showTransferForm) {
+      this.showForm = false;
+    } else {
+      this.transferForm.reset();
+    }
+  }
+
+  changeView(mode: 'inventory' | 'transfers') {
+    this.viewMode = mode;
+    if (mode === 'inventory') {
+      this.loadBranchStocks();
+    } else {
+      this.loadTransfers();
     }
   }
 
@@ -118,15 +194,77 @@ export class BranchStocks implements OnInit {
 
     this.commonService.postApi('branch-stock/update', payload).subscribe({
       next: () => {
-        this.alert.success("Branch stock updated successfully");
+        this.alert.success("Branch stock level adjustment submitted");
         this.toggleForm();
         this.loadBranchStocks();
       },
       error: (err) => {
         console.error('Stock update failed:', err);
-        this.alert.error("Stock update failed: " + (err.error?.message || "Internal error"));
+        this.alert.error("Adjustment failed: " + (err.error?.message || "Internal error"));
         this.loading = false;
       }
     });
+  }
+
+  submitTransferRequest() {
+    if (this.transferForm.invalid) {
+      this.transferForm.markAllAsTouched();
+      return;
+    }
+
+    this.loading = true;
+    const payload = this.transferForm.value;
+
+    this.commonService.postApi('branch-stock/transfer', payload).subscribe({
+      next: () => {
+        this.alert.success("Inter-branch stock transfer requested");
+        this.toggleTransferForm();
+        this.loadTransfers();
+      },
+      error: (err) => {
+        console.error('Transfer request failed:', err);
+        this.alert.error("Transfer failed: " + (err.error?.message || "Internal error"));
+        this.loading = false;
+      }
+    });
+  }
+
+  approveTransfer(id: number, action: 'APPROVE' | 'REJECT', reason?: string) {
+    this.loading = true;
+    this.commonService.putApi(`branch-stock/transfers/${id}/approve`, { action, rejection_reason: reason }).subscribe({
+      next: () => {
+        this.alert.success(`Transfer ${action.toLowerCase()}d successfully`);
+        this.loadTransfers();
+        this.loadBranchStocks();
+        this.loading = false;
+      },
+      error: (err) => {
+        this.alert.error(err.error?.message || "Action failed");
+        this.loading = false;
+      }
+    });
+  }
+
+  rejectTransfer(id: number) {
+    const Swal = (window as any).Swal;
+    if (Swal) {
+      Swal.fire({
+        title: 'Reject Transfer Request',
+        input: 'text',
+        inputLabel: 'Provide reason for rejection',
+        inputPlaceholder: 'Enter reason...',
+        showCancelButton: true,
+        inputValidator: (value: string) => {
+          if (!value) {
+            return 'You must enter a reason!';
+          }
+          return null;
+        }
+      }).then((inputResult: any) => {
+        if (inputResult.isConfirmed) {
+          this.approveTransfer(id, 'REJECT', inputResult.value);
+        }
+      });
+    }
   }
 }

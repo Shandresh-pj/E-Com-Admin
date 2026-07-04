@@ -23,6 +23,7 @@ import { Payroll } from './payroll/payroll';
 import { Leave } from './leave/leave';
 import { DeliveryTracking } from './delivery-tracking/delivery-tracking';
 import { Payments } from './payments/payments';
+import { Notifications } from './notifications/notifications';
 import { RoleGuard } from '../Securities/Guard/role.guard';
 import { UserType } from '../Securities/Models/role-access';
 
@@ -321,6 +322,15 @@ export const ComponentsRoutes: Routes = [
       title: 'Payments',
       roles: [SA, A, BM, SK],
       urls: [{ title: 'Payments', url: '/components/payments' }]
+    }
+  },
+  {
+    path: 'notifications',
+    component: Notifications,
+    canActivate: [RoleGuard],
+    data: {
+      title: 'Notifications',
+      urls: [{ title: 'Notifications', url: '/components/notifications' }]
     }
   }
 

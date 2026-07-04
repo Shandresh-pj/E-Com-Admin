@@ -15,6 +15,8 @@ import { PermissionService } from 'src/app/Securities/Services/permissions.servi
 import { MatTable } from 'src/utils/mat-table/mat-table';
 import { toFileUrl } from 'src/utils/file-url';
 import { ViewDetailsDialog } from 'src/utils/view-details-dialog/view-details-dialog';
+import { SocketService } from 'src/app/Securities/Services/socket.service';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-product',
@@ -41,6 +43,7 @@ export class Product {
     { columnDef: 'price', header: 'Price' },
     { columnDef: 'stock_in_hand', header: 'Stock' },
     { columnDef: 'product_type', header: 'Type' },
+    { columnDef: 'approval_status', header: 'Approval State' },
     { columnDef: 'status', header: 'Status' },
   ];
 
@@ -69,6 +72,9 @@ export class Product {
   videoPreviewUrl: string | null = null;
   existingVideoUrl: string | null = null;
 
+  selectedStatusFilter: string = 'all';
+  private socketSub = new Subscription();
+
   constructor(
     private fb: FormBuilder,
     private authService: AuthService,
@@ -76,7 +82,8 @@ export class Product {
     private alert: AlertService,
     private cdr: ChangeDetectorRef,
     private dialog: MatDialog,
-    public perm: PermissionService
+    public perm: PermissionService,
+    private socketService: SocketService
   ) {
     this.ProductForm = fb.group({
       name: ['', [Validators.required, Validators.maxLength(200)]],
@@ -89,6 +96,8 @@ export class Product {
       status: ['', Validators.required],
       variants: this.fb.array([]),
       attributeValues: this.fb.array([]),
+      low_stock_threshold: [5, [Validators.required, Validators.min(0)]],
+      critical_stock_threshold: [2, [Validators.required, Validators.min(0)]]
     });
   }
 
@@ -96,6 +105,23 @@ export class Product {
     this.getProducts();
     this.getCategories();
     this.getProductAttributes();
+
+    this.socketSub.add(
+      this.socketService.on('product-created').subscribe(() => this.getProducts())
+    );
+    this.socketSub.add(
+      this.socketService.on('product-updated').subscribe(() => this.getProducts())
+    );
+    this.socketSub.add(
+      this.socketService.on('product-deleted').subscribe(() => this.getProducts())
+    );
+    this.socketSub.add(
+      this.socketService.on('product-approval-update').subscribe(() => this.getProducts())
+    );
+  }
+
+  ngOnDestroy() {
+    this.socketSub.unsubscribe();
   }
 
   get variants(): FormArray {
@@ -117,13 +143,22 @@ export class Product {
   }
 
   getProducts(onLoaded?: () => void) {
-    this.commonService.getApi(`products`).subscribe({
+    const params: any = {};
+    if (this.selectedStatusFilter !== 'all') {
+      params.status = this.selectedStatusFilter;
+    }
+    this.commonService.getApi(`products`, params).subscribe({
       next: (res: any) => {
-        this.Products = res?.data;
+        this.Products = res?.data || [];
         onLoaded?.();
         this.cdr.detectChanges();
       }
     });
+  }
+
+  filterByStatus(status: string) {
+    this.selectedStatusFilter = status;
+    this.getProducts();
   }
 
   getCategories() {
@@ -432,7 +467,9 @@ export class Product {
       stock_in_hand: product?.stock_in_hand,
       barcode: product?.barcode,
       product_type: product?.product_type,
-      status: product?.status
+      status: product?.status,
+      low_stock_threshold: product?.low_stock_threshold || 5,
+      critical_stock_threshold: product?.critical_stock_threshold || 2
     });
 
     if (product?.product_type === 'variant' && product?.variants?.length) {
@@ -497,8 +534,19 @@ export class Product {
           { label: 'Stock In Hand', value: data?.stock_in_hand },
           { label: 'Barcode', value: data?.barcode },
           { label: 'Product Type', value: data?.product_type },
+          { label: 'Approval State', value: data?.approval_status },
           { label: 'Status', value: data?.status },
         ];
+
+        if (data?.approved_by) {
+          fields.push({ label: 'Approved By ID', value: data?.approved_by });
+          fields.push({ label: 'Approved At', value: data?.approved_at ? new Date(data.approved_at).toLocaleString() : '' });
+        }
+        if (data?.rejected_by) {
+          fields.push({ label: 'Rejected By ID', value: data?.rejected_by });
+          fields.push({ label: 'Rejected At', value: data?.rejected_at ? new Date(data.rejected_at).toLocaleString() : '' });
+          fields.push({ label: 'Rejection Reason', value: data?.rejection_reason });
+        }
 
         if (data?.product_type !== 'single') {
           fields.push({ label: 'Variants', value: variantsSummary || undefined });
@@ -511,15 +559,102 @@ export class Product {
           { label: 'Video', value: toFileUrl(data?.video), isVideo: true }
         );
 
-        this.dialog.open(ViewDetailsDialog, {
+        const dialogRef = this.dialog.open(ViewDetailsDialog, {
           width: '700px',
           data: {
             title: 'Product Details',
             fields: fields,
           },
         });
+
+        const isAdmin = this.authService.isSuperAdmin() || this.authService.getUserType() === 'Admin';
+        if (isAdmin && (data?.approval_status === 'Pending Approval' || data?.approval_status === 'Approved' || data?.approval_status === 'Draft')) {
+          dialogRef.afterClosed().subscribe(() => {
+            this.showApprovalActions(data);
+          });
+        }
       }
     });
+  }
+
+  showApprovalActions(product: any) {
+    const states = {
+      DRAFT: 'Draft',
+      PENDING: 'Pending Approval',
+      APPROVED: 'Approved',
+      PUBLISHED: 'Published',
+      REJECTED: 'Rejected'
+    };
+
+    if (product.approval_status === states.DRAFT) {
+      this.alert.confirm("Submit this product for approval?").then((result) => {
+        if (result.isConfirmed) {
+          this.commonService.putApi(`products/${product.id}`, { approval_status: states.PENDING }).subscribe({
+            next: () => {
+              this.alert.success("Product submitted for approval successfully");
+              this.getProducts();
+            }
+          });
+        }
+      });
+    } else if (product.approval_status === states.PENDING) {
+      const Swal = (window as any).Swal;
+      if (Swal) {
+        Swal.fire({
+          title: 'Review Product Approval',
+          text: `Do you want to Approve or Reject "${product.name}"?`,
+          icon: 'question',
+          showCancelButton: true,
+          showDenyButton: true,
+          confirmButtonText: 'Approve',
+          denyButtonText: 'Reject',
+          cancelButtonText: 'Close'
+        }).then((result: any) => {
+          if (result.isConfirmed) {
+            this.commonService.putApi(`products/${product.id}/approve`, { action: 'APPROVE' }).subscribe({
+              next: () => {
+                this.alert.success("Product Approved successfully");
+                this.getProducts();
+              }
+            });
+          } else if (result.isDenied) {
+            Swal.fire({
+              title: 'Rejection Reason',
+              input: 'text',
+              inputLabel: 'Provide reason for rejection',
+              inputPlaceholder: 'Enter reason...',
+              showCancelButton: true,
+              inputValidator: (value: string) => {
+                if (!value) {
+                  return 'You must enter a reason!';
+                }
+                return null;
+              }
+            }).then((inputResult: any) => {
+              if (inputResult.isConfirmed) {
+                this.commonService.putApi(`products/${product.id}/approve`, { action: 'REJECT', rejection_reason: inputResult.value }).subscribe({
+                  next: () => {
+                    this.alert.success("Product Rejected successfully");
+                    this.getProducts();
+                  }
+                });
+              }
+            });
+          }
+        });
+      }
+    } else if (product.approval_status === states.APPROVED) {
+      this.alert.confirm("Publish this approved product?").then((result) => {
+        if (result.isConfirmed) {
+          this.commonService.putApi(`products/${product.id}/approve`, { action: 'PUBLISH' }).subscribe({
+            next: () => {
+              this.alert.success("Product Published successfully");
+              this.getProducts();
+            }
+          });
+        }
+      });
+    }
   }
 
   deleteUser(product: any) {
@@ -573,6 +708,8 @@ export class Product {
     formData.append('barcode', value.barcode || '');
     formData.append('product_type', value.product_type);
     formData.append('status', value.status);
+    formData.append('low_stock_threshold', value.low_stock_threshold || '5');
+    formData.append('critical_stock_threshold', value.critical_stock_threshold || '2');
     formData.append('registration_id', this.getRegistrationId() || '');
 
     formData.append('variants', JSON.stringify(value.product_type === 'variant' ? value.variants : []));

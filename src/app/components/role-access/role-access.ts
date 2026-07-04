@@ -39,10 +39,10 @@ export class RoleAccess implements OnInit {
   readonly actions = ['READ', 'WRITE', 'UPDATE', 'DELETE', 'APPROVE'];
 
   readonly levels: { value: AccessLevel; label: string; hint: string }[] = [
-    { value: 'global',   label: 'Role (Global)', hint: 'Applies to the role everywhere' },
-    { value: 'admin',    label: 'Admin',         hint: 'Applies to one admin company' },
-    { value: 'branch',   label: 'Branch',        hint: 'Applies to one branch' },
-    { value: 'employee', label: 'Employee',      hint: 'Applies to one employee only' },
+    { value: 'global', label: 'Role (Global)', hint: 'Applies to the role everywhere' },
+    { value: 'admin', label: 'Admin', hint: 'Applies to one admin company' },
+    { value: 'branch', label: 'Branch', hint: 'Applies to one branch' },
+    { value: 'employee', label: 'Employee', hint: 'Applies to one employee only' },
   ];
 
   roles: any[] = [];
@@ -69,12 +69,12 @@ export class RoleAccess implements OnInit {
   matrixLoading = false;
 
   constructor(
-     private commonService: CommonService,
-     private alert: AlertService,
-     public auth: AuthService,
-     private permissionService: PermissionService,
-     private cdr: ChangeDetectorRef,
-  ) {}
+    private commonService: CommonService,
+    private alert: AlertService,
+    public auth: AuthService,
+    private permissionService: PermissionService,
+    private cdr: ChangeDetectorRef,
+  ) { }
 
   ngOnInit(): void {
     this.loadRoles();
@@ -225,9 +225,9 @@ export class RoleAccess implements OnInit {
 
   private scopePayload(): any {
     const payload: any = {};
-    if (this.needsCompany)  payload.company_id = this.selectedCompanyId;
-    if (this.needsBranch)   payload.branch_id  = this.selectedBranchId;
-    if (this.needsEmployee) payload.user_id    = this.selectedUserId;
+    if (this.needsCompany) payload.company_id = this.selectedCompanyId;
+    if (this.needsBranch) payload.branch_id = this.selectedBranchId;
+    if (this.needsEmployee) payload.user_id = this.selectedUserId;
     return payload;
   }
 
@@ -243,7 +243,7 @@ export class RoleAccess implements OnInit {
     } else {
       params.role_id = this.selectedRoleId;
       if (this.needsCompany) params.company_id = this.selectedCompanyId;
-      if (this.needsBranch)  params.branch_id  = this.selectedBranchId;
+      if (this.needsBranch) params.branch_id = this.selectedBranchId;
     }
 
     this.commonService.getApi('role-access', params).subscribe({

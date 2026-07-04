@@ -21,6 +21,16 @@
     @if (!Product_Forms) {
     <mat-card-content class="b-t-1">
 
+        <div class="d-flex align-items-center justify-content-start m-b-16 bg-light p-12 rounded border" style="gap: 8px;">
+            <span class="f-w-600 m-r-16 text-muted">Filter Approval Status:</span>
+            <button mat-stroked-button [color]="selectedStatusFilter === 'all' ? 'primary' : ''" (click)="filterByStatus('all')">All</button>
+            <button mat-stroked-button [color]="selectedStatusFilter === 'Draft' ? 'primary' : ''" (click)="filterByStatus('Draft')">Draft</button>
+            <button mat-stroked-button [color]="selectedStatusFilter === 'Pending Approval' ? 'primary' : ''" (click)="filterByStatus('Pending Approval')">Pending Approval</button>
+            <button mat-stroked-button [color]="selectedStatusFilter === 'Approved' ? 'primary' : ''" (click)="filterByStatus('Approved')">Approved</button>
+            <button mat-stroked-button [color]="selectedStatusFilter === 'Published' ? 'primary' : ''" (click)="filterByStatus('Published')">Published</button>
+            <button mat-stroked-button [color]="selectedStatusFilter === 'Rejected' ? 'primary' : ''" (click)="filterByStatus('Rejected')">Rejected</button>
+        </div>
+
         <app-mat-table [columns]="tableColumns" [tableData]="Products" [showAction]="true" [showView]="true"
             [Extra_Column]="false" [showEdit]="perm.hasRoleAction('canUpdate')" [showDelete]="perm.hasRoleAction('canDelete')"
             (editClick)="editUser($event)" (deleteClick)="deleteUser($event)"
@@ -100,6 +110,24 @@
                             <mat-option value="inactive">Inactive</mat-option>
                         </mat-select>
                         <mat-error *ngIf="ProductForm.get('status')?.hasError('required')">Status is required</mat-error>
+                    </mat-form-field>
+                </div>
+
+                <div class="col-lg-4">
+                    <mat-label class="f-w-600 m-b-8 d-block">Low Stock Threshold <span class="text-danger">*</span></mat-label>
+                    <mat-form-field appearance="outline" class="w-100">
+                        <input matInput type="number" formControlName="low_stock_threshold" placeholder="Enter Low Stock level">
+                        <mat-error *ngIf="ProductForm.get('low_stock_threshold')?.hasError('required')">Low stock threshold is required</mat-error>
+                        <mat-error *ngIf="ProductForm.get('low_stock_threshold')?.hasError('min')">Value must be 0 or greater</mat-error>
+                    </mat-form-field>
+                </div>
+
+                <div class="col-lg-4">
+                    <mat-label class="f-w-600 m-b-8 d-block">Critical Stock Threshold <span class="text-danger">*</span></mat-label>
+                    <mat-form-field appearance="outline" class="w-100">
+                        <input matInput type="number" formControlName="critical_stock_threshold" placeholder="Enter Critical Stock level">
+                        <mat-error *ngIf="ProductForm.get('critical_stock_threshold')?.hasError('required')">Critical stock threshold is required</mat-error>
+                        <mat-error *ngIf="ProductForm.get('critical_stock_threshold')?.hasError('min')">Value must be 0 or greater</mat-error>
                     </mat-form-field>
                 </div>
 

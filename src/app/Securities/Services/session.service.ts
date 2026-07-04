@@ -21,10 +21,18 @@ export class SessionService {
   permissionsChanged$: Observable<void> = this.permissionsChangedSubject.asObservable();
 
   setSession(data: any): void {
-    this.userSubject.next(data.user ?? {});
-    this.rolesSubject.next(data.roles ?? []);
-    this.permissionsSubject.next(data.permissions ?? []);
-    this.menusSubject.next(data.menus ?? []);
+    if (data.user !== undefined) {
+      this.userSubject.next(data.user ?? {});
+    }
+    if (data.roles !== undefined) {
+      this.rolesSubject.next(data.roles ?? []);
+    }
+    if (data.permissions !== undefined) {
+      this.permissionsSubject.next(data.permissions ?? []);
+    }
+    if (data.menus !== undefined) {
+      this.menusSubject.next(data.menus ?? []);
+    }
     this.loadedSubject.next(true);
     this.permissionsChangedSubject.next();
   }

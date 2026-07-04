@@ -4,7 +4,7 @@ import { MatCardModule } from '@angular/material/card';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { CommonModule, DatePipe } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import { AlertService } from 'src/app/Securities/Services/alert.service';
 import { PermissionService } from 'src/app/Securities/Services/permissions.service';
 import { CommonService } from 'src/app/Securities/Services/common.service';
@@ -20,7 +20,6 @@ import { MatTable } from 'src/utils/mat-table/mat-table';
     MatChipsModule,
     MatIconModule,
     MatTooltipModule,
-    DatePipe,
     MatTable
   ],
   templateUrl: './audit-logs.html',

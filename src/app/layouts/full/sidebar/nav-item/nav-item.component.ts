@@ -103,7 +103,9 @@ export class AppNavItemComponent implements OnChanges, OnInit, OnDestroy {
     (event?.currentTarget as HTMLElement | undefined)?.blur();
 
     if (!item.children || !item.children.length) {
-      this.router.navigate([item.route]);
+      if (item.route) {
+        this.router.navigate([item.route]);
+      }
     }
     if (item.children && item.children.length) {
       this.expanded = !this.expanded;

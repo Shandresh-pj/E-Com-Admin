@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Subject, Observable } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
+import { TokenService } from '../Securities/Services/token.service';
 import { environment } from 'src/environment/environment';
 
 @Injectable({
@@ -11,27 +12,21 @@ export class SocketService {
   private eventSubject = new Subject<{ event: string; data: any }>();
   private pingIntervalId: any = null;
   private isConnected = false;
-  private currentToken: string | null = null;
 
-  private sessionSubject = new Subject<any>();
-  private sessionExpiredSubject = new Subject<void>();
-  private sessionRefreshSubject = new Subject<any>();
-
-  session$: Observable<any> = this.sessionSubject.asObservable();
-  sessionExpired$: Observable<void> = this.sessionExpiredSubject.asObservable();
-  sessionRefresh$: Observable<any> = this.sessionRefreshSubject.asObservable();
-
-  constructor() {}
-
-  public connect(token?: string): void {
-    if (token) {
-      this.currentToken = token;
+  constructor(private tokenService: TokenService) {
+    if (this.tokenService.isLoggedIn()) {
+      this.connect();
     }
-    if (this.ws || this.isConnected) return;
-    if (!this.currentToken) return;
+  }
 
-    const socketBase = environment.socketUrl || environment.apiUrl.replace(/\/api$/, '');
-    const wsUrl = socketBase.replace(/^http/, 'ws') + '/ws/?EIO=4&transport=websocket';
+  public connect(): void {
+    if (this.ws || this.isConnected) return;
+
+    const token = this.tokenService.getToken();
+    if (!token) return;
+
+    const baseUrl = environment.apiUrl.replace(/\/api$/, '');
+    const wsUrl = baseUrl.replace(/^http/, 'ws') + '/ws/?EIO=4&transport=websocket';
 
     try {
       this.ws = new WebSocket(wsUrl);
@@ -42,7 +37,6 @@ export class SocketService {
       };
 
       this.ws.onmessage = (event) => {
-        console.log('[WebSocket] Message received:', event.data);
         this.handleMessage(event.data);
       };
 
@@ -53,7 +47,7 @@ export class SocketService {
       this.ws.onclose = () => {
         console.log('[WebSocket] Disconnected');
         this.cleanup();
-        if (this.currentToken) {
+        if (this.tokenService.isLoggedIn()) {
           setTimeout(() => this.connect(), 3000);
         }
       };
@@ -66,7 +60,6 @@ export class SocketService {
 
   public disconnect(): void {
     this.cleanup();
-    this.currentToken = null;
     if (this.ws) {
       this.ws.close();
       this.ws = null;
@@ -93,7 +86,8 @@ export class SocketService {
         const pingInterval = config.pingInterval || 25000;
         this.startHeartbeat(pingInterval);
 
-        const connectPayload = `40${JSON.stringify({ token: this.currentToken })}`;
+        const token = this.tokenService.getToken();
+        const connectPayload = `40${JSON.stringify({ token })}`;
         this.sendRaw(connectPayload);
 
       } catch (err) {
@@ -112,14 +106,6 @@ export class SocketService {
             const event = parsed[0];
             const eventData = parsed[1];
             this.eventSubject.next({ event, data: eventData });
-
-            if (event === 'permissions-updated') {
-              console.log('Received updated permissions via socket', eventData);
-              this.sessionRefreshSubject.next({ permissions: eventData });
-            } else if (event === 'logout') {
-              console.log('Force logout event received via socket', eventData);
-              this.sessionExpiredSubject.next();
-            }
           }
         } catch (err) {
           console.error('[WebSocket] Failed to parse SIO message:', err);
@@ -140,7 +126,6 @@ export class SocketService {
 
   private sendRaw(message: string): void {
     if (this.ws && this.ws.readyState === WebSocket.OPEN) {
-      console.log('[WebSocket] Message sent:', message);
       this.ws.send(message);
     }
   }

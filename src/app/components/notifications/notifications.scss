@@ -1,0 +1,26 @@
+.notification-list {
+  max-height: 600px;
+  overflow-y: auto;
+}
+
+.notification-item {
+  transition: all 0.2s ease-in-out;
+  cursor: pointer;
+  border-color: #e5eaef !important;
+
+  &:hover {
+    background-color: #f8f9fa;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  }
+
+  &.unread {
+    background-color: #f4f6f9;
+    border-left: 4px solid #5d87ff !important;
+  }
+}
+
+.icon-wrapper {
+  width: 42px;
+  height: 42px;
+}

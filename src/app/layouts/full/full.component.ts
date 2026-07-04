@@ -161,89 +161,82 @@ export class FullComponent implements OnInit {
   }
 
   loadDynamicMenus(): void {
-    this.commonService.getApi('menus').subscribe({
-      next: (res: any) => {
-        const apiMenus = res?.data ?? [];
-        
-        // Filter active menus and those the user has READ permission for
-        const allowedMenus = apiMenus.filter((m: any) => {
-          if (!m.isActive) return false;
-          return this.permissionService.hasPermission(m.id, 'READ');
-        });
+    const apiMenus = this.authService.getMenus() ?? [];
+    
+    // Filter active menus and those the user has READ permission for
+    const allowedMenus = apiMenus.filter((m: any) => {
+      if (m.isActive === false) return false;
+      return this.permissionService.hasPermission(m.id, 'READ');
+    });
 
-        // Now map allowed menus to NavItems
-        let colorToggle = true;
-        const dynamicItems: NavItem[] = allowedMenus.map((m: any) => {
-          const bgcolor = colorToggle ? 'primary' : 'success';
-          colorToggle = !colorToggle;
+    // Now map allowed menus to NavItems
+    let colorToggle = true;
+    const dynamicItems: NavItem[] = allowedMenus.map((m: any) => {
+      const bgcolor = colorToggle ? 'primary' : 'success';
+      colorToggle = !colorToggle;
 
-          return {
-            displayName: m.name,
-            route: m.path,
-            iconName: this.mapIcon(m.icon || 'bi-grid-fill'),
-            bgcolor: bgcolor
-          };
-        });
+      return {
+        displayName: m.name,
+        route: m.path,
+        iconName: this.mapIcon(m.icon || 'bi-grid-fill'),
+        bgcolor: bgcolor
+      };
+    });
 
-        // Build the final navItems list
-        // Always include Dashboard at the top
-        const finalItems: NavItem[] = [
-          {
-            navCap: 'Home',
-          },
-          {
-            displayName: 'Dashboard',
-            iconName: 'layout-grid-add',
-            route: '/dashboard',
-            bgcolor: 'primary',
-          }
-        ];
-
-        if (dynamicItems.length > 0) {
-          finalItems.push({
-            navCap: 'Modules'
-          });
-          finalItems.push(...dynamicItems);
-        }
-
-        // Always include Change Password at the bottom under Settings
-        finalItems.push({
-          navCap: 'Settings'
-        });
-
-        // Only add the hardcoded "Menu Bar" if the API menus didn't already
-        // supply it, otherwise the sidebar shows two identical entries.
-        const norm = (r?: string) => (r || '').toLowerCase().replace(/\/+$/, '');
-        const hasMenuBar = dynamicItems.some(d => norm(d.route) === '/components/menubar');
-        if (this.authService.isSuperAdmin() && !hasMenuBar) {
-          finalItems.push({
-            displayName: 'Menu Bar',
-            iconName: 'list-check',
-            route: '/components/menubar',
-            bgcolor: 'primary'
-          });
-        }
-
-        finalItems.push({
-          displayName: 'Change Password',
-          iconName: 'lock',
-          route: '/components/change-password',
-          bgcolor: colorToggle ? 'primary' : 'success'
-        });
-
-        // Final guard: drop any duplicate routes (keep first occurrence).
-        const seen = new Set<string>();
-        this.navItems = finalItems.filter(it => {
-          if (!it.route) return true; // keep captions
-          const key = norm(it.route);
-          if (seen.has(key)) return false;
-          seen.add(key);
-          return true;
-        });
+    // Build the final navItems list
+    // Always include Dashboard at the top
+    const finalItems: NavItem[] = [
+      {
+        navCap: 'Home',
       },
-      error: (err) => {
-        console.error('Failed to load dynamic menus', err);
+      {
+        displayName: 'Dashboard',
+        iconName: 'layout-grid-add',
+        route: '/dashboard',
+        bgcolor: 'primary',
       }
+    ];
+
+    if (dynamicItems.length > 0) {
+      finalItems.push({
+        navCap: 'Modules'
+      });
+      finalItems.push(...dynamicItems);
+    }
+
+    // Always include Change Password at the bottom under Settings
+    finalItems.push({
+      navCap: 'Settings'
+    });
+
+    // Only add the hardcoded "Menu Bar" if the API menus didn't already
+    // supply it, otherwise the sidebar shows two identical entries.
+    const norm = (r?: string) => (r || '').toLowerCase().replace(/\/+$/, '');
+    const hasMenuBar = dynamicItems.some(d => norm(d.route) === '/components/menubar');
+    if (this.authService.isSuperAdmin() && !hasMenuBar) {
+      finalItems.push({
+        displayName: 'Menu Bar',
+        iconName: 'list-check',
+        route: '/components/menubar',
+        bgcolor: 'primary'
+      });
+    }
+
+    finalItems.push({
+      displayName: 'Change Password',
+      iconName: 'lock',
+      route: '/components/change-password',
+      bgcolor: colorToggle ? 'primary' : 'success'
+    });
+
+    // Final guard: drop any duplicate routes (keep first occurrence).
+    const seen = new Set<string>();
+    this.navItems = finalItems.filter(it => {
+      if (!it.route) return true; // keep captions
+      const key = norm(it.route);
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
     });
   }
 

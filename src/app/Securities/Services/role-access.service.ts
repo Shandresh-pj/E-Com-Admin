@@ -39,10 +39,9 @@ export class RoleAccessService {
       this.session.getPermissions();
 
     return permissions.some(
-      (x:any)=>
-
-      x.menu_id===menuId &&
-      x.action===action
+      (x: any) =>
+        (x.menu_id ?? x.menu?.id) === menuId &&
+        x.action === action
     );
   }
 

@@ -7,6 +7,7 @@ import { TokenService } from './token.service';
 import { SessionService } from './session.service';
 import { RefreshService } from './refresh.service';
 import { UserType } from '../Models/role-access';
+import { SocketService } from './socket.service';
 
 @Injectable({
   providedIn: 'root'
@@ -18,8 +19,22 @@ export class AuthService {
     private tokenService: TokenService,
     private sessionService: SessionService,
     private refreshService: RefreshService,
-    private router: Router
-  ) {}
+    private router: Router,
+    private socketService: SocketService
+  ) {
+    // Listen for socket events to update session
+    this.socketService.session$.subscribe((data) => {
+      this.sessionService.setSession(data);
+    });
+
+    this.socketService.sessionExpired$.subscribe(() => {
+      this.logout();
+    });
+
+    this.socketService.sessionRefresh$.subscribe((data) => {
+      this.sessionService.setSession(data);
+    });
+  }
 
   // ─── Login ───────────────────────────────────────────────────────────────
 
@@ -37,6 +52,8 @@ export class AuthService {
         }
         // Store user, roles, permissions, menus
         this.sessionService.setSession(response);
+        // Connect Socket
+        this.socketService.connect(response.token);
       })
     );
   }
@@ -54,6 +71,7 @@ export class AuthService {
     this.tokenService.removeToken();
     this.tokenService.removeRefreshToken();
     this.sessionService.clearSession();
+    this.socketService.disconnect();
 
     this.router.navigate(['/authentication/login']);
   }

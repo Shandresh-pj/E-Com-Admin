@@ -6,31 +6,44 @@ import {
 import { SessionService } from '../Services/session.service';
 import { UserType } from '../Models/role-access';
 import { PermissionService } from '../Services/permissions.service';
+import { TokenService } from '../Services/token.service';
+import { map } from 'rxjs/operators';
 
 export const RoleGuard: CanActivateFn = (route, state) => {
   const router = inject(Router);
   const session = inject(SessionService);
   const permissionService = inject(PermissionService);
+  const tokenService = inject(TokenService);
 
-  const user = session.getUser();
-
-  if (user?.isSuperAdmin || user?.userType === UserType.SUPER_ADMIN) {
-    return true;
-  }
-
-  // 1. Dynamic permission check — if the DB grants this page, allow it
-  //    regardless of the static roles array (permission overrides role matrix)
-  const url = state.url.split('?')[0];
-  if (permissionService.hasPagePermission(url)) {
-    return true;
-  }
-
-  // 2. Static UserType fallback — for pages not covered by dynamic permissions
-  const expectedRoles: string[] = route.data['roles'] ?? [];
-  if (expectedRoles.length && !expectedRoles.includes(user?.userType)) {
-    router.navigate(['/unauthorized']);
+  if (!tokenService.getToken()) {
+    router.navigate(['/authentication/login']);
     return false;
   }
 
-  return true;
+  // Wait for session data to be fetched from the socket
+  return session.waitForLoad().pipe(
+    map(() => {
+      const user = session.getUser();
+
+      if (user?.isSuperAdmin || user?.userType === UserType.SUPER_ADMIN) {
+        return true;
+      }
+
+      // 1. Dynamic permission check — if the DB grants this page, allow it
+      //    regardless of the static roles array (permission overrides role matrix)
+      const url = state.url.split('?')[0];
+      if (permissionService.hasPagePermission(url)) {
+        return true;
+      }
+
+      // 2. Static UserType fallback — for pages not covered by dynamic permissions
+      const expectedRoles: string[] = route.data['roles'] ?? [];
+      if (expectedRoles.length && !expectedRoles.includes(user?.userType)) {
+        router.navigate(['/unauthorized']);
+        return false;
+      }
+
+      return true;
+    })
+  );
 };

@@ -62,11 +62,11 @@ export class MenuBar implements OnInit {
   SelectedMenu: any = null;
 
   defaultRoutes = [
-    { name: 'App Admin', path: '/components/admin', icon: 'archive', isActive: true },
-    { name: 'App Branch', path: '/components/branch', icon: 'Badge', isActive: true },
-    { name: 'App Employee', path: '/components/employees', icon: 'Badge', isActive: true },
-    { name: 'App Role Access', path: '/components/role-access', icon: 'Badge', isActive: true },
-    { name: 'App Roles', path: '/components/roles', icon: 'Badge', isActive: true },
+    { name: 'Admin', path: '/components/admin', icon: 'archive', isActive: true },
+    { name: 'Branch', path: '/components/branch', icon: 'Badge', isActive: true },
+    { name: 'Employee', path: '/components/employees', icon: 'Badge', isActive: true },
+    { name: 'Role Access', path: '/components/role-access', icon: 'Badge', isActive: true },
+    { name: 'Roles', path: '/components/roles', icon: 'Badge', isActive: true },
     { name: 'Product Attribute', path: '/components/product-attribute', icon: 'tag', isActive: true },
     { name: 'Attribute Value', path: '/components/attribute-value', icon: 'list-details', isActive: true },
     { name: 'Category', path: '/components/category', icon: 'category', isActive: true },

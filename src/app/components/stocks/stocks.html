@@ -1,0 +1,90 @@
+<mat-card class="cardWithShadow theme-card">
+  <mat-card-header>
+    <div class="header-container flex-column flex-sm-row gap-12">
+      <mat-card-title class="m-b-0">Global Stock Ledger</mat-card-title>
+      
+      <!-- Tab Controls and Action Button -->
+      <div class="d-flex align-items-center gap-12 flex-wrap">
+        <button mat-stroked-button [color]="viewMode === 'products' ? 'primary' : ''" (click)="changeView('products')" [disabled]="showForm">
+          Current Inventory
+        </button>
+        <button mat-stroked-button [color]="viewMode === 'logs' ? 'primary' : ''" (click)="changeView('logs')" [disabled]="showForm">
+          Transaction Logs
+        </button>
+        @if (!showForm && perm.hasRoleAction('canCreate')) {
+          <button mat-flat-button color="primary" (click)="toggleForm()">
+            <mat-icon class="icon-16 m-r-4">add</mat-icon> Adjust Inventory
+          </button>
+        }
+      </div>
+    </div>
+  </mat-card-header>
+
+  @if (showForm) {
+    <mat-card-content class="p-24 b-t-1">
+      <form [formGroup]="stockForm">
+        <div class="row">
+          <!-- Select Product -->
+          <div class="col-lg-4 col-md-6 col-sm-12 m-b-16">
+            <mat-label class="f-w-600 m-b-8 d-block">Product <span class="text-danger">*</span></mat-label>
+            <mat-form-field appearance="outline" class="w-100">
+              <mat-select formControlName="product_id" placeholder="Select Product">
+                @for(p of products; track p.id) {
+                  <mat-option [value]="p.id">{{ p.name }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+          </div>
+
+          <!-- Quantity Input -->
+          <div class="col-lg-4 col-md-6 col-sm-12 m-b-16">
+            <mat-label class="f-w-600 m-b-8 d-block">Adjustment Amount <span class="text-danger">*</span></mat-label>
+            <mat-form-field appearance="outline" class="w-100">
+              <input matInput type="number" formControlName="quantity" placeholder="Enter count to adjust">
+            </mat-form-field>
+          </div>
+
+          <!-- Action Select -->
+          <div class="col-lg-4 col-md-6 col-sm-12 m-b-16">
+            <mat-label class="f-w-600 m-b-8 d-block">Action Type <span class="text-danger">*</span></mat-label>
+            <mat-form-field appearance="outline" class="w-100">
+              <mat-select formControlName="action">
+                <mat-option value="ADD">ADD Stock</mat-option>
+                <mat-option value="REMOVE">REMOVE Stock</mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+        </div>
+
+        <div class="m-t-16">
+          <button mat-stroked-button class="me-3" (click)="toggleForm()" [disabled]="loading">Cancel</button>
+          <button mat-flat-button color="primary" (click)="submitStockUpdate()" [disabled]="loading || stockForm.invalid">
+            Apply Stock Adjustment
+          </button>
+        </div>
+      </form>
+    </mat-card-content>
+  } @else {
+    <mat-card-content class="b-t-1">
+      <div class="table-responsive">
+        @if (viewMode === 'products') {
+          <app-mat-table 
+            [columns]="productColumns" 
+            [tableData]="products" 
+            [showAction]="false" 
+            [showView]="false"
+            [Extra_Column]="false">
+          </app-mat-table>
+        } @else {
+          <app-mat-table 
+            [columns]="logColumns" 
+            [tableData]="stockLogs" 
+            [showAction]="false" 
+            [showView]="false"
+            [Extra_Column]="false">
+          </app-mat-table>
+        }
+      </div>
+    </mat-card-content>
+  }
+</mat-card>

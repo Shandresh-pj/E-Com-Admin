@@ -1,0 +1,57 @@
+<div class="row m-b-24">
+  <!-- Metric Card 1: Total Alerts -->
+  <div class="col-lg-6 col-md-6 col-sm-12 m-b-16">
+    <mat-card class="cardWithShadow info-card bg-light-warning">
+      <mat-card-content class="p-24 d-flex align-items-center justify-content-between">
+        <div>
+          <h4 class="f-w-600 m-b-4 text-warning">Total Low Stock Alerts</h4>
+          <h2 class="f-s-32 f-w-700 m-b-0">{{ totalAlerts }}</h2>
+        </div>
+        <div class="icon-round bg-warning-dim text-warning">
+          <i-tabler name="bell" class="icon-28"></i-tabler>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <!-- Metric Card 2: Out of Stock -->
+  <div class="col-lg-6 col-md-6 col-sm-12 m-b-16">
+    <mat-card class="cardWithShadow info-card bg-light-danger">
+      <mat-card-content class="p-24 d-flex align-items-center justify-content-between">
+        <div>
+          <h4 class="f-w-600 m-b-4 text-danger">Critical (Out of Stock)</h4>
+          <h2 class="f-s-32 f-w-700 m-b-0">{{ criticalAlertsCount }}</h2>
+        </div>
+        <div class="icon-round bg-danger-dim text-danger">
+          <i-tabler name="alert-triangle" class="icon-28"></i-tabler>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+</div>
+
+<mat-card class="cardWithShadow theme-card">
+  <mat-card-header>
+    <div class="header-container">
+      <mat-card-title class="m-b-0">Low Stock Product Alerts</mat-card-title>
+      <button mat-flat-button color="primary" (click)="loadAlerts()" [disabled]="loading">
+        <i-tabler name="refresh" class="icon-16 m-r-4"></i-tabler> Refresh
+      </button>
+    </div>
+  </mat-card-header>
+
+  <mat-card-content class="b-t-1">
+    <div class="table-responsive">
+      <app-mat-table 
+        [columns]="tableColumns" 
+        [tableData]="alerts" 
+        [showAction]="true" 
+        [showView]="false"
+        [Extra_Column]="false"
+        [showEdit]="false" 
+        [showDelete]="perm.hasRoleAction('canDelete')" 
+        (deleteClick)="deleteAlert($event)">
+      </app-mat-table>
+    </div>
+  </mat-card-content>
+</mat-card>

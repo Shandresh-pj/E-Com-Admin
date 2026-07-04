@@ -1,0 +1,117 @@
+<div class="row m-b-24">
+  <!-- Check-in Status Card -->
+  <div class="col-lg-12">
+    <mat-card class="cardWithShadow theme-card">
+      <mat-card-header>
+        <mat-card-title class="m-b-0">Attendance Terminal</mat-card-title>
+      </mat-card-header>
+      <mat-card-content class="p-24 b-t-1">
+        <div class="d-flex flex-wrap align-items-center justify-content-between gap-16">
+          <div class="status-indicator-box d-flex align-items-center gap-12">
+            <span class="pulse-indicator" [ngClass]="isCheckedIn ? 'bg-success' : 'bg-danger'"></span>
+            <div>
+              <p class="f-s-12 text-muted m-b-2">CURRENT SESSION STATUS</p>
+              <h3 class="f-w-600 m-b-0" [ngClass]="isCheckedIn ? 'text-success' : 'text-danger'">
+                {{ isCheckedIn ? 'CHECKED IN' : 'CHECKED OUT' }}
+              </h3>
+            </div>
+          </div>
+
+          <!-- Quick Action Buttons -->
+          <div class="action-buttons-box d-flex gap-12">
+            @if (!isCheckedIn) {
+              <button mat-flat-button color="primary" class="btn-terminal" (click)="checkIn()" [disabled]="loading || attendanceForm.invalid">
+                <mat-icon class="m-r-4">login</mat-icon> Punch In
+              </button>
+            } @else {
+              <button mat-flat-button color="warn" class="btn-terminal" (click)="checkOut()" [disabled]="loading">
+                <mat-icon class="m-r-4">logout</mat-icon> Punch Out
+              </button>
+            }
+          </div>
+        </div>
+
+        @if (detectedEmployee) {
+          <div class="employee-details-bar m-t-16 p-12 bg-light-primary rounded-8 d-flex align-items-center gap-8">
+            <mat-icon class="text-primary">account_circle</mat-icon>
+            <span class="f-w-600">Logged in Employee:</span>
+            <span>{{ detectedEmployee.name }} ({{ detectedEmployee.email }})</span>
+          </div>
+        }
+      </mat-card-content>
+    </mat-card>
+  </div>
+</div>
+
+<!-- Manual Selection Form for Admin / Managers -->
+@if (!detectedEmployee && (perm.hasRoleAction('canCreate') || perm.hasRoleAction('canUpdate'))) {
+<mat-card class="cardWithShadow theme-card m-b-24">
+  <mat-card-header>
+    <mat-card-title class="m-b-0">Manual Session Parameters</mat-card-title>
+  </mat-card-header>
+  <mat-card-content class="p-24 b-t-1">
+    <form [formGroup]="attendanceForm">
+      <div class="row">
+        <!-- Company selection -->
+        <div class="col-lg-4 col-md-6 col-sm-12">
+          <mat-label class="f-w-600 m-b-8 d-block">Company <span class="text-danger">*</span></mat-label>
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-select formControlName="company_id" placeholder="Select Company">
+              @for(c of companies; track c.id) {
+                <mat-option [value]="c.id">{{ c.name }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+        </div>
+
+        <!-- Branch selection -->
+        <div class="col-lg-4 col-md-6 col-sm-12">
+          <mat-label class="f-w-600 m-b-8 d-block">Branch <span class="text-danger">*</span></mat-label>
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-select formControlName="branch_id" placeholder="Select Branch">
+              @for(b of branches; track b.id) {
+                <mat-option [value]="b.id">{{ b.name }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+        </div>
+
+        <!-- Employee selection -->
+        <div class="col-lg-4 col-md-6 col-sm-12">
+          <mat-label class="f-w-600 m-b-8 d-block">Employee <span class="text-danger">*</span></mat-label>
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-select formControlName="employee_id" placeholder="Select Employee">
+              @for(e of employees; track e.id) {
+                <mat-option [value]="e.id">{{ e.name }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+        </div>
+      </div>
+    </form>
+  </mat-card-content>
+</mat-card>
+}
+
+<!-- Logs list -->
+<mat-card class="cardWithShadow theme-card">
+  <mat-card-header>
+    <div class="header-container">
+      <mat-card-title class="m-b-0">Attendance History Logs</mat-card-title>
+      <button mat-stroked-button (click)="loadInitialData()">
+        <mat-icon class="icon-16">refresh</mat-icon> Refresh Logs
+      </button>
+    </div>
+  </mat-card-header>
+  <mat-card-content class="b-t-1">
+    <div class="table-responsive">
+      <app-mat-table 
+        [columns]="tableColumns" 
+        [tableData]="attendanceLogs" 
+        [showAction]="false" 
+        [showView]="false"
+        [Extra_Column]="false">
+      </app-mat-table>
+    </div>
+  </mat-card-content>
+</mat-card>

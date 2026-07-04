@@ -207,17 +207,25 @@ export class FullComponent implements OnInit {
         }
 
         // Always include Change Password at the bottom under Settings
-        finalItems.push(
-          {
-            navCap: 'Settings'
-          },
-          {
-            displayName: 'Change Password',
-            iconName: 'lock',
-            route: '/components/change-password',
-            bgcolor: colorToggle ? 'primary' : 'success'
-          }
-        );
+        finalItems.push({
+          navCap: 'Settings'
+        });
+
+        if (this.authService.isSuperAdmin()) {
+          finalItems.push({
+            displayName: 'Menu Bar',
+            iconName: 'list-check',
+            route: '/components/menubar',
+            bgcolor: 'primary'
+          });
+        }
+
+        finalItems.push({
+          displayName: 'Change Password',
+          iconName: 'lock',
+          route: '/components/change-password',
+          bgcolor: colorToggle ? 'primary' : 'success'
+        });
 
         this.navItems = finalItems;
       },

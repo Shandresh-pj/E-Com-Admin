@@ -1,125 +1,134 @@
-<div class="blank-layout-container justify-content-center align-items-center bg-light">
-  <div class="position-relative row w-100 h-100 bg-gredient justify-content-center">
-    <div class="col-lg-4 d-flex align-items-center">
-      <mat-card class="cardWithShadow boxed-auth">
-        <mat-card-content class="p-32">
-          <div class="text-center">
-            <a [routerLink]="['/dashboard']">
-              <img src="./assets/images/logos/dark-logo.svg" class="align-middle m-2" alt="logo" />
-            </a>
-          </div>
+<!-- ─── Liquid Glass Login ──────────────────────────────────────────── -->
+<div class="lg-auth-root">
 
-          <!-- <div class="row m-t-24 custom-row">
-            <div class="col-12 col-sm-6">
-              <button mat-stroked-button class="w-100">
-                <div class="d-flex align-items-center">
-                  <img src="/assets/images/svgs/google-icon.svg" alt="google" width="16" class="m-r-8" />
-                  <span>
-                  Sign in with Google
-                </span> 
-                </div>
-              </button>
-            </div>
-            <div class="col-12 col-sm-6">
-              <button mat-stroked-button class="w-100 d-flex align-items-center">
-                <div class="d-flex align-items-center">
-                  <img src="/assets/images/svgs/facebook-icon.svg" alt="facebook" width="40" class="m-r-4" />
-                  Sign in with FB
-                </div>
-              </button>
-            </div>
-          </div> -->
+  <!-- Floating ambient orbs (decorative, CSS-animated) -->
+  <div class="lg-orb lg-orb-1"></div>
+  <div class="lg-orb lg-orb-2"></div>
+  <div class="lg-orb lg-orb-3"></div>
 
-          <div class="or-border m-t-30">or sign in with</div>
+  <!-- Centered glass card -->
+  <div class="lg-card-wrap">
+    <div class="lg-card">
 
-          <form class="m-t-30" [formGroup]="LoginForm" (ngSubmit)="onSubmit()">
+      <!-- Logo + heading -->
+      <div class="lg-logo-area">
+        <a [routerLink]="['/dashboard']" class="lg-logo-link">
+          <img
+            src="./assets/images/logos/dark-logo.svg"
+            class="lg-logo-img"
+            alt="logo"
+          />
+        </a>
+        <h1 class="lg-title">Welcome Back</h1>
+        <p class="lg-subtitle">Sign in to your account to continue</p>
+      </div>
 
-            <!-- Email -->
-            <mat-label class="f-s-14 f-w-600 m-b-12 d-block">
-              Email <span class="text-danger">*</span>
-            </mat-label>
+      <!-- Login form (all bindings preserved) -->
+      <form class="lg-form" [formGroup]="LoginForm" (ngSubmit)="onSubmit()">
 
-            <mat-form-field appearance="outline" class="w-100" color="primary">
+        <!-- Email field -->
+        <div class="lg-field-group">
+          <label class="lg-label">
+            Email <span class="lg-required">*</span>
+          </label>
+          <mat-form-field
+            appearance="outline"
+            class="lg-mat-field w-100"
+            color="primary"
+          >
+            <input
+              matInput
+              type="email"
+              formControlName="email"
+              placeholder="Enter your email"
+              id="login-email"
+            />
 
-              <input matInput formControlName="email" placeholder="Enter your email" />
+            @if (f['email'].hasError('required')) {
+              <mat-error>Email is required</mat-error>
+            }
+            @if (f['email'].hasError('email')) {
+              <mat-error>Enter a valid email address</mat-error>
+            }
+          </mat-form-field>
+        </div>
 
-              @if (f['email'].hasError('required')) {
-              <mat-error>
-                Email is required
-              </mat-error>
-              }
-
-              @if (f['email'].hasError('email')) {
-              <mat-error>
-                Enter a valid email address
-              </mat-error>
-              }
-
-            </mat-form-field>
-
-            <!-- Password -->
-            <mat-label class="f-s-14 f-w-600 m-b-12 d-block">
-              Password <span class="text-danger">*</span>
-            </mat-label>
-
-            <mat-form-field appearance="outline" class="w-100" color="primary">
-
-              <input matInput [type]="hidePassword ? 'password' : 'text'" formControlName="password"
-                placeholder="Enter your password" />
-
-              <button mat-icon-button matSuffix type="button" (click)="hidePassword = !hidePassword">
-
-                <mat-icon>
-                  {{ hidePassword ? 'visibility_off' : 'visibility' }}
-                </mat-icon>
-
-              </button>
-
-              @if (f['password'].hasError('required')) {
-              <mat-error>
-                Password is required
-              </mat-error>
-              }
-
-              @if (f['password'].hasError('minlength')) {
-              <mat-error>
-                Password must be at least 6 characters
-              </mat-error>
-              }
-
-            </mat-form-field>
-
-            <!-- Remember Device + Forgot Password -->
-
-            <div class="d-flex align-items-center m-b-12">
-
-              <mat-checkbox color="primary">
-                Remember this Device
-              </mat-checkbox>
-
-              <a [routerLink]="['/authentication/forgot-password']" class="text-primary f-w-600 text-decoration-none m-l-auto f-s-14">
-
-                Forgot Password?
-
-              </a>
-
-            </div>
-
-            <!-- Submit -->
-
-            <button type="submit" mat-flat-button color="primary" class="w-100">
-
-              Sign In
-
+        <!-- Password field -->
+        <div class="lg-field-group">
+          <label class="lg-label">
+            Password <span class="lg-required">*</span>
+          </label>
+          <mat-form-field
+            appearance="outline"
+            class="lg-mat-field w-100"
+            color="primary"
+          >
+            <input
+              matInput
+              [type]="hidePassword ? 'password' : 'text'"
+              formControlName="password"
+              placeholder="Enter your password"
+              id="login-password"
+            />
+            <button
+              mat-icon-button
+              matSuffix
+              type="button"
+              (click)="hidePassword = !hidePassword"
+              [attr.aria-label]="hidePassword ? 'Show password' : 'Hide password'"
+            >
+              <mat-icon>
+                {{ hidePassword ? 'visibility_off' : 'visibility' }}
+              </mat-icon>
             </button>
 
-          </form>
-          <span class="d-block f-w-500 text-center m-t-24">New to Spike?
-            <a [routerLink]="['/authentication/register']" class="text-decoration-none text-primary f-w-500 f-s-14">
-              Create an account</a>
+            @if (f['password'].hasError('required')) {
+              <mat-error>Password is required</mat-error>
+            }
+            @if (f['password'].hasError('minlength')) {
+              <mat-error>Password must be at least 6 characters</mat-error>
+            }
+          </mat-form-field>
+        </div>
+
+        <!-- Remember + Forgot row -->
+        <div class="lg-row-between">
+          <mat-checkbox color="primary" id="login-remember">
+            Remember this Device
+          </mat-checkbox>
+          <a
+            [routerLink]="['/authentication/forgot-password']"
+            class="lg-forgot-link"
+          >
+            Forgot Password?
+          </a>
+        </div>
+
+        <!-- Submit button with loading state -->
+        <button
+          type="submit"
+          class="lg-btn-primary"
+          [class.lg-loading]="isLoading"
+          [disabled]="isLoading"
+          id="login-submit"
+        >
+          <span class="lg-btn-text">
+            {{ isLoading ? 'Signing In...' : 'Sign In' }}
           </span>
-        </mat-card-content>
-      </mat-card>
+          <span class="lg-btn-shimmer"></span>
+        </button>
+
+      </form>
+
+      <!-- Sign up link -->
+      <p class="lg-footer-text">
+        New to Spike?
+        <a [routerLink]="['/authentication/register']" class="lg-link">
+          Create an account
+        </a>
+      </p>
+
     </div>
   </div>
+
 </div>

@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { ChangeDetectorRef, Component } from '@angular/core';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
@@ -44,18 +44,24 @@ export class Roles {
     private commonService:CommonService,
     private auth:AuthService,
     private alert:AlertService,
+    private cdr: ChangeDetectorRef,
     public perm: PermissionService
   ){
     this.RolesForm = fb.group({
       name: ['', [Validators.required, Validators.maxLength(100)]],
       isActive: [true, Validators.required]
     })
+  }
+
+  ngOnInit() {
     this.getRoles();
   }
+
   getRoles(){
     this.commonService.getApi(`roles`).subscribe({
       next:(res:any) => {
-        this.Roles = res?.data
+        this.Roles = res?.data;
+        this.cdr.detectChanges();
       }
     })
   }

@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { ChangeDetectorRef, Component } from '@angular/core';
 import { ReactiveFormsModule, FormsModule, FormGroup, FormBuilder, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
@@ -73,6 +73,7 @@ export class Employees {
     private fb: FormBuilder,
     private alert: AlertService,
     private commonService: CommonService,
+    private cdr: ChangeDetectorRef,
     public perm: PermissionService
   ) {
     this.EmployeeForm = fb.group({
@@ -174,24 +175,7 @@ export class Employees {
     this.commonService.getApi('companies').subscribe({
       next: (res: any) => {
         this.Companies = res?.data || [];
-  
-        this.Employees = this.Companies.flatMap(
-          (company: any) =>
-            company.userRoles
-              ?.filter(
-                (role: any) => role.role?.name === 'Employee'
-              )
-              .map((role: any) => ({
-                id: role.user?.id,
-                name: role.user?.name,
-                email: role.user?.email,
-                mobilenumber: role.user?.mobilenumber,
-                companyId: company.id,
-                companyName: company.name,
-                branchId: role.branch?.id,
-                branchName: role.branch?.name
-              }))
-        ) || [];
+        this.cdr.detectChanges();
       }
     });
   }
@@ -233,7 +217,8 @@ export class Employees {
   getEmployees(){
     this.commonService.getApi(`employees`).subscribe({
       next:(res:any) => {
-        this.Employees = res?.data
+        this.Employees = res?.data;
+        this.cdr.detectChanges();
       }
     })
   }

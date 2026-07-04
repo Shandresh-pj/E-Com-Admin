@@ -12,7 +12,7 @@ import { ProductAttribute } from './product-attribute/product-attribute';
 import { AttributeValue } from './attribute-value/attribute-value';
 import { Category } from './category/category';
 import { Product } from './product/product';
-import { Order } from './order/order';
+import { Orders } from './orders/orders';
 import { ChangePassword } from './change-password/change-password';
 import { AuditLogs } from './audit-logs/audit-logs';
 import { Alerts } from './alerts/alerts';
@@ -21,6 +21,8 @@ import { BranchStocks } from './branch-stocks/branch-stocks';
 import { Stocks } from './stocks/stocks';
 import { Payroll } from './payroll/payroll';
 import { Leave } from './leave/leave';
+import { DeliveryTracking } from './delivery-tracking/delivery-tracking';
+import { Payments } from './payments/payments';
 import { RoleGuard } from '../Securities/Guard/role.guard';
 import { UserType } from '../Securities/Models/role-access';
 
@@ -29,6 +31,7 @@ const A  = UserType.ADMIN;
 const BM = UserType.BRANCH_MANAGER;
 const SK = UserType.SHOPKEEPER;
 const EM = UserType.EMPLOYEE;
+const DB = UserType.DELIVERY_BOY;
 
 export const ComponentsRoutes: Routes = [
 
@@ -199,16 +202,16 @@ export const ComponentsRoutes: Routes = [
   },
 
   {
-    path: 'order',
-    component: Order,
+    path: 'orders',
+    component: Orders,
     canActivate: [RoleGuard],
     data: {
-      title: 'Order',
+      title: 'Orders',
       roles: [SA, A, BM, SK],
       urls: [
         {
-          title: 'Order',
-          url: '/components/order'
+          title: 'Orders',
+          url: '/components/orders'
         }
       ]
     }
@@ -298,6 +301,26 @@ export const ComponentsRoutes: Routes = [
       title: 'Leave',
       roles: [SA, A, BM, SK, EM],
       urls: [{ title: 'Leave', url: '/components/leave' }]
+    }
+  },
+  {
+    path: 'delivery-tracking',
+    component: DeliveryTracking,
+    canActivate: [RoleGuard],
+    data: {
+      title: 'Delivery Tracking',
+      roles: [SA, A, BM, DB],
+      urls: [{ title: 'Delivery Tracking', url: '/components/delivery-tracking' }]
+    }
+  },
+  {
+    path: 'payments',
+    component: Payments,
+    canActivate: [RoleGuard],
+    data: {
+      title: 'Payments',
+      roles: [SA, A, BM, SK],
+      urls: [{ title: 'Payments', url: '/components/payments' }]
     }
   }
 

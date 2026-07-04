@@ -1,0 +1,181 @@
+<mat-card class="cardWithShadow theme-card">
+  <mat-card-header>
+    <div class="header-container">
+      <mat-card-title class="m-b-0">Payments Registry Ledger</mat-card-title>
+      @if (!showForm && perm.hasRoleAction('canCreate')) {
+        <button mat-flat-button color="primary" (click)="toggleForm()">
+          <mat-icon class="icon-16 m-r-4">attach_money</mat-icon> Record New Payment
+        </button>
+      }
+    </div>
+  </mat-card-header>
+
+  <!-- Record Payment Form -->
+  @if (showForm) {
+    <mat-card-content class="p-24 b-t-1">
+      <form [formGroup]="paymentForm">
+        <div class="row">
+          <!-- Select Order -->
+          <div class="col-lg-4 col-md-6 col-sm-12 m-b-16">
+            <mat-label class="f-w-600 m-b-8 d-block">Order / Invoice <span class="text-danger">*</span></mat-label>
+            <mat-form-field appearance="outline" class="w-100">
+              <mat-select formControlName="order_id" placeholder="Select Order">
+                @for(o of orders; track o.id) {
+                  <mat-option [value]="o.id">{{ o.invoice_no }} (${{ o.total }})</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+          </div>
+
+          <!-- Select User -->
+          <div class="col-lg-4 col-md-6 col-sm-12 m-b-16">
+            <mat-label class="f-w-600 m-b-8 d-block">Payer / Customer <span class="text-danger">*</span></mat-label>
+            <mat-form-field appearance="outline" class="w-100">
+              <mat-select formControlName="user_id" placeholder="Select Payer">
+                @for(e of employees; track e.id) {
+                  <mat-option [value]="e.id">{{ e.name }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+          </div>
+
+          <!-- Method Selection -->
+          <div class="col-lg-4 col-md-6 col-sm-12 m-b-16">
+            <mat-label class="f-w-600 m-b-8 d-block">Payment Method <span class="text-danger">*</span></mat-label>
+            <mat-form-field appearance="outline" class="w-100">
+              <mat-select formControlName="method">
+                <mat-option value="CASH">CASH</mat-option>
+                <mat-option value="CARD">CARD</mat-option>
+                <mat-option value="ONLINE">ONLINE / GATEWAY</mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+
+          <!-- Amount Input -->
+          <div class="col-lg-4 col-md-6 col-sm-12 m-b-16">
+            <mat-label class="f-w-600 m-b-8 d-block">Amount Paid ($) <span class="text-danger">*</span></mat-label>
+            <mat-form-field appearance="outline" class="w-100">
+              <input matInput type="number" step="0.01" formControlName="amount" placeholder="Enter amount">
+            </mat-form-field>
+          </div>
+
+          <!-- Status Select -->
+          <div class="col-lg-4 col-md-6 col-sm-12 m-b-16">
+            <mat-label class="f-w-600 m-b-8 d-block">Payment Status <span class="text-danger">*</span></mat-label>
+            <mat-form-field appearance="outline" class="w-100">
+              <mat-select formControlName="status">
+                <mat-option value="SUCCESS">SUCCESS</mat-option>
+                <mat-option value="PENDING">PENDING</mat-option>
+                <mat-option value="FAILED">FAILED</mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+
+          <!-- Transaction ID -->
+          <div class="col-lg-4 col-md-6 col-sm-12 m-b-16">
+            <mat-label class="f-w-600 m-b-8 d-block">Transaction ID</mat-label>
+            <mat-form-field appearance="outline" class="w-100">
+              <input matInput type="text" formControlName="transaction_id" placeholder="Enter txn id (if any)">
+            </mat-form-field>
+          </div>
+
+          <!-- Gateway -->
+          <div class="col-lg-4 col-md-6 col-sm-12 m-b-16">
+            <mat-label class="f-w-600 m-b-8 d-block">Payment Gateway</mat-label>
+            <mat-form-field appearance="outline" class="w-100">
+              <input matInput type="text" formControlName="gateway" placeholder="e.g. Stripe, PayPal (if any)">
+            </mat-form-field>
+          </div>
+        </div>
+
+        <div class="m-t-16">
+          <button mat-stroked-button class="me-3" (click)="toggleForm()" [disabled]="loading">Cancel</button>
+          <button mat-flat-button color="primary" (click)="recordPayment()" [disabled]="loading || paymentForm.invalid">
+            Record Payment
+          </button>
+        </div>
+      </form>
+    </mat-card-content>
+  }
+  
+  <!-- Table View -->
+  @else {
+    <mat-card-content class="b-t-1">
+      <div class="table-responsive">
+        <table mat-table [dataSource]="payments" class="w-100 custom-table">
+          
+          <!-- No. -->
+          <ng-container matColumnDef="id">
+            <th mat-header-cell *matHeaderCellDef>No</th>
+            <td mat-cell *matCellDef="let row; let i = index">{{ i + 1 }}</td>
+          </ng-container>
+
+          <!-- Order -->
+          <ng-container matColumnDef="invoice_no">
+            <th mat-header-cell *matHeaderCellDef>Invoice / Order</th>
+            <td mat-cell *matCellDef="let row">{{ row.invoice_no }}</td>
+          </ng-container>
+
+          <!-- User Name -->
+          <ng-container matColumnDef="user_name">
+            <th mat-header-cell *matHeaderCellDef>Payer</th>
+            <td mat-cell *matCellDef="let row">{{ row.user_name }}</td>
+          </ng-container>
+
+          <!-- Amount -->
+          <ng-container matColumnDef="amount">
+            <th mat-header-cell *matHeaderCellDef>Amount</th>
+            <td mat-cell *matCellDef="let row">${{ row.amount | number:'1.2-2' }}</td>
+          </ng-container>
+
+          <!-- Method -->
+          <ng-container matColumnDef="method">
+            <th mat-header-cell *matHeaderCellDef>Method</th>
+            <td mat-cell *matCellDef="let row">
+              <span class="method-badge">{{ row.method }}</span>
+            </td>
+          </ng-container>
+
+          <!-- Gateway & Txn ID -->
+          <ng-container matColumnDef="details">
+            <th mat-header-cell *matHeaderCellDef>Txn ID / Gateway</th>
+            <td mat-cell *matCellDef="let row">
+              @if (row.transaction_id || row.gateway) {
+                <span class="f-s-12 text-muted">{{ row.transaction_id || '-' }} ({{ row.gateway || 'None' }})</span>
+              } @else {
+                <span class="text-muted">-</span>
+              }
+            </td>
+          </ng-container>
+
+          <!-- Timestamp -->
+          <ng-container matColumnDef="created_at">
+            <th mat-header-cell *matHeaderCellDef>Paid At</th>
+            <td mat-cell *matCellDef="let row">{{ row.created_at }}</td>
+          </ng-container>
+
+          <!-- Status -->
+          <ng-container matColumnDef="status">
+            <th mat-header-cell *matHeaderCellDef>Status</th>
+            <td mat-cell *matCellDef="let row">
+              <span class="badge" [ngClass]="{
+                'bg-success': row.status === 'SUCCESS',
+                'bg-warning': row.status === 'PENDING',
+                'bg-danger': row.status === 'FAILED'
+              }">
+                {{ row.status }}
+              </span>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="['id', 'invoice_no', 'user_name', 'amount', 'method', 'details', 'created_at', 'status']"></tr>
+          <tr mat-row *matRowDef="let row; columns: ['id', 'invoice_no', 'user_name', 'amount', 'method', 'details', 'created_at', 'status']"></tr>
+
+          <tr class="mat-no-data-row" *matNoDataRow>
+            <td class="no-data-cell" colspan="8">No payments recorded found</td>
+          </tr>
+        </table>
+      </div>
+    </mat-card-content>
+  }
+</mat-card>

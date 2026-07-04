@@ -71,7 +71,7 @@ export class MenuBar implements OnInit {
     { name: 'Attribute Value', path: '/components/attribute-value', icon: 'list-details', isActive: true },
     { name: 'Category', path: '/components/category', icon: 'category', isActive: true },
     { name: 'Product', path: '/components/product', icon: 'box', isActive: true },
-    { name: 'Order', path: '/components/order', icon: 'shopping-cart', isActive: true },
+    { name: 'Orders', path: '/components/orders', icon: 'shopping-cart', isActive: true },
     { name: 'Audit Logs', path: '/components/audit-logs', icon: 'clipboard-list', isActive: true },
     { name: 'Status', path: '/components/status', icon: 'list-check', isActive: true },
     { name: 'Menu Bar', path: '/components/menubar', icon: 'list-check', isActive: true },
@@ -80,7 +80,9 @@ export class MenuBar implements OnInit {
     { name: 'Branch Stocks', path: '/components/branch-stocks', icon: 'git-merge', isActive: true },
     { name: 'Stocks', path: '/components/stocks', icon: 'database', isActive: true },
     { name: 'Payroll', path: '/components/payroll', icon: 'credit-card', isActive: true },
-    { name: 'Leave', path: '/components/leave', icon: 'plane-departure', isActive: true }
+    { name: 'Leave', path: '/components/leave', icon: 'plane-departure', isActive: true },
+    { name: 'Delivery Tracking', path: '/components/delivery-tracking', icon: 'map-pin', isActive: true },
+    { name: 'Payments', path: '/components/payments', icon: 'credit-card', isActive: true }
   ];
 
   constructor(

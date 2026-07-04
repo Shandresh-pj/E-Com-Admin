@@ -1,0 +1,201 @@
+<mat-card class="cardWithShadow theme-card">
+  <mat-card-header>
+    <div class="header-container">
+      <mat-card-title class="m-b-0">Delivery Dispatch & Tracking</mat-card-title>
+      @if (!showStartForm && !showLocationForm && perm.hasRoleAction('canCreate')) {
+        <button mat-flat-button color="primary" (click)="toggleStartForm()">
+          <mat-icon class="icon-16 m-r-4">local_shipping</mat-icon> Dispatch New Delivery
+        </button>
+      }
+    </div>
+  </mat-card-header>
+
+  <!-- Start Delivery Form -->
+  @if (showStartForm) {
+    <mat-card-content class="p-24 b-t-1">
+      <form [formGroup]="trackingForm">
+        <div class="row">
+          <!-- Selection Fields (Only shown if NOT auto-mapped) -->
+          @if (!detectedEmployee) {
+            <div class="col-lg-4 col-md-6 col-sm-12 m-b-16">
+              <mat-label class="f-w-600 m-b-8 d-block">Company <span class="text-danger">*</span></mat-label>
+              <mat-form-field appearance="outline" class="w-100">
+                <mat-select formControlName="company_id" placeholder="Select Company">
+                  @for(c of companies; track c.id) {
+                    <mat-option [value]="c.id">{{ c.name }}</mat-option>
+                  }
+                </mat-select>
+              </mat-form-field>
+            </div>
+
+            <div class="col-lg-4 col-md-6 col-sm-12 m-b-16">
+              <mat-label class="f-w-600 m-b-8 d-block">Branch <span class="text-danger">*</span></mat-label>
+              <mat-form-field appearance="outline" class="w-100">
+                <mat-select formControlName="branch_id" placeholder="Select Branch">
+                  @for(b of branches; track b.id) {
+                    <mat-option [value]="b.id">{{ b.name }}</mat-option>
+                  }
+                </mat-select>
+              </mat-form-field>
+            </div>
+
+            <div class="col-lg-4 col-md-6 col-sm-12 m-b-16">
+              <mat-label class="f-w-600 m-b-8 d-block">Delivery Agent <span class="text-danger">*</span></mat-label>
+              <mat-form-field appearance="outline" class="w-100">
+                <mat-select formControlName="delivery_boy_id" placeholder="Select Agent">
+                  @for(e of employees; track e.id) {
+                    <mat-option [value]="e.id">{{ e.name }}</mat-option>
+                  }
+                </mat-select>
+              </mat-form-field>
+            </div>
+          }
+
+          <!-- Order Selection -->
+          <div class="col-lg-4 col-md-6 col-sm-12 m-b-16">
+            <mat-label class="f-w-600 m-b-8 d-block">Order / Invoice <span class="text-danger">*</span></mat-label>
+            <mat-form-field appearance="outline" class="w-100">
+              <mat-select formControlName="order_id" placeholder="Select Invoice">
+                @for(o of orders; track o.id) {
+                  <mat-option [value]="o.id">{{ o.invoice_no }} ({{ o.status }})</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+          </div>
+
+          <!-- Lat/Long Inputs -->
+          <div class="col-lg-4 col-md-6 col-sm-12 m-b-16">
+            <mat-label class="f-w-600 m-b-8 d-block">Starting Latitude <span class="text-danger">*</span></mat-label>
+            <mat-form-field appearance="outline" class="w-100">
+              <input matInput type="number" step="0.0001" formControlName="latitude" placeholder="e.g. 40.7128">
+            </mat-form-field>
+          </div>
+
+          <div class="col-lg-4 col-md-6 col-sm-12 m-b-16">
+            <mat-label class="f-w-600 m-b-8 d-block">Starting Longitude <span class="text-danger">*</span></mat-label>
+            <mat-form-field appearance="outline" class="w-100">
+              <input matInput type="number" step="0.0001" formControlName="longitude" placeholder="e.g. -74.0060">
+            </mat-form-field>
+          </div>
+        </div>
+
+        <div class="m-t-16">
+          <button mat-stroked-button class="me-3" (click)="toggleStartForm()" [disabled]="loading">Cancel</button>
+          <button mat-flat-button color="primary" (click)="startDelivery()" [disabled]="loading || trackingForm.invalid">
+            Dispatch Delivery
+          </button>
+        </div>
+      </form>
+    </mat-card-content>
+  }
+
+  <!-- Update Location Form -->
+  @else if (showLocationForm) {
+    <mat-card-content class="p-24 b-t-1">
+      <h3 class="f-w-600 m-b-16">Update Coordinates (Tracking ID: #{{ selectedTrackingId }})</h3>
+      <form [formGroup]="locationForm">
+        <div class="row">
+          <div class="col-lg-6 col-md-6 col-sm-12 m-b-16">
+            <mat-label class="f-w-600 m-b-8 d-block">Current Latitude <span class="text-danger">*</span></mat-label>
+            <mat-form-field appearance="outline" class="w-100">
+              <input matInput type="number" step="0.0001" formControlName="latitude" placeholder="e.g. 40.7128">
+            </mat-form-field>
+          </div>
+
+          <div class="col-lg-6 col-md-6 col-sm-12 m-b-16">
+            <mat-label class="f-w-600 m-b-8 d-block">Current Longitude <span class="text-danger">*</span></mat-label>
+            <mat-form-field appearance="outline" class="w-100">
+              <input matInput type="number" step="0.0001" formControlName="longitude" placeholder="e.g. -74.0060">
+            </mat-form-field>
+          </div>
+        </div>
+
+        <div class="m-t-16">
+          <button mat-stroked-button class="me-3" (click)="cancelLocationUpdate()" [disabled]="loading">Cancel</button>
+          <button mat-flat-button color="primary" (click)="submitLocationUpdate()" [disabled]="loading || locationForm.invalid">
+            Save Location
+          </button>
+        </div>
+      </form>
+    </mat-card-content>
+  }
+
+  <!-- Table View -->
+  @else {
+    <mat-card-content class="b-t-1">
+      <div class="table-responsive">
+        <table mat-table [dataSource]="trackings" class="w-100 custom-table">
+          
+          <!-- ID -->
+          <ng-container matColumnDef="id">
+            <th mat-header-cell *matHeaderCellDef>No</th>
+            <td mat-cell *matCellDef="let row; let i = index">{{ i + 1 }}</td>
+          </ng-container>
+
+          <!-- Invoice No / Order -->
+          <ng-container matColumnDef="invoice_no">
+            <th mat-header-cell *matHeaderCellDef>Invoice / Order</th>
+            <td mat-cell *matCellDef="let row">{{ row.invoice_no }}</td>
+          </ng-container>
+
+          <!-- Delivery Boy -->
+          <ng-container matColumnDef="delivery_boy_name">
+            <th mat-header-cell *matHeaderCellDef>Agent</th>
+            <td mat-cell *matCellDef="let row">{{ row.delivery_boy_name }}</td>
+          </ng-container>
+
+          <!-- Coordinates -->
+          <ng-container matColumnDef="coordinates">
+            <th mat-header-cell *matHeaderCellDef>Coordinates</th>
+            <td mat-cell *matCellDef="let row">{{ row.latitude }}, {{ row.longitude }}</td>
+          </ng-container>
+
+          <!-- Created At Timestamp -->
+          <ng-container matColumnDef="created_at">
+            <th mat-header-cell *matHeaderCellDef>Dispatched At</th>
+            <td mat-cell *matCellDef="let row">{{ row.created_at }}</td>
+          </ng-container>
+
+          <!-- Status / Action Column -->
+          <ng-container matColumnDef="status">
+            <th mat-header-cell *matHeaderCellDef>Status / Actions</th>
+            <td mat-cell *matCellDef="let row">
+              <div class="d-flex align-items-center gap-12 flex-wrap">
+                <span class="badge" [ngClass]="{
+                  'bg-success': row.status === 'DELIVERED',
+                  'bg-warning': row.status === 'ON_THE_WAY',
+                  'bg-info': row.status === 'MOVING'
+                }">
+                  {{ row.status }}
+                </span>
+
+                @if (row.status !== 'DELIVERED' && perm.hasRoleAction('canUpdate')) {
+                  <button mat-icon-button color="primary" matTooltip="Update Location" (click)="openLocationDialog(row)">
+                    <mat-icon class="text-primary">my_location</mat-icon>
+                  </button>
+
+                  <button mat-flat-button color="primary" class="btn-approve btn-xs" (click)="markAsDelivered(row)">
+                    <mat-icon class="icon-14 m-r-2">check</mat-icon> Delivered
+                  </button>
+                }
+
+                @if (perm.hasRoleAction('canDelete')) {
+                  <button mat-icon-button color="warn" matTooltip="Delete Track" (click)="deleteTracking(row)">
+                    <mat-icon class="text-danger">delete</mat-icon>
+                  </button>
+                }
+              </div>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="['id', 'invoice_no', 'delivery_boy_name', 'coordinates', 'created_at', 'status']"></tr>
+          <tr mat-row *matRowDef="let row; columns: ['id', 'invoice_no', 'delivery_boy_name', 'coordinates', 'created_at', 'status']"></tr>
+
+          <tr class="mat-no-data-row" *matNoDataRow>
+            <td class="no-data-cell" colspan="6">No delivery tracking logs found</td>
+          </tr>
+        </table>
+      </div>
+    </mat-card-content>
+  }
+</mat-card>

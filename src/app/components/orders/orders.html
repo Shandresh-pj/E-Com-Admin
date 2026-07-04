@@ -1,0 +1,327 @@
+<mat-card class="cardWithShadow theme-card">
+  <mat-card-header>
+    <div class="header-container">
+      <mat-card-title class="m-b-0">Orders & Invoicing Management</mat-card-title>
+      @if (!showCreateForm && !viewDetailsMode && perm.hasRoleAction('canCreate')) {
+        <button mat-flat-button color="primary" (click)="toggleCreateForm()">
+          <mat-icon class="icon-16 m-r-4">shopping_cart</mat-icon> Place New Order
+        </button>
+      }
+    </div>
+  </mat-card-header>
+
+  <!-- Create Order View -->
+  @if (showCreateForm) {
+    <mat-card-content class="p-24 b-t-1">
+      <form [formGroup]="orderForm">
+        <!-- Core Order Params -->
+        <div class="row">
+          <!-- Select Company -->
+          <div class="col-lg-6 col-md-6 col-sm-12 m-b-16">
+            <mat-label class="f-w-600 m-b-8 d-block">Company / Shop Branch Owner <span class="text-danger">*</span></mat-label>
+            <mat-form-field appearance="outline" class="w-100">
+              <mat-select formControlName="company_id" placeholder="Select Company">
+                @for(c of companies; track c.id) {
+                  <mat-option [value]="c.id">{{ c.name }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+          </div>
+
+          <!-- Coupon Code Input -->
+          <div class="col-lg-6 col-md-6 col-sm-12 m-b-16">
+            <mat-label class="f-w-600 m-b-8 d-block">Promo / Coupon Code</mat-label>
+            <mat-form-field appearance="outline" class="w-100">
+              <input matInput type="text" formControlName="coupon_code" placeholder="Enter Coupon Code (e.g. WELCOME10)">
+            </mat-form-field>
+          </div>
+        </div>
+
+        <hr class="m-t-8 m-b-24 border-light">
+
+        <!-- Dynamic Items Form Array -->
+        <h3 class="f-w-600 m-b-16 d-flex align-items-center justify-content-between">
+          <span>Items Cart</span>
+          <button mat-stroked-button color="primary" (click)="addItem()">
+            <mat-icon class="icon-14 m-r-4">add</mat-icon> Add Item
+          </button>
+        </h3>
+
+        <div formArrayName="items" class="m-b-24">
+          @for(item of items.controls; track item; let i = $index) {
+            <div [formGroupName]="i" class="row align-items-center bg-light-primary rounded-8 p-16 m-b-12">
+              
+              <!-- Select Product -->
+              <div class="col-lg-5 col-md-5 col-sm-12">
+                <mat-label class="f-w-600 m-b-4 d-block">Product <span class="text-danger">*</span></mat-label>
+                <mat-form-field appearance="outline" class="w-100">
+                  <mat-select formControlName="product_id" placeholder="Select Product">
+                    @for(p of products; track p.id) {
+                      <mat-option [value]="p.id">{{ p.name }} (${{ p.price }})</mat-option>
+                    }
+                  </mat-select>
+                </mat-form-field>
+              </div>
+
+              <!-- Price (Read-only) -->
+              <div class="col-lg-3 col-md-3 col-sm-6">
+                <mat-label class="f-w-600 m-b-4 d-block">Price</mat-label>
+                <mat-form-field appearance="outline" class="w-100">
+                  <input matInput type="number" formControlName="price">
+                </mat-form-field>
+              </div>
+
+              <!-- Quantity -->
+              <div class="col-lg-3 col-md-3 col-sm-6">
+                <mat-label class="f-w-600 m-b-4 d-block">Qty <span class="text-danger">*</span></mat-label>
+                <mat-form-field appearance="outline" class="w-100">
+                  <input matInput type="number" formControlName="quantity">
+                </mat-form-field>
+              </div>
+
+              <!-- Delete Button -->
+              <div class="col-lg-1 col-md-1 col-sm-12 text-center">
+                <button mat-icon-button color="warn" class="m-t-16" (click)="removeItem(i)" [disabled]="items.length === 1">
+                  <mat-icon>delete</mat-icon>
+                </button>
+              </div>
+
+            </div>
+          }
+        </div>
+
+        <hr class="m-b-24 border-light">
+
+        <!-- Payment Details Group -->
+        <h3 class="f-w-600 m-b-16">Payment Information</h3>
+        <div formGroupName="payment" class="row m-b-24">
+          <div class="col-lg-3 col-md-6 col-sm-12 m-b-16">
+            <mat-label class="f-w-600 m-b-8 d-block">Payment Method <span class="text-danger">*</span></mat-label>
+            <mat-form-field appearance="outline" class="w-100">
+              <mat-select formControlName="method">
+                <mat-option value="CASH">CASH</mat-option>
+                <mat-option value="CARD">CARD</mat-option>
+                <mat-option value="ONLINE">ONLINE / GATEWAY</mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+
+          <div class="col-lg-3 col-md-6 col-sm-12 m-b-16">
+            <mat-label class="f-w-600 m-b-8 d-block">Payment Status <span class="text-danger">*</span></mat-label>
+            <mat-form-field appearance="outline" class="w-100">
+              <mat-select formControlName="status">
+                <mat-option value="SUCCESS">SUCCESS</mat-option>
+                <mat-option value="PENDING">PENDING</mat-option>
+                <mat-option value="FAILED">FAILED</mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+
+          <div class="col-lg-3 col-md-6 col-sm-12 m-b-16">
+            <mat-label class="f-w-600 m-b-8 d-block">Transaction ID</mat-label>
+            <mat-form-field appearance="outline" class="w-100">
+              <input matInput type="text" formControlName="transaction_id" placeholder="Txn ID (if any)">
+            </mat-form-field>
+          </div>
+
+          <div class="col-lg-3 col-md-6 col-sm-12 m-b-16">
+            <mat-label class="f-w-600 m-b-8 d-block">Gateway Provider</mat-label>
+            <mat-form-field appearance="outline" class="w-100">
+              <input matInput type="text" formControlName="gateway" placeholder="e.g. Stripe, Razorpay">
+            </mat-form-field>
+          </div>
+        </div>
+
+        <!-- Calculated Summary Boxes -->
+        <div class="row justify-content-end m-b-24">
+          <div class="col-lg-4 col-md-6 col-sm-12">
+            <div class="summary-box p-16 rounded-8 bg-light-primary">
+              <div class="d-flex justify-content-between m-b-8">
+                <span class="text-muted">Subtotal:</span>
+                <span class="f-w-600">${{ calculateSubtotal() | number:'1.2-2' }}</span>
+              </div>
+              <div class="d-flex justify-content-between m-b-8">
+                <span class="text-muted">Promo Discount:</span>
+                <span class="f-w-600 text-danger">-${{ calculateDiscountValue() | number:'1.2-2' }}</span>
+              </div>
+              <hr class="border-light m-y-8">
+              <div class="d-flex justify-content-between">
+                <span class="f-w-700 text-primary f-s-16">Grand Total:</span>
+                <span class="f-w-800 text-primary f-s-18">${{ calculateTotal() | number:'1.2-2' }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="m-t-16">
+          <button mat-stroked-button class="me-3" (click)="toggleCreateForm()" [disabled]="loading">Cancel</button>
+          <button mat-flat-button color="primary" (click)="submitOrder()" [disabled]="loading || orderForm.invalid || items.length === 0">
+            Submit & Process Order
+          </button>
+        </div>
+      </form>
+    </mat-card-content>
+  }
+
+  <!-- View Order Details View -->
+  @else if (viewDetailsMode) {
+    <mat-card-content class="p-24 b-t-1">
+      <div class="order-receipt">
+        <div class="receipt-header d-flex flex-wrap justify-content-between align-items-center m-b-24 pb-3 border-bottom">
+          <div>
+            <h3 class="f-w-700 m-b-4">Invoice #{{ selectedOrder?.invoice_no }}</h3>
+            <p class="text-muted f-s-14 m-b-0">Order Placed: {{ selectedOrder?.created_at | date:'medium' }}</p>
+          </div>
+          <div class="d-flex gap-12 align-items-center m-t-8 m-sm-t-0">
+            <span class="badge bg-primary">{{ selectedOrder?.status }}</span>
+            <span class="badge" [ngClass]="selectedOrder?.payment_status === 'SUCCESS' ? 'bg-success' : 'bg-warning'">
+              Payment: {{ selectedOrder?.payment_status }}
+            </span>
+          </div>
+        </div>
+
+        <div class="row">
+          <!-- Details left -->
+          <div class="col-lg-8 col-md-8 col-sm-12">
+            <h4 class="f-w-700 m-b-16 text-dark border-bottom pb-2">Order Items</h4>
+            <div class="table-responsive m-b-24">
+              <table class="w-100 table-items">
+                <thead>
+                  <tr class="text-muted border-bottom pb-2">
+                    <th>Product</th>
+                    <th>Price</th>
+                    <th>Qty</th>
+                    <th class="text-end">Total</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for(item of selectedOrder?.items; track item.id) {
+                    <tr class="border-bottom">
+                      <td>{{ getProductName(item.product_id) }}</td>
+                      <td>${{ item.price }}</td>
+                      <td>{{ item.quantity }}</td>
+                      <td class="text-end f-w-600">${{ (item.price * item.quantity) | number:'1.2-2' }}</td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+            
+            <div class="summary-receipt-ledger m-b-24">
+              <div class="d-flex justify-content-between m-b-4">
+                <span class="text-muted">Subtotal:</span>
+                <span class="f-w-600">${{ selectedOrder?.subtotal | number:'1.2-2' }}</span>
+              </div>
+              <div class="d-flex justify-content-between m-b-4">
+                <span class="text-muted">Discount Applied:</span>
+                <span class="f-w-600 text-danger">-${{ selectedOrder?.discount | number:'1.2-2' }}</span>
+              </div>
+              <div class="d-flex justify-content-between border-top pt-2">
+                <span class="f-w-700 text-primary f-s-16">Total Amount Paid:</span>
+                <span class="f-w-800 text-primary f-s-18">${{ selectedOrder?.total | number:'1.2-2' }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Details right (QR Invoice) -->
+          <div class="col-lg-4 col-md-4 col-sm-12 text-center d-flex flex-column align-items-center justify-content-center border-left">
+            @if (selectedOrder?.qr_code) {
+              <div class="qr-box m-b-16 p-12 bg-white rounded-8 shadow-sm">
+                <img [src]="selectedOrder?.qr_code" class="qr-img" alt="Order QR Code Verification">
+              </div>
+              <p class="text-muted f-s-12 m-b-24">Scan QR to verify invoice digitally</p>
+            }
+            
+            <button mat-flat-button color="primary" (click)="downloadInvoice(selectedOrder)" class="w-100 m-b-12">
+              <mat-icon class="m-r-4">download</mat-icon> Download PDF Invoice
+            </button>
+          </div>
+        </div>
+
+        <div class="m-t-24 border-top pt-3">
+          <button mat-stroked-button (click)="closeDetails()" class="me-3">Back to Orders List</button>
+          @if (perm.hasRoleAction('canDelete')) {
+            <button mat-flat-button color="warn" (click)="deleteOrder(selectedOrder)">
+              <mat-icon class="m-r-4">delete</mat-icon> Delete Order
+            </button>
+          }
+        </div>
+      </div>
+    </mat-card-content>
+  }
+  
+  <!-- List Table View -->
+  @else {
+    <mat-card-content class="b-t-1">
+      <div class="table-responsive">
+        <table mat-table [dataSource]="ordersList" class="w-100 custom-table">
+          <!-- ID -->
+          <ng-container matColumnDef="id">
+            <th mat-header-cell *matHeaderCellDef>No</th>
+            <td mat-cell *matCellDef="let row; let i = index">{{ i + 1 }}</td>
+          </ng-container>
+
+          <!-- Invoice No -->
+          <ng-container matColumnDef="invoice_no">
+            <th mat-header-cell *matHeaderCellDef>Invoice No</th>
+            <td mat-cell *matCellDef="let row">{{ row.invoice_no }}</td>
+          </ng-container>
+
+          <!-- Total Amount -->
+          <ng-container matColumnDef="total">
+            <th mat-header-cell *matHeaderCellDef>Total</th>
+            <td mat-cell *matCellDef="let row">${{ row.total | number:'1.2-2' }}</td>
+          </ng-container>
+
+          <!-- Method -->
+          <ng-container matColumnDef="payment_method">
+            <th mat-header-cell *matHeaderCellDef>Method</th>
+            <td mat-cell *matCellDef="let row">
+              <span class="method-badge">{{ row.payment_method }}</span>
+            </td>
+          </ng-container>
+
+          <!-- Created At Date -->
+          <ng-container matColumnDef="created_at">
+            <th mat-header-cell *matHeaderCellDef>Created At</th>
+            <td mat-cell *matCellDef="let row">{{ row.created_at | date:'mediumDate' }}</td>
+          </ng-container>
+
+          <!-- Status / Action Column -->
+          <ng-container matColumnDef="status">
+            <th mat-header-cell *matHeaderCellDef>Status / Actions</th>
+            <td mat-cell *matCellDef="let row">
+              <div class="d-flex align-items-center gap-8 flex-wrap">
+                <span class="badge bg-primary">{{ row.status }}</span>
+                <span class="badge" [ngClass]="row.payment_status === 'SUCCESS' ? 'bg-success' : 'bg-warning'">
+                  {{ row.payment_status }}
+                </span>
+
+                <button mat-icon-button color="accent" matTooltip="View details" (click)="viewOrderDetails(row)">
+                  <mat-icon class="text-info">visibility</mat-icon>
+                </button>
+
+                <button mat-icon-button color="primary" matTooltip="Download PDF" (click)="downloadInvoice(row)">
+                  <mat-icon class="text-success">download</mat-icon>
+                </button>
+
+                @if (perm.hasRoleAction('canDelete')) {
+                  <button mat-icon-button color="warn" matTooltip="Delete Order" (click)="deleteOrder(row)">
+                    <mat-icon class="text-danger">delete</mat-icon>
+                  </button>
+                }
+              </div>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="['id', 'invoice_no', 'total', 'payment_method', 'created_at', 'status']"></tr>
+          <tr mat-row *matRowDef="let row; columns: ['id', 'invoice_no', 'total', 'payment_method', 'created_at', 'status']"></tr>
+
+          <tr class="mat-no-data-row" *matNoDataRow>
+            <td class="no-data-cell" colspan="6">No orders found</td>
+          </tr>
+        </table>
+      </div>
+    </mat-card-content>
+  }
+</mat-card>

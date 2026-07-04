@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { forkJoin } from 'rxjs';
 import { ReactiveFormsModule, FormsModule, FormGroup, FormBuilder, Validators } from '@angular/forms';
 import { CommonModule } from '@angular/common';
@@ -87,6 +87,7 @@ export class MenuBar implements OnInit {
     private fb: FormBuilder,
     private commonService: CommonService,
     private alert: AlertService,
+    private cdr: ChangeDetectorRef,
     public perm: PermissionService
   ) {
     this.MenuForm = fb.group({
@@ -108,6 +109,7 @@ export class MenuBar implements OnInit {
           ...item,
           status: item.isActive ? 'Active' : 'Inactive'
         }));
+        this.cdr.detectChanges();
       },
       error: (err: any) => {
         console.error('Failed to load menus:', err);

@@ -107,3 +107,400 @@
   top: -19px;
   right: 3px;
 }
+
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// LIQUID GLASS LOGIN — scoped under .lg-auth-root (login page only)
+// ═══════════════════════════════════════════════════════════════════════════════
+
+// ── Root: full-viewport dark mesh background ──────────────────────────────────
+.lg-auth-root {
+  position: relative;
+  min-height: 100vh;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background:
+    radial-gradient(ellipse at 15% 15%, #1e0a50 0%, transparent 55%),
+    radial-gradient(ellipse at 85% 85%, #0d2a5e 0%, transparent 55%),
+    radial-gradient(ellipse at 50% 50%, #0a0f1e 0%, #060d1a 100%);
+  font-family: 'Inter', 'Plus Jakarta Sans', sans-serif;
+}
+
+// ── Animated background orbs ──────────────────────────────────────────────────
+.lg-orb {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+  will-change: transform;
+}
+
+.lg-orb-1 {
+  width: 600px;
+  height: 600px;
+  top: -200px;
+  left: -160px;
+  background: radial-gradient(circle, rgba(124, 92, 252, 0.28) 0%, transparent 65%);
+  filter: blur(60px);
+  animation: lg-float-a 12s ease-in-out infinite;
+}
+
+.lg-orb-2 {
+  width: 500px;
+  height: 500px;
+  bottom: -160px;
+  right: -120px;
+  background: radial-gradient(circle, rgba(56, 132, 255, 0.25) 0%, transparent 65%);
+  filter: blur(70px);
+  animation: lg-float-b 15s ease-in-out infinite;
+}
+
+.lg-orb-3 {
+  width: 360px;
+  height: 360px;
+  top: 40%;
+  right: 5%;
+  background: radial-gradient(circle, rgba(167, 80, 220, 0.18) 0%, transparent 65%);
+  filter: blur(55px);
+  animation: lg-float-c 18s ease-in-out infinite;
+}
+
+@keyframes lg-float-a {
+  0%,  100% { transform: translate(0, 0) scale(1); }
+  33%        { transform: translate(30px, -40px) scale(1.06); }
+  66%        { transform: translate(-20px, 25px) scale(0.96); }
+}
+
+@keyframes lg-float-b {
+  0%,  100% { transform: translate(0, 0) scale(1); }
+  40%        { transform: translate(-35px, -25px) scale(1.04); }
+  70%        { transform: translate(20px, 30px) scale(0.97); }
+}
+
+@keyframes lg-float-c {
+  0%,  100% { transform: translate(0, 0); }
+  50%        { transform: translate(-25px, -35px) scale(1.08); }
+}
+
+// ── Card wrapper (centered, max-width, fade-in) ───────────────────────────────
+.lg-card-wrap {
+  position: relative;
+  z-index: 10;
+  width: 100%;
+  max-width: 460px;
+  padding: 24px 20px;
+  animation: lg-fade-up 0.75s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes lg-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(36px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// ── Glass Card ────────────────────────────────────────────────────────────────
+.lg-card {
+  background: rgba(255, 255, 255, 0.055);
+  backdrop-filter: blur(40px) saturate(180%);
+  -webkit-backdrop-filter: blur(40px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 28px;
+  padding: 48px 40px 40px;
+  box-shadow:
+    0 2px 0 rgba(255, 255, 255, 0.08) inset,   // top highlight
+    0 24px 64px rgba(0, 0, 0, 0.55),
+    0 0 0 1px rgba(124, 92, 252, 0.08);
+
+  @media (max-width: 480px) {
+    padding: 36px 24px 32px;
+    border-radius: 22px;
+  }
+}
+
+// ── Logo Area ─────────────────────────────────────────────────────────────────
+.lg-logo-area {
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+.lg-logo-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 14px 20px;
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 18px;
+  margin-bottom: 22px;
+  text-decoration: none;
+  transition: background 0.3s ease, box-shadow 0.3s ease, transform 0.25s ease;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.11);
+    box-shadow: 0 0 28px rgba(124, 92, 252, 0.35);
+    transform: scale(1.03);
+  }
+}
+
+.lg-logo-img {
+  width: 130px;
+  height: auto;
+  display: block;
+}
+
+.lg-title {
+  font-size: 26px;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0 0 6px;
+  letter-spacing: -0.4px;
+  line-height: 1.2;
+}
+
+.lg-subtitle {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.45);
+  margin: 0;
+  letter-spacing: 0.1px;
+}
+
+// ── Form layout ───────────────────────────────────────────────────────────────
+.lg-form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.lg-field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.lg-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.75);
+  letter-spacing: 0.25px;
+  display: block;
+}
+
+.lg-required {
+  color: #f87171;
+  margin-left: 2px;
+}
+
+// ── Glass overrides for Angular Material mat-form-field ───────────────────────
+.lg-mat-field {
+  // Shrink the bottom gap so errors sit tighter
+  .mat-mdc-form-field-subscript-wrapper {
+    padding: 0 !important;
+  }
+
+  // Outline border segments
+  .mdc-notched-outline__leading,
+  .mdc-notched-outline__notch,
+  .mdc-notched-outline__trailing {
+    border-color: rgba(255, 255, 255, 0.14) !important;
+    background-color: rgba(255, 255, 255, 0.05) !important;
+    transition: border-color 0.25s ease, box-shadow 0.25s ease !important;
+  }
+
+  .mdc-notched-outline__leading  { border-radius: 14px 0 0 14px !important; }
+  .mdc-notched-outline__trailing { border-radius: 0 14px 14px 0 !important; }
+
+  // Focused state — violet glow ring
+  &.mat-focused {
+    .mdc-notched-outline__leading,
+    .mdc-notched-outline__notch,
+    .mdc-notched-outline__trailing {
+      border-color: rgba(124, 92, 252, 0.9) !important;
+      border-width: 1.5px !important;
+    }
+
+    // Glow effect via the trailing (full-width pseudo approach)
+    .mdc-notched-outline {
+      filter: drop-shadow(0 0 8px rgba(124, 92, 252, 0.35));
+    }
+  }
+
+  // Input text colour
+  .mat-mdc-input-element {
+    color: #ffffff !important;
+    caret-color: #a78bfa !important;
+
+    &::placeholder {
+      color: rgba(255, 255, 255, 0.3) !important;
+    }
+  }
+
+  // Suffix icon button (visibility toggle)
+  .mat-mdc-icon-button {
+    color: rgba(255, 255, 255, 0.45) !important;
+    transition: color 0.2s ease;
+
+    &:hover {
+      color: rgba(255, 255, 255, 0.85) !important;
+    }
+  }
+
+  // Error text
+  .mat-mdc-form-field-error {
+    color: #f87171 !important;
+    font-size: 12px !important;
+    font-weight: 500 !important;
+  }
+
+  // Floating label (if ever shown)
+  .mat-mdc-floating-label {
+    color: rgba(255, 255, 255, 0.45) !important;
+  }
+
+  // Hover state border brightening
+  &:hover:not(.mat-focused) {
+    .mdc-notched-outline__leading,
+    .mdc-notched-outline__notch,
+    .mdc-notched-outline__trailing {
+      border-color: rgba(255, 255, 255, 0.24) !important;
+    }
+  }
+}
+
+// ── Remember + Forgot row ─────────────────────────────────────────────────────
+.lg-row-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+
+  // Checkbox track/thumb glass tint
+  .mdc-checkbox__native-control:enabled:not(:checked):not(:indeterminate)
+    ~ .mdc-checkbox__background {
+    border-color: rgba(255, 255, 255, 0.35) !important;
+  }
+
+  .mdc-label {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 13px;
+    font-family: 'Inter', 'Plus Jakarta Sans', sans-serif;
+  }
+}
+
+.lg-forgot-link {
+  font-size: 13px;
+  font-weight: 600;
+  color: #a78bfa;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: color 0.2s ease, text-shadow 0.2s ease;
+
+  &:hover {
+    color: #c4b5fd;
+    text-shadow: 0 0 12px rgba(167, 139, 250, 0.5);
+  }
+}
+
+// ── Primary gradient button ───────────────────────────────────────────────────
+.lg-btn-primary {
+  position: relative;
+  width: 100%;
+  padding: 15px 24px;
+  background: linear-gradient(135deg, #7c5cfc 0%, #5b8dee 100%);
+  border: none;
+  border-radius: 14px;
+  color: #ffffff;
+  font-size: 15px;
+  font-weight: 600;
+  font-family: 'Inter', 'Plus Jakarta Sans', sans-serif;
+  letter-spacing: 0.2px;
+  cursor: pointer;
+  overflow: hidden;
+  transition: transform 0.25s ease, box-shadow 0.25s ease, opacity 0.2s ease;
+  margin-top: 6px;
+  box-shadow:
+    0 4px 20px rgba(124, 92, 252, 0.45),
+    0 1px 0 rgba(255, 255, 255, 0.2) inset;
+
+  &:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow:
+      0 10px 32px rgba(124, 92, 252, 0.6),
+      0 1px 0 rgba(255, 255, 255, 0.2) inset;
+  }
+
+  &:active:not(:disabled) {
+    transform: translateY(0px);
+    box-shadow: 0 4px 16px rgba(124, 92, 252, 0.4);
+  }
+
+  &:disabled,
+  &.lg-loading {
+    opacity: 0.65;
+    cursor: not-allowed;
+    transform: none !important;
+    box-shadow: none;
+  }
+
+  &:hover:not(:disabled) .lg-btn-shimmer {
+    animation: lg-shimmer 0.75s ease forwards;
+  }
+}
+
+.lg-btn-text {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.lg-btn-shimmer {
+  position: absolute;
+  top: 0;
+  left: -120%;
+  width: 60%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.28) 50%,
+    transparent 100%
+  );
+  transform: skewX(-18deg);
+  z-index: 1;
+}
+
+@keyframes lg-shimmer {
+  from { left: -120%; }
+  to   { left: 160%;  }
+}
+
+// ── Footer ────────────────────────────────────────────────────────────────────
+.lg-footer-text {
+  text-align: center;
+  margin: 28px 0 0;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.45);
+  font-family: 'Inter', 'Plus Jakarta Sans', sans-serif;
+}
+
+.lg-link {
+  color: #a78bfa;
+  font-weight: 600;
+  text-decoration: none;
+  margin-left: 4px;
+  transition: color 0.2s ease, text-shadow 0.2s ease;
+
+  &:hover {
+    color: #c4b5fd;
+    text-shadow: 0 0 12px rgba(167, 139, 250, 0.5);
+  }
+}

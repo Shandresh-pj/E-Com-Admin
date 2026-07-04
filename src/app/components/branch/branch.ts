@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { ChangeDetectorRef, Component } from '@angular/core';
 import { ReactiveFormsModule, FormsModule, FormGroup, FormBuilder, Validators } from '@angular/forms';
 import { MatOption } from '@angular/material/autocomplete';
 import { MatButtonModule } from '@angular/material/button';
@@ -69,6 +69,7 @@ export class Branch {
     private authService:AuthService,
     private commonService:CommonService,
     private alert:AlertService,
+    private cdr: ChangeDetectorRef,
     public perm: PermissionService
   ){
     this.BranchForm = fb.group({
@@ -107,6 +108,7 @@ export class Branch {
           ...item,
           status: item.userRoles?.[0]?.user?.status || '-'
         }));
+        this.cdr.detectChanges();
       }
     })
   }

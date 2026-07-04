@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
@@ -73,6 +73,7 @@ export class RoleAccess implements OnInit {
      private alert: AlertService,
      public auth: AuthService,
      private permissionService: PermissionService,
+     private cdr: ChangeDetectorRef,
   ) {}
 
   ngOnInit(): void {
@@ -86,7 +87,7 @@ export class RoleAccess implements OnInit {
 
   loadRoles(): void {
     this.commonService.getApi('roles').subscribe({
-      next: (res: any) => { this.roles = res?.data ?? []; },
+      next: (res: any) => { this.roles = res?.data ?? []; this.cdr.detectChanges(); },
     });
   }
 
@@ -96,20 +97,21 @@ export class RoleAccess implements OnInit {
       next: (res: any) => {
         this.menus = res?.data ?? [];
         this.loading = false;
+        this.cdr.detectChanges();
       },
-      error: () => { this.loading = false; },
+      error: () => { this.loading = false; this.cdr.detectChanges(); },
     });
   }
 
   loadCompanies(): void {
     this.commonService.getApi('companies').subscribe({
-      next: (res: any) => { this.companies = res?.data ?? []; },
+      next: (res: any) => { this.companies = res?.data ?? []; this.cdr.detectChanges(); },
     });
   }
 
   loadBranches(): void {
     this.commonService.getApi('branches').subscribe({
-      next: (res: any) => { this.allBranches = res?.data ?? []; },
+      next: (res: any) => { this.allBranches = res?.data ?? []; this.cdr.detectChanges(); },
     });
   }
 
@@ -251,9 +253,11 @@ export class RoleAccess implements OnInit {
         assignments.forEach(a => this.assignedMap.set(a.permission_id, a.id));
         this.workingAssignments = new Set(this.assignedMap.keys());
         this.matrixLoading = false;
+        this.cdr.detectChanges();
       },
       error: (err: any) => {
         this.matrixLoading = false;
+        this.cdr.detectChanges();
         this.alert.error(err?.error?.message ?? 'Failed to load permissions');
       },
     });
@@ -405,6 +409,7 @@ export class RoleAccess implements OnInit {
       },
       complete: () => {
         this.matrixLoading = false;
+        this.cdr.detectChanges();
         const failed = results.filter(r => r && r.error);
         if (failed.length > 0) {
           const errorMsg = failed.map(f => f.message || 'Unknown error').join(', ');
@@ -417,6 +422,7 @@ export class RoleAccess implements OnInit {
       },
       error: (err: any) => {
         this.matrixLoading = false;
+        this.cdr.detectChanges();
         this.alert.error(err?.error?.message ?? 'Failed to save changes');
         this.tryLoadMatrix();
       }

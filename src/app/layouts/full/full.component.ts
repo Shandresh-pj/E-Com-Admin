@@ -211,7 +211,11 @@ export class FullComponent implements OnInit {
           navCap: 'Settings'
         });
 
-        if (this.authService.isSuperAdmin()) {
+        // Only add the hardcoded "Menu Bar" if the API menus didn't already
+        // supply it, otherwise the sidebar shows two identical entries.
+        const norm = (r?: string) => (r || '').toLowerCase().replace(/\/+$/, '');
+        const hasMenuBar = dynamicItems.some(d => norm(d.route) === '/components/menubar');
+        if (this.authService.isSuperAdmin() && !hasMenuBar) {
           finalItems.push({
             displayName: 'Menu Bar',
             iconName: 'list-check',
@@ -227,7 +231,15 @@ export class FullComponent implements OnInit {
           bgcolor: colorToggle ? 'primary' : 'success'
         });
 
-        this.navItems = finalItems;
+        // Final guard: drop any duplicate routes (keep first occurrence).
+        const seen = new Set<string>();
+        this.navItems = finalItems.filter(it => {
+          if (!it.route) return true; // keep captions
+          const key = norm(it.route);
+          if (seen.has(key)) return false;
+          seen.add(key);
+          return true;
+        });
       },
       error: (err) => {
         console.error('Failed to load dynamic menus', err);

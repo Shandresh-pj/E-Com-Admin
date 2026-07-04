@@ -2,31 +2,32 @@
 
 html,
 body {
-    height: 100%;
-    margin: 0;
+  height: 100%;
+  margin: 0;
 }
+
 .Cancel_Button {
-    --mdc-outlined-button-outline-color: #ff4d4f;
-    --mdc-outlined-button-outline-width: 1px;
-    --mdc-outlined-button-label-text-color: #ff4d4f;
-    --mat-mdc-button-persistent-ripple-color: #ff4d4f;
-    --mat-mdc-button-ripple-color: rgba(255, 77, 79, 0.12);
+  --mdc-outlined-button-outline-color: #ff4d4f;
+  --mdc-outlined-button-outline-width: 1px;
+  --mdc-outlined-button-label-text-color: #ff4d4f;
+  --mat-mdc-button-persistent-ripple-color: #ff4d4f;
+  --mat-mdc-button-ripple-color: rgba(255, 77, 79, 0.12);
 }
 
 .header-container {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+@media (max-width: 768px) {
+  .header-container {
+    flex-wrap: wrap;
+  }
+
+  .header-container button {
     width: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
   }
-  
-  @media (max-width: 768px) {
-    .header-container {
-      flex-wrap: wrap;
-    }
-  
-    .header-container button {
-      width: 100%;
-    }
-  }
+}

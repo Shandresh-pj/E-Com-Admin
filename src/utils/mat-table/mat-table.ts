@@ -11,139 +11,136 @@ import {
 
 import { CommonModule } from '@angular/common';
 
-import {MatPaginator,MatPaginatorModule} from '@angular/material/paginator';
+import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
 
-import {MatSort,MatSortModule} from '@angular/material/sort';
+import { MatSort, MatSortModule } from '@angular/material/sort';
 
-import {MatTableDataSource,MatTableModule,MatTable as MatTableDirective} from '@angular/material/table';
+import { MatTableDataSource, MatTableModule, MatTable as MatTableDirective } from '@angular/material/table';
 
-import {MatButtonModule} from '@angular/material/button';
+import { MatButtonModule } from '@angular/material/button';
 
-import {MatIconModule} from '@angular/material/icon';
+import { MatIconModule } from '@angular/material/icon';
 
-import {MatFormFieldModule} from '@angular/material/form-field';
+import { MatFormFieldModule } from '@angular/material/form-field';
 
-import {MatInputModule} from '@angular/material/input';
+import { MatInputModule } from '@angular/material/input';
 
 import { AlertService } from 'src/app/Securities/Services/alert.service';
 
 
 @Component({
-selector:'app-mat-table',
-standalone:true,
-imports:[
-CommonModule,
-MatTableModule,
-MatPaginatorModule,
-MatSortModule,
-MatButtonModule,
-MatIconModule,
-MatFormFieldModule,
-MatInputModule
-],
-templateUrl:'./mat-table.html',
-styleUrl:'./mat-table.scss'
+  selector: 'app-mat-table',
+  standalone: true,
+  imports: [
+    CommonModule,
+    MatTableModule,
+    MatPaginatorModule,
+    MatSortModule,
+    MatButtonModule,
+    MatIconModule,
+    MatFormFieldModule,
+    MatInputModule
+  ],
+  templateUrl: './mat-table.html',
+  styleUrl: './mat-table.scss'
 })
 
-export class MatTable implements OnInit,AfterViewInit{
+export class MatTable implements OnInit, AfterViewInit {
 
 
-@Input() columns:any[]=[];
+  @Input() columns: any[] = [];
 
 
-@Input() showAction=true;
+  @Input() showAction = true;
 
-@Input() showEdit=true;
+  @Input() showEdit = true;
 
-@Input() showDelete=true;
+  @Input() showDelete = true;
 
-@Input() showView=false;
+  @Input() showView = false;
 
-@Input() Extra_Column = true;
-
-
-@Input() set tableData( value:any[]){
-this.dataSource.data=value || [];
-this.refreshView();
-}
-
-@ViewChild(MatTableDirective) table!: MatTableDirective<any>;
-
-constructor(private cdr: ChangeDetectorRef, private alert: AlertService) {}
-
-@Output()editClick=new EventEmitter<any>();
-
-@Output()AddClick=new EventEmitter<any>();
-@Output()ViewClick=new EventEmitter<any>();
+  @Input() Extra_Column = true;
 
 
-@Output()deleteClick=new EventEmitter<any>();
-@Input() extraColumnHeader: string = '';
-displayedColumns:string[]=[];
-dataSource=new MatTableDataSource<any>();
+  @Input() set tableData(value: any[]) {
+    this.dataSource.data = value || [];
+    this.refreshView();
+  }
+
+  @ViewChild(MatTableDirective) table!: MatTableDirective<any>;
+
+  constructor(private cdr: ChangeDetectorRef, private alert: AlertService) { }
+
+  @Output() editClick = new EventEmitter<any>();
+
+  @Output() AddClick = new EventEmitter<any>();
+  @Output() ViewClick = new EventEmitter<any>();
 
 
-@ViewChild(MatPaginator)paginator!:MatPaginator;
+  @Output() deleteClick = new EventEmitter<any>();
+  @Input() extraColumnHeader: string = '';
+  displayedColumns: string[] = [];
+  dataSource = new MatTableDataSource<any>();
 
-@ViewChild(MatSort)sort!:MatSort;
 
+  @ViewChild(MatPaginator) paginator!: MatPaginator;
 
-
-ngOnInit(){
-
-this.displayedColumns=this.columns.map(x=>x.columnDef);
-
-if(this.showAction){this.displayedColumns.push('action');}
-if(this.Extra_Column){this.displayedColumns.push('Companies');}
-
-}
+  @ViewChild(MatSort) sort!: MatSort;
 
 
 
-ngAfterViewInit(){
-this.dataSource.paginator=
-this.paginator;
-this.dataSource.sort=
-this.sort;
-this.refreshView();
-}
+  ngOnInit() {
 
-private refreshView(){
-this.cdr.markForCheck();
-setTimeout(()=>{
-try{
-this.table?.renderRows();
-this.cdr.detectChanges();
-}catch{
-this.cdr.markForCheck();
-}
-});
-}
+    this.displayedColumns = this.columns.map(x => x.columnDef);
 
+    if (this.showAction) { this.displayedColumns.push('action'); }
+    if (this.Extra_Column) { this.displayedColumns.push('Companies'); }
 
-applyFilter(event:Event){
-
-const value=(event.target as HTMLInputElement).value;
-
-this.dataSource.filter=value.trim().toLowerCase();
-}
+  }
 
 
 
-edit(row:any){
-this.editClick.emit(row);
-}
+  ngAfterViewInit() {
+    this.dataSource.paginator =
+      this.paginator;
+    this.dataSource.sort =
+      this.sort;
+    this.refreshView();
+  }
 
-Add(row:any){
-  this.AddClick.emit(row);
-}
-View(row:any){
-  this.ViewClick.emit(row);
-}
+  private refreshView() {
+    setTimeout(() => {
+      try {
+        this.table?.renderRows();
+      } catch {}
+      this.cdr.detectChanges();
+    });
+  }
 
 
-delete(row:any){
-this.deleteClick.emit(row);
-}
+  applyFilter(event: Event) {
+
+    const value = (event.target as HTMLInputElement).value;
+
+    this.dataSource.filter = value.trim().toLowerCase();
+  }
+
+
+
+  edit(row: any) {
+    this.editClick.emit(row);
+  }
+
+  Add(row: any) {
+    this.AddClick.emit(row);
+  }
+  View(row: any) {
+    this.ViewClick.emit(row);
+  }
+
+
+  delete(row: any) {
+    this.deleteClick.emit(row);
+  }
 
 }

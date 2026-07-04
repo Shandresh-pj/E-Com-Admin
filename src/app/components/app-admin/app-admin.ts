@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { ChangeDetectorRef, Component } from '@angular/core';
 import { ReactiveFormsModule, FormsModule, FormGroup, FormBuilder, Validators } from '@angular/forms';
 import { MatOption } from '@angular/material/autocomplete';
 import { MatButtonModule } from '@angular/material/button';
@@ -75,6 +75,7 @@ constructor(private fb: FormBuilder,
   private authService:AuthService,
   private commonService:CommonService,
   private alert:AlertService,
+  private cdr: ChangeDetectorRef,
   public perm: PermissionService
 ){
   const user = this.authService.getUser();
@@ -129,8 +130,8 @@ cancelComapny(){
 getUser(){
   this.commonService.getApi('companies').subscribe({
     next:(res:any) => {
-      this.Users = res?.data
-      console.log('Users', this.Users)
+      this.Users = res?.data;
+      this.cdr.detectChanges();
     }
   })
 }

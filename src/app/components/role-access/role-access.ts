@@ -11,7 +11,7 @@ import { CommonModule } from '@angular/common';
 import { AlertService } from 'src/app/Securities/Services/alert.service';
 import { AuthService } from 'src/app/Securities/Services/auth.service';
 import { CommonService } from 'src/app/Securities/Services/common.service';
-import { forkJoin, of, switchMap, map, concat } from 'rxjs';
+import { of, concat } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { PermissionService } from 'src/app/Securities/Services/permissions.service';
 
@@ -315,107 +315,59 @@ export class RoleAccess implements OnInit {
 
     this.matrixLoading = true;
 
-    const grantsAndUpdates: any[] = [];
-    const revokes: any[] = [];
+    const requests: any[] = [];
 
-    // Find permissions to grant or update (all checked items in workingAssignments)
+    // Grant newly-checked permissions (CREATE only — backend sets status ACTIVE on creation)
     for (const permId of this.workingAssignments) {
+      if (this.assignedMap.has(permId)) continue; // already exists, no change needed
+
       const details = this.findPermissionDetails(permId);
-      if (details) {
-        const payload = {
-          role_id: this.selectedRoleId,
-          permission_id: permId,
-          company_id: this.selectedCompanyId,
-          branch_id: this.selectedBranchId,
-          user_id: this.selectedUserId,
-          canApprove: details.action === 'APPROVE',
-        };
+      if (!details) continue;
 
-        const existingRecordId = this.assignedMap.get(permId);
+      const payload = {
+        role_id: this.selectedRoleId,
+        permission_id: permId,
+        company_id: this.selectedCompanyId,
+        branch_id: this.selectedBranchId,
+        user_id: this.selectedUserId,
+        canApprove: details.action === 'APPROVE',
+      };
 
-        if (!existingRecordId) {
-          // 1. Create case: POST to role-access, then POST/PUT to role-access/{id}/approve
-          grantsAndUpdates.push(
-            this.commonService.postApi('role-access', payload).pipe(
-              switchMap((res: any) => {
-                const recordId = res?.data?.id;
-                if (recordId) {
-                  return this.commonService.postApi(`role-access/${recordId}/approve`, { status: 'ACTIVE' }).pipe(
-                    map(() => res),
-                    catchError(() => {
-                      // Fallback to PUT in case of POST method mismatch on approve
-                      return this.commonService.putApi(`role-access/${recordId}/approve`, { status: 'ACTIVE' }).pipe(
-                        map(() => res)
-                      );
-                    })
-                  );
-                }
-                return of(res);
-              }),
-              catchError((err) => {
-                console.error(`Failed to grant and approve permission ${permId}`, err);
-                return of({ error: true, id: permId, message: err?.error?.message });
-              })
-            )
-          );
-        } else {
-          // 2. Update case: PUT to role-access/{id}, then POST/PUT to role-access/{id}/approve
-          grantsAndUpdates.push(
-            this.commonService.putApi(`role-access/${existingRecordId}`, payload).pipe(
-              switchMap((res: any) => {
-                return this.commonService.postApi(`role-access/${existingRecordId}/approve`, { status: 'ACTIVE' }).pipe(
-                  map(() => res),
-                  catchError(() => {
-                    return this.commonService.putApi(`role-access/${existingRecordId}/approve`, { status: 'ACTIVE' }).pipe(
-                      map(() => res)
-                    );
-                  })
-                );
-              }),
-              catchError((err) => {
-                console.error(`Failed to update and approve permission ${permId}`, err);
-                return of({ error: true, id: permId, message: err?.error?.message });
-              })
-            )
-          );
-        }
-      }
+      requests.push(
+        this.commonService.postApi('role-access', payload).pipe(
+          catchError((err) => of({ error: true, id: permId, message: err?.error?.message }))
+        )
+      );
     }
 
-    // Find permissions to revoke (unchecked items)
+    // Revoke unchecked permissions (DELETE)
     for (const [permId, recordId] of this.assignedMap.entries()) {
-      if (!this.workingAssignments.has(permId)) {
-        revokes.push(
-          this.commonService.deleteApi(`role-access/${recordId}`).pipe(
-            catchError((err) => {
-              console.error(`Failed to revoke permission ${permId}`, err);
-              return of({ error: true, id: permId, message: err?.error?.message });
-            })
-          )
-        );
-      }
+      if (this.workingAssignments.has(permId)) continue; // still checked, keep it
+
+      requests.push(
+        this.commonService.deleteApi(`role-access/${recordId}`).pipe(
+          catchError((err) => of({ error: true, id: permId, message: err?.error?.message }))
+        )
+      );
     }
 
-    const allRequests = [...grantsAndUpdates, ...revokes];
-    if (allRequests.length === 0) {
+    if (requests.length === 0) {
       this.matrixLoading = false;
+      this.cdr.detectChanges();
       return;
     }
 
     const results: any[] = [];
-    concat(...allRequests).subscribe({
-      next: (res: any) => {
-        results.push(res);
-      },
+    concat(...requests).subscribe({
+      next: (res: any) => { results.push(res); },
       complete: () => {
         this.matrixLoading = false;
         this.cdr.detectChanges();
         const failed = results.filter(r => r && r.error);
         if (failed.length > 0) {
-          const errorMsg = failed.map(f => f.message || 'Unknown error').join(', ');
-          this.alert.error(`Some changes failed: ${errorMsg}`);
+          this.alert.error(`Some changes failed: ${failed.map(f => f.message || 'Unknown error').join(', ')}`);
         } else {
-          this.alert.success('Permissions updated and approved successfully');
+          this.alert.success('Permissions updated successfully');
           this.permissionService.permissionsUpdated.set(Date.now());
         }
         this.tryLoadMatrix();

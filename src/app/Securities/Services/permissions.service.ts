@@ -29,7 +29,7 @@ export class PermissionService {
     if (permissions.includes('FULL_ACCESS')) return true;
 
     return permissions.some(
-      (p: any) => p.menu_id === menuId && p.action === action
+      (p: any) => (p.menu_id ?? p.menu?.id) === menuId && p.action === action
     );
   }
 

@@ -18,17 +18,16 @@ export const RoleGuard: CanActivateFn = (route, state) => {
     return true;
   }
 
-  // 1. Static UserType check
-  const expectedRoles: string[] = route.data['roles'] ?? [];
-
-  if (expectedRoles.length && !expectedRoles.includes(user?.userType)) {
-    router.navigate(['/unauthorized']);
-    return false;
+  // 1. Dynamic permission check — if the DB grants this page, allow it
+  //    regardless of the static roles array (permission overrides role matrix)
+  const url = state.url.split('?')[0];
+  if (permissionService.hasPagePermission(url)) {
+    return true;
   }
 
-  // 2. Dynamic DB Menu check
-  const url = state.url.split('?')[0];
-  if (!permissionService.hasPagePermission(url)) {
+  // 2. Static UserType fallback — for pages not covered by dynamic permissions
+  const expectedRoles: string[] = route.data['roles'] ?? [];
+  if (expectedRoles.length && !expectedRoles.includes(user?.userType)) {
     router.navigate(['/unauthorized']);
     return false;
   }

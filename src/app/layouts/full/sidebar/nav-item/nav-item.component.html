@@ -8,7 +8,11 @@
     expanded: expanded,
     disabled: item.disabled
   }" class="menu-list-item {{ item.bgcolor }}">
+  @if(item.iconName && item.iconName.indexOf('bi-') === 0) {
+  <i [class]="'bi ' + item.iconName + ' routeIcon'" matListItemIcon style="font-size: 1.25rem; display: flex; align-items: center; justify-content: center;"></i>
+  } @else {
   <i-tabler class="routeIcon" name="{{ item.iconName }}" matListItemIcon></i-tabler>
+  }
   <span class="hide-menu">{{ item.displayName }}</span>
   
   @if(item.children && item.children.length) {
@@ -31,7 +35,11 @@
 
 @if(!item.navCap && item.external) {
 <mat-list-item (click)="openExternalLink(item.route)" class="menu-list-item {{ item.bgcolor }}" target="_blank">
+  @if(item.iconName && item.iconName.indexOf('bi-') === 0) {
+  <i [class]="'bi ' + item.iconName + ' routeIcon'" matListItemIcon style="font-size: 1.25rem; display: flex; align-items: center; justify-content: center;"></i>
+  } @else {
   <i-tabler class="routeIcon" name="{{ item.iconName }}" matListItemIcon></i-tabler>
+  }
   <span class="hide-menu">{{ item.displayName }} </span>
   @if(item.chip) {
   <span>

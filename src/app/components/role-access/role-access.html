@@ -1,20 +1,25 @@
-<mat-card class="cardWithShadow theme-card">
+<mat-card class="cardWithShadow theme-card premium-card">
 
-  <mat-card-header>
+  <mat-card-header class="premium-header">
     <div class="header-container">
-      <mat-card-title class="m-b-0">Permission Management</mat-card-title>
+      <mat-card-title class="m-b-0 premium-title">
+        <i class="shield-icon">🛡️</i> Permission Management Matrix
+      </mat-card-title>
+      <mat-card-subtitle class="premium-subtitle">
+        Configure access control across different system levels and roles dynamically
+      </mat-card-subtitle>
     </div>
   </mat-card-header>
 
-  <mat-card-content class="b-t-1">
+  <mat-card-content class="premium-content b-t-1">
 
-    <!-- Scope selectors -->
-    <div class="row m-b-16">
+    <!-- Scope selectors Grid -->
+    <div class="row m-b-24 selectors-grid">
 
       <!-- 1. Access level -->
-      <div class="col-lg-3 col-md-6">
-        <mat-label class="f-w-600 m-b-8 d-block">Access Level</mat-label>
-        <mat-form-field appearance="outline" class="w-100">
+      <div class="col-lg-3 col-md-6 col-sm-12 select-item">
+        <mat-label class="f-w-600 m-b-8 d-block selector-label">Access Level</mat-label>
+        <mat-form-field appearance="outline" class="w-100 custom-field">
           <mat-select [(ngModel)]="selectedLevel" (ngModelChange)="onLevelChange()"
             placeholder="Select level">
             @for (level of levels; track level.value) {
@@ -26,9 +31,9 @@
 
       <!-- 2. Admin (company) -->
       @if (needsCompany) {
-      <div class="col-lg-3 col-md-6">
-        <mat-label class="f-w-600 m-b-8 d-block">Admin</mat-label>
-        <mat-form-field appearance="outline" class="w-100">
+      <div class="col-lg-3 col-md-6 col-sm-12 select-item animate-fade-in">
+        <mat-label class="f-w-600 m-b-8 d-block selector-label">Admin</mat-label>
+        <mat-form-field appearance="outline" class="w-100 custom-field">
           <mat-select [(ngModel)]="selectedCompanyId" (ngModelChange)="onCompanyChange()"
             placeholder="Select admin">
             @for (company of companies; track company.id) {
@@ -39,11 +44,11 @@
       </div>
       }
 
-      <!-- 3. Branch (auto-selected when only one exists) -->
+      <!-- 3. Branch -->
       @if (needsBranch && selectedCompanyId) {
-      <div class="col-lg-3 col-md-6">
-        <mat-label class="f-w-600 m-b-8 d-block">Branch</mat-label>
-        <mat-form-field appearance="outline" class="w-100">
+      <div class="col-lg-3 col-md-6 col-sm-12 select-item animate-fade-in">
+        <mat-label class="f-w-600 m-b-8 d-block selector-label">Branch</mat-label>
+        <mat-form-field appearance="outline" class="w-100 custom-field">
           <mat-select [(ngModel)]="selectedBranchId" (ngModelChange)="onBranchChange()"
             placeholder="Select branch">
             @for (branch of companyBranches; track branch.id) {
@@ -52,16 +57,16 @@
           </mat-select>
         </mat-form-field>
         @if (companyBranches.length === 0) {
-        <p class="f-s-12 text-muted">This admin has no branches yet.</p>
+        <p class="f-s-12 text-warning m-t-4">This admin has no branches yet.</p>
         }
       </div>
       }
 
       <!-- 4. Employee -->
       @if (needsEmployee && selectedBranchId) {
-      <div class="col-lg-3 col-md-6">
-        <mat-label class="f-w-600 m-b-8 d-block">Employee</mat-label>
-        <mat-form-field appearance="outline" class="w-100">
+      <div class="col-lg-3 col-md-6 col-sm-12 select-item animate-fade-in">
+        <mat-label class="f-w-600 m-b-8 d-block selector-label">Employee</mat-label>
+        <mat-form-field appearance="outline" class="w-100 custom-field">
           <mat-select [(ngModel)]="selectedUserId" (ngModelChange)="onEmployeeChange()"
             placeholder="Select employee">
             @for (entry of branchUsers; track entry.user.id) {
@@ -72,17 +77,20 @@
           </mat-select>
         </mat-form-field>
         @if (branchUsers.length === 0) {
-        <p class="f-s-12 text-muted">No users are assigned to this branch.</p>
+        <p class="f-s-12 text-warning m-t-4">No users are assigned to this branch.</p>
         }
       </div>
       }
 
-      <!-- 5. Role (locked for employee level — comes from their assignment) -->
-      @if (selectedLevel && !needsEmployee) {
-      <div class="col-lg-3 col-md-6">
-        <mat-label class="f-w-600 m-b-8 d-block">Role</mat-label>
-        <mat-form-field appearance="outline" class="w-100">
+      <!-- 5. Role (disabled/locked for employee level — comes from their assignment) -->
+      @if (selectedLevel) {
+      <div class="col-lg-3 col-md-6 col-sm-12 select-item animate-fade-in">
+        <mat-label class="f-w-600 m-b-8 d-block selector-label">
+          Role @if (roleLocked) { <span class="lock-badge">(Auto-assigned)</span> }
+        </mat-label>
+        <mat-form-field appearance="outline" class="w-100 custom-field" [class.locked-field]="roleLocked">
           <mat-select [(ngModel)]="selectedRoleId" (ngModelChange)="onRoleChange()"
+            [disabled]="roleLocked"
             placeholder="Select role">
             @for (role of roles; track role.id) {
             <mat-option [value]="role.id">{{ role.name }}</mat-option>
@@ -94,60 +102,78 @@
 
     </div>
 
-    <!-- Loading menus -->
+    <!-- Loading spinner -->
     @if (loading) {
-    <div class="d-flex justify-content-center p-24">
-      <mat-spinner diameter="40"></mat-spinner>
+    <div class="d-flex justify-content-center align-items-center p-48 spinner-container">
+      <mat-spinner diameter="50" color="primary"></mat-spinner>
+      <span class="loading-text">Loading permissions configuration...</span>
     </div>
     }
 
     <!-- Incomplete scope -->
     @else if (!scopeReady) {
-    <div class="text-center text-muted p-24">
-      <p class="f-s-16">Select an access level and complete the selections above to configure permissions.</p>
+    <div class="text-center text-muted p-48 scope-placeholder-card animate-fade-in">
+      <div class="placeholder-icon">⚙️</div>
+      <p class="f-s-16 placeholder-text">Select an access level and complete the configurations above to load the permission matrix.</p>
     </div>
     }
 
     <!-- Matrix -->
     @else {
-    <div class="permission-matrix-wrapper">
+    <div class="permission-matrix-wrapper animate-slide-up">
 
       @if (matrixLoading) {
       <div class="matrix-overlay">
-        <mat-spinner diameter="32"></mat-spinner>
+        <mat-spinner diameter="40" color="accent"></mat-spinner>
+        <span class="overlay-text">Updating permissions...</span>
       </div>
       }
 
-      <p class="f-w-600 m-b-12 f-s-15">
-        Permissions for: <span class="text-primary">{{ scopeSummary }}</span>
-      </p>
+      <!-- Scope Summary Banner -->
+      <div class="scope-summary-banner">
+        <div class="banner-title-sec">
+          <span class="dot-indicator animate-pulse"></span>
+          <span class="summary-label">Configuring Scope:</span>
+        </div>
+        <div class="summary-chips">
+          @for (part of scopeSummary.split('  ·  '); track part) {
+            <span class="summary-chip shadow-sm">{{ part }}</span>
+          }
+        </div>
+      </div>
 
-      <div class="table-responsive">
+      <!-- Matrix Table -->
+      <div class="table-responsive shadow-sm border-radius-8">
         <table class="permission-table">
           <thead>
             <tr>
-              <th class="menu-col">Menu</th>
+              <th class="menu-col">Menu / Module</th>
               @for (action of actions; track action) {
-              <th class="action-col">{{ action }}</th>
+              <th [class]="'action-col col-' + action.toLowerCase()">
+                <span class="action-header-badge">{{ action }}</span>
+              </th>
               }
             </tr>
           </thead>
           <tbody>
             @for (menu of menus; track menu.id) {
-            <tr>
-              <td class="menu-name">{{ menu.name }}</td>
+            <tr class="menu-row">
+              <td class="menu-name">
+                <span class="menu-bullet"></span>
+                {{ menu.name }}
+              </td>
               @for (action of actions; track action) {
-              <td class="action-cell">
+              <td [class]="'action-cell cell-' + action.toLowerCase()">
                 @if (getPermission(menu, action)) {
-                <mat-checkbox
-                  [checked]="isAssigned(menu, action)"
-                  [disabled]="isPending(menu, action)"
-                  (change)="toggle(menu, action)"
-                  color="primary"
-                  [matTooltip]="isAssigned(menu, action) ? 'Revoke ' + action : 'Grant ' + action">
-                </mat-checkbox>
+                <div class="checkbox-wrapper">
+                  <mat-checkbox
+                    [checked]="isWorkingAssigned(menu, action)"
+                    (change)="toggle(menu, action)"
+                    color="primary">
+                  </mat-checkbox>
+                </div>
                 } @else {
-                <span class="text-muted">—</span>
+                <span class="no-permission-indicator" matTooltip="Action not available for this menu">—</span>
                 }
               </td>
               }
@@ -157,10 +183,34 @@
         </table>
       </div>
 
-      <p class="f-s-12 text-muted m-t-12">
-        More specific levels override broader ones (Employee &gt; Branch &gt; Admin &gt; Global).
-        Changes take effect on the user's next login.
-      </p>
+      <!-- Sticky Action Bar when Changes exist -->
+      @if (hasChanges) {
+      <div class="matrix-action-bar animate-slide-up shadow-lg">
+        <div class="action-bar-content">
+          <span class="action-text">
+            ⚠️ You have unsaved changes in this permission matrix.
+          </span>
+          <div class="action-buttons">
+            <button mat-stroked-button color="warn" class="cancel-btn" (click)="cancelChanges()">
+              Cancel
+            </button>
+            <button mat-flat-button color="primary" class="confirm-btn" (click)="saveChanges()">
+              Confirm & Update
+            </button>
+          </div>
+        </div>
+      </div>
+      }
+
+      <div class="matrix-footer">
+        <div class="footer-info">
+          <span class="info-icon">ℹ️</span>
+          <p class="f-s-13 text-muted">
+            More specific levels override broader ones (Employee &gt; Branch &gt; Admin &gt; Global).
+            Changes take effect on the user's next login.
+          </p>
+        </div>
+      </div>
 
     </div>
     }

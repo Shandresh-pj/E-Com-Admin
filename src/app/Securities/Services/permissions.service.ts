@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, signal } from '@angular/core';
 import { SessionService } from './session.service';
 import { AuthService } from './auth.service';
 import { ROLE_PERMISSIONS, UserType } from '../Models/role-access';
@@ -7,6 +7,8 @@ import { ROLE_PERMISSIONS, UserType } from '../Models/role-access';
   providedIn: 'root'
 })
 export class PermissionService {
+
+  permissionsUpdated = signal<number>(0);
 
   constructor(
     private session: SessionService,
@@ -41,18 +43,24 @@ export class PermissionService {
     return ROLE_PERMISSIONS[userType]?.[action] ?? false;
   }
 
-  /**
-   * Page-level check: can the user navigate to the given URL path?
-   * Checks the `menus` array from the JWT.
-   */
   hasPagePermission(path: string): boolean {
     if (this.auth.isSuperAdmin()) return true;
+
+    const defaultPaths = [
+      '/dashboard',
+      '/components/change-password',
+      '/components/profile',
+      '/unauthorized'
+    ];
+    if (defaultPaths.some(p => path === p || path.startsWith(p + '/'))) {
+      return true;
+    }
 
     const menus = this.session.getMenus();
 
     if (!Array.isArray(menus) || !menus.length) return false;
     if (menus.includes('ALL')) return true;
 
-    return menus.some((m: any) => m.path === path);
+    return menus.some((m: any) => m.path === path || path.startsWith(m.path + '/'));
   }
 }

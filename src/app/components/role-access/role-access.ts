@@ -11,6 +11,9 @@ import { CommonModule } from '@angular/common';
 import { AlertService } from 'src/app/Securities/Services/alert.service';
 import { AuthService } from 'src/app/Securities/Services/auth.service';
 import { CommonService } from 'src/app/Securities/Services/common.service';
+import { forkJoin, of, switchMap, map, concat } from 'rxjs';
+import { catchError } from 'rxjs/operators';
+import { PermissionService } from 'src/app/Securities/Services/permissions.service';
 
 type AccessLevel = 'global' | 'admin' | 'branch' | 'employee';
 
@@ -56,6 +59,9 @@ export class RoleAccess implements OnInit {
   /** permission_id → role_permission record id  (used for DELETE) */
   assignedMap = new Map<number, number>();
 
+  /** Local working set of assigned permission_ids (used for batch changes) */
+  workingAssignments = new Set<number>();
+
   /** permission_ids currently being toggled (debounce + optimistic UI) */
   pending = new Set<number>();
 
@@ -63,9 +69,10 @@ export class RoleAccess implements OnInit {
   matrixLoading = false;
 
   constructor(
-    private commonService: CommonService,
-    private alert: AlertService,
-    public auth: AuthService,
+     private commonService: CommonService,
+     private alert: AlertService,
+     public auth: AuthService,
+     private permissionService: PermissionService,
   ) {}
 
   ngOnInit(): void {
@@ -170,7 +177,7 @@ export class RoleAccess implements OnInit {
     this.selectedCompanyId = null;
     this.selectedBranchId = null;
     this.selectedUserId = null;
-    if (this.selectedLevel === 'employee') this.selectedRoleId = null;
+    this.selectedRoleId = null;
     this.clearMatrix();
     this.tryLoadMatrix();
   }
@@ -208,6 +215,7 @@ export class RoleAccess implements OnInit {
 
   private clearMatrix(): void {
     this.assignedMap.clear();
+    this.workingAssignments.clear();
     this.pending.clear();
   }
 
@@ -241,6 +249,7 @@ export class RoleAccess implements OnInit {
         const assignments: any[] = res?.data ?? [];
         this.assignedMap.clear();
         assignments.forEach(a => this.assignedMap.set(a.permission_id, a.id));
+        this.workingAssignments = new Set(this.assignedMap.keys());
         this.matrixLoading = false;
       },
       error: (err: any) => {
@@ -255,54 +264,162 @@ export class RoleAccess implements OnInit {
     return menu.permissions?.find((p: any) => p.action === action);
   }
 
-  isAssigned(menu: any, action: string): boolean {
+  isWorkingAssigned(menu: any, action: string): boolean {
     const perm = this.getPermission(menu, action);
-    return perm ? this.assignedMap.has(perm.id) : false;
+    return perm ? this.workingAssignments.has(perm.id) : false;
   }
 
-  isPending(menu: any, action: string): boolean {
-    const perm = this.getPermission(menu, action);
-    return perm ? this.pending.has(perm.id) : false;
+  get hasChanges(): boolean {
+    if (this.workingAssignments.size !== this.assignedMap.size) return true;
+    for (const key of this.workingAssignments) {
+      if (!this.assignedMap.has(key)) return true;
+    }
+    return false;
   }
 
   toggle(menu: any, action: string): void {
+    const perm = this.getPermission(menu, action);
+    if (!perm) return;
+
+    if (this.workingAssignments.has(perm.id)) {
+      this.workingAssignments.delete(perm.id);
+    } else {
+      this.workingAssignments.add(perm.id);
+    }
+  }
+
+  cancelChanges(): void {
+    this.workingAssignments = new Set(this.assignedMap.keys());
+  }
+
+  private findPermissionDetails(permId: number): { menu: any; action: string } | null {
+    for (const menu of this.menus) {
+      if (menu.permissions) {
+        for (const action of this.actions) {
+          const p = menu.permissions.find((x: any) => x.action === action);
+          if (p && p.id === permId) {
+            return { menu, action };
+          }
+        }
+      }
+    }
+    return null;
+  }
+
+  saveChanges(): void {
     if (!this.scopeReady) return;
 
-    const perm = this.getPermission(menu, action);
-    if (!perm || this.pending.has(perm.id)) return;
+    this.matrixLoading = true;
 
-    this.pending.add(perm.id);
+    const grantsAndUpdates: any[] = [];
+    const revokes: any[] = [];
 
-    if (this.assignedMap.has(perm.id)) {
-      const recordId = this.assignedMap.get(perm.id)!;
-      this.commonService.deleteApi(`role-access/${recordId}`).subscribe({
-        next: () => {
-          this.assignedMap.delete(perm.id);
-          this.pending.delete(perm.id);
-        },
-        error: (err: any) => {
-          this.alert.error(err?.error?.message ?? 'Failed to revoke permission');
-          this.pending.delete(perm.id);
-          if (err?.status === 404) this.tryLoadMatrix(); // stale state — resync
-        },
-      });
-    } else {
-      this.commonService.postApi('role-access', {
-        role_id: this.selectedRoleId,
-        permission_id: perm.id,
-        canApprove: action === 'APPROVE',
-        ...this.scopePayload(),
-      }).subscribe({
-        next: (res: any) => {
-          this.assignedMap.set(perm.id, res.data.id);
-          this.pending.delete(perm.id);
-        },
-        error: (err: any) => {
-          this.alert.error(err?.error?.message ?? 'Failed to grant permission');
-          this.pending.delete(perm.id);
-          if (err?.status === 409) this.tryLoadMatrix(); // already assigned — resync
-        },
-      });
+    // Find permissions to grant or update (all checked items in workingAssignments)
+    for (const permId of this.workingAssignments) {
+      const details = this.findPermissionDetails(permId);
+      if (details) {
+        const payload = {
+          role_id: this.selectedRoleId,
+          permission_id: permId,
+          company_id: this.selectedCompanyId,
+          branch_id: this.selectedBranchId,
+          user_id: this.selectedUserId,
+          canApprove: details.action === 'APPROVE',
+        };
+
+        const existingRecordId = this.assignedMap.get(permId);
+
+        if (!existingRecordId) {
+          // 1. Create case: POST to role-access, then POST/PUT to role-access/{id}/approve
+          grantsAndUpdates.push(
+            this.commonService.postApi('role-access', payload).pipe(
+              switchMap((res: any) => {
+                const recordId = res?.data?.id;
+                if (recordId) {
+                  return this.commonService.postApi(`role-access/${recordId}/approve`, { status: 'ACTIVE' }).pipe(
+                    map(() => res),
+                    catchError(() => {
+                      // Fallback to PUT in case of POST method mismatch on approve
+                      return this.commonService.putApi(`role-access/${recordId}/approve`, { status: 'ACTIVE' }).pipe(
+                        map(() => res)
+                      );
+                    })
+                  );
+                }
+                return of(res);
+              }),
+              catchError((err) => {
+                console.error(`Failed to grant and approve permission ${permId}`, err);
+                return of({ error: true, id: permId, message: err?.error?.message });
+              })
+            )
+          );
+        } else {
+          // 2. Update case: PUT to role-access/{id}, then POST/PUT to role-access/{id}/approve
+          grantsAndUpdates.push(
+            this.commonService.putApi(`role-access/${existingRecordId}`, payload).pipe(
+              switchMap((res: any) => {
+                return this.commonService.postApi(`role-access/${existingRecordId}/approve`, { status: 'ACTIVE' }).pipe(
+                  map(() => res),
+                  catchError(() => {
+                    return this.commonService.putApi(`role-access/${existingRecordId}/approve`, { status: 'ACTIVE' }).pipe(
+                      map(() => res)
+                    );
+                  })
+                );
+              }),
+              catchError((err) => {
+                console.error(`Failed to update and approve permission ${permId}`, err);
+                return of({ error: true, id: permId, message: err?.error?.message });
+              })
+            )
+          );
+        }
+      }
     }
+
+    // Find permissions to revoke (unchecked items)
+    for (const [permId, recordId] of this.assignedMap.entries()) {
+      if (!this.workingAssignments.has(permId)) {
+        revokes.push(
+          this.commonService.deleteApi(`role-access/${recordId}`).pipe(
+            catchError((err) => {
+              console.error(`Failed to revoke permission ${permId}`, err);
+              return of({ error: true, id: permId, message: err?.error?.message });
+            })
+          )
+        );
+      }
+    }
+
+    const allRequests = [...grantsAndUpdates, ...revokes];
+    if (allRequests.length === 0) {
+      this.matrixLoading = false;
+      return;
+    }
+
+    const results: any[] = [];
+    concat(...allRequests).subscribe({
+      next: (res: any) => {
+        results.push(res);
+      },
+      complete: () => {
+        this.matrixLoading = false;
+        const failed = results.filter(r => r && r.error);
+        if (failed.length > 0) {
+          const errorMsg = failed.map(f => f.message || 'Unknown error').join(', ');
+          this.alert.error(`Some changes failed: ${errorMsg}`);
+        } else {
+          this.alert.success('Permissions updated and approved successfully');
+          this.permissionService.permissionsUpdated.set(Date.now());
+        }
+        this.tryLoadMatrix();
+      },
+      error: (err: any) => {
+        this.matrixLoading = false;
+        this.alert.error(err?.error?.message ?? 'Failed to save changes');
+        this.tryLoadMatrix();
+      }
+    });
   }
 }

@@ -1,5 +1,5 @@
 import { BreakpointObserver, MediaMatcher } from '@angular/cdk/layout';
-import { Component, OnInit, ViewChild, ViewEncapsulation } from '@angular/core';
+import { Component, OnInit, ViewChild, ViewEncapsulation, effect } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { MatSidenav, MatSidenavContent } from '@angular/material/sidenav';
 import { CoreService } from 'src/app/services/core.service';
@@ -18,6 +18,9 @@ import { AppNavItemComponent } from './sidebar/nav-item/nav-item.component';
 import { navItems } from './sidebar/sidebar-data';
 import { AppTopstripComponent } from './top-strip/topstrip.component';
 import { AuthService } from 'src/app/Securities/Services/auth.service';
+import { CommonService } from 'src/app/Securities/Services/common.service';
+import { PermissionService } from 'src/app/Securities/Services/permissions.service';
+import { NavItem } from './sidebar/nav-item/nav-item';
 
 
 const MOBILE_VIEW = 'screen and (max-width: 768px)';
@@ -41,7 +44,7 @@ const TABLET_VIEW = 'screen and (min-width: 769px) and (max-width: 1024px)';
   encapsulation: ViewEncapsulation.None
 })
 export class FullComponent implements OnInit {
-  navItems = this.buildNavItems();
+  navItems: NavItem[] = [];
 
   /**
    * Sidebar items come from two sources, merged:
@@ -60,14 +63,14 @@ export class FullComponent implements OnInit {
         .map((m: any) => String(m.path).toLowerCase().replace(/\/+$/, ''))
     );
 
-    const visible = navItems.filter(item => {
+    const visible = navItems.filter((item: NavItem) => {
       if (!item.route) return true; // captions are pruned below
       if (grantedPaths.has(item.route.toLowerCase().replace(/\/+$/, ''))) return true;
       if (!item.roles || !item.roles.length) return true; // universal items
       return item.roles.includes(this.authService.getUserType());
     });
 
-    return visible.filter((item, i) => {
+    return visible.filter((item: NavItem, i: number) => {
       if (!item.navCap) return true;
       for (let j = i + 1; j < visible.length; j++) {
         if (visible[j].navCap) break;
@@ -99,6 +102,8 @@ export class FullComponent implements OnInit {
     private router: Router,
     private breakpointObserver: BreakpointObserver,
     private authService: AuthService,
+    private commonService: CommonService,
+    private permissionService: PermissionService,
   ) {
     this.htmlElement = document.querySelector('html')!;
     this.layoutChangesSubscription = this.breakpointObserver
@@ -112,8 +117,11 @@ export class FullComponent implements OnInit {
         }
       });
 
-    // Initialize project theme with options
-
+    // Reactively reload menus whenever permissions are updated
+    effect(() => {
+      this.permissionService.permissionsUpdated();
+      this.loadDynamicMenus();
+    });
 
     // This is for scroll to top
     this.router.events
@@ -123,7 +131,10 @@ export class FullComponent implements OnInit {
       });
   }
 
-  ngOnInit(): void { }
+  ngOnInit(): void {
+    this.navItems = this.buildNavItems();
+    this.loadDynamicMenus();
+  }
 
   ngOnDestroy() {
     this.layoutChangesSubscription.unsubscribe();
@@ -147,6 +158,91 @@ export class FullComponent implements OnInit {
     this.isCollapsedWidthFixed = !this.isOver;
     this.options.sidenavOpened = isOpened;
     //this.settings.setOptions(this.options);
+  }
+
+  loadDynamicMenus(): void {
+    this.commonService.getApi('menus').subscribe({
+      next: (res: any) => {
+        const apiMenus = res?.data ?? [];
+        
+        // Filter active menus and those the user has READ permission for
+        const allowedMenus = apiMenus.filter((m: any) => {
+          if (!m.isActive) return false;
+          return this.permissionService.hasPermission(m.id, 'READ');
+        });
+
+        // Now map allowed menus to NavItems
+        let colorToggle = true;
+        const dynamicItems: NavItem[] = allowedMenus.map((m: any) => {
+          const bgcolor = colorToggle ? 'primary' : 'success';
+          colorToggle = !colorToggle;
+
+          return {
+            displayName: m.name,
+            route: m.path,
+            iconName: this.mapIcon(m.icon || 'bi-grid-fill'),
+            bgcolor: bgcolor
+          };
+        });
+
+        // Build the final navItems list
+        // Always include Dashboard at the top
+        const finalItems: NavItem[] = [
+          {
+            navCap: 'Home',
+          },
+          {
+            displayName: 'Dashboard',
+            iconName: 'layout-grid-add',
+            route: '/dashboard',
+            bgcolor: 'primary',
+          }
+        ];
+
+        if (dynamicItems.length > 0) {
+          finalItems.push({
+            navCap: 'Modules'
+          });
+          finalItems.push(...dynamicItems);
+        }
+
+        // Always include Change Password at the bottom under Settings
+        finalItems.push(
+          {
+            navCap: 'Settings'
+          },
+          {
+            displayName: 'Change Password',
+            iconName: 'lock',
+            route: '/components/change-password',
+            bgcolor: colorToggle ? 'primary' : 'success'
+          }
+        );
+
+        this.navItems = finalItems;
+      },
+      error: (err) => {
+        console.error('Failed to load dynamic menus', err);
+      }
+    });
+  }
+
+  private mapIcon(icon: string): string {
+    const lowercase = String(icon).toLowerCase();
+    if (lowercase.startsWith('bi-') || lowercase.startsWith('bi ')) return icon;
+    if (lowercase.includes('dashboard') || lowercase === 'dashboard-icon') return 'bi-grid-fill';
+    if (lowercase.includes('admin') || lowercase === 'archive') return 'bi-archive-fill';
+    if (lowercase.includes('branch') || lowercase === 'badge') return 'bi-shop';
+    if (lowercase.includes('employee') || lowercase.includes('user')) return 'bi-people-fill';
+    if (lowercase.includes('role') || lowercase.includes('key')) return 'bi-key-fill';
+    if (lowercase.includes('product') || lowercase === 'box') return 'bi-box-seam-fill';
+    if (lowercase.includes('category')) return 'bi-tags-fill';
+    if (lowercase.includes('attribute') || lowercase === 'tag') return 'bi-tag-fill';
+    if (lowercase.includes('order') || lowercase === 'shopping-cart') return 'bi-cart-fill';
+    if (lowercase.includes('log') || lowercase.includes('list')) return 'bi-card-list';
+    if (lowercase.includes('status')) return 'bi-list-check';
+    if (lowercase.includes('lock') || lowercase.includes('password')) return 'bi-lock-fill';
+    return 'bi-' + icon;
   }
 
 }

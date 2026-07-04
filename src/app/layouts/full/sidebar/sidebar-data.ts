@@ -2,7 +2,7 @@ import { NavItem } from './nav-item/nav-item';
 import { UserType } from 'src/app/Securities/Models/role-access';
 
 const SA = UserType.SUPER_ADMIN;
-const A  = UserType.ADMIN;
+const A = UserType.ADMIN;
 const BR = UserType.BRANCH;
 const BM = UserType.BRANCH_MANAGER;
 const SK = UserType.SHOPKEEPER;
@@ -31,7 +31,7 @@ export const navItems: NavItem[] = [
     roles: [SA, A],
   },
 
- {
+  {
     navCap: 'Branch',
     roles: [SA, A],
   },

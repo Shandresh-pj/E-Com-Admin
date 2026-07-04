@@ -1,0 +1,94 @@
+<mat-card class="cardWithShadow theme-card">
+  <mat-card-header>
+    <div class="header-container">
+      <mat-card-title class="m-b-0">Branch Stock Management</mat-card-title>
+      @if (!showForm && perm.hasRoleAction('canCreate')) {
+        <button mat-flat-button color="primary" (click)="toggleForm()">
+          <mat-icon class="icon-16 m-r-4">edit</mat-icon> Adjust Stock Level
+        </button>
+      }
+    </div>
+  </mat-card-header>
+
+  @if (showForm) {
+    <mat-card-content class="p-24 b-t-1">
+      <form [formGroup]="stockForm">
+        <div class="row">
+          <!-- Select Company -->
+          <div class="col-lg-4 col-md-6 col-sm-12 m-b-16">
+            <mat-label class="f-w-600 m-b-8 d-block">Company <span class="text-danger">*</span></mat-label>
+            <mat-form-field appearance="outline" class="w-100">
+              <mat-select formControlName="company_id" placeholder="Select Company">
+                @for(c of companies; track c.id) {
+                  <mat-option [value]="c.id">{{ c.name }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+          </div>
+
+          <!-- Select Branch Name -->
+          <div class="col-lg-4 col-md-6 col-sm-12 m-b-16">
+            <mat-label class="f-w-600 m-b-8 d-block">Branch <span class="text-danger">*</span></mat-label>
+            <mat-form-field appearance="outline" class="w-100">
+              <mat-select formControlName="branch_name" placeholder="Select Branch">
+                @for(b of branches; track b.id) {
+                  <mat-option [value]="b.name">{{ b.name }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+          </div>
+
+          <!-- Select Product -->
+          <div class="col-lg-4 col-md-6 col-sm-12 m-b-16">
+            <mat-label class="f-w-600 m-b-8 d-block">Product <span class="text-danger">*</span></mat-label>
+            <mat-form-field appearance="outline" class="w-100">
+              <mat-select formControlName="product_id" placeholder="Select Product">
+                @for(p of products; track p.id) {
+                  <mat-option [value]="p.id">{{ p.name }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+          </div>
+
+          <!-- Quantity Input -->
+          <div class="col-lg-4 col-md-6 col-sm-12 m-b-16">
+            <mat-label class="f-w-600 m-b-8 d-block">Quantity <span class="text-danger">*</span></mat-label>
+            <mat-form-field appearance="outline" class="w-100">
+              <input matInput type="number" formControlName="quantity" placeholder="Enter quantity Adjust amount">
+            </mat-form-field>
+          </div>
+
+          <!-- Action Select -->
+          <div class="col-lg-4 col-md-6 col-sm-12 m-b-16">
+            <mat-label class="f-w-600 m-b-8 d-block">Adjustment Action <span class="text-danger">*</span></mat-label>
+            <mat-form-field appearance="outline" class="w-100">
+              <mat-select formControlName="action">
+                <mat-option value="ADD">ADD Stock</mat-option>
+                <mat-option value="REMOVE">REMOVE Stock</mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+        </div>
+
+        <div class="m-t-16">
+          <button mat-stroked-button class="me-3" (click)="toggleForm()" [disabled]="loading">Cancel</button>
+          <button mat-flat-button color="primary" (click)="submitStockUpdate()" [disabled]="loading || stockForm.invalid">
+            Submit
+          </button>
+        </div>
+      </form>
+    </mat-card-content>
+  } @else {
+    <mat-card-content class="b-t-1">
+      <div class="table-responsive">
+        <app-mat-table 
+          [columns]="tableColumns" 
+          [tableData]="branchStocks" 
+          [showAction]="false" 
+          [showView]="false"
+          [Extra_Column]="false">
+        </app-mat-table>
+      </div>
+    </mat-card-content>
+  }
+</mat-card>

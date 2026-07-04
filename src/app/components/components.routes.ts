@@ -15,6 +15,12 @@ import { Product } from './product/product';
 import { Order } from './order/order';
 import { ChangePassword } from './change-password/change-password';
 import { AuditLogs } from './audit-logs/audit-logs';
+import { Alerts } from './alerts/alerts';
+import { Attendance } from './attendance/attendance';
+import { BranchStocks } from './branch-stocks/branch-stocks';
+import { Stocks } from './stocks/stocks';
+import { Payroll } from './payroll/payroll';
+import { Leave } from './leave/leave';
 import { RoleGuard } from '../Securities/Guard/role.guard';
 import { UserType } from '../Securities/Models/role-access';
 
@@ -22,6 +28,7 @@ const SA = UserType.SUPER_ADMIN;
 const A  = UserType.ADMIN;
 const BM = UserType.BRANCH_MANAGER;
 const SK = UserType.SHOPKEEPER;
+const EM = UserType.EMPLOYEE;
 
 export const ComponentsRoutes: Routes = [
 
@@ -231,6 +238,66 @@ export const ComponentsRoutes: Routes = [
       urls: [
         { title: 'Audit Logs', url: '/components/audit-logs' }
       ]
+    }
+  },
+  {
+    path: 'alerts',
+    component: Alerts,
+    canActivate: [RoleGuard],
+    data: {
+      title: 'Alerts',
+      roles: [SA, A, BM],
+      urls: [{ title: 'Alerts', url: '/components/alerts' }]
+    }
+  },
+  {
+    path: 'attendance',
+    component: Attendance,
+    canActivate: [RoleGuard],
+    data: {
+      title: 'Attendance',
+      roles: [SA, A, BM, SK, EM],
+      urls: [{ title: 'Attendance', url: '/components/attendance' }]
+    }
+  },
+  {
+    path: 'branch-stocks',
+    component: BranchStocks,
+    canActivate: [RoleGuard],
+    data: {
+      title: 'Branch Stocks',
+      roles: [SA, A, BM, SK],
+      urls: [{ title: 'Branch Stocks', url: '/components/branch-stocks' }]
+    }
+  },
+  {
+    path: 'stocks',
+    component: Stocks,
+    canActivate: [RoleGuard],
+    data: {
+      title: 'Stocks',
+      roles: [SA, A, BM, SK],
+      urls: [{ title: 'Stocks', url: '/components/stocks' }]
+    }
+  },
+  {
+    path: 'payroll',
+    component: Payroll,
+    canActivate: [RoleGuard],
+    data: {
+      title: 'Payroll',
+      roles: [SA, A, BM],
+      urls: [{ title: 'Payroll', url: '/components/payroll' }]
+    }
+  },
+  {
+    path: 'leave',
+    component: Leave,
+    canActivate: [RoleGuard],
+    data: {
+      title: 'Leave',
+      roles: [SA, A, BM, SK, EM],
+      urls: [{ title: 'Leave', url: '/components/leave' }]
     }
   }
 

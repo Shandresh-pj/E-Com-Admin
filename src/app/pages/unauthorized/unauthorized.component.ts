@@ -3,260 +3,490 @@ import { Router } from '@angular/router';
 import { MaterialModule } from 'src/app/material.module';
 
 @Component({
-  selector: 'app-unauthorized',
-  standalone: true,
-  imports: [MaterialModule],
-  template: `
-    <div class="unauthorized-container">
+    selector: 'app-unauthorized',
+    standalone: true,
+    imports: [MaterialModule],
 
-      <div class="floating-circle circle1"></div>
-      <div class="floating-circle circle2"></div>
-      <div class="floating-circle circle3"></div>
+    template: `
 
-      <div class="card-container">
+<div class="page">
 
-        <div class="icon-wrapper">
-          <mat-icon class="lock-icon">lock</mat-icon>
-        </div>
+  <!-- Animated background -->
 
-        <h1 class="error-code">403</h1>
+  <div class="bg-gradient"></div>
 
-        <h2 class="title">
-          Access Denied
-        </h2>
+  <div class="blob blob1"></div>
+  <div class="blob blob2"></div>
+  <div class="blob blob3"></div>
 
-        <p class="description">
-          You do not have permission to access this page.
-          Please contact your administrator or return to dashboard.
-        </p>
+  <div class="content">
 
-        <button
-          mat-flat-button
-          color="primary"
-          (click)="goToDashboard()"
-        >
-          Go To Dashboard
-        </button>
+      <!-- Left section -->
+
+      <div class="left-section">
+
+          <div class="badge">
+              <mat-icon>security</mat-icon>
+              Authorization Required
+          </div>
+
+          <h1 class="error-code">
+              403
+          </h1>
+
+          <h2>
+              Access Restricted
+          </h2>
+
+          <p>
+
+            The page or resource you are trying to access
+            is restricted based on your permissions.
+            Contact your administrator if you believe
+            this is a mistake.
+
+          </p>
+
+          <div class="buttons">
+
+              <button
+                  mat-flat-button
+                  color="primary"
+                  (click)="goToDashboard()"
+              >
+                  Dashboard
+              </button>
+
+              <button
+                  mat-stroked-button
+                  (click)="goBack()"
+              >
+                  Go Back
+              </button>
+
+          </div>
 
       </div>
 
-    </div>
-  `,
-  styles: [`
-  
-  .unauthorized-container{
-      position:relative;
-      min-height:100vh;
-      display:flex;
-      justify-content:center;
-      align-items:center;
-      overflow:hidden;
 
-      background:linear-gradient(
-          135deg,
-          #0f172a,
-          #1e293b,
-          #334155
-      );
-      padding:20px;
-  }
+      <!-- Right section -->
 
-  .card-container{
-      position:relative;
-      z-index:10;
+      <div class="right-section">
 
-      width:100%;
-      max-width:500px;
+          <div class="lock-container">
 
-      padding:40px;
-      border-radius:24px;
+              <div class="ring"></div>
 
-      background:rgba(255,255,255,0.1);
-      backdrop-filter:blur(18px);
+              <mat-icon class="lock-icon">
+                  lock
+              </mat-icon>
 
-      box-shadow:
-      0 8px 30px rgba(0,0,0,0.4);
+          </div>
 
-      text-align:center;
+      </div>
 
-      animation:fadeIn 1s ease;
-  }
+  </div>
 
-  .icon-wrapper{
-      width:100px;
-      height:100px;
+</div>
 
-      margin:auto;
+`,
 
-      display:flex;
-      justify-content:center;
-      align-items:center;
+    styles: [`
 
-      border-radius:50%;
+:host{
+display:block;
+height:100%;
+}
 
-      background:rgba(255,255,255,.15);
 
-      animation:pulse 2s infinite;
-  }
+.page{
 
-  .lock-icon{
-      font-size:50px;
-      width:50px;
-      height:50px;
-      color:#ff5252;
-  }
+position:relative;
+overflow:hidden;
 
-  .error-code{
-      margin-top:25px;
-      font-size:80px;
-      font-weight:800;
-      color:#fff;
-      margin-bottom:10px;
+min-height:100vh;
 
-      animation:slideDown 1s;
-  }
+display:flex;
+justify-content:center;
+align-items:center;
 
-  .title{
-      color:#ff5252;
-      margin-bottom:15px;
-      font-size:32px;
-      font-weight:600;
-  }
+padding:30px;
 
-  .description{
-      color:#ddd;
-      margin-bottom:30px;
-      line-height:1.6;
-      font-size:16px;
-  }
+background:#020617;
+}
 
-  button{
-      width:100%;
-      height:50px;
-      border-radius:30px;
-      font-size:16px;
-  }
 
-  .floating-circle{
-      position:absolute;
-      border-radius:50%;
-      background:rgba(255,255,255,.08);
-      animation:float 8s infinite ease-in-out;
-  }
+/* Background */
 
-  .circle1{
-      width:250px;
-      height:250px;
-      top:-60px;
-      left:-60px;
-  }
+.bg-gradient{
 
-  .circle2{
-      width:150px;
-      height:150px;
-      right:10%;
-      bottom:15%;
-      animation-delay:2s;
-  }
+position:absolute;
+inset:0;
 
-  .circle3{
-      width:100px;
-      height:100px;
-      bottom:5%;
-      left:20%;
-      animation-delay:4s;
-  }
+background:
 
-  @keyframes pulse{
-      0%{
-          transform:scale(1);
-      }
+radial-gradient(
+circle at top left,
+rgba(99,102,241,.4),
+transparent 35%
+),
 
-      50%{
-          transform:scale(1.1);
-      }
+radial-gradient(
+circle at bottom right,
+rgba(236,72,153,.3),
+transparent 40%
+);
 
-      100%{
-          transform:scale(1);
-      }
-  }
+}
 
-  @keyframes float{
-      0%{
-          transform:translateY(0);
-      }
 
-      50%{
-          transform:translateY(-25px);
-      }
+.blob{
 
-      100%{
-          transform:translateY(0);
-      }
-  }
+position:absolute;
+border-radius:50%;
+filter:blur(80px);
 
-  @keyframes slideDown{
-      from{
-          transform:translateY(-40px);
-          opacity:0;
-      }
+animation:move 18s infinite alternate;
 
-      to{
-          transform:translateY(0);
-          opacity:1;
-      }
-  }
+}
 
-  @keyframes fadeIn{
-      from{
-          opacity:0;
-          transform:scale(.9);
-      }
+.blob1{
 
-      to{
-          opacity:1;
-          transform:scale(1);
-      }
-  }
+width:300px;
+height:300px;
 
-  /* Mobile responsiveness */
+background:#6366f1;
 
-  @media(max-width:768px){
+top:-100px;
+left:-100px;
+}
 
-      .card-container{
-          padding:30px 20px;
-      }
+.blob2{
 
-      .error-code{
-          font-size:60px;
-      }
+width:250px;
+height:250px;
 
-      .title{
-          font-size:26px;
-      }
+background:#ec4899;
 
-      .description{
-          font-size:14px;
-      }
+right:-80px;
+bottom:20%;
+}
 
-      .icon-wrapper{
-          width:80px;
-          height:80px;
-      }
+.blob3{
 
-      .lock-icon{
-          font-size:40px;
-      }
-  }
+width:200px;
+height:200px;
 
-  `]
+background:#06b6d4;
+
+bottom:-60px;
+left:35%;
+}
+
+
+/* Main content */
+
+.content{
+
+position:relative;
+z-index:10;
+
+display:grid;
+grid-template-columns:1fr 1fr;
+
+width:100%;
+max-width:1200px;
+
+padding:50px;
+
+border-radius:30px;
+
+background:
+rgba(255,255,255,.08);
+
+backdrop-filter:blur(25px);
+
+border:1px solid rgba(255,255,255,.15);
+
+box-shadow:
+
+0 30px 80px rgba(0,0,0,.4);
+
+}
+
+
+.left-section{
+
+display:flex;
+flex-direction:column;
+justify-content:center;
+
+padding-right:50px;
+}
+
+
+.badge{
+
+display:inline-flex;
+align-items:center;
+gap:8px;
+
+padding:10px 18px;
+
+border-radius:40px;
+
+width:fit-content;
+
+background:rgba(255,255,255,.1);
+
+color:#fff;
+
+margin-bottom:25px;
+
+font-size:13px;
+}
+
+
+.error-code{
+
+font-size:120px;
+font-weight:800;
+
+margin:0;
+
+line-height:1;
+
+background:linear-gradient(
+90deg,
+#6366f1,
+#ec4899
+);
+
+-webkit-background-clip:text;
+
+-webkit-text-fill-color:transparent;
+}
+
+
+h2{
+
+font-size:42px;
+
+color:white;
+
+margin-top:10px;
+margin-bottom:15px;
+}
+
+
+p{
+
+font-size:16px;
+line-height:1.8;
+
+color:#cbd5e1;
+
+max-width:500px;
+}
+
+
+.buttons{
+
+margin-top:30px;
+
+display:flex;
+gap:15px;
+flex-wrap:wrap;
+}
+
+
+button{
+
+height:50px;
+padding:0 30px;
+
+border-radius:40px;
+}
+
+
+/* Right side */
+
+.right-section{
+
+display:flex;
+justify-content:center;
+align-items:center;
+}
+
+
+.lock-container{
+
+position:relative;
+
+width:260px;
+height:260px;
+
+display:flex;
+justify-content:center;
+align-items:center;
+}
+
+
+.ring{
+
+position:absolute;
+
+width:100%;
+height:100%;
+
+border-radius:50%;
+
+border:2px solid
+rgba(255,255,255,.15);
+
+animation:rotate 12s linear infinite;
+}
+
+
+.lock-icon{
+
+font-size:110px;
+width:110px;
+height:110px;
+
+color:white;
+
+animation:pulse 2s infinite;
+}
+
+
+
+/* Animations */
+
+@keyframes rotate{
+
+from{
+transform:rotate(0deg);
+}
+
+to{
+transform:rotate(360deg);
+}
+
+}
+
+
+@keyframes pulse{
+
+50%{
+transform:scale(1.1);
+}
+
+}
+
+
+@keyframes move{
+
+100%{
+
+transform:
+translateY(60px)
+translateX(80px);
+
+}
+
+}
+
+
+/* Responsive */
+
+@media(max-width:992px){
+
+.content{
+
+grid-template-columns:1fr;
+
+text-align:center;
+
+padding:30px;
+}
+
+.left-section{
+
+padding-right:0;
+align-items:center;
+}
+
+.right-section{
+
+margin-top:40px;
+}
+
+.error-code{
+
+font-size:90px;
+}
+
+}
+
+
+@media(max-width:576px){
+
+.error-code{
+
+font-size:70px;
+}
+
+h2{
+
+font-size:28px;
+}
+
+p{
+
+font-size:14px;
+}
+
+.lock-container{
+
+width:180px;
+height:180px;
+}
+
+.lock-icon{
+
+font-size:80px;
+}
+
+.buttons{
+
+justify-content:center;
+}
+
+}
+
+`]
+
 })
+
 export class UnauthorizedComponent {
 
-  constructor(private router: Router) { }
+    constructor(
+        private router: Router
+    ) { }
 
-  goToDashboard() {
-    this.router.navigate(['/dashboard']);
-  }
+    goToDashboard() {
+
+        this.router.navigate(
+            ['/dashboard']
+        );
+
+    }
+
+    goBack() {
+
+        window.history.back();
+
+    }
 
 }

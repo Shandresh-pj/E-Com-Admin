@@ -163,9 +163,14 @@
                 </span>
                 
                 @if (row.status === 'PENDING' && perm.hasRoleAction('canApprove')) {
-                  <button mat-flat-button color="primary" class="btn-approve btn-xs" (click)="approveLeave(row)">
-                    <mat-icon class="icon-14 m-r-2">check</mat-icon> Approve
-                  </button>
+                  <div class="d-flex gap-8">
+                    <button mat-flat-button color="primary" class="btn-approve btn-xs" (click)="approveLeave(row)">
+                      <mat-icon class="icon-14 m-r-2">check</mat-icon> Approve
+                    </button>
+                    <button mat-flat-button color="warn" class="btn-xs" (click)="rejectLeave(row)">
+                      <mat-icon class="icon-14 m-r-2">close</mat-icon> Reject
+                    </button>
+                  </div>
                 }
               </div>
             </td>

@@ -1,5 +1,24 @@
 import { Routes } from '@angular/router';
 
+// import { AppAdmin } from './app-admin/app-admin';
+// import { Branch } from './branch/branch';
+// import { Employees } from './employees/employees';
+// import { Roles } from './roles/roles';
+// import { RoleAccess } from './role-access/role-access';
+// import { Profile } from './profile/profile';
+// import { MenuBar } from './menu-bar/menu-bar';
+// import { Status } from './status/status';
+// import { ProductAttribute } from './product-attribute/product-attribute';
+// import { AttributeValue } from './attribute-value/attribute-value';
+// import { Category } from './category/category';
+// import { Product } from './product/product';
+// import { Orders } from './orders/orders';
+// import { ChangePassword } from './change-password/change-password';
+// import { AuditLogs } from './audit-logs/audit-logs';
+// import { Alerts } from './alerts/alerts';
+// import { Attendance } from './attendance/attendance';
+// import { Routes } from '@angular/router';
+
 import { AppAdmin } from './app-admin/app-admin';
 import { Branch } from './branch/branch';
 import { Employees } from './employees/employees';
@@ -24,11 +43,12 @@ import { Leave } from './leave/leave';
 import { DeliveryTracking } from './delivery-tracking/delivery-tracking';
 import { Payments } from './payments/payments';
 import { Notifications } from './notifications/notifications';
+import { Workforce } from './workforce/workforce';
 import { RoleGuard } from '../Securities/Guard/role.guard';
 import { UserType } from '../Securities/Models/role-access';
 
 const SA = UserType.SUPER_ADMIN;
-const A  = UserType.ADMIN;
+const A = UserType.ADMIN;
 const BM = UserType.BRANCH_MANAGER;
 const SK = UserType.SHOPKEEPER;
 const EM = UserType.EMPLOYEE;
@@ -331,6 +351,16 @@ export const ComponentsRoutes: Routes = [
     data: {
       title: 'Notifications',
       urls: [{ title: 'Notifications', url: '/components/notifications' }]
+    }
+  },
+  {
+    path: 'workforce',
+    component: Workforce,
+    canActivate: [RoleGuard],
+    data: {
+      title: 'Workforce Console',
+      roles: [SA, A, BM],
+      urls: [{ title: 'Workforce Console', url: '/components/workforce' }]
     }
   }
 

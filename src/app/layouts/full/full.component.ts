@@ -98,6 +98,10 @@ export class FullComponent implements OnInit {
     return this.isMobileScreen;
   }
 
+  get currentThemeClass(): string {
+    return this.settings.themeSignal() === 'dark' ? 'dark-theme' : 'light-theme';
+  }
+
 
   private socketSubscription = Subscription.EMPTY;
   unreadNotificationsCount = 0;
@@ -305,7 +309,8 @@ export class FullComponent implements OnInit {
         { id: 21, name: 'Leave', path: '/components/leave', icon: 'bi-airplane-fill', isActive: true },
         { id: 22, name: 'Delivery Tracking', path: '/components/delivery-tracking', icon: 'bi-truck', isActive: true },
         { id: 23, name: 'Payments', path: '/components/payments', icon: 'bi-credit-card-2-front-fill', isActive: true },
-        { id: 24, name: 'Notifications', path: '/components/notifications', icon: 'bi-bell-fill', isActive: true }
+        { id: 24, name: 'Notifications', path: '/components/notifications', icon: 'bi-bell-fill', isActive: true },
+        { id: 25, name: 'Workforce Console', path: '/components/workforce', icon: 'bi-gear-wide-connected', isActive: true }
       ];
     } else {
       allowedMenus = apiMenus.filter((m: any) => {
@@ -467,6 +472,7 @@ export class FullComponent implements OnInit {
     if (lowercase.includes('log') || lowercase.includes('list')) return 'bi-card-list';
     if (lowercase.includes('status')) return 'bi-list-check';
     if (lowercase.includes('lock') || lowercase.includes('password')) return 'bi-lock-fill';
+    if (lowercase.includes('workforce') || lowercase.includes('settings') || lowercase === 'settings') return 'bi-gear-wide-connected';
     return 'bi-' + icon;
   }
 

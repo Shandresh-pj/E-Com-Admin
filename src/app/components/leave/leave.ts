@@ -210,4 +210,24 @@ export class Leave implements OnInit {
       }
     });
   }
+
+  rejectLeave(row: any) {
+    this.alert.confirm("Are you sure you want to reject this leave request?").then((result) => {
+      if (result.isConfirmed) {
+        this.loading = true;
+        this.commonService.putApi(`leave/reject/${row.id}`, {}).subscribe({
+          next: () => {
+            this.alert.success("Leave request rejected successfully");
+            this.loadLeaveRequests();
+          },
+          error: (err) => {
+            console.error('Rejection failed:', err);
+            this.alert.error("Rejection failed: " + (err.error?.message || "Internal error"));
+            this.loading = false;
+          }
+        });
+      }
+    });
+  }
 }
+

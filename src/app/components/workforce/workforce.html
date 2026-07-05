@@ -1,0 +1,414 @@
+<div class="row">
+  <div class="col-lg-12">
+    <mat-card class="cardWithShadow theme-card">
+      <mat-card-header class="p-x-24 p-y-16">
+        <mat-card-title class="m-b-0 f-w-600">Workforce Config Console</mat-card-title>
+      </mat-card-header>
+      <mat-card-content class="p-0 b-t-1">
+        <mat-tab-group (selectedTabChange)="onTabChange($event)" class="workforce-tabs">
+
+          <!-- ─── TAB 1: SHIFTS & SCHEDULES ─────────────────────────────────── -->
+          <mat-tab label="Shifts & Schedules">
+            <div class="p-24">
+              @if (!showShiftForm) {
+                <div class="row">
+                  <!-- Shifts Table -->
+                  <div class="col-lg-7">
+                    <div class="d-flex justify-content-between align-items-center m-b-16">
+                      <h4 class="f-w-600 m-b-0 text-dark">Shift Calendars</h4>
+                      @if (perm.hasRoleAction('canCreate')) {
+                        <button mat-flat-button color="primary" (click)="createShift()">
+                          <mat-icon class="icon-18 m-r-4">add</mat-icon> Add Shift
+                        </button>
+                      }
+                    </div>
+
+                    <div class="table-responsive">
+                      <app-mat-table 
+                        [columns]="shiftColumns" 
+                        [tableData]="shiftsList" 
+                        [showAction]="perm.hasRoleAction('canUpdate') || perm.hasRoleAction('canDelete') || perm.hasRoleAction('canRead')" 
+                        [showView]="false"
+                        [showEdit]="perm.hasRoleAction('canUpdate')"
+                        [showDelete]="perm.hasRoleAction('canDelete')"
+                        (editClick)="editShift($event)"
+                        (deleteClick)="deleteShift($event)"
+                        [Extra_Column]="false">
+                      </app-mat-table>
+                    </div>
+                  </div>
+
+                  <!-- Bulk Shift Assign Form -->
+                  <div class="col-lg-5">
+                    <mat-card class="cardWithShadow border-dashed-primary m-b-0">
+                      <mat-card-header class="p-x-20 p-y-16">
+                        <mat-card-title class="m-b-0 f-w-600 f-s-14">Bulk Shift Assignment</mat-card-title>
+                      </mat-card-header>
+                      <mat-card-content class="p-20 b-t-1">
+                        <form [formGroup]="shiftAssignForm" (ngSubmit)="submitShiftAssign()">
+                          <div class="row">
+                            <!-- Select Employees -->
+                            <div class="col-12 m-b-16">
+                              <mat-label class="f-w-600 m-b-6 d-block f-s-12">Select Employees <span class="text-danger">*</span></mat-label>
+                              <mat-form-field appearance="outline" class="w-100">
+                                <mat-select formControlName="employee_ids" multiple placeholder="Multi-Select Employees">
+                                  @for (emp of employeesList; track emp.id) {
+                                    <mat-option [value]="emp.id">{{ emp.name }}</mat-option>
+                                  }
+                                </mat-select>
+                              </mat-form-field>
+                            </div>
+
+                            <!-- Select Shift -->
+                            <div class="col-12 m-b-16">
+                              <mat-label class="f-w-600 m-b-6 d-block f-s-12">Target Shift Pattern <span class="text-danger">*</span></mat-label>
+                              <mat-form-field appearance="outline" class="w-100">
+                                <mat-select formControlName="shift_id" placeholder="Select Shift">
+                                  @for (s of shiftsList; track s.id) {
+                                    <mat-option [value]="s.id">{{ s.name }} ({{ s.type }})</mat-option>
+                                  }
+                                </mat-select>
+                              </mat-form-field>
+                            </div>
+
+                            <!-- Effective Date -->
+                            <div class="col-12 m-b-16">
+                              <mat-label class="f-w-600 m-b-6 d-block f-s-12">Effective Start Date (DD:MM:YYYY) <span class="text-danger">*</span></mat-label>
+                              <mat-form-field appearance="outline" class="w-100">
+                                <input matInput formControlName="effective_from" placeholder="e.g. 05:07:2026">
+                              </mat-form-field>
+                            </div>
+                          </div>
+
+                          <button mat-flat-button color="primary" type="submit" class="w-100 m-t-12" [disabled]="shiftAssignForm.invalid">
+                            Assign Shift Pattern
+                          </button>
+                        </form>
+                      </mat-card-content>
+                    </mat-card>
+                  </div>
+                </div>
+              } @else {
+                <!-- Create/Edit Shift Form -->
+                <mat-card class="cardWithShadow border-0 shadow-none m-b-0">
+                  <mat-card-header class="p-0 m-b-20">
+                    <mat-card-title class="m-b-0 f-w-600 f-s-15">{{ editingShiftId ? 'Modify' : 'Create' }} Shift Configuration</mat-card-title>
+                  </mat-card-header>
+                  <mat-card-content class="p-0">
+                    <form [formGroup]="shiftForm" (ngSubmit)="submitShift()">
+                      <div class="row">
+                        <div class="col-md-6 m-b-16">
+                          <mat-label class="f-w-600 m-b-6 d-block f-s-12">Shift Pattern Name <span class="text-danger">*</span></mat-label>
+                          <mat-form-field appearance="outline" class="w-100">
+                            <input matInput formControlName="name" placeholder="e.g. Morning Regular Shift">
+                          </mat-form-field>
+                        </div>
+                        <div class="col-md-6 m-b-16">
+                          <mat-label class="f-w-600 m-b-6 d-block f-s-12">Shift Pattern Type <span class="text-danger">*</span></mat-label>
+                          <mat-form-field appearance="outline" class="w-100">
+                            <mat-select formControlName="type">
+                              <mat-option value="FIXED">FIXED SCHEDULE</mat-option>
+                              <mat-option value="FLEXIBLE">FLEXIBLE HOURS</mat-option>
+                              <mat-option value="ROTATIONAL">ROTATIONAL SCHEDULE</mat-option>
+                              <mat-option value="OVERNIGHT">OVERNIGHT GRAVEYARD</mat-option>
+                            </mat-select>
+                          </mat-form-field>
+                        </div>
+                        <div class="col-md-3 col-sm-6 m-b-16">
+                          <mat-label class="f-w-600 m-b-6 d-block f-s-12">Start Time (HH:MM) <span class="text-danger">*</span></mat-label>
+                          <mat-form-field appearance="outline" class="w-100">
+                            <input matInput formControlName="start_time" placeholder="e.g. 09:00">
+                          </mat-form-field>
+                        </div>
+                        <div class="col-md-3 col-sm-6 m-b-16">
+                          <mat-label class="f-w-600 m-b-6 d-block f-s-12">End Time (HH:MM) <span class="text-danger">*</span></mat-label>
+                          <mat-form-field appearance="outline" class="w-100">
+                            <input matInput formControlName="end_time" placeholder="e.g. 18:00">
+                          </mat-form-field>
+                        </div>
+                        <div class="col-md-3 col-sm-6 m-b-16">
+                          <mat-label class="f-w-600 m-b-6 d-block f-s-12">Grace Period (minutes) <span class="text-danger">*</span></mat-label>
+                          <mat-form-field appearance="outline" class="w-100">
+                            <input type="number" matInput formControlName="grace_period_minutes">
+                          </mat-form-field>
+                        </div>
+                        <div class="col-md-3 col-sm-6 m-b-16">
+                          <mat-label class="f-w-600 m-b-6 d-block f-s-12">Min Working Time (min) <span class="text-danger">*</span></mat-label>
+                          <mat-form-field appearance="outline" class="w-100">
+                            <input type="number" matInput formControlName="min_work_minutes">
+                          </mat-form-field>
+                        </div>
+                      </div>
+
+                      <div class="m-t-16 d-flex gap-8">
+                        <button mat-stroked-button type="button" class="Cancel_Button" (click)="showShiftForm = false">Cancel</button>
+                        <button mat-flat-button color="primary" type="submit" [disabled]="shiftForm.invalid">
+                          Save Shift Template
+                        </button>
+                      </div>
+                    </form>
+                  </mat-card-content>
+                </mat-card>
+              }
+            </div>
+          </mat-tab>
+
+          <!-- ─── TAB 2: BREAK POLICIES ────────────────────────────────────── -->
+          <mat-tab label="Break Deductions Policies">
+            <div class="p-24">
+              @if (!showPolicyForm) {
+                <div class="d-flex justify-content-between align-items-center m-b-16">
+                  <h4 class="f-w-600 m-b-0 text-dark">Break Policies & Deduction Rules</h4>
+                  @if (perm.hasRoleAction('canCreate')) {
+                    <button mat-flat-button color="primary" (click)="createPolicy()">
+                      <mat-icon class="icon-18 m-r-4">add</mat-icon> Add Policy
+                    </button>
+                  }
+                </div>
+
+                <div class="table-responsive">
+                  <app-mat-table 
+                    [columns]="policyColumns" 
+                    [tableData]="policiesList" 
+                    [showAction]="perm.hasRoleAction('canUpdate') || perm.hasRoleAction('canDelete') || perm.hasRoleAction('canRead')" 
+                    [showView]="false"
+                    [showEdit]="perm.hasRoleAction('canUpdate')"
+                    [showDelete]="perm.hasRoleAction('canDelete')"
+                    (editClick)="editPolicy($event)"
+                    (deleteClick)="deletePolicy($event)"
+                    [Extra_Column]="false">
+                  </app-mat-table>
+                </div>
+              } @else {
+                <!-- Create/Edit Policy Form -->
+                <mat-card class="cardWithShadow border-0 shadow-none m-b-0">
+                  <mat-card-header class="p-0 m-b-20">
+                    <mat-card-title class="m-b-0 f-w-600 f-s-15">{{ editingPolicyId ? 'Modify' : 'Create' }} Break policy rules</mat-card-title>
+                  </mat-card-header>
+                  <mat-card-content class="p-0">
+                    <form [formGroup]="policyForm" (ngSubmit)="submitPolicy()">
+                      <div class="row">
+                        <div class="col-md-6 m-b-16">
+                          <mat-label class="f-w-600 m-b-6 d-block f-s-12">Policy Name <span class="text-danger">*</span></mat-label>
+                          <mat-form-field appearance="outline" class="w-100">
+                            <input matInput formControlName="name" placeholder="e.g. Standard Office Policy">
+                          </mat-form-field>
+                        </div>
+                        <div class="col-md-6 m-b-16">
+                          <mat-label class="f-w-600 m-b-6 d-block f-s-12">Break Type <span class="text-danger">*</span></mat-label>
+                          <mat-form-field appearance="outline" class="w-100">
+                            <mat-select formControlName="break_type">
+                              <mat-option value="LUNCH">LUNCH BREAK</mat-option>
+                              <mat-option value="TEA">TEA BREAK</mat-option>
+                              <mat-option value="PERSONAL">PERSONAL BREAK</mat-option>
+                              <mat-option value="FLEXIBLE">FLEXIBLE REST INTERVAL</mat-option>
+                            </mat-select>
+                          </mat-form-field>
+                        </div>
+                        <div class="col-md-3 col-sm-6 m-b-16">
+                          <mat-label class="f-w-600 m-b-6 d-block f-s-12">Max Break Duration (mins) <span class="text-danger">*</span></mat-label>
+                          <mat-form-field appearance="outline" class="w-100">
+                            <input type="number" matInput formControlName="max_duration_minutes">
+                          </mat-form-field>
+                        </div>
+                        <div class="col-md-3 col-sm-6 m-b-16">
+                          <mat-label class="f-w-600 m-b-6 d-block f-s-12">Max Sessions / Day <span class="text-danger">*</span></mat-label>
+                          <mat-form-field appearance="outline" class="w-100">
+                            <input type="number" matInput formControlName="max_frequency">
+                          </mat-form-field>
+                        </div>
+                        <div class="col-md-3 col-sm-6 m-b-16">
+                          <mat-label class="f-w-600 m-b-6 d-block f-s-12">Deduction Paid Status</mat-label>
+                          <div class="d-flex align-items-center h-48">
+                            <mat-checkbox formControlName="is_paid">Paid Break Session</mat-checkbox>
+                          </div>
+                        </div>
+                        <div class="col-md-3 col-sm-6 m-b-16">
+                          <mat-label class="f-w-600 m-b-6 d-block f-s-12">Allow Split Sessions</mat-label>
+                          <div class="d-flex align-items-center h-48">
+                            <mat-checkbox formControlName="allow_split">Allow split intervals</mat-checkbox>
+                          </div>
+                        </div>
+                      </div>
+
+                      <!-- Sub-panel deduction JSON rules -->
+                      <h5 class="f-w-600 m-t-16 m-b-16 text-primary">Automated Penalty Threshold Rules</h5>
+                      <div class="row">
+                        <div class="col-md-3 col-sm-6 m-b-16">
+                          <mat-label class="f-w-600 m-b-6 d-block f-s-12">Excess Warning limit (min) <span class="text-danger">*</span></mat-label>
+                          <mat-form-field appearance="outline" class="w-100">
+                            <input type="number" matInput formControlName="warning_threshold">
+                          </mat-form-field>
+                        </div>
+                        <div class="col-md-3 col-sm-6 m-b-16">
+                          <mat-label class="f-w-600 m-b-6 d-block f-s-12">Salary Deduction limit (min) <span class="text-danger">*</span></mat-label>
+                          <mat-form-field appearance="outline" class="w-100">
+                            <input type="number" matInput formControlName="deduction_threshold">
+                          </mat-form-field>
+                        </div>
+                        <div class="col-md-3 col-sm-6 m-b-16">
+                          <mat-label class="f-w-600 m-b-6 d-block f-s-12">Auto Half-Day limit (min) <span class="text-danger">*</span></mat-label>
+                          <mat-form-field appearance="outline" class="w-100">
+                            <input type="number" matInput formControlName="half_day_threshold">
+                          </mat-form-field>
+                        </div>
+                        <div class="col-md-3 col-sm-6 m-b-16">
+                          <mat-label class="f-w-600 m-b-6 d-block f-s-12">HR Review escalation (min) <span class="text-danger">*</span></mat-label>
+                          <mat-form-field appearance="outline" class="w-100">
+                            <input type="number" matInput formControlName="hr_review_threshold">
+                          </mat-form-field>
+                        </div>
+                      </div>
+
+                      <div class="m-t-20 d-flex gap-8">
+                        <button mat-stroked-button type="button" class="Cancel_Button" (click)="showPolicyForm = false">Cancel</button>
+                        <button mat-flat-button color="primary" type="submit" [disabled]="policyForm.invalid">
+                          Save Policy Config
+                        </button>
+                      </div>
+                    </form>
+                  </mat-card-content>
+                </mat-card>
+              }
+            </div>
+          </mat-tab>
+
+          <!-- ─── TAB 3: BIOMETRIC SENSORS ──────────────────────────────────── -->
+          <mat-tab label="Biometric Whitelist Sensors">
+            <div class="p-24">
+              @if (!showDeviceForm) {
+                <div class="row">
+                  <!-- Registered Devices Grid list -->
+                  <div class="col-lg-7">
+                    <div class="d-flex justify-content-between align-items-center m-b-16">
+                      <h4 class="f-w-600 m-b-0 text-dark">Whitelisted Biometric Hardware</h4>
+                      @if (perm.hasRoleAction('canCreate')) {
+                        <button mat-flat-button color="primary" (click)="createDevice()">
+                          <mat-icon class="icon-18 m-r-4">add</mat-icon> Whitelist Device
+                        </button>
+                      }
+                    </div>
+
+                    <div class="table-responsive">
+                      <app-mat-table 
+                        [columns]="deviceColumns" 
+                        [tableData]="devicesList" 
+                        [showAction]="perm.hasRoleAction('canUpdate') || perm.hasRoleAction('canDelete') || perm.hasRoleAction('canRead')" 
+                        [showView]="false"
+                        [showEdit]="perm.hasRoleAction('canUpdate')"
+                        [showDelete]="perm.hasRoleAction('canDelete')"
+                        (editClick)="editDevice($event)"
+                        (deleteClick)="deleteDevice($event)"
+                        [Extra_Column]="false">
+                      </app-mat-table>
+                    </div>
+
+                    <!-- Live logs logs section -->
+                    <h4 class="f-w-600 m-t-32 m-b-16 text-dark">Hardware Verification Log Activity</h4>
+                    <div class="table-responsive">
+                      <app-mat-table 
+                        [columns]="logColumns" 
+                        [tableData]="authLogsList" 
+                        [showAction]="false"
+                        [Extra_Column]="false">
+                      </app-mat-table>
+                    </div>
+                  </div>
+
+                  <!-- Help Center Card -->
+                  <div class="col-lg-5">
+                    <mat-card class="cardWithShadow bg-light-primary border-dashed-primary m-b-0">
+                      <mat-card-content class="p-20 text-center">
+                        <mat-icon class="text-primary icon-48">fingerprint</mat-icon>
+                        <h4 class="f-w-600 m-t-12 m-b-8">Hardware Integration Guide</h4>
+                        <p class="f-s-13 text-muted m-b-16">
+                          Our enterprise biometric terminal secures attendance tracking using whitelists, confidence anti-spoofing constraints, and signing JWT tokens per device.
+                        </p>
+                        <div class="text-start f-s-12 bg-white p-12 rounded-8 border">
+                          <p class="m-b-4 f-w-600 text-dark">Device Auth Steps:</p>
+                          <ol class="m-b-0 p-l-20 text-muted">
+                            <li>Register the sensor with a unique Serial Key.</li>
+                            <li>Save the generated JWT signing key onto the device client.</li>
+                            <li>Ensure pings send confidence scores (>= min limit).</li>
+                          </ol>
+                        </div>
+                      </mat-card-content>
+                    </mat-card>
+                  </div>
+                </div>
+              } @else {
+                <!-- Create/Edit Device Form -->
+                <mat-card class="cardWithShadow border-0 shadow-none m-b-0">
+                  <mat-card-header class="p-0 m-b-20">
+                    <mat-card-title class="m-b-0 f-w-600 f-s-15">{{ editingDeviceId ? 'Modify' : 'Register' }} Biometric Sensor Device</mat-card-title>
+                  </mat-card-header>
+                  <mat-card-content class="p-0">
+                    <form [formGroup]="deviceForm" (ngSubmit)="submitDevice()">
+                      <div class="row">
+                        <div class="col-md-6 m-b-16">
+                          <mat-label class="f-w-600 m-b-6 d-block f-s-12">Hardware Device Name <span class="text-danger">*</span></mat-label>
+                          <mat-form-field appearance="outline" class="w-100">
+                            <input matInput formControlName="device_name" placeholder="e.g. Main Lobby Gate Reader">
+                          </mat-form-field>
+                        </div>
+                        <div class="col-md-6 m-b-16">
+                          <mat-label class="f-w-600 m-b-6 d-block f-s-12">Unique Hardware Serial Number <span class="text-danger">*</span></mat-label>
+                          <mat-form-field appearance="outline" class="w-100">
+                            <input matInput formControlName="device_serial" placeholder="e.g. BIO-LOBBY-778X">
+                          </mat-form-field>
+                        </div>
+                        <div class="col-md-4 col-sm-6 m-b-16">
+                          <mat-label class="f-w-600 m-b-6 d-block f-s-12">Auth Sensor Type <span class="text-danger">*</span></mat-label>
+                          <mat-form-field appearance="outline" class="w-100">
+                            <mat-select formControlName="device_type">
+                              <mat-option value="FINGERPRINT">FINGERPRINT SENSOR</mat-option>
+                              <mat-option value="FACE">FACE RECOGNITION SCANNER</mat-option>
+                              <mat-option value="RFID">RFID CARD READER</mat-option>
+                              <mat-option value="HYBRID">HYBRID DETECTOR</mat-option>
+                            </mat-select>
+                          </mat-form-field>
+                        </div>
+                        <div class="col-md-4 col-sm-6 m-b-16">
+                          <mat-label class="f-w-600 m-b-6 d-block f-s-12">Hardware IP address</mat-label>
+                          <mat-form-field appearance="outline" class="w-100">
+                            <input matInput formControlName="ip_address" placeholder="e.g. 192.168.1.150">
+                          </mat-form-field>
+                        </div>
+                        <div class="col-md-4 col-sm-6 m-b-16">
+                          <mat-label class="f-w-600 m-b-6 d-block f-s-12">Installed Location</mat-label>
+                          <mat-form-field appearance="outline" class="w-100">
+                            <input matInput formControlName="location" placeholder="e.g. Reception Desk">
+                          </mat-form-field>
+                        </div>
+                        <div class="col-md-4 col-sm-6 m-b-16">
+                          <mat-label class="f-w-600 m-b-6 d-block f-s-12">Confidence Threshold limit (0.0 - 1.0) <span class="text-danger">*</span></mat-label>
+                          <mat-form-field appearance="outline" class="w-100">
+                            <input type="number" step="0.01" matInput formControlName="min_confidence_score">
+                          </mat-form-field>
+                        </div>
+                        <div class="col-md-4 col-sm-6 m-b-16">
+                          <mat-label class="f-w-600 m-b-6 d-block f-s-12">Device Whitelist status</mat-label>
+                          <div class="d-flex align-items-center h-48">
+                            <mat-checkbox formControlName="is_whitelisted">Device Whitelisted (Allowed to Sync)</mat-checkbox>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div class="m-t-20 d-flex gap-8">
+                        <button mat-stroked-button type="button" class="Cancel_Button" (click)="showDeviceForm = false">Cancel</button>
+                        <button mat-flat-button color="primary" type="submit" [disabled]="deviceForm.invalid">
+                          Register Hardware
+                        </button>
+                      </div>
+                    </form>
+                  </mat-card-content>
+                </mat-card>
+              }
+            </div>
+          </mat-tab>
+
+        </mat-tab-group>
+      </mat-card-content>
+    </mat-card>
+  </div>
+</div>

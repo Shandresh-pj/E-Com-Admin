@@ -1,20 +1,515 @@
-<div class="row">
-  <div class="col-lg-8">
-    <app-profit-expenses></app-profit-expenses>
-  </div>
-  <div class="col-lg-4">
-    <app-traffic-distribution></app-traffic-distribution>
-    <app-product-sales></app-product-sales>
-  </div>
-</div>
+<!-- Dashboard Container -->
+<div class="dashboard-container p-t-16">
 
-<div class="row">
-  <div class="col-lg-4">
-    <app-upcoming-schedules></app-upcoming-schedules>
+  <!-- Welcome / Title Row -->
+  <div class="row m-b-24 animate-fade-in-up">
+    <div class="col-lg-12">
+      <mat-card class="cardWithShadow welcome-banner overflow-hidden border-0">
+        <mat-card-content class="p-24 position-relative">
+          <div class="d-flex flex-wrap align-items-center justify-content-between gap-16 position-relative z-index-2">
+            <div>
+              <p class="f-s-12 text-light-white text-uppercase tracking-wider m-b-4 f-w-700">WORKFORCE COMMAND PLATFORM</p>
+              <h2 class="f-w-700 m-b-0 text-white welcome-title">Welcome back, {{ currentUser?.name || 'User' }}</h2>
+              <p class="f-s-13 text-light-white m-t-4 m-b-0">
+                You are currently logged in with authorization role level: <span class="badge-role-pill">{{ userRole }}</span>
+              </p>
+            </div>
+            <div class="d-flex align-items-center gap-12 bg-white-opacity p-12 rounded-12">
+              <mat-icon class="text-white icon-24">shield</mat-icon>
+              <div class="text-start text-white">
+                <p class="f-s-10 text-uppercase m-b-0 opacity-75">Scope Context</p>
+                <p class="f-s-12 f-w-600 m-b-0">Company #{{ currentUser?.companyId || 'Global' }}</p>
+              </div>
+            </div>
+          </div>
+          <!-- Decorative glass circles -->
+          <div class="glass-bg-circle circle-1"></div>
+          <div class="glass-bg-circle circle-2"></div>
+        </mat-card-content>
+      </mat-card>
+    </div>
   </div>
-  <div class="col-lg-8">
-    <app-top-employees></app-top-employees>
-  </div>
-</div>
 
-<app-blog></app-blog>
+  <!-- ══════════════════════════════════════════════════════════════════════════ -->
+  <!-- 1. ADMIN / SUPER ADMIN DASHBOARD PANEL -->
+  <!-- ══════════════════════════════════════════════════════════════════════════ -->
+  @if (userRole === 'Super_Admin' || userRole === 'Admin') {
+    <!-- KPIs Stats Grid -->
+    <div class="row m-b-24">
+      <div class="col-lg-3 col-sm-6 animate-fade-in-up delay-1">
+        <mat-card class="cardWithShadow stats-kpi border-left-primary">
+          <mat-card-content class="p-20">
+            <div class="d-flex align-items-center justify-content-between">
+              <div>
+                <p class="f-s-12 text-muted m-b-4 text-uppercase f-w-600">Company Size</p>
+                <h3 class="f-w-700 m-b-0">{{ totalEmployees }} Staff</h3>
+              </div>
+              <div class="kpi-icon bg-light-primary rounded-8 p-12"><mat-icon class="text-primary">groups</mat-icon></div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      </div>
+      <div class="col-lg-3 col-sm-6 animate-fade-in-up delay-2">
+        <mat-card class="cardWithShadow stats-kpi border-left-success">
+          <mat-card-content class="p-20">
+            <div class="d-flex align-items-center justify-content-between">
+              <div>
+                <p class="f-s-12 text-muted m-b-4 text-uppercase f-w-600">Staff On Duty</p>
+                <h3 class="f-w-700 m-b-0">{{ presentTodayCount }} Present</h3>
+              </div>
+              <div class="kpi-icon bg-light-success rounded-8 p-12"><mat-icon class="text-success">check_circle</mat-icon></div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      </div>
+      <div class="col-lg-3 col-sm-6 animate-fade-in-up delay-3">
+        <mat-card class="cardWithShadow stats-kpi border-left-warning">
+          <mat-card-content class="p-20">
+            <div class="d-flex align-items-center justify-content-between">
+              <div>
+                <p class="f-s-12 text-muted m-b-4 text-uppercase f-w-600">Low Stock Items</p>
+                <h3 class="f-w-700 m-b-0">{{ lowStockAlertsCount }} Alerts</h3>
+              </div>
+              <div class="kpi-icon bg-light-warning rounded-8 p-12"><mat-icon class="text-warning">warning</mat-icon></div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      </div>
+      <div class="col-lg-3 col-sm-6 animate-fade-in-up delay-4">
+        <mat-card class="cardWithShadow stats-kpi border-left-danger">
+          <mat-card-content class="p-20">
+            <div class="d-flex align-items-center justify-content-between">
+              <div>
+                <p class="f-s-12 text-muted m-b-4 text-uppercase f-w-600">Pending Approvals</p>
+                <h3 class="f-w-700 m-b-0">{{ pendingApprovalsCount }} Products</h3>
+              </div>
+              <div class="kpi-icon bg-light-danger rounded-8 p-12"><mat-icon class="text-danger">pending_actions</mat-icon></div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      </div>
+    </div>
+
+    <!-- Analytics Charts Row -->
+    <div class="row m-b-24 animate-fade-in-up delay-5">
+      <div class="col-lg-8">
+        <app-profit-expenses></app-profit-expenses>
+      </div>
+      <div class="col-lg-4">
+        <app-traffic-distribution></app-traffic-distribution>
+        <app-product-sales></app-product-sales>
+      </div>
+    </div>
+
+    <!-- Audit Logs & Quick Actions Panel -->
+    <div class="row m-b-24 animate-fade-in-up delay-5">
+      <!-- Audit Logs Timeline -->
+      <div class="col-lg-7">
+        <mat-card class="cardWithShadow theme-card h-100">
+          <mat-card-header class="p-x-24 p-y-16">
+            <mat-card-title class="m-b-0 f-w-600 f-s-15">Real-time Platform Audit Log</mat-card-title>
+          </mat-card-header>
+          <mat-card-content class="p-24 b-t-1">
+            @if (recentAuditLogs.length > 0) {
+              <div class="timeline-log-list">
+                @for(log of recentAuditLogs; track log.id) {
+                  <div class="timeline-log-item d-flex gap-16 m-b-16">
+                    <div class="timeline-indicator-box">
+                      <span class="timeline-dot" [ngClass]="{
+                        'bg-primary': log.action === 'CREATE',
+                        'bg-warning': log.action === 'UPDATE',
+                        'bg-danger': log.action === 'DELETE'
+                      }"></span>
+                      <span class="timeline-bar"></span>
+                    </div>
+                    <div class="timeline-log-body w-100 p-b-8 b-b-1">
+                      <div class="d-flex justify-content-between align-items-center">
+                        <span class="f-w-600 f-s-13">{{ log.module }} - {{ log.action }}</span>
+                        <span class="f-s-11 text-muted">{{ log.createdAt | date:'shortTime' }}</span>
+                      </div>
+                      <p class="f-s-12 text-muted m-b-0 m-t-4">Record Reference: #{{ log.recordId }} — Executed by User #{{ log.userId }}</p>
+                    </div>
+                  </div>
+                }
+              </div>
+            } @else {
+              <div class="p-24 text-center">
+                <mat-icon class="text-muted icon-48">receipt_long</mat-icon>
+                <p class="text-muted m-t-8 m-b-0">No platform actions logged today.</p>
+              </div>
+            }
+          </mat-card-content>
+        </mat-card>
+      </div>
+
+      <!-- Quick Action Controls -->
+      <div class="col-lg-5">
+        <mat-card class="cardWithShadow theme-card h-100">
+          <mat-card-header class="p-x-24 p-y-16">
+            <mat-card-title class="m-b-0 f-w-600 f-s-15">Quick Portal Navigation</mat-card-title>
+          </mat-card-header>
+          <mat-card-content class="p-24 b-t-1">
+            <div class="admin-quick-actions-grid d-flex flex-column gap-12">
+              <a routerLink="/components/attendance" class="action-row-btn d-flex align-items-center justify-content-between p-12 rounded-8">
+                <div class="d-flex align-items-center gap-12">
+                  <div class="action-btn-icon bg-light-primary p-8 rounded-6"><mat-icon class="text-primary icon-20">history</mat-icon></div>
+                  <span class="f-w-600 f-s-13">View Attendance Terminal</span>
+                </div>
+                <mat-icon class="text-muted icon-16">chevron_right</mat-icon>
+              </a>
+              <a routerLink="/components/employees" class="action-row-btn d-flex align-items-center justify-content-between p-12 rounded-8">
+                <div class="d-flex align-items-center gap-12">
+                  <div class="action-btn-icon bg-light-success p-8 rounded-6"><mat-icon class="text-success icon-20">badge</mat-icon></div>
+                  <span class="f-w-600 f-s-13">Manage Company Employees</span>
+                </div>
+                <mat-icon class="text-muted icon-16">chevron_right</mat-icon>
+              </a>
+              <a routerLink="/components/payroll" class="action-row-btn d-flex align-items-center justify-content-between p-12 rounded-8">
+                <div class="d-flex align-items-center gap-12">
+                  <div class="action-btn-icon bg-light-warn p-8 rounded-6"><mat-icon class="text-warning icon-20">payments</mat-icon></div>
+                  <span class="f-w-600 f-s-13">Generate Monthly Payrolls</span>
+                </div>
+                <mat-icon class="text-muted icon-16">chevron_right</mat-icon>
+              </a>
+              <a routerLink="/components/audit-logs" class="action-row-btn d-flex align-items-center justify-content-between p-12 rounded-8">
+                <div class="d-flex align-items-center gap-12">
+                  <div class="action-btn-icon bg-light-danger p-8 rounded-6"><mat-icon class="text-danger icon-20">receipt_long</mat-icon></div>
+                  <span class="f-w-600 f-s-13">Audit Logs Registry</span>
+                </div>
+                <mat-icon class="text-muted icon-16">chevron_right</mat-icon>
+              </a>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      </div>
+    </div>
+  }
+
+  <!-- ══════════════════════════════════════════════════════════════════════════ -->
+  <!-- 2. BRANCH MANAGER / SHOPKEEPER DASHBOARD PANEL -->
+  <!-- ══════════════════════════════════════════════════════════════════════════ -->
+  @if (userRole === 'Branch_Manager' || userRole === 'Shopkeeper' || userRole === 'Branch') {
+    <div class="row m-b-24">
+      <div class="col-lg-3 col-sm-6 animate-fade-in-up delay-1">
+        <mat-card class="cardWithShadow stats-kpi border-left-primary">
+          <mat-card-content class="p-20">
+            <div class="d-flex align-items-center justify-content-between">
+              <div>
+                <p class="f-s-12 text-muted m-b-4 text-uppercase f-w-600">Branch Staff</p>
+                <h3 class="f-w-700 m-b-0">{{ totalEmployees }} Staff</h3>
+              </div>
+              <div class="kpi-icon bg-light-primary rounded-8 p-12"><mat-icon class="text-primary">badge</mat-icon></div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      </div>
+      <div class="col-lg-3 col-sm-6 animate-fade-in-up delay-2">
+        <mat-card class="cardWithShadow stats-kpi border-left-success">
+          <mat-card-content class="p-20">
+            <div class="d-flex align-items-center justify-content-between">
+              <div>
+                <p class="f-s-12 text-muted m-b-4 text-uppercase f-w-600">Staff Active Today</p>
+                <h3 class="f-w-700 m-b-0">{{ presentTodayCount }} Present</h3>
+              </div>
+              <div class="kpi-icon bg-light-success rounded-8 p-12"><mat-icon class="text-success">done_all</mat-icon></div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      </div>
+      <div class="col-lg-3 col-sm-6 animate-fade-in-up delay-3">
+        <mat-card class="cardWithShadow stats-kpi border-left-warning">
+          <mat-card-content class="p-20">
+            <div class="d-flex align-items-center justify-content-between">
+              <div>
+                <p class="f-s-12 text-muted m-b-4 text-uppercase f-w-600">Leave Approvals</p>
+                <h3 class="f-w-700 m-b-0">{{ pendingLeaves.length }} Pending</h3>
+              </div>
+              <div class="kpi-icon bg-light-warning rounded-8 p-12"><mat-icon class="text-warning">time_to_leave</mat-icon></div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      </div>
+      <div class="col-lg-3 col-sm-6 animate-fade-in-up delay-4">
+        <mat-card class="cardWithShadow stats-kpi border-left-info">
+          <mat-card-content class="p-20">
+            <div class="d-flex align-items-center justify-content-between">
+              <div>
+                <p class="f-s-12 text-muted m-b-4 text-uppercase f-w-600">Scope Branch</p>
+                <h3 class="f-w-700 m-b-0 text-truncate max-w-150">{{ branchName || 'Loading...' }}</h3>
+              </div>
+              <div class="kpi-icon bg-light-info rounded-8 p-12"><mat-icon class="text-info">store</mat-icon></div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      </div>
+    </div>
+
+    <!-- Manager Actions / Leave list -->
+    <div class="row m-b-24 animate-fade-in-up delay-5">
+      <div class="col-lg-8">
+        <mat-card class="cardWithShadow theme-card">
+          <mat-card-header class="p-x-24 p-y-16">
+            <mat-card-title class="m-b-0 f-w-600 f-s-15">Pending Leave Approvals Queue</mat-card-title>
+          </mat-card-header>
+          <mat-card-content class="p-24 b-t-1">
+            @if (pendingLeaves.length > 0) {
+              <div class="table-responsive">
+                <table class="table align-middle text-nowrap m-b-0">
+                  <thead>
+                    <tr>
+                      <th class="f-w-600 f-s-13 text-muted">Emp ID</th>
+                      <th class="f-w-600 f-s-13 text-muted">Leave Type</th>
+                      <th class="f-w-600 f-s-13 text-muted">From</th>
+                      <th class="f-w-600 f-s-13 text-muted">To</th>
+                      <th class="f-w-600 f-s-13 text-muted">Days</th>
+                      <th class="f-w-600 f-s-13 text-muted">Reason</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for(l of pendingLeaves; track l.id) {
+                      <tr>
+                        <td class="f-s-13">Employee #{{ l.employee_id }}</td>
+                        <td><span class="badge-role">{{ l.leave_type }}</span></td>
+                        <td class="f-s-13">{{ l.from_date }}</td>
+                        <td class="f-s-13">{{ l.to_date }}</td>
+                        <td class="f-w-600 f-s-13 text-primary">{{ l.total_days }} days</td>
+                        <td class="f-s-12 text-muted text-truncate max-w-200">{{ l.reason }}</td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+            } @else {
+              <div class="p-24 text-center">
+                <mat-icon class="text-success icon-48">done_all</mat-icon>
+                <p class="text-muted m-t-8 m-b-0">Excellent! All employee leave requests have been approved.</p>
+              </div>
+            }
+          </mat-card-content>
+        </mat-card>
+      </div>
+
+      <!-- Quick controls for Manager -->
+      <div class="col-lg-4">
+        <mat-card class="cardWithShadow theme-card">
+          <mat-card-header class="p-x-24 p-y-16">
+            <mat-card-title class="m-b-0 f-w-600 f-s-15">Branch Terminal Controls</mat-card-title>
+          </mat-card-header>
+          <mat-card-content class="p-24 b-t-1">
+            <div class="d-flex flex-column gap-12">
+              <a routerLink="/components/attendance" mat-flat-button color="primary" class="w-100 text-center py-8">
+                <mat-icon class="m-r-8">schedule</mat-icon> Attendance Terminal
+              </a>
+              <a routerLink="/components/branch-stocks" mat-flat-button color="accent" class="w-100 text-center py-8">
+                <mat-icon class="m-r-8">inventory</mat-icon> Manage Branch Stock
+              </a>
+              <a routerLink="/components/leave" mat-stroked-button class="w-100 text-center py-8">
+                <mat-icon class="m-r-8">time_to_leave</mat-icon> Go To Leave Center
+              </a>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      </div>
+    </div>
+  }
+
+  <!-- ══════════════════════════════════════════════════════════════════════════ -->
+  <!-- 3. EMPLOYEE / DELIVERY BOY PERSONAL DASHBOARD PANEL -->
+  <!-- ══════════════════════════════════════════════════════════════════════════ -->
+  @if (userRole === 'Employee' || userRole === 'Delivery_Boy') {
+    <div class="row m-b-24">
+      <!-- Active Shift Box -->
+      <div class="col-lg-6 animate-fade-in-up delay-1">
+        <mat-card class="cardWithShadow theme-card h-100">
+          <mat-card-header class="p-x-24 p-y-16">
+            <mat-card-title class="m-b-0 f-w-600 f-s-15">Your Active Duty Shift</mat-card-title>
+          </mat-card-header>
+          <mat-card-content class="p-24 b-t-1">
+            @if (employeeShift) {
+              <div class="d-flex flex-column gap-12">
+                <div class="d-flex justify-content-between align-items-center">
+                  <span class="text-muted f-s-13">Shift Plan:</span>
+                  <span class="f-w-600 text-primary">{{ employeeShift.name }} ({{ employeeShift.type }})</span>
+                </div>
+                <div class="d-flex justify-content-between align-items-center">
+                  <span class="text-muted f-s-13">Timings Schedule:</span>
+                  <span class="f-w-600 text-dark">{{ employeeShift.start_time }} to {{ employeeShift.end_time }}</span>
+                </div>
+                <div class="d-flex justify-content-between align-items-center">
+                  <span class="text-muted f-s-13">Grace Period:</span>
+                  <span class="badge-role">{{ employeeShift.grace_period_minutes }} minutes</span>
+                </div>
+              </div>
+            } @else {
+              <div class="p-16 text-center">
+                <mat-icon class="text-muted">alarm_off</mat-icon>
+                <p class="text-muted m-t-8 m-b-0">No active shift assignment found. Contact HR Manager.</p>
+              </div>
+            }
+          </mat-card-content>
+        </mat-card>
+      </div>
+
+      <!-- Current Session status box -->
+      <div class="col-lg-6 animate-fade-in-up delay-2">
+        <mat-card class="cardWithShadow theme-card h-100">
+          <mat-card-header class="p-x-24 p-y-16">
+            <mat-card-title class="m-b-0 f-w-600 f-s-15">Today's Session State</mat-card-title>
+          </mat-card-header>
+          <mat-card-content class="p-24 b-t-1">
+            <div class="d-flex align-items-center justify-content-between">
+              <div>
+                <p class="f-s-12 text-muted m-b-2">CURRENT STATE</p>
+                <h3 class="f-w-700" [ngClass]="attendanceToday ? 'text-success' : 'text-danger'">
+                  {{ attendanceToday ? 'DOCKED PRESENT (' + attendanceToday.status + ')' : 'NOT CHECKED IN YET' }}
+                </h3>
+                @if (attendanceToday) {
+                  <p class="f-s-12 text-muted m-b-0">Punch In Time: {{ attendanceToday.check_in }}</p>
+                }
+              </div>
+              <a routerLink="/components/attendance" mat-flat-button color="primary">Go To Terminal</a>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      </div>
+    </div>
+
+    <!-- Personal check-in logs list -->
+    <div class="row m-b-24 animate-fade-in-up delay-3">
+      <div class="col-lg-12">
+        <mat-card class="cardWithShadow theme-card">
+          <mat-card-header class="p-x-24 p-y-16">
+            <mat-card-title class="m-b-0 f-w-600 f-s-15">Your Recent Attendance Logs</mat-card-title>
+          </mat-card-header>
+          <mat-card-content class="p-24 b-t-1">
+            @if (recentLogs.length > 0) {
+              <div class="table-responsive">
+                <table class="table align-middle text-nowrap m-b-0">
+                  <thead>
+                    <tr>
+                      <th class="f-w-600 f-s-13 text-muted">Date</th>
+                      <th class="f-w-600 f-s-13 text-muted">Punch In</th>
+                      <th class="f-w-600 f-s-13 text-muted">Punch Out</th>
+                      <th class="f-w-600 f-s-13 text-muted">Breaks</th>
+                      <th class="f-w-600 f-s-13 text-muted">Duty Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for(log of recentLogs; track log.id) {
+                      <tr>
+                        <td class="f-s-13 f-w-600">{{ log.attendance_date }}</td>
+                        <td class="f-s-13 text-success">{{ log.check_in || '--:--' }}</td>
+                        <td class="f-s-13 text-danger">{{ log.check_out || '--:--' }}</td>
+                        <td class="f-s-13">{{ log.break_minutes || 0 }} min</td>
+                        <td>
+                          <span class="badge-rules" [ngClass]="{
+                            'bg-light-success text-success': log.status === 'PRESENT',
+                            'bg-light-warning text-warning': log.status === 'LATE',
+                            'bg-light-danger text-danger': log.status === 'ABSENT'
+                          }">{{ log.status }}</span>
+                        </td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+            } @else {
+              <div class="p-24 text-center">
+                <mat-icon class="text-muted icon-40">calendar_today</mat-icon>
+                <p class="text-muted m-t-8 m-b-0">No attendance logs registered in database.</p>
+              </div>
+            }
+          </mat-card-content>
+        </mat-card>
+      </div>
+    </div>
+  }
+
+  <!-- ══════════════════════════════════════════════════════════════════════════ -->
+  <!-- 4. CUSTOMER VIEW -->
+  <!-- ══════════════════════════════════════════════════════════════════════════ -->
+  @if (userRole === 'Customer') {
+    <div class="row m-b-24">
+      <div class="col-lg-4 col-sm-12">
+        <mat-card class="cardWithShadow stats-kpi border-left-primary">
+          <mat-card-content class="p-20">
+            <div class="d-flex align-items-center justify-content-between">
+              <div>
+                <p class="f-s-12 text-muted m-b-4 text-uppercase f-w-600">Your Orders</p>
+                <h3 class="f-w-700 m-b-0">{{ customerOrders.length }} Items</h3>
+              </div>
+              <div class="kpi-icon bg-light-primary rounded-8 p-12"><mat-icon class="text-primary">local_shipping</mat-icon></div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      </div>
+      <div class="col-lg-4 col-sm-12">
+        <mat-card class="cardWithShadow stats-kpi border-left-warning">
+          <mat-card-content class="p-20">
+            <div class="d-flex align-items-center justify-content-between">
+              <div>
+                <p class="f-s-12 text-muted m-b-4 text-uppercase f-w-600">Loyalty Rewards</p>
+                <h3 class="f-w-700 m-b-0">{{ loyaltyPoints }} Points</h3>
+              </div>
+              <div class="kpi-icon bg-light-warning rounded-8 p-12"><mat-icon class="text-warning">stars</mat-icon></div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      </div>
+      <div class="col-lg-4 col-sm-12">
+        <mat-card class="cardWithShadow stats-kpi border-left-success">
+          <mat-card-content class="p-20">
+            <div class="d-flex align-items-center justify-content-between">
+              <div>
+                <p class="f-s-12 text-muted m-b-4 text-uppercase f-w-600">Shop Catalog</p>
+                <h3 class="f-w-700 m-b-0">Active Store</h3>
+              </div>
+              <div class="kpi-icon bg-light-success rounded-8 p-12"><mat-icon class="text-success">shopping_bag</mat-icon></div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      </div>
+    </div>
+
+    <!-- Active Orders list -->
+    <div class="row m-b-24">
+      <div class="col-lg-12">
+        <mat-card class="cardWithShadow theme-card">
+          <mat-card-header class="p-x-24 p-y-16">
+            <mat-card-title class="m-b-0 f-w-600 f-s-15">Your Purchase History Tracker</mat-card-title>
+          </mat-card-header>
+          <mat-card-content class="p-24 b-t-1">
+            @if (customerOrders.length > 0) {
+              <div class="table-responsive">
+                <table class="table align-middle text-nowrap m-b-0">
+                  <thead>
+                    <tr>
+                      <th class="f-w-600 f-s-13 text-muted">Order ID</th>
+                      <th class="f-w-600 f-s-13 text-muted">Total Price</th>
+                      <th class="f-w-600 f-s-13 text-muted">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for(o of customerOrders; track o.id) {
+                      <tr>
+                        <td class="f-s-13 f-w-600">#{{ o.id }}</td>
+                        <td class="f-s-13 text-primary f-w-600">₹{{ o.total_price }}</td>
+                        <td><span class="badge-role">{{ o.status }}</span></td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+            } @else {
+              <div class="p-24 text-center">
+                <mat-icon class="text-muted icon-40">shopping_cart</mat-icon>
+                <p class="text-muted m-t-8 m-b-0">You have no registered purchases yet. Visit our shop catalog!</p>
+              </div>
+            }
+          </mat-card-content>
+        </mat-card>
+      </div>
+    </div>
+  }
+
+</div>

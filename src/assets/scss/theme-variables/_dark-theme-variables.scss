@@ -1,0 +1,28 @@
+html.dark, html .dark-theme {
+  color-scheme: dark;
+  --mat-sys-corner-small: 7px;
+  --mat-sys-corner-medium: 16px;
+  
+  /* Core Colors */
+  --mat-sys-background: #0f172a;              // Slate 900
+  --mat-sys-surface-bright: #1e293b;         // Slate 800 (sidebar background, headers)
+  --mat-sys-surface: #1e293b;                // Slate 800 (card background)
+  --mat-sys-surface-container: #1e293b;       // Slate 800 (dropdown panels)
+  --mat-sys-surface-container-low: #0f172a;   // Slate 900
+  --mat-sys-on-background: #f8fafc;           // Slate 50 (text color)
+  --mat-sys-outline: #334155;                // Slate 700 (borders)
+  --mat-sys-outline-variant: #334155;        // Slate 700 (border grids)
+  
+  /* Material Component Overrides */
+  --mdc-outlined-text-field-hover-outline-color: #475569;
+  --mdc-checkbox-unselected-hover-state-layer-color: #475569;
+  --mat-menu-item-hover-state-layer-color: #334155;
+  --mat-standard-button-toggle-state-layer-color: #334155;
+  --mat-option-focus-state-layer-color: #334155;
+  --mat-option-hover-state-layer-color: #334155;
+  --mdc-switch-unselected-track-color: #334155;
+  --mat-stepper-header-focus-state-layer-color: #334155;
+  --mat-stepper-header-hover-state-layer-color: #334155;
+  --mdc-dialog-supporting-text-color: var(--mat-sys-on-background);
+  --mat-expansion-header-hover-state-layer-color: #334155;
+}

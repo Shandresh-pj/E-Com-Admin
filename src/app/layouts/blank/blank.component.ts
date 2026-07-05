@@ -19,5 +19,9 @@ export class BlankComponent {
     this.htmlElement = document.querySelector('html')!;
   }
 
+  get currentThemeClass(): string {
+    return this.settings.themeSignal() === 'dark' ? 'dark-theme' : 'light-theme';
+  }
+
 
 }

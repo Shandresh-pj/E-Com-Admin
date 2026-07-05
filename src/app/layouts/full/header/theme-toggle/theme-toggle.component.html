@@ -1,0 +1,32 @@
+<button 
+  class="sky-toggle-container" 
+  [class.dark-active]="isDarkTheme()" 
+  (click)="toggleTheme()" 
+  aria-label="Toggle light and dark theme"
+>
+  <div class="sky-toggle-background">
+    <!-- Starry night elements (Dark Mode) -->
+    <div class="stars-container">
+      <span class="star star-1"></span>
+      <span class="star star-2"></span>
+      <span class="star star-3"></span>
+      <span class="star star-4"></span>
+      <span class="star star-5"></span>
+    </div>
+
+    <!-- Puffy cloud elements (Light Mode) -->
+    <div class="clouds-container">
+      <div class="cloud cloud-1"></div>
+      <div class="cloud cloud-2"></div>
+      <div class="cloud cloud-3"></div>
+    </div>
+  </div>
+
+  <!-- Animated Thumb (Sun / Moon) -->
+  <div class="sun-moon-thumb">
+    <!-- Moon craters -->
+    <span class="crater crater-1"></span>
+    <span class="crater crater-2"></span>
+    <span class="crater crater-3"></span>
+  </div>
+</button>

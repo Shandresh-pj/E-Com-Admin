@@ -6,7 +6,10 @@
     <i-tabler name="menu-2" class="icon-20 d-flex"></i-tabler>
   </button>
 
-<div class="ms-auto">
+<div class="ms-auto d-flex align-items-center gap-10">
+  <!-- Theme Toggle Switcher -->
+  <app-theme-toggle class="d-flex align-items-center justify-content-center"></app-theme-toggle>
+
   <button mat-icon-button [matMenuTriggerFor]="menu" aria-label="Notifications" >
     <i-tabler class="d-flex" name="bell" matBadge="1" matBadgeColor="primary"></i-tabler>
   </button>

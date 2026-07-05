@@ -1,0 +1,262 @@
+// ─── Command Center Welcome Banner ──────────────────────────────────────────
+.welcome-banner {
+  background: linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #4338ca 100%) !important;
+  color: #ffffff;
+  border-radius: 20px !important;
+  box-shadow: 0 20px 40px -15px rgba(67, 56, 202, 0.3) !important;
+  position: relative;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  
+  .welcome-title {
+    font-size: 2.25rem;
+    letter-spacing: -1px;
+    font-family: 'Outfit', 'Plus Jakarta Sans', sans-serif;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
+  }
+}
+
+.badge-role-pill {
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(8px);
+  color: #a5b4fc;
+  padding: 4px 12px;
+  border-radius: 24px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.2);
+}
+
+.bg-white-opacity {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+// Glowing background decorations
+.glass-bg-circle {
+  position: absolute;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(129, 140, 248, 0.2) 0%, rgba(99, 102, 241, 0) 70%);
+  pointer-events: none;
+  
+  &.circle-1 {
+    width: 320px;
+    height: 320px;
+    top: -120px;
+    right: -60px;
+    animation: pulseGlow 8s infinite alternate;
+  }
+  
+  &.circle-2 {
+    width: 220px;
+    height: 220px;
+    bottom: -90px;
+    left: 15%;
+    animation: pulseGlow 6s infinite alternate-reverse;
+  }
+}
+
+@keyframes pulseGlow {
+  0% { transform: scale(1); opacity: 0.6; }
+  100% { transform: scale(1.15); opacity: 0.9; }
+}
+
+// ─── Glassmorphism KPI Grid Cards ───────────────────────────────────────────
+.stats-kpi {
+  transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+  background: rgba(255, 255, 255, 0.8) !important;
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  border: 1px solid rgba(229, 231, 235, 0.5) !important;
+  border-radius: 16px !important;
+  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.04) !important;
+  
+  &:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.08) !important;
+  }
+
+  &.border-left-primary {
+    border-left: 5px solid #4f46e5 !important;
+    .kpi-icon { background: rgba(79, 70, 229, 0.08); color: #4f46e5; }
+  }
+  &.border-left-success {
+    border-left: 5px solid #10b981 !important;
+    .kpi-icon { background: rgba(16, 185, 129, 0.08); color: #10b981; }
+  }
+  &.border-left-warning {
+    border-left: 5px solid #f59e0b !important;
+    .kpi-icon { background: rgba(245, 158, 11, 0.08); color: #f59e0b; }
+  }
+  &.border-left-danger {
+    border-left: 5px solid #ef4444 !important;
+    .kpi-icon { background: rgba(239, 68, 68, 0.08); color: #ef4444; }
+  }
+}
+
+// Dark Mode Support for Glassmorphic KPI Cards
+html.dark, html .dark-theme {
+  .stats-kpi {
+    background: rgba(30, 41, 59, 0.7) !important;
+    border: 1px solid rgba(255, 255, 255, 0.05) !important;
+    box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.2) !important;
+    
+    &:hover {
+      box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.4) !important;
+    }
+  }
+}
+
+.kpi-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+}
+
+// ─── Audit Log Timeline ─────────────────────────────────────────────────────
+.timeline-log-list {
+  padding-left: 6px;
+}
+
+.timeline-log-item {
+  position: relative;
+  
+  &:last-child {
+    .timeline-bar {
+      display: none;
+    }
+  }
+}
+
+.timeline-indicator-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 20px;
+  flex-shrink: 0;
+}
+
+.timeline-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 3px solid var(--mat-sys-surface);
+  box-shadow: 0 0 0 2px currentColor;
+  z-index: 2;
+  transition: transform 0.2s ease;
+  
+  &:hover {
+    transform: scale(1.2);
+  }
+  
+  &.bg-primary { background-color: #4f46e5 !important; color: #4f46e5; }
+  &.bg-warning { background-color: #f59e0b !important; color: #f59e0b; }
+  &.bg-danger { background-color: #ef4444 !important; color: #ef4444; }
+}
+
+.timeline-bar {
+  width: 2px;
+  flex-grow: 1;
+  background: var(--mat-sys-outline-variant);
+  margin-top: 4px;
+  margin-bottom: -16px;
+  z-index: 1;
+  opacity: 0.6;
+}
+
+.timeline-log-body {
+  border-bottom: 1px dashed var(--mat-sys-outline-variant);
+  transition: background-color 0.2s ease;
+  
+  &:hover {
+    background-color: rgba(93, 135, 255, 0.02);
+  }
+}
+
+// ─── Actions Navigation List ────────────────────────────────────────────────
+.action-row-btn {
+  background: var(--mat-sys-surface);
+  border: 1px solid var(--mat-sys-outline-variant);
+  text-decoration: none;
+  color: var(--mat-sys-on-surface);
+  transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.01);
+  
+  &:hover {
+    transform: translate(6px, -2px);
+    background: rgba(79, 70, 229, 0.05);
+    border-color: #4f46e5;
+    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.1);
+  }
+}
+
+.action-btn-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+}
+
+// Badges
+.badge-role {
+  background: rgba(79, 70, 229, 0.06);
+  color: #4f46e5;
+  padding: 4px 10px;
+  border-radius: 8px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border: 1px solid rgba(79, 70, 229, 0.1);
+}
+
+.badge-rules {
+  background: rgba(16, 185, 129, 0.06);
+  color: #10b981;
+  padding: 4px 10px;
+  border-radius: 8px;
+  font-size: 11px;
+  font-weight: 700;
+  border: 1px solid rgba(16, 185, 129, 0.1);
+}
+
+// Responsive layout scaling overrides
+@media (max-width: 768px) {
+  .welcome-banner {
+    text-align: center;
+    padding: 24px 16px !important;
+    
+    .d-flex {
+      justify-content: center !important;
+      flex-direction: column;
+    }
+  }
+}
+
+// ─── Entry Staggered Slide Animations ───────────────────────────────────────
+.animate-fade-in-up {
+  opacity: 0;
+  transform: translateY(24px);
+  animation: fadeInUp 0.75s cubic-bezier(0.19, 1, 0.22, 1) forwards;
+}
+
+.delay-1 { animation-delay: 0.08s; }
+.delay-2 { animation-delay: 0.16s; }
+.delay-3 { animation-delay: 0.24s; }
+.delay-4 { animation-delay: 0.32s; }
+.delay-5 { animation-delay: 0.4s; }
+
+@keyframes fadeInUp {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+

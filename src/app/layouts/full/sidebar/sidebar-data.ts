@@ -128,6 +128,17 @@ export const navItems: NavItem[] = [
   //   bgcolor: 'warning',
   //   roles: [SA, A],
   // },
+  // {
+  //   navCap: 'Workforce',
+  //   roles: [SA, A, BM],
+  // },
+  // {
+  //   displayName: 'Workforce Console',
+  //   iconName: 'settings',
+  //   route: '/components/workforce',
+  //   bgcolor: 'primary',
+  //   roles: [SA, A, BM],
+  // },
   {
     displayName: 'Change Password',
     iconName: 'lock',

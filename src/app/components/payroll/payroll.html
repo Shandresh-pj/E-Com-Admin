@@ -1,8 +1,8 @@
 <mat-card class="cardWithShadow theme-card">
-  <mat-card-header>
-    <div class="header-container">
-      <mat-card-title class="m-b-0">Employee Payroll Ledger</mat-card-title>
-      @if (!showForm && !viewDetailsMode && perm.hasRoleAction('canCreate')) {
+  <mat-card-header class="p-x-24 p-y-16">
+    <div class="header-container w-100 d-flex justify-content-between align-items-center">
+      <mat-card-title class="m-b-0 f-w-600">Employee Payroll Ledger</mat-card-title>
+      @if (!showForm && !viewDetailsMode && !showPaymentModal && perm.hasRoleAction('canCreate')) {
         <button mat-flat-button color="primary" (click)="toggleForm()">
           <mat-icon class="icon-16 m-r-4">add_circle</mat-icon> Generate Monthly Payroll
         </button>
@@ -17,7 +17,7 @@
         <div class="row">
           <!-- Select Employee -->
           <div class="col-lg-4 col-md-6 col-sm-12 m-b-16">
-            <mat-label class="f-w-600 m-b-8 d-block">Employee <span class="text-danger">*</span></mat-label>
+            <mat-label class="f-w-600 m-b-8 d-block f-s-13">Employee <span class="text-danger">*</span></mat-label>
             <mat-form-field appearance="outline" class="w-100">
               <mat-select formControlName="employee_id" placeholder="Select Employee">
                 @for(e of employees; track e.id) {
@@ -29,7 +29,7 @@
 
           <!-- Select Month -->
           <div class="col-lg-4 col-md-6 col-sm-12 m-b-16">
-            <mat-label class="f-w-600 m-b-8 d-block">Month <span class="text-danger">*</span></mat-label>
+            <mat-label class="f-w-600 m-b-8 d-block f-s-13">Month <span class="text-danger">*</span></mat-label>
             <mat-form-field appearance="outline" class="w-100">
               <mat-select formControlName="month" placeholder="Select Month">
                 @for(m of months; track m.value) {
@@ -41,15 +41,15 @@
 
           <!-- Year Input -->
           <div class="col-lg-4 col-md-6 col-sm-12 m-b-16">
-            <mat-label class="f-w-600 m-b-8 d-block">Year <span class="text-danger">*</span></mat-label>
+            <mat-label class="f-w-600 m-b-8 d-block f-s-13">Year <span class="text-danger">*</span></mat-label>
             <mat-form-field appearance="outline" class="w-100">
               <input matInput type="number" formControlName="year" placeholder="Enter Year">
             </mat-form-field>
           </div>
         </div>
 
-        <div class="m-t-16">
-          <button mat-stroked-button class="me-3" (click)="toggleForm()" [disabled]="loading">Cancel</button>
+        <div class="m-t-16 d-flex gap-8">
+          <button mat-stroked-button class="Cancel_Button" (click)="toggleForm()" [disabled]="loading">Cancel</button>
           <button mat-flat-button color="primary" (click)="generatePayroll()" [disabled]="loading || payrollForm.invalid">
             Generate Now
           </button>
@@ -58,64 +58,203 @@
     </mat-card-content>
   }
   
-  <!-- View Details Mode -->
-  @else if (viewDetailsMode) {
+  <!-- View Details / Payslip Details Mode -->
+  @else if (viewDetailsMode && payslipDetails) {
     <mat-card-content class="p-24 b-t-1">
       <div class="payroll-receipt">
         <div class="receipt-header d-flex justify-content-between align-items-center m-b-24 pb-3 border-bottom">
           <div>
             <h3 class="f-w-700 m-b-4">{{ selectedPayroll?.employee_name }}</h3>
-            <p class="text-muted f-s-14 m-b-0">Payroll Record ID: #{{ selectedPayroll?.id }} | Period: {{ selectedPayroll?.month_year }}</p>
+            <p class="text-muted f-s-13 m-b-0">Payroll Record ID: #{{ payslipDetails.id }} | Period: {{ selectedPayroll?.month_year }}</p>
           </div>
-          <span class="badge" [ngClass]="selectedPayroll?.payment_status === 'PAID' ? 'bg-success' : 'bg-warning'">
-            {{ selectedPayroll?.payment_status }}
+          <span class="badge-rules font-monospace text-uppercase" [ngClass]="{
+            'bg-light-success text-success': payslipDetails.payment_status === 'PAID',
+            'bg-light-warn text-warn': payslipDetails.payment_status === 'APPROVED',
+            'bg-light-danger text-danger': payslipDetails.payment_status === 'DRAFT'
+          }">
+            {{ payslipDetails.payment_status }}
           </span>
         </div>
 
+        <!-- Detailed Breakdown Grid -->
         <div class="row">
-          <div class="col-lg-6 col-md-6 col-sm-12 m-b-16">
-            <p class="f-w-600 m-b-4 text-muted">Basic Monthly Salary</p>
-            <h4 class="f-s-18 f-w-600 text-dark">${{ selectedPayroll?.basic_salary }}</h4>
+          <!-- Earnings and Allowances Panel -->
+          <div class="col-md-6 m-b-24">
+            <mat-card class="cardWithShadow border-dashed-primary m-b-0">
+              <mat-card-header class="p-x-20 p-y-12">
+                <mat-card-title class="m-b-0 f-w-600 f-s-14 text-primary">Earnings & Allowances</mat-card-title>
+              </mat-card-header>
+              <mat-card-content class="p-20 b-t-1">
+                <div class="d-flex flex-column gap-12">
+                  <div class="d-flex justify-content-between">
+                    <span class="text-muted">Basic Monthly Salary:</span>
+                    <span class="f-w-600">₹{{ payslipDetails.basic_salary }}</span>
+                  </div>
+                  <div class="d-flex justify-content-between">
+                    <span class="text-muted">HRA (40% of Basic):</span>
+                    <span class="f-w-600 text-success">+ ₹{{ payslipDetails.allowances?.hra || 0 }}</span>
+                  </div>
+                  <div class="d-flex justify-content-between">
+                    <span class="text-muted">Transport Allowance:</span>
+                    <span class="f-w-600 text-success">+ ₹{{ payslipDetails.allowances?.transport || 0 }}</span>
+                  </div>
+                  <div class="d-flex justify-content-between">
+                    <span class="text-muted">Medical Allowance:</span>
+                    <span class="f-w-600 text-success">+ ₹{{ payslipDetails.allowances?.medical || 0 }}</span>
+                  </div>
+                  <div class="d-flex justify-content-between">
+                    <span class="text-muted">Overtime Pay (1.5x):</span>
+                    <span class="f-w-600 text-success">+ ₹{{ payslipDetails.allowances?.overtime_pay || 0 }}</span>
+                  </div>
+                  <div class="d-flex justify-content-between border-top p-t-8 f-w-700">
+                    <span>Gross Earnings:</span>
+                    <span>₹{{ payslipDetails.gross_salary }}</span>
+                  </div>
+                </div>
+              </mat-card-content>
+            </mat-card>
           </div>
 
-          <div class="col-lg-6 col-md-6 col-sm-12 m-b-16">
-            <p class="f-w-600 m-b-4 text-muted">Overtime Minutes</p>
-            <h4 class="f-s-18 f-w-600 text-dark">{{ selectedPayroll?.overtime_minutes || 0 }} min</h4>
-          </div>
-
-          <div class="col-lg-4 col-md-6 col-sm-12 m-b-16">
-            <p class="f-w-600 m-b-4 text-muted">Present Days</p>
-            <h4 class="f-s-16 text-dark">{{ selectedPayroll?.present_days || 0 }} Days</h4>
-          </div>
-
-          <div class="col-lg-4 col-md-6 col-sm-12 m-b-16">
-            <p class="f-w-600 m-b-4 text-muted">Leave Days (Approved)</p>
-            <h4 class="f-s-16 text-dark">{{ selectedPayroll?.leave_days || 0 }} Days</h4>
-          </div>
-
-          <div class="col-lg-4 col-md-6 col-sm-12 m-b-16">
-            <p class="f-w-600 m-b-4 text-muted">Absent Days</p>
-            <h4 class="f-s-16 text-dark">{{ selectedPayroll?.absent_days || 0 }} Days</h4>
+          <!-- Deductions Panel -->
+          <div class="col-md-6 m-b-24">
+            <mat-card class="cardWithShadow border-dashed-danger m-b-0">
+              <mat-card-header class="p-x-20 p-y-12">
+                <mat-card-title class="m-b-0 f-w-600 f-s-14 text-danger">Deductions & Taxes</mat-card-title>
+              </mat-card-header>
+              <mat-card-content class="p-20 b-t-1">
+                <div class="d-flex flex-column gap-12">
+                  <div class="d-flex justify-content-between">
+                    <span class="text-muted">Absent Days Deductions:</span>
+                    <span class="f-w-600 text-danger">- ₹{{ payslipDetails.deductions?.absent_deduction || 0 }}</span>
+                  </div>
+                  <div class="d-flex justify-content-between">
+                    <span class="text-muted">Half-day Deductions:</span>
+                    <span class="f-w-600 text-danger">- ₹{{ payslipDetails.deductions?.half_day_deduction || 0 }}</span>
+                  </div>
+                  <div class="d-flex justify-content-between">
+                    <span class="text-muted">Late Arrivals (3 Lates = 1/2 Day):</span>
+                    <span class="f-w-600 text-danger">- ₹{{ payslipDetails.deductions?.late_deduction || 0 }}</span>
+                  </div>
+                  <div class="d-flex justify-content-between">
+                    <span class="text-muted">Excess Breaks Deductions:</span>
+                    <span class="f-w-600 text-danger">- ₹{{ payslipDetails.deductions?.break_deduction || 0 }}</span>
+                  </div>
+                  <div class="d-flex justify-content-between">
+                    <span class="text-muted">Professional Tax (Income Slab):</span>
+                    <span class="f-w-600 text-danger">- ₹{{ payslipDetails.deductions?.tax_deduction || 0 }}</span>
+                  </div>
+                  <div class="d-flex justify-content-between border-top p-t-8 f-w-700">
+                    <span>Total Deductions:</span>
+                    <span>₹{{ payslipDetails.total_deductions }}</span>
+                  </div>
+                </div>
+              </mat-card-content>
+            </mat-card>
           </div>
         </div>
 
-        <div class="total-salary-box m-t-24 p-24 rounded-8 bg-light-primary border-left-4">
-          <div class="d-flex justify-content-between align-items-center">
-            <div>
-              <h3 class="f-w-700 m-b-0 text-primary">Final Calculated Payout</h3>
-              <p class="text-muted f-s-12 m-b-0 m-t-4">Calculated using basic salary, present days, leaves, and overtime calculations.</p>
+        <!-- Attendance Stats Counters Row -->
+        <div class="row m-b-24">
+          <div class="col-lg-3 col-sm-6">
+            <div class="p-12 rounded-8 bg-light-primary text-center">
+              <span class="text-muted f-s-12">Present Days</span>
+              <h4 class="m-b-0 f-w-600">{{ payslipDetails.present_days || 0 }} Days</h4>
             </div>
-            <h2 class="f-s-36 f-w-800 text-primary m-b-0">${{ selectedPayroll?.final_salary | number:'1.2-2' }}</h2>
+          </div>
+          <div class="col-lg-3 col-sm-6">
+            <div class="p-12 rounded-8 bg-light-warn text-center">
+              <span class="text-muted f-s-12">Paid Leaves</span>
+              <h4 class="m-b-0 f-w-600">{{ payslipDetails.leave_days || 0 }} Days</h4>
+            </div>
+          </div>
+          <div class="col-lg-3 col-sm-6">
+            <div class="p-12 rounded-8 bg-light-danger text-center">
+              <span class="text-muted f-s-12">Absent Days</span>
+              <h4 class="m-b-0 f-w-600">{{ payslipDetails.absent_days || 0 }} Days</h4>
+            </div>
+          </div>
+          <div class="col-lg-3 col-sm-6">
+            <div class="p-12 rounded-8 bg-light-info text-center">
+              <span class="text-muted f-s-12">Overtime</span>
+              <h4 class="m-b-0 f-w-600">{{ payslipDetails.overtime_minutes || 0 }} Mins</h4>
+            </div>
           </div>
         </div>
 
-        <div class="m-t-24">
-          <button mat-stroked-button (click)="closeDetails()">Back to List</button>
+        <!-- Final calculated payout banner -->
+        <div class="total-salary-box p-20 rounded-12 bg-light-primary border-left-4 m-b-24">
+          <div class="d-flex flex-wrap justify-content-between align-items-center gap-16">
+            <div>
+              <h3 class="f-w-700 m-b-0 text-primary">Final Calculated Net Take-Home Payout</h3>
+              <p class="text-muted f-s-12 m-b-0 m-t-4">Reflects all earnings minus tax deductions and attendance penalties.</p>
+            </div>
+            <h2 class="f-s-32 f-w-800 text-primary m-b-0">₹{{ payslipDetails.final_salary | number:'1.2-2' }}</h2>
+          </div>
+        </div>
+
+        <!-- Action tools -->
+        <div class="d-flex gap-8 justify-content-between align-items-center">
+          <button mat-stroked-button (click)="closeDetails()" [disabled]="loading">Back to Ledger</button>
+          
+          <div class="d-flex gap-8">
+            <!-- Approve Draft -->
+            @if (payslipDetails.payment_status === 'DRAFT' && perm.hasRoleAction('canUpdate')) {
+              <button mat-flat-button color="accent" (click)="approvePayroll(payslipDetails.id)" [disabled]="loading">
+                <mat-icon class="m-r-4">verified</mat-icon> Approve Payroll
+              </button>
+            }
+            <!-- Mark Paid -->
+            @if (payslipDetails.payment_status === 'APPROVED' && perm.hasRoleAction('canUpdate')) {
+              <button mat-flat-button color="primary" (click)="initiatePayment(payslipDetails)" [disabled]="loading">
+                <mat-icon class="m-r-4">paid</mat-icon> Release Payment
+              </button>
+            }
+          </div>
         </div>
       </div>
     </mat-card-content>
   }
   
+  <!-- Release Payment Modal Form -->
+  @else if (showPaymentModal && selectedPayroll) {
+    <mat-card-content class="p-24 b-t-1">
+      <div class="payment-modal">
+        <h4 class="f-w-600 m-b-16 text-dark">Log Payout Settlement</h4>
+        <p class="f-s-13 text-muted m-b-20">
+          Releasing payout of **₹{{ selectedPayroll.final_salary | number:'1.2-2' }}** to **{{ selectedPayroll.employee_name }}**. Provide the payment references below.
+        </p>
+
+        <form [formGroup]="paymentForm" (ngSubmit)="submitPayment()">
+          <div class="row">
+            <div class="col-md-6 m-b-16">
+              <mat-label class="f-w-600 m-b-8 d-block f-s-13">Payment Reference Transaction ID <span class="text-danger">*</span></mat-label>
+              <mat-form-field appearance="outline" class="w-100">
+                <input matInput formControlName="payment_reference" placeholder="e.g. TXN-199200234">
+              </mat-form-field>
+            </div>
+            <div class="col-md-6 m-b-16">
+              <mat-label class="f-w-600 m-b-8 d-block f-s-13">Payment Method Channel <span class="text-danger">*</span></mat-label>
+              <mat-form-field appearance="outline" class="w-100">
+                <mat-select formControlName="payment_method">
+                  <mat-option value="BANK_TRANSFER">ONLINE BANK TRANSFER</mat-option>
+                  <mat-option value="CASH">CASH SETTLEMENT</mat-option>
+                  <mat-option value="CHEQUE">CHEQUE PAYOUT</mat-option>
+                </mat-select>
+              </mat-form-field>
+            </div>
+          </div>
+
+          <div class="m-t-16 d-flex gap-8">
+            <button mat-stroked-button type="button" class="Cancel_Button" (click)="showPaymentModal = false; viewDetailsMode = true;" [disabled]="loading">Cancel</button>
+            <button mat-flat-button color="primary" type="submit" [disabled]="loading || paymentForm.invalid">
+              Confirm Release
+            </button>
+          </div>
+        </form>
+      </div>
+    </mat-card-content>
+  }
+
   <!-- List Table Mode -->
   @else {
     <mat-card-content class="b-t-1">
@@ -124,7 +263,7 @@
           [columns]="tableColumns" 
           [tableData]="payrolls" 
           [showAction]="true" 
-          [showView]="true"
+          [showView]="perm.hasRoleAction('canRead')"
           [Extra_Column]="false"
           [showEdit]="false"
           [showDelete]="false"

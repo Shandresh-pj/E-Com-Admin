@@ -19,7 +19,7 @@
 
     @if (!Menu_Forms && !View_Mode) {
     <mat-card-content class="b-t-1">
-        <app-mat-table [columns]="tableColumns" [tableData]="menus" [showAction]="true" [showView]="true" [Extra_Column]="false"
+        <app-mat-table [columns]="tableColumns" [tableData]="menus" [showAction]="true" [showView]="perm.hasRoleAction('canRead')" [Extra_Column]="false"
             [showEdit]="perm.hasRoleAction('canUpdate')" [showDelete]="perm.hasRoleAction('canDelete')"
             (editClick)="editMenu($event)" (deleteClick)="deleteMenu($event)" (ViewClick)="viewMenu($event)">
         </app-mat-table>

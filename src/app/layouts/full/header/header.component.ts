@@ -13,6 +13,8 @@ import { NgScrollbarModule } from 'ngx-scrollbar';
 import { AlertService } from 'src/app/Securities/Services/alert.service';
 import { AuthService } from 'src/app/Securities/Services/auth.service';
 import { CommonService } from 'src/app/Securities/Services/common.service';
+import { CoreService } from 'src/app/services/core.service';
+import { ThemeToggleComponent } from './theme-toggle/theme-toggle.component';
 
 @Component({
   selector: 'app-header',
@@ -20,8 +22,9 @@ import { CommonService } from 'src/app/Securities/Services/common.service';
     RouterModule,
     NgScrollbarModule,
     TablerIconsModule,
-    MaterialModule
-],
+    MaterialModule,
+    ThemeToggleComponent
+  ],
   templateUrl: './header.component.html',
   encapsulation: ViewEncapsulation.None,
 })
@@ -32,9 +35,18 @@ export class HeaderComponent {
   constructor( 
     private router: Router,
     private commonService: CommonService,
-     private authService: AuthService,
-     private alert: AlertService
+    private authService: AuthService,
+    private alert: AlertService,
+    public coreService: CoreService
   ) {}
+
+  toggleTheme() {
+    this.coreService.toggleTheme();
+  }
+
+  isDarkTheme(): boolean {
+    return this.coreService.themeSignal() === 'dark';
+  }
 
 
   onLogout() {

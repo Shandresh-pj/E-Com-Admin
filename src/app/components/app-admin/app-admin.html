@@ -25,7 +25,7 @@
         <app-mat-table [columns]="tableColumns"
         [tableData]="Users"
         [showAction]="true"
-        [showView]="true"
+        [showView]="perm.hasRoleAction('canRead')"
         [Extra_Column]="false"
         [showEdit]="perm.hasRoleAction('canUpdate')"
         [showDelete]="perm.hasRoleAction('canDelete')"

@@ -1,6 +1,6 @@
 <!-- ============================================================== -->
 <!-- Only router without any element -->
 <!-- ============================================================== -->
-<mat-sidenav-container dir="ltr" class="light-theme blue_theme">
+<mat-sidenav-container dir="ltr" [class]="'blue_theme ' + currentThemeClass">
   <router-outlet></router-outlet>
 </mat-sidenav-container>

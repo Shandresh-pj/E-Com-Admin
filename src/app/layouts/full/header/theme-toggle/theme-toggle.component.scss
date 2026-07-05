@@ -1,0 +1,165 @@
+.sky-toggle-container {
+  display: inline-block;
+  position: relative;
+  width: 66px;
+  height: 32px;
+  padding: 0;
+  border: none;
+  border-radius: 16px;
+  background: linear-gradient(to bottom, #7ec0ee, #bce0fd);
+  cursor: pointer;
+  overflow: hidden;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05), inset 0 2px 4px rgba(255, 255, 255, 0.3);
+  transition: background 0.5s ease, transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  outline: none;
+
+  &:hover {
+    transform: scale(1.05);
+  }
+
+  &:active {
+    transform: scale(0.95);
+  }
+}
+
+.sky-toggle-background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+/* Day Mode Cloud Styles */
+.clouds-container {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 0.4s ease, transform 0.4s ease;
+  animation: float-clouds 4s infinite ease-in-out;
+}
+
+.cloud {
+  position: absolute;
+  background: #ffffff;
+  border-radius: 50%;
+}
+
+.cloud-1 {
+  width: 14px;
+  height: 14px;
+  top: 13px;
+  right: 8px;
+  opacity: 0.85;
+}
+
+.cloud-2 {
+  width: 18px;
+  height: 18px;
+  top: 7px;
+  right: 16px;
+  opacity: 0.95;
+}
+
+.cloud-3 {
+  width: 12px;
+  height: 12px;
+  top: 11px;
+  right: 28px;
+  opacity: 0.75;
+}
+
+/* Night Mode Stars Styles */
+.stars-container {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  opacity: 0;
+  transform: translateY(-8px);
+  transition: opacity 0.4s ease, transform 0.4s ease;
+}
+
+.star {
+  position: absolute;
+  background: #ffffff;
+  border-radius: 50%;
+  box-shadow: 0 0 4px #ffffff;
+  animation: twinkle 2s infinite ease-in-out;
+}
+
+.star-1 { width: 2px; height: 2px; top: 6px; left: 16px; animation-delay: 0.1s; }
+.star-2 { width: 1.5px; height: 1.5px; top: 18px; left: 24px; animation-delay: 0.5s; }
+.star-3 { width: 3px; height: 3px; top: 8px; left: 30px; animation-delay: 0.9s; }
+.star-4 { width: 2px; height: 2px; top: 22px; left: 14px; animation-delay: 1.3s; }
+.star-5 { width: 1.5px; height: 1.5px; top: 13px; left: 38px; animation-delay: 1.7s; }
+
+/* The Thumb (Sun / Moon) */
+.sun-moon-thumb {
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #ffdb3a 0%, #fdb813 100%);
+  box-shadow: 0 0 6px #ffdb3a, 0 0 12px #fdb813, inset -1px -1px 3px rgba(0, 0, 0, 0.1);
+  transform: rotate(0deg);
+  transition: left 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55), transform 0.5s ease, background 0.5s ease, box-shadow 0.5s ease;
+}
+
+/* Craters on the Moon */
+.crater {
+  position: absolute;
+  background: #cbd5e1;
+  border-radius: 50%;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.crater-1 { width: 5px; height: 5px; top: 5px; left: 5px; box-shadow: inset 1px 1px 1px rgba(0, 0, 0, 0.15); }
+.crater-2 { width: 6px; height: 6px; top: 13px; left: 11px; box-shadow: inset 1px 1px 1px rgba(0, 0, 0, 0.15); }
+.crater-3 { width: 4px; height: 4px; top: 6px; left: 15px; box-shadow: inset 1px 1px 1px rgba(0, 0, 0, 0.15); }
+
+/* Dark Mode Active State */
+.sky-toggle-container.dark-active {
+  background: linear-gradient(to bottom, #0f172a, #1e1b4b);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.15), inset 0 2px 4px rgba(0, 0, 0, 0.4);
+
+  .clouds-container {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  .stars-container {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .sun-moon-thumb {
+    left: 38px;
+    transform: rotate(360deg);
+    background: linear-gradient(135deg, #f1f5f9 0%, #cbd5e1 100%);
+    box-shadow: 0 0 8px #cbd5e1, inset -2px -2px 4px rgba(0, 0, 0, 0.15), inset 0 2px 4px rgba(255, 255, 255, 0.6);
+  }
+
+  .crater {
+    opacity: 1;
+  }
+}
+
+/* Animations */
+@keyframes float-clouds {
+  0%, 100% { transform: translateX(0); }
+  50% { transform: translateX(-3px); }
+}
+
+@keyframes twinkle {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 1; }
+}

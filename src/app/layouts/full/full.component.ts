@@ -1,5 +1,5 @@
 import { BreakpointObserver, MediaMatcher } from '@angular/cdk/layout';
-import { Component, OnInit, ViewChild, ViewEncapsulation, effect } from '@angular/core';
+import { Component, OnInit, ViewChild, ViewEncapsulation, effect, signal } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { MatSidenav, MatSidenavContent } from '@angular/material/sidenav';
 import { CoreService } from 'src/app/services/core.service';
@@ -46,7 +46,11 @@ const TABLET_VIEW = 'screen and (min-width: 769px) and (max-width: 1024px)';
   encapsulation: ViewEncapsulation.None
 })
 export class FullComponent implements OnInit {
-  navItems: NavItem[] = [];
+  // A signal (not a plain field) so the sidebar updates the instant a
+  // socket-driven permissions refresh rebuilds it — a plain field mutated
+  // inside an effect() isn't guaranteed to be picked up by the same
+  // change-detection pass the effect ran in (Angular Signals gotcha).
+  navItems = signal<NavItem[]>([]);
 
   /**
    * Sidebar items come from two sources, merged:
@@ -227,7 +231,7 @@ export class FullComponent implements OnInit {
   }
 
   updateNavBadges(): void {
-    this.navItems.forEach(item => {
+    this.navItems().forEach(item => {
       if (item.displayName === 'Notifications') {
         item.chip = this.unreadNotificationsCount > 0;
         item.chipContent = String(this.unreadNotificationsCount);
@@ -446,13 +450,13 @@ export class FullComponent implements OnInit {
 
     // Prune duplicates
     const seen = new Set<string>();
-    this.navItems = finalItems.filter(it => {
+    this.navItems.set(finalItems.filter(it => {
       if (!it.route) return true;
       const key = norm(it.route) + (it.children ? '_parent' : '');
       if (seen.has(key)) return false;
       seen.add(key);
       return true;
-    });
+    }));
 
     this.updateNavBadges();
   }

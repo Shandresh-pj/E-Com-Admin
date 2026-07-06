@@ -4,7 +4,7 @@ import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { NotificationService } from 'src/app/services/notification.service';
-import { SocketService } from 'src/app/services/socket.service';
+import { SocketService } from 'src/app/Securities/Services/socket.service';
 import { AlertService } from 'src/app/Securities/Services/alert.service';
 import { Subscription } from 'rxjs';
 

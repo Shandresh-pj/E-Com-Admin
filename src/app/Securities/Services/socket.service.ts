@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, NgZone } from '@angular/core';
 import { Subject, Observable } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 import { environment } from 'src/environment/environment';
@@ -9,7 +9,6 @@ import { environment } from 'src/environment/environment';
 export class SocketService {
   private ws: WebSocket | null = null;
   private eventSubject = new Subject<{ event: string; data: any }>();
-  private pingIntervalId: any = null;
   private isConnected = false;
   private currentToken: string | null = null;
 
@@ -21,7 +20,7 @@ export class SocketService {
   sessionExpired$: Observable<void> = this.sessionExpiredSubject.asObservable();
   sessionRefresh$: Observable<any> = this.sessionRefreshSubject.asObservable();
 
-  constructor() {}
+  constructor(private ngZone: NgZone) {}
 
   public connect(token?: string): void {
     if (token) {
@@ -36,26 +35,38 @@ export class SocketService {
     try {
       this.ws = new WebSocket(wsUrl);
 
+      // The native WebSocket isn't reliably zone-patched, so its callbacks can
+      // run outside Angular's zone — state updates happen but nothing tells
+      // Angular to re-render until an unrelated zone-patched event (like a
+      // route change) forces a change-detection pass. Force it explicitly.
       this.ws.onopen = () => {
-        console.log('[WebSocket] Connected');
-        this.isConnected = true;
+        this.ngZone.run(() => {
+          console.log('[WebSocket] Connected');
+          this.isConnected = true;
+        });
       };
 
       this.ws.onmessage = (event) => {
-        console.log('[WebSocket] Message received:', event.data);
-        this.handleMessage(event.data);
+        this.ngZone.run(() => {
+          console.log('[WebSocket] Message received:', event.data);
+          this.handleMessage(event.data);
+        });
       };
 
       this.ws.onerror = (err) => {
-        console.error('[WebSocket] Error:', err);
+        this.ngZone.run(() => {
+          console.error('[WebSocket] Error:', err);
+        });
       };
 
       this.ws.onclose = () => {
-        console.log('[WebSocket] Disconnected');
-        this.cleanup();
-        if (this.currentToken) {
-          setTimeout(() => this.connect(), 3000);
-        }
+        this.ngZone.run(() => {
+          console.log('[WebSocket] Disconnected');
+          this.cleanup();
+          if (this.currentToken) {
+            setTimeout(() => this.connect(), 3000);
+          }
+        });
       };
 
     } catch (e) {
@@ -75,10 +86,6 @@ export class SocketService {
 
   private cleanup(): void {
     this.isConnected = false;
-    if (this.pingIntervalId) {
-      clearInterval(this.pingIntervalId);
-      this.pingIntervalId = null;
-    }
   }
 
   private handleMessage(data: string): void {
@@ -89,9 +96,9 @@ export class SocketService {
 
     if (eioType === '0') {
       try {
-        const config = JSON.parse(payload);
-        const pingInterval = config.pingInterval || 25000;
-        this.startHeartbeat(pingInterval);
+        // Handshake ack only — the server drives the ping/pong heartbeat
+        // from here (Engine.IO v4: server pings, client only pongs below).
+        JSON.parse(payload);
 
         const connectPayload = `40${JSON.stringify({ token: this.currentToken })}`;
         this.sendRaw(connectPayload);
@@ -100,6 +107,9 @@ export class SocketService {
         console.error('[WebSocket] Failed to parse EIO open packet:', err);
       }
     } else if (eioType === '2') {
+      // Server ping — reply with pong. Never send '2' (ping) ourselves;
+      // under EIO v4 only the server initiates pings, and a client-sent
+      // ping is a protocol violation that gets the connection dropped.
       this.sendRaw('3');
     } else if (eioType === '4') {
       const sioType = payload.charAt(0);
@@ -126,16 +136,6 @@ export class SocketService {
         }
       }
     }
-  }
-
-  private startHeartbeat(interval: number): void {
-    if (this.pingIntervalId) clearInterval(this.pingIntervalId);
-
-    this.pingIntervalId = setInterval(() => {
-      if (this.isConnected) {
-        this.sendRaw('2');
-      }
-    }, interval);
   }
 
   private sendRaw(message: string): void {

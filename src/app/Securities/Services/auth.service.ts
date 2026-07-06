@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, tap } from 'rxjs';
+import { Observable, tap, switchMap, map, catchError, of } from 'rxjs';
 import { Router } from '@angular/router';
 import { environment } from 'src/environment/environment';
 import { TokenService } from './token.service';
@@ -31,8 +31,11 @@ export class AuthService {
       this.logout();
     });
 
-    this.socketService.sessionRefresh$.subscribe((data) => {
-      this.sessionService.setSession(data);
+    // An admin changed this user's role access — the socket payload is just
+    // a signal, so pull the fresh roles/permissions/menus from the API
+    // instead of trusting whatever was pushed over the socket.
+    this.socketService.sessionRefresh$.subscribe(() => {
+      this.refreshPermissions().subscribe({ error: () => {} });
     });
   }
 
@@ -50,11 +53,29 @@ export class AuthService {
         if (response.refreshToken) {
           this.tokenService.setRefreshToken(response.refreshToken);
         }
-        // Store user, roles, permissions, menus
+        // Store user + roles (permissions/menus are fetched separately below)
         this.sessionService.setSession(response);
         // Connect Socket
         this.socketService.connect(response.token);
-      })
+      }),
+      switchMap((response: any) =>
+        this.refreshPermissions().pipe(
+          map(() => response),
+          catchError(() => of(response))
+        )
+      )
+    );
+  }
+
+  // ─── Live permissions/menus refresh ────────────────────────────────────────
+  // Login no longer returns permissions/menus in the response body — they're
+  // fetched here so a role-access change made by an admin can be picked up
+  // immediately (triggered by the "permissions-updated" socket event) without
+  // requiring the user to log in again.
+
+  refreshPermissions(): Observable<any> {
+    return this.http.get(`${environment.apiUrl}/auth/me/permissions`).pipe(
+      tap((data: any) => this.sessionService.setSession(data))
     );
   }
 

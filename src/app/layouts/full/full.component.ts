@@ -40,7 +40,7 @@ const TABLET_VIEW = 'screen and (min-width: 769px) and (max-width: 1024px)';
     TablerIconsModule,
     HeaderComponent,
     AppTopstripComponent
-],
+  ],
   templateUrl: './full.component.html',
   styleUrls: [],
   encapsulation: ViewEncapsulation.None
@@ -310,7 +310,8 @@ export class FullComponent implements OnInit {
         { id: 22, name: 'Delivery Tracking', path: '/components/delivery-tracking', icon: 'bi-truck', isActive: true },
         { id: 23, name: 'Payments', path: '/components/payments', icon: 'bi-credit-card-2-front-fill', isActive: true },
         { id: 24, name: 'Notifications', path: '/components/notifications', icon: 'bi-bell-fill', isActive: true },
-        { id: 25, name: 'Workforce Console', path: '/components/workforce', icon: 'bi-gear-wide-connected', isActive: true }
+        { id: 25, name: 'Workforce Console', path: '/components/workforce', icon: 'bi-gear-wide-connected', isActive: true },
+        { id: 26, name: 'Invoice Generator', path: '/components/invoices', icon: 'bi-file-text', isActive: true }
       ];
     } else {
       allowedMenus = apiMenus.filter((m: any) => {

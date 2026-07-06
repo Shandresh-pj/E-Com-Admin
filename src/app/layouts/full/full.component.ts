@@ -343,6 +343,13 @@ export class FullComponent implements OnInit {
     const hasStockMenu = allowedMenus.some(m => norm(m.path) === '/components/stocks');
     const hasBranchStockMenu = allowedMenus.some(m => norm(m.path) === '/components/branch-stocks');
 
+    // These three modules render as parent items with children below, so they
+    // can't go through the generic otherItems mapping — but they should still
+    // reflect the icon actually configured on the Menu record, not a guess.
+    const productMenuIcon = allowedMenus.find(m => norm(m.path) === '/components/product')?.icon;
+    const stockMenuIcon = allowedMenus.find(m => norm(m.path) === '/components/stocks')?.icon;
+    const branchStockMenuIcon = allowedMenus.find(m => norm(m.path) === '/components/branch-stocks')?.icon;
+
     const isAdmin = this.authService.isSuperAdmin() || this.authService.getUserType() === 'Admin';
 
     if (hasProductMenu || hasStockMenu || hasBranchStockMenu) {
@@ -352,34 +359,24 @@ export class FullComponent implements OnInit {
     }
 
     if (hasProductMenu) {
-      const productChildren: NavItem[] = [
-        { displayName: 'Product List', route: '/components/product', bgcolor: 'primary' },
-        { displayName: 'Published Products', route: '/components/product', bgcolor: 'success' }
-      ];
-      if (isAdmin) {
-        productChildren.splice(1, 0, { displayName: 'Add Product', route: '/components/product', bgcolor: 'warning' });
-        productChildren.splice(2, 0, { displayName: 'Pending Approval', route: '/components/product', bgcolor: 'error' });
-      }
       finalItems.push({
         displayName: 'Products',
-        iconName: 'bi-box-seam-fill',
-        bgcolor: 'primary',
-        children: productChildren
+        iconName: this.mapIcon(productMenuIcon || 'box-seam-fill'),
+        route: '/components/product',
+        bgcolor: 'primary'
       });
     }
 
     if (hasStockMenu) {
       const stockChildren: NavItem[] = [
-        { displayName: 'Stock List', route: '/components/stocks', bgcolor: 'primary' },
-        { displayName: 'Stock History', route: '/components/stocks', bgcolor: 'success' }
+        { displayName: 'Stock List', route: '/components/stocks', queryParams: { view: 'products' }, bgcolor: 'primary' }
       ];
       if (isAdmin) {
-        stockChildren.splice(1, 0, { displayName: 'Add Stock', route: '/components/stocks', bgcolor: 'warning' });
         stockChildren.push({ displayName: 'Low Stock Alerts', route: '/components/alerts', bgcolor: 'error' });
       }
       finalItems.push({
         displayName: 'Stocks',
-        iconName: 'bi-card-list',
+        iconName: this.mapIcon(stockMenuIcon || 'card-list'),
         bgcolor: 'warning',
         children: stockChildren
       });
@@ -388,12 +385,9 @@ export class FullComponent implements OnInit {
     if (hasBranchStockMenu) {
       finalItems.push({
         displayName: 'Branch Stocks',
-        iconName: 'bi-shop',
-        bgcolor: 'success',
-        children: [
-          { displayName: 'Branch Inventory', route: '/components/branch-stocks', bgcolor: 'primary' },
-          { displayName: 'Stock Transfer', route: '/components/branch-stocks', bgcolor: 'success' }
-        ]
+        iconName: this.mapIcon(branchStockMenuIcon || 'shop'),
+        route: '/components/branch-stocks',
+        bgcolor: 'success'
       });
     }
 
@@ -415,7 +409,7 @@ export class FullComponent implements OnInit {
         return {
           displayName: m.name,
           route: m.path,
-          iconName: this.mapIcon(m.icon || 'bi-grid-fill'),
+          iconName: this.mapIcon(m.icon),
           bgcolor: bgcolor
         };
       });
@@ -462,23 +456,31 @@ export class FullComponent implements OnInit {
     this.updateNavBadges();
   }
 
-  private mapIcon(icon: string): string {
-    const lowercase = String(icon).toLowerCase();
-    if (lowercase.startsWith('bi-') || lowercase.startsWith('bi ')) return icon;
-    if (lowercase.includes('dashboard') || lowercase === 'dashboard-icon') return 'bi-grid-fill';
-    if (lowercase.includes('admin') || lowercase === 'archive') return 'bi-archive-fill';
-    if (lowercase.includes('branch') || lowercase === 'badge') return 'bi-shop';
-    if (lowercase.includes('employee') || lowercase.includes('user')) return 'bi-people-fill';
-    if (lowercase.includes('role') || lowercase.includes('key')) return 'bi-key-fill';
-    if (lowercase.includes('product') || lowercase === 'box') return 'bi-box-seam-fill';
-    if (lowercase.includes('category')) return 'bi-tags-fill';
-    if (lowercase.includes('attribute') || lowercase === 'tag') return 'bi-tag-fill';
-    if (lowercase.includes('order') || lowercase === 'shopping-cart') return 'bi-cart-fill';
-    if (lowercase.includes('log') || lowercase.includes('list')) return 'bi-card-list';
-    if (lowercase.includes('status')) return 'bi-list-check';
-    if (lowercase.includes('lock') || lowercase.includes('password')) return 'bi-lock-fill';
-    if (lowercase.includes('workforce') || lowercase.includes('settings') || lowercase === 'settings') return 'bi-gear-wide-connected';
-    return 'bi-' + icon;
+  // A handful of Menu records store an icon "name" that was never a real
+  // Bootstrap Icons glyph (e.g. "Badge", "settings", "shopping-cart") — those
+  // resolve to no ::before content at all (not just the wrong icon, an empty
+  // slot), because bootstrap-icons only defines rules for its actual glyph
+  // names. Map the known-bad ones to a real equivalent; everything else
+  // passes through as-is since most DB values already match a real glyph.
+  private static readonly ICON_ALIASES: Record<string, string> = {
+    badge: 'person-badge-fill',
+    settings: 'gear-wide-connected',
+    'plane-departure': 'airplane-fill',
+    'map-pin': 'geo-alt-fill',
+    'git-merge': 'shop',
+    category: 'tags-fill',
+    'shopping-cart': 'cart-fill',
+    'clipboard-list': 'clock-history',
+    'list-details': 'list-ul',
+  };
+
+  private mapIcon(icon?: string): string {
+    // Bootstrap Icons classes are always lowercase (e.g. bi-badge); the DB
+    // has inconsistent casing on some Menu records (e.g. "Badge"), which
+    // otherwise produces a class like bi-Badge that matches no real CSS rule.
+    const raw = (icon || 'grid-fill').trim().toLowerCase();
+    const bare = raw.startsWith('bi-') ? raw.slice(3) : raw.startsWith('bi ') ? raw.slice(3).trim() : raw;
+    return `bi-${FullComponent.ICON_ALIASES[bare] ?? bare}`;
   }
 
 }

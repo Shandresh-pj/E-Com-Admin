@@ -1,4 +1,5 @@
 import { ChangeDetectorRef, Component } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormsModule, FormGroup, FormArray, FormBuilder, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
@@ -83,7 +84,8 @@ export class Product {
     private cdr: ChangeDetectorRef,
     private dialog: MatDialog,
     public perm: PermissionService,
-    private socketService: SocketService
+    private socketService: SocketService,
+    private route: ActivatedRoute
   ) {
     this.ProductForm = fb.group({
       name: ['', [Validators.required, Validators.maxLength(200)]],
@@ -117,6 +119,25 @@ export class Product {
     );
     this.socketSub.add(
       this.socketService.on('product-approval-update').subscribe(() => this.getProducts())
+    );
+
+    // Sidebar submenu items (Product List / Published Products / Pending
+    // Approval / Add Product) all route here and distinguish themselves via
+    // query params since they share one page.
+    this.socketSub.add(
+      this.route.queryParamMap.subscribe((params) => {
+        const filter = params.get('filter');
+        if (filter && filter !== this.selectedStatusFilter) {
+          this.filterByStatus(filter);
+        }
+        const wantsAdd = params.get('action') === 'add';
+        if (wantsAdd && !this.Product_Forms) {
+          this.AddNewUser();
+        } else if (!wantsAdd && this.Product_Forms) {
+          this.cancelProduct();
+        }
+        this.cdr.detectChanges();
+      })
     );
   }
 

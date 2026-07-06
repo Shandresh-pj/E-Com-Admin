@@ -72,10 +72,22 @@ export class AuthService {
   // fetched here so a role-access change made by an admin can be picked up
   // immediately (triggered by the "permissions-updated" socket event) without
   // requiring the user to log in again.
+  //
+  // This is called from several independent, uncoordinated places (login,
+  // app bootstrap, every socket-pushed permission change) with no shared
+  // cancellation between them. A sequence number ensures that if an older
+  // call's response happens to resolve after a newer one's, it's ignored
+  // instead of clobbering the session back to stale data.
+  private permissionsRequestSeq = 0;
 
   refreshPermissions(): Observable<any> {
+    const seq = ++this.permissionsRequestSeq;
     return this.http.get(`${environment.apiUrl}/auth/me/permissions`).pipe(
-      tap((data: any) => this.sessionService.setSession(data))
+      tap((data: any) => {
+        if (seq === this.permissionsRequestSeq) {
+          this.sessionService.setSession(data);
+        }
+      })
     );
   }
 

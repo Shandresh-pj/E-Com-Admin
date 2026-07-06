@@ -1,4 +1,5 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, OnDestroy } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormsModule, FormGroup, FormBuilder, Validators } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
@@ -49,7 +50,9 @@ export class Stocks implements OnInit, OnDestroy {
     private alert: AlertService,
     private authService: AuthService,
     private socketService: SocketService,
-    public perm: PermissionService
+    public perm: PermissionService,
+    private route: ActivatedRoute,
+    private cdr: ChangeDetectorRef
   ) {
     this.stockForm = this.fb.group({
       product_id: ['', Validators.required],
@@ -74,6 +77,25 @@ export class Stocks implements OnInit, OnDestroy {
       this.socketService.on('stock-update').subscribe(() => {
         this.loadProducts();
         this.loadStockLogs();
+      })
+    );
+
+    // Sidebar submenu items (Stock List / Stock History / Add Stock) all
+    // route here and distinguish themselves via query params since they
+    // share one page.
+    this.socketSub.add(
+      this.route.queryParamMap.subscribe((params) => {
+        const view = params.get('view');
+        if ((view === 'products' || view === 'logs') && view !== this.viewMode) {
+          this.changeView(view);
+        }
+        const wantsAdd = params.get('action') === 'add';
+        if (wantsAdd && !this.showForm) {
+          this.toggleForm();
+        } else if (!wantsAdd && this.showForm) {
+          this.toggleForm();
+        }
+        this.cdr.detectChanges();
       })
     );
   }

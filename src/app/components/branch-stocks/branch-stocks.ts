@@ -1,4 +1,5 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, OnDestroy } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormsModule, FormGroup, FormBuilder, Validators } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
@@ -64,7 +65,9 @@ export class BranchStocks implements OnInit, OnDestroy {
     private alert: AlertService,
     private authService: AuthService,
     private socketService: SocketService,
-    public perm: PermissionService
+    public perm: PermissionService,
+    private route: ActivatedRoute,
+    private cdr: ChangeDetectorRef
   ) {
     this.stockForm = this.fb.group({
       company_id: ['', Validators.required],
@@ -102,6 +105,19 @@ export class BranchStocks implements OnInit, OnDestroy {
       this.socketService.on('branch-transfer-update').subscribe(() => {
         this.loadTransfers();
         this.loadBranchStocks();
+      })
+    );
+
+    // Sidebar submenu items (Branch Inventory / Stock Transfer) both route
+    // here and distinguish themselves via the "view" query param since they
+    // share one page.
+    this.socketSub.add(
+      this.route.queryParamMap.subscribe((params) => {
+        const view = params.get('view');
+        if ((view === 'inventory' || view === 'transfers') && view !== this.viewMode) {
+          this.changeView(view);
+        }
+        this.cdr.detectChanges();
       })
     );
   }

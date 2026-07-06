@@ -51,7 +51,7 @@ export class Invoices implements OnInit, OnDestroy {
   apiUrl = environment.apiUrl;
 
   // ── Customizer settings ──────────────────────────────────────────────
-  selectedThemeId = 'aurora';
+  selectedThemeId = 'corporate';
   invoiceTitle    = 'TAX INVOICE';
   currencySymbol  = '₹';
   taxRate         = 18;
@@ -65,12 +65,6 @@ export class Invoices implements OnInit, OnDestroy {
 
   // ── Premium themes ───────────────────────────────────────────────────
   themes: InvoiceTheme[] = [
-    {
-      id: 'aurora',       name: '✦ Aurora Violet',
-      primary: '#5b21b6', secondary: '#7c3aed',  accent: '#06b6d4',
-      bg: '#f5f3ff',      altRow: '#faf5ff',
-      textColor: '#1e1b4b', headerText: '#ffffff',
-    },
     {
       id: 'corporate',    name: '◆ Corporate Navy',
       primary: '#1e3a8a', secondary: '#2563eb',  accent: '#0ea5e9',
@@ -94,6 +88,12 @@ export class Invoices implements OnInit, OnDestroy {
       primary: '#1e293b', secondary: '#334155',  accent: '#64748b',
       bg: '#f1f5f9',      altRow: '#f8fafc',
       textColor: '#0f172a', headerText: '#ffffff',
+    },
+    {
+      id: 'premium',      name: '👑 Premium Elite',
+      primary: '#14110f', secondary: '#8a6d1f',  accent: '#b8902c',
+      bg: '#fffdf6',      altRow: '#f8f2df',
+      textColor: '#221d12', headerText: '#14110f',
     },
   ];
 

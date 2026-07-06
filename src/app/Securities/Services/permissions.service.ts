@@ -6,11 +6,14 @@ import { ROLE_PERMISSIONS, UserType } from '../Models/role-access';
 
 /**
  * Maps DB permission action strings to UI action keys.
- * WRITE covers both create and update operations.
+ * Each DB action maps to exactly one UI action — WRITE (create) and UPDATE
+ * are distinct, independently-grantable permissions and must never imply
+ * each other.
  */
 const DB_ACTION_MAP: Record<string, Array<'canCreate' | 'canRead' | 'canUpdate' | 'canDelete' | 'canApprove'>> = {
   READ:    ['canRead'],
-  WRITE:   ['canCreate', 'canUpdate'],
+  WRITE:   ['canCreate'],
+  UPDATE:  ['canUpdate'],
   DELETE:  ['canDelete'],
   APPROVE: ['canApprove'],
 };
@@ -38,6 +41,12 @@ export class PermissionService {
    * Also handles the string 'FULL_ACCESS' for super-admin tokens.
    */
   hasPermission(menuId: number, action: string): boolean {
+    // Unconditional signal read: registers any template calling this method
+    // as a reactive consumer of permissionsUpdated, so a socket-driven
+    // permission change repaints it automatically — same mechanism that
+    // makes the sidebar's navItems signal update live.
+    this.permissionsUpdated();
+
     if (this.auth.isSuperAdmin()) return true;
 
     const permissions = this.session.getPermissions();
@@ -56,8 +65,8 @@ export class PermissionService {
    * Priority:
    *  1. SuperAdmin → always true.
    *  2. If the user has DB permissions, derive the answer from those entries
-   *     (READ → canRead, WRITE → canCreate + canUpdate, DELETE → canDelete,
-   *      APPROVE action OR canApprove flag → canApprove).
+   *     (READ → canRead, WRITE → canCreate, UPDATE → canUpdate, DELETE → canDelete,
+   *      APPROVE action OR canApprove flag → canApprove — each independent).
    *  3. Fall back to the static ROLE_PERMISSIONS matrix when no DB permissions
    *     exist (e.g. first-run or legacy tokens).
    */
@@ -65,6 +74,8 @@ export class PermissionService {
     action: 'canCreate' | 'canRead' | 'canUpdate' | 'canDelete' | 'canApprove',
     menuNameOrPath?: string
   ): boolean {
+    this.permissionsUpdated();
+
     if (this.auth.isSuperAdmin()) return true;
 
     const permissions = this.session.getPermissions();
@@ -118,6 +129,8 @@ export class PermissionService {
   }
 
   hasPagePermission(path: string): boolean {
+    this.permissionsUpdated();
+
     if (this.auth.isSuperAdmin()) return true;
 
     const defaultPaths = [

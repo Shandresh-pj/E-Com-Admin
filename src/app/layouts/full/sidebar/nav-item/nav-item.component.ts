@@ -77,8 +77,17 @@ export class AppNavItemComponent implements OnChanges, OnInit, OnDestroy {
       return;
     }
     const url = this.navService.currentUrl();
-    if (this.item.route && url) {
-      this.expanded = url.indexOf(`/${this.item.route}`) === 0;
+    if (url) {
+      if (this.item.route) {
+        this.expanded = url.indexOf(`/${this.item.route}`) === 0;
+      } else {
+        // Parent items built from dynamic menus (Products/Stocks/Branch Stocks)
+        // carry no route of their own — only their children do — so fall back
+        // to expanding whenever any child's route is the active page.
+        this.expanded = (this.item.children || []).some(
+          (child: NavItem) => child.route && url.indexOf(`/${child.route}`) === 0
+        );
+      }
       this.ariaExpanded = this.expanded;
     }
   }
@@ -94,7 +103,16 @@ export class AppNavItemComponent implements OnChanges, OnInit, OnDestroy {
     if (!item?.route) return false;
     const normalize = (url: string) =>
       ('/' + String(url).split(/[?#]/)[0].replace(/^\/+/, '').replace(/\/+$/, '')).toLowerCase();
-    return normalize(this.router.url) === normalize(item.route);
+    if (normalize(this.router.url) !== normalize(item.route)) return false;
+
+    // Siblings that share the same route (e.g. Products' "Product List" vs
+    // "Published Products") are distinguished by query params, not path —
+    // without this check every such sibling would light up as active together.
+    if (!item.queryParams) return true;
+    const currentQuery = this.router.parseUrl(this.router.url).queryParams;
+    return Object.keys(item.queryParams).every(
+      (key) => String(currentQuery[key] ?? '') === String(item.queryParams[key])
+    );
   }
 
   onItemSelected(item: NavItem, event?: MouseEvent) {
@@ -104,7 +122,7 @@ export class AppNavItemComponent implements OnChanges, OnInit, OnDestroy {
 
     if (!item.children || !item.children.length) {
       if (item.route) {
-        this.router.navigate([item.route]);
+        this.router.navigate([item.route], { queryParams: item.queryParams || {} });
       }
     }
     if (item.children && item.children.length) {

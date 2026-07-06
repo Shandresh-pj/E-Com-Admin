@@ -21,7 +21,7 @@
         <span class="iv-stat__lbl">Orders</span>
       </div>
       <div class="iv-stat">
-        <span class="iv-stat__num">5</span>
+        <span class="iv-stat__num">{{ themes.length }}</span>
         <span class="iv-stat__lbl">Themes</span>
       </div>
       <div class="iv-stat">
@@ -175,71 +175,203 @@
       </div>
 
       <!-- A4-proportioned document preview -->
-      <div class="iv-doc" [style.--doc-primary]="theme().primary"
+      <div class="iv-doc" [class]="'iv-doc--' + selectedThemeId"
+           [style.--doc-primary]="theme().primary"
            [style.--doc-secondary]="theme().secondary"
            [style.--doc-accent]="theme().accent"
            [style.--doc-bg]="theme().bg"
            [style.--doc-alt]="theme().altRow"
            [style.--doc-text]="theme().textColor">
 
-        <!-- HERO BAND -->
-        <div class="iv-doc__hero" [style.background]="theme().primary">
-          <div class="iv-doc__accent-stripe" [style.background]="theme().accent"></div>
-          <div class="iv-doc__hero-content">
-            <div class="iv-doc__hero-left">
-              <div class="iv-doc__logo-ring" [style.border-color]="theme().accent">
-                <mat-icon [style.color]="theme().accent">layers</mat-icon>
+        @switch (selectedThemeId) {
+        @case ('premium') {
+        <!-- ══════════════ PREMIUM ELITE LAYOUT ══════════════ -->
+        <!-- Letterhead: no colour-filled bands, thin gold rules, serif type -->
+        <div class="iv-prem__letterhead">
+          <div class="iv-prem__brand">
+            <div class="iv-prem__crest">{{ (selectedOrder?.company?.name || 'BizCore Enterprise').charAt(0) }}</div>
+            <div>
+              <div class="iv-prem__company">{{ selectedOrder?.company?.name || 'BizCore Enterprise' }}</div>
+              <div class="iv-prem__meta">GSTIN {{ customGst }} · {{ selectedOrder?.company?.email || 'admin@bizcore.io' }}</div>
+            </div>
+          </div>
+          <div class="iv-prem__docbox">
+            <div class="iv-prem__doctitle">{{ invoiceTitle }}</div>
+            <div class="iv-prem__docno">{{ selectedOrder?.invoice_no || 'INV-2026-0001' }}</div>
+            <div class="iv-prem__docdate">
+              Issued {{ selectedOrder?.created_at ? (selectedOrder.created_at | date:'dd MMM yyyy') : ('' | date:'dd MMM yyyy') }}
+            </div>
+          </div>
+        </div>
+        <div class="iv-prem__rule"></div>
+        <div class="iv-prem__rule iv-prem__rule--hair"></div>
+
+        <div class="iv-prem__body">
+          <!-- PARTIES -->
+          <div class="iv-prem__parties">
+            <div class="iv-prem__party">
+              <div class="iv-prem__label">Billed From</div>
+              <div class="iv-prem__name">{{ selectedOrder?.company?.name || 'BizCore Merchant' }}</div>
+              <div class="iv-prem__line">{{ selectedOrder?.company?.address || 'N/A' }}</div>
+              <div class="iv-prem__line">Branch: {{ customBranch }} · BR-{{ selectedOrder?.company_id || '01' }}</div>
+            </div>
+            <div class="iv-prem__party iv-prem__party--right">
+              <div class="iv-prem__label">Billed To</div>
+              <div class="iv-prem__name">{{ selectedOrder?.user?.name || 'Walk-in Customer' }}</div>
+              <div class="iv-prem__line">{{ selectedOrder?.user?.email || 'N/A' }}</div>
+              <div class="iv-prem__line">{{ selectedOrder?.user?.mobilenumber || 'N/A' }}</div>
+            </div>
+          </div>
+
+          <!-- META STRIP -->
+          <div class="iv-prem__meta-strip">
+            <div class="iv-prem__meta-cell">
+              <span>Payment Method</span>
+              <strong>{{ selectedOrder?.payment_method || 'CASH' }}</strong>
+            </div>
+            <div class="iv-prem__meta-cell">
+              <span>Transaction ID</span>
+              <strong>{{ selectedOrder?.transaction_id || 'N/A' }}</strong>
+            </div>
+            <div class="iv-prem__meta-cell">
+              <span>Status</span>
+              <strong [class]="'iv-prem__status--' + statusClass()">{{ statusLabel() }}</strong>
+            </div>
+          </div>
+
+          <!-- ITEMS TABLE -->
+          <table class="iv-prem__table">
+            <thead>
+              <tr>
+                <th style="text-align:center;width:28px">#</th>
+                <th>Item / Description</th>
+                <th style="text-align:center;width:44px">Qty</th>
+                <th style="text-align:right;width:80px">Unit ({{ currencySymbol }})</th>
+                <th style="text-align:right;width:70px">Tax ({{ taxRate }}%)</th>
+                <th style="text-align:right;width:84px">Amount ({{ currencySymbol }})</th>
+              </tr>
+            </thead>
+            <tbody>
+              @if (selectedOrder?.items?.length) {
+                @for (item of selectedOrder.items; track item.id; let i = $index) {
+                  <tr [class.iv-prem__alt]="i % 2 !== 0">
+                    <td style="text-align:center" class="iv-prem__num">{{ i + 1 }}</td>
+                    <td class="iv-prem__desc">{{ item.product?.name || 'Product #' + item.product_id }}</td>
+                    <td style="text-align:center">{{ item.quantity }}</td>
+                    <td style="text-align:right">{{ item.price | number:'1.2-2' }}</td>
+                    <td style="text-align:right" class="iv-prem__muted">
+                      {{ (item.price * item.quantity * taxRate / 100) | number:'1.2-2' }}
+                    </td>
+                    <td style="text-align:right" class="iv-prem__amount">
+                      {{ (item.price * item.quantity) | number:'1.2-2' }}
+                    </td>
+                  </tr>
+                }
+              } @else {
+                <tr><td colspan="6" class="iv-prem__empty">No items found for this order.</td></tr>
+              }
+            </tbody>
+          </table>
+
+          <!-- NOTES + TOTALS + QR -->
+          <div class="iv-prem__bottom">
+            <div class="iv-prem__notes">
+              <span class="iv-prem__quote">&ldquo;</span>
+              <p>{{ customNotes }}</p>
+              <div class="iv-prem__sig-line"></div>
+              <div class="iv-prem__sig-lbl">AUTHORISED SIGNATORY</div>
+              <div class="iv-prem__sig-name">{{ selectedOrder?.company?.name || 'BizCore' }}</div>
+            </div>
+
+            <div class="iv-prem__totals">
+              <div class="iv-prem__trow">
+                <span>Subtotal</span>
+                <span>{{ currencySymbol }} {{ calcSubtotal() | number:'1.2-2' }}</span>
               </div>
-              <div>
-                <div class="iv-doc__company-name">{{ selectedOrder?.company?.name || 'BizCore Enterprise' }}</div>
-                <div class="iv-doc__company-meta">{{ customGst }} · {{ selectedOrder?.company?.email || 'admin@bizcore.io' }}</div>
+              <div class="iv-prem__trow">
+                <span>Discount</span>
+                <span>− {{ currencySymbol }} {{ calcDiscount() | number:'1.2-2' }}</span>
+              </div>
+              <div class="iv-prem__trow">
+                <span>Tax @ {{ taxRate }}%</span>
+                <span>{{ currencySymbol }} {{ calcTax() | number:'1.2-2' }}</span>
+              </div>
+              <div class="iv-prem__grand">
+                <span>Grand Total</span>
+                <span>{{ currencySymbol }} {{ calculatePreviewTotal() | number:'1.2-2' }}</span>
               </div>
             </div>
-            <div class="iv-doc__hero-right">
-              <div class="iv-doc__title-pill">{{ invoiceTitle }}</div>
-              <div class="iv-doc__inv-no">{{ selectedOrder?.invoice_no || 'INV-2026-0001' }}</div>
-              <div class="iv-doc__inv-date">
-                {{ selectedOrder?.created_at ? (selectedOrder.created_at | date:'dd MMM yyyy') : ('' | date:'dd MMM yyyy') }}
-              </div>
+
+            <div class="iv-prem__qr">
+              @if (liveQrUrl) {
+                <img [src]="liveQrUrl" alt="Invoice QR Code" class="iv-prem__qr-img" />
+              } @else {
+                <div class="iv-prem__qr-placeholder">
+                  <mat-icon>qr_code_2</mat-icon>
+                </div>
+              }
+              <div class="iv-prem__qr-lbl">Scan to verify</div>
             </div>
           </div>
         </div>
 
-        <!-- BODY -->
-        <div class="iv-doc__body" [style.background]="theme().bg">
+        <div class="iv-prem__footer">
+          <div class="iv-prem__footer-rule"></div>
+          <div class="iv-prem__footer-rule iv-prem__footer-rule--hair"></div>
+          <div class="iv-prem__footer-text">
+            {{ selectedOrder?.company?.name || 'BizCore Enterprise' }} · GSTIN {{ customGst }}
+          </div>
+          <div class="iv-prem__footer-sub">
+            Invoice {{ selectedOrder?.invoice_no || '' }} · Crafted with BizCore Premium
+          </div>
+        </div>
+        }
+        @case ('corporate') {
+        <!-- ══════════════ CORPORATE NAVY — LEDGER LAYOUT ══════════════ -->
+        <div class="iv-corp__band" [style.background]="theme().primary">
+          <div class="iv-corp__band-top">
+            <div class="iv-corp__brand">
+              <div class="iv-corp__logo" [style.border-color]="theme().accent">
+                <mat-icon [style.color]="theme().accent">account_balance</mat-icon>
+              </div>
+              <div class="iv-corp__company">{{ selectedOrder?.company?.name || 'BizCore Enterprise' }}</div>
+            </div>
+            <div class="iv-corp__ribbon" [style.border-color]="theme().accent">{{ invoiceTitle }}</div>
+          </div>
+          <div class="iv-corp__band-sub" [style.background]="theme().secondary">
+            <div class="iv-corp__sub-cell"><span>INVOICE NO.</span><strong>{{ selectedOrder?.invoice_no || 'INV-2026-0001' }}</strong></div>
+            <div class="iv-corp__sub-cell">
+              <span>ISSUE DATE</span>
+              <strong>{{ selectedOrder?.created_at ? (selectedOrder.created_at | date:'dd MMM yyyy') : ('' | date:'dd MMM yyyy') }}</strong>
+            </div>
+            <div class="iv-corp__sub-cell"><span>BRANCH</span><strong>{{ customBranch }}</strong></div>
+            <div class="iv-corp__sub-cell"><span>GSTIN</span><strong>{{ customGst }}</strong></div>
+          </div>
+        </div>
 
-          <!-- PARTIES ROW -->
-          <div class="iv-doc__parties">
-            <div class="iv-doc__party">
-              <div class="iv-doc__party-hd" [style.color]="theme().primary">ISSUED BY</div>
-              <div class="iv-doc__party-name">{{ selectedOrder?.company?.name || 'BizCore Merchant' }}</div>
-              <div class="iv-doc__party-line">GSTIN: {{ customGst }}</div>
-              <div class="iv-doc__party-line">{{ selectedOrder?.company?.address || 'N/A' }}</div>
+        <div class="iv-corp__body" [style.background]="theme().bg">
+          <div class="iv-corp__parties">
+            <div class="iv-corp__party" [style.border-color]="theme().primary + '33'">
+              <div class="iv-corp__party-tab" [style.background]="theme().primary">BILL FROM</div>
+              <div class="iv-corp__party-name">{{ selectedOrder?.company?.name || 'BizCore Merchant' }}</div>
+              <div class="iv-corp__party-line">{{ selectedOrder?.company?.address || 'N/A' }}</div>
+              <div class="iv-corp__party-line">{{ selectedOrder?.company?.email || 'admin@bizcore.io' }}</div>
             </div>
-            <div class="iv-doc__party">
-              <div class="iv-doc__party-hd" [style.color]="theme().primary">BRANCH</div>
-              <div class="iv-doc__party-name">{{ customBranch }}</div>
-              <div class="iv-doc__party-line">Corporate Distribution</div>
-              <div class="iv-doc__party-line">BR-{{ selectedOrder?.company_id || '01' }}</div>
+            <div class="iv-corp__party" [style.border-color]="theme().primary + '33'">
+              <div class="iv-corp__party-tab" [style.background]="theme().primary">BILL TO</div>
+              <div class="iv-corp__party-name">{{ selectedOrder?.user?.name || 'Walk-in Customer' }}</div>
+              <div class="iv-corp__party-line">{{ selectedOrder?.user?.email || 'N/A' }}</div>
+              <div class="iv-corp__party-line">{{ selectedOrder?.user?.mobilenumber || 'N/A' }}</div>
             </div>
-            <div class="iv-doc__party">
-              <div class="iv-doc__party-hd" [style.color]="theme().primary">BILL TO</div>
-              <div class="iv-doc__party-name">{{ selectedOrder?.user?.name || 'Walk-in Customer' }}</div>
-              <div class="iv-doc__party-line">{{ selectedOrder?.user?.email || 'N/A' }}</div>
-              <div class="iv-doc__party-line">{{ selectedOrder?.user?.mobilenumber || 'N/A' }}</div>
-            </div>
-            <div class="iv-doc__party">
-              <div class="iv-doc__party-hd" [style.color]="theme().primary">PAYMENT</div>
-              <div class="iv-doc__party-name">{{ selectedOrder?.payment_method || 'CASH' }}</div>
-              <div class="iv-doc__party-line">TXN: {{ selectedOrder?.transaction_id || 'N/A' }}</div>
+            <div class="iv-corp__party" [style.border-color]="theme().primary + '33'">
+              <div class="iv-corp__party-tab" [style.background]="theme().primary">PAYMENT</div>
+              <div class="iv-corp__party-name">{{ selectedOrder?.payment_method || 'CASH' }}</div>
+              <div class="iv-corp__party-line">TXN: {{ selectedOrder?.transaction_id || 'N/A' }}</div>
               <div class="iv-status-pill" [class]="'iv-status-pill--' + statusClass()">{{ statusLabel() }}</div>
             </div>
           </div>
 
-          <div class="iv-doc__rule" [style.background]="theme().accent"></div>
-
-          <!-- ITEMS TABLE -->
-          <table class="iv-tbl">
+          <table class="iv-corp__table" [style.border-color]="theme().primary + '33'">
             <thead>
               <tr [style.background]="theme().primary">
                 <th style="text-align:center;width:32px">#</th>
@@ -253,83 +385,333 @@
             <tbody>
               @if (selectedOrder?.items?.length) {
                 @for (item of selectedOrder.items; track item.id; let i = $index) {
-                  <tr [class.iv-tbl__alt]="i % 2 !== 0" [style.--alt-bg]="theme().altRow">
-                    <td style="text-align:center" class="iv-tbl__num">{{ i + 1 }}</td>
-                    <td class="iv-tbl__desc">
-                      <strong>{{ item.product?.name || 'Product #' + item.product_id }}</strong>
-                    </td>
+                  <tr [class.iv-corp__alt]="i % 2 !== 0" [style.--alt-bg]="theme().altRow">
+                    <td style="text-align:center" class="iv-corp__num">{{ i + 1 }}</td>
+                    <td class="iv-corp__desc">{{ item.product?.name || 'Product #' + item.product_id }}</td>
                     <td style="text-align:center">{{ item.quantity }}</td>
                     <td style="text-align:right">{{ item.price | number:'1.2-2' }}</td>
-                    <td style="text-align:right" class="iv-tbl__muted">
-                      {{ (item.price * item.quantity * taxRate / 100) | number:'1.2-2' }}
-                    </td>
-                    <td style="text-align:right" class="iv-tbl__amount">
-                      {{ (item.price * item.quantity) | number:'1.2-2' }}
-                    </td>
+                    <td style="text-align:right" class="iv-corp__muted">{{ (item.price * item.quantity * taxRate / 100) | number:'1.2-2' }}</td>
+                    <td style="text-align:right" class="iv-corp__amount">{{ (item.price * item.quantity) | number:'1.2-2' }}</td>
                   </tr>
                 }
               } @else {
-                <tr><td colspan="6" class="iv-tbl__empty">No items found for this order.</td></tr>
+                <tr><td colspan="6" class="iv-corp__empty">No items found for this order.</td></tr>
               }
             </tbody>
           </table>
 
-          <!-- TOTALS + QR SIDE-BY-SIDE -->
-          <div class="iv-doc__bottom">
-            <!-- Notes -->
-            <div class="iv-doc__notes">
-              <div class="iv-doc__notes-hd" [style.color]="theme().primary">CUSTOMER NOTE</div>
-              <p class="iv-doc__notes-body">{{ customNotes }}</p>
-              <div class="iv-doc__sig-line"></div>
-              <div class="iv-doc__sig-lbl">Authorised Signatory — {{ selectedOrder?.company?.name || 'BizCore' }}</div>
+          <div class="iv-corp__bottom">
+            <div class="iv-corp__notes" [style.border-color]="theme().primary + '33'">
+              <div class="iv-corp__notes-hd" [style.color]="theme().primary">TERMS &amp; NOTES</div>
+              <p>{{ customNotes }}</p>
+              <div class="iv-corp__sig-line"></div>
+              <div class="iv-corp__sig-lbl">Authorised Signatory — {{ selectedOrder?.company?.name || 'BizCore' }}</div>
             </div>
 
-            <!-- Totals card -->
-            <div class="iv-doc__totals" [style.border-color]="theme().primary + '33'">
-              <div class="iv-totals__row">
-                <span>Subtotal</span>
-                <span>{{ currencySymbol }} {{ calcSubtotal() | number:'1.2-2' }}</span>
-              </div>
-              <div class="iv-totals__row">
-                <span>Discount</span>
-                <span>− {{ currencySymbol }} {{ calcDiscount() | number:'1.2-2' }}</span>
-              </div>
-              <div class="iv-totals__row">
-                <span>Tax @ {{ taxRate }}%</span>
-                <span>{{ currencySymbol }} {{ calcTax() | number:'1.2-2' }}</span>
-              </div>
-              <div class="iv-totals__grand" [style.background]="theme().primary">
+            <div class="iv-corp__totals" [style.border-color]="theme().primary + '55'">
+              <div class="iv-corp__trow"><span>Subtotal</span><span>{{ currencySymbol }} {{ calcSubtotal() | number:'1.2-2' }}</span></div>
+              <div class="iv-corp__trow"><span>Discount</span><span>− {{ currencySymbol }} {{ calcDiscount() | number:'1.2-2' }}</span></div>
+              <div class="iv-corp__trow"><span>Tax @ {{ taxRate }}%</span><span>{{ currencySymbol }} {{ calcTax() | number:'1.2-2' }}</span></div>
+              <div class="iv-corp__grand" [style.background]="theme().primary">
                 <span>GRAND TOTAL</span>
                 <span>{{ currencySymbol }} {{ calculatePreviewTotal() | number:'1.2-2' }}</span>
               </div>
             </div>
 
-            <!-- QR Block -->
-            <div class="iv-doc__qr">
+            <div class="iv-corp__qr">
               @if (liveQrUrl) {
-                <img [src]="liveQrUrl" alt="Invoice QR Code" class="iv-qr__img"
-                     [style.border-color]="theme().primary + '44'" />
+                <img [src]="liveQrUrl" alt="Invoice QR Code" class="iv-corp__qr-img" [style.border-color]="theme().primary" />
               } @else {
-                <div class="iv-qr__placeholder" [style.border-color]="theme().primary + '44'">
-                  <mat-icon [style.color]="theme().accent">qr_code_2</mat-icon>
+                <div class="iv-corp__qr-placeholder" [style.border-color]="theme().primary">
+                  <mat-icon [style.color]="theme().primary">qr_code_2</mat-icon>
                 </div>
               }
-              <div class="iv-qr__label">Scan to verify invoice</div>
-              <div class="iv-qr__sub">Powered by BizCore</div>
+              <div class="iv-corp__qr-lbl">Scan to verify</div>
             </div>
           </div>
         </div>
 
-        <!-- FOOTER BAND -->
-        <div class="iv-doc__footer" [style.background]="theme().primary">
-          <div class="iv-doc__footer-accent" [style.background]="theme().accent"></div>
-          <div class="iv-doc__footer-text">
-            {{ selectedOrder?.company?.name || 'BizCore Enterprise' }} · {{ selectedOrder?.company?.email || '' }} · GSTIN: {{ customGst }}
+        <div class="iv-corp__footer" [style.background]="theme().primary">
+          <div class="iv-corp__footer-col"><span>COMPANY</span>{{ selectedOrder?.company?.name || 'BizCore Enterprise' }}</div>
+          <div class="iv-corp__footer-col"><span>CONTACT</span>{{ selectedOrder?.company?.email || 'admin@bizcore.io' }}</div>
+          <div class="iv-corp__footer-col"><span>GSTIN</span>{{ customGst }}</div>
+        </div>
+        }
+        @case ('obsidian') {
+        <!-- ══════════════ LUXURY OBSIDIAN — BOUTIQUE RECEIPT LAYOUT ══════════════ -->
+        <div class="iv-obs" [style.background]="theme().primary">
+          <div class="iv-obs__crest" [style.border-color]="theme().accent">
+            <mat-icon [style.color]="theme().accent">diamond</mat-icon>
           </div>
-          <div class="iv-doc__footer-sub">
-            Invoice {{ selectedOrder?.invoice_no || '' }} · Generated by BizCore Invoice Studio
+          <div class="iv-obs__company">{{ selectedOrder?.company?.name || 'BizCore Enterprise' }}</div>
+          <div class="iv-obs__tagline">{{ customGst }} · {{ selectedOrder?.company?.email || 'admin@bizcore.io' }}</div>
+          <div class="iv-obs__rule" [style.background]="theme().accent"></div>
+          <div class="iv-obs__doctitle" [style.color]="theme().accent">{{ invoiceTitle }}</div>
+          <div class="iv-obs__docno">{{ selectedOrder?.invoice_no || 'INV-2026-0001' }}</div>
+          <div class="iv-obs__docdate">
+            {{ selectedOrder?.created_at ? (selectedOrder.created_at | date:'dd MMM yyyy') : ('' | date:'dd MMM yyyy') }}
+          </div>
+
+          <div class="iv-obs__prepared">
+            Prepared for <strong>{{ selectedOrder?.user?.name || 'Walk-in Customer' }}</strong><br />
+            {{ selectedOrder?.user?.email || 'N/A' }} · {{ selectedOrder?.user?.mobilenumber || 'N/A' }}
+          </div>
+
+          <div class="iv-obs__rule iv-obs__rule--thin"></div>
+
+          <div class="iv-obs__list">
+            @if (selectedOrder?.items?.length) {
+              @for (item of selectedOrder.items; track item.id; let i = $index) {
+                <div class="iv-obs__item">
+                  <span class="iv-obs__item-name">{{ item.product?.name || 'Product #' + item.product_id }}
+                    <span class="iv-obs__item-qty">× {{ item.quantity }}</span>
+                  </span>
+                  <span class="iv-obs__item-leader"></span>
+                  <span class="iv-obs__item-amt">{{ currencySymbol }} {{ (item.price * item.quantity) | number:'1.2-2' }}</span>
+                </div>
+              }
+            } @else {
+              <div class="iv-obs__empty">No items found for this order.</div>
+            }
+          </div>
+
+          <div class="iv-obs__rule iv-obs__rule--thin"></div>
+
+          <div class="iv-obs__totals">
+            <div class="iv-obs__trow"><span>Subtotal</span><span>{{ currencySymbol }} {{ calcSubtotal() | number:'1.2-2' }}</span></div>
+            <div class="iv-obs__trow"><span>Discount</span><span>− {{ currencySymbol }} {{ calcDiscount() | number:'1.2-2' }}</span></div>
+            <div class="iv-obs__trow"><span>Tax @ {{ taxRate }}%</span><span>{{ currencySymbol }} {{ calcTax() | number:'1.2-2' }}</span></div>
+          </div>
+
+          <div class="iv-obs__rule" [style.background]="theme().accent"></div>
+          <div class="iv-obs__grand">
+            <span>TOTAL DUE</span>
+            <span [style.color]="theme().accent">{{ currencySymbol }} {{ calculatePreviewTotal() | number:'1.2-2' }}</span>
+          </div>
+          <div class="iv-obs__rule" [style.background]="theme().accent"></div>
+
+          <div class="iv-obs__status-row">
+            <span class="iv-status-pill" [class]="'iv-status-pill--' + statusClass()">{{ statusLabel() }}</span>
+            <span class="iv-obs__pay">{{ selectedOrder?.payment_method || 'CASH' }} · TXN {{ selectedOrder?.transaction_id || 'N/A' }}</span>
+          </div>
+
+          <div class="iv-obs__qr">
+            @if (liveQrUrl) {
+              <img [src]="liveQrUrl" alt="Invoice QR Code" class="iv-obs__qr-img" [style.border-color]="theme().accent" />
+            } @else {
+              <div class="iv-obs__qr-placeholder" [style.border-color]="theme().accent">
+                <mat-icon [style.color]="theme().accent">qr_code_2</mat-icon>
+              </div>
+            }
+          </div>
+
+          <div class="iv-obs__notes">{{ customNotes }}</div>
+
+          <div class="iv-obs__footer">
+            Invoice {{ selectedOrder?.invoice_no || '' }} · {{ selectedOrder?.company?.name || 'BizCore Enterprise' }}
           </div>
         </div>
+        }
+        @case ('green') {
+        <!-- ══════════════ ECO EMERALD — CARD LAYOUT ══════════════ -->
+        <div class="iv-eco" [style.background]="theme().bg">
+          <div class="iv-eco__hero" [style.background]="theme().primary">
+            <div class="iv-eco__leaf" [style.background]="theme().accent">
+              <mat-icon>eco</mat-icon>
+            </div>
+            <div>
+              <div class="iv-eco__company">{{ selectedOrder?.company?.name || 'BizCore Enterprise' }}</div>
+              <div class="iv-eco__meta">{{ customGst }} · {{ selectedOrder?.company?.email || 'admin@bizcore.io' }}</div>
+            </div>
+            <div class="iv-eco__pill" [style.background]="theme().accent">{{ invoiceTitle }}</div>
+          </div>
+
+          <div class="iv-eco__chips">
+            <div class="iv-eco__chip">
+              <mat-icon [style.color]="theme().primary">confirmation_number</mat-icon>
+              <div><span>Invoice No.</span><strong>{{ selectedOrder?.invoice_no || 'INV-2026-0001' }}</strong></div>
+            </div>
+            <div class="iv-eco__chip">
+              <mat-icon [style.color]="theme().primary">store</mat-icon>
+              <div><span>Branch</span><strong>{{ customBranch }}</strong></div>
+            </div>
+            <div class="iv-eco__chip">
+              <mat-icon [style.color]="theme().primary">payments</mat-icon>
+              <div><span>Payment</span><strong>{{ selectedOrder?.payment_method || 'CASH' }}</strong></div>
+            </div>
+            <div class="iv-eco__chip">
+              <span class="iv-status-pill" [class]="'iv-status-pill--' + statusClass()">{{ statusLabel() }}</span>
+            </div>
+          </div>
+
+          <div class="iv-eco__cards">
+            <div class="iv-eco__card">
+              <div class="iv-eco__card-hd" [style.color]="theme().primary">FROM</div>
+              <div class="iv-eco__card-name">{{ selectedOrder?.company?.name || 'BizCore Merchant' }}</div>
+              <div class="iv-eco__card-line">{{ selectedOrder?.company?.address || 'N/A' }}</div>
+            </div>
+            <div class="iv-eco__card">
+              <div class="iv-eco__card-hd" [style.color]="theme().primary">TO</div>
+              <div class="iv-eco__card-name">{{ selectedOrder?.user?.name || 'Walk-in Customer' }}</div>
+              <div class="iv-eco__card-line">{{ selectedOrder?.user?.email || 'N/A' }}</div>
+              <div class="iv-eco__card-line">{{ selectedOrder?.user?.mobilenumber || 'N/A' }}</div>
+            </div>
+          </div>
+
+          <div class="iv-eco__items">
+            @if (selectedOrder?.items?.length) {
+              @for (item of selectedOrder.items; track item.id; let i = $index) {
+                <div class="iv-eco__item-card">
+                  <div class="iv-eco__item-idx" [style.background]="theme().accent">{{ i + 1 }}</div>
+                  <div class="iv-eco__item-info">
+                    <div class="iv-eco__item-name">{{ item.product?.name || 'Product #' + item.product_id }}</div>
+                    <div class="iv-eco__item-sub">Qty {{ item.quantity }} × {{ currencySymbol }}{{ item.price | number:'1.2-2' }} · Tax {{ (item.price * item.quantity * taxRate / 100) | number:'1.2-2' }}</div>
+                  </div>
+                  <div class="iv-eco__item-amt">{{ currencySymbol }} {{ (item.price * item.quantity) | number:'1.2-2' }}</div>
+                </div>
+              }
+            } @else {
+              <div class="iv-eco__empty">No items found for this order.</div>
+            }
+          </div>
+
+          <div class="iv-eco__bottom">
+            <div class="iv-eco__notes">
+              <mat-icon [style.color]="theme().primary">forest</mat-icon>
+              <p>{{ customNotes }}</p>
+            </div>
+            <div class="iv-eco__qr">
+              @if (liveQrUrl) {
+                <img [src]="liveQrUrl" alt="Invoice QR Code" class="iv-eco__qr-img" />
+              } @else {
+                <div class="iv-eco__qr-placeholder"><mat-icon [style.color]="theme().primary">qr_code_2</mat-icon></div>
+              }
+              <div class="iv-eco__qr-lbl">Scan to verify</div>
+            </div>
+          </div>
+
+          <div class="iv-eco__totals-card">
+            <div class="iv-eco__trow"><span>Subtotal</span><span>{{ currencySymbol }} {{ calcSubtotal() | number:'1.2-2' }}</span></div>
+            <div class="iv-eco__trow"><span>Discount</span><span>− {{ currencySymbol }} {{ calcDiscount() | number:'1.2-2' }}</span></div>
+            <div class="iv-eco__trow"><span>Tax @ {{ taxRate }}%</span><span>{{ currencySymbol }} {{ calcTax() | number:'1.2-2' }}</span></div>
+            <div class="iv-eco__grand-pill" [style.background]="theme().primary">
+              <span>Grand Total</span>
+              <span>{{ currencySymbol }} {{ calculatePreviewTotal() | number:'1.2-2' }}</span>
+            </div>
+          </div>
+
+          <div class="iv-eco__footer">
+            <mat-icon [style.color]="theme().primary">eco</mat-icon>
+            {{ selectedOrder?.company?.name || 'BizCore Enterprise' }} · Invoice {{ selectedOrder?.invoice_no || '' }} · Printed responsibly
+          </div>
+        </div>
+        }
+        @case ('classic') {
+          <ng-container *ngTemplateOutlet="classicLayout"></ng-container>
+        }
+        @default {
+          <ng-container *ngTemplateOutlet="classicLayout"></ng-container>
+        }
+        }
+
+        <ng-template #classicLayout>
+        <!-- ══════════════ SLATE CLASSIC — MINIMAL LEDGER LAYOUT ══════════════ -->
+        <div class="iv-mini" [style.background]="theme().bg" [style.color]="theme().textColor">
+          <div class="iv-mini__top">
+            <div>
+              <div class="iv-mini__company">{{ selectedOrder?.company?.name || 'BizCore Enterprise' }}</div>
+              <div class="iv-mini__meta">GSTIN {{ customGst }} · {{ selectedOrder?.company?.email || 'admin@bizcore.io' }}</div>
+            </div>
+            <div class="iv-mini__docbox">
+              <div class="iv-mini__doctitle">{{ invoiceTitle }}</div>
+              <div class="iv-mini__docno">{{ selectedOrder?.invoice_no || 'INV-2026-0001' }}</div>
+              <div class="iv-mini__docdate">
+                {{ selectedOrder?.created_at ? (selectedOrder.created_at | date:'dd MMM yyyy') : ('' | date:'dd MMM yyyy') }}
+              </div>
+            </div>
+          </div>
+          <div class="iv-mini__rule iv-mini__rule--bold"></div>
+
+          <div class="iv-mini__parties">
+            <div class="iv-mini__party">
+              <div class="iv-mini__label">Billed From</div>
+              <div class="iv-mini__name">{{ selectedOrder?.company?.name || 'BizCore Merchant' }}</div>
+              <div class="iv-mini__line">{{ selectedOrder?.company?.address || 'N/A' }}</div>
+              <div class="iv-mini__line">Branch: {{ customBranch }}</div>
+            </div>
+            <div class="iv-mini__party iv-mini__party--right">
+              <div class="iv-mini__label">Billed To</div>
+              <div class="iv-mini__name">{{ selectedOrder?.user?.name || 'Walk-in Customer' }}</div>
+              <div class="iv-mini__line">{{ selectedOrder?.user?.email || 'N/A' }}</div>
+              <div class="iv-mini__line">{{ selectedOrder?.user?.mobilenumber || 'N/A' }}</div>
+            </div>
+          </div>
+
+          <div class="iv-mini__meta-row">
+            <span>Payment: <strong>{{ selectedOrder?.payment_method || 'CASH' }}</strong></span>
+            <span>TXN: <strong>{{ selectedOrder?.transaction_id || 'N/A' }}</strong></span>
+            <span>Status: <strong [class]="'iv-mini__status--' + statusClass()">{{ statusLabel() }}</strong></span>
+          </div>
+
+          <table class="iv-mini__table">
+            <thead>
+              <tr>
+                <th style="text-align:center;width:28px">#</th>
+                <th>Item / Description</th>
+                <th style="text-align:center;width:44px">Qty</th>
+                <th style="text-align:right;width:80px">Unit ({{ currencySymbol }})</th>
+                <th style="text-align:right;width:70px">Tax ({{ taxRate }}%)</th>
+                <th style="text-align:right;width:84px">Amount ({{ currencySymbol }})</th>
+              </tr>
+            </thead>
+            <tbody>
+              @if (selectedOrder?.items?.length) {
+                @for (item of selectedOrder.items; track item.id; let i = $index) {
+                  <tr>
+                    <td style="text-align:center" class="iv-mini__num">{{ i + 1 }}</td>
+                    <td class="iv-mini__desc">{{ item.product?.name || 'Product #' + item.product_id }}</td>
+                    <td style="text-align:center">{{ item.quantity }}</td>
+                    <td style="text-align:right">{{ item.price | number:'1.2-2' }}</td>
+                    <td style="text-align:right" class="iv-mini__muted">{{ (item.price * item.quantity * taxRate / 100) | number:'1.2-2' }}</td>
+                    <td style="text-align:right" class="iv-mini__amount">{{ (item.price * item.quantity) | number:'1.2-2' }}</td>
+                  </tr>
+                }
+              } @else {
+                <tr><td colspan="6" class="iv-mini__empty">No items found for this order.</td></tr>
+              }
+            </tbody>
+          </table>
+
+          <div class="iv-mini__bottom">
+            <div class="iv-mini__notes">
+              <div class="iv-mini__notes-hd">NOTES</div>
+              <p>{{ customNotes }}</p>
+              <div class="iv-mini__sig-line"></div>
+              <div class="iv-mini__sig-lbl">Authorised Signatory</div>
+            </div>
+            <div class="iv-mini__totals">
+              <div class="iv-mini__trow"><span>Subtotal</span><span>{{ currencySymbol }} {{ calcSubtotal() | number:'1.2-2' }}</span></div>
+              <div class="iv-mini__trow"><span>Discount</span><span>− {{ currencySymbol }} {{ calcDiscount() | number:'1.2-2' }}</span></div>
+              <div class="iv-mini__trow"><span>Tax @ {{ taxRate }}%</span><span>{{ currencySymbol }} {{ calcTax() | number:'1.2-2' }}</span></div>
+              <div class="iv-mini__rule iv-mini__rule--bold"></div>
+              <div class="iv-mini__grand"><span>GRAND TOTAL</span><span>{{ currencySymbol }} {{ calculatePreviewTotal() | number:'1.2-2' }}</span></div>
+            </div>
+            <div class="iv-mini__qr">
+              @if (liveQrUrl) {
+                <img [src]="liveQrUrl" alt="Invoice QR Code" class="iv-mini__qr-img" />
+              } @else {
+                <div class="iv-mini__qr-placeholder"><mat-icon>qr_code_2</mat-icon></div>
+              }
+              <div class="iv-mini__qr-lbl">Scan to verify</div>
+            </div>
+          </div>
+
+          <div class="iv-mini__rule"></div>
+          <div class="iv-mini__footer">
+            {{ selectedOrder?.company?.name || 'BizCore Enterprise' }} · GSTIN {{ customGst }} · Invoice {{ selectedOrder?.invoice_no || '' }}
+          </div>
+        </div>
+        </ng-template>
       </div>
     </main>
 

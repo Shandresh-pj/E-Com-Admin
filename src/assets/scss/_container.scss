@@ -15,10 +15,16 @@ body {
 
 .mainWrapper {
   display: flex;
-  min-height: calc(100vh - 72px);
+  height: calc(100vh - 72px);
   width: 100%;
   flex: 1;
+  overflow: hidden;
   // margin-top: 72px;
+}
+
+.mat-drawer-content.contentWrapper {
+  height: 100%;
+  overflow-y: auto;
 }
 
 @media (max-width: 991px) {

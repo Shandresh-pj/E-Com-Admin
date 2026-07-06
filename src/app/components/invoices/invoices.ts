@@ -72,21 +72,21 @@ export class Invoices implements OnInit, OnDestroy {
       textColor: '#0f172a', headerText: '#ffffff',
     },
     {
-      id: 'obsidian',     name: '◈ Luxury Obsidian',
-      primary: '#1c1917', secondary: '#b45309',  accent: '#d97706',
-      bg: '#fffbeb',      altRow: '#fefce8',
+      id: 'obsidian', name: '◈ Luxury Obsidian',
+      primary: '#1c1917', secondary: '#b45309', accent: '#d97706',
+      bg: '#fffbeb', altRow: '#fefce8',
       textColor: '#111827', headerText: '#ffffff',
     },
     {
-      id: 'green',        name: '◉ Eco Emerald',
-      primary: '#064e3b', secondary: '#059669',  accent: '#34d399',
-      bg: '#ecfdf5',      altRow: '#f0fdf4',
+      id: 'green', name: '◉ Eco Emerald',
+      primary: '#064e3b', secondary: '#059669', accent: '#34d399',
+      bg: '#ecfdf5', altRow: '#f0fdf4',
       textColor: '#022c22', headerText: '#ffffff',
     },
     {
-      id: 'classic',      name: '▣ Slate Classic',
-      primary: '#1e293b', secondary: '#334155',  accent: '#64748b',
-      bg: '#f1f5f9',      altRow: '#f8fafc',
+      id: 'classic', name: '▣ Slate Classic',
+      primary: '#1e293b', secondary: '#334155', accent: '#64748b',
+      bg: '#f1f5f9', altRow: '#f8fafc',
       textColor: '#0f172a', headerText: '#ffffff',
     },
     {
@@ -104,7 +104,7 @@ export class Invoices implements OnInit, OnDestroy {
     private alert: AlertService,
     private cdr: ChangeDetectorRef,
     private sanitizer: DomSanitizer
-  ) {}
+  ) { }
 
   ngOnInit() { this.loadOrders(); }
   ngOnDestroy() { if (this.qrUpdateTimer) clearTimeout(this.qrUpdateTimer); }
@@ -134,7 +134,7 @@ export class Invoices implements OnInit, OnDestroy {
     if (!this.selectedOrder) return;
     const payload = JSON.stringify({
       inv: this.selectedOrder.invoice_no || 'N/A',
-      id:  this.selectedOrder.id,
+      id: this.selectedOrder.id,
       tot: this.calculatePreviewTotal().toFixed(2),
     });
     // Google Charts QR API (free, no npm needed)
@@ -174,8 +174,8 @@ export class Invoices implements OnInit, OnDestroy {
 
   statusClass(): string {
     const s = (this.selectedOrder?.payment_status || 'PENDING').toUpperCase();
-    if (['PAID','COMPLETED','SUCCESS'].includes(s))  return 'paid';
-    if (['FAILED','DECLINED','REJECTED'].includes(s)) return 'failed';
+    if (['PAID', 'COMPLETED', 'SUCCESS'].includes(s)) return 'paid';
+    if (['FAILED', 'DECLINED', 'REJECTED'].includes(s)) return 'failed';
     return 'pending';
   }
 
@@ -190,12 +190,12 @@ export class Invoices implements OnInit, OnDestroy {
       return;
     }
     const params = new URLSearchParams({
-      theme:    this.selectedThemeId,
-      title:    this.invoiceTitle,
-      gst:      this.customGst,
-      notes:    this.customNotes,
-      branch:   this.customBranch,
-      taxRate:  String(this.taxRate),
+      theme: this.selectedThemeId,
+      title: this.invoiceTitle,
+      gst: this.customGst,
+      notes: this.customNotes,
+      branch: this.customBranch,
+      taxRate: String(this.taxRate),
       currency: this.currencySymbol,
     });
     window.open(`${this.apiUrl}/orders/invoice/${this.selectedOrder.id}?${params}`, '_blank');

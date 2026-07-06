@@ -1,5 +1,5 @@
 export const environment = {
-    production: true,
-    apiUrl: 'http://localhost:3000/api',
-    appName: 'Spike Angular Prod'
-  };
+  production: true,
+  apiUrl: 'https://new-e-commerce-backend-iq4f.onrender.com/api',
+  appName: 'Spike Angular Prod'
+};

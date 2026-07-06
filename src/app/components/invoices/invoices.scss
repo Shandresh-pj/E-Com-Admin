@@ -4,17 +4,21 @@
 
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Playfair+Display:wght@600;700;800&display=swap');
 
-$dark-bg:      #06080f;
-$surface:      rgba(255,255,255,0.035);
-$surface-2:    rgba(255,255,255,0.06);
-$border:       rgba(255,255,255,0.07);
-$border-light: rgba(255,255,255,0.12);
+$dark-bg: #06080f;
+$surface: rgba(255, 255, 255, 0.035);
+$surface-2: rgba(255, 255, 255, 0.06);
+$border: rgba(255, 255, 255, 0.07);
+$border-light: rgba(255, 255, 255, 0.12);
 $text-primary: #f0f4ff;
-$text-muted:   rgba(255,255,255,0.45);
-$radius:       16px;
-$radius-sm:    10px;
+$text-muted: rgba(255, 255, 255, 0.45);
+$radius: 16px;
+$radius-sm: 10px;
 
-:host { display: block; background: $dark-bg; min-height: 100vh; }
+:host {
+  display: block;
+  background: $dark-bg;
+  min-height: 100vh;
+}
 
 // ── ROOT ───────────────────────────────────────────────────────────────────
 .iv-root {
@@ -34,31 +38,36 @@ $radius-sm:    10px;
   border-radius: 20px;
   padding: 32px 36px;
   overflow: hidden;
-  background: linear-gradient(135deg, rgba(91,33,182,.18) 0%, rgba(6,182,212,.08) 60%, transparent 100%);
-  border: 1px solid rgba(91,33,182,.2);
+  background: linear-gradient(135deg, rgba(91, 33, 182, .18) 0%, rgba(6, 182, 212, .08) 60%, transparent 100%);
+  border: 1px solid rgba(91, 33, 182, .2);
   display: flex;
   justify-content: space-between;
   align-items: center;
   flex-wrap: wrap;
   gap: 20px;
-  box-shadow: 0 8px 40px rgba(0,0,0,.4);
+  box-shadow: 0 8px 40px rgba(0, 0, 0, .4);
 
   &__glow {
     position: absolute;
-    top: -60px; left: -60px;
-    width: 280px; height: 280px;
-    background: radial-gradient(circle, rgba(91,33,182,.25) 0%, transparent 70%);
+    top: -60px;
+    left: -60px;
+    width: 280px;
+    height: 280px;
+    background: radial-gradient(circle, rgba(91, 33, 182, .25) 0%, transparent 70%);
     pointer-events: none;
   }
 
-  &__inner { position: relative; flex: 1; }
+  &__inner {
+    position: relative;
+    flex: 1;
+  }
 
   &__badge {
     display: inline-flex;
     align-items: center;
     gap: 7px;
-    background: rgba(91,33,182,.15);
-    border: 1px solid rgba(91,33,182,.35);
+    background: rgba(91, 33, 182, .15);
+    border: 1px solid rgba(91, 33, 182, .35);
     border-radius: 100px;
     padding: 5px 14px;
     font-size: 10px;
@@ -76,7 +85,9 @@ $radius-sm:    10px;
     color: #fff;
   }
 
-  &__accent { color: #a78bfa; }
+  &__accent {
+    color: #a78bfa;
+  }
 
   &__sub {
     font-size: 13.5px;
@@ -121,16 +132,30 @@ $radius-sm:    10px;
 // ── STATUS DOTS ────────────────────────────────────────────────────────────
 .iv-dot {
   display: inline-block;
-  width: 7px; height: 7px;
+  width: 7px;
+  height: 7px;
   border-radius: 50%;
 
-  &--green { background: #10b981; box-shadow: 0 0 6px #10b981; }
+  &--green {
+    background: #10b981;
+    box-shadow: 0 0 6px #10b981;
+  }
 
   &--pulse {
     animation: iv-pulse 2s ease-in-out infinite;
+
     @keyframes iv-pulse {
-      0%,100% { transform: scale(1); opacity: .7; }
-      50%      { transform: scale(1.4); opacity: 1; }
+
+      0%,
+      100% {
+        transform: scale(1);
+        opacity: .7;
+      }
+
+      50% {
+        transform: scale(1.4);
+        opacity: 1;
+      }
     }
   }
 }
@@ -158,7 +183,7 @@ $radius-sm:    10px;
   border: 1px solid $border;
   border-radius: 20px;
   overflow: hidden;
-  box-shadow: 0 20px 56px rgba(0,0,0,.4);
+  box-shadow: 0 20px 56px rgba(0, 0, 0, .4);
 
   &__topbar {
     height: 3px;
@@ -173,22 +198,34 @@ $radius-sm:    10px;
   }
 
   &__icon {
-    width: 40px; height: 40px;
+    width: 40px;
+    height: 40px;
     border-radius: 10px;
     border: 1px solid;
-    display: flex; align-items: center; justify-content: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     flex-shrink: 0;
     transition: background .3s, border-color .3s;
 
-    mat-icon { font-size: 20px; width: 20px; height: 20px; }
+    mat-icon {
+      font-size: 20px;
+      width: 20px;
+      height: 20px;
+    }
   }
 
   &__title {
-    font-size: 15.5px; font-weight: 700; color: #fff; margin: 0 0 2px;
+    font-size: 15.5px;
+    font-weight: 700;
+    color: #fff;
+    margin: 0 0 2px;
   }
 
   &__sub {
-    font-size: 11.5px; color: $text-muted; margin: 0;
+    font-size: 11.5px;
+    color: $text-muted;
+    margin: 0;
   }
 
   &__body {
@@ -213,25 +250,30 @@ $radius-sm:    10px;
 .iv-label {
   font-size: 11.5px;
   font-weight: 600;
-  color: rgba(255,255,255,.65);
+  color: rgba(255, 255, 255, .65);
   display: flex;
   align-items: center;
   gap: 5px;
 
-  &__icon { font-size: 14px; width: 14px; height: 14px; opacity: .55; }
+  &__icon {
+    font-size: 14px;
+    width: 14px;
+    height: 14px;
+    opacity: .55;
+  }
 }
 
 .iv-ff {
   width: 100%;
 
   .mat-mdc-text-field-wrapper {
-    background: rgba(255,255,255,.03) !important;
+    background: rgba(255, 255, 255, .03) !important;
   }
 
   .mdc-notched-outline__leading,
   .mdc-notched-outline__notch,
   .mdc-notched-outline__trailing {
-    border-color: rgba(255,255,255,.1) !important;
+    border-color: rgba(255, 255, 255, .1) !important;
   }
 
   &.mat-focused .mdc-notched-outline__leading,
@@ -241,25 +283,40 @@ $radius-sm:    10px;
     border-width: 1.5px !important;
   }
 
-  input, textarea, .mat-mdc-select {
+  input,
+  textarea,
+  .mat-mdc-select {
     color: #fff !important;
     font-size: 13px !important;
     font-family: 'Inter', sans-serif !important;
     caret-color: #a78bfa;
   }
 
-  .mat-mdc-select-arrow { color: rgba(255,255,255,.35) !important; }
+  .mat-mdc-select-arrow {
+    color: rgba(255, 255, 255, .35) !important;
+  }
 
-  .mat-mdc-form-field-subscript-wrapper { display: none; }
+  .mat-mdc-form-field-subscript-wrapper {
+    display: none;
+  }
 }
 
 .iv-skeleton {
   height: 40px;
-  background: linear-gradient(90deg, rgba(255,255,255,.04) 25%, rgba(255,255,255,.08) 50%, rgba(255,255,255,.04) 75%);
+  background: linear-gradient(90deg, rgba(255, 255, 255, .04) 25%, rgba(255, 255, 255, .08) 50%, rgba(255, 255, 255, .04) 75%);
   background-size: 200% 100%;
   border-radius: 8px;
   animation: iv-shimmer 1.5s infinite;
-  @keyframes iv-shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
+
+  @keyframes iv-shimmer {
+    0% {
+      background-position: -200% 0;
+    }
+
+    100% {
+      background-position: 200% 0;
+    }
+  }
 }
 
 .iv-row-2 {
@@ -280,11 +337,11 @@ $radius-sm:    10px;
   align-items: center;
   gap: 10px;
   padding: 10px 14px;
-  background: rgba(255,255,255,.03);
-  border: 1px solid rgba(255,255,255,.08);
+  background: rgba(255, 255, 255, .03);
+  border: 1px solid rgba(255, 255, 255, .08);
   border-radius: 10px;
   cursor: pointer;
-  color: rgba(255,255,255,.75);
+  color: rgba(255, 255, 255, .75);
   font-family: 'Inter', sans-serif;
   font-size: 12px;
   font-weight: 500;
@@ -292,8 +349,8 @@ $radius-sm:    10px;
   position: relative;
 
   &:hover {
-    background: rgba(255,255,255,.07);
-    border-color: rgba(255,255,255,.15);
+    background: rgba(255, 255, 255, .07);
+    border-color: rgba(255, 255, 255, .15);
     transform: translateX(3px);
   }
 
@@ -306,15 +363,20 @@ $radius-sm:    10px;
 }
 
 .iv-theme-dot {
-  width: 11px; height: 11px;
+  width: 11px;
+  height: 11px;
   border-radius: 50%;
   flex-shrink: 0;
 }
 
-.iv-theme-label { flex: 1; }
+.iv-theme-label {
+  flex: 1;
+}
 
 .iv-theme-check {
-  font-size: 16px !important; width: 16px !important; height: 16px !important;
+  font-size: 16px !important;
+  width: 16px !important;
+  height: 16px !important;
   color: #10b981;
   margin-left: auto;
 }
@@ -335,16 +397,23 @@ $radius-sm:    10px;
   cursor: pointer;
   color: #fff;
   transition: all .2s ease;
-  box-shadow: 0 8px 28px rgba(0,0,0,.35);
+  box-shadow: 0 8px 28px rgba(0, 0, 0, .35);
 
-  mat-icon { font-size: 18px; width: 18px; height: 18px; }
+  mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+  }
 
   &--primary:hover {
     filter: brightness(1.12);
     transform: translateY(-2px);
-    box-shadow: 0 14px 36px rgba(0,0,0,.45);
+    box-shadow: 0 14px 36px rgba(0, 0, 0, .45);
   }
-  &--primary:active { transform: translateY(0); }
+
+  &--primary:active {
+    transform: translateY(0);
+  }
 }
 
 // ── PREVIEW PANEL ──────────────────────────────────────────────────────────
@@ -380,10 +449,11 @@ $radius-sm:    10px;
 }
 
 .iv-icon-btn {
-  background: rgba(255,255,255,.05);
+  background: rgba(255, 255, 255, .05);
   border: 1px solid $border;
-  color: rgba(255,255,255,.6);
-  width: 34px; height: 34px;
+  color: rgba(255, 255, 255, .6);
+  width: 34px;
+  height: 34px;
   border-radius: 8px;
   display: flex;
   align-items: center;
@@ -392,12 +462,16 @@ $radius-sm:    10px;
   transition: all .18s;
 
   &:hover {
-    background: rgba(255,255,255,.1);
+    background: rgba(255, 255, 255, .1);
     color: #fff;
     border-color: $border-light;
   }
 
-  mat-icon { font-size: 17px; width: 17px; height: 17px; }
+  mat-icon {
+    font-size: 17px;
+    width: 17px;
+    height: 17px;
+  }
 }
 
 // ══════════════════════════════════════════════════════════════════════════════
@@ -407,12 +481,19 @@ $radius-sm:    10px;
   background: #fff;
   border-radius: 14px;
   overflow: hidden;
-  box-shadow: 0 24px 72px rgba(0,0,0,.5);
+  box-shadow: 0 24px 72px rgba(0, 0, 0, .5);
   animation: iv-doc-in .35s ease-out;
 
   @keyframes iv-doc-in {
-    from { opacity: 0; transform: scale(.985); }
-    to   { opacity: 1; transform: scale(1); }
+    from {
+      opacity: 0;
+      transform: scale(.985);
+    }
+
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
   }
 }
 
@@ -427,9 +508,20 @@ $radius-sm:    10px;
   letter-spacing: .5px;
   margin-top: 6px;
 
-  &--paid    { background: #d1fae5; color: #065f46; }
-  &--pending { background: #fef3c7; color: #92400e; }
-  &--failed  { background: #fee2e2; color: #991b1b; }
+  &--paid {
+    background: #d1fae5;
+    color: #065f46;
+  }
+
+  &--pending {
+    background: #fef3c7;
+    color: #92400e;
+  }
+
+  &--failed {
+    background: #fee2e2;
+    color: #991b1b;
+  }
 }
 
 // ══════════════════════════════════════════════════════════════════════════════

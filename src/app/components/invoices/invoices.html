@@ -41,7 +41,8 @@
 
         <!-- Panel title -->
         <div class="iv-card__head">
-          <div class="iv-card__icon" [style.background]="theme().primary + '22'" [style.border-color]="theme().primary + '55'">
+          <div class="iv-card__icon" [style.background]="theme().primary + '22'"
+            [style.border-color]="theme().primary + '55'">
             <mat-icon [style.color]="theme().primary">tune</mat-icon>
           </div>
           <div>
@@ -58,17 +59,17 @@
               Target Order
             </label>
             @if (loading) {
-              <div class="iv-skeleton"></div>
+            <div class="iv-skeleton"></div>
             } @else {
-              <mat-form-field appearance="outline" class="iv-ff">
-                <mat-select [(ngModel)]="selectedOrder" name="order" (ngModelChange)="onOrderChange()">
-                  @for (o of ordersList; track o.id) {
-                    <mat-option [value]="o">
-                      #{{ o.id }} — {{ o.invoice_no }} ({{ currencySymbol }}{{ o.total | number:'1.2-2' }})
-                    </mat-option>
-                  }
-                </mat-select>
-              </mat-form-field>
+            <mat-form-field appearance="outline" class="iv-ff">
+              <mat-select [(ngModel)]="selectedOrder" name="order" (ngModelChange)="onOrderChange()">
+                @for (o of ordersList; track o.id) {
+                <mat-option [value]="o">
+                  #{{ o.id }} — {{ o.invoice_no }} ({{ currencySymbol }}{{ o.total | number:'1.2-2' }})
+                </mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
             }
           </div>
 
@@ -80,15 +81,14 @@
             </label>
             <div class="iv-themes">
               @for (th of themes; track th.id) {
-                <button class="iv-theme-btn" [class.active]="selectedThemeId === th.id"
-                        [style.--th-color]="th.primary" (click)="selectTheme(th.id)"
-                        [matTooltip]="th.name">
-                  <span class="iv-theme-dot" [style.background]="th.primary"></span>
-                  <span class="iv-theme-label">{{ th.name }}</span>
-                  @if (selectedThemeId === th.id) {
-                    <mat-icon class="iv-theme-check">check_circle</mat-icon>
-                  }
-                </button>
+              <button class="iv-theme-btn" [class.active]="selectedThemeId === th.id" [style.--th-color]="th.primary"
+                (click)="selectTheme(th.id)" [matTooltip]="th.name">
+                <span class="iv-theme-dot" [style.background]="th.primary"></span>
+                <span class="iv-theme-label">{{ th.name }}</span>
+                @if (selectedThemeId === th.id) {
+                <mat-icon class="iv-theme-check">check_circle</mat-icon>
+                }
+              </button>
               }
             </div>
           </div>
@@ -142,7 +142,7 @@
             </label>
             <mat-form-field appearance="outline" class="iv-ff">
               <textarea matInput rows="3" [(ngModel)]="customNotes"
-                        placeholder="Payment guidelines, warranty info…"></textarea>
+                placeholder="Payment guidelines, warranty info…"></textarea>
             </mat-form-field>
           </div>
         </div>

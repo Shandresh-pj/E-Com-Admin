@@ -139,13 +139,13 @@ export const navItems: NavItem[] = [
   //   bgcolor: 'primary',
   //   roles: [SA, A, BM],
   // },
-  {
-    displayName: 'Invoice Generator',
-    iconName: 'file-text',
-    route: '/components/invoices',
-    bgcolor: 'warning',
-    roles: [SA, A, BM, SK]
-  },
+  // {
+  //   displayName: 'Invoice Generator',
+  //   iconName: 'file-text',
+  //   route: '/components/invoices',
+  //   bgcolor: 'warning',
+  //   roles: [SA, A, BM, SK]
+  // },
   {
     displayName: 'Change Password',
     iconName: 'lock',

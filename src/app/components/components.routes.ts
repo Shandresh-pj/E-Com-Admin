@@ -1,24 +1,4 @@
 import { Routes } from '@angular/router';
-
-// import { AppAdmin } from './app-admin/app-admin';
-// import { Branch } from './branch/branch';
-// import { Employees } from './employees/employees';
-// import { Roles } from './roles/roles';
-// import { RoleAccess } from './role-access/role-access';
-// import { Profile } from './profile/profile';
-// import { MenuBar } from './menu-bar/menu-bar';
-// import { Status } from './status/status';
-// import { ProductAttribute } from './product-attribute/product-attribute';
-// import { AttributeValue } from './attribute-value/attribute-value';
-// import { Category } from './category/category';
-// import { Product } from './product/product';
-// import { Orders } from './orders/orders';
-// import { ChangePassword } from './change-password/change-password';
-// import { AuditLogs } from './audit-logs/audit-logs';
-// import { Alerts } from './alerts/alerts';
-// import { Attendance } from './attendance/attendance';
-// import { Routes } from '@angular/router';
-
 import { AppAdmin } from './app-admin/app-admin';
 import { Branch } from './branch/branch';
 import { Employees } from './employees/employees';

@@ -83,7 +83,8 @@ export class MenuBar implements OnInit {
     { name: 'Leave', path: '/components/leave', icon: 'plane-departure', isActive: true },
     { name: 'Delivery Tracking', path: '/components/delivery-tracking', icon: 'map-pin', isActive: true },
     { name: 'Payments', path: '/components/payments', icon: 'credit-card', isActive: true },
-    { name: 'Workforce Console', path: '/components/workforce', icon: 'settings', isActive: true }
+    { name: 'Workforce Console', path: '/components/workforce', icon: 'settings', isActive: true },
+    { name: 'Invoice Generator', path: '/components/invoices', icon: 'file-text', isActive: true }
   ];
 
   constructor(

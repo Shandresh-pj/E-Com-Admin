@@ -44,6 +44,7 @@ import { DeliveryTracking } from './delivery-tracking/delivery-tracking';
 import { Payments } from './payments/payments';
 import { Notifications } from './notifications/notifications';
 import { Workforce } from './workforce/workforce';
+import { Invoices } from './invoices/invoices';
 import { RoleGuard } from '../Securities/Guard/role.guard';
 import { UserType } from '../Securities/Models/role-access';
 
@@ -362,6 +363,15 @@ export const ComponentsRoutes: Routes = [
       roles: [SA, A, BM],
       urls: [{ title: 'Workforce Console', url: '/components/workforce' }]
     }
+  },
+  {
+    path: 'invoices',
+    component: Invoices,
+    canActivate: [RoleGuard],
+    data: {
+      title: 'Invoice Generator',
+      roles: [SA, A, BM, SK],
+      urls: [{ title: 'Invoice Generator', url: '/components/invoices' }]
+    }
   }
-
 ];

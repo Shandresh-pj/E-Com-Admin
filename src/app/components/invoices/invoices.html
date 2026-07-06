@@ -41,7 +41,8 @@
 
         <!-- Panel title -->
         <div class="iv-card__head">
-          <div class="iv-card__icon" [style.background]="theme().primary + '22'" [style.border-color]="theme().primary + '55'">
+          <div class="iv-card__icon" [style.background]="theme().primary + '22'"
+            [style.border-color]="theme().primary + '55'">
             <mat-icon [style.color]="theme().primary">tune</mat-icon>
           </div>
           <div>
@@ -58,17 +59,17 @@
               Target Order
             </label>
             @if (loading) {
-              <div class="iv-skeleton"></div>
+            <div class="iv-skeleton"></div>
             } @else {
-              <mat-form-field appearance="outline" class="iv-ff">
-                <mat-select [(ngModel)]="selectedOrder" name="order" (ngModelChange)="onOrderChange()">
-                  @for (o of ordersList; track o.id) {
-                    <mat-option [value]="o">
-                      #{{ o.id }} — {{ o.invoice_no }} ({{ currencySymbol }}{{ o.total | number:'1.2-2' }})
-                    </mat-option>
-                  }
-                </mat-select>
-              </mat-form-field>
+            <mat-form-field appearance="outline" class="iv-ff">
+              <mat-select [(ngModel)]="selectedOrder" name="order" (ngModelChange)="onOrderChange()">
+                @for (o of ordersList; track o.id) {
+                <mat-option [value]="o">
+                  #{{ o.id }} — {{ o.invoice_no }} ({{ currencySymbol }}{{ o.total | number:'1.2-2' }})
+                </mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
             }
           </div>
 
@@ -80,15 +81,14 @@
             </label>
             <div class="iv-themes">
               @for (th of themes; track th.id) {
-                <button class="iv-theme-btn" [class.active]="selectedThemeId === th.id"
-                        [style.--th-color]="th.primary" (click)="selectTheme(th.id)"
-                        [matTooltip]="th.name">
-                  <span class="iv-theme-dot" [style.background]="th.primary"></span>
-                  <span class="iv-theme-label">{{ th.name }}</span>
-                  @if (selectedThemeId === th.id) {
-                    <mat-icon class="iv-theme-check">check_circle</mat-icon>
-                  }
-                </button>
+              <button class="iv-theme-btn" [class.active]="selectedThemeId === th.id" [style.--th-color]="th.primary"
+                (click)="selectTheme(th.id)" [matTooltip]="th.name">
+                <span class="iv-theme-dot" [style.background]="th.primary"></span>
+                <span class="iv-theme-label">{{ th.name }}</span>
+                @if (selectedThemeId === th.id) {
+                <mat-icon class="iv-theme-check">check_circle</mat-icon>
+                }
+              </button>
               }
             </div>
           </div>
@@ -142,7 +142,7 @@
             </label>
             <mat-form-field appearance="outline" class="iv-ff">
               <textarea matInput rows="3" [(ngModel)]="customNotes"
-                        placeholder="Payment guidelines, warranty info…"></textarea>
+                placeholder="Payment guidelines, warranty info…"></textarea>
             </mat-form-field>
           </div>
         </div>
@@ -175,12 +175,9 @@
       </div>
 
       <!-- A4-proportioned document preview -->
-      <div class="iv-doc" [style.--doc-primary]="theme().primary"
-           [style.--doc-secondary]="theme().secondary"
-           [style.--doc-accent]="theme().accent"
-           [style.--doc-bg]="theme().bg"
-           [style.--doc-alt]="theme().altRow"
-           [style.--doc-text]="theme().textColor">
+      <div class="iv-doc" [style.--doc-primary]="theme().primary" [style.--doc-secondary]="theme().secondary"
+        [style.--doc-accent]="theme().accent" [style.--doc-bg]="theme().bg" [style.--doc-alt]="theme().altRow"
+        [style.--doc-text]="theme().textColor">
 
         <!-- HERO BAND -->
         <div class="iv-doc__hero" [style.background]="theme().primary">
@@ -192,14 +189,16 @@
               </div>
               <div>
                 <div class="iv-doc__company-name">{{ selectedOrder?.company?.name || 'BizCore Enterprise' }}</div>
-                <div class="iv-doc__company-meta">{{ customGst }} · {{ selectedOrder?.company?.email || 'admin@bizcore.io' }}</div>
+                <div class="iv-doc__company-meta">{{ customGst }} · {{ selectedOrder?.company?.email ||
+                  'admin@bizcore.io' }}</div>
               </div>
             </div>
             <div class="iv-doc__hero-right">
               <div class="iv-doc__title-pill">{{ invoiceTitle }}</div>
               <div class="iv-doc__inv-no">{{ selectedOrder?.invoice_no || 'INV-2026-0001' }}</div>
               <div class="iv-doc__inv-date">
-                {{ selectedOrder?.created_at ? (selectedOrder.created_at | date:'dd MMM yyyy') : ('' | date:'dd MMM yyyy') }}
+                {{ selectedOrder?.created_at ? (selectedOrder.created_at | date:'dd MMM yyyy') : ('' | date:'dd MMM
+                yyyy') }}
               </div>
             </div>
           </div>
@@ -252,24 +251,26 @@
             </thead>
             <tbody>
               @if (selectedOrder?.items?.length) {
-                @for (item of selectedOrder.items; track item.id; let i = $index) {
-                  <tr [class.iv-tbl__alt]="i % 2 !== 0" [style.--alt-bg]="theme().altRow">
-                    <td style="text-align:center" class="iv-tbl__num">{{ i + 1 }}</td>
-                    <td class="iv-tbl__desc">
-                      <strong>{{ item.product?.name || 'Product #' + item.product_id }}</strong>
-                    </td>
-                    <td style="text-align:center">{{ item.quantity }}</td>
-                    <td style="text-align:right">{{ item.price | number:'1.2-2' }}</td>
-                    <td style="text-align:right" class="iv-tbl__muted">
-                      {{ (item.price * item.quantity * taxRate / 100) | number:'1.2-2' }}
-                    </td>
-                    <td style="text-align:right" class="iv-tbl__amount">
-                      {{ (item.price * item.quantity) | number:'1.2-2' }}
-                    </td>
-                  </tr>
-                }
+              @for (item of selectedOrder.items; track item.id; let i = $index) {
+              <tr [class.iv-tbl__alt]="i % 2 !== 0" [style.--alt-bg]="theme().altRow">
+                <td style="text-align:center" class="iv-tbl__num">{{ i + 1 }}</td>
+                <td class="iv-tbl__desc">
+                  <strong>{{ item.product?.name || 'Product #' + item.product_id }}</strong>
+                </td>
+                <td style="text-align:center">{{ item.quantity }}</td>
+                <td style="text-align:right">{{ item.price | number:'1.2-2' }}</td>
+                <td style="text-align:right" class="iv-tbl__muted">
+                  {{ (item.price * item.quantity * taxRate / 100) | number:'1.2-2' }}
+                </td>
+                <td style="text-align:right" class="iv-tbl__amount">
+                  {{ (item.price * item.quantity) | number:'1.2-2' }}
+                </td>
+              </tr>
+              }
               } @else {
-                <tr><td colspan="6" class="iv-tbl__empty">No items found for this order.</td></tr>
+              <tr>
+                <td colspan="6" class="iv-tbl__empty">No items found for this order.</td>
+              </tr>
               }
             </tbody>
           </table>
@@ -307,12 +308,12 @@
             <!-- QR Block -->
             <div class="iv-doc__qr">
               @if (liveQrUrl) {
-                <img [src]="liveQrUrl" alt="Invoice QR Code" class="iv-qr__img"
-                     [style.border-color]="theme().primary + '44'" />
+              <img [src]="liveQrUrl" alt="Invoice QR Code" class="iv-qr__img"
+                [style.border-color]="theme().primary + '44'" />
               } @else {
-                <div class="iv-qr__placeholder" [style.border-color]="theme().primary + '44'">
-                  <mat-icon [style.color]="theme().accent">qr_code_2</mat-icon>
-                </div>
+              <div class="iv-qr__placeholder" [style.border-color]="theme().primary + '44'">
+                <mat-icon [style.color]="theme().accent">qr_code_2</mat-icon>
+              </div>
               }
               <div class="iv-qr__label">Scan to verify invoice</div>
               <div class="iv-qr__sub">Powered by BizCore</div>
@@ -324,7 +325,8 @@
         <div class="iv-doc__footer" [style.background]="theme().primary">
           <div class="iv-doc__footer-accent" [style.background]="theme().accent"></div>
           <div class="iv-doc__footer-text">
-            {{ selectedOrder?.company?.name || 'BizCore Enterprise' }} · {{ selectedOrder?.company?.email || '' }} · GSTIN: {{ customGst }}
+            {{ selectedOrder?.company?.name || 'BizCore Enterprise' }} · {{ selectedOrder?.company?.email || '' }} ·
+            GSTIN: {{ customGst }}
           </div>
           <div class="iv-doc__footer-sub">
             Invoice {{ selectedOrder?.invoice_no || '' }} · Generated by BizCore Invoice Studio

@@ -315,7 +315,11 @@ export class FullComponent implements OnInit {
         { id: 23, name: 'Payments', path: '/components/payments', icon: 'bi-credit-card-2-front-fill', isActive: true },
         { id: 24, name: 'Notifications', path: '/components/notifications', icon: 'bi-bell-fill', isActive: true },
         { id: 25, name: 'Workforce Console', path: '/components/workforce', icon: 'bi-gear-wide-connected', isActive: true },
-        { id: 26, name: 'Invoice Generator', path: '/components/invoices', icon: 'bi-file-text', isActive: true }
+        { id: 26, name: 'Invoice Generator', path: '/components/invoices', icon: 'bi-file-text', isActive: true },
+        { id: 27, name: 'Approvals', path: '/components/approvals', icon: 'bi-check-square', isActive: true },
+        { id: 28, name: 'Workforce Requests', path: '/components/workforce-requests', icon: 'bi-briefcase-fill', isActive: true },
+        { id: 29, name: 'Leave Management', path: '/components/leave', icon: 'bi-calendar-x-fill', isActive: true },
+
       ];
     } else {
       allowedMenus = apiMenus.filter((m: any) => {

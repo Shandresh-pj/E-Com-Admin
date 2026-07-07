@@ -74,6 +74,7 @@ export class Product {
   existingVideoUrl: string | null = null;
 
   selectedStatusFilter: string = 'all';
+  aiLoading: boolean = false;
   private socketSub = new Subscription();
 
   constructor(
@@ -773,5 +774,38 @@ export class Product {
         }
       });
     }
+  }
+
+  generateAIDescription() {
+    const name = this.ProductForm.get('name')?.value;
+    const category = this.ProductForm.get('category')?.value;
+    const price = this.ProductForm.get('price')?.value;
+
+    if (!name) {
+      this.alert.warning('Please enter a product name first before generating description.');
+      return;
+    }
+
+    this.aiLoading = true;
+    this.cdr.detectChanges();
+
+    this.commonService.postApi('ai/generate-description', { name, category, price }).subscribe({
+      next: (res: any) => {
+        this.aiLoading = false;
+        if (res.success && res.description) {
+          this.ProductForm.patchValue({ description: res.description });
+          this.alert.success('Description generated successfully by Gemini AI!');
+        } else {
+          this.alert.error('Failed to generate description.');
+        }
+        this.cdr.detectChanges();
+      },
+      error: (err: any) => {
+        this.aiLoading = false;
+        const msg = err?.error?.message || 'Failed to call Gemini API.';
+        this.alert.error(msg);
+        this.cdr.detectChanges();
+      }
+    });
   }
 }

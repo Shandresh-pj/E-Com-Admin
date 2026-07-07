@@ -25,6 +25,7 @@ import { Payments } from './payments/payments';
 import { Notifications } from './notifications/notifications';
 import { Workforce } from './workforce/workforce';
 import { Invoices } from './invoices/invoices';
+import { Approvals } from './approvals/approvals';
 import { RoleGuard } from '../Securities/Guard/role.guard';
 import { UserType } from '../Securities/Models/role-access';
 
@@ -352,6 +353,16 @@ export const ComponentsRoutes: Routes = [
       title: 'Invoice Generator',
       roles: [SA, A, BM, SK],
       urls: [{ title: 'Invoice Generator', url: '/components/invoices' }]
+    }
+  },
+  {
+    path: 'approvals',
+    component: Approvals,
+    canActivate: [RoleGuard],
+    data: {
+      title: 'Workflow Approvals',
+      roles: [SA, A, BM, SK, EM],
+      urls: [{ title: 'Workflow Approvals', url: '/components/approvals' }]
     }
   }
 ];

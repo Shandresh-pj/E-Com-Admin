@@ -94,7 +94,10 @@ export class Orders implements OnInit {
     });
 
     this.commonService.getApi('products').subscribe({
-      next: (res: any) => { this.products = res?.data || []; }
+      next: (res: any) => {
+        const list = res?.data || [];
+        this.products = list.filter((p: any) => p.approval_status === 'Published' || (!p.approval_status && p.status === 'active'));
+      }
     });
 
     this.commonService.getApi('coupons').subscribe({

@@ -1,0 +1,431 @@
+<mat-card class="cardWithShadow theme-card">
+  <mat-card-header class="d-flex justify-content-between align-items-center">
+    <mat-card-title class="m-b-0">Product & Stock Approval Workflow</mat-card-title>
+    <div class="d-flex gap-8 flex-wrap">
+      <!-- Status Filter -->
+      <mat-form-field appearance="outline" class="density-compact filter-field">
+        <mat-label>Status</mat-label>
+        <mat-select [(ngModel)]="statusFilter" (selectionChange)="onFilterChange()">
+          <mat-option value="">All Statuses</mat-option>
+          <mat-option value="Pending">Pending</mat-option>
+          <mat-option value="Approved">Approved</mat-option>
+          <mat-option value="Rejected">Rejected</mat-option>
+          <mat-option value="Cancelled">Cancelled</mat-option>
+          <mat-option value="Changes Requested">Changes Requested</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <!-- Action Type Filter -->
+      <mat-form-field appearance="outline" class="density-compact filter-field">
+        <mat-label>Workflow Type</mat-label>
+        <mat-select [(ngModel)]="typeFilter" (selectionChange)="onFilterChange()">
+          <mat-option value="">All Types</mat-option>
+          <mat-option value="CREATE">Product Creation</mat-option>
+          <mat-option value="UPDATE">Product Modification</mat-option>
+          <mat-option value="STOCK_ADJUST">Stock Adjustment</mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+  </mat-card-header>
+
+  <!-- Bulk Actions Card (Visible when Admin has pending items selected) -->
+  @if (isAdmin && selection.selected.length > 0) {
+    <mat-card-content class="bg-light-primary rounded-8 m-16 p-16 border-primary border">
+      <div class="d-flex flex-wrap align-items-center justify-content-between gap-16">
+        <div class="d-flex align-items-center gap-12">
+          <mat-icon class="text-primary font-24">task_alt</mat-icon>
+          <div>
+            <h4 class="f-w-700 m-b-4 text-primary">{{ selection.selected.length }} Requests Selected</h4>
+            <p class="text-muted f-s-12 m-b-0">Select bulk actions to apply comments and approve/reject all at once.</p>
+          </div>
+        </div>
+
+        <div class="d-flex align-items-center gap-12 flex-grow-1 max-w-500">
+          <mat-form-field appearance="outline" class="w-100 density-compact m-b-0">
+            <mat-label>Bulk Approval Comment</mat-label>
+            <input matInput [(ngModel)]="bulkComment" placeholder="Write reason for bulk action...">
+          </mat-form-field>
+        </div>
+
+        <div class="d-flex gap-8">
+          <button mat-flat-button color="warn" (click)="submitBulkAction('REJECT')" [disabled]="isProcessingBulk">
+            <mat-icon class="m-r-4">close</mat-icon> Bulk Reject
+          </button>
+          <button mat-flat-button color="primary" (click)="submitBulkAction('APPROVE')" [disabled]="isProcessingBulk">
+            <mat-icon class="m-r-4">check</mat-icon> Bulk Approve
+          </button>
+        </div>
+      </div>
+    </mat-card-content>
+  }
+
+  <!-- Review Mode: Detail Dialog and Difference Viewer -->
+  @if (selectedRequest) {
+    <mat-card-content class="p-24 b-t-1 bg-light-gray">
+      <div class="d-flex justify-content-between align-items-center border-bottom pb-12 m-b-24">
+        <div>
+          <button mat-stroked-button (click)="closeDetails()" class="m-r-12">
+            <mat-icon class="m-r-4">arrow_back</mat-icon> Back to Dashboard
+          </button>
+          <span class="f-w-800 f-s-18">Review Approval ID: #{{ selectedRequest.id }}</span>
+        </div>
+        <div class="d-flex gap-12">
+          <span class="badge font-weight-bold" 
+                [ngClass]="{
+                  'bg-light-warning text-warning': selectedRequest.status === 'Pending',
+                  'bg-light-success text-success': selectedRequest.status === 'Approved',
+                  'bg-light-error text-error': selectedRequest.status === 'Rejected' || selectedRequest.status === 'Cancelled',
+                  'bg-light-primary text-primary': selectedRequest.status === 'Changes Requested'
+                }">
+            {{ selectedRequest.status }}
+          </span>
+          <span class="badge bg-light-primary text-primary">{{ selectedRequest.action_type }}</span>
+        </div>
+      </div>
+
+      <div class="row">
+        <!-- Left Side: Differences Viewer -->
+        <div class="col-lg-8 col-md-12 m-b-24">
+          <mat-card class="cardWithShadow bg-white">
+            <mat-card-content class="p-24">
+              <h3 class="f-w-700 m-b-16 d-flex align-items-center gap-8">
+                <mat-icon class="text-info">difference</mat-icon> Change Log Details
+              </h3>
+
+              <!-- Type: Product Creation -->
+              @if (selectedRequest.action_type === 'CREATE') {
+                <div class="table-responsive">
+                  <table class="table table-bordered align-middle">
+                    <thead class="bg-light-primary text-primary">
+                      <tr>
+                        <th width="30%">Field</th>
+                        <th>Proposed Value</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      @for (field of getDiffFields(); track field) {
+                        <tr>
+                          <td class="f-w-600 capitalize-text">{{ field.replace('_', ' ') }}</td>
+                          <td>
+                            @if (field === 'price') {
+                              ${{ getNewValue(field) }}
+                            } @else {
+                              {{ getNewValue(field) }}
+                            }
+                          </td>
+                        </tr>
+                      }
+                    </tbody>
+                  </table>
+                </div>
+              }
+
+              <!-- Type: Product Update -->
+              @else if (selectedRequest.action_type === 'UPDATE') {
+                <div class="table-responsive">
+                  <table class="table table-bordered align-middle">
+                    <thead class="bg-light">
+                      <tr>
+                        <th width="25%">Field</th>
+                        <th width="35%" class="text-error">Previous Value</th>
+                        <th width="40%" class="text-success">Proposed Value</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      @for (field of getDiffFields(); track field) {
+                        <tr [ngClass]="{'bg-light-warning': isFieldChanged(field)}">
+                          <td class="f-w-600 capitalize-text">
+                            {{ field.replace('_', ' ') }}
+                            @if (isFieldChanged(field)) {
+                              <span class="text-warning f-s-12 d-block f-w-400">(Modified)</span>
+                            }
+                          </td>
+                          <td class="text-error text-decor-line-through">
+                            {{ getPreviousValue(field) }}
+                          </td>
+                          <td class="text-success f-w-600">
+                            {{ getNewValue(field) }}
+                          </td>
+                        </tr>
+                      }
+                    </tbody>
+                  </table>
+                </div>
+              }
+
+              <!-- Type: Stock Adjustment -->
+              @else if (selectedRequest.action_type === 'STOCK_ADJUST') {
+                <div class="row text-center m-b-24">
+                  <div class="col-lg-4 col-md-4 col-sm-12">
+                    <div class="p-16 rounded-8 bg-light text-muted">
+                      <p class="m-b-4 f-s-12">Current Stock</p>
+                      <h2 class="f-w-800">{{ selectedRequest.previous_values?.stock }}</h2>
+                    </div>
+                  </div>
+                  <div class="col-lg-4 col-md-4 col-sm-12">
+                    <div class="p-16 rounded-8 bg-light-primary text-primary">
+                      <p class="m-b-4 f-s-12">Stock Action</p>
+                      <h2 class="f-w-800">
+                        {{ selectedRequest.new_values?.action === 'ADD' ? '+' : '-' }}{{ selectedRequest.new_values?.quantity }}
+                      </h2>
+                    </div>
+                  </div>
+                  <div class="col-lg-4 col-md-4 col-sm-12">
+                    <div class="p-16 rounded-8 bg-light-success text-success">
+                      <p class="m-b-4 f-s-12">Result Stock</p>
+                      <h2 class="f-w-800">
+                        @if (selectedRequest.new_values?.action === 'ADD') {
+                          {{ selectedRequest.previous_values?.stock + selectedRequest.new_values?.quantity }}
+                        } @else {
+                          {{ selectedRequest.previous_values?.stock - selectedRequest.new_values?.quantity }}
+                        }
+                      </h2>
+                    </div>
+                  </div>
+                </div>
+              }
+
+              <!-- Preview Media if available -->
+              @if (selectedRequest.new_values?.image) {
+                <div class="media-preview m-t-24 p-16 bg-light rounded-8">
+                  <h4 class="f-w-600 m-b-12">Media Preview</h4>
+                  <div class="d-flex gap-16 align-items-center">
+                    <img [src]="selectedRequest.new_values.image" class="preview-img rounded-8 border shadow-sm" alt="Product Image">
+                    <div>
+                      <p class="f-w-700 m-b-4 text-dark">{{ selectedRequest.new_values.name }}</p>
+                      <p class="text-muted f-s-12 m-b-0">Cover photo for approval</p>
+                    </div>
+                  </div>
+                </div>
+              }
+            </mat-card-content>
+          </mat-card>
+        </div>
+
+        <!-- Right Side: Workflow Timeline & Action Card -->
+        <div class="col-lg-4 col-md-12">
+          <!-- Administrator Decision Control Card -->
+          @if (isAdmin && selectedRequest.status === 'Pending') {
+            <mat-card class="cardWithShadow bg-white m-b-24 border-primary border">
+              <mat-card-content class="p-24">
+                <h3 class="f-w-700 m-b-16 text-primary">Workflow Decision</h3>
+                
+                <mat-form-field appearance="outline" class="w-100 m-b-16">
+                  <mat-label>Approval/Rejection Comments</mat-label>
+                  <textarea matInput [(ngModel)]="adminComment" placeholder="Write feedback comment..." rows="3"></textarea>
+                </mat-form-field>
+
+                <div class="d-flex flex-column gap-12">
+                  <button mat-flat-button color="primary" class="w-100 py-12" (click)="submitAction('APPROVE')" [disabled]="isSavingAction">
+                    <mat-icon class="m-r-4">check</mat-icon> Approve and Publish
+                  </button>
+                  <div class="d-flex gap-8">
+                    <button mat-stroked-button color="warn" class="flex-grow-1" (click)="submitAction('REJECT')" [disabled]="isSavingAction">
+                      <mat-icon class="m-r-4">close</mat-icon> Reject
+                    </button>
+                    <button mat-stroked-button color="primary" class="flex-grow-1" (click)="submitAction('CHANGES_REQUESTED')" [disabled]="isSavingAction">
+                      <mat-icon class="m-r-4">edit_note</mat-icon> Request Changes
+                    </button>
+                  </div>
+                </div>
+              </mat-card-content>
+            </mat-card>
+          }
+
+          <!-- Branch User Cancel Button (If Pending) -->
+          @if (!isAdmin && selectedRequest.status === 'Pending' && selectedRequest.requested_by_id === getUserId()) {
+            <mat-card class="cardWithShadow bg-white m-b-24 border-warn border">
+              <mat-card-content class="p-24">
+                <h3 class="f-w-700 m-b-16 text-warn">Cancel Submission</h3>
+                <p class="text-muted f-s-13 m-b-16">You submitted this request. You can cancel it before an admin reviews it.</p>
+                <button mat-flat-button color="warn" class="w-100" (click)="submitAction('CANCEL')" [disabled]="isSavingAction">
+                  <mat-icon class="m-r-4">delete_sweep</mat-icon> Cancel Request
+                </button>
+              </mat-card-content>
+            </mat-card>
+          }
+
+          <!-- Gemini AI Product Review Card -->
+          <mat-card class="cardWithShadow bg-white m-b-24 border-primary border-dashed">
+            <mat-card-content class="p-24">
+              <div class="d-flex align-items-center justify-content-between m-b-16">
+                <h3 class="f-w-700 text-primary m-b-0 d-flex align-items-center gap-8">
+                  <mat-icon>psychology</mat-icon> Gemini AI Audit
+                </h3>
+                @if (!aiAuditReport && !aiLoadingReport) {
+                  <button mat-flat-button color="primary" size="small" (click)="runAiAudit()">
+                    Analyze
+                  </button>
+                }
+              </div>
+
+              @if (aiLoadingReport) {
+                <div class="d-flex flex-column align-items-center justify-content-center p-24">
+                  <mat-icon class="rotating text-primary font-32 m-b-12">sync</mat-icon>
+                  <p class="text-muted f-s-12">Gemini is auditing product details...</p>
+                </div>
+              } @else if (aiAuditReport) {
+                <div class="ai-report-body bg-light-primary rounded-8 p-16 f-s-13 text-dark border-left-primary" [innerHTML]="aiAuditReport">
+                </div>
+                <button mat-stroked-button color="primary" class="w-100 m-t-12" (click)="runAiAudit()">
+                  Re-Analyze
+                </button>
+              } @else {
+                <p class="text-muted f-s-12 m-b-0">Get smart recommendations, pricing validation, and SEO tags suggestions for this submission.</p>
+              }
+            </mat-card-content>
+          </mat-card>
+
+          <!-- Workflow History Timeline -->
+          <mat-card class="cardWithShadow bg-white">
+            <mat-card-content class="p-24">
+              <h3 class="f-w-700 m-b-20 d-flex align-items-center gap-8">
+                <mat-icon class="text-secondary font-20">history</mat-icon> Workflow Timeline
+              </h3>
+              
+              <div class="timeline-container">
+                <!-- Request Created Node -->
+                <div class="timeline-node">
+                  <div class="node-icon bg-light-primary text-primary">
+                    <mat-icon>add_shopping_cart</mat-icon>
+                  </div>
+                  <div class="node-content">
+                    <h5 class="f-w-700 m-b-4 text-dark">Submitted</h5>
+                    <p class="text-muted f-s-12 m-b-2">By: {{ selectedRequest.requested_by }}</p>
+                    <p class="text-muted f-s-11 m-b-0">{{ selectedRequest.requested_date | date:'medium' }}</p>
+                  </div>
+                </div>
+
+                <!-- Action Node from audit_history -->
+                @for (audit of selectedRequest.audit_history; track audit.timestamp) {
+                  @if (audit.action !== 'CREATE') {
+                    <div class="timeline-node">
+                      <div class="node-icon" 
+                           [ngClass]="{
+                             'bg-light-success text-success': audit.action === 'APPROVE',
+                             'bg-light-error text-error': audit.action === 'REJECT' || audit.action === 'CANCEL',
+                             'bg-light-warning text-warning': audit.action === 'CHANGES_REQUESTED'
+                           }">
+                        <mat-icon>
+                          {{ audit.action === 'APPROVE' ? 'check' : (audit.action === 'REJECT' ? 'close' : (audit.action === 'CANCEL' ? 'cancel' : 'edit_note')) }}
+                        </mat-icon>
+                      </div>
+                      <div class="node-content">
+                        <h5 class="f-w-700 m-b-4 text-dark">{{ audit.action }}</h5>
+                        <p class="text-muted f-s-12 m-b-2">User: {{ audit.user }}</p>
+                        @if (audit.comment) {
+                          <p class="text-dark f-s-12 italic-comment bg-light rounded p-8 m-b-4">"{{ audit.comment }}"</p>
+                        }
+                        <p class="text-muted f-s-11 m-b-0">{{ audit.timestamp | date:'medium' }}</p>
+                      </div>
+                    </div>
+                  }
+                }
+              </div>
+            </mat-card-content>
+          </mat-card>
+        </div>
+      </div>
+    </mat-card-content>
+  }
+
+  <!-- Main Table View -->
+  @else {
+    <mat-card-content class="b-t-1">
+      <div class="table-responsive">
+        <table mat-table [dataSource]="requests" class="w-100 custom-table">
+          
+          <!-- Checkbox Column -->
+          <ng-container matColumnDef="select">
+            <th mat-header-cell *matHeaderCellDef width="5%">
+              <mat-checkbox (change)="$event ? masterToggle() : null"
+                            [checked]="selection.hasValue() && isAllSelected()"
+                            [indeterminate]="selection.hasValue() && !isAllSelected()">
+              </mat-checkbox>
+            </th>
+            <td mat-cell *matCellDef="let row">
+              <mat-checkbox (click)="$event.stopPropagation()"
+                            (change)="$event ? selection.toggle(row) : null"
+                            [checked]="selection.isSelected(row)"
+                            [disabled]="row.status !== 'Pending'">
+              </mat-checkbox>
+            </td>
+          </ng-container>
+
+          <!-- ID -->
+          <ng-container matColumnDef="id">
+            <th mat-header-cell *matHeaderCellDef width="8%">No</th>
+            <td mat-cell *matCellDef="let row; let i = index">{{ i + 1 }}</td>
+          </ng-container>
+
+          <!-- Type -->
+          <ng-container matColumnDef="action_type">
+            <th mat-header-cell *matHeaderCellDef width="15%">Type</th>
+            <td mat-cell *matCellDef="let row">
+              <span class="type-badge">{{ row.action_type }}</span>
+            </td>
+          </ng-container>
+
+          <!-- Status -->
+          <ng-container matColumnDef="status">
+            <th mat-header-cell *matHeaderCellDef width="15%">Status</th>
+            <td mat-cell *matCellDef="let row">
+              <span class="badge font-weight-bold" 
+                    [ngClass]="{
+                      'bg-light-warning text-warning': row.status === 'Pending',
+                      'bg-light-success text-success': row.status === 'Approved',
+                      'bg-light-error text-error': row.status === 'Rejected' || row.status === 'Cancelled',
+                      'bg-light-primary text-primary': row.status === 'Changes Requested'
+                    }">
+                {{ row.status }}
+              </span>
+            </td>
+          </ng-container>
+
+          <!-- Requested By -->
+          <ng-container matColumnDef="requested_by">
+            <th mat-header-cell *matHeaderCellDef width="15%">Requested By</th>
+            <td mat-cell *matCellDef="let row">{{ row.requested_by }}</td>
+          </ng-container>
+
+          <!-- Requested Date -->
+          <ng-container matColumnDef="requested_date">
+            <th mat-header-cell *matHeaderCellDef width="15%">Submitted Date</th>
+            <td mat-cell *matCellDef="let row">{{ row.requested_date | date:'mediumDate' }}</td>
+          </ng-container>
+
+          <!-- Branch -->
+          <ng-container matColumnDef="branch">
+            <th mat-header-cell *matHeaderCellDef width="17%">Branch Owner</th>
+            <td mat-cell *matCellDef="let row">Branch #{{ row.branch_id || 'N/A' }}</td>
+          </ng-container>
+
+          <!-- Actions -->
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef width="15%">Actions</th>
+            <td mat-cell *matCellDef="let row">
+              <button mat-icon-button color="accent" matTooltip="Review Changes" (click)="viewDetails(row.id)">
+                <mat-icon class="text-info">rate_review</mat-icon>
+              </button>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+
+          <tr class="mat-no-data-row" *matNoDataRow>
+            <td class="no-data-cell" colspan="8">No pending workflow requests found</td>
+          </tr>
+        </table>
+      </div>
+
+      <!-- Server-side Pagination -->
+      <mat-paginator [length]="totalRequests"
+                     [pageSize]="pageSize"
+                     [pageSizeOptions]="[5, 10, 20]"
+                     (page)="onPageChange($event)"
+                     aria-label="Select page of approvals">
+      </mat-paginator>
+    </mat-card-content>
+  }
+</mat-card>

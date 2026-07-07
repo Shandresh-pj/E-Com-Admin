@@ -132,7 +132,12 @@
                 </div>
 
                 <div class="col-lg-8">
-                    <mat-label class="f-w-600 m-b-8 d-block">Description</mat-label>
+                    <div class="d-flex align-items-center justify-content-between m-b-8">
+                        <mat-label class="f-w-600 m-b-0">Description</mat-label>
+                        <button type="button" mat-stroked-button color="primary" class="ai-btn" (click)="generateAIDescription()" [disabled]="aiLoading">
+                            <mat-icon class="icon-16 m-r-4">auto_awesome</mat-icon> AI Generate
+                        </button>
+                    </div>
                     <mat-form-field appearance="outline" class="w-100">
                         <textarea matInput formControlName="description" placeholder="Enter Description" rows="3"></textarea>
                         <mat-error *ngIf="ProductForm.get('description')?.hasError('maxlength')">Description cannot exceed 1000 characters</mat-error>

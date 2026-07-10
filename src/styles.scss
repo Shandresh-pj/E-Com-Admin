@@ -6,6 +6,14 @@ body {
   margin: 0;
 }
 
+/* Blank layout wrapper — public pages (home, login, etc.) */
+.blank-wrapper {
+  min-height: 100vh;
+  width: 100%;
+  display: block;
+  overflow-x: hidden;
+}
+
 .Cancel_Button {
   --mdc-outlined-button-outline-color: #ff4d4f;
   --mdc-outlined-button-outline-width: 1px;
@@ -77,23 +85,64 @@ router-outlet + * {
   }
 }
 
-/* 5. Dark Mode Contrast Overrides for Legibility */
-html.dark, html .dark-theme {
-  .text-dark {
-    color: #f1f5f9 !important;
+/* 5. Comprehensive Light Mode & Dark Mode System */
+html.light, body.light, .light-theme {
+  --bg-primary: #f8fafc;
+  --bg-secondary: #ffffff;
+  --text-main: #0f172a;
+  --text-muted: #475569;
+  --border-color: #e2e8f0;
+  color: var(--text-main);
+  background-color: var(--bg-primary);
+
+  .mainWrapper, .mat-drawer-container, .mat-sidenav-content, .pageWrapper {
+    background-color: #f8fafc !important;
+    color: #0f172a !important;
   }
-  
-  .text-muted {
-    color: #94a3b8 !important;
+
+  .sidebarNav, .mat-sidenav {
+    background-color: #ffffff !important;
+    border-right: 1px solid #e2e8f0 !important;
   }
-  
-  .mat-mdc-list-item-icon {
-    color: #f1f5f9 !important;
+
+  .mat-mdc-card {
+    background-color: #ffffff !important;
+    color: #0f172a !important;
+    border: 1px solid #f1f5f9;
   }
-  
-  .mat-drawer-container {
-    color: #f1f5f9 !important;
+
+  .text-dark { color: #0f172a !important; }
+  .text-muted { color: #475569 !important; }
+}
+
+html.dark, body.dark, .dark-theme {
+  --bg-primary: #090d16;
+  --bg-secondary: #111827;
+  --text-main: #f8fafc;
+  --text-muted: #94a3b8;
+  --border-color: rgba(255, 255, 255, 0.08);
+  color: var(--text-main);
+  background-color: var(--bg-primary);
+
+  .mainWrapper, .mat-drawer-container, .mat-sidenav-content, .pageWrapper {
+    background-color: #090d16 !important;
+    color: #f8fafc !important;
   }
+
+  .sidebarNav, .mat-sidenav {
+    background-color: #111827 !important;
+    border-right: 1px solid rgba(255, 255, 255, 0.08) !important;
+  }
+
+  .mat-mdc-card {
+    background-color: #111827 !important;
+    color: #f8fafc !important;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  .text-dark { color: #f1f5f9 !important; }
+  .text-muted { color: #94a3b8 !important; }
+  .mat-mdc-list-item-icon { color: #f1f5f9 !important; }
 }
 
 /* 6. Sidebar Collapse Full-Page Content Expansion */

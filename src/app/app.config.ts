@@ -17,9 +17,11 @@ import {
   provideRouter,
   withComponentInputBinding,
   withInMemoryScrolling,
+  TitleStrategy
 } from '@angular/router';
 
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
+import { TemplatePageTitleStrategy } from './services/title-strategy.service';
 
 import { TablerIconsModule } from 'angular-tabler-icons';
 import * as TablerIcons from 'angular-tabler-icons/icons';
@@ -54,6 +56,11 @@ export const appConfig: ApplicationConfig = {
 
       withComponentInputBinding()
     ),
+
+    {
+      provide: TitleStrategy,
+      useClass: TemplatePageTitleStrategy
+    },
 
     provideHttpClient(
 

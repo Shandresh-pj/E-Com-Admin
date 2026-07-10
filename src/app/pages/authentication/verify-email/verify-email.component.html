@@ -1,0 +1,36 @@
+<div class="verify-root">
+  <div class="verify-card">
+    <div class="card-stripe"></div>
+
+    @if (isVerifying) {
+    <div class="state-verifying">
+      <div class="spinner"></div>
+      <h2>Verifying Email Address</h2>
+      <p>Validating registration signature, please wait...</p>
+    </div>
+    } @else if (isSuccess) {
+    <div class="state-success">
+      <div class="icon success">✓</div>
+      <h2>Email Verified Successfully!</h2>
+      <p>{{ message }}</p>
+
+      <div class="actions">
+        @if (!autoApproved) {
+        <a routerLink="/authentication/login" class="btn-primary">Go to Login</a>
+        <p class="wait-note">Once the administrator approves your request, you'll receive a password setup link.</p>
+        }
+      </div>
+    </div>
+    } @else {
+    <div class="state-failure">
+      <div class="icon failure">✗</div>
+      <h2>Verification Failed</h2>
+      <p>{{ message }}</p>
+
+      <div class="actions">
+        <a routerLink="/" class="btn-ghost">Go to Homepage</a>
+      </div>
+    </div>
+    }
+  </div>
+</div>

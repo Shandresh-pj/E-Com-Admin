@@ -1,5 +1,7 @@
 import { Component, OnInit } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+import { RouterOutlet, Router, ActivatedRoute, NavigationEnd } from '@angular/router';
+import { Title } from '@angular/platform-browser';
+import { filter, map, mergeMap } from 'rxjs/operators';
 import { TokenService } from './Securities/Services/token.service';
 import { SocketService } from './Securities/Services/socket.service';
 import { SessionService } from './Securities/Services/session.service';
@@ -11,13 +13,16 @@ import { AuthService } from './Securities/Services/auth.service';
     templateUrl: './app.component.html'
 })
 export class AppComponent implements OnInit {
-  title = 'Spike Angular Admin Template';
+  title = 'E-Com Enterprise Admin';
 
   constructor(
     private tokenService: TokenService,
     private socketService: SocketService,
     private sessionService: SessionService,
-    private authService: AuthService
+    private authService: AuthService,
+    private router: Router,
+    private activatedRoute: ActivatedRoute,
+    private titleService: Title
   ) {}
 
   ngOnInit(): void {
@@ -33,5 +38,25 @@ export class AppComponent implements OnInit {
       this.socketService.connect(token);
       this.authService.refreshPermissions().subscribe({ error: () => {} });
     }
+
+    // Automatically apply route titles to all pages
+    this.router.events.pipe(
+      filter(event => event instanceof NavigationEnd),
+      map(() => {
+        let route = this.activatedRoute;
+        while (route.firstChild) {
+          route = route.firstChild;
+        }
+        return route;
+      }),
+      mergeMap(route => route.data)
+    ).subscribe(data => {
+      const pageTitle = data['title'];
+      if (pageTitle) {
+        this.titleService.setTitle(`${pageTitle} | E-Com Enterprise Admin`);
+      } else {
+        this.titleService.setTitle('E-Com Enterprise Admin Console');
+      }
+    });
   }
 }

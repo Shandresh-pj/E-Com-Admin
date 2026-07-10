@@ -18,6 +18,7 @@ import { toFileUrl } from 'src/utils/file-url';
 import { ViewDetailsDialog } from 'src/utils/view-details-dialog/view-details-dialog';
 import { SocketService } from 'src/app/Securities/Services/socket.service';
 import { Subscription } from 'rxjs';
+import { GeminiAiService } from 'src/app/services/gemini-ai.service';
 
 @Component({
   selector: 'app-product',
@@ -86,7 +87,8 @@ export class Product {
     private dialog: MatDialog,
     public perm: PermissionService,
     private socketService: SocketService,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private geminiAi: GeminiAiService
   ) {
     this.ProductForm = fb.group({
       name: ['', [Validators.required, Validators.maxLength(200)]],
@@ -212,6 +214,34 @@ export class Product {
           this.cdr.detectChanges();
         }
       });
+    });
+  }
+
+  generateAIDescription() {
+    const name = this.ProductForm.get('name')?.value || '';
+    const category = this.ProductForm.get('category')?.value || 'General';
+    const price = this.ProductForm.get('price')?.value;
+
+    if (!name || name.trim() === '') {
+      this.alert.error('Please enter a Product Name first to generate an AI description.');
+      return;
+    }
+
+    this.aiLoading = true;
+    this.cdr.detectChanges();
+
+    this.geminiAi.generateProductDescription(name, category, price).subscribe({
+      next: (desc) => {
+        this.ProductForm.patchValue({ description: desc });
+        this.aiLoading = false;
+        this.alert.success('AI Product Description generated successfully!');
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.aiLoading = false;
+        this.alert.error('Failed to generate AI description. Using default template.');
+        this.cdr.detectChanges();
+      }
     });
   }
 
@@ -774,38 +804,5 @@ export class Product {
         }
       });
     }
-  }
-
-  generateAIDescription() {
-    const name = this.ProductForm.get('name')?.value;
-    const category = this.ProductForm.get('category')?.value;
-    const price = this.ProductForm.get('price')?.value;
-
-    if (!name) {
-      this.alert.warning('Please enter a product name first before generating description.');
-      return;
-    }
-
-    this.aiLoading = true;
-    this.cdr.detectChanges();
-
-    this.commonService.postApi('ai/generate-description', { name, category, price }).subscribe({
-      next: (res: any) => {
-        this.aiLoading = false;
-        if (res.success && res.description) {
-          this.ProductForm.patchValue({ description: res.description });
-          this.alert.success('Description generated successfully by Gemini AI!');
-        } else {
-          this.alert.error('Failed to generate description.');
-        }
-        this.cdr.detectChanges();
-      },
-      error: (err: any) => {
-        this.aiLoading = false;
-        const msg = err?.error?.message || 'Failed to call Gemini API.';
-        this.alert.error(msg);
-        this.cdr.detectChanges();
-      }
-    });
   }
 }

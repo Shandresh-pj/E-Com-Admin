@@ -53,17 +53,15 @@ export class AuthService {
         if (response.refreshToken) {
           this.tokenService.setRefreshToken(response.refreshToken);
         }
-        // Store user + roles (permissions/menus are fetched separately below)
+        // Store user + roles
         this.sessionService.setSession(response);
         // Connect Socket
         this.socketService.connect(response.token);
-      }),
-      switchMap((response: any) =>
-        this.refreshPermissions().pipe(
-          map(() => response),
-          catchError(() => of(response))
-        )
-      )
+        // Defer refreshPermissions so login navigation completes immediately
+        setTimeout(() => {
+          this.refreshPermissions().subscribe({ error: () => {} });
+        }, 100);
+      })
     );
   }
 
@@ -87,6 +85,10 @@ export class AuthService {
         if (seq === this.permissionsRequestSeq) {
           this.sessionService.setSession(data);
         }
+      }),
+      catchError((error) => {
+        console.warn('[Permissions] Live permissions refresh error:', error);
+        return of(null);
       })
     );
   }

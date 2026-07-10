@@ -1,0 +1,1269 @@
+<div class="home-root">
+
+  <!-- Ultra-Premium Floating Quantum Cyber-Island Navbar -->
+  <nav class="quantum-island-nav" [class.nav--scrolled]="isScrolled()" role="navigation" aria-label="Main navigation">
+    <div class="nav-island-container">
+
+      <!-- Brand Shield Logo -->
+      <a routerLink="/" class="island-logo" aria-label="SVK E-Com Home">
+        <div class="logo-hex-core">
+          <svg viewBox="0 0 40 40" fill="none" class="hex-svg">
+            <path d="M20 3L35 11.5V28.5L20 37L5 28.5V11.5L20 3Z" stroke="url(#hexGrad)" stroke-width="2.5"
+              fill="rgba(99, 102, 241, 0.15)" />
+            <path d="M20 10L28 15V25L20 30L12 25V15L20 10Z" fill="url(#hexGradCore)" />
+            <defs>
+              <linearGradient id="hexGrad" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stop-color="#38bdf8" />
+                <stop offset="50%" stop-color="#818cf8" />
+                <stop offset="100%" stop-color="#c084fc" />
+              </linearGradient>
+              <linearGradient id="hexGradCore" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stop-color="#6366f1" />
+                <stop offset="100%" stop-color="#06b6d4" />
+              </linearGradient>
+            </defs>
+          </svg>
+          <span class="logo-spark"></span>
+        </div>
+        <div class="logo-text-stack">
+          <div class="logo-main">SVK <span class="accent-ecom">E-COM</span></div>
+          <div class="logo-sub">ENTERPRISE ERP</div>
+        </div>
+      </a>
+
+      <!-- Island Center Navigation Pills -->
+      <ul class="island-links" role="list">
+        <li>
+          <a href="#features" class="island-link">
+            <span class="link-txt">Architecture</span>
+            <span class="link-beam"></span>
+          </a>
+        </li>
+        <li>
+          <a href="#modules" class="island-link">
+            <span class="link-txt">18 AI Modules</span>
+            <span class="link-beam"></span>
+          </a>
+        </li>
+        <li>
+          <a href="#pricing" class="island-link">
+            <span class="link-txt">Transparent Pricing</span>
+            <span class="link-beam"></span>
+          </a>
+        </li>
+        <li>
+          <a href="#faq" class="island-link">
+            <span class="link-txt">Knowledge Base</span>
+            <span class="link-beam"></span>
+          </a>
+        </li>
+      </ul>
+
+      <!-- Action Cluster -->
+      <div class="island-actions">
+        <a routerLink="/authentication/login" class="island-btn-login">
+          <span>Sign In</span>
+        </a>
+        <a routerLink="/contact" class="island-btn-launch">
+          <span class="launch-shimmer"></span>
+          <span class="launch-txt">Launch Platform</span>
+          <span class="launch-arrow">⚡</span>
+        </a>
+      </div>
+
+      <!-- Mobile Menu Burger -->
+      <button class="island-burger" [class.open]="mobileMenuOpen()" (click)="toggleMobileMenu()"
+        aria-label="Toggle mobile menu">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+
+    </div>
+  </nav>
+
+  <div class="lg-drawer" [class.lg-drawer--open]="mobileMenuOpen()" role="dialog" aria-label="Mobile navigation"
+    [attr.aria-hidden]="!mobileMenuOpen()">
+    <div class="lg-drawer__backdrop" (click)="toggleMobileMenu()"></div>
+
+    <div class="lg-drawer__panel">
+      <div class="lg-drawer__orb"></div>
+
+      <div class="lg-drawer__head">
+        <a routerLink="/" class="lg-logo" (click)="toggleMobileMenu()">
+          <div class="lg-logo__orb">
+            <span class="lg-logo__orb-ring"></span>
+            <span class="lg-logo__icon">⚡</span>
+          </div>
+          <div class="lg-logo__text">
+            <span class="lg-logo__brand">SVK</span>
+            <span class="lg-logo__accent">E-Com</span>
+          </div>
+        </a>
+        <button class="lg-drawer__close" (click)="toggleMobileMenu()" aria-label="Close menu">✕</button>
+      </div>
+
+      <nav class="lg-drawer__nav" aria-label="Mobile navigation links">
+        <a href="#features" class="lg-drawer__link" (click)="toggleMobileMenu()">
+          <span class="lg-drawer__link-icon">✦</span>
+          <span>Features</span>
+          <span class="lg-drawer__link-arrow">→</span>
+        </a>
+        <a href="#modules" class="lg-drawer__link" (click)="toggleMobileMenu()">
+          <span class="lg-drawer__link-icon">⬡</span>
+          <span>Modules</span>
+          <span class="lg-drawer__link-arrow">→</span>
+        </a>
+        <a href="#pricing" class="lg-drawer__link" (click)="toggleMobileMenu()">
+          <span class="lg-drawer__link-icon">◈</span>
+          <span>Pricing</span>
+          <span class="lg-drawer__link-arrow">→</span>
+        </a>
+        <a href="#faq" class="lg-drawer__link" (click)="toggleMobileMenu()">
+          <span class="lg-drawer__link-icon">◎</span>
+          <span>FAQ</span>
+          <span class="lg-drawer__link-arrow">→</span>
+        </a>
+      </nav>
+
+      <div class="lg-drawer__divider"></div>
+      <div class="lg-drawer__ctas">
+        <a routerLink="/authentication/login" class="lg-drawer__ghost" (click)="toggleMobileMenu()">Sign In</a>
+        <a routerLink="/contact" class="lg-drawer__primary" (click)="toggleMobileMenu()">
+          <span>Get Started Free</span>
+          <span>→</span>
+        </a>
+      </div>
+
+      <div class="lg-drawer__status">
+        <span class="lg-status__dot"></span>
+        <span>All systems operational · 99.9% uptime</span>
+      </div>
+    </div>
+  </div>
+  <section class="hero-section" aria-label="Hero">
+    <div class="hero-bg">
+      <div class="aurora-blob b1"></div>
+      <div class="aurora-blob b2"></div>
+      <div class="aurora-blob b3"></div>
+      <div class="grid-overlay"></div>
+    </div>
+
+    <div class="section-wrap">
+      <div class="hero-layout">
+
+        <div class="hero-left">
+          <div class="hero-badge">
+            <span class="bdot"></span>
+            AI-Powered Enterprise Platform &nbsp;·&nbsp; Powered by Gemini
+          </div>
+
+          <h1 class="hero-headline">
+            <span class="line-plain">Manage Your</span>
+            <span class="line-typed">{{ typedText() }}<span class="cur">|</span></span>
+            <span class="line-plain">With Intelligence</span>
+          </h1>
+
+          <p class="hero-sub">
+            The complete AI-powered Enterprise ERP — products, orders, inventory, invoices, analytics, approvals, and AI
+            automation unified in one platform.
+          </p>
+
+          <div class="hero-btns">
+            <a routerLink="/contact" class="btn-primary">
+              Start Free Trial
+            </a>
+            <a routerLink="/authentication/login" class="btn-ghost-hero">
+              <span class="play-ring">🔐</span>
+              Sign In to Portal →
+            </a>
+          </div>
+
+          <div class="hero-trust">
+            <div class="trust-pill">🔒 SOC2 Ready</div>
+            <div class="trust-pill">🛡️ GDPR</div>
+            <div class="trust-pill">⚡ 99.9% Uptime</div>
+            <div class="trust-pill">🤖 AI-Powered</div>
+          </div>
+        </div>
+
+        <div class="hero-right">
+          @if (liveNotification()) {
+          <div class="live-toast-alert">
+            <span class="toast-pulse"></span>
+            <span>{{ liveNotification() }}</span>
+          </div>
+          }
+
+          <div class="dash-card premium-command-card">
+            <div class="dc-header">
+              <div class="dc-dots">
+                <span class="dc-dot r"></span>
+                <span class="dc-dot y"></span>
+                <span class="dc-dot g"></span>
+              </div>
+              <span class="dc-title">SVK Enterprise Console · Live Terminal</span>
+              <div class="dc-tabs">
+                <button [class.active]="activeHeroTab() === 'live'" (click)="setHeroTab('live')" type="button">Live
+                  Feed</button>
+                <button [class.active]="activeHeroTab() === 'branches'" (click)="setHeroTab('branches')"
+                  type="button">Branches</button>
+                <button [class.active]="activeHeroTab() === 'ai'" (click)="setHeroTab('ai')" type="button">AI
+                  Health</button>
+              </div>
+            </div>
+
+            <div class="dc-body">
+              <!-- KPI Row -->
+              <div class="dc-kpis">
+                <div class="kpi-cell">
+                  <div class="kl">Total Revenue (Live)</div>
+                  <div class="kv">₹{{ liveRevenue().toLocaleString() }}</div>
+                  <div class="ka up">↑ 24.8% SLA Verified</div>
+                </div>
+                <div class="kpi-cell">
+                  <div class="kl">Orders Processed</div>
+                  <div class="kv">{{ liveOrders() }}</div>
+                  <div class="ka up">↑ 14.2% Today</div>
+                </div>
+                <div class="kpi-cell">
+                  <div class="kl">Network SLA</div>
+                  <div class="kv">99.98%</div>
+                  <div class="ka up">✓ AES-256 Secured</div>
+                </div>
+              </div>
+
+              <!-- Interactive Tabs Content -->
+              @if (activeHeroTab() === 'live') {
+              <div class="dc-chart">
+                <div class="chart-lbl">
+                  <span>Live Revenue Flow (6 Branches Across India)</span>
+                  <button class="sim-btn" (click)="simulateLiveOrder()" type="button">
+                    ⚡ Simulate Order
+                  </button>
+                </div>
+                <div class="chart-bars">
+                  <div class="cbar" *ngFor="let h of [45,68,52,84,65,92,76,88,62,96,78,100]; trackBy: trackByIndex"
+                    [style.height.%]="h"></div>
+                </div>
+              </div>
+
+              <div class="dc-feed">
+                <div class="feed-row" *ngFor="let f of liveTransactions(); trackBy: trackByIndex">
+                  <span class="fi" [style.background]="f.color + '22'" [style.color]="f.color">{{ f.icon }}</span>
+                  <span class="ft">
+                    <strong>{{ f.id }}</strong> · {{ f.branch }}
+                  </span>
+                  <span class="f-amt">{{ f.amount }}</span>
+                  <span class="ftt">{{ f.status }}</span>
+                </div>
+              </div>
+              }
+
+              @if (activeHeroTab() === 'branches') {
+              <div class="dc-branches-grid">
+                <div class="branch-matrix-item" *ngFor="let b of branchesData">
+                  <div class="b-head">
+                    <span class="b-name">🏢 {{ b.name }}</span>
+                    <span class="b-status">{{ b.status }}</span>
+                  </div>
+                  <div class="b-stats">
+                    <span>Orders: <strong>{{ b.orders }}</strong></span>
+                    <span>Revenue: <strong>{{ b.revenue }}</strong></span>
+                  </div>
+                </div>
+              </div>
+              }
+
+              @if (activeHeroTab() === 'ai') {
+              <div class="dc-ai-health">
+                <div class="ai-banner">
+                  <span class="ai-icon">🤖</span>
+                  <div>
+                    <h4>Gemini Enterprise AI Engine Active</h4>
+                    <p>Monitoring 12,400+ SKUs across 6 branches for demand anomalies & stockouts.</p>
+                  </div>
+                  <button class="sim-btn ai-btn" (click)="triggerAiAudit()" type="button">Audit Now</button>
+                </div>
+                <div class="ai-metrics-row">
+                  <div><strong>0</strong> Stockout Risks</div>
+                  <div><strong>100%</strong> Compliance</div>
+                  <div><strong>0.12s</strong> Query Latency</div>
+                </div>
+              </div>
+              }
+            </div>
+          </div>
+
+          <div class="fc fc-ai">🤖 AI Engine Active</div>
+          <div class="fc fc-ord">🛒 Live Order Simulation</div>
+          <div class="fc fc-rev">📈 6 Branches Syncing</div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- Quantum 3D Holographic Cyber-Cockpit Telemetry Deck -->
+
+
+  <div class="marquee-section" aria-label="Trusted by companies">
+    <div class="marquee-lbl">Trusted by leading businesses</div>
+    <div class="marquee-track" role="list">
+      <div class="marquee-inner">
+        <span class="mq-item" *ngFor="let c of companies; trackBy: trackByIndex" role="listitem">{{c}}</span>
+        <span class="mq-item" *ngFor="let c of companies; trackBy: trackByIndex" aria-hidden="true">{{c}}</span>
+      </div>
+    </div>
+  </div>
+
+  <section class="ai-section" id="ai" aria-labelledby="ai-heading">
+    <div class="section-wrap">
+      <div class="section-header" data-reveal="ai-hdr">
+        <div class="s-badge">🤖 Artificial Intelligence</div>
+        <h2 class="s-title" id="ai-heading">AI That Works <span class="gradient-text">For You</span></h2>
+        <p class="s-sub">18 intelligent AI capabilities embedded directly into every workflow — no external tools
+          needed.</p>
+      </div>
+
+      <div class="ai-grid">
+        <div class="ai-card" *ngFor="let f of aiFeatures; let i = index; trackBy: trackByIndex"
+          [style.animation-delay]="(i * 40) + 'ms'" data-reveal="ai-c">
+          <div class="ai-glow"></div>
+          <span class="ai-icon">{{f.icon}}</span>
+          <span class="ai-tag">{{f.tag}}</span>
+          <div class="ai-card-title">{{f.title}}</div>
+          <div class="ai-card-desc">{{f.desc}}</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="modules-section" id="modules" aria-labelledby="mod-heading">
+    <div class="section-wrap">
+      <div class="section-header" data-reveal="mod-hdr">
+        <div class="s-badge">📦 Platform Modules</div>
+        <h2 class="s-title" id="mod-heading">Everything Your <span class="gradient-text">Business Needs</span></h2>
+        <p class="s-sub">18 enterprise-grade modules working in perfect harmony.</p>
+      </div>
+
+      <div class="mod-grid">
+        <div class="mod-card" *ngFor="let m of modules; let i = index; trackBy: trackByIndex"
+          [style.animation-delay]="(i * 35) + 'ms'" data-reveal="mod-c">
+          <span class="mod-icon">{{m.icon}}</span>
+          <div class="mod-name">{{m.title}}</div>
+          <div class="mod-desc">{{m.desc}}</div>
+          <span class="mod-arrow">→</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="preview-section liquid-glass-section" aria-label="Dashboard preview">
+    <div class="section-wrap">
+      <div class="section-header" data-reveal="prev-hdr">
+        <div class="s-badge liquid-badge">
+          <svg viewBox="0 0 24 24" fill="none" class="badge-svg">
+            <path d="M18 20V10M12 20V4M6 20V14" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+              stroke-linejoin="round" />
+          </svg>
+          <span>LIVE TELEMETRY PREVIEW</span>
+        </div>
+        <h2 class="s-title">See Your Business <span class="gradient-text">At a Glance</span></h2>
+        <p class="s-sub">An immersive liquid-glass console displaying multi-branch sync, revenue velocity, and AI
+          predictions in real time.</p>
+      </div>
+
+      <div class="preview-panel liquid-glass-panel" data-reveal="prev-panel">
+        <div class="preview-grid">
+
+          <!-- Main SVG Waveform Revenue Chart -->
+          <div class="pv-card pv-span2 liquid-glass-card">
+            <div class="pv-head">
+              <div class="pv-title-row">
+                <svg viewBox="0 0 24 24" fill="none" class="pv-svg-icon text-purple">
+                  <path d="M3 17L9 11L13 15L21 7" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                    stroke-linejoin="round" />
+                  <path d="M17 7H21V11" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                    stroke-linejoin="round" />
+                </svg>
+                <span class="pv-title">Multi-Branch Revenue Flow (FY 2026)</span>
+              </div>
+              <span class="badge-green-pill">
+                <span class="pulse-dot"></span> ▲ 24.8% YoY Uplift
+              </span>
+            </div>
+
+            <!-- Custom Interactive SVG Liquid Area Chart -->
+            <div class="svg-chart-wrap">
+              <svg viewBox="0 0 500 140" class="liquid-chart-svg">
+                <defs>
+                  <linearGradient id="liquidGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="#6366f1" stop-opacity="0.45" />
+                    <stop offset="100%" stop-color="#6366f1" stop-opacity="0.0" />
+                  </linearGradient>
+                  <linearGradient id="lineGrad" x1="0" y1="0" x2="1" y2="0">
+                    <stop offset="0%" stop-color="#06b6d4" />
+                    <stop offset="50%" stop-color="#6366f1" />
+                    <stop offset="100%" stop-color="#10b981" />
+                  </linearGradient>
+                </defs>
+                <path d="M 0 120 Q 50 85 100 95 T 200 65 T 300 45 T 400 30 T 500 15 L 500 140 L 0 140 Z"
+                  fill="url(#liquidGrad)" />
+                <path d="M 0 120 Q 50 85 100 95 T 200 65 T 300 45 T 400 30 T 500 15" fill="none" stroke="url(#lineGrad)"
+                  stroke-width="3.5" stroke-linecap="round" />
+                <!-- Glowing Nodes -->
+                <circle cx="100" cy="95" r="4.5" fill="#fff" stroke="#6366f1" stroke-width="2.5" />
+                <circle cx="200" cy="65" r="4.5" fill="#fff" stroke="#6366f1" stroke-width="2.5" />
+                <circle cx="300" cy="45" r="4.5" fill="#fff" stroke="#6366f1" stroke-width="2.5" />
+                <circle cx="400" cy="30" r="4.5" fill="#fff" stroke="#10b981" stroke-width="2.5" />
+                <circle cx="500" cy="15" r="6" fill="#10b981" stroke="#fff" stroke-width="2.5" />
+              </svg>
+            </div>
+
+            <div class="rev-months">
+              <span
+                *ngFor="let m of ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']; trackBy: trackByIndex">{{m}}</span>
+            </div>
+          </div>
+
+          <!-- Interactive Quantum Active Orders Velocity Glass Card -->
+          <div class="pv-card liquid-glass-card quantum-velocity-card">
+            <div class="pv-head">
+              <div class="pv-title-row">
+                <svg viewBox="0 0 24 24" fill="none" class="pv-svg-icon text-cyan">
+                  <path d="M13 2L3 14H12L11 22L21 10H12L13 2Z" fill="url(#velGrad)" stroke="currentColor"
+                    stroke-width="1.8" />
+                  <defs>
+                    <linearGradient id="velGrad" x1="0" y1="0" x2="1" y2="1">
+                      <stop offset="0%" stop-color="#06b6d4" />
+                      <stop offset="100%" stop-color="#6366f1" />
+                    </linearGradient>
+                  </defs>
+                </svg>
+                <span class="pv-title">Active Orders Velocity</span>
+              </div>
+              <span class="vel-status-pill">🔥 PEAK FLOW</span>
+            </div>
+
+            <div class="vel-display-row">
+              <div class="vel-left">
+                <div class="vel-big-val gradient-text">1,482</div>
+                <div class="vel-unit">Orders / Hour across 6 Warehouses</div>
+              </div>
+              <div class="vel-sparkline">
+                <svg viewBox="0 0 100 40" class="spark-svg">
+                  <path d="M 0 32 L 15 28 L 30 30 L 45 18 L 60 22 L 75 10 L 90 14 L 100 4" fill="none" stroke="#38bdf8"
+                    stroke-width="2.5" stroke-linecap="round" />
+                  <circle cx="100" cy="4" r="3.5" fill="#38bdf8" />
+                </svg>
+              </div>
+            </div>
+
+            <div class="vel-metrics-bar">
+              <div class="v-metric">
+                <span>Dispatch SLA</span>
+                <strong>99.4%</strong>
+              </div>
+              <div class="v-metric">
+                <span>Avg Fulfillment</span>
+                <strong>18 mins</strong>
+              </div>
+              <div class="v-metric">
+                <span>Live Queue</span>
+                <strong class="text-emerald">42 Orders</strong>
+              </div>
+            </div>
+          </div>
+
+          <!-- Interactive Quantum Channel Revenue Split Glass Card -->
+          <div class="pv-card liquid-glass-card quantum-split-card">
+            <div class="pv-head">
+              <div class="pv-title-row">
+                <svg viewBox="0 0 24 24" fill="none" class="pv-svg-icon text-emerald">
+                  <path d="M21.21 15.89A10 10 0 1 1 8 2.83" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" />
+                  <path d="M22 12A10 10 0 0 0 12 2V12H22Z" stroke="currentColor" stroke-width="2"
+                    stroke-linejoin="round" />
+                </svg>
+                <span class="pv-title">Channel Revenue Split</span>
+              </div>
+              <span class="split-total-badge">₹4.8M TODAY</span>
+            </div>
+
+            <div class="channel-split-list">
+              <div class="ch-row">
+                <div class="ch-meta">
+                  <span class="ch-name">D2C Online Storefront</span>
+                  <span class="ch-val">₹2.1M (44%)</span>
+                </div>
+                <div class="ch-bar-wrap">
+                  <div class="ch-bar bg-indigo" style="width: 44%"></div>
+                </div>
+              </div>
+
+              <div class="ch-row">
+                <div class="ch-meta">
+                  <span class="ch-name">Offline Retail POS (6 Branches)</span>
+                  <span class="ch-val">₹1.5M (31%)</span>
+                </div>
+                <div class="ch-bar-wrap">
+                  <div class="ch-bar bg-cyan" style="width: 31%"></div>
+                </div>
+              </div>
+
+              <div class="ch-row">
+                <div class="ch-meta">
+                  <span class="ch-name">B2B Wholesale & Distributors</span>
+                  <span class="ch-val">₹1.2M (25%)</span>
+                </div>
+                <div class="ch-bar-wrap">
+                  <div class="ch-bar bg-emerald" style="width: 25%"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Real-Time Activity Feed Glass Card -->
+          <div class="pv-card pv-span2 liquid-glass-card">
+            <div class="pv-head">
+              <div class="pv-title-row">
+                <svg viewBox="0 0 24 24" fill="none" class="pv-svg-icon text-purple">
+                  <path
+                    d="M12 2V6M12 18V22M4.93 4.93L7.76 7.76M16.24 16.24L19.07 19.07M2 12H6M18 12H22M4.93 19.07L7.76 16.24M16.24 7.76L19.07 4.93"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                </svg>
+                <span class="pv-title">Live Enterprise Event Stream</span>
+              </div>
+              <div class="live-badge-glow"><span class="ldot"></span> QUANTUM SYNC</div>
+            </div>
+            <div class="live-items">
+              <div class="live-row">
+                <div class="li-svg-badge bg-purple">
+                  <svg viewBox="0 0 24 24" fill="none" class="li-svg">
+                    <path d="M16 11V7A4 4 0 0 0 8 7V11M5 9H19L20 21H4L5 9Z" stroke="currentColor" stroke-width="2" />
+                  </svg>
+                </div>
+                <div class="li-info">
+                  <span class="li-t">Order #89201 dispatched from Mumbai Fulfillment Hub</span>
+                  <span class="li-s">₹48,200 · Express Air Cargo · Verified GST Invoice</span>
+                </div>
+              </div>
+              <div class="live-row">
+                <div class="li-svg-badge bg-emerald">
+                  <svg viewBox="0 0 24 24" fill="none" class="li-svg">
+                    <path d="M9 12L11 14L15 10M21 12A9 9 0 1 1 3 12A9 9 0 0 1 21 12Z" stroke="currentColor"
+                      stroke-width="2" />
+                  </svg>
+                </div>
+                <div class="li-info">
+                  <span class="li-t">B2B Wholesale Payment Received #INV-4920</span>
+                  <span class="li-s">₹1,85,000 · NEFT · Automated Ledger Reconciliation</span>
+                </div>
+              </div>
+              <div class="live-row">
+                <div class="li-svg-badge bg-cyan">
+                  <svg viewBox="0 0 24 24" fill="none" class="li-svg">
+                    <path d="M12 2A10 10 0 1 0 22 12A10 10 0 0 0 12 2Z M12 6V12L16 14" stroke="currentColor"
+                      stroke-width="2" />
+                  </svg>
+                </div>
+                <div class="li-info">
+                  <span class="li-t">AI Stock Rebalance Triggered across Chennai & Bengaluru</span>
+                  <span class="li-s">Auto-transfer 120 SKUs to prevent high-demand stockout</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- AI Assistant Telemetry Card -->
+          <div class="pv-card pv-ai liquid-glass-card">
+            <div class="pv-head">
+              <div class="pv-title-row">
+                <svg viewBox="0 0 24 24" fill="none" class="pv-svg-icon text-cyan">
+                  <path d="M12 2L14.4 7.2L20 8.4L15.6 12.1L17 17.6L12 14.6L7 17.6L8.4 12.1L4 8.4L9.6 7.2L12 2Z"
+                    stroke="currentColor" stroke-width="2" stroke-linejoin="round" />
+                </svg>
+                <span class="pv-title">Gemini AI Demand Autopilot</span>
+              </div>
+            </div>
+            <div class="ai-chat">
+              <div class="ai-bubble">"Analyze revenue trends across our top 15 electronic SKUs for Q3"</div>
+              <div class="ai-resp">
+                <div class="typing-dots"><span></span><span></span><span></span></div>
+                <p>Demand projected to increase +28% in Western Zone. Recommend restocking SKU #EL-8921 by Friday.</p>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="workflow-section" aria-labelledby="wf-heading">
+    <div class="section-wrap">
+      <div class="section-header" data-reveal="wf-hdr">
+        <div class="s-badge">⚙️ How It Works</div>
+        <h2 class="s-title" id="wf-heading">Up and Running in <span class="gradient-text">Minutes</span></h2>
+        <p class="s-sub">Six simple steps to transform your business operations.</p>
+      </div>
+
+      <div class="workflow-grid">
+        <div class="wf-card" *ngFor="let s of workflowSteps; let i = index; trackBy: trackByIndex"
+          [style.animation-delay]="(i * 80) + 'ms'" data-reveal="wf-c">
+          <div class="wf-num">{{s.num}}</div>
+          <div class="wf-title">{{s.title}}</div>
+          <div class="wf-desc">{{s.desc}}</div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <section class="features-section" id="features" aria-labelledby="feat-heading">
+    <div class="section-wrap">
+      <div class="section-header" data-reveal="feat-hdr">
+        <div class="s-badge">✨ Platform Features</div>
+        <h2 class="s-title" id="feat-heading">Built for <span class="gradient-text">Enterprise Scale</span></h2>
+      </div>
+
+      <div class="feat-grid">
+        <div class="feat-card" *ngFor="let f of [
+          {icon:'🚀',title:'Blazing Performance',desc:'Sub-50ms API responses. Angular OnPush CD. Lazy-loaded modules. Optimized for thousands of SKUs.',pts:['PostgreSQL query optimization','Redis caching layer','CDN-delivered assets']},
+          {icon:'🔐',title:'Enterprise Security',desc:'Multi-layer security architecture designed for regulated industries and enterprise compliance.',pts:['Role-based access control','JWT + refresh token auth','Full audit trail logging']},
+          {icon:'🤖',title:'AI at the Core',desc:'Gemini AI embedded in every workflow — not bolted on as an afterthought.',pts:['18 AI modules built-in','Natural language search','Automated insights & alerts']},
+          {icon:'📊',title:'Deep Analytics',desc:'Real-time dashboards and scheduled reports covering every dimension of your business.',pts:['Revenue, orders, inventory','Branch-level comparison','Export to CSV, PDF, Excel']},
+          {icon:'🔄',title:'Workflow Automation',desc:'Approval chains, notifications, and automated triggers that eliminate manual processes.',pts:['Multi-level approval flows','Email & push notifications','Configurable business rules']},
+          {icon:'🌐',title:'Multi-Branch Ready',desc:'Manage unlimited branches, warehouses, and regions from a single unified platform.',pts:['Consolidated reporting','Branch-level permissions','Inter-branch stock transfers']}
+        ]; let i = index; trackBy: trackByIndex" [style.animation-delay]="(i * 70) + 'ms'" data-reveal="feat-c">
+          <div class="feat-icon-box"><span>{{f.icon}}</span></div>
+          <div class="feat-title">{{f.title}}</div>
+          <div class="feat-desc">{{f.desc}}</div>
+          <ul class="feat-list">
+            <li *ngFor="let p of f.pts; trackBy: trackByIndex"><span class="ck">✓</span> {{p}}</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <section class="quantum-telemetry-section" aria-label="Enterprise telemetry live counters">
+    <div class="section-wrap">
+      <div class="q-telemetry-grid" data-reveal="telemetry">
+
+        <!-- Card 1: Active Businesses -->
+        <div class="q-tel-card card-purple">
+          <div class="q-tel-glow"></div>
+          <div class="q-tel-header">
+            <div class="q-tel-icon bg-purple">
+              <svg viewBox="0 0 24 24" fill="none" class="tel-svg">
+                <path
+                  d="M19 21V5A2 2 0 0 0 17 3H7A2 2 0 0 0 5 5V21M3 21H21M9 8H10M9 12H10M9 16H10M14 8H15M14 12H15M14 16H15"
+                  stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+              </svg>
+            </div>
+            <span class="q-tel-badge badge-purple">PAN INDIA</span>
+          </div>
+          <div class="q-tel-body">
+            <div class="q-tel-value text-grad-purple">{{ formatNumber(usersCount()) }}</div>
+            <div class="q-tel-label">Active Businesses</div>
+          </div>
+          <div class="q-tel-footer">
+            <div class="q-tel-progress-wrap">
+              <div class="q-tel-bar fill-purple" style="width: 88%;">
+                <span class="bar-shine"></span>
+              </div>
+            </div>
+            <span class="q-tel-sub">+18.4% YoY Growth Network</span>
+          </div>
+        </div>
+
+        <!-- Card 2: Products Managed -->
+        <div class="q-tel-card card-cyan">
+          <div class="q-tel-glow"></div>
+          <div class="q-tel-header">
+            <div class="q-tel-icon bg-cyan">
+              <svg viewBox="0 0 24 24" fill="none" class="tel-svg">
+                <path d="M20 7L12 3L4 7M20 7L12 11M20 7V17L12 21M12 11L4 7M12 11V21M4 7V17L12 21" stroke="currentColor"
+                  stroke-width="2" stroke-linejoin="round" />
+              </svg>
+            </div>
+            <span class="q-tel-badge badge-cyan">LIVE SYNC</span>
+          </div>
+          <div class="q-tel-body">
+            <div class="q-tel-value text-grad-cyan">{{ formatNumber(productsCount()) }}</div>
+            <div class="q-tel-label">Products Managed</div>
+          </div>
+          <div class="q-tel-footer">
+            <div class="q-tel-progress-wrap">
+              <div class="q-tel-bar fill-cyan" style="width: 92%;">
+                <span class="bar-shine"></span>
+              </div>
+            </div>
+            <span class="q-tel-sub">Real-time Omnichannel SKUs</span>
+          </div>
+        </div>
+
+        <!-- Card 3: Invoices Generated -->
+        <div class="q-tel-card card-emerald">
+          <div class="q-tel-glow"></div>
+          <div class="q-tel-header">
+            <div class="q-tel-icon bg-emerald">
+              <svg viewBox="0 0 24 24" fill="none" class="tel-svg">
+                <path
+                  d="M9 14L11 16L15 12M19 21H5C3.89543 21 3 20.1046 3 19V5C3 3.89543 3.89543 3 5 3H14L21 10V19C21 20.1046 20.1046 21 19 21Z"
+                  stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+            </div>
+            <span class="q-tel-badge badge-emerald">AUTOMATED</span>
+          </div>
+          <div class="q-tel-body">
+            <div class="q-tel-value text-grad-emerald">{{ formatNumber(invoicesCount()) }}</div>
+            <div class="q-tel-label">Invoices Generated</div>
+          </div>
+          <div class="q-tel-footer">
+            <div class="q-tel-progress-wrap">
+              <div class="q-tel-bar fill-emerald" style="width: 96%;">
+                <span class="bar-shine"></span>
+              </div>
+            </div>
+            <span class="q-tel-sub">100% e-Way & GST Compliant</span>
+          </div>
+        </div>
+
+        <!-- Card 4: Platform Uptime -->
+        <div class="q-tel-card card-amber">
+          <div class="q-tel-glow"></div>
+          <div class="q-tel-header">
+            <div class="q-tel-icon bg-amber">
+              <svg viewBox="0 0 24 24" fill="none" class="tel-svg">
+                <path
+                  d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z"
+                  stroke="currentColor" stroke-width="2" />
+                <path d="M12 6V12L16 14" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+              </svg>
+            </div>
+            <span class="q-tel-badge badge-amber">MULTI-ZONE</span>
+          </div>
+          <div class="q-tel-body">
+            <div class="q-tel-value text-grad-amber">{{ uptimeVal() }}%</div>
+            <div class="q-tel-label">Platform Uptime</div>
+          </div>
+          <div class="q-tel-footer">
+            <div class="q-tel-progress-wrap">
+              <div class="q-tel-bar fill-amber" style="width: 99.98%;">
+                <span class="bar-shine"></span>
+              </div>
+            </div>
+            <span class="q-tel-sub">Automated Edge Failover SLA</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- <section class="stats-section" aria-label="Platform statistics">
+    <div class="stats-bg-blobs"><span></span><span></span></div>
+    <div class="section-wrap">
+      <div class="stats-grid" data-reveal="stats">
+        <div class="stat-box">
+          <div class="stat-num">{{ formatNumber(usersCount()) }}</div>
+          <div class="stat-lbl">Active Businesses</div>
+          <div class="stat-bar">
+            <div class="stat-fill" style="width:78%"></div>
+          </div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-num">{{ formatNumber(productsCount()) }}</div>
+          <div class="stat-lbl">Products Managed</div>
+          <div class="stat-bar">
+            <div class="stat-fill" style="width:92%"></div>
+          </div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-num">{{ formatNumber(invoicesCount()) }}</div>
+          <div class="stat-lbl">Invoices Generated</div>
+          <div class="stat-bar">
+            <div class="stat-fill" style="width:85%"></div>
+          </div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-num">{{ uptimeVal() }}%</div>
+          <div class="stat-lbl">Platform Uptime</div>
+          <div class="stat-bar">
+            <div class="stat-fill" style="width:99.98%"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section> -->
+
+  <section class="auto-section" aria-labelledby="auto-heading">
+    <div class="section-wrap">
+      <div class="auto-layout">
+        <div class="auto-left" data-reveal="auto-l">
+          <div class="s-badge">🧠 AI Automation</div>
+          <h2 class="s-title" id="auto-heading">Let AI Handle the <span class="gradient-text">Heavy Lifting</span></h2>
+          <p class="s-sub" style="text-align:left;margin:0;">Your team focuses on decisions. Our AI handles data entry,
+            summaries, translations, and insights — automatically.</p>
+          <ul class="auto-list">
+            <li
+              *ngFor="let a of ['Auto-generate product content in seconds','AI-powered inventory reorder suggestions','Instant invoice and order summaries','Real-time sales trend analysis','Customer intent prediction','Smart anomaly detection']; trackBy: trackByIndex">
+              <span class="ac">✦</span> {{a}}
+            </li>
+          </ul>
+          <a routerLink="/contact" class="btn-primary-lg">Start AI Trial →</a>
+        </div>
+
+        <div data-reveal="auto-r">
+          <div class="terminal">
+            <div class="term-bar">
+              <span class="tdot r"></span><span class="tdot y"></span><span class="tdot g"></span>
+              <span class="tname">SVK AI Engine</span>
+            </div>
+            <div class="term-body">
+              <div class="tl"><span class="tp">$</span><span class="tc">analyze --product "Wireless Earbuds Pro"</span>
+              </div>
+              <div class="tl to">✓ Analyzing product metadata...</div>
+              <div class="tl to">✓ Generating optimized description...</div>
+              <div class="tl to">✓ Suggesting 12 SEO tags...</div>
+              <div class="tl to">✓ Category: Electronics → Audio → TWS</div>
+              <div class="tl ts">✓ AI content ready in 1.2s</div>
+              <div class="tl gap"></div>
+              <div class="tl"><span class="tp">$</span><span class="tc">forecast --period Q4-2025</span></div>
+              <div class="tl to">✓ Analyzing 18 months of sales data...</div>
+              <div class="tl ts">✓ Projected revenue: ₹5.8M (+38%)</div>
+              <div class="tl ts">✓ Top category: Mobiles & Accessories</div>
+              <div class="tcur">█</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="testi-section" aria-labelledby="testi-heading">
+    <div class="section-wrap">
+      <div class="section-header" data-reveal="testi-hdr">
+        <div class="s-badge">💬 Customer Stories</div>
+        <h2 class="s-title" id="testi-heading">Loved by <span class="gradient-text">Business Leaders</span></h2>
+        <p class="s-sub">See why thousands of businesses trust SVK E-Com.</p>
+      </div>
+
+      <div class="testi-grid">
+        <div class="testi-card" *ngFor="let t of testimonials; let i = index; trackBy: trackByIndex"
+          [style.animation-delay]="(i * 70) + 'ms'" data-reveal="testi-c">
+          <div class="t-stars"><span *ngFor="let s of [1,2,3,4,5]">★</span></div>
+          <p class="t-text">"{{t.text}}"</p>
+          <div class="t-author">
+            <div class="t-avatar" [style.background]="t.color + '28'" [style.color]="t.color">{{t.initials}}</div>
+            <div class="t-info">
+              <span class="t-name">{{t.name}}</span>
+              <span class="t-role">{{t.role}} · {{t.company}}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="pricing-section liquid-glass-section" id="pricing" aria-labelledby="price-heading">
+    <div class="section-wrap">
+      <div class="section-header" data-reveal="price-hdr">
+        <div class="s-badge liquid-badge">
+          <svg viewBox="0 0 24 24" fill="none" class="badge-svg">
+            <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"
+              stroke="currentColor" stroke-width="2" stroke-linejoin="round" />
+          </svg>
+          <span>TRANSPARENT ENTERPRISE TIERS</span>
+        </div>
+        <h2 class="s-title" id="price-heading">Simple, <span class="gradient-text">Transparent Pricing</span></h2>
+        <p class="s-sub">Enterprise-grade multi-branch scaling with zero hidden costs. All tiers include automated SSL &
+          daily backups.</p>
+
+        <div class="billing-toggle-container liquid-toggle">
+          <span class="toggle-lbl" [class.active]="billingCycle() === 'Monthly'">Monthly Billing</span>
+          <button type="button" class="billing-switch" (click)="toggleBilling()"
+            [attr.aria-label]="'Current billing cycle is ' + billingCycle()">
+            <span class="switch-dot" [class.yearly]="billingCycle() === 'Yearly'"></span>
+          </button>
+          <span class="toggle-lbl" [class.active]="billingCycle() === 'Yearly'">
+            Yearly Billing <span class="save-chip liquid-save">SAVE 20%</span>
+          </span>
+        </div>
+      </div>
+
+      <!-- Owl-Carousel Navigation Header -->
+      <div class="owl-carousel-header">
+        <div class="owl-slide-pills">
+          <button type="button" class="owl-pill" [class.active]="activePriceSlide() === 0" (click)="goToPriceSlide(0)">
+            <span>14-Day Free</span>
+          </button>
+          <button type="button" class="owl-pill pop-pill" [class.active]="activePriceSlide() === 1"
+            (click)="goToPriceSlide(1)">
+            <span>Professional ★ RECOMMENDED</span>
+          </button>
+          <button type="button" class="owl-pill" [class.active]="activePriceSlide() === 2" (click)="goToPriceSlide(2)">
+            <span>Business Scale</span>
+          </button>
+          <button type="button" class="owl-pill" [class.active]="activePriceSlide() === 3" (click)="goToPriceSlide(3)">
+            <span>Enterprise Custom</span>
+          </button>
+        </div>
+
+        <div class="owl-arrows">
+          <button type="button" class="owl-arrow-btn" (click)="prevPriceSlide()" aria-label="Previous Pricing Tier">
+            <svg viewBox="0 0 24 24" fill="none">
+              <path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+                stroke-linejoin="round" />
+            </svg>
+          </button>
+          <span class="owl-slide-indicator">{{ activePriceSlide() + 1 }} / 4</span>
+          <button type="button" class="owl-arrow-btn" (click)="nextPriceSlide()" aria-label="Next Pricing Tier">
+            <svg viewBox="0 0 24 24" fill="none">
+              <path d="M9 18L15 12L9 6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+                stroke-linejoin="round" />
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Owl-Carousel Interactive Stage -->
+      <div class="owl-pricing-stage">
+        <!-- Slide 0: Starter / Trial Hybrid -->
+        <div class="owl-slide-item" [class.active-slide]="activePriceSlide() === 0">
+          <div class="price-card liquid-price-card owl-card">
+            <div class="pc-tier-badge">INSTANT TRIAL TO STARTER</div>
+            <div class="pc-name">Starter Hub</div>
+            <div class="pc-price">
+              {{ billingCycle() === 'Monthly' ? '₹299' : '₹1,599' }}
+              <span class="per">/ month</span>
+            </div>
+            <div class="pc-desc">Designed for independent retail locations scaling digital & offline operations.</div>
+            <ul class="pc-feats">
+              <li><svg viewBox="0 0 24 24" fill="none" class="feat-check">
+                  <path d="M5 13L9 17L19 7" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+                    stroke-linejoin="round" />
+                </svg> Up to 1,000 SKUs</li>
+              <li><svg viewBox="0 0 24 24" fill="none" class="feat-check">
+                  <path d="M5 13L9 17L19 7" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+                    stroke-linejoin="round" />
+                </svg> 1 primary branch access</li>
+              <li><svg viewBox="0 0 24 24" fill="none" class="feat-check">
+                  <path d="M5 13L9 17L19 7" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+                    stroke-linejoin="round" />
+                </svg> 5 team user accounts</li>
+              <li><svg viewBox="0 0 24 24" fill="none" class="feat-check">
+                  <path d="M5 13L9 17L19 7" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+                    stroke-linejoin="round" />
+                </svg> Automated GST e-invoicing</li>
+            </ul>
+            <a [routerLink]="['/contact']" [queryParams]="{ plan: 'Starter', cycle: billingCycle() }"
+              class="pc-cta liquid-cta">Launch Starter Tier →</a>
+          </div>
+        </div>
+
+        <!-- Slide 1: Professional (Recommended) -->
+        <div class="owl-slide-item" [class.active-slide]="activePriceSlide() === 1">
+          <div class="price-card liquid-price-card pop-liquid-card owl-card featured-owl-card">
+            <div class="pc-pop-badge">RECOMMENDED MULTI-BRANCH ERP</div>
+            <div class="pc-name">Professional</div>
+            <div class="pc-price">
+              {{ billingCycle() === 'Monthly' ? '₹499' : '₹5,499' }}
+              <span class="per">/ month</span>
+            </div>
+            <div class="pc-desc">Perfect for multi-location businesses needing live omnichannel sync.</div>
+            <ul class="pc-feats">
+              <li><svg viewBox="0 0 24 24" fill="none" class="feat-check text-purple">
+                  <path d="M5 13L9 17L19 7" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+                    stroke-linejoin="round" />
+                </svg> Up to 10,000 SKUs</li>
+              <li><svg viewBox="0 0 24 24" fill="none" class="feat-check text-purple">
+                  <path d="M5 13L9 17L19 7" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+                    stroke-linejoin="round" />
+                </svg> Up to 3 branch locations</li>
+              <li><svg viewBox="0 0 24 24" fill="none" class="feat-check text-purple">
+                  <path d="M5 13L9 17L19 7" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+                    stroke-linejoin="round" />
+                </svg> 20 team user accounts</li>
+              <li><svg viewBox="0 0 24 24" fill="none" class="feat-check text-purple">
+                  <path d="M5 13L9 17L19 7" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+                    stroke-linejoin="round" />
+                </svg> Gemini AI Autopilot forecasting</li>
+              <li><svg viewBox="0 0 24 24" fill="none" class="feat-check text-purple">
+                  <path d="M5 13L9 17L19 7" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+                    stroke-linejoin="round" />
+                </svg> Multi-level PO approvals</li>
+            </ul>
+            <a [routerLink]="['/contact']" [queryParams]="{ plan: 'Professional', cycle: billingCycle() }"
+              class="pc-cta liquid-cta-pop">Deploy Professional Suite →</a>
+          </div>
+        </div>
+
+        <!-- Slide 2: Business -->
+        <div class="owl-slide-item" [class.active-slide]="activePriceSlide() === 2">
+          <div class="price-card liquid-price-card owl-card">
+            <div class="pc-tier-badge">SCALING ENTERPRISE CHAINS</div>
+            <div class="pc-name">Business Scale</div>
+            <div class="pc-price">
+              {{ billingCycle() === 'Monthly' ? '₹799' : '₹8,499' }}
+              <span class="per">/ month</span>
+            </div>
+            <div class="pc-desc">Full 18-module ERP access for growing enterprise chains across India.</div>
+            <ul class="pc-feats">
+              <li><svg viewBox="0 0 24 24" fill="none" class="feat-check">
+                  <path d="M5 13L9 17L19 7" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+                    stroke-linejoin="round" />
+                </svg> Unlimited SKUs</li>
+              <li><svg viewBox="0 0 24 24" fill="none" class="feat-check">
+                  <path d="M5 13L9 17L19 7" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+                    stroke-linejoin="round" />
+                </svg> Up to 10 branch locations</li>
+              <li><svg viewBox="0 0 24 24" fill="none" class="feat-check">
+                  <path d="M5 13L9 17L19 7" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+                    stroke-linejoin="round" />
+                </svg> 50 team user accounts</li>
+              <li><svg viewBox="0 0 24 24" fill="none" class="feat-check">
+                  <path d="M5 13L9 17L19 7" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+                    stroke-linejoin="round" />
+                </svg> Complete 18 AI ERP modules</li>
+            </ul>
+            <a [routerLink]="['/contact']" [queryParams]="{ plan: 'Business', cycle: billingCycle() }"
+              class="pc-cta liquid-cta">Choose Business Suite →</a>
+          </div>
+        </div>
+
+        <!-- Slide 3: Enterprise Custom -->
+        <div class="owl-slide-item" [class.active-slide]="activePriceSlide() === 3">
+          <div class="price-card liquid-price-card owl-card">
+            <div class="pc-tier-badge">BESPOKE ARCHITECTURE</div>
+            <div class="pc-name">Enterprise Custom</div>
+            <div class="pc-price">Custom<span class="per">/ year</span></div>
+            <div class="pc-desc">Dedicated cloud instance, custom SLA, bespoke SAP/Oracle sync.</div>
+            <ul class="pc-feats">
+              <li><svg viewBox="0 0 24 24" fill="none" class="feat-check">
+                  <path d="M5 13L9 17L19 7" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+                    stroke-linejoin="round" />
+                </svg> Unlimited branch locations</li>
+              <li><svg viewBox="0 0 24 24" fill="none" class="feat-check">
+                  <path d="M5 13L9 17L19 7" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+                    stroke-linejoin="round" />
+                </svg> Custom private cloud VPC</li>
+              <li><svg viewBox="0 0 24 24" fill="none" class="feat-check">
+                  <path d="M5 13L9 17L19 7" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+                    stroke-linejoin="round" />
+                </svg> Dedicated Solutions Architect</li>
+            </ul>
+            <a [routerLink]="['/contact']" [queryParams]="{ plan: 'Enterprise', cycle: billingCycle() }"
+              class="pc-cta liquid-cta">Request Enterprise Quote →</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="pricing-referral-note liquid-note">
+        <svg viewBox="0 0 24 24" fill="none" class="note-svg">
+          <path
+            d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z"
+            stroke="currentColor" stroke-width="2" />
+          <path d="M12 8V12L15 15" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+        </svg>
+        <span>Have a referral code or multi-brand chain discount? Apply it during onboarding setup with our dedicated
+          sales engineering team.</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Quantum Liquid Glass FAQ Section -->
+  <section class="faq-section quantum-faq-section" id="faq" aria-labelledby="faq-heading">
+    <div class="section-wrap" style="max-width:880px">
+      <div class="section-header" data-reveal="faq-hdr">
+        <div class="s-badge quantum-badge">
+          <svg viewBox="0 0 24 24" fill="none" class="badge-svg">
+            <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" />
+            <path
+              d="M9.09 9C9.3251 8.33167 9.78915 7.76811 10.4 7.40913C11.0108 7.05016 11.7289 6.91894 12.4272 7.03871C13.1255 7.15849 13.7588 7.52152 14.2151 8.06353C14.6713 8.60553 14.9211 9.29152 14.92 10C14.92 12 11.92 13 11.92 13M12 17H12.01"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+          </svg>
+          <span>KNOWLEDGE CENTER</span>
+        </div>
+        <h2 class="s-title" id="faq-heading">Frequently Asked <span class="gradient-text">Questions</span></h2>
+        <p class="s-sub">Everything you need to know about multi-branch onboarding, data security, and enterprise
+          scaling.</p>
+      </div>
+
+      <div class="faq-wrap quantum-faq-wrap">
+        <div class="faq-item quantum-faq-card" *ngFor="let f of faqs; let i = index; trackBy: trackByIndex"
+          [class.open]="isFaqOpen(i)">
+          <button class="faq-btn quantum-faq-btn" (click)="toggleFaq(i)" [attr.aria-expanded]="isFaqOpen(i)"
+            type="button">
+            <div class="faq-btn-left">
+              <span class="faq-num">0{{ i + 1 }}</span>
+              <span class="faq-question-text">{{f.q}}</span>
+            </div>
+            <div class="faq-icon-orb" [class.orb-open]="isFaqOpen(i)">
+              <svg viewBox="0 0 24 24" fill="none" class="faq-chevron-svg">
+                <path d="M6 9L12 15L18 9" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"
+                  stroke-linejoin="round" />
+              </svg>
+            </div>
+          </button>
+          <div class="faq-ans quantum-faq-ans" [class.open]="isFaqOpen(i)">
+            <div class="faq-ans-inner">
+              <p>{{f.a}}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="cta-section" aria-label="Call to action">
+    <div class="cta-blob1"></div>
+    <div class="cta-blob2"></div>
+    <div class="section-wrap">
+      <div class="cta-inner" data-reveal="cta">
+        <div class="cta-badge">🚀 Ready to Transform?</div>
+        <h2 class="cta-title">Start Your Free Trial <span class="gradient-text">Today</span></h2>
+        <p class="cta-sub">Join 12,000+ businesses already using SVK E-Com. Set up in minutes. Cancel anytime.</p>
+        <div class="cta-acts">
+          <a routerLink="/contact" class="btn-primary" style="font-size:16px;padding:15px 36px">
+            Create Free Account →
+          </a>
+          <a routerLink="/authentication/login" class="btn-ghost-hero" style="font-size:15px;padding:15px 28px">
+            Sign In to Account →
+          </a>
+          <div class="cta-perks">
+            <span>✓ No credit card</span>
+            <span>✓ 14-day trial</span>
+            <span>✓ Full access</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Quantum Liquid Glass Enterprise Footer -->
+  <footer class="footer liquid-glass-footer" role="contentinfo">
+    <!-- Ambient Footer Glow -->
+    <div class="footer-ambient-glow" aria-hidden="true"></div>
+
+    <!-- Top Telemetry Status Bar -->
+    <div class="footer-telemetry-strip">
+      <div class="f-status">
+        <span class="status-dot"></span>
+        <span>ALL ENTERPRISE NODES OPERATIONAL · INDIA REGION (AP-SOUTH-1)</span>
+      </div>
+      <div class="f-certs">
+        <span class="cert-pill">
+          <svg viewBox="0 0 24 24" fill="none" class="cert-svg">
+            <path d="M12 22S4 18 4 11V5L12 2L20 5V11C20 18 12 22 12 22Z" stroke="currentColor" stroke-width="2" />
+          </svg>
+          SOC2 TYPE II VERIFIED
+        </span>
+        <span class="cert-pill">
+          <svg viewBox="0 0 24 24" fill="none" class="cert-svg">
+            <rect x="3" y="11" width="18" height="11" rx="2" stroke="currentColor" stroke-width="2" />
+            <path d="M7 11V7A5 5 0 0 1 17 7V11" stroke="currentColor" stroke-width="2" />
+          </svg>
+          AES-256 QUANTUM VAULT
+        </span>
+        <span class="cert-pill">
+          <svg viewBox="0 0 24 24" fill="none" class="cert-svg">
+            <path d="M13 2L3 14H12L11 22L21 10H12L13 2Z" stroke="currentColor" stroke-width="2" />
+          </svg>
+          99.99% UPTIME SLA
+        </span>
+      </div>
+    </div>
+
+    <div class="footer-grid">
+      <!-- Brand & Mission -->
+      <div class="footer-brand">
+        <div class="f-logo">
+          <div class="logo-svg-wrap">
+            <svg viewBox="0 0 24 24" fill="none" class="logo-svg">
+              <path d="M13 2L3 14H12L11 22L21 10H12L13 2Z" fill="url(#brandGrad)" stroke="currentColor"
+                stroke-width="1.5" />
+              <defs>
+                <linearGradient id="brandGrad" x1="0" y1="0" x2="1" y2="1">
+                  <stop offset="0%" stop-color="#6366f1" />
+                  <stop offset="100%" stop-color="#06b6d4" />
+                </linearGradient>
+              </defs>
+            </svg>
+          </div>
+          <span>SVK <span class="fla">E-Com</span></span>
+          <span class="enterprise-chip">ENTERPRISE</span>
+        </div>
+        <p class="f-tagline">The AI-native liquid ERP platform architected for modern multi-branch Indian retail and
+          supply chain ecosystems.</p>
+        <div class="f-socials">
+          <a href="https://twitter.com" target="_blank" aria-label="X Twitter" class="glass-icon-btn">
+            <svg viewBox="0 0 24 24" fill="none">
+              <path
+                d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"
+                fill="currentColor" />
+            </svg>
+          </a>
+          <a href="https://linkedin.com" target="_blank" aria-label="LinkedIn" class="glass-icon-btn">
+            <svg viewBox="0 0 24 24" fill="none">
+              <path d="M16 8A6 6 0 0 1 22 14V21H18V14A2 2 0 0 0 16 12A2 2 0 0 0 14 14V21H10V14A6 6 0 0 1 16 8Z"
+                stroke="currentColor" stroke-width="2" />
+              <rect x="2" y="9" width="4" height="12" stroke="currentColor" stroke-width="2" />
+              <circle cx="4" cy="4" r="2" stroke="currentColor" stroke-width="2" />
+            </svg>
+          </a>
+          <a href="https://github.com" target="_blank" aria-label="GitHub" class="glass-icon-btn">
+            <svg viewBox="0 0 24 24" fill="none">
+              <path
+                d="M9 19C4 20.5 4 16.5 2 16M16 22V18.13C16.0375 17.6532 15.9731 17.1738 15.811 16.7238C15.6489 16.2738 15.3929 15.8634 15.06 15.52C18.2 15.17 21.5 13.98 21.5 8.52C21.4997 7.12383 20.9627 5.7812 20.01 4.77C20.4559 3.54851 20.4236 2.19835 19.92 0.999999C19.92 0.999999 18.73 0.649999 16 2.48C13.708 1.85882 11.292 1.85882 9 2.48C6.27 0.649999 5.08 0.999999 5.08 0.999999C4.57638 2.19835 4.54414 3.54851 4.99 4.77C4.03013 5.7887 3.49252 7.14346 3.5 8.55C3.5 13.97 6.8 15.16 9.94 15.55C9.611 15.89 9.35726 16.2954 9.19531 16.7399C9.03335 17.1844 8.96681 17.6581 9 18.13V22"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+          </a>
+        </div>
+      </div>
+
+      <!-- Navigation Columns -->
+      <div class="footer-col">
+        <h4>Enterprise Core</h4>
+        <ul>
+          <li><a href="#features" class="footer-link">Quantum Features</a></li>
+          <li><a href="#modules" class="footer-link">18 ERP Modules</a></li>
+          <li><a href="#pricing" class="footer-link">Transparent Tiers</a></li>
+          <li><a href="#ai" class="footer-link">Gemini AI Autopilot</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col">
+        <h4>Solutions & Sync</h4>
+        <ul>
+          <li><a href="#features" class="footer-link">Multi-Branch Retail</a></li>
+          <li><a href="#features" class="footer-link">Wholesale & B2B</a></li>
+          <li><a href="#features" class="footer-link">Automated Invoicing</a></li>
+          <li><a routerLink="/contact" class="footer-link">Custom API Gateway</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col">
+        <h4>Trust & Compliance</h4>
+        <ul>
+          <li><a routerLink="/contact" class="footer-link">SOC2 Security Overview</a></li>
+          <li><a routerLink="/contact" class="footer-link">ISO 27001 Certification</a></li>
+          <li><a routerLink="/contact" class="footer-link">DPDP Compliance</a></li>
+          <li><a routerLink="/contact" class="footer-link">System Status · Live</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Bottom Legal Bar -->
+    <div class="footer-bottom liquid-bottom">
+      <span>© 2026 SVK E-Com Enterprise Systems India Pvt Ltd. All rights reserved.</span>
+      <!-- <div class="f-badges">
+        <span class="f-badge">🔒 AES-256 VAULT</span>
+        <span class="f-badge">🛡️ INDIA DPDP ACT COMPLIANT</span>
+        <span class="f-badge">⚡ AP-SOUTH-1 REDUNDANCY</span>
+      </div> -->
+    </div>
+  </footer>
+</div>

@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { CrmContacts } from './crm-contacts/crm-contacts';
 import { AppAdmin } from './app-admin/app-admin';
 import { Branch } from './branch/branch';
 import { Employees } from './employees/employees';
@@ -363,6 +364,16 @@ export const ComponentsRoutes: Routes = [
       title: 'Workflow Approvals',
       roles: [SA, A, BM, SK, EM],
       urls: [{ title: 'Workflow Approvals', url: '/components/approvals' }]
+    }
+  },
+  {
+    path: 'crm-contacts',
+    component: CrmContacts,
+    canActivate: [RoleGuard],
+    data: {
+      title: 'CRM Contacts',
+      roles: [SA, A],
+      urls: [{ title: 'CRM Contacts', url: '/components/crm-contacts' }]
     }
   }
 ];

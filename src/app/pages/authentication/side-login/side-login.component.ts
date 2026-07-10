@@ -1,130 +1,134 @@
-import { Component, HostListener, OnInit, OnDestroy } from '@angular/core';
-import { FormGroup, Validators, FormBuilder } from '@angular/forms';
-import { Router } from '@angular/router';
-import { RouterModule } from '@angular/router';
-import { MaterialModule } from 'src/app/material.module';
-import { FormsModule } from '@angular/forms';
-import { ReactiveFormsModule } from '@angular/forms';
-import { DecimalPipe } from '@angular/common';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef, ViewEncapsulation } from '@angular/core';
+import { FormGroup, Validators, FormBuilder, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { Router, RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
+import { Subject } from 'rxjs';
+import { takeUntil, finalize } from 'rxjs/operators';
+
+import { MaterialModule } from 'src/app/material.module';
 import { AuthService } from 'src/app/Securities/Services/auth.service';
 import { AlertService } from 'src/app/Securities/Services/alert.service';
-
-interface Particle {
-  id: number;
-  left: number;
-  size: number;
-  duration: number;
-  delay: number;
-  drift: number;
-  color: string;
-}
+import { TokenService } from 'src/app/Securities/Services/token.service';
+import { SessionService } from 'src/app/Securities/Services/session.service';
 
 @Component({
   selector: 'app-side-login',
-  imports: [RouterModule, MaterialModule, FormsModule, ReactiveFormsModule, DecimalPipe, CommonModule],
+  imports: [
+    RouterModule,
+    MaterialModule,
+    FormsModule,
+    ReactiveFormsModule,
+    CommonModule
+  ],
   templateUrl: './side-login.component.html',
+  styleUrls: ['./side-login.component.scss'],
+  encapsulation: ViewEncapsulation.None
 })
 export class AppSideLoginComponent implements OnInit, OnDestroy {
 
   LoginForm: FormGroup;
-  isLoading  = false;
+  isLoading = false;
   hidePassword = true;
 
-  // Animated metric targets
-  readonly metricSessions = 1284;
-  readonly metricUptime   = 94.8;
-  displaySessions = 0;
-  displayUptime   = 0;
-
-  // Particle system
-  readonly particles: Particle[] = this._buildParticles(28);
-
-  private _raf = 0;
-  private _counterTimer: any;
+  private destroy$ = new Subject<void>();
 
   constructor(
     private router: Router,
     private fb: FormBuilder,
     private authService: AuthService,
-    private alert: AlertService
+    private alert: AlertService,
+    private tokenService: TokenService,
+    private sessionService: SessionService,
+    private cdr: ChangeDetectorRef
   ) {
     this.LoginForm = this.fb.group({
-      email:    ['', [Validators.required, Validators.email]],
+      email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required, Validators.minLength(6)]],
     });
   }
 
   ngOnInit(): void {
-    this._startCounters();
+    // Ensure clean session & local storage every time the user visits the login page
+    this.tokenService.removeToken();
+    this.tokenService.removeRefreshToken();
+    this.sessionService.clearSession();
   }
 
   ngOnDestroy(): void {
-    cancelAnimationFrame(this._raf);
-    if (this._counterTimer) clearTimeout(this._counterTimer);
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
-  // ── Mouse parallax — aurora blobs follow cursor ──────────────
-  @HostListener('document:mousemove', ['$event'])
-  onMouseMove(e: MouseEvent): void {
-    const x = ((e.clientX / window.innerWidth)  - 0.5) * 40;
-    const y = ((e.clientY / window.innerHeight) - 0.5) * 28;
-    document.documentElement.style.setProperty('--nc-mx', `${x}px`);
-    document.documentElement.style.setProperty('--nc-my', `${y}px`);
+  get f() {
+    return this.LoginForm.controls;
   }
-
-  // ── Animated counters ────────────────────────────────────────
-  private _startCounters(): void {
-    this._counterTimer = setTimeout(() => {
-      const duration  = 2400;
-      const startTime = performance.now();
-      const tick = (now: number) => {
-        const t    = Math.min((now - startTime) / duration, 1);
-        const ease = 1 - Math.pow(1 - t, 3);
-        this.displaySessions = Math.floor(ease * this.metricSessions);
-        this.displayUptime   = parseFloat((ease * this.metricUptime).toFixed(1));
-        if (t < 1) this._raf = requestAnimationFrame(tick);
-      };
-      this._raf = requestAnimationFrame(tick);
-    }, 700);
-  }
-
-  // ── Particle builder ─────────────────────────────────────────
-  private _buildParticles(count: number): Particle[] {
-    const colors = [
-      'rgba(124,92,252,0.9)',
-      'rgba(96,165,250,0.85)',
-      'rgba(52,211,153,0.75)',
-      'rgba(167,139,250,0.8)',
-      'rgba(255,255,255,0.55)',
-    ];
-    return Array.from({ length: count }, (_, i) => ({
-      id:       i + 1,
-      left:     ((i * 137.508) % 100),
-      size:     i % 3 === 0 ? 3 : i % 3 === 1 ? 2 : 1.5,
-      duration: 9 + (i % 9) * 1.3,
-      delay:    i * 0.38,
-      drift:    ((i * 29) % 60) - 30,
-      color:    colors[i % colors.length],
-    }));
-  }
-
-  get f() { return this.LoginForm.controls; }
 
   onSubmit(): void {
-    if (this.LoginForm.invalid) { this.LoginForm.markAllAsTouched(); return; }
-    if (this.isLoading) return;
-    this.isLoading = true;
+    if (this.LoginForm.invalid) {
+      this.LoginForm.markAllAsTouched();
+      this.alert.warning('Please enter a valid email and password.');
+      return;
+    }
 
-    this.authService.login(this.LoginForm.value).subscribe({
-      next:     () => { this.router.navigate(['/dashboard']); },
-      error:    (err) => {
-        this.isLoading = false;
-        if (err.status === 401) { this.alert.error(err?.error?.message || 'Invalid email or password'); return; }
-        if (err.status === 429) { this.alert.warning('Too many login attempts. Please wait a moment.'); return; }
-        this.alert.error(err?.error?.message || 'Something went wrong. Please try again.');
-      },
-      complete: () => { this.isLoading = false; }
-    });
+    if (this.isLoading) {
+      return;
+    }
+
+    this.isLoading = true;
+    this.cdr.detectChanges();
+
+    this.authService.login(this.LoginForm.value)
+      .pipe(
+        takeUntil(this.destroy$),
+        finalize(() => {
+          this.isLoading = false;
+          this.cdr.detectChanges();
+        })
+      )
+      .subscribe({
+        next: (res: any) => {
+          if (!res || !res.token) {
+            this.alert.error(res?.message || 'Login failed. Please try again.');
+            return;
+          }
+
+          this.router.navigate(['/dashboard']).then((success) => {
+            if (!success) {
+              console.warn('[Login] Navigation to /dashboard was cancelled.');
+            }
+          }).catch((err) => {
+            console.error('[Login] Navigation error:', err);
+            this.alert.error('Navigation error. Please try again.');
+          });
+        },
+        error: (err) => {
+          console.error('[Login] Error:', err);
+          switch (err.status) {
+            case 0:
+              this.alert.error('Unable to connect to the server. Check your network.');
+              break;
+            case 400:
+              this.alert.error(err.error?.message || 'Invalid request.');
+              break;
+            case 401:
+              this.alert.error(err.error?.message || 'Invalid email or password.');
+              break;
+            case 403:
+              this.alert.error(err.error?.message || 'Access denied. Contact an administrator.');
+              break;
+            case 404:
+              this.alert.error('Service not found. Contact support.');
+              break;
+            case 429:
+              this.alert.error('Too many attempts. Please try again later.');
+              break;
+            case 500:
+              this.alert.error('Internal server error. Please try again later.');
+              break;
+            default:
+              this.alert.error(err.error?.message || 'Something went wrong. Please try again.');
+          }
+        }
+      });
   }
 }

@@ -117,6 +117,13 @@ export const navItems: NavItem[] = [
     roles: [SA, A, BM, SK],
   },
   {
+    displayName: 'Coupons',
+    iconName: 'ticket',
+    route: '/components/coupons',
+    bgcolor: 'error',
+    roles: [SA, A, BM, SK],
+  },
+  {
     displayName: 'Invoice Generator',
     iconName: 'file-text',
     route: '/components/invoices',
@@ -171,6 +178,13 @@ export const navItems: NavItem[] = [
     iconName: 'settings',
     route: '/components/workforce',
     bgcolor: 'primary',
+    roles: [SA, A, BM],
+  },
+  {
+    displayName: 'Workforce Requests',
+    iconName: 'file-check',
+    route: '/components/workforce-requests',
+    bgcolor: 'warning',
     roles: [SA, A, BM],
   },
   {

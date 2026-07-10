@@ -1,0 +1,39 @@
+<div class="premium-liquid-glass-wrapper">
+  <mat-card class="cardWithShadow liquid-glass-card">
+  <mat-card-content>
+    <div class="flex items-center justify-between m-b-24">
+      <mat-card-title>Coupons Management</mat-card-title>
+      <button mat-flat-button color="primary" (click)="openCouponDialog()">
+        <mat-icon>add</mat-icon> Add Coupon
+      </button>
+    </div>
+
+    <div class="table-responsive">
+      <app-mat-table 
+        *ngIf="!isLoading && coupons.length > 0"
+        [columns]="tableColumns"
+        [tableData]="coupons"
+        [showAction]="true"
+        [showView]="false"
+        [Extra_Column]="false"
+        [showEdit]="true"
+        [showDelete]="true"
+        (editClick)="openCouponDialog($event)"
+        (deleteClick)="deleteCoupon($event)">
+      </app-mat-table>
+
+      <!-- Loading State -->
+      <div *ngIf="isLoading" class="p-24 flex justify-center items-center">
+        <p class="text-muted">Loading coupons...</p>
+      </div>
+
+      <!-- Empty State -->
+      <div *ngIf="!isLoading && coupons.length === 0" class="p-24 flex justify-center items-center flex-col">
+        <mat-icon class="text-muted f-s-32 m-b-8" style="height: auto; width: auto;">local_offer</mat-icon>
+        <p class="text-muted f-s-16">No coupons found.</p>
+        <button mat-stroked-button color="primary" class="m-t-12" (click)="openCouponDialog()">Create your first coupon</button>
+      </div>
+    </div>
+  </mat-card-content>
+</mat-card>
+</div>

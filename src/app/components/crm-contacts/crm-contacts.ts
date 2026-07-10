@@ -4,6 +4,10 @@ import { RouterModule } from '@angular/router';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { environment } from 'src/environment/environment';
+import { MatTableModule } from '@angular/material/table';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatSortModule, Sort } from '@angular/material/sort';
+import { MatIconModule } from '@angular/material/icon';
 
 export interface LeadContact {
   id: number;
@@ -31,12 +35,13 @@ export interface LeadContact {
 @Component({
   selector: 'app-crm-contacts',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule],
+  imports: [CommonModule, RouterModule, FormsModule, MatTableModule, MatCheckboxModule, MatSortModule, MatIconModule],
   templateUrl: './crm-contacts.html',
   styleUrls: ['./crm-contacts.scss']
 })
 export class CrmContacts implements OnInit {
   leads: LeadContact[] = [];
+  displayedColumns: string[] = ['select', 'company', 'owner', 'email', 'phone', 'plan', 'billing', 'status', 'date', 'actions'];
   stats = { total: 0, pending: 0, approved: 0, rejected: 0, converted: 0 };
 
   // Filters & Pagination state
@@ -59,7 +64,7 @@ export class CrmContacts implements OnInit {
   // Bulk action selection
   selectedIds = new Set<number>();
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   ngOnInit() {
     this.fetchLeads();
@@ -136,9 +141,21 @@ export class CrmContacts implements OnInit {
     this.fetchLeads();
   }
 
+  sortData(sort: Sort) {
+    if (!sort.active || sort.direction === '') {
+      this.sortBy = 'createdAt';
+      this.sortOrder = 'DESC';
+    } else {
+      this.sortBy = sort.active;
+      this.sortOrder = sort.direction.toUpperCase();
+    }
+    this.fetchLeads();
+  }
+
   // Bulk actions selection
   toggleSelectAll(event: any) {
-    if (event.target.checked) {
+    const isChecked = event.checked !== undefined ? event.checked : event.target.checked;
+    if (isChecked) {
       this.leads.forEach(l => this.selectedIds.add(l.id));
     } else {
       this.selectedIds.clear();

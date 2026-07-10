@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { CrmContacts } from './crm-contacts/crm-contacts';
+import { Coupons } from './coupons/coupons';
 import { AppAdmin } from './app-admin/app-admin';
 import { Branch } from './branch/branch';
 import { Employees } from './employees/employees';
@@ -347,6 +348,16 @@ export const ComponentsRoutes: Routes = [
     }
   },
   {
+    path: 'workforce-requests',
+    loadComponent: () => import('./workforce-requests/workforce-requests').then(m => m.WorkforceRequests),
+    canActivate: [RoleGuard],
+    data: {
+      title: 'Workforce Requests',
+      roles: [SA, A, BM],
+      urls: [{ title: 'Workforce Requests', url: '/components/workforce-requests' }]
+    }
+  },
+  {
     path: 'invoices',
     component: Invoices,
     canActivate: [RoleGuard],
@@ -374,6 +385,16 @@ export const ComponentsRoutes: Routes = [
       title: 'CRM Contacts',
       roles: [SA, A],
       urls: [{ title: 'CRM Contacts', url: '/components/crm-contacts' }]
+    }
+  },
+  {
+    path: 'coupons',
+    component: Coupons,
+    canActivate: [RoleGuard],
+    data: {
+      title: 'Coupons Management',
+      roles: [SA, A, BM, SK],
+      urls: [{ title: 'Coupons', url: '/components/coupons' }]
     }
   }
 ];

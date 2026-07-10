@@ -1,5 +1,11 @@
 html.dark, html .dark-theme {
   color-scheme: dark;
+  
+  body, .mat-typography {
+    color: var(--mat-sys-on-background);
+    background-color: var(--mat-sys-background);
+  }
+
   --mat-sys-corner-small: 7px;
   --mat-sys-corner-medium: 16px;
   

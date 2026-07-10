@@ -1,24 +1,37 @@
-<mat-card class="cardWithShadow theme-card">
+<mat-card class="py-ledger-card">
   <mat-card-header>
     <div class="header-container">
-      <mat-card-title class="m-b-0">Payments Registry Ledger</mat-card-title>
-      @if (!showForm && perm.hasRoleAction('canCreate')) {
-        <button mat-flat-button color="primary" (click)="toggleForm()">
-          <mat-icon class="icon-16 m-r-4">attach_money</mat-icon> Record New Payment
-        </button>
-      }
+      <div class="title-wrap">
+        <h3 class="ledger-title">Payments Registry Ledger</h3>
+        <p class="ledger-sub">Monitor global transaction logs, payment methods, and gateways</p>
+      </div>
+
+      <div class="d-flex align-items-center gap-12">
+        <span class="secure-badge-pnl">
+          <svg viewBox="0 0 24 24" fill="none" class="shield-icon" stroke="currentColor" stroke-width="2.5">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          256-Bit TLS Secured
+        </span>
+
+        @if (!showForm && perm.hasRoleAction('canCreate')) {
+          <button mat-flat-button color="primary" (click)="toggleForm()">
+            <mat-icon class="icon-16 m-r-4">attach_money</mat-icon> Record New Payment
+          </button>
+        }
+      </div>
     </div>
   </mat-card-header>
 
   <!-- Record Payment Form -->
   @if (showForm) {
-    <mat-card-content class="p-24 b-t-1">
+    <mat-card-content class="form-section b-t-1">
       <form [formGroup]="paymentForm">
-        <div class="row">
+        <div class="form-row">
           <!-- Select Order -->
-          <div class="col-lg-4 col-md-6 col-sm-12 m-b-16">
-            <mat-label class="f-w-600 m-b-8 d-block">Order / Invoice <span class="text-danger">*</span></mat-label>
-            <mat-form-field appearance="outline" class="w-100">
+          <div class="form-field-group">
+            <span class="field-label">Order / Invoice <span class="text-danger">*</span></span>
+            <mat-form-field appearance="outline">
               <mat-select formControlName="order_id" placeholder="Select Order">
                 @for(o of orders; track o.id) {
                   <mat-option [value]="o.id">{{ o.invoice_no }} (${{ o.total }})</mat-option>
@@ -28,9 +41,9 @@
           </div>
 
           <!-- Select User -->
-          <div class="col-lg-4 col-md-6 col-sm-12 m-b-16">
-            <mat-label class="f-w-600 m-b-8 d-block">Payer / Customer <span class="text-danger">*</span></mat-label>
-            <mat-form-field appearance="outline" class="w-100">
+          <div class="form-field-group">
+            <span class="field-label">Payer / Customer <span class="text-danger">*</span></span>
+            <mat-form-field appearance="outline">
               <mat-select formControlName="user_id" placeholder="Select Payer">
                 @for(e of employees; track e.id) {
                   <mat-option [value]="e.id">{{ e.name }}</mat-option>
@@ -40,29 +53,40 @@
           </div>
 
           <!-- Method Selection -->
-          <div class="col-lg-4 col-md-6 col-sm-12 m-b-16">
-            <mat-label class="f-w-600 m-b-8 d-block">Payment Method <span class="text-danger">*</span></mat-label>
-            <mat-form-field appearance="outline" class="w-100">
+          <div class="form-field-group">
+            <span class="field-label">Payment Method <span class="text-danger">*</span></span>
+            <mat-form-field appearance="outline">
               <mat-select formControlName="method">
                 <mat-option value="CASH">CASH</mat-option>
-                <mat-option value="CARD">CARD</mat-option>
-                <mat-option value="ONLINE">ONLINE / GATEWAY</mat-option>
+                <mat-option value="ONLINE">ONLINE (Default)</mat-option>
+                <mat-option value="STRIPE">STRIPE</mat-option>
+                <mat-option value="PAYPAL">PAYPAL</mat-option>
+                <mat-option value="RAZORPAY">RAZORPAY</mat-option>
+                <mat-option value="UPI">UPI</mat-option>
+                <mat-option value="WALLET">WALLET</mat-option>
+                <mat-option value="EMI">EMI</mat-option>
+                <mat-option value="PAY_LATER">PAY LATER</mat-option>
+                <mat-option value="BANK_TRANSFER">BANK TRANSFER</mat-option>
+                <mat-option value="CASH_ON_DELIVERY">CASH ON DELIVERY</mat-option>
+                <mat-option value="PAY_ON_DELIVERY">PAY ON DELIVERY</mat-option>
+                <mat-option value="GIFT_CARD">GIFT CARD</mat-option>
+                <mat-option value="PARTIAL">PARTIAL</mat-option>
               </mat-select>
             </mat-form-field>
           </div>
 
           <!-- Amount Input -->
-          <div class="col-lg-4 col-md-6 col-sm-12 m-b-16">
-            <mat-label class="f-w-600 m-b-8 d-block">Amount Paid ($) <span class="text-danger">*</span></mat-label>
-            <mat-form-field appearance="outline" class="w-100">
+          <div class="form-field-group">
+            <span class="field-label">Amount Paid ($) <span class="text-danger">*</span></span>
+            <mat-form-field appearance="outline">
               <input matInput type="number" step="0.01" formControlName="amount" placeholder="Enter amount">
             </mat-form-field>
           </div>
 
           <!-- Status Select -->
-          <div class="col-lg-4 col-md-6 col-sm-12 m-b-16">
-            <mat-label class="f-w-600 m-b-8 d-block">Payment Status <span class="text-danger">*</span></mat-label>
-            <mat-form-field appearance="outline" class="w-100">
+          <div class="form-field-group">
+            <span class="field-label">Payment Status <span class="text-danger">*</span></span>
+            <mat-form-field appearance="outline">
               <mat-select formControlName="status">
                 <mat-option value="SUCCESS">SUCCESS</mat-option>
                 <mat-option value="PENDING">PENDING</mat-option>
@@ -72,23 +96,23 @@
           </div>
 
           <!-- Transaction ID -->
-          <div class="col-lg-4 col-md-6 col-sm-12 m-b-16">
-            <mat-label class="f-w-600 m-b-8 d-block">Transaction ID</mat-label>
-            <mat-form-field appearance="outline" class="w-100">
+          <div class="form-field-group">
+            <span class="field-label">Transaction ID</span>
+            <mat-form-field appearance="outline">
               <input matInput type="text" formControlName="transaction_id" placeholder="Enter txn id (if any)">
             </mat-form-field>
           </div>
 
           <!-- Gateway -->
-          <div class="col-lg-4 col-md-6 col-sm-12 m-b-16">
-            <mat-label class="f-w-600 m-b-8 d-block">Payment Gateway</mat-label>
-            <mat-form-field appearance="outline" class="w-100">
-              <input matInput type="text" formControlName="gateway" placeholder="e.g. Stripe, PayPal (if any)">
+          <div class="form-field-group">
+            <span class="field-label">Payment Gateway</span>
+            <mat-form-field appearance="outline">
+              <input matInput type="text" formControlName="gateway" placeholder="e.g. Stripe, Razorpay">
             </mat-form-field>
           </div>
         </div>
 
-        <div class="m-t-16">
+        <div class="form-actions">
           <button mat-stroked-button class="me-3" (click)="toggleForm()" [disabled]="loading">Cancel</button>
           <button mat-flat-button color="primary" (click)="recordPayment()" [disabled]="loading || paymentForm.invalid">
             Record Payment
@@ -132,14 +156,14 @@
           <ng-container matColumnDef="method">
             <th mat-header-cell *matHeaderCellDef>Method</th>
             <td mat-cell *matCellDef="let row">
-              <span class="method-badge">{{ row.method }}</span>
+              <span class="payment-method-tag">{{ row.method }}</span>
             </td>
           </ng-container>
 
           <!-- Gateway & Txn ID -->
           <ng-container matColumnDef="details">
             <th mat-header-cell *matHeaderCellDef>Txn ID / Gateway</th>
-            <td mat-cell *matCellDef="let row">
+            <td mat-cell *matCellDef="let row" class="details-column">
               @if (row.transaction_id || row.gateway) {
                 <span class="f-s-12 text-muted">{{ row.transaction_id || '-' }} ({{ row.gateway || 'None' }})</span>
               } @else {
@@ -158,10 +182,10 @@
           <ng-container matColumnDef="status">
             <th mat-header-cell *matHeaderCellDef>Status</th>
             <td mat-cell *matCellDef="let row">
-              <span class="badge" [ngClass]="{
-                'bg-success': row.status === 'SUCCESS',
-                'bg-warning': row.status === 'PENDING',
-                'bg-danger': row.status === 'FAILED'
+              <span class="status-badge" [ngClass]="{
+                'status-success': row.status === 'SUCCESS',
+                'status-pending': row.status === 'PENDING',
+                'status-failed': row.status === 'FAILED'
               }">
                 {{ row.status }}
               </span>

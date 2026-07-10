@@ -292,6 +292,28 @@ export class RoleAccess implements OnInit {
     }
   }
 
+  /** Returns true if every available permission for this menu row is assigned */
+  isAllAssignedForMenu(menu: any): boolean {
+    const perms = this.actions
+      .map(a => this.getPermission(menu, a))
+      .filter(p => !!p);
+    if (perms.length === 0) return false;
+    return perms.every(p => this.workingAssignments.has(p.id));
+  }
+
+  /** Toggle all available permissions for a menu row on/off */
+  toggleAllForMenu(menu: any): void {
+    const perms = this.actions
+      .map(a => this.getPermission(menu, a))
+      .filter(p => !!p);
+    const allOn = this.isAllAssignedForMenu(menu);
+    if (allOn) {
+      perms.forEach(p => this.workingAssignments.delete(p.id));
+    } else {
+      perms.forEach(p => this.workingAssignments.add(p.id));
+    }
+  }
+
   cancelChanges(): void {
     this.workingAssignments = new Set(this.assignedMap.keys());
   }

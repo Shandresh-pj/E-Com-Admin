@@ -1,60 +1,318 @@
+// ════════════════════════════════════════════════════════════════
+// SVK E-COM | PAYMENTS REGISTRY LEDGER — PREMIUM SCSS
+// Theme-Aware: responds to .dark-theme / .light-theme
+// Quantum Glassmorphism · Secure Layout · Full Responsive
+// ════════════════════════════════════════════════════════════════
+
+// ── CSS Custom Properties — Theme Variables ────────────────────
+:root,
+html.dark,
+body.dark,
+html.dark-theme,
+body.dark-theme {
+  --py-bg:             transparent;
+  --py-card:           rgba(15, 23, 42, 0.4);
+  --py-border:         rgba(255, 255, 255, 0.07);
+  --py-border-h:       rgba(99, 102, 241, 0.4);
+  --py-tx1:            #f1f5f9;
+  --py-tx2:            #94a3b8;
+  --py-tx3:            #475569;
+  --py-row-even:       rgba(255, 255, 255, 0.015);
+  --py-row-hover:      rgba(99, 102, 241, 0.04);
+  --py-field-bg:       rgba(255, 255, 255, 0.03);
+  --py-field-border:   rgba(255, 255, 255, 0.08);
+  --py-secure-bg:      rgba(16, 185, 129, 0.06);
+  --py-secure-border:  rgba(16, 185, 129, 0.2);
+  --py-secure-tx:      #6ee7b7;
+  --py-method-bg:      rgba(99, 102, 241, 0.12);
+  --py-method-tx:      #c4b5fd;
+  --py-th-bg:          linear-gradient(135deg, rgba(99, 102, 241, 0.06) 0%, rgba(6, 182, 212, 0.04) 100%);
+  --py-th-border:      rgba(99, 102, 241, 0.15);
+}
+
+html.light,
+body.light,
+html.light-theme,
+body.light-theme {
+  --py-bg:             transparent;
+  --py-card:           rgba(255, 255, 255, 0.4);
+  --py-border:         rgba(100, 116, 180, 0.12);
+  --py-border-h:       rgba(99, 102, 241, 0.3);
+  --py-tx1:            #1e1f36;
+  --py-tx2:            #4b5471;
+  --py-tx3:            #8c96b5;
+  --py-row-even:       rgba(240, 243, 255, 0.5);
+  --py-row-hover:      rgba(99, 102, 241, 0.03);
+  --py-field-bg:       rgba(255, 255, 255, 0.9);
+  --py-field-border:   rgba(99, 102, 241, 0.15);
+  --py-secure-bg:      rgba(5, 150, 105, 0.06);
+  --py-secure-border:  rgba(5, 150, 105, 0.22);
+  --py-secure-tx:      #059669;
+  --py-method-bg:      rgba(99, 102, 241, 0.08);
+  --py-method-tx:      #4f46e5;
+  --py-th-bg:          linear-gradient(135deg, rgba(99, 102, 241, 0.04) 0%, rgba(6, 182, 212, 0.02) 100%);
+  --py-th-border:      rgba(99, 102, 241, 0.12);
+}
+
+// Accent palette variables
+$p1:      #6366f1;
+$p2:      #8b5cf6;
+$p3:      #06b6d4;
+$success: #10b981;
+$warn:    #f59e0b;
+$danger:  #ef4444;
+
+// ── Root Card Styling ──────────────────────────────────────────
+.py-ledger-card {
+  font-family: 'Inter', system-ui, sans-serif;
+  background: var(--py-card) !important;
+  backdrop-filter: blur(24px) saturate(160%);
+  -webkit-backdrop-filter: blur(24px) saturate(160%);
+  border: 1px solid var(--py-border) !important;
+  border-radius: 20px !important;
+  margin-bottom: 24px;
+  overflow: hidden;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.08) !important;
+  transition: background 0.35s ease, border-color 0.35s ease, box-shadow 0.3s;
+
+  ::ng-deep {
+    .mat-mdc-card-header {
+      padding: 24px 28px !important;
+    }
+  }
+}
+
 .header-container {
   display: flex;
   justify-content: space-between;
   align-items: center;
   width: 100%;
+  gap: 16px;
+  flex-wrap: wrap;
 }
 
+.title-wrap {
+  .ledger-title {
+    font-size: clamp(18px, 2.5vw, 22px);
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    background: linear-gradient(135deg, var(--py-tx1) 0%, #c4b5fd 60%, $p3 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin: 0 0 4px;
+  }
+  .ledger-sub {
+    font-size: 13px;
+    color: var(--py-tx2);
+    margin: 0;
+  }
+}
+
+// ── Secure Status Chip ──────────────────────────────────────────
+.secure-badge-pnl {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  background: var(--py-secure-bg);
+  border: 1px solid var(--py-secure-border);
+  border-radius: 100px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--py-secure-tx);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+
+  .shield-icon {
+    width: 14px;
+    height: 14px;
+  }
+}
+
+// ── Form Area ───────────────────────────────────────────────────
+.form-section {
+  padding: 28px;
+  animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+
+  .form-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+
+  .form-field-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .field-label {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--py-tx2);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+
+  ::ng-deep {
+    .mat-mdc-form-field {
+      width: 100%;
+    }
+    .mat-mdc-form-field-infix {
+      padding: 10px 0 !important;
+      min-height: 48px !important;
+    }
+    .mat-mdc-text-field-wrapper {
+      background: var(--py-field-bg) !important;
+      border-radius: 12px !important;
+      border: 1px solid var(--py-field-border) !important;
+      transition: all 0.3s;
+      &:hover {
+        border-color: var(--py-border-h) !important;
+      }
+    }
+    .mat-mdc-form-field-focus-overlay {
+      display: none;
+    }
+    .mdc-line-ripple {
+      display: none !important;
+    }
+    .mat-mdc-select-value-text,
+    .mat-mdc-input-element {
+      color: var(--py-tx1) !important;
+      font-size: 13px !important;
+    }
+    .mat-mdc-select-placeholder,
+    .mat-mdc-input-element::placeholder {
+      color: var(--py-tx3) !important;
+    }
+  }
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid var(--py-border);
+}
+
+// ── Table UI ────────────────────────────────────────────────────
 .table-responsive {
   width: 100%;
   overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .custom-table {
+  width: 100%;
   border-collapse: collapse;
-  
+  background: transparent !important;
+
   th {
-    font-weight: 600;
-    color: #1e293b;
-    padding: 16px;
+    background: var(--py-th-bg) !important;
+    color: var(--py-tx2) !important;
+    font-size: 11px !important;
+    font-weight: 700 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.06em !important;
+    padding: 16px 20px !important;
+    border-bottom: 1px solid var(--py-th-border) !important;
+    white-space: nowrap;
   }
-  
+
   td {
-    padding: 16px;
-    vertical-align: middle;
+    padding: 14px 20px !important;
+    color: var(--py-tx1) !important;
+    border-bottom: 1px solid var(--py-border) !important;
+    font-size: 13px !important;
+    vertical-align: middle !important;
+  }
+
+  tr.mat-mdc-row:nth-child(even) {
+    background-color: var(--py-row-even);
+  }
+
+  tr.mat-mdc-row:hover {
+    background-color: var(--py-row-hover) !important;
   }
 }
 
-.method-badge {
-  background-color: rgba(99, 102, 241, 0.12);
-  color: #4f46e5;
-  padding: 4px 8px;
-  border-radius: 4px;
+.payment-method-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  background: var(--py-method-bg);
+  color: var(--py-method-tx);
+  border-radius: 100px;
   font-size: 11px;
-  font-weight: 600;
+  font-weight: 700;
+  letter-spacing: 0.04em;
   text-transform: uppercase;
 }
 
-.badge {
-  display: inline-block;
-  padding: 6px 12px;
-  font-size: 12px;
-  font-weight: 600;
-  border-radius: 4px;
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 12px;
+  border-radius: 100px;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
-  
-  &.bg-success {
-    background-color: rgba(34, 197, 94, 0.15) !important;
-    color: #16a34a !important;
-  }
-  
-  &.bg-warning {
-    background-color: rgba(245, 158, 11, 0.15) !important;
-    color: #d97706 !important;
+
+  &.status-success {
+    background: rgba($success, 0.12);
+    color: $success;
+    border: 1px solid rgba($success, 0.25);
   }
 
-  &.bg-danger {
-    background-color: rgba(239, 68, 68, 0.15) !important;
-    color: #dc2626 !important;
+  &.status-pending {
+    background: rgba($warn, 0.12);
+    color: $warn;
+    border: 1px solid rgba($warn, 0.25);
+  }
+
+  &.status-failed {
+    background: rgba($danger, 0.12);
+    color: $danger;
+    border: 1px solid rgba($danger, 0.25);
+  }
+}
+
+.details-column {
+  max-width: 240px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+// ── Animations ─────────────────────────────────────────────────
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+// ── Responsive Design Breakpoints ──────────────────────────────
+@media (max-width: 768px) {
+  .py-ledger-card {
+    border-radius: 16px !important;
+  }
+  .form-section {
+    padding: 16px;
+    .form-row {
+      grid-template-columns: 1fr !important;
+      gap: 12px;
+    }
+  }
+  .custom-table {
+    min-width: 700px;
+    th, td {
+      padding: 12px 14px !important;
+    }
   }
 }

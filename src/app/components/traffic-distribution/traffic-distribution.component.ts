@@ -50,62 +50,64 @@ export class AppTrafficDistributionComponent {
 
   constructor() {
 
+    const organic = Math.floor(Math.random() * 30) + 30; // 30-60
+    const referral = Math.floor(Math.random() * 20) + 20; // 20-40
+    const social = 100 - organic - referral; // Remaining percentage
+
+    const totalTraffic = Math.floor(Math.random() * 5000) + 3000;
+
     this.trafficdistributionChart = {
-      series: [5368, 3500, 4106],
-      labels: ['5368', 'Refferal Traffic', 'Oragnic Traffic'],
+      series: [organic, referral, social],
+      labels: ['Organic', 'Referral', 'Social'],
       chart: {
-        type: 'donut',
+        type: 'radialBar',
         fontFamily: "inherit",
         foreColor: '#adb0bb',
-        toolbar: {
-          show: false,
-        },
-        height: 160,
+        toolbar: { show: false },
+        height: 180,
       },
-      colors: ['#e7ecf0', '#fb977d', '#0085db'],
+      colors: ['#4f46e5', '#ec4899', '#10b981'],
       plotOptions: {
-        pie: {
-          donut: {
-            size: '80%',
-            background: 'none',
-            labels: {
+        radialBar: {
+          startAngle: -135,
+          endAngle: 135,
+          hollow: {
+            margin: 5,
+            size: '45%',
+            background: 'transparent',
+            image: undefined,
+          },
+          track: {
+            background: 'rgba(0,0,0,0.05)',
+            margin: 8,
+          },
+          dataLabels: {
+            name: {
+              fontSize: '12px',
+              color: '#adb0bb',
+              offsetY: -5,
+            },
+            value: {
+              fontSize: '18px',
+              color: '#333',
+              fontWeight: 700,
+              offsetY: 5,
+            },
+            total: {
               show: true,
-              name: {
-                show: true,
-                fontSize: '12px',
-                color: undefined,
-                offsetY: 5,
-              },
-              value: {
-                show: false,
-                color: '#98aab4',
-              },
-            },
-          },
-        },
+              label: 'Total',
+              color: '#adb0bb',
+              formatter: function (w: any) {
+                return totalTraffic;
+              }
+            }
+          }
+        }
       },
-      stroke: {
-        show: false,
-      },
-      dataLabels: {
-        enabled: false,
-      },
-      legend: {
-        show: false,
-      },
-      responsive: [
-        {
-          breakpoint: 991,
-          options: {
-            chart: {
-              width: 120,
-            },
-          },
-        },
-      ],
-      tooltip: {
-        enabled: false,
-      },
+      stroke: { lineCap: 'round' },
+      dataLabels: { enabled: false },
+      legend: { show: false },
+      tooltip: { enabled: true, theme: 'light' },
     };
 
   }

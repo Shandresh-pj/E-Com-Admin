@@ -80,15 +80,16 @@ constructor(private fb: FormBuilder,
 ){
   const user = this.authService.getUser();
   console.log("aaaa-1.1",user)
-
   this.CompanyForm = fb.group({
     name : ['', Validators.required],
     email : ['', [Validators.required, Validators.email]],
-    phone : ['',Validators.required],
+    phone : ['', Validators.required],
     address : [''],
     gst_number : [''],
-    role_id:[{value:'', disabled:true},Validators.required]
-  })
+    role_id: [{value:'', disabled:true}, Validators.required],
+    razorpay_key_id: [''],
+    razorpay_key_secret: ['']
+  });
 }
 
 ngOnInit() {
@@ -163,8 +164,10 @@ console.log("user",user)
     email: user?.email,
     phone: user?.phone,
     address: user?.address,
-    gst_number : user?.gst_number,
-    role_id : this.Roleid
+    gst_number: user?.gst_number,
+    role_id: this.Roleid,
+    razorpay_key_id: user?.razorpay_key_id || '',
+    razorpay_key_secret: user?.razorpay_key_secret || ''
   });
 
   this.SelectedComapanyId = user?.id

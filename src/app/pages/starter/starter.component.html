@@ -8,17 +8,17 @@
         <mat-card-content class="p-24 position-relative">
           <div class="d-flex flex-wrap align-items-center justify-content-between gap-16 position-relative z-index-2">
             <div>
-              <p class="f-s-12 text-light-white text-uppercase tracking-wider m-b-4 f-w-700">WORKFORCE COMMAND PLATFORM</p>
-              <h2 class="f-w-700 m-b-0 text-white welcome-title">Welcome back, {{ currentUser?.name || 'User' }}</h2>
-              <p class="f-s-13 text-light-white m-t-4 m-b-0">
-                You are currently logged in with authorization role level: <span class="badge-role-pill">{{ userRole }}</span>
+              <p class="f-s-13 text-primary text-uppercase tracking-wider m-b-4 f-w-800">WORKFORCE COMMAND PLATFORM</p>
+              <h2 class="f-w-800 m-b-0 welcome-title">Welcome back, <span class="text-gradient">{{ currentUser?.name || 'User' }}</span></h2>
+              <p class="f-s-14 font-weight-bold m-t-8 m-b-0">
+                You are currently logged in with authorization role level: <span class="badge-role-pill f-w-800">{{ displayRole }}</span>
               </p>
             </div>
-            <div class="d-flex align-items-center gap-12 bg-white-opacity p-12 rounded-12">
-              <mat-icon class="text-white icon-24">shield</mat-icon>
-              <div class="text-start text-white">
-                <p class="f-s-10 text-uppercase m-b-0 opacity-75">Scope Context</p>
-                <p class="f-s-12 f-w-600 m-b-0">Company #{{ currentUser?.companyId || 'Global' }}</p>
+            <div class="d-flex align-items-center gap-12 liquid-badge p-12 rounded-12">
+              <mat-icon class="text-primary icon-24">shield</mat-icon>
+              <div class="text-start">
+                <p class="f-s-11 text-uppercase m-b-0 text-muted f-w-700">Scope Context</p>
+                <p class="f-s-14 f-w-800 m-b-0">Company #{{ currentUser?.companyId || 'Global' }}</p>
               </div>
             </div>
           </div>
@@ -33,71 +33,69 @@
   <!-- ══════════════════════════════════════════════════════════════════════════ -->
   <!-- 1. ADMIN / SUPER ADMIN DASHBOARD PANEL -->
   <!-- ══════════════════════════════════════════════════════════════════════════ -->
-  @if (userRole === 'Super_Admin' || userRole === 'Admin') {
+  @if (isAdminDashboard) {
     <!-- KPIs Stats Grid -->
     <div class="row m-b-24">
       <div class="col-lg-3 col-sm-6 animate-fade-in-up delay-1">
-        <mat-card class="cardWithShadow stats-kpi border-left-primary">
-          <mat-card-content class="p-20">
-            <div class="d-flex align-items-center justify-content-between">
-              <div>
-                <p class="f-s-12 text-muted m-b-4 text-uppercase f-w-600">Company Size</p>
-                <h3 class="f-w-700 m-b-0">{{ totalEmployees }} Staff</h3>
-              </div>
-              <div class="kpi-icon bg-light-primary rounded-8 p-12"><mat-icon class="text-primary">groups</mat-icon></div>
+        <mat-card class="cardWithShadow stats-kpi kpi-primary">
+          <div class="kpi-inner-glass">
+            <div>
+              <p class="f-s-12 text-muted m-b-4 text-uppercase f-w-700 tracking-wider">Company Size</p>
+              <h3 class="f-w-800 m-b-0 kpi-value">{{ totalEmployees }} Staff</h3>
             </div>
-          </mat-card-content>
+            <div class="kpi-icon-orb"><mat-icon>groups</mat-icon></div>
+          </div>
         </mat-card>
       </div>
       <div class="col-lg-3 col-sm-6 animate-fade-in-up delay-2">
-        <mat-card class="cardWithShadow stats-kpi border-left-success">
-          <mat-card-content class="p-20">
-            <div class="d-flex align-items-center justify-content-between">
-              <div>
-                <p class="f-s-12 text-muted m-b-4 text-uppercase f-w-600">Staff On Duty</p>
-                <h3 class="f-w-700 m-b-0">{{ presentTodayCount }} Present</h3>
-              </div>
-              <div class="kpi-icon bg-light-success rounded-8 p-12"><mat-icon class="text-success">check_circle</mat-icon></div>
+        <mat-card class="cardWithShadow stats-kpi kpi-success">
+          <div class="kpi-inner-glass">
+            <div>
+              <p class="f-s-12 text-muted m-b-4 text-uppercase f-w-700 tracking-wider">Staff On Duty</p>
+              <h3 class="f-w-800 m-b-0 kpi-value">{{ presentTodayCount }} Present</h3>
             </div>
-          </mat-card-content>
+            <div class="kpi-icon-orb"><mat-icon>check_circle</mat-icon></div>
+          </div>
         </mat-card>
       </div>
       <div class="col-lg-3 col-sm-6 animate-fade-in-up delay-3">
-        <mat-card class="cardWithShadow stats-kpi border-left-warning">
-          <mat-card-content class="p-20">
-            <div class="d-flex align-items-center justify-content-between">
-              <div>
-                <p class="f-s-12 text-muted m-b-4 text-uppercase f-w-600">Low Stock Items</p>
-                <h3 class="f-w-700 m-b-0">{{ lowStockAlertsCount }} Alerts</h3>
-              </div>
-              <div class="kpi-icon bg-light-warning rounded-8 p-12"><mat-icon class="text-warning">warning</mat-icon></div>
+        <mat-card class="cardWithShadow stats-kpi kpi-warning">
+          <div class="kpi-inner-glass">
+            <div>
+              <p class="f-s-12 text-muted m-b-4 text-uppercase f-w-700 tracking-wider">Low Stock Items</p>
+              <h3 class="f-w-800 m-b-0 kpi-value">{{ lowStockAlertsCount }} Alerts</h3>
             </div>
-          </mat-card-content>
+            <div class="kpi-icon-orb"><mat-icon>warning</mat-icon></div>
+          </div>
         </mat-card>
       </div>
       <div class="col-lg-3 col-sm-6 animate-fade-in-up delay-4">
-        <mat-card class="cardWithShadow stats-kpi border-left-danger">
-          <mat-card-content class="p-20">
-            <div class="d-flex align-items-center justify-content-between">
-              <div>
-                <p class="f-s-12 text-muted m-b-4 text-uppercase f-w-600">Pending Approvals</p>
-                <h3 class="f-w-700 m-b-0">{{ pendingApprovalsCount }} Products</h3>
-              </div>
-              <div class="kpi-icon bg-light-danger rounded-8 p-12"><mat-icon class="text-danger">pending_actions</mat-icon></div>
+        <mat-card class="cardWithShadow stats-kpi kpi-danger">
+          <div class="kpi-inner-glass">
+            <div>
+              <p class="f-s-12 text-muted m-b-4 text-uppercase f-w-700 tracking-wider">Pending Approvals</p>
+              <h3 class="f-w-800 m-b-0 kpi-value">{{ pendingApprovalsCount }} Products</h3>
             </div>
-          </mat-card-content>
+            <div class="kpi-icon-orb"><mat-icon>pending_actions</mat-icon></div>
+          </div>
         </mat-card>
       </div>
     </div>
 
     <!-- Analytics Charts Row -->
     <div class="row m-b-24 animate-fade-in-up delay-5">
-      <div class="col-lg-8">
-        <app-profit-expenses></app-profit-expenses>
+      <div class="col-lg-8 m-b-24 m-lg-b-0">
+        <div class="dashboard-graph-card h-100">
+          <app-profit-expenses></app-profit-expenses>
+        </div>
       </div>
-      <div class="col-lg-4">
-        <app-traffic-distribution></app-traffic-distribution>
-        <app-product-sales></app-product-sales>
+      <div class="col-lg-4 d-flex flex-column gap-24">
+        <div class="dashboard-graph-card">
+          <app-traffic-distribution></app-traffic-distribution>
+        </div>
+        <div class="dashboard-graph-card">
+          <app-product-sales></app-product-sales>
+        </div>
       </div>
     </div>
 
@@ -113,21 +111,29 @@
             @if (recentAuditLogs.length > 0) {
               <div class="timeline-log-list">
                 @for(log of recentAuditLogs; track log.id) {
-                  <div class="timeline-log-item d-flex gap-16 m-b-16">
+                  <div class="timeline-log-item modern-log-card d-flex gap-16 m-b-12 animate-fade-in-up" [style.animation-delay]="($index * 0.1) + 's'">
                     <div class="timeline-indicator-box">
                       <span class="timeline-dot" [ngClass]="{
-                        'bg-primary': log.action === 'CREATE',
-                        'bg-warning': log.action === 'UPDATE',
-                        'bg-danger': log.action === 'DELETE'
+                        'border-primary text-primary': log.action === 'CREATE',
+                        'border-warning text-warning': log.action === 'UPDATE',
+                        'border-danger text-danger': log.action === 'DELETE'
                       }"></span>
-                      <span class="timeline-bar"></span>
+                      <span class="timeline-bar" [ngClass]="{
+                        'text-primary': log.action === 'CREATE',
+                        'text-warning': log.action === 'UPDATE',
+                        'text-danger': log.action === 'DELETE'
+                      }"></span>
                     </div>
-                    <div class="timeline-log-body w-100 p-b-8 b-b-1">
-                      <div class="d-flex justify-content-between align-items-center">
-                        <span class="f-w-600 f-s-13">{{ log.module }} - {{ log.action }}</span>
-                        <span class="f-s-11 text-muted">{{ log.createdAt | date:'shortTime' }}</span>
+                    <div class="timeline-log-body w-100">
+                      <div class="d-flex justify-content-between align-items-center m-b-4">
+                        <span class="f-w-700 f-s-13 text-uppercase tracking-wider" [ngClass]="{
+                            'text-primary': log.action === 'CREATE',
+                            'text-warning': log.action === 'UPDATE',
+                            'text-danger': log.action === 'DELETE'
+                          }">{{ log.action }} <span class="text-muted fw-normal">— {{ log.module }}</span></span>
+                        <span class="f-s-11 text-muted f-w-600 bg-light-primary rounded-8 px-2 py-1">{{ log.createdAt | date:'shortTime' }}</span>
                       </div>
-                      <p class="f-s-12 text-muted m-b-0 m-t-4">Record Reference: #{{ log.recordId }} — Executed by User #{{ log.userId }}</p>
+                      <p class="f-s-13 text-light-dark m-b-0">Ref: <span class="f-w-600 text-dark">#{{ log.recordId }}</span> — Executed by User #{{ log.userId }}</p>
                     </div>
                   </div>
                 }
@@ -149,34 +155,54 @@
             <mat-card-title class="m-b-0 f-w-600 f-s-15">Quick Portal Navigation</mat-card-title>
           </mat-card-header>
           <mat-card-content class="p-24 b-t-1">
-            <div class="admin-quick-actions-grid d-flex flex-column gap-12">
-              <a routerLink="/components/attendance" class="action-row-btn d-flex align-items-center justify-content-between p-12 rounded-8">
-                <div class="d-flex align-items-center gap-12">
-                  <div class="action-btn-icon bg-light-primary p-8 rounded-6"><mat-icon class="text-primary icon-20">history</mat-icon></div>
-                  <span class="f-w-600 f-s-13">View Attendance Terminal</span>
-                </div>
-                <mat-icon class="text-muted icon-16">chevron_right</mat-icon>
+            <div class="admin-quick-actions-grid">
+              <a routerLink="/components/attendance" class="action-row-btn animate-fade-in-up delay-1">
+                <div class="action-btn-icon bg-light-primary text-primary"><mat-icon>history</mat-icon></div>
+                <span class="f-w-700 f-s-14 m-b-4 text-dark">Attendance</span>
+                <span class="f-s-12 text-muted">View terminal logs</span>
+                <mat-icon class="action-chevron text-muted icon-20">chevron_right</mat-icon>
               </a>
-              <a routerLink="/components/employees" class="action-row-btn d-flex align-items-center justify-content-between p-12 rounded-8">
-                <div class="d-flex align-items-center gap-12">
-                  <div class="action-btn-icon bg-light-success p-8 rounded-6"><mat-icon class="text-success icon-20">badge</mat-icon></div>
-                  <span class="f-w-600 f-s-13">Manage Company Employees</span>
-                </div>
-                <mat-icon class="text-muted icon-16">chevron_right</mat-icon>
+              <a routerLink="/components/employees" class="action-row-btn animate-fade-in-up delay-2">
+                <div class="action-btn-icon bg-light-success text-success"><mat-icon>badge</mat-icon></div>
+                <span class="f-w-700 f-s-14 m-b-4 text-dark">Employees</span>
+                <span class="f-s-12 text-muted">Manage workforce</span>
+                <mat-icon class="action-chevron text-muted icon-20">chevron_right</mat-icon>
               </a>
-              <a routerLink="/components/payroll" class="action-row-btn d-flex align-items-center justify-content-between p-12 rounded-8">
-                <div class="d-flex align-items-center gap-12">
-                  <div class="action-btn-icon bg-light-warn p-8 rounded-6"><mat-icon class="text-warning icon-20">payments</mat-icon></div>
-                  <span class="f-w-600 f-s-13">Generate Monthly Payrolls</span>
-                </div>
-                <mat-icon class="text-muted icon-16">chevron_right</mat-icon>
+              <a routerLink="/components/payroll" class="action-row-btn animate-fade-in-up delay-3">
+                <div class="action-btn-icon bg-light-warn text-warning"><mat-icon>payments</mat-icon></div>
+                <span class="f-w-700 f-s-14 m-b-4 text-dark">Payrolls</span>
+                <span class="f-s-12 text-muted">Generate slips</span>
+                <mat-icon class="action-chevron text-muted icon-20">chevron_right</mat-icon>
               </a>
-              <a routerLink="/components/audit-logs" class="action-row-btn d-flex align-items-center justify-content-between p-12 rounded-8">
-                <div class="d-flex align-items-center gap-12">
-                  <div class="action-btn-icon bg-light-danger p-8 rounded-6"><mat-icon class="text-danger icon-20">receipt_long</mat-icon></div>
-                  <span class="f-w-600 f-s-13">Audit Logs Registry</span>
-                </div>
-                <mat-icon class="text-muted icon-16">chevron_right</mat-icon>
+              <a routerLink="/components/audit-logs" class="action-row-btn animate-fade-in-up delay-4">
+                <div class="action-btn-icon bg-light-danger text-danger"><mat-icon>receipt_long</mat-icon></div>
+                <span class="f-w-700 f-s-14 m-b-4 text-dark">Audit Logs</span>
+                <span class="f-s-12 text-muted">System registry</span>
+                <mat-icon class="action-chevron text-muted icon-20">chevron_right</mat-icon>
+              </a>
+              <a routerLink="/components/orders" class="action-row-btn animate-fade-in-up delay-5">
+                <div class="action-btn-icon bg-light-info text-info"><mat-icon>shopping_cart</mat-icon></div>
+                <span class="f-w-700 f-s-14 m-b-4 text-dark">Orders</span>
+                <span class="f-s-12 text-muted">Manage purchases</span>
+                <mat-icon class="action-chevron text-muted icon-20">chevron_right</mat-icon>
+              </a>
+              <a routerLink="/components/product" class="action-row-btn animate-fade-in-up delay-6">
+                <div class="action-btn-icon bg-light-primary text-primary" style="background: rgba(139, 92, 246, 0.1); color: #8b5cf6;"><mat-icon>inventory_2</mat-icon></div>
+                <span class="f-w-700 f-s-14 m-b-4 text-dark">Products</span>
+                <span class="f-s-12 text-muted">Stock catalog</span>
+                <mat-icon class="action-chevron text-muted icon-20">chevron_right</mat-icon>
+              </a>
+              <a routerLink="/components/category" class="action-row-btn animate-fade-in-up delay-7">
+                <div class="action-btn-icon bg-light-success text-success" style="background: rgba(236, 72, 153, 0.1); color: #ec4899;"><mat-icon>category</mat-icon></div>
+                <span class="f-w-700 f-s-14 m-b-4 text-dark">Categories</span>
+                <span class="f-s-12 text-muted">Groupings & tags</span>
+                <mat-icon class="action-chevron text-muted icon-20">chevron_right</mat-icon>
+              </a>
+              <a routerLink="/components/invoices" class="action-row-btn animate-fade-in-up delay-8">
+                <div class="action-btn-icon bg-light-warn text-warning" style="background: rgba(16, 185, 129, 0.1); color: #10b981;"><mat-icon>receipt</mat-icon></div>
+                <span class="f-w-700 f-s-14 m-b-4 text-dark">Invoices</span>
+                <span class="f-s-12 text-muted">Billing records</span>
+                <mat-icon class="action-chevron text-muted icon-20">chevron_right</mat-icon>
               </a>
             </div>
           </mat-card-content>
@@ -188,58 +214,50 @@
   <!-- ══════════════════════════════════════════════════════════════════════════ -->
   <!-- 2. BRANCH MANAGER / SHOPKEEPER DASHBOARD PANEL -->
   <!-- ══════════════════════════════════════════════════════════════════════════ -->
-  @if (userRole === 'Branch_Manager' || userRole === 'Shopkeeper' || userRole === 'Branch') {
+  @if (isBranchDashboard) {
     <div class="row m-b-24">
       <div class="col-lg-3 col-sm-6 animate-fade-in-up delay-1">
-        <mat-card class="cardWithShadow stats-kpi border-left-primary">
-          <mat-card-content class="p-20">
-            <div class="d-flex align-items-center justify-content-between">
-              <div>
-                <p class="f-s-12 text-muted m-b-4 text-uppercase f-w-600">Branch Staff</p>
-                <h3 class="f-w-700 m-b-0">{{ totalEmployees }} Staff</h3>
-              </div>
-              <div class="kpi-icon bg-light-primary rounded-8 p-12"><mat-icon class="text-primary">badge</mat-icon></div>
+        <mat-card class="cardWithShadow stats-kpi kpi-primary">
+          <div class="kpi-inner-glass">
+            <div>
+              <p class="f-s-12 text-muted m-b-4 text-uppercase f-w-700 tracking-wider">Branch Staff</p>
+              <h3 class="f-w-800 m-b-0 kpi-value">{{ totalEmployees }} Staff</h3>
             </div>
-          </mat-card-content>
+            <div class="kpi-icon-orb"><mat-icon>badge</mat-icon></div>
+          </div>
         </mat-card>
       </div>
       <div class="col-lg-3 col-sm-6 animate-fade-in-up delay-2">
-        <mat-card class="cardWithShadow stats-kpi border-left-success">
-          <mat-card-content class="p-20">
-            <div class="d-flex align-items-center justify-content-between">
-              <div>
-                <p class="f-s-12 text-muted m-b-4 text-uppercase f-w-600">Staff Active Today</p>
-                <h3 class="f-w-700 m-b-0">{{ presentTodayCount }} Present</h3>
-              </div>
-              <div class="kpi-icon bg-light-success rounded-8 p-12"><mat-icon class="text-success">done_all</mat-icon></div>
+        <mat-card class="cardWithShadow stats-kpi kpi-success">
+          <div class="kpi-inner-glass">
+            <div>
+              <p class="f-s-12 text-muted m-b-4 text-uppercase f-w-700 tracking-wider">Staff Active Today</p>
+              <h3 class="f-w-800 m-b-0 kpi-value">{{ presentTodayCount }} Present</h3>
             </div>
-          </mat-card-content>
+            <div class="kpi-icon-orb"><mat-icon>done_all</mat-icon></div>
+          </div>
         </mat-card>
       </div>
       <div class="col-lg-3 col-sm-6 animate-fade-in-up delay-3">
-        <mat-card class="cardWithShadow stats-kpi border-left-warning">
-          <mat-card-content class="p-20">
-            <div class="d-flex align-items-center justify-content-between">
-              <div>
-                <p class="f-s-12 text-muted m-b-4 text-uppercase f-w-600">Leave Approvals</p>
-                <h3 class="f-w-700 m-b-0">{{ pendingLeaves.length }} Pending</h3>
-              </div>
-              <div class="kpi-icon bg-light-warning rounded-8 p-12"><mat-icon class="text-warning">time_to_leave</mat-icon></div>
+        <mat-card class="cardWithShadow stats-kpi kpi-warning">
+          <div class="kpi-inner-glass">
+            <div>
+              <p class="f-s-12 text-muted m-b-4 text-uppercase f-w-700 tracking-wider">Leave Approvals</p>
+              <h3 class="f-w-800 m-b-0 kpi-value">{{ pendingLeaves.length }} Pending</h3>
             </div>
-          </mat-card-content>
+            <div class="kpi-icon-orb"><mat-icon>time_to_leave</mat-icon></div>
+          </div>
         </mat-card>
       </div>
       <div class="col-lg-3 col-sm-6 animate-fade-in-up delay-4">
-        <mat-card class="cardWithShadow stats-kpi border-left-info">
-          <mat-card-content class="p-20">
-            <div class="d-flex align-items-center justify-content-between">
-              <div>
-                <p class="f-s-12 text-muted m-b-4 text-uppercase f-w-600">Scope Branch</p>
-                <h3 class="f-w-700 m-b-0 text-truncate max-w-150">{{ branchName || 'Loading...' }}</h3>
-              </div>
-              <div class="kpi-icon bg-light-info rounded-8 p-12"><mat-icon class="text-info">store</mat-icon></div>
+        <mat-card class="cardWithShadow stats-kpi kpi-primary">
+          <div class="kpi-inner-glass">
+            <div>
+              <p class="f-s-12 text-muted m-b-4 text-uppercase f-w-700 tracking-wider">Scope Branch</p>
+              <h3 class="f-w-800 m-b-0 kpi-value text-truncate max-w-150">{{ branchName || 'Loading...' }}</h3>
             </div>
-          </mat-card-content>
+            <div class="kpi-icon-orb"><mat-icon>store</mat-icon></div>
+          </div>
         </mat-card>
       </div>
     </div>
@@ -316,7 +334,7 @@
   <!-- ══════════════════════════════════════════════════════════════════════════ -->
   <!-- 3. EMPLOYEE / DELIVERY BOY PERSONAL DASHBOARD PANEL -->
   <!-- ══════════════════════════════════════════════════════════════════════════ -->
-  @if (userRole === 'Employee' || userRole === 'Delivery_Boy') {
+  @if (isEmployeeDashboard) {
     <div class="row m-b-24">
       <!-- Active Shift Box -->
       <div class="col-lg-6 animate-fade-in-up delay-1">
@@ -428,45 +446,39 @@
   <!-- ══════════════════════════════════════════════════════════════════════════ -->
   <!-- 4. CUSTOMER VIEW -->
   <!-- ══════════════════════════════════════════════════════════════════════════ -->
-  @if (userRole === 'Customer') {
+  @if (isCustomerDashboard) {
     <div class="row m-b-24">
       <div class="col-lg-4 col-sm-12">
-        <mat-card class="cardWithShadow stats-kpi border-left-primary">
-          <mat-card-content class="p-20">
-            <div class="d-flex align-items-center justify-content-between">
-              <div>
-                <p class="f-s-12 text-muted m-b-4 text-uppercase f-w-600">Your Orders</p>
-                <h3 class="f-w-700 m-b-0">{{ customerOrders.length }} Items</h3>
-              </div>
-              <div class="kpi-icon bg-light-primary rounded-8 p-12"><mat-icon class="text-primary">local_shipping</mat-icon></div>
+        <mat-card class="cardWithShadow stats-kpi kpi-primary">
+          <div class="kpi-inner-glass">
+            <div>
+              <p class="f-s-12 text-muted m-b-4 text-uppercase f-w-700 tracking-wider">Your Orders</p>
+              <h3 class="f-w-800 m-b-0 kpi-value">{{ customerOrders.length }} Items</h3>
             </div>
-          </mat-card-content>
+            <div class="kpi-icon-orb"><mat-icon>local_shipping</mat-icon></div>
+          </div>
         </mat-card>
       </div>
       <div class="col-lg-4 col-sm-12">
-        <mat-card class="cardWithShadow stats-kpi border-left-warning">
-          <mat-card-content class="p-20">
-            <div class="d-flex align-items-center justify-content-between">
-              <div>
-                <p class="f-s-12 text-muted m-b-4 text-uppercase f-w-600">Loyalty Rewards</p>
-                <h3 class="f-w-700 m-b-0">{{ loyaltyPoints }} Points</h3>
-              </div>
-              <div class="kpi-icon bg-light-warning rounded-8 p-12"><mat-icon class="text-warning">stars</mat-icon></div>
+        <mat-card class="cardWithShadow stats-kpi kpi-warning">
+          <div class="kpi-inner-glass">
+            <div>
+              <p class="f-s-12 text-muted m-b-4 text-uppercase f-w-700 tracking-wider">Loyalty Rewards</p>
+              <h3 class="f-w-800 m-b-0 kpi-value">{{ loyaltyPoints }} Points</h3>
             </div>
-          </mat-card-content>
+            <div class="kpi-icon-orb"><mat-icon>stars</mat-icon></div>
+          </div>
         </mat-card>
       </div>
       <div class="col-lg-4 col-sm-12">
-        <mat-card class="cardWithShadow stats-kpi border-left-success">
-          <mat-card-content class="p-20">
-            <div class="d-flex align-items-center justify-content-between">
-              <div>
-                <p class="f-s-12 text-muted m-b-4 text-uppercase f-w-600">Shop Catalog</p>
-                <h3 class="f-w-700 m-b-0">Active Store</h3>
-              </div>
-              <div class="kpi-icon bg-light-success rounded-8 p-12"><mat-icon class="text-success">shopping_bag</mat-icon></div>
+        <mat-card class="cardWithShadow stats-kpi kpi-success">
+          <div class="kpi-inner-glass">
+            <div>
+              <p class="f-s-12 text-muted m-b-4 text-uppercase f-w-700 tracking-wider">Shop Catalog</p>
+              <h3 class="f-w-800 m-b-0 kpi-value">Active Store</h3>
             </div>
-          </mat-card-content>
+            <div class="kpi-icon-orb"><mat-icon>shopping_bag</mat-icon></div>
+          </div>
         </mat-card>
       </div>
     </div>

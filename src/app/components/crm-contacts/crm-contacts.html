@@ -1,5 +1,5 @@
 <div class="crm-root">
-  
+
   <div class="stats-row">
     <div class="stat-card total">
       <div class="card-glow"></div>
@@ -28,18 +28,23 @@
   </div>
 
   <div class="crm-panel">
-    
-    <div class="banner success" *ngIf="successMessage">
-      ✨ {{ successMessage }}
-    </div>
-    <div class="banner error" *ngIf="errorMessage">
-      ⚠️ {{ errorMessage }}
-    </div>
+
+    @if (successMessage) {
+      <div class="banner success">
+        ✨ {{ successMessage }}
+      </div>
+    }
+    @if (errorMessage) {
+      <div class="banner error">
+        ⚠️ {{ errorMessage }}
+      </div>
+    }
 
     <div class="toolbar">
       <div class="search-box">
         <span class="search-icon">🔍</span>
-        <input type="text" [(ngModel)]="searchQuery" (input)="onFilterChange()" placeholder="Search by company, owner, email or phone...">
+        <input type="text" [(ngModel)]="searchQuery" (input)="onFilterChange()"
+          placeholder="Search by company, owner, email or phone...">
       </div>
 
       <div class="filter-group">
@@ -73,84 +78,138 @@
       </div>
     </div>
 
-    <div class="bulk-actions-row" *ngIf="selectedIds.size > 0">
-      <span class="selected-count">Selected {{ selectedIds.size }} items:</span>
-      <button type="button" class="btn-bulk approve" (click)="performBulkAction('approve')">Approve All</button>
-      <button type="button" class="btn-bulk reject" (click)="performBulkAction('reject')">Reject All</button>
-      <button type="button" class="btn-bulk delete" (click)="performBulkAction('delete')">Delete All</button>
-    </div>
+    @if (selectedIds.size > 0) {
+      <div class="bulk-actions-row">
+        <span class="selected-count">Selected {{ selectedIds.size }} items:</span>
+        <button type="button" class="btn-bulk approve" (click)="performBulkAction('approve')">Approve All</button>
+        <button type="button" class="btn-bulk reject" (click)="performBulkAction('reject')">Reject All</button>
+        <button type="button" class="btn-bulk delete" (click)="performBulkAction('delete')">Delete All</button>
+      </div>
+    }
 
     <div class="table-container">
-      <div class="loading-overlay" *ngIf="isLoading">
-        <div class="loader"></div>
-        <span>Loading lead database...</span>
-      </div>
+      @if (isLoading) {
+        <div class="loading-overlay">
+          <div class="loader"></div>
+          <span>Loading lead database...</span>
+        </div>
+      }
 
-      <table class="crm-table">
-        <thead>
-          <tr>
-            <th class="col-chk">
-              <input type="checkbox" (change)="toggleSelectAll($event)">
-            </th>
-            <th (click)="toggleSort('companyName')">Company Name <span class="sort-icon">{{ sortBy === 'companyName' ? (sortOrder === 'ASC' ? '▲' : '▼') : '↕' }}</span></th>
-            <th (click)="toggleSort('ownerName')">Owner Name <span class="sort-icon">{{ sortBy === 'ownerName' ? (sortOrder === 'ASC' ? '▲' : '▼') : '↕' }}</span></th>
-            <th (click)="toggleSort('email')">Contact Email <span class="sort-icon">{{ sortBy === 'email' ? (sortOrder === 'ASC' ? '▲' : '▼') : '↕' }}</span></th>
-            <th>Phone</th>
-            <th (click)="toggleSort('preferredPlan')">Preferred Plan <span class="sort-icon">{{ sortBy === 'preferredPlan' ? (sortOrder === 'ASC' ? '▲' : '▼') : '↕' }}</span></th>
-            <th>Billing Cycle</th>
-            <th>Status</th>
-            <th (click)="toggleSort('createdAt')">Date Registered <span class="sort-icon">{{ sortBy === 'createdAt' ? (sortOrder === 'ASC' ? '▲' : '▼') : '↕' }}</span></th>
-            <th class="col-actions">Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let lead of leads" [class.selected]="isSelected(lead.id)" [class.deleted]="lead.isDeleted">
-            <td class="col-chk">
-              <input type="checkbox" [checked]="isSelected(lead.id)" (change)="toggleSelect(lead.id)">
-            </td>
-            <td>
-              <div class="company-cell">
-                <span class="name">{{ lead.companyName }}</span>
-                <span class="sub">{{ lead.businessName }} · {{ lead.businessType }}</span>
-              </div>
-            </td>
-            <td>{{ lead.ownerName }}</td>
-            <td>
-              <div class="email-cell">
-                <span class="email">{{ lead.email }}</span>
-                <span class="badge-verified" [class.verified]="lead.emailVerified">
-                  {{ lead.emailVerified ? 'Verified' : 'Unverified' }}
-                </span>
-              </div>
-            </td>
-            <td>{{ lead.phone }}</td>
-            <td>
-              <span class="badge-plan" [class.trial]="lead.preferredPlan.includes('Trial')" [class.professional]="lead.preferredPlan === 'Professional'">
-                {{ lead.preferredPlan }}
+      <table mat-table [dataSource]="leads" matSort (matSortChange)="sortData($event)" class="crm-table">
+        
+        <!-- Checkbox Column -->
+        <ng-container matColumnDef="select">
+          <th mat-header-cell *matHeaderCellDef class="col-chk">
+            <mat-checkbox (change)="toggleSelectAll($event)"></mat-checkbox>
+          </th>
+          <td mat-cell *matCellDef="let lead" class="col-chk">
+            <mat-checkbox [checked]="isSelected(lead.id)" (change)="toggleSelect(lead.id)"></mat-checkbox>
+          </td>
+        </ng-container>
+
+        <!-- Company Column -->
+        <ng-container matColumnDef="company">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header="companyName"> Company Name </th>
+          <td mat-cell *matCellDef="let lead">
+            <div class="company-cell">
+              <span class="name">{{ lead.companyName }}</span>
+              <span class="sub">{{ lead.businessName }} · {{ lead.businessType }}</span>
+            </div>
+          </td>
+        </ng-container>
+
+        <!-- Owner Column -->
+        <ng-container matColumnDef="owner">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header="ownerName"> Owner Name </th>
+          <td mat-cell *matCellDef="let lead"> {{ lead.ownerName }} </td>
+        </ng-container>
+
+        <!-- Email Column -->
+        <ng-container matColumnDef="email">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header="email"> Contact Email </th>
+          <td mat-cell *matCellDef="let lead">
+            <div class="email-cell">
+              <span class="email">{{ lead.email }}</span>
+              <span class="badge-verified" [class.verified]="lead.emailVerified">
+                {{ lead.emailVerified ? 'Verified' : 'Unverified' }}
               </span>
-            </td>
-            <td>{{ lead.billingCycle }}</td>
-            <td>
-              <span class="badge-status" [class.pending]="lead.status === 'PENDING'" [class.approved]="lead.status === 'APPROVED'" [class.converted]="lead.status === 'CONVERTED'" [class.rejected]="lead.status === 'REJECTED'">
-                {{ lead.status }}
-              </span>
-            </td>
-            <td>{{ lead.createdAt | date:'dd MMM yyyy, HH:mm' }}</td>
-            <td class="col-actions">
-              <div class="action-btns" *ngIf="!lead.isDeleted">
-                <button type="button" class="btn-action approve" *ngIf="lead.status === 'PENDING'" (click)="approveLead(lead.id)" title="Approve Lead">Approve</button>
-                <button type="button" class="btn-action reject" *ngIf="lead.status === 'PENDING'" (click)="rejectLead(lead.id)" title="Reject Lead">Reject</button>
+            </div>
+          </td>
+        </ng-container>
+
+        <!-- Phone Column -->
+        <ng-container matColumnDef="phone">
+          <th mat-header-cell *matHeaderCellDef> Phone </th>
+          <td mat-cell *matCellDef="let lead"> {{ lead.phone }} </td>
+        </ng-container>
+
+        <!-- Plan Column -->
+        <ng-container matColumnDef="plan">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header="preferredPlan"> Preferred Plan </th>
+          <td mat-cell *matCellDef="let lead">
+            <span class="badge-plan" [class.trial]="lead.preferredPlan.includes('Trial')"
+              [class.professional]="lead.preferredPlan === 'Professional'">
+              {{ lead.preferredPlan }}
+            </span>
+          </td>
+        </ng-container>
+
+        <!-- Billing Column -->
+        <ng-container matColumnDef="billing">
+          <th mat-header-cell *matHeaderCellDef> Billing Cycle </th>
+          <td mat-cell *matCellDef="let lead"> {{ lead.billingCycle }} </td>
+        </ng-container>
+
+        <!-- Status Column -->
+        <ng-container matColumnDef="status">
+          <th mat-header-cell *matHeaderCellDef> Status </th>
+          <td mat-cell *matCellDef="let lead">
+            <span class="badge-status" [class.pending]="lead.status === 'PENDING'"
+              [class.approved]="lead.status === 'APPROVED'" [class.converted]="lead.status === 'CONVERTED'"
+              [class.rejected]="lead.status === 'REJECTED'">
+              {{ lead.status }}
+            </span>
+          </td>
+        </ng-container>
+
+        <!-- Date Column -->
+        <ng-container matColumnDef="date">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header="createdAt"> Date Registered </th>
+          <td mat-cell *matCellDef="let lead"> {{ lead.createdAt | date:'dd MMM yyyy, HH:mm' }} </td>
+        </ng-container>
+
+        <!-- Actions Column -->
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef class="col-actions"> Actions </th>
+          <td mat-cell *matCellDef="let lead" class="col-actions">
+            @if (!lead.isDeleted) {
+              <div class="action-btns">
+                @if (lead.status === 'PENDING') {
+                  <button type="button" class="btn-action approve" (click)="approveLead(lead.id)" title="Approve Lead">Approve</button>
+                  <button type="button" class="btn-action reject" (click)="rejectLead(lead.id)" title="Reject Lead">Reject</button>
+                }
                 <button type="button" class="btn-action delete" (click)="deleteLead(lead.id)" title="Soft Delete">Delete</button>
               </div>
-              <div class="action-btns" *ngIf="lead.isDeleted">
+            }
+            @if (lead.isDeleted) {
+              <div class="action-btns">
                 <button type="button" class="btn-action restore" (click)="restoreLead(lead.id)" title="Restore Lead">Restore</button>
               </div>
-            </td>
-          </tr>
-          <tr *ngIf="leads.length === 0 && !isLoading">
-            <td colspan="10" class="empty-row">No lead registrations found matching the filters.</td>
-          </tr>
-        </tbody>
+            }
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;" [class.selected]="isSelected(row.id)" [class.deleted]="row.isDeleted"></tr>
+
+        <!-- No Data Row -->
+        <tr class="mat-row empty-row" *matNoDataRow>
+          <td class="mat-cell" colspan="10">
+            @if (!isLoading) {
+              <div>No lead registrations found matching the filters.</div>
+            }
+          </td>
+        </tr>
       </table>
     </div>
 

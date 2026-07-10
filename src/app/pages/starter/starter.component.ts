@@ -72,6 +72,29 @@ export class StarterComponent implements OnInit {
     this.loadDashboardData();
   }
 
+  // Formats raw role strings for display (e.g. 'test' -> 'Test', 'Super_Admin' -> 'Super Admin')
+  get displayRole(): string {
+    if (!this.userRole) return 'Unknown';
+    return this.userRole.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+  }
+
+  get isBranchDashboard(): boolean {
+    return this.userRole === UserType.BRANCH_MANAGER || this.userRole === UserType.SHOPKEEPER || this.userRole === 'Branch';
+  }
+
+  get isEmployeeDashboard(): boolean {
+    return this.userRole === UserType.EMPLOYEE || this.userRole === UserType.DELIVERY_BOY;
+  }
+
+  get isCustomerDashboard(): boolean {
+    return this.userRole === UserType.CUSTOMER;
+  }
+
+  get isAdminDashboard(): boolean {
+    // If not matching any other specific dashboard, fallback to Admin to prevent a blank screen
+    return !this.isBranchDashboard && !this.isEmployeeDashboard && !this.isCustomerDashboard;
+  }
+
   loadDashboardData() {
     this.loading = true;
 
@@ -90,6 +113,10 @@ export class StarterComponent implements OnInit {
     // Load customer metrics
     else if (this.userRole === UserType.CUSTOMER) {
       this.loadCustomerMetrics();
+    }
+    // Fallback for unknown/test roles so dashboard is not empty
+    else {
+      this.loadAdminMetrics();
     }
 
     this.loading = false;

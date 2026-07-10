@@ -3,31 +3,37 @@
     <mat-card class="cardWithShadow overflow-hidden">
       <mat-card-header class="d-flex align-items-center justify-content-between p-24 bg-light-primary">
         <mat-card-title class="m-b-0">Notification Center</mat-card-title>
-        <button mat-flat-button color="primary" *ngIf="notifications.length > 0" (click)="markAllAsRead()">
+        @if (notifications.length > 0) {
+        <button mat-flat-button color="primary" (click)="markAllAsRead()">
           <mat-icon>check_circle</mat-icon> Mark All as Read
         </button>
+        }
       </mat-card-header>
 
       <mat-card-content class="p-24">
-        <div *ngIf="loading" class="text-center p-y-24">
+        @if (loading) {
+        <div class="text-center p-y-24">
           <p class="text-muted">Loading notifications...</p>
         </div>
+        }
 
-        <div *ngIf="!loading && notifications.length === 0" class="text-center p-y-48">
+        @if (!loading && notifications.length === 0) {
+        <div class="text-center p-y-48">
           <mat-icon style="font-size: 48px; width: 48px; height: 48px;" class="text-muted">notifications_off</mat-icon>
           <h4 class="m-t-16 text-muted">No notifications found</h4>
           <p class="text-muted">You're all caught up!</p>
         </div>
+        }
 
-        <div *ngIf="!loading && notifications.length > 0" class="notification-list">
-          <div *ngFor="let item of notifications" 
-               [class.unread]="!item.is_read" 
-               (click)="markAsRead(item)" 
-               class="notification-item d-flex align-items-center justify-content-between p-16 m-b-12 rounded border">
-            
+        @if (!loading && notifications.length > 0) {
+        <div class="notification-list">
+          @for (item of notifications; track item) {
+          <div [class.unread]="!item.is_read" (click)="markAsRead(item)"
+            class="notification-item d-flex align-items-center justify-content-between p-16 m-b-12 rounded border">
+
             <div class="d-flex align-items-center">
               <div class="icon-wrapper m-r-16 rounded-circle d-flex align-items-center justify-content-center p-8"
-                   [ngClass]="item.is_read ? 'bg-light' : 'bg-light-primary'">
+                [ngClass]="item.is_read ? 'bg-light' : 'bg-light-primary'">
                 <mat-icon [class]="getClassForType(item.type)">{{ getIconForType(item.type) }}</mat-icon>
               </div>
               <div>
@@ -41,14 +47,20 @@
             </div>
 
             <div class="actions">
-              <button mat-icon-button *ngIf="!item.is_read" (click)="markAsRead(item); $event.stopPropagation()" title="Mark as read">
+              @if (!item.is_read) {
+              <button mat-icon-button (click)="markAsRead(item); $event.stopPropagation()" title="Mark as read">
                 <mat-icon color="primary">done</mat-icon>
               </button>
-              <mat-icon *ngIf="item.is_read" class="text-success" title="Read">done_all</mat-icon>
+              }
+              @if (item.is_read) {
+              <mat-icon class="text-success" title="Read">done_all</mat-icon>
+              }
             </div>
-            
+
           </div>
+          }
         </div>
+        }
       </mat-card-content>
     </mat-card>
   </div>

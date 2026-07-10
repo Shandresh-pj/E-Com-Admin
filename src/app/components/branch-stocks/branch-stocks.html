@@ -34,7 +34,7 @@
             <mat-label class="f-w-600 m-b-8 d-block">Company <span class="text-danger">*</span></mat-label>
             <mat-form-field appearance="outline" class="w-100">
               <mat-select formControlName="company_id" placeholder="Select Company">
-                @for(c of companies; track c.id) {
+                @for (c of companies; track c.id) {
                   <mat-option [value]="c.id">{{ c.name }}</mat-option>
                 }
               </mat-select>
@@ -46,7 +46,7 @@
             <mat-label class="f-w-600 m-b-8 d-block">Branch <span class="text-danger">*</span></mat-label>
             <mat-form-field appearance="outline" class="w-100">
               <mat-select formControlName="branch_name" placeholder="Select Branch">
-                @for(b of branches; track b.id) {
+                @for (b of branches; track b.id) {
                   <mat-option [value]="b.name">{{ b.name }}</mat-option>
                 }
               </mat-select>
@@ -58,7 +58,7 @@
             <mat-label class="f-w-600 m-b-8 d-block">Product <span class="text-danger">*</span></mat-label>
             <mat-form-field appearance="outline" class="w-100">
               <mat-select formControlName="product_id" placeholder="Select Product">
-                @for(p of products; track p.id) {
+                @for (p of products; track p.id) {
                   <mat-option [value]="p.id">{{ p.name }}</mat-option>
                 }
               </mat-select>
@@ -102,7 +102,7 @@
             <mat-label class="f-w-600 m-b-8 d-block">From Branch <span class="text-danger">*</span></mat-label>
             <mat-form-field appearance="outline" class="w-100">
               <mat-select formControlName="from_branch" placeholder="Select Source Branch">
-                @for(b of branches; track b.id) {
+                @for (b of branches; track b.id) {
                   <mat-option [value]="b.name">{{ b.name }}</mat-option>
                 }
               </mat-select>
@@ -114,7 +114,7 @@
             <mat-label class="f-w-600 m-b-8 d-block">To Branch <span class="text-danger">*</span></mat-label>
             <mat-form-field appearance="outline" class="w-100">
               <mat-select formControlName="to_branch" placeholder="Select Destination Branch">
-                @for(b of branches; track b.id) {
+                @for (b of branches; track b.id) {
                   <mat-option [value]="b.name">{{ b.name }}</mat-option>
                 }
               </mat-select>
@@ -126,7 +126,7 @@
             <mat-label class="f-w-600 m-b-8 d-block">Product <span class="text-danger">*</span></mat-label>
             <mat-form-field appearance="outline" class="w-100">
               <mat-select formControlName="product_id" placeholder="Select Product">
-                @for(p of products; track p.id) {
+                @for (p of products; track p.id) {
                   <mat-option [value]="p.id">{{ p.name }}</mat-option>
                 }
               </mat-select>
@@ -154,85 +154,91 @@
     <mat-card-content class="b-t-1">
 
       <!-- Branch Inventory Table -->
-      <div *ngIf="viewMode === 'inventory'" class="table-responsive">
-        <app-mat-table
-          [columns]="tableColumns"
-          [tableData]="branchStocks"
-          [showAction]="false"
-          [showView]="false"
-          [Extra_Column]="false">
-        </app-mat-table>
-      </div>
+      @if (viewMode === 'inventory') {
+        <div class="table-responsive">
+          <app-mat-table
+            [columns]="tableColumns"
+            [tableData]="branchStocks"
+            [showAction]="false"
+            [showView]="false"
+            [Extra_Column]="false">
+          </app-mat-table>
+        </div>
+      }
 
       <!-- Stock Transfer Requests Table -->
-      <div *ngIf="viewMode === 'transfers'" class="table-responsive p-24">
-        <table mat-table [dataSource]="transfers" class="w-100 text-nowrap">
+      @if (viewMode === 'transfers') {
+        <div class="table-responsive p-24">
+          <table mat-table [dataSource]="transfers" class="w-100 text-nowrap">
 
-          <ng-container matColumnDef="id">
-            <th mat-header-cell *matHeaderCellDef class="f-w-600"> No </th>
-            <td mat-cell *matCellDef="let element; let i = index"> {{ i + 1 }} </td>
-          </ng-container>
+            <ng-container matColumnDef="id">
+              <th mat-header-cell *matHeaderCellDef class="f-w-600"> No </th>
+              <td mat-cell *matCellDef="let element; let i = index"> {{ i + 1 }} </td>
+            </ng-container>
 
-          <ng-container matColumnDef="product_name">
-            <th mat-header-cell *matHeaderCellDef class="f-w-600"> Product </th>
-            <td mat-cell *matCellDef="let element"> {{ element.product_name }} </td>
-          </ng-container>
+            <ng-container matColumnDef="product_name">
+              <th mat-header-cell *matHeaderCellDef class="f-w-600"> Product </th>
+              <td mat-cell *matCellDef="let element"> {{ element.product_name }} </td>
+            </ng-container>
 
-          <ng-container matColumnDef="from_branch">
-            <th mat-header-cell *matHeaderCellDef class="f-w-600"> From Branch </th>
-            <td mat-cell *matCellDef="let element"> {{ element.from_branch }} </td>
-          </ng-container>
+            <ng-container matColumnDef="from_branch">
+              <th mat-header-cell *matHeaderCellDef class="f-w-600"> From Branch </th>
+              <td mat-cell *matCellDef="let element"> {{ element.from_branch }} </td>
+            </ng-container>
 
-          <ng-container matColumnDef="to_branch">
-            <th mat-header-cell *matHeaderCellDef class="f-w-600"> To Branch </th>
-            <td mat-cell *matCellDef="let element"> {{ element.to_branch }} </td>
-          </ng-container>
+            <ng-container matColumnDef="to_branch">
+              <th mat-header-cell *matHeaderCellDef class="f-w-600"> To Branch </th>
+              <td mat-cell *matCellDef="let element"> {{ element.to_branch }} </td>
+            </ng-container>
 
-          <ng-container matColumnDef="quantity">
-            <th mat-header-cell *matHeaderCellDef class="f-w-600"> Quantity </th>
-            <td mat-cell *matCellDef="let element"> {{ element.quantity }} </td>
-          </ng-container>
+            <ng-container matColumnDef="quantity">
+              <th mat-header-cell *matHeaderCellDef class="f-w-600"> Quantity </th>
+              <td mat-cell *matCellDef="let element"> {{ element.quantity }} </td>
+            </ng-container>
 
-          <ng-container matColumnDef="status">
-            <th mat-header-cell *matHeaderCellDef class="f-w-600"> Status </th>
-            <td mat-cell *matCellDef="let element">
-              <span class="badge font-weight-bold"
-                    [ngClass]="{
-                      'bg-light-warning text-warning': element.status === 'Pending Approval',
-                      'bg-light-success text-success': element.status === 'Approved',
-                      'bg-light-error text-error': element.status === 'Rejected'
-                    }">
-                {{ element.status }}
-              </span>
-              <span *ngIf="element.status === 'Rejected'" class="d-block text-muted f-s-12 m-t-4" style="max-width: 200px; white-space: normal;">
-                Reason: {{ element.rejection_reason }}
-              </span>
-            </td>
-          </ng-container>
+            <ng-container matColumnDef="status">
+              <th mat-header-cell *matHeaderCellDef class="f-w-600"> Status </th>
+              <td mat-cell *matCellDef="let element">
+                <span class="badge font-weight-bold"
+                      [ngClass]="{
+                        'bg-light-warning text-warning': element.status === 'Pending Approval',
+                        'bg-light-success text-success': element.status === 'Approved',
+                        'bg-light-error text-error': element.status === 'Rejected'
+                      }">
+                  {{ element.status }}
+                </span>
+                @if (element.status === 'Rejected') {
+                  <span class="d-block text-muted f-s-12 m-t-4" style="max-width: 200px; white-space: normal;">
+                    Reason: {{ element.rejection_reason }}
+                  </span>
+                }
+              </td>
+            </ng-container>
 
-          <ng-container matColumnDef="created_at">
-            <th mat-header-cell *matHeaderCellDef class="f-w-600"> Requested At </th>
-            <td mat-cell *matCellDef="let element"> {{ element.created_at | date:'medium' }} </td>
-          </ng-container>
+            <ng-container matColumnDef="created_at">
+              <th mat-header-cell *matHeaderCellDef class="f-w-600"> Requested At </th>
+              <td mat-cell *matCellDef="let element"> {{ element.created_at | date:'medium' }} </td>
+            </ng-container>
 
-          <ng-container matColumnDef="actions">
-            <th mat-header-cell *matHeaderCellDef class="f-w-600"> Review </th>
-            <td mat-cell *matCellDef="let element">
-              @if (element.status === 'Pending Approval' && isAdmin) {
-                <button mat-icon-button color="primary" (click)="approveTransfer(element.id, 'APPROVE')" title="Approve">
-                  <mat-icon>done</mat-icon>
-                </button>
-                <button mat-icon-button color="warn" (click)="rejectTransfer(element.id)" title="Reject">
-                  <mat-icon>close</mat-icon>
-                </button>
-              }
-            </td>
-          </ng-container>
+            <ng-container matColumnDef="actions">
+              <th mat-header-cell *matHeaderCellDef class="f-w-600"> Review </th>
+              <td mat-cell *matCellDef="let element">
+                @if (element.status === 'Pending Approval' && isAdmin) {
+                  <button mat-icon-button color="primary" (click)="approveTransfer(element.id, 'APPROVE')" title="Approve">
+                    <mat-icon>done</mat-icon>
+                  </button>
+                  <button mat-icon-button color="warn" (click)="rejectTransfer(element.id)" title="Reject">
+                    <mat-icon>close</mat-icon>
+                  </button>
+                }
+              </td>
+            </ng-container>
 
-          <tr mat-header-row *matHeaderRowDef="['id', 'product_name', 'from_branch', 'to_branch', 'quantity', 'status', 'created_at', 'actions']"></tr>
-          <tr mat-row *matRowDef="let row; columns: ['id', 'product_name', 'from_branch', 'to_branch', 'quantity', 'status', 'created_at', 'actions'];"></tr>
-        </table>
-      </div>
+            <tr mat-header-row *matHeaderRowDef="['id', 'product_name', 'from_branch', 'to_branch', 'quantity', 'status', 'created_at', 'actions']"></tr>
+            <tr mat-row *matRowDef="let row; columns: ['id', 'product_name', 'from_branch', 'to_branch', 'quantity', 'status', 'created_at', 'actions'];"></tr>
+          </table>
+        </div>
+      }
 
     </mat-card-content>
   }

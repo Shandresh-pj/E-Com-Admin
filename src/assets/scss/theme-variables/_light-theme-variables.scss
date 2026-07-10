@@ -20,6 +20,12 @@
 
 html .light-theme {
   color-scheme: light;
+  
+  body, .mat-typography {
+    color: var(--mat-sys-on-background);
+    background-color: var(--mat-sys-background);
+  }
+
   --mat-sys-corner-small: 7px;
   --mat-sys-corner-medium: 16px;
   --mat-sys-background: #f0f5f9;

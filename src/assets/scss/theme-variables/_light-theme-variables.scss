@@ -28,14 +28,16 @@ html .light-theme {
 
   --mat-sys-corner-small: 7px;
   --mat-sys-corner-medium: 16px;
+  
+  /* Core Colors - Liquid Glass Setup */
   --mat-sys-background: #f0f5f9;
-  --mat-sys-surface-bright: #f2f6fa;
-  --mat-sys-surface: #fff;
-  --mat-sys-surface-container: #fff;
-  --mat-sys-surface-container-low: #fff;
+  --mat-sys-surface-bright: rgba(255, 255, 255, 0.4);
+  --mat-sys-surface: rgba(255, 255, 255, 0.6);
+  --mat-sys-surface-container: rgba(255, 255, 255, 0.8);
+  --mat-sys-surface-container-low: rgba(255, 255, 255, 0.9);
   --mat-sys-on-background: #111c2d;
-  --mat-sys-outline: #e5eaef;
-  --mat-sys-outline-variant: #e5eaef;
+  --mat-sys-outline: rgba(100, 116, 139, 0.15);
+  --mat-sys-outline-variant: rgba(100, 116, 139, 0.1);
   --mdc-outlined-text-field-hover-outline-color: #dfe5ef;
   --mdc-checkbox-unselected-hover-state-layer-color: #dfe5ef;
   --mat-menu-item-hover-state-layer-color: #f6f9fc;

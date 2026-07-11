@@ -1,36 +1,100 @@
-<div class="verify-root">
-  <div class="verify-card">
-    <div class="card-stripe"></div>
+<!-- Premium Dark Glass Verify Email -->
+<div class="auth-single-root">
 
-    @if (isVerifying) {
-    <div class="state-verifying">
-      <div class="spinner"></div>
-      <h2>Verifying Email Address</h2>
-      <p>Validating registration signature, please wait...</p>
-    </div>
-    } @else if (isSuccess) {
-    <div class="state-success">
-      <div class="icon success">✓</div>
-      <h2>Email Verified Successfully!</h2>
-      <p>{{ message }}</p>
-
-      <div class="actions">
-        @if (!autoApproved) {
-        <a routerLink="/authentication/login" class="btn-primary">Go to Login</a>
-        <p class="wait-note">Once the administrator approves your request, you'll receive a password setup link.</p>
-        }
-      </div>
-    </div>
-    } @else {
-    <div class="state-failure">
-      <div class="icon failure">✗</div>
-      <h2>Verification Failed</h2>
-      <p>{{ message }}</p>
-
-      <div class="actions">
-        <a routerLink="/" class="btn-ghost">Go to Homepage</a>
-      </div>
-    </div>
-    }
+  <!-- Ambient Glowing Aurora & Particle Backdrop -->
+  <div class="auth-ambient-canvas" aria-hidden="true">
+    <div class="ambient-blob blob-purple"></div>
+    <div class="ambient-blob blob-blue"></div>
+    <div class="ambient-blob blob-cyan"></div>
+    <div class="ambient-grid"></div>
+    <div class="cyber-particle p1"></div>
+    <div class="cyber-particle p2"></div>
+    <div class="cyber-particle p3"></div>
+    <div class="cyber-particle p4"></div>
   </div>
+
+  <div class="auth-single-container">
+
+    <!-- Top Brand Bar -->
+    <div class="auth-brand-head">
+      <a routerLink="/" class="auth-logo">
+        <div class="logo-orb"><span class="orb-icon">⚡</span></div>
+        <div class="logo-text">
+          <span class="brand-name">SVK</span>
+          <span class="brand-sub">E-Com PRO</span>
+        </div>
+      </a>
+      <div class="security-badge">
+        <span class="sec-dot"></span>
+        <span>VERIFICATION</span>
+      </div>
+    </div>
+
+    <!-- Premium Glass Card -->
+    <div class="auth-single-card">
+      <div class="card-scanner-beam" aria-hidden="true"></div>
+
+      @if (isVerifying) {
+        <div class="quantum-header" style="margin-bottom: 0;">
+          <div class="quantum-orb-wrap">
+            <div class="q-ring q-ring-outer" style="animation: spin 3s linear infinite;"></div>
+            <div class="q-ring q-ring-inner" style="animation: spin-reverse 2s linear infinite;"></div>
+            <div class="q-core-icon">⏳</div>
+          </div>
+          <div class="quantum-titles" style="text-align: center;">
+            <h1 class="card-title">Verifying Email</h1>
+            <p class="card-subtitle">Validating registration signature, please wait...</p>
+          </div>
+        </div>
+      } @else if (isSuccess) {
+        <div class="quantum-header" style="margin-bottom: 0;">
+          <div class="quantum-orb-wrap" style="box-shadow: 0 0 30px rgba(16, 185, 129, 0.4);">
+            <div class="q-core-icon" style="color: #10b981;">✓</div>
+          </div>
+          <div class="quantum-titles" style="text-align: center;">
+            <h1 class="card-title">Verified Successfully!</h1>
+            <p class="card-subtitle" style="color: #a7f3d0;">{{ message }}</p>
+          </div>
+        </div>
+
+        <div class="auth-actions" style="margin-top: 32px; display: flex; flex-direction: column; align-items: center; gap: 16px;">
+          @if (!autoApproved) {
+            <p style="font-size: 13px; color: #94a3b8; text-align: center; max-width: 280px; line-height: 1.5;">
+              Once the administrator approves your request, you'll receive a password setup link.
+            </p>
+            <a routerLink="/authentication/login" mat-raised-button color="primary" class="submit-cta-btn" style="width: 100%;">
+              <span class="cta-inner"><span>Return to Login</span><span class="cta-arrow">→</span></span>
+            </a>
+          } @else {
+            <a routerLink="/authentication/login" mat-raised-button color="primary" class="submit-cta-btn" style="width: 100%;">
+              <span class="cta-inner"><span>Go to Login</span><span class="cta-arrow">→</span></span>
+            </a>
+          }
+        </div>
+      } @else {
+        <div class="quantum-header" style="margin-bottom: 0;">
+          <div class="quantum-orb-wrap" style="box-shadow: 0 0 30px rgba(239, 68, 68, 0.4);">
+            <div class="q-core-icon" style="color: #ef4444;">✗</div>
+          </div>
+          <div class="quantum-titles" style="text-align: center;">
+            <h1 class="card-title">Verification Failed</h1>
+            <p class="card-subtitle" style="color: #fca5a5;">{{ message }}</p>
+          </div>
+        </div>
+
+        <div class="auth-actions" style="margin-top: 32px;">
+          <a routerLink="/" mat-stroked-button class="submit-cta-btn" style="width: 100%; border-color: rgba(255,255,255,0.1); color: white;">
+            <span>Return to Homepage</span>
+          </a>
+        </div>
+      }
+    </div>
+
+    <!-- Bottom Bar -->
+    <div class="auth-bottom-bar">
+      <span class="copyright-text">© 2026 SVK E-Com Enterprise ERP</span>
+    </div>
+
+  </div>
+
 </div>

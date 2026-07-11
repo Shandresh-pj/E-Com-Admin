@@ -1606,6 +1606,10 @@ $danger: #ef4444;
 .dc-kpis {
     display: flex;
     border-bottom: 1px solid $border;
+
+    @media (max-width: 600px) {
+        flex-direction: column;
+    }
 }
 
 .kpi-cell {
@@ -3488,6 +3492,10 @@ $danger: #ef4444;
     display: flex;
     border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 
+    @media (max-width: 600px) {
+        flex-direction: column;
+    }
+
     .kpi-cell {
         flex: 1;
         padding: 14px 16px;
@@ -3927,6 +3935,14 @@ $danger: #ef4444;
 
     &.pv-span2 {
         grid-column: span 2;
+
+        @media (max-width: 900px) {
+            grid-column: span 2;
+        }
+
+        @media (max-width: 600px) {
+            grid-column: span 1;
+        }
     }
 
     &.pv-ai {
@@ -6026,6 +6042,11 @@ $danger: #ef4444;
         display: flex;
         align-items: center;
         gap: 12px;
+
+        @media (max-width: 1024px) {
+            display: none;
+        }
+
 
         .island-btn-login {
             padding: 9px 18px;

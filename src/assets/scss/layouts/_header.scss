@@ -1,13 +1,323 @@
 @use "../variables" as *;
 
+/* ── Premium Glassmorphic Topbar ─────────────────────────────────────────── */
 html .topbar {
-  background-color: var(--mat-sys-surface);
   position: sticky;
   top: 0;
   z-index: 9;
   height: $header-height;
   border-radius: $border-radius;
-  box-shadow: var(--mat-sys-level2);
+  display: flex;
+  align-items: center;
+  background: var(--mat-sys-surface-bright) !important;
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border-bottom: 1px solid var(--mat-sys-outline-variant);
+  box-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.05);
+  transition: background 0.3s ease, border-color 0.3s ease;
+}
+
+/* ── Topbar Brand Dot + Tagline ──────────────────────────────────────────── */
+.topbar-brand-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #4f46e5, #3b82f6);
+  box-shadow: 0 0 8px rgba(79, 70, 229, 0.5);
+  animation: pulseDot 2.5s infinite ease-out;
+  flex-shrink: 0;
+}
+
+@keyframes pulseDot {
+  0%, 100% { box-shadow: 0 0 8px rgba(79, 70, 229, 0.5); transform: scale(1); }
+  50% { box-shadow: 0 0 16px rgba(79, 70, 229, 0.8); transform: scale(1.15); }
+}
+
+.topbar-tagline {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+/* ── Mobile Toggle ───────────────────────────────────────────────────────── */
+.mobile-toggle-btn {
+  width: 36px !important;
+  height: 36px !important;
+  border-radius: 10px !important;
+  transition: background 150ms ease !important;
+
+  &:hover {
+    background: var(--brand-primary-light) !important;
+    color: var(--brand-primary) !important;
+  }
+}
+
+/* ── Action Pill ─────────────────────────────────────────────────────────── */
+.topbar-action-pill {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  padding: 4px;
+  transition: background var(--transition-fast);
+
+  &:hover { background: var(--brand-primary-light); }
+}
+
+/* ── Notification Bell Button ────────────────────────────────────────────── */
+.topbar-icon-btn {
+  width: 36px !important;
+  height: 36px !important;
+  border-radius: 10px !important;
+  transition: background var(--transition-fast) !important;
+
+  &:hover { background: var(--brand-primary-light) !important; }
+
+  .notif-btn-inner {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+  }
+
+  .notif-dot {
+    position: absolute;
+    top: -2px;
+    right: -3px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #ef4444;
+    border: 2px solid var(--mat-sys-surface, #fff);
+    animation: pulseDot 2s infinite ease-out;
+  }
+}
+
+/* Notification Menu Panel */
+.notif-menu-panel.mat-mdc-menu-panel {
+  min-width: 300px !important;
+  max-width: 340px !important;
+
+  .notif-menu-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 16px;
+
+    .notif-menu-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .notif-badge-count {
+      font-size: 11px;
+      font-weight: 600;
+      color: #4f46e5;
+      background: rgba(79, 70, 229, 0.1);
+      border: 1px solid rgba(79, 70, 229, 0.2);
+      padding: 2px 8px;
+      border-radius: 9999px;
+    }
+  }
+
+  .notif-item {
+    display: flex !important;
+    align-items: center !important;
+    gap: 12px !important;
+    padding: 10px 16px !important;
+    height: auto !important;
+
+    .notif-item-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+
+      &.notif-icon-info {
+        background: rgba(59, 130, 246, 0.1);
+        color: #3b82f6;
+      }
+    }
+
+    .notif-item-content {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+
+      .notif-item-title { font-size: 13px; font-weight: 600; color: var(--text-primary); }
+      .notif-item-time { font-size: 11px; color: var(--text-muted); }
+    }
+  }
+
+  .notif-footer {
+    padding: 10px 16px;
+    border-top: 1px solid var(--glass-border-subtle);
+
+    .notif-view-all {
+      font-size: 12.5px;
+      font-weight: 600;
+      color: #4f46e5;
+      text-decoration: none;
+      transition: color var(--transition-fast);
+
+      &:hover { color: #4338ca; }
+    }
+  }
+}
+
+/* ── Profile Avatar Button ───────────────────────────────────────────────── */
+.profile-avatar-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border-subtle);
+  border-radius: 12px;
+  padding: 5px 10px 5px 5px;
+  cursor: pointer;
+  transition: all var(--transition-base);
+  backdrop-filter: blur(8px);
+
+  &:hover {
+    background: var(--glass-bg-hover);
+    border-color: rgba(79, 70, 229, 0.2);
+    box-shadow: 0 4px 16px rgba(79, 70, 229, 0.12);
+  }
+
+  .avatar-circle {
+    width: 30px;
+    height: 30px;
+    border-radius: 8px;
+    background: linear-gradient(135deg, #4f46e5, #3b82f6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    box-shadow: 0 2px 8px rgba(79, 70, 229, 0.35);
+
+    .avatar-initials {
+      font-size: 13px;
+      font-weight: 700;
+      color: #fff;
+      font-family: var(--font-display);
+    }
+  }
+
+  .avatar-info {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1px;
+
+    .avatar-name {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-primary);
+      line-height: 1.2;
+    }
+
+    .avatar-role {
+      font-size: 10.5px;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+  }
+
+  .avatar-chevron {
+    color: var(--text-muted);
+    margin-left: 2px;
+    transition: transform var(--transition-base);
+  }
+}
+
+/* Profile Menu Panel */
+.profile-menu-panel.mat-mdc-menu-panel {
+  min-width: 220px !important;
+
+  .profile-menu-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 16px;
+
+    .profile-menu-avatar {
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #4f46e5, #3b82f6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      box-shadow: 0 2px 8px rgba(79, 70, 229, 0.3);
+
+      span {
+        font-size: 16px;
+        font-weight: 700;
+        color: #fff;
+        font-family: var(--font-display);
+      }
+    }
+
+    .profile-menu-name {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin: 0;
+      line-height: 1.2;
+    }
+
+    .profile-menu-role {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin: 2px 0 0;
+      font-weight: 500;
+    }
+  }
+
+  .profile-menu-item {
+    display: flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+    font-size: 13.5px !important;
+    font-weight: 500 !important;
+    padding: 8px 14px !important;
+    margin: 2px 6px !important;
+    border-radius: 8px !important;
+    transition: all var(--transition-fast) !important;
+    height: auto !important;
+
+    .menu-item-icon {
+      color: var(--text-muted);
+      transition: color var(--transition-fast);
+      flex-shrink: 0;
+    }
+
+    &:hover {
+      background: var(--brand-primary-light) !important;
+      color: var(--brand-primary) !important;
+
+      .menu-item-icon { color: var(--brand-primary) !important; }
+    }
+
+    &.logout-item {
+      color: #ef4444 !important;
+      .menu-item-icon { color: #ef4444 !important; }
+
+      &:hover {
+        background: rgba(239, 68, 68, 0.08) !important;
+        color: #dc2626 !important;
+        .menu-item-icon { color: #dc2626 !important; }
+      }
+    }
+  }
 }
 
 .topbar-dd {
@@ -30,9 +340,6 @@ html .topbar {
   margin-left: -5px;
 }
 
-
-
-// App Topstrip
 
 .app-topstrip {
   position: fixed;

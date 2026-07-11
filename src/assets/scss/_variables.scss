@@ -30,7 +30,7 @@ $light-accent: var(--mat-sys-secondary-fixed-dim);
 $light-error: var(--mat-sys-error-fixed-dim);
 $light-warning: rgba(248, 192, 118, 0.15);
 $light-success: rgba(75, 208, 139, 0.15);
-$dark: #111c2d;
+$dark: var(--theme-text-dark, #111c2d);
 
 // layout
 $boxedWidth: 1200px;

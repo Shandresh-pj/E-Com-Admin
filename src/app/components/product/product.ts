@@ -650,51 +650,41 @@ export class Product {
         }
       });
     } else if (product.approval_status === states.PENDING) {
-      const Swal = (window as any).Swal;
-      if (Swal) {
-        Swal.fire({
-          title: 'Review Product Approval',
-          text: `Do you want to Approve or Reject "${product.name}"?`,
-          icon: 'question',
-          showCancelButton: true,
-          showDenyButton: true,
-          confirmButtonText: 'Approve',
-          denyButtonText: 'Reject',
-          cancelButtonText: 'Close'
-        }).then((result: any) => {
-          if (result.isConfirmed) {
-            this.commonService.putApi(`products/${product.id}/approve`, { action: 'APPROVE' }).subscribe({
-              next: () => {
-                this.alert.success("Product Approved successfully");
-                this.getProducts();
-              }
-            });
-          } else if (result.isDenied) {
-            Swal.fire({
-              title: 'Rejection Reason',
-              input: 'text',
-              inputLabel: 'Provide reason for rejection',
-              inputPlaceholder: 'Enter reason...',
-              showCancelButton: true,
-              inputValidator: (value: string) => {
-                if (!value) {
-                  return 'You must enter a reason!';
+      this.alert.fire({
+        title: 'Review Product Approval',
+        text: `Do you want to Approve or Reject "${product.name}"?`,
+        icon: 'question',
+        showCancelButton: true,
+        showDenyButton: true,
+        confirmButtonText: 'Approve',
+        denyButtonText: 'Reject',
+        cancelButtonText: 'Close'
+      }).then((result: any) => {
+        if (result.isConfirmed) {
+          this.commonService.putApi(`products/${product.id}/approve`, { action: 'APPROVE' }).subscribe({
+            next: () => {
+              this.alert.success("Product Approved successfully");
+              this.getProducts();
+            }
+          });
+        } else if (result.isDenied) {
+          this.alert.prompt({
+            title: 'Rejection Reason',
+            label: 'Provide reason for rejection',
+            placeholder: 'Enter reason...',
+            validatorText: 'You must enter a reason!'
+          }).then((inputResult: any) => {
+            if (inputResult.isConfirmed) {
+              this.commonService.putApi(`products/${product.id}/approve`, { action: 'REJECT', rejection_reason: inputResult.value }).subscribe({
+                next: () => {
+                  this.alert.success("Product Rejected successfully");
+                  this.getProducts();
                 }
-                return null;
-              }
-            }).then((inputResult: any) => {
-              if (inputResult.isConfirmed) {
-                this.commonService.putApi(`products/${product.id}/approve`, { action: 'REJECT', rejection_reason: inputResult.value }).subscribe({
-                  next: () => {
-                    this.alert.success("Product Rejected successfully");
-                    this.getProducts();
-                  }
-                });
-              }
-            });
-          }
-        });
-      }
+              });
+            }
+          });
+        }
+      });
     } else if (product.approval_status === states.APPROVED) {
       this.alert.confirm("Publish this approved product?").then((result) => {
         if (result.isConfirmed) {

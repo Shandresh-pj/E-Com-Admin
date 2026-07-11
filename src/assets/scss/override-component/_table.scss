@@ -1,8 +1,71 @@
 @use "sass:map";
 @use "@angular/material" as mat;
 
+/* Premium Liquid Glass Table Design */
 @include mat.table-overrides(
   (
-    background-color: var(--mdc-elevated-card-container-color),
+    background-color: transparent,
+    row-item-outline-color: var(--mat-sys-outline-variant),
   )
 );
+
+html {
+  .mat-mdc-table {
+    background: transparent !important;
+    border-collapse: separate;
+    border-spacing: 0;
+
+    .mat-mdc-header-row {
+      background: var(--page-bg-gradient, rgba(255, 255, 255, 0.03));
+      border-bottom: 1px solid var(--mat-sys-outline-variant);
+      height: 48px;
+
+      .mat-mdc-header-cell {
+        font-family: 'Outfit', sans-serif;
+        font-weight: 600;
+        font-size: 13px;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        color: var(--text-muted, #64748b);
+        border-bottom: none;
+        padding: 0 16px;
+        white-space: nowrap;
+      }
+    }
+
+    .mat-mdc-row {
+      transition: all 0.2s ease;
+      background: transparent;
+      border-bottom: 1px solid var(--mat-sys-outline-variant);
+
+      &:hover {
+        background: var(--mat-sys-surface-bright, rgba(255, 255, 255, 0.02));
+        box-shadow: inset 3px 0 0 var(--mat-sys-primary);
+        transform: translateY(-1px);
+      }
+
+      .mat-mdc-cell {
+        font-family: 'Inter', sans-serif;
+        font-size: 14px;
+        font-weight: 500;
+        color: var(--mat-sys-on-background);
+        border-bottom: none;
+        padding: 12px 16px;
+      }
+    }
+  }
+
+  /* Table responsive wrapper glass effect */
+  .table-responsive {
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid var(--mat-sys-outline-variant);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    background: var(--mat-sys-surface, #ffffff);
+    
+    html.dark & {
+      background: rgba(30, 41, 59, 0.4);
+      backdrop-filter: blur(12px);
+    }
+  }
+}

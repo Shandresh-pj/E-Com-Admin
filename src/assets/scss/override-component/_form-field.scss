@@ -8,6 +8,31 @@
 
 // forms
 html {
+  .mat-mdc-text-field-wrapper {
+    background-color: var(--mat-sys-surface-bright) !important;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+    
+    &.mdc-text-field--focused {
+      background-color: var(--mat-sys-surface) !important;
+      box-shadow: 0 0 0 1px var(--mat-sys-primary) inset, 0 4px 12px rgba(0,0,0,0.05) !important;
+    }
+  }
+
+  .mdc-notched-outline__leading,
+  .mdc-notched-outline__notch,
+  .mdc-notched-outline__trailing {
+    border-color: var(--mat-sys-outline-variant) !important;
+    transition: border-color 0.3s ease;
+  }
+  
+  .mdc-text-field--focused .mdc-notched-outline__leading,
+  .mdc-text-field--focused .mdc-notched-outline__notch,
+  .mdc-text-field--focused .mdc-notched-outline__trailing {
+    border-color: var(--mat-sys-primary) !important;
+  }
+
   .hide-hint {
     .mat-mdc-form-field-subscript-wrapper {
       display: none;

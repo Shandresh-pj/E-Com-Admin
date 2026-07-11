@@ -194,25 +194,15 @@ export class Stocks implements OnInit, OnDestroy {
   }
 
   rejectAdjustment(id: number) {
-    const Swal = (window as any).Swal;
-    if (Swal) {
-      Swal.fire({
-        title: 'Reject Stock Adjustment',
-        input: 'text',
-        inputLabel: 'Provide reason for rejection',
-        inputPlaceholder: 'Enter reason...',
-        showCancelButton: true,
-        inputValidator: (value: string) => {
-          if (!value) {
-            return 'You must enter a reason!';
-          }
-          return null;
-        }
-      }).then((inputResult: any) => {
-        if (inputResult.isConfirmed) {
-          this.approveAdjustment(id, 'REJECT', inputResult.value);
-        }
-      });
-    }
+    this.alert.prompt({
+      title: 'Reject Stock Adjustment',
+      label: 'Provide reason for rejection',
+      placeholder: 'Enter reason...',
+      validatorText: 'You must enter a reason!'
+    }).then((inputResult: any) => {
+      if (inputResult.isConfirmed) {
+        this.approveAdjustment(id, 'REJECT', inputResult.value);
+      }
+    });
   }
 }

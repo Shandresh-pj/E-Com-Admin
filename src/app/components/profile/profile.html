@@ -1,65 +1,53 @@
-<div class="profile-page">
+<div class="profile-container">
 
-  <!-- ── HERO COVER SECTION ─────────────────────────────────────────────── -->
-  <div class="profile-cover-wrap">
+  <!-- ── Left Column: Profile Card ──────────────────────────────────────── -->
+  <div class="profile-sidebar">
+    <div class="profile-card cardWithShadow">
+      
+      <!-- Cover Section -->
+      <div class="profile-cover" [style.background-image]="coverPreview ? 'url(' + coverPreview + ')' : null">
+        <div class="cover-glow"></div>
+        <label class="cover-edit-btn" for="coverInput" title="Update Cover Photo">
+          <i-tabler name="camera" class="icon-14 d-flex"></i-tabler>
+          <span>Edit Cover</span>
+          <input id="coverInput" type="file" accept="image/*" hidden (change)="onCoverChange($event)">
+        </label>
+      </div>
 
-    <!-- Cover image / gradient -->
-    <div class="profile-cover"
-         [style.background-image]="coverPreview ? 'url(' + coverPreview + ')' : null">
-      <div class="cover-overlay"></div>
-
-      <!-- Cover change button -->
-      <label class="cover-edit-btn" for="coverInput" title="Change cover photo">
-        <i-tabler name="camera" class="icon-15 d-flex"></i-tabler>
-        Change Cover
-        <input id="coverInput" type="file" accept="image/*" hidden (change)="onCoverChange($event)">
-      </label>
-    </div>
-
-    <!-- ── AVATAR SECTION ───────────────────────────────────────────────── -->
-    <div class="profile-avatar-section">
-
-      <!-- Avatar ring -->
-      <div class="profile-avatar-ring">
-        <div class="profile-avatar-img">
-          @if (avatarPreview) {
-            <img [src]="avatarPreview" alt="Profile Photo" class="avatar-photo">
-          } @else {
-            <span class="avatar-letters">{{ initials }}</span>
-          }
+      <!-- Avatar Info -->
+      <div class="avatar-info-wrap">
+        <div class="avatar-glow-ring">
+          <div class="avatar-inner">
+            @if (avatarPreview) {
+              <img [src]="avatarPreview" alt="Profile" class="avatar-img">
+            } @else {
+              <span class="avatar-text">{{ initials }}</span>
+            }
+            <label class="avatar-edit-btn" for="avatarInput" title="Update Profile Photo">
+              <i-tabler name="camera" class="icon-16 d-flex"></i-tabler>
+              <input id="avatarInput" type="file" accept="image/*" hidden (change)="onAvatarChange($event)">
+            </label>
+          </div>
+          <span class="online-indicator-dot"></span>
         </div>
 
-        <!-- Camera overlay -->
-        <label class="avatar-edit-overlay" for="avatarInput" title="Change photo">
-          <i-tabler name="camera" class="icon-18 d-flex"></i-tabler>
-          <input id="avatarInput" type="file" accept="image/*" hidden (change)="onAvatarChange($event)">
-        </label>
-
-        <!-- Online dot -->
-        <span class="avatar-online-dot"></span>
+        <h2 class="user-display-name">{{ ProfileForm.get('name')?.value || ProfileData?.name || 'User' }}</h2>
+        <span class="role-badge">
+          <i-tabler name="shield-check" class="icon-12 d-flex"></i-tabler>
+          {{ ProfileData?.userType || 'Admin' }}
+        </span>
       </div>
 
-      <!-- Name & role -->
-      <div class="profile-identity">
-        <h1 class="profile-name">{{ ProfileForm.get('name')?.value || ProfileData?.name || 'User' }}</h1>
-        <p class="profile-role">
-          <span class="profile-role-pill">
-            <i-tabler name="shield-check" class="icon-12 d-flex"></i-tabler>
-            {{ ProfileData?.userType || 'Admin' }}
-          </span>
-        </p>
-      </div>
-
-      <!-- Stats chips -->
-      <div class="profile-stats-row">
+      <!-- Quick Stats Grid -->
+      <div class="stats-grid">
         @for (s of stats; track s.label) {
-          <div class="profile-stat-chip">
-            <div class="stat-icon-orb">
-              <i-tabler [name]="s.icon" class="icon-14 d-flex"></i-tabler>
+          <div class="stat-card">
+            <div class="stat-icon">
+              <i-tabler [name]="s.icon" class="icon-16 d-flex"></i-tabler>
             </div>
-            <div class="stat-info">
+            <div class="stat-meta">
               <span class="stat-value">{{ s.value }}</span>
-              <span class="stat-label">{{ s.label }}</span>
+              <span class="stat-title">{{ s.label }}</span>
             </div>
           </div>
         }
@@ -68,83 +56,82 @@
     </div>
   </div>
 
-  <!-- ── FORM CARD ──────────────────────────────────────────────────────── -->
-  <div class="profile-form-wrap">
-    <mat-card class="profile-form-card cardWithShadow">
-      <mat-card-content class="profile-form-body">
+  <!-- ── Right Column: Info Form ────────────────────────────────────────── -->
+  <div class="profile-form-area">
+    <mat-card class="form-card cardWithShadow">
+      <mat-card-content class="form-card-body">
 
-        <!-- Section header -->
-        <div class="form-section-header">
-          <div class="form-section-icon">
-            <i-tabler name="user-edit" class="icon-18 d-flex"></i-tabler>
+        <div class="form-header-row">
+          <div class="form-header-icon">
+            <i-tabler name="user-edit" class="icon-20 d-flex"></i-tabler>
           </div>
           <div>
-            <h2 class="form-section-title">Personal Information</h2>
-            <p class="form-section-sub">Update your profile details below</p>
+            <h3 class="form-title">Account Information</h3>
+            <p class="form-subtitle">Manage your personal details and system credentials</p>
           </div>
         </div>
 
         <form [formGroup]="ProfileForm" (ngSubmit)="onSubmit()">
-          <div class="profile-form-grid">
+          <div class="form-fields-grid">
 
-            <!-- Name -->
-            <div class="form-field-wrap">
-              <label class="field-label">
-                <i-tabler name="user" class="icon-13 d-flex"></i-tabler>
-                Full Name <span class="req">*</span>
+            <!-- Full Name -->
+            <div class="form-field-item">
+              <label class="custom-field-label">
+                <i-tabler name="user" class="icon-14 d-flex"></i-tabler>
+                Full Name <span class="required-star">*</span>
               </label>
-              <mat-form-field appearance="outline" class="w-100">
-                <input matInput formControlName="name" placeholder="Enter your full name">
+              <mat-form-field appearance="outline" class="w-100 custom-input">
+                <input matInput formControlName="name" placeholder="Enter your name">
                 @if (ProfileForm.get('name')?.hasError('required') && ProfileForm.get('name')?.touched) {
                   <mat-error>Name is required</mat-error>
                 }
               </mat-form-field>
             </div>
 
-            <!-- Email -->
-            <div class="form-field-wrap">
-              <label class="field-label">
-                <i-tabler name="mail" class="icon-13 d-flex"></i-tabler>
+            <!-- Email (Read Only) -->
+            <div class="form-field-item">
+              <label class="custom-field-label">
+                <i-tabler name="mail" class="icon-14 d-flex"></i-tabler>
                 Email Address
-                <span class="field-readonly-badge">Read only</span>
+                <span class="readonly-badge">Locked</span>
               </label>
-              <mat-form-field appearance="outline" class="w-100">
-                <input matInput formControlName="email" placeholder="Email">
+              <mat-form-field appearance="outline" class="w-100 custom-input disabled-input">
+                <input matInput formControlName="email" placeholder="Email Address">
               </mat-form-field>
             </div>
 
-            <!-- Mobile -->
-            <div class="form-field-wrap">
-              <label class="field-label">
-                <i-tabler name="phone" class="icon-13 d-flex"></i-tabler>
+            <!-- Mobile (Read Only) -->
+            <div class="form-field-item">
+              <label class="custom-field-label">
+                <i-tabler name="phone" class="icon-14 d-flex"></i-tabler>
                 Mobile Number
-                <span class="field-readonly-badge">Read only</span>
+                <span class="readonly-badge">Locked</span>
               </label>
-              <mat-form-field appearance="outline" class="w-100">
+              <mat-form-field appearance="outline" class="w-100 custom-input disabled-input">
                 <input matInput formControlName="mobilenumber" placeholder="Mobile Number">
               </mat-form-field>
             </div>
 
-            <!-- User Type -->
-            <div class="form-field-wrap">
-              <label class="field-label">
-                <i-tabler name="id-badge" class="icon-13 d-flex"></i-tabler>
-                User Type
-                <span class="field-readonly-badge">Read only</span>
+            <!-- User Type (Read Only) -->
+            <div class="form-field-item">
+              <label class="custom-field-label">
+                <i-tabler name="id-badge" class="icon-14 d-flex"></i-tabler>
+                User Workspace Role
+                <span class="readonly-badge">Locked</span>
               </label>
-              <mat-form-field appearance="outline" class="w-100">
-                <input matInput formControlName="userType" placeholder="User Type">
+              <mat-form-field appearance="outline" class="w-100 custom-input disabled-input">
+                <input matInput formControlName="userType" placeholder="Workspace Role">
               </mat-form-field>
             </div>
 
-            <!-- Address — full width -->
-            <div class="form-field-wrap form-field-full">
-              <label class="field-label">
-                <i-tabler name="map-pin" class="icon-13 d-flex"></i-tabler>
-                Address <span class="req">*</span>
+            <!-- Address (Editable) -->
+            <div class="form-field-item field-full-width">
+              <label class="custom-field-label">
+                <i-tabler name="map-pin" class="icon-14 d-flex"></i-tabler>
+                Physical Address <span class="required-star">*</span>
               </label>
-              <mat-form-field appearance="outline" class="w-100">
-                <input matInput formControlName="address" placeholder="Enter your address">
+              <mat-form-field appearance="outline" class="w-100 custom-input">
+                <input matInput formControlName="address" placeholder="Enter your full physical address">
                 @if (ProfileForm.get('address')?.hasError('required') && ProfileForm.get('address')?.touched) {
                   <mat-error>Address is required</mat-error>
                 }
@@ -154,18 +141,18 @@
           </div>
 
           <!-- Actions -->
-          <div class="profile-form-actions">
-            <button type="button" class="btn-reset" (click)="onReset()">
-              <i-tabler name="refresh" class="icon-15 d-flex"></i-tabler>
-              Reset
+          <div class="form-action-row">
+            <button type="button" class="btn-cancel-glass" (click)="onReset()">
+              <i-tabler name="rotate-clockwise" class="icon-14 d-flex"></i-tabler>
+              Reset Details
             </button>
-            <button type="submit" class="btn-save" [class.saving]="isSaving">
+            <button type="submit" class="btn-save-glow" [class.btn-loading]="isSaving">
               @if (isSaving) {
-                <span class="save-spinner"></span>
-                Saving…
+                <span class="spinner-mini"></span>
+                Processing…
               } @else {
-                <i-tabler name="check" class="icon-15 d-flex"></i-tabler>
-                Save Changes
+                <i-tabler name="device-floppy" class="icon-14 d-flex"></i-tabler>
+                Save Profile
               }
             </button>
           </div>

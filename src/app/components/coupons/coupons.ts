@@ -1,5 +1,5 @@
 import { Component, OnInit, Inject, ViewEncapsulation } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatTableModule } from '@angular/material/table';
 import { MatButtonModule } from '@angular/material/button';
@@ -19,15 +19,14 @@ import { MatTable } from 'src/utils/mat-table/mat-table';
   selector: 'app-coupons',
   standalone: true,
   imports: [
-    CommonModule, 
-    MatTableModule, 
-    MatButtonModule, 
-    MatIconModule, 
-    MatCardModule, 
+    MatTableModule,
+    MatButtonModule,
+    MatIconModule,
+    MatCardModule,
     MatDialogModule,
     MatChipsModule,
     MatTable
-  ],
+],
   templateUrl: './coupons.html',
   styleUrls: ['./coupons.scss'],
   encapsulation: ViewEncapsulation.None
@@ -102,7 +101,6 @@ export class Coupons implements OnInit {
   selector: 'app-coupon-dialog',
   standalone: true,
   imports: [
-    CommonModule,
     FormsModule,
     ReactiveFormsModule,
     MatDialogModule,
@@ -112,7 +110,7 @@ export class Coupons implements OnInit {
     MatButtonModule,
     MatDatepickerModule,
     MatNativeDateModule
-  ],
+],
   template: `
     <h2 mat-dialog-title>{{ data ? 'Edit Coupon' : 'Create Coupon' }}</h2>
     <mat-dialog-content>

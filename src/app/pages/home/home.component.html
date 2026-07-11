@@ -243,13 +243,15 @@
                   </button>
                 </div>
                 <div class="chart-bars">
-                  <div class="cbar" *ngFor="let h of [45,68,52,84,65,92,76,88,62,96,78,100]; trackBy: trackByIndex"
-                    [style.height.%]="h"></div>
+                  @for (h of [45,68,52,84,65,92,76,88,62,96,78,100]; track $index) {
+                  <div class="cbar" [style.height.%]="h"></div>
+                  }
                 </div>
               </div>
 
               <div class="dc-feed">
-                <div class="feed-row" *ngFor="let f of liveTransactions(); trackBy: trackByIndex">
+                @for (f of liveTransactions(); track $index) {
+                <div class="feed-row">
                   <span class="fi" [style.background]="f.color + '22'" [style.color]="f.color">{{ f.icon }}</span>
                   <span class="ft">
                     <strong>{{ f.id }}</strong> · {{ f.branch }}
@@ -257,12 +259,14 @@
                   <span class="f-amt">{{ f.amount }}</span>
                   <span class="ftt">{{ f.status }}</span>
                 </div>
+                }
               </div>
               }
 
               @if (activeHeroTab() === 'branches') {
               <div class="dc-branches-grid">
-                <div class="branch-matrix-item" *ngFor="let b of branchesData">
+                @for (b of branchesData; track b) {
+                <div class="branch-matrix-item">
                   <div class="b-head">
                     <span class="b-name">🏢 {{ b.name }}</span>
                     <span class="b-status">{{ b.status }}</span>
@@ -272,6 +276,7 @@
                     <span>Revenue: <strong>{{ b.revenue }}</strong></span>
                   </div>
                 </div>
+                }
               </div>
               }
 
@@ -311,8 +316,12 @@
     <div class="marquee-lbl">Trusted by leading businesses</div>
     <div class="marquee-track" role="list">
       <div class="marquee-inner">
-        <span class="mq-item" *ngFor="let c of companies; trackBy: trackByIndex" role="listitem">{{c}}</span>
-        <span class="mq-item" *ngFor="let c of companies; trackBy: trackByIndex" aria-hidden="true">{{c}}</span>
+        @for (c of companies; track $index) {
+        <span class="mq-item" role="listitem">{{c}}</span>
+        }
+        @for (c of companies; track $index) {
+        <span class="mq-item" aria-hidden="true">{{c}}</span>
+        }
       </div>
     </div>
   </div>
@@ -327,14 +336,15 @@
       </div>
 
       <div class="ai-grid">
-        <div class="ai-card" *ngFor="let f of aiFeatures; let i = index; trackBy: trackByIndex"
-          [style.animation-delay]="(i * 40) + 'ms'" data-reveal="ai-c">
+        @for (f of aiFeatures; track $index; let i = $index) {
+        <div class="ai-card" [style.animation-delay]="(i * 40) + 'ms'" data-reveal="ai-c">
           <div class="ai-glow"></div>
           <span class="ai-icon">{{f.icon}}</span>
           <span class="ai-tag">{{f.tag}}</span>
           <div class="ai-card-title">{{f.title}}</div>
           <div class="ai-card-desc">{{f.desc}}</div>
         </div>
+        }
       </div>
     </div>
   </section>
@@ -348,13 +358,14 @@
       </div>
 
       <div class="mod-grid">
-        <div class="mod-card" *ngFor="let m of modules; let i = index; trackBy: trackByIndex"
-          [style.animation-delay]="(i * 35) + 'ms'" data-reveal="mod-c">
+        @for (m of modules; track $index; let i = $index) {
+        <div class="mod-card" [style.animation-delay]="(i * 35) + 'ms'" data-reveal="mod-c">
           <span class="mod-icon">{{m.icon}}</span>
           <div class="mod-name">{{m.title}}</div>
           <div class="mod-desc">{{m.desc}}</div>
           <span class="mod-arrow">→</span>
         </div>
+        }
       </div>
     </div>
   </section>
@@ -422,8 +433,9 @@
             </div>
 
             <div class="rev-months">
-              <span
-                *ngFor="let m of ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']; trackBy: trackByIndex">{{m}}</span>
+              @for (m of ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']; track $index) {
+              <span>{{m}}</span>
+              }
             </div>
           </div>
 
@@ -610,12 +622,13 @@
       </div>
 
       <div class="workflow-grid">
-        <div class="wf-card" *ngFor="let s of workflowSteps; let i = index; trackBy: trackByIndex"
-          [style.animation-delay]="(i * 80) + 'ms'" data-reveal="wf-c">
+        @for (s of workflowSteps; track $index; let i = $index) {
+        <div class="wf-card" [style.animation-delay]="(i * 80) + 'ms'" data-reveal="wf-c">
           <div class="wf-num">{{s.num}}</div>
           <div class="wf-title">{{s.title}}</div>
           <div class="wf-desc">{{s.desc}}</div>
         </div>
+        }
       </div>
     </div>
   </section>
@@ -627,21 +640,34 @@
       </div>
 
       <div class="feat-grid">
-        <div class="feat-card" *ngFor="let f of [
-          {icon:'🚀',title:'Blazing Performance',desc:'Sub-50ms API responses. Angular OnPush CD. Lazy-loaded modules. Optimized for thousands of SKUs.',pts:['PostgreSQL query optimization','Redis caching layer','CDN-delivered assets']},
-          {icon:'🔐',title:'Enterprise Security',desc:'Multi-layer security architecture designed for regulated industries and enterprise compliance.',pts:['Role-based access control','JWT + refresh token auth','Full audit trail logging']},
-          {icon:'🤖',title:'AI at the Core',desc:'Gemini AI embedded in every workflow — not bolted on as an afterthought.',pts:['18 AI modules built-in','Natural language search','Automated insights & alerts']},
-          {icon:'📊',title:'Deep Analytics',desc:'Real-time dashboards and scheduled reports covering every dimension of your business.',pts:['Revenue, orders, inventory','Branch-level comparison','Export to CSV, PDF, Excel']},
-          {icon:'🔄',title:'Workflow Automation',desc:'Approval chains, notifications, and automated triggers that eliminate manual processes.',pts:['Multi-level approval flows','Email & push notifications','Configurable business rules']},
-          {icon:'🌐',title:'Multi-Branch Ready',desc:'Manage unlimited branches, warehouses, and regions from a single unified platform.',pts:['Consolidated reporting','Branch-level permissions','Inter-branch stock transfers']}
-        ]; let i = index; trackBy: trackByIndex" [style.animation-delay]="(i * 70) + 'ms'" data-reveal="feat-c">
+        @for (f of [
+        {icon:'🚀',title:'Blazing Performance',desc:'Sub-50ms API responses. Angular OnPush CD. Lazy-loaded modules.
+        Optimized for thousands of SKUs.',pts:['PostgreSQL query optimization','Redis caching layer','CDN-delivered
+        assets']},
+        {icon:'🔐',title:'Enterprise Security',desc:'Multi-layer security architecture designed for regulated industries
+        and enterprise compliance.',pts:['Role-based access control','JWT + refresh token auth','Full audit trail
+        logging']},
+        {icon:'🤖',title:'AI at the Core',desc:'Gemini AI embedded in every workflow — not bolted on as an
+        afterthought.',pts:['18 AI modules built-in','Natural language search','Automated insights & alerts']},
+        {icon:'📊',title:'Deep Analytics',desc:'Real-time dashboards and scheduled reports covering every dimension of
+        your business.',pts:['Revenue, orders, inventory','Branch-level comparison','Export to CSV, PDF, Excel']},
+        {icon:'🔄',title:'Workflow Automation',desc:'Approval chains, notifications, and automated triggers that
+        eliminate manual processes.',pts:['Multi-level approval flows','Email & push notifications','Configurable
+        business rules']},
+        {icon:'🌐',title:'Multi-Branch Ready',desc:'Manage unlimited branches, warehouses, and regions from a single
+        unified platform.',pts:['Consolidated reporting','Branch-level permissions','Inter-branch stock transfers']}
+        ]; track $index; let i = $index) {
+        <div class="feat-card" [style.animation-delay]="(i * 70) + 'ms'" data-reveal="feat-c">
           <div class="feat-icon-box"><span>{{f.icon}}</span></div>
           <div class="feat-title">{{f.title}}</div>
           <div class="feat-desc">{{f.desc}}</div>
           <ul class="feat-list">
-            <li *ngFor="let p of f.pts; trackBy: trackByIndex"><span class="ck">✓</span> {{p}}</li>
+            @for (p of f.pts; track $index) {
+            <li><span class="ck">✓</span> {{p}}</li>
+            }
           </ul>
         </div>
+        }
       </div>
     </div>
   </section>
@@ -764,40 +790,40 @@
   </section>
 
   <!-- <section class="stats-section" aria-label="Platform statistics">
-    <div class="stats-bg-blobs"><span></span><span></span></div>
-    <div class="section-wrap">
-      <div class="stats-grid" data-reveal="stats">
-        <div class="stat-box">
-          <div class="stat-num">{{ formatNumber(usersCount()) }}</div>
-          <div class="stat-lbl">Active Businesses</div>
-          <div class="stat-bar">
-            <div class="stat-fill" style="width:78%"></div>
-          </div>
-        </div>
-        <div class="stat-box">
-          <div class="stat-num">{{ formatNumber(productsCount()) }}</div>
-          <div class="stat-lbl">Products Managed</div>
-          <div class="stat-bar">
-            <div class="stat-fill" style="width:92%"></div>
-          </div>
-        </div>
-        <div class="stat-box">
-          <div class="stat-num">{{ formatNumber(invoicesCount()) }}</div>
-          <div class="stat-lbl">Invoices Generated</div>
-          <div class="stat-bar">
-            <div class="stat-fill" style="width:85%"></div>
-          </div>
-        </div>
-        <div class="stat-box">
-          <div class="stat-num">{{ uptimeVal() }}%</div>
-          <div class="stat-lbl">Platform Uptime</div>
-          <div class="stat-bar">
-            <div class="stat-fill" style="width:99.98%"></div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section> -->
+                                      <div class="stats-bg-blobs"><span></span><span></span></div>
+                                      <div class="section-wrap">
+                                        <div class="stats-grid" data-reveal="stats">
+                                          <div class="stat-box">
+                                            <div class="stat-num">{{ formatNumber(usersCount()) }}</div>
+                                            <div class="stat-lbl">Active Businesses</div>
+                                            <div class="stat-bar">
+                                              <div class="stat-fill" style="width:78%"></div>
+                                            </div>
+                                          </div>
+                                          <div class="stat-box">
+                                            <div class="stat-num">{{ formatNumber(productsCount()) }}</div>
+                                            <div class="stat-lbl">Products Managed</div>
+                                            <div class="stat-bar">
+                                              <div class="stat-fill" style="width:92%"></div>
+                                            </div>
+                                          </div>
+                                          <div class="stat-box">
+                                            <div class="stat-num">{{ formatNumber(invoicesCount()) }}</div>
+                                            <div class="stat-lbl">Invoices Generated</div>
+                                            <div class="stat-bar">
+                                              <div class="stat-fill" style="width:85%"></div>
+                                            </div>
+                                          </div>
+                                          <div class="stat-box">
+                                            <div class="stat-num">{{ uptimeVal() }}%</div>
+                                            <div class="stat-lbl">Platform Uptime</div>
+                                            <div class="stat-bar">
+                                              <div class="stat-fill" style="width:99.98%"></div>
+                                            </div>
+                                          </div>
+                                        </div>
+                                      </div>
+                                    </section> -->
 
   <section class="auto-section" aria-labelledby="auto-heading">
     <div class="section-wrap">
@@ -808,10 +834,13 @@
           <p class="s-sub" style="text-align:left;margin:0;">Your team focuses on decisions. Our AI handles data entry,
             summaries, translations, and insights — automatically.</p>
           <ul class="auto-list">
-            <li
-              *ngFor="let a of ['Auto-generate product content in seconds','AI-powered inventory reorder suggestions','Instant invoice and order summaries','Real-time sales trend analysis','Customer intent prediction','Smart anomaly detection']; trackBy: trackByIndex">
+            @for (a of ['Auto-generate product content in seconds','AI-powered inventory reorder suggestions','Instant
+            invoice and order summaries','Real-time sales trend analysis','Customer intent prediction','Smart anomaly
+            detection']; track $index) {
+            <li>
               <span class="ac">✦</span> {{a}}
             </li>
+            }
           </ul>
           <a routerLink="/contact" class="btn-primary-lg">Start AI Trial →</a>
         </div>
@@ -852,9 +881,12 @@
       </div>
 
       <div class="testi-grid">
-        <div class="testi-card" *ngFor="let t of testimonials; let i = index; trackBy: trackByIndex"
-          [style.animation-delay]="(i * 70) + 'ms'" data-reveal="testi-c">
-          <div class="t-stars"><span *ngFor="let s of [1,2,3,4,5]">★</span></div>
+        @for (t of testimonials; track $index; let i = $index) {
+        <div class="testi-card" [style.animation-delay]="(i * 70) + 'ms'" data-reveal="testi-c">
+          <div class="t-stars">@for (s of [1,2,3,4,5]; track s) {
+            <span>★</span>
+            }
+          </div>
           <p class="t-text">"{{t.text}}"</p>
           <div class="t-author">
             <div class="t-avatar" [style.background]="t.color + '28'" [style.color]="t.color">{{t.initials}}</div>
@@ -864,6 +896,7 @@
             </div>
           </div>
         </div>
+        }
       </div>
     </div>
   </section>
@@ -895,39 +928,39 @@
       </div>
 
       <!-- Owl-Carousel Navigation Header -->
-      <div class="owl-carousel-header">
-        <div class="owl-slide-pills">
-          <button type="button" class="owl-pill" [class.active]="activePriceSlide() === 0" (click)="goToPriceSlide(0)">
-            <span>14-Day Free</span>
-          </button>
-          <button type="button" class="owl-pill pop-pill" [class.active]="activePriceSlide() === 1"
-            (click)="goToPriceSlide(1)">
-            <span>Professional ★ RECOMMENDED</span>
-          </button>
-          <button type="button" class="owl-pill" [class.active]="activePriceSlide() === 2" (click)="goToPriceSlide(2)">
-            <span>Business Scale</span>
-          </button>
-          <button type="button" class="owl-pill" [class.active]="activePriceSlide() === 3" (click)="goToPriceSlide(3)">
-            <span>Enterprise Custom</span>
-          </button>
-        </div>
+      <!-- <div class="owl-carousel-header">
+                                          <div class="owl-slide-pills">
+                                            <button type="button" class="owl-pill" [class.active]="activePriceSlide() === 0" (click)="goToPriceSlide(0)">
+                                              <span>14-Day Free</span>
+                                            </button>
+                                            <button type="button" class="owl-pill pop-pill" [class.active]="activePriceSlide() === 1"
+                                              (click)="goToPriceSlide(1)">
+                                              <span>Professional ★ RECOMMENDED</span>
+                                            </button>
+                                            <button type="button" class="owl-pill" [class.active]="activePriceSlide() === 2" (click)="goToPriceSlide(2)">
+                                              <span>Business Scale</span>
+                                            </button>
+                                            <button type="button" class="owl-pill" [class.active]="activePriceSlide() === 3" (click)="goToPriceSlide(3)">
+                                              <span>Enterprise Custom</span>
+                                            </button>
+                                          </div>
 
-        <div class="owl-arrows">
-          <button type="button" class="owl-arrow-btn" (click)="prevPriceSlide()" aria-label="Previous Pricing Tier">
-            <svg viewBox="0 0 24 24" fill="none">
-              <path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
-                stroke-linejoin="round" />
-            </svg>
-          </button>
-          <span class="owl-slide-indicator">{{ activePriceSlide() + 1 }} / 4</span>
-          <button type="button" class="owl-arrow-btn" (click)="nextPriceSlide()" aria-label="Next Pricing Tier">
-            <svg viewBox="0 0 24 24" fill="none">
-              <path d="M9 18L15 12L9 6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
-                stroke-linejoin="round" />
-            </svg>
-          </button>
-        </div>
-      </div>
+                                          <div class="owl-arrows">
+                                            <button type="button" class="owl-arrow-btn" (click)="prevPriceSlide()" aria-label="Previous Pricing Tier">
+                                              <svg viewBox="0 0 24 24" fill="none">
+                                                <path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+                                                  stroke-linejoin="round" />
+                                                </svg>
+                                              </button>
+                                              <span class="owl-slide-indicator">{{ activePriceSlide() + 1 }} / 4</span>
+                                              <button type="button" class="owl-arrow-btn" (click)="nextPriceSlide()" aria-label="Next Pricing Tier">
+                                                <svg viewBox="0 0 24 24" fill="none">
+                                                  <path d="M9 18L15 12L9 6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+                                                    stroke-linejoin="round" />
+                                                  </svg>
+                                                </button>
+                                              </div>
+                                            </div> -->
 
       <!-- Owl-Carousel Interactive Stage -->
       <div class="owl-pricing-stage">
@@ -1093,8 +1126,8 @@
       </div>
 
       <div class="faq-wrap quantum-faq-wrap">
-        <div class="faq-item quantum-faq-card" *ngFor="let f of faqs; let i = index; trackBy: trackByIndex"
-          [class.open]="isFaqOpen(i)">
+        @for (f of faqs; track $index; let i = $index) {
+        <div class="faq-item quantum-faq-card" [class.open]="isFaqOpen(i)">
           <button class="faq-btn quantum-faq-btn" (click)="toggleFaq(i)" [attr.aria-expanded]="isFaqOpen(i)"
             type="button">
             <div class="faq-btn-left">
@@ -1114,6 +1147,7 @@
             </div>
           </div>
         </div>
+        }
       </div>
     </div>
   </section>
@@ -1260,10 +1294,10 @@
     <div class="footer-bottom liquid-bottom">
       <span>© 2026 SVK E-Com Enterprise Systems India Pvt Ltd. All rights reserved.</span>
       <!-- <div class="f-badges">
-        <span class="f-badge">🔒 AES-256 VAULT</span>
-        <span class="f-badge">🛡️ INDIA DPDP ACT COMPLIANT</span>
-        <span class="f-badge">⚡ AP-SOUTH-1 REDUNDANCY</span>
-      </div> -->
+                                                                                          <span class="f-badge">🔒 AES-256 VAULT</span>
+                                                                                          <span class="f-badge">🛡️ INDIA DPDP ACT COMPLIANT</span>
+                                                                                          <span class="f-badge">⚡ AP-SOUTH-1 REDUNDANCY</span>
+                                                                                        </div> -->
     </div>
   </footer>
 </div>

@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { MatCardModule } from '@angular/material/card';
 import { MatTableModule } from '@angular/material/table';
 import { MatButtonModule } from '@angular/material/button';
@@ -27,14 +27,13 @@ const REQUEST_DATA: WorkforceRequest[] = [
   selector: 'app-workforce-requests',
   standalone: true,
   imports: [
-    CommonModule,
     MatCardModule,
     MatTableModule,
     MatButtonModule,
     MatIconModule,
     MatChipsModule,
     TablerIconsModule
-  ],
+],
   templateUrl: './workforce-requests.html',
   styleUrl: './workforce-requests.scss',
 })

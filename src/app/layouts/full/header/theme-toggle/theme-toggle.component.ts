@@ -1,11 +1,11 @@
 import { Component, ViewEncapsulation } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { CoreService } from 'src/app/services/core.service';
 
 @Component({
   selector: 'app-theme-toggle',
   standalone: true,
-  imports: [CommonModule],
+  imports: [],
   templateUrl: './theme-toggle.component.html',
   styleUrl: './theme-toggle.component.scss',
   encapsulation: ViewEncapsulation.None,

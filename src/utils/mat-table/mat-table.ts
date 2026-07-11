@@ -9,7 +9,7 @@ import {
   OnInit
 } from '@angular/core';
 
-import { CommonModule } from '@angular/common';
+
 
 import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
 
@@ -32,7 +32,6 @@ import { AlertService } from 'src/app/Securities/Services/alert.service';
   selector: 'app-mat-table',
   standalone: true,
   imports: [
-    CommonModule,
     MatTableModule,
     MatPaginatorModule,
     MatSortModule,
@@ -40,7 +39,7 @@ import { AlertService } from 'src/app/Securities/Services/alert.service';
     MatIconModule,
     MatFormFieldModule,
     MatInputModule
-  ],
+],
   templateUrl: './mat-table.html',
   styleUrl: './mat-table.scss'
 })

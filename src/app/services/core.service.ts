@@ -7,9 +7,9 @@ import { AppSettings, defaults } from '../config';
 export class CoreService {
     private optionsSignal = signal<AppSettings>(defaults);
 
-    // Theme signal: 'light' or 'dark', loaded from local storage (defaults to dark to align with the login screen)
+    // Theme signal: 'light' or 'dark', loaded from local storage (defaults to light as requested)
     public themeSignal = signal<'light' | 'dark'>(
-        (localStorage.getItem('theme') as 'light' | 'dark') || 'dark'
+        (localStorage.getItem('theme') as 'light' | 'dark') || 'light'
     );
 
     constructor() {

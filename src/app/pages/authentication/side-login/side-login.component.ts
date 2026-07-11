@@ -1,7 +1,7 @@
 import { Component, OnInit, OnDestroy, ChangeDetectorRef, ViewEncapsulation } from '@angular/core';
 import { FormGroup, Validators, FormBuilder, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
-import { CommonModule } from '@angular/common';
+
 import { Subject } from 'rxjs';
 import { takeUntil, finalize } from 'rxjs/operators';
 
@@ -17,9 +17,8 @@ import { SessionService } from 'src/app/Securities/Services/session.service';
     RouterModule,
     MaterialModule,
     FormsModule,
-    ReactiveFormsModule,
-    CommonModule
-  ],
+    ReactiveFormsModule
+],
   templateUrl: './side-login.component.html',
   styleUrls: ['./side-login.component.scss'],
   encapsulation: ViewEncapsulation.None

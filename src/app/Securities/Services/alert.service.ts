@@ -7,7 +7,7 @@ import Swal from 'sweetalert2';
 export class AlertService {
 
   /**
-   * Helper method to trigger a SweetAlert2 dialog styled with custom liquid glass classes.
+   * Core fire method — applies the Liquid Glass custom classes.
    */
   fire(options: any) {
     const icon = options.icon || 'info';
@@ -25,60 +25,71 @@ export class AlertService {
       },
       ...options,
       customClass: {
-        container: 'glass-backdrop',
-        popup: `glass-popup glass-${icon} ${options.customClass?.popup || ''}`,
-        title: `glass-title ${options.customClass?.title || ''}`,
+        container:     'glass-backdrop',
+        popup:         `glass-popup glass-${icon} ${options.customClass?.popup || ''}`,
+        title:         `glass-title ${options.customClass?.title || ''}`,
         htmlContainer: `glass-content ${options.customClass?.htmlContainer || ''}`,
         confirmButton: `glass-btn glass-btn-confirm ${options.customClass?.confirmButton || ''}`,
-        cancelButton: `glass-btn glass-btn-cancel ${options.customClass?.cancelButton || ''}`,
-        denyButton: `glass-btn glass-btn-deny ${options.customClass?.denyButton || ''}`,
-        input: `glass-input ${options.customClass?.input || ''}`,
-        actions: `glass-actions ${options.customClass?.actions || ''}`,
-        loader: `glass-loader ${options.customClass?.loader || ''}`,
-        footer: `glass-footer ${options.customClass?.footer || ''}`,
+        cancelButton:  `glass-btn glass-btn-cancel ${options.customClass?.cancelButton || ''}`,
+        denyButton:    `glass-btn glass-btn-deny ${options.customClass?.denyButton || ''}`,
+        input:         `glass-input ${options.customClass?.input || ''}`,
+        actions:       `glass-actions ${options.customClass?.actions || ''}`,
+        footer:        `glass-footer ${options.customClass?.footer || ''}`,
         ...options.customClass
       }
     });
   }
 
+  /** Auto-dismisses in 2.5 s — NO button shown */
   success(message: string, title = 'Success') {
     this.fire({
       icon: 'success',
       title,
       text: message,
       timer: 2500,
+      timerProgressBar: true,
       showConfirmButton: false
     });
   }
 
+  /** Single small dismiss button */
   error(message: string, title = 'Error') {
     this.fire({
       icon: 'error',
       title,
       text: message,
-      confirmButtonText: 'Dismiss'
+      showConfirmButton: true,
+      confirmButtonText: 'Dismiss',
+      showCancelButton: false
     });
   }
 
+  /** Single small dismiss button */
   warning(message: string, title = 'Warning') {
     this.fire({
       icon: 'warning',
       title,
       text: message,
-      confirmButtonText: 'Got it'
+      showConfirmButton: true,
+      confirmButtonText: 'Got it',
+      showCancelButton: false
     });
   }
 
+  /** Single small dismiss button */
   info(message: string, title = 'Info') {
     this.fire({
       icon: 'info',
       title,
       text: message,
-      confirmButtonText: 'Got it'
+      showConfirmButton: true,
+      confirmButtonText: 'OK',
+      showCancelButton: false
     });
   }
 
-  confirm(message: string, title = 'Confirmation') {
+  /** Two buttons — Yes / No */
+  confirm(message: string, title = 'Are you sure?') {
     return this.fire({
       icon: 'question',
       title,
@@ -89,6 +100,7 @@ export class AlertService {
     });
   }
 
+  /** Two buttons — Submit / Cancel with a text input */
   prompt(options: { title: string; label: string; placeholder?: string; validatorText?: string }) {
     return this.fire({
       title: options.title,
@@ -99,11 +111,9 @@ export class AlertService {
       confirmButtonText: 'Submit',
       cancelButtonText: 'Cancel',
       inputValidator: (value: string) => {
-        if (!value) {
-          return options.validatorText || 'This field is required!';
-        }
+        if (!value) return options.validatorText || 'This field is required!';
         return null;
       }
     });
   }
-}
+}

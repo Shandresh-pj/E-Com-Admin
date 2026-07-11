@@ -1,6 +1,6 @@
 import { ChangeDetectorRef, Component } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { CommonModule } from '@angular/common';
+
 import { ReactiveFormsModule, FormsModule, FormGroup, FormArray, FormBuilder, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
@@ -24,7 +24,6 @@ import { GeminiAiService } from 'src/app/services/gemini-ai.service';
   selector: 'app-product',
   standalone: true,
   imports: [
-    CommonModule,
     ReactiveFormsModule,
     FormsModule,
     MatFormFieldModule,
@@ -34,7 +33,7 @@ import { GeminiAiService } from 'src/app/services/gemini-ai.service';
     MatSelectModule,
     MatIconModule,
     MatTable
-  ],
+],
   templateUrl: './product.html',
   styleUrl: './product.scss',
 })

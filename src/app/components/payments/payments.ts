@@ -172,8 +172,30 @@ export class Payments implements OnInit {
     });
   }
 
-  initiateRazorpayPayment(payload: any) {
+  loadRazorpayScript(): Promise<void> {
+    return new Promise((resolve, reject) => {
+      if ((window as any).Razorpay) {
+        resolve();
+        return;
+      }
+      const script = document.createElement('script');
+      script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+      script.onload = () => resolve();
+      script.onerror = () => reject('Failed to load Razorpay script');
+      document.body.appendChild(script);
+    });
+  }
+
+  async initiateRazorpayPayment(payload: any) {
     this.loading = true;
+
+    try {
+      await this.loadRazorpayScript();
+    } catch (e) {
+      this.alert.error("Could not load payment gateway. Please check your internet connection.");
+      this.loading = false;
+      return;
+    }
 
     // Call backend to create Razorpay Order
     this.commonService.postApi('payments/razorpay/create-order', {

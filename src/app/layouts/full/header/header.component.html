@@ -24,30 +24,152 @@
     </div>
 
     <!-- Notifications Bell -->
-    <button mat-icon-button [matMenuTriggerFor]="notifMenu" class="topbar-icon-btn" aria-label="Notifications">
-      <div class="notif-btn-inner">
-        <i-tabler class="d-flex icon-20" name="bell"></i-tabler>
-        <span class="notif-dot" aria-hidden="true"></span>
+    <button mat-icon-button [matMenuTriggerFor]="notifMenu" class="topbar-icon-btn premium-bell-btn" aria-label="Notifications">
+      <div class="notif-btn-inner" [class.has-unread]="unreadCount > 0">
+        <i-tabler class="d-flex icon-20 bell-icon" name="bell"></i-tabler>
+        @if (unreadCount > 0) {
+          <span class="notif-pulse" aria-hidden="true"></span>
+          <span class="notif-count">{{ unreadCount }}</span>
+        }
       </div>
     </button>
 
+    <!-- ═══ PREMIUM NOTIFICATION PANEL ═══ -->
     <mat-menu #notifMenu="matMenu" class="notif-menu-panel" xPosition="before">
-      <div class="notif-menu-header px-16 py-12" (click)="$event.stopPropagation()">
-        <span class="notif-menu-title">Notifications</span>
-        <span class="notif-badge-count">1 new</span>
-      </div>
-      <mat-divider></mat-divider>
-      <button mat-menu-item class="notif-item">
-        <div class="notif-item-icon notif-icon-info">
-          <i-tabler name="info-circle" class="icon-16 d-flex"></i-tabler>
+      <div class="notif-panel" (click)="$event.stopPropagation()">
+
+        <!-- Panel Header -->
+        <div class="notif-panel-header">
+          <div class="notif-panel-header-left">
+            <div class="notif-header-icon-orb">
+              <i-tabler name="bell-ringing" class="icon-16 d-flex"></i-tabler>
+            </div>
+            <div>
+              <h3 class="notif-panel-title">Notifications</h3>
+              @if (unreadCount > 0) {
+                <span class="notif-panel-subtitle">{{ unreadCount }} unread</span>
+              } @else {
+                <span class="notif-panel-subtitle">All caught up</span>
+              }
+            </div>
+          </div>
+          @if (notifications.length > 0) {
+            <button class="notif-clear-btn" (click)="clearAll()">
+              <i-tabler name="trash" class="icon-12 d-flex"></i-tabler>
+              Clear
+            </button>
+          }
         </div>
-        <div class="notif-item-content">
-          <span class="notif-item-title">System ready</span>
-          <span class="notif-item-time">Just now</span>
+
+        <!-- Segment Tabs -->
+        <div class="notif-tabs">
+          <button class="notif-tab active">All</button>
+          <button class="notif-tab">Unread
+            @if (unreadCount > 0) {
+              <span class="notif-tab-badge">{{ unreadCount }}</span>
+            }
+          </button>
         </div>
-      </button>
-      <div class="notif-footer px-16 py-10">
-        <a class="notif-view-all" [routerLink]="['/components/notifications']">View all notifications →</a>
+
+        <!-- Notification List -->
+        <div class="notif-list-scroll">
+
+          <!-- ──── PASSWORD REMINDER CARD (pinned at top) ──── -->
+          @if (showPwdReminder) {
+            <div class="pwd-reminder-card notif-item-unread">
+
+              <!-- Shimmer pulse background -->
+              <div class="pwd-reminder-shimmer"></div>
+
+              <div class="pwd-reminder-header">
+                <div class="pwd-reminder-icon-wrap">
+                  <i-tabler name="shield-lock" class="icon-18 d-flex"></i-tabler>
+                </div>
+                <div class="pwd-reminder-text">
+                  <p class="pwd-reminder-title">Update Your Password</p>
+                  <p class="pwd-reminder-sub">Secure your account on first login</p>
+                </div>
+                <span class="pwd-reminder-priority-dot"></span>
+              </div>
+
+              <!-- Countdown Timer -->
+              <div class="pwd-countdown-wrap" [class.pwd-countdown-urgent]="countdownUrgent">
+                <div class="pwd-countdown-label">
+                  <i-tabler name="clock-hour-4" class="icon-12 d-flex me-1"></i-tabler>
+                  <span>{{ countdownUrgent ? 'Act now! Expires in' : 'Time remaining' }}</span>
+                </div>
+                <div class="pwd-countdown-digits">
+                  <span class="pwd-digit-block">{{ countdownDisplay.split(':')[0] }}<small>h</small></span>
+                  <span class="pwd-colon">:</span>
+                  <span class="pwd-digit-block">{{ countdownDisplay.split(':')[1] }}<small>m</small></span>
+                  <span class="pwd-colon">:</span>
+                  <span class="pwd-digit-block">{{ countdownDisplay.split(':')[2] }}<small>s</small></span>
+                </div>
+              </div>
+
+              <!-- Progress bar -->
+              <div class="pwd-progress-wrap">
+                <div class="pwd-progress-track">
+                  <div class="pwd-progress-fill"
+                       [style.width]="(100 - (countdownDisplay ? 100 : 0)) + '%'"
+                       [class.urgent]="countdownUrgent">
+                  </div>
+                </div>
+              </div>
+
+              <!-- Actions -->
+              <div class="pwd-reminder-actions">
+                <button class="pwd-update-btn" (click)="navigateToChangePassword()">
+                  <i-tabler name="key" class="icon-13 d-flex"></i-tabler>
+                  Update Now
+                </button>
+                <button class="pwd-dismiss-btn" (click)="markPasswordUpdated()">
+                  Done
+                </button>
+              </div>
+
+            </div>
+          }
+
+          <!-- Regular notifications -->
+          @if (notifications.length === 0 && !showPwdReminder) {
+            <div class="notif-empty-state">
+              <div class="notif-empty-orb">
+                <i-tabler name="bell-off" class="icon-28 d-flex"></i-tabler>
+              </div>
+              <p class="notif-empty-title">All caught up!</p>
+              <p class="notif-empty-sub">No new notifications right now</p>
+            </div>
+          }
+
+          @for (notif of notifications; track notif.id; let i = $index) {
+            <div class="notif-item-row" [class.notif-item-unread]="notif.unread"
+                 [style.animation-delay]="(i * 60) + 'ms'">
+              <div class="notif-item-icon-wrap notif-color-{{ notif.color }}">
+                <i-tabler name="{{ notif.icon }}" class="icon-15 d-flex"></i-tabler>
+              </div>
+              <div class="notif-item-body">
+                <p class="notif-item-title">{{ notif.title }}</p>
+                <span class="notif-item-time">
+                  <i-tabler name="clock" class="icon-11 d-flex me-1"></i-tabler>
+                  {{ notif.time }}
+                </span>
+              </div>
+              @if (notif.unread) {
+                <span class="notif-unread-indicator"></span>
+              }
+            </div>
+          }
+        </div>
+
+        <!-- Panel Footer -->
+        <div class="notif-panel-footer">
+          <a class="notif-view-all-btn" [routerLink]="['/components/notifications']">
+            <span>View all notifications</span>
+            <i-tabler name="arrow-right" class="icon-14 d-flex"></i-tabler>
+          </a>
+        </div>
+
       </div>
     </mat-menu>
 

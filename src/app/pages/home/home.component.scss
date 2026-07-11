@@ -6721,4 +6721,188 @@ $danger: #ef4444;
 @keyframes shimmerBar {
     0% { transform: translateX(-100%); }
     100% { transform: translateX(100%); }
+}/* ══════════════════════════════════════════════════════════════
+   PREMIUM LIQUID GLASS UPGRADES (ADDED BY AI)
+   ══════════════════════════════════════════════════════════════ */
+
+/* ── Grids & General Layout Upgrades ──────────────────────────────────────── */
+.ai-grid, .mod-grid, .workflow-grid, .feat-grid, .testi-grid {
+    display: grid;
+    gap: 24px;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    align-items: stretch;
+    width: 100%;
+}
+
+/* ── Premium Card Enhancements ─────────────────────────────────────────── */
+.ai-card, .mod-card, .wf-card, .feat-card, .testi-card {
+    position: relative;
+    background: rgba(15, 15, 36, 0.65) !important;
+    backdrop-filter: blur(24px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(24px) saturate(180%) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    border-radius: 20px !important;
+    padding: 32px !important;
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255,255,255,0.1) !important;
+    overflow: hidden;
+    z-index: 1;
+
+    &::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(circle at 0% 0%, rgba(99, 102, 241, 0.15), transparent 70%);
+        opacity: 0;
+        transition: opacity 0.4s;
+        z-index: -1;
+    }
+
+    &:hover {
+        border-color: rgba(99, 102, 241, 0.4) !important;
+        transform: translateY(-6px) scale(1.02) !important;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255,255,255,0.2) !important;
+
+        &::before {
+            opacity: 1;
+        }
+    }
+}
+
+/* ── Pricing & Billing Upgrades ────────────────────────────────────────── */
+.billing-toggle-container.liquid-toggle {
+    background: rgba(12, 12, 30, 0.6);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 100px;
+    padding: 8px 24px;
+    display: inline-flex;
+    align-items: center;
+    gap: 16px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255,255,255,0.05);
+    margin-bottom: 40px;
+}
+
+.owl-slide-item {
+    animation: owlSlideIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes owlSlideIn {
+    0% { transform: translateY(40px) scale(0.95); opacity: 0; filter: blur(10px); }
+    100% { transform: translateY(0) scale(1); opacity: 1; filter: blur(0); }
+}
+
+.price-card.liquid-price-card.owl-card {
+    background: linear-gradient(145deg, rgba(15,15,36,0.8), rgba(8,8,24,0.95)) !important;
+    backdrop-filter: blur(30px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    border-radius: 24px !important;
+    padding: 40px !important;
+    transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    box-shadow: 0 12px 40px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.08) !important;
+
+    &:hover {
+        transform: translateY(-10px) !important;
+        border-color: rgba(99, 102, 241, 0.5) !important;
+        box-shadow: 0 30px 60px rgba(99, 102, 241, 0.2), inset 0 1px 0 rgba(255,255,255,0.2) !important;
+    }
+}
+
+.pricing-referral-note.liquid-note {
+    display: inline-block;
+    margin-top: 32px;
+    padding: 12px 24px;
+    background: rgba(16, 185, 129, 0.1);
+    border: 1px solid rgba(16, 185, 129, 0.3);
+    border-radius: 100px;
+    color: #34d399;
+    font-weight: 700;
+    font-size: 14px;
+    animation: pulseGlow 3s infinite alternate;
+}
+
+@keyframes pulseGlow {
+    0% { box-shadow: 0 0 10px rgba(16, 185, 129, 0.2); }
+    100% { box-shadow: 0 0 24px rgba(16, 185, 129, 0.6); }
+}
+
+/* ── FAQ Section (Quantum FAQ) ─────────────────────────────────────────── */
+.faq-section.quantum-faq-section {
+    position: relative;
+    padding: 120px 0;
+    overflow: hidden;
+}
+
+.faq-wrap.quantum-faq-wrap {
+    max-width: 800px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.faq-item.quantum-faq-card {
+    background: rgba(15, 15, 36, 0.5) !important;
+    backdrop-filter: blur(16px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    border-radius: 16px !important;
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1) !important;
+
+    &:hover {
+        background: rgba(20, 20, 45, 0.7) !important;
+        border-color: rgba(99, 102, 241, 0.3) !important;
+        transform: scale(1.01) !important;
+    }
+
+    &.open {
+        background: linear-gradient(135deg, rgba(20, 20, 45, 0.8), rgba(15, 15, 36, 0.9)) !important;
+        border-color: rgba(99, 102, 241, 0.6) !important;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.5), 0 0 20px rgba(99, 102, 241, 0.15) !important;
+    }
+}
+
+/* ── CTA Section Premium Upgrade ───────────────────────────────────────── */
+.cta-section {
+    background: linear-gradient(180deg, #05050f 0%, rgba(99, 102, 241, 0.05) 50%, #05050f 100%) !important;
+    padding: 140px 0 !important;
+}
+
+.cta-inner {
+    background: rgba(12, 12, 30, 0.7);
+    backdrop-filter: blur(40px) saturate(200%);
+    -webkit-backdrop-filter: blur(40px) saturate(200%);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 32px;
+    padding: 64px 32px;
+    box-shadow: 0 24px 80px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.15);
+    position: relative;
+    overflow: hidden;
+
+    &::before {
+        content: '';
+        position: absolute;
+        top: -50%; left: -50%; width: 200%; height: 200%;
+        background: conic-gradient(from 0deg at 50% 50%, transparent 0%, rgba(99, 102, 241, 0.2) 25%, transparent 50%);
+        animation: rotateGlow 10s linear infinite;
+        z-index: -1;
+    }
+}
+
+@keyframes rotateGlow {
+    100% { transform: rotate(360deg); }
+}
+
+/* ── Footer Modernization ────────────────────────────────────────────── */
+.footer {
+    background: #03030a !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.05) !important;
+    position: relative;
+    overflow: hidden;
+
+    &::before {
+        content: '';
+        position: absolute;
+        top: 0; left: 0; right: 0; height: 1px;
+        background: linear-gradient(90deg, transparent, rgba(99, 102, 241, 0.5), transparent);
+    }
 }

@@ -1,0 +1,170 @@
+<div class="page-container liquid-bg">
+  <div class="content-header">
+    <div class="header-text">
+      <h1 class="liquid-title">Profit & Loss Dashboard</h1>
+      <p class="liquid-subtitle">Track, manage, and analyze your financial performance.</p>
+    </div>
+    <div class="header-actions">
+      <button mat-flat-button class="liquid-btn-secondary" (click)="showManualEntryModal = true">
+        <mat-icon>add</mat-icon> Manual Entry
+      </button>
+      <button mat-flat-button class="liquid-btn-primary" (click)="showAutoCalcModal = true">
+        <mat-icon>calculator</mat-icon> Auto Calculate
+      </button>
+    </div>
+  </div>
+
+  <mat-card class="liquid-card mt-24">
+    <mat-card-content>
+      <div class="table-container">
+        <table mat-table [dataSource]="dataSource" class="liquid-table">
+          
+          <!-- Date Column -->
+          <ng-container matColumnDef="record_date">
+            <th mat-header-cell *matHeaderCellDef> Date </th>
+            <td mat-cell *matCellDef="let element"> {{element.record_date}} </td>
+          </ng-container>
+
+          <!-- Revenue Column -->
+          <ng-container matColumnDef="revenue">
+            <th mat-header-cell *matHeaderCellDef> Revenue </th>
+            <td mat-cell *matCellDef="let element" class="text-success fw-bold"> 
+              {{element.revenue | currency:'INR'}} 
+            </td>
+          </ng-container>
+
+          <!-- Expenses Column -->
+          <ng-container matColumnDef="expenses">
+            <th mat-header-cell *matHeaderCellDef> Expenses </th>
+            <td mat-cell *matCellDef="let element" class="text-danger fw-bold"> 
+              {{element.expenses | currency:'INR'}} 
+            </td>
+          </ng-container>
+
+          <!-- Net Profit Column -->
+          <ng-container matColumnDef="net_profit">
+            <th mat-header-cell *matHeaderCellDef> Net Profit </th>
+            <td mat-cell *matCellDef="let element" [ngClass]="element.net_profit >= 0 ? 'text-success' : 'text-danger'" class="fw-bold fs-16"> 
+              {{element.net_profit | currency:'INR'}} 
+            </td>
+          </ng-container>
+
+          <!-- Entry Type Column -->
+          <ng-container matColumnDef="entry_type">
+            <th mat-header-cell *matHeaderCellDef> Source </th>
+            <td mat-cell *matCellDef="let element"> 
+              <span class="badge" [ngClass]="element.entry_type === 'AUTO' ? 'badge-auto' : 'badge-manual'">
+                {{element.entry_type}}
+              </span>
+            </td>
+          </ng-container>
+
+          <!-- Actions Column -->
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef> Actions </th>
+            <td mat-cell *matCellDef="let element">
+              <button mat-icon-button class="text-danger action-btn" (click)="deleteRecord(element.id)">
+                <i-tabler name="trash" class="icon-18"></i-tabler>
+              </button>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns;" class="liquid-row"></tr>
+        </table>
+
+        <!-- Loading State -->
+        @if (isLoading) {
+          <div class="empty-state">
+            <div class="spinner"></div>
+            <p>Loading financial data...</p>
+          </div>
+        }
+
+        <!-- Empty State -->
+        @if (!isLoading && dataSource.length === 0) {
+          <div class="empty-state">
+            <i-tabler name="cash" class="icon-48 text-muted"></i-tabler>
+            <p>No Profit & Loss records found.</p>
+            <button mat-stroked-button class="liquid-btn-outline" (click)="showManualEntryModal = true">
+              Create First Entry
+            </button>
+          </div>
+        }
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>
+
+<!-- Manual Entry Modal -->
+@if (showManualEntryModal) {
+<div class="liquid-modal-overlay">
+  <div class="liquid-modal">
+    <div class="modal-header">
+      <h2>Add Manual P&L Entry</h2>
+      <button mat-icon-button (click)="showManualEntryModal = false"><mat-icon>close</mat-icon></button>
+    </div>
+    <div class="modal-body">
+      <form (ngSubmit)="submitManualEntry()" #manual="ngForm" class="liquid-form">
+        <mat-form-field appearance="outline" class="w-100 mb-16">
+          <mat-label>Record Date</mat-label>
+          <input matInput type="date" [(ngModel)]="manualForm.record_date" name="record_date" required>
+        </mat-form-field>
+        
+        <mat-form-field appearance="outline" class="w-100 mb-16">
+          <mat-label>Revenue (INR)</mat-label>
+          <input matInput type="number" [(ngModel)]="manualForm.revenue" name="revenue" required>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="w-100 mb-16">
+          <mat-label>Expenses (INR)</mat-label>
+          <input matInput type="number" [(ngModel)]="manualForm.expenses" name="expenses" required>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="w-100 mb-24">
+          <mat-label>Notes (Optional)</mat-label>
+          <textarea matInput [(ngModel)]="manualForm.notes" name="notes" rows="3"></textarea>
+        </mat-form-field>
+
+        <div class="modal-actions">
+          <button mat-button type="button" (click)="showManualEntryModal = false">Cancel</button>
+          <button mat-flat-button class="liquid-btn-primary" type="submit" [disabled]="!manual.valid">Save Entry</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+}
+
+<!-- Auto Calc Modal -->
+@if (showAutoCalcModal) {
+<div class="liquid-modal-overlay">
+  <div class="liquid-modal">
+    <div class="modal-header">
+      <h2>Auto-Calculate P&L</h2>
+      <button mat-icon-button (click)="showAutoCalcModal = false"><mat-icon>close</mat-icon></button>
+    </div>
+    <div class="modal-body">
+      <p class="modal-desc">
+        Select a date range. The system will automatically fetch all delivered orders for revenue, and employee salaries for expenses, then calculate the net profit.
+      </p>
+      <form (ngSubmit)="submitAutoCalc()" #auto="ngForm" class="liquid-form mt-16">
+        <mat-form-field appearance="outline" class="w-100 mb-16">
+          <mat-label>Start Date</mat-label>
+          <input matInput type="date" [(ngModel)]="autoCalcForm.start_date" name="start_date" required>
+        </mat-form-field>
+        
+        <mat-form-field appearance="outline" class="w-100 mb-24">
+          <mat-label>End Date</mat-label>
+          <input matInput type="date" [(ngModel)]="autoCalcForm.end_date" name="end_date" required>
+        </mat-form-field>
+
+        <div class="modal-actions">
+          <button mat-button type="button" (click)="showAutoCalcModal = false">Cancel</button>
+          <button mat-flat-button class="liquid-btn-primary" type="submit" [disabled]="!auto.valid">Calculate Now</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+}

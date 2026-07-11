@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { RouterModule, ActivatedRoute, Router } from '@angular/router';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
@@ -15,15 +15,14 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
   selector: 'app-setup-password',
   standalone: true,
   imports: [
-    CommonModule, 
-    RouterModule, 
+    RouterModule,
     ReactiveFormsModule,
     MatIconModule,
     MatFormFieldModule,
     MatInputModule,
     MatButtonModule,
     MatProgressSpinnerModule
-  ],
+],
   templateUrl: './setup-password.component.html',
   styleUrls: ['./setup-password.component.scss']
 })

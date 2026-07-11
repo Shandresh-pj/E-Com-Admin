@@ -1,5 +1,5 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { ReactiveFormsModule, FormsModule, FormGroup, FormBuilder, Validators } from '@angular/forms';
 import { MaterialModule } from 'src/app/material.module';
 import { TablerIconsModule } from 'angular-tabler-icons';
@@ -12,13 +12,12 @@ import { MatTable } from 'src/utils/mat-table/mat-table';
   selector: 'app-workforce',
   standalone: true,
   imports: [
-    CommonModule,
     ReactiveFormsModule,
     FormsModule,
     MaterialModule,
     TablerIconsModule,
     MatTable
-  ],
+],
   templateUrl: './workforce.html',
   styleUrl: './workforce.scss'
 })

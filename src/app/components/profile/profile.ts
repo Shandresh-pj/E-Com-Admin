@@ -1,9 +1,17 @@
-import { Component } from '@angular/core';
-import { ReactiveFormsModule, FormsModule, FormGroup, FormBuilder, Validators } from '@angular/forms';
+import { Component, OnInit } from '@angular/core';
+import {
+  ReactiveFormsModule,
+  FormsModule,
+  FormGroup,
+  FormBuilder,
+  Validators
+} from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
+import { TablerIconsModule } from 'angular-tabler-icons';
+import { CommonModule } from '@angular/common';
 import { AlertService } from 'src/app/Securities/Services/alert.service';
 import { AuthService } from 'src/app/Securities/Services/auth.service';
 import { CommonService } from 'src/app/Securities/Services/common.service';
@@ -11,76 +19,126 @@ import { CommonService } from 'src/app/Securities/Services/common.service';
 @Component({
   selector: 'app-profile',
   imports: [
+    CommonModule,
     ReactiveFormsModule,
     FormsModule,
     MatFormFieldModule,
     MatInputModule,
     MatButtonModule,
-    MatCardModule
+    MatCardModule,
+    TablerIconsModule
   ],
   templateUrl: './profile.html',
   styleUrl: './profile.scss',
 })
-export class Profile {
+export class Profile implements OnInit {
 
-  ProfileForm : FormGroup;
+  ProfileForm: FormGroup;
   ProfileId: any;
   ProfileData: any;
 
+  /** Local preview URL for avatar */
+  avatarPreview: string | null = null;
+  avatarFile: File | null = null;
+
+  /** Local preview URL for cover */
+  coverPreview: string | null = null;
+  coverFile: File | null = null;
+
+  isSaving = false;
+
+  /** Stats shown under the avatar */
+  stats = [
+    { label: 'Orders',   value: '128',  icon: 'shopping-cart' },
+    { label: 'Revenue',  value: '₹4.2L', icon: 'currency-rupee' },
+    { label: 'Days Active', value: '365', icon: 'calendar-check' },
+  ];
 
   constructor(
-    private authService:AuthService,
+    private authService: AuthService,
     private alert: AlertService,
-    private commonService:CommonService,
-    private fb:FormBuilder
-  ){
-    this.ProfileForm = fb.group({
-      name : ['', Validators.required],
-      email : [{value:'',disabled:true}, Validators.required],
-      mobilenumber : [{value:'',disabled:true}, Validators.required],
-      address : ['',Validators.required],
-      userType:[{value:'',disabled:true},Validators.required]
-    })
-  const user = this.authService.getUser();
-  console.log("aaaa-1.3",user)
-   this.ProfileId  = user?.id
-   this.getProfile();
+    private commonService: CommonService,
+    private fb: FormBuilder
+  ) {
+    this.ProfileForm = this.fb.group({
+      name:         ['', Validators.required],
+      email:        [{ value: '', disabled: true }, Validators.required],
+      mobilenumber: [{ value: '', disabled: true }, Validators.required],
+      address:      ['', Validators.required],
+      userType:     [{ value: '', disabled: true }, Validators.required],
+    });
+
+    const user = this.authService.getUser();
+    this.ProfileId = user?.id;
   }
 
-
-  ngOnInit(){
-    
+  ngOnInit(): void {
+    this.getProfile();
   }
 
-  getProfile(){
+  getProfile(): void {
     this.commonService.getApi(`profile/${this.ProfileId}`).subscribe({
-      next:(res:any) => {
+      next: (res: any) => {
         this.ProfileData = res?.data;
-
         this.ProfileForm.patchValue({
-          name: this.ProfileData?.name,
-          email: this.ProfileData?.email,
-          mobilenumber: this.ProfileData.mobilenumber,
-          address: this.ProfileData?.address,
-          userType: this.ProfileData?.userType,
-         })
+          name:         this.ProfileData?.name,
+          email:        this.ProfileData?.email,
+          mobilenumber: this.ProfileData?.mobilenumber,
+          address:      this.ProfileData?.address,
+          userType:     this.ProfileData?.userType,
+        });
       }
-    })
+    });
   }
 
-  onSubmit(Form: FormGroup) {
-    if (Form.invalid) {
-      Form.markAllAsTouched();
+  /** Avatar file chosen */
+  onAvatarChange(event: Event): void {
+    const file = (event.target as HTMLInputElement).files?.[0];
+    if (!file) return;
+    this.avatarFile = file;
+    const reader = new FileReader();
+    reader.onload = () => (this.avatarPreview = reader.result as string);
+    reader.readAsDataURL(file);
+  }
+
+  /** Cover file chosen */
+  onCoverChange(event: Event): void {
+    const file = (event.target as HTMLInputElement).files?.[0];
+    if (!file) return;
+    this.coverFile = file;
+    const reader = new FileReader();
+    reader.onload = () => (this.coverPreview = reader.result as string);
+    reader.readAsDataURL(file);
+  }
+
+  /** Get initials from name */
+  get initials(): string {
+    const name = this.ProfileForm.get('name')?.value || this.ProfileData?.name || 'A';
+    return name.split(' ').map((w: string) => w[0]).join('').toUpperCase().slice(0, 2);
+  }
+
+  onSubmit(): void {
+    if (this.ProfileForm.invalid) {
+      this.ProfileForm.markAllAsTouched();
       return;
     }
-    const payload = Form.getRawValue();
+    this.isSaving = true;
+    const payload = this.ProfileForm.getRawValue();
     this.commonService.putApi(`profile/${this.ProfileId}`, payload).subscribe({
       next: () => {
-        this.alert.success('Profile updated successfully');
+        this.isSaving = false;
+        this.alert.success('Profile updated successfully! 🎉');
       },
       error: (err: any) => {
+        this.isSaving = false;
         this.alert.error(err?.error?.message || 'Profile update failed');
       }
     });
+  }
+
+  onReset(): void {
+    this.getProfile();
+    this.avatarPreview = null;
+    this.coverPreview  = null;
   }
 }

@@ -39,7 +39,15 @@ const EM = UserType.EMPLOYEE;
 const DB = UserType.DELIVERY_BOY;
 
 export const ComponentsRoutes: Routes = [
-
+  {
+    path: '',
+    children: [
+      {
+        path: 'profit-loss',
+        loadComponent: () => import('./profit-loss/profit-loss').then(m => m.ProfitLossComponent)
+      }
+    ]
+  },
   {
     path: 'admin',
     component: AppAdmin,

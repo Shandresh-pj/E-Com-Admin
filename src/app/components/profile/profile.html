@@ -1,76 +1,178 @@
-<mat-card class="cardWithShadow theme-card">
+<div class="profile-page">
 
-    <mat-card-header>
-        <div class="header-container">
+  <!-- ── HERO COVER SECTION ─────────────────────────────────────────────── -->
+  <div class="profile-cover-wrap">
 
-            <mat-card-title class="m-b-0">
-                Profile
-            </mat-card-title>
-        </div>
-    </mat-card-header>
-    <mat-card-content class="b-t-1">
-    <form [formGroup]="ProfileForm">
-        <div class="row">
-            <div class="col-lg-4 col-md-6">
-                <mat-label class="f-w-600 m-b-8 d-block">
-                    Name <span class="text-danger">*</span>
-                </mat-label>
-                <mat-form-field appearance="outline" class="w-100">
-                    <input matInput formControlName="name" placeholder="Enter Name">
-                    @if (ProfileForm.get('name')?.hasError('required')) {
-                    <mat-error>Name is required</mat-error>
-                    }
-                </mat-form-field>
-            </div>
+    <!-- Cover image / gradient -->
+    <div class="profile-cover"
+         [style.background-image]="coverPreview ? 'url(' + coverPreview + ')' : null">
+      <div class="cover-overlay"></div>
 
-            <div class="col-lg-4 col-md-6">
-                <mat-label class="f-w-600 m-b-8 d-block">
-                    Email <span class="text-danger">*</span>
-                </mat-label>
-                <mat-form-field appearance="outline" class="w-100">
-                    <input matInput formControlName="email" placeholder="Enter Email">
-                </mat-form-field>
-            </div>
+      <!-- Cover change button -->
+      <label class="cover-edit-btn" for="coverInput" title="Change cover photo">
+        <i-tabler name="camera" class="icon-15 d-flex"></i-tabler>
+        Change Cover
+        <input id="coverInput" type="file" accept="image/*" hidden (change)="onCoverChange($event)">
+      </label>
+    </div>
 
-            <div class="col-lg-4 col-md-6">
-                <mat-label class="f-w-600 m-b-8 d-block">
-                    Mobile Number <span class="text-danger">*</span>
-                </mat-label>
-                <mat-form-field appearance="outline" class="w-100">
-                    <input matInput formControlName="mobilenumber" placeholder="Enter Mobile Number">
-                </mat-form-field>
-            </div>
+    <!-- ── AVATAR SECTION ───────────────────────────────────────────────── -->
+    <div class="profile-avatar-section">
 
-            <div class="col-lg-4 col-md-6">
-                <mat-label class="f-w-600 m-b-8 d-block">
-                    User Type <span class="text-danger">*</span>
-                </mat-label>
-                <mat-form-field appearance="outline" class="w-100">
-                    <input matInput formControlName="userType" placeholder="Enter User Type">
-                </mat-form-field>
-            </div>
-
-            <div class="col-lg-4 col-md-6">
-                <mat-label class="f-w-600 m-b-8 d-block">
-                    Address <span class="text-danger">*</span>
-                </mat-label>
-                <mat-form-field appearance="outline" class="w-100">
-                    <input matInput formControlName="address" placeholder="Enter Address">
-                    @if (ProfileForm.get('address')?.hasError('required')) {
-                    <mat-error>Address is required</mat-error>
-                    }
-                </mat-form-field>
-            </div>
+      <!-- Avatar ring -->
+      <div class="profile-avatar-ring">
+        <div class="profile-avatar-img">
+          @if (avatarPreview) {
+            <img [src]="avatarPreview" alt="Profile Photo" class="avatar-photo">
+          } @else {
+            <span class="avatar-letters">{{ initials }}</span>
+          }
         </div>
 
-        <div class="m-t-12">
-            <button mat-stroked-button class="me-3 Cancel_Button" type="button" (click)="ProfileForm.reset()">
-                Cancel
+        <!-- Camera overlay -->
+        <label class="avatar-edit-overlay" for="avatarInput" title="Change photo">
+          <i-tabler name="camera" class="icon-18 d-flex"></i-tabler>
+          <input id="avatarInput" type="file" accept="image/*" hidden (change)="onAvatarChange($event)">
+        </label>
+
+        <!-- Online dot -->
+        <span class="avatar-online-dot"></span>
+      </div>
+
+      <!-- Name & role -->
+      <div class="profile-identity">
+        <h1 class="profile-name">{{ ProfileForm.get('name')?.value || ProfileData?.name || 'User' }}</h1>
+        <p class="profile-role">
+          <span class="profile-role-pill">
+            <i-tabler name="shield-check" class="icon-12 d-flex"></i-tabler>
+            {{ ProfileData?.userType || 'Admin' }}
+          </span>
+        </p>
+      </div>
+
+      <!-- Stats chips -->
+      <div class="profile-stats-row">
+        @for (s of stats; track s.label) {
+          <div class="profile-stat-chip">
+            <div class="stat-icon-orb">
+              <i-tabler [name]="s.icon" class="icon-14 d-flex"></i-tabler>
+            </div>
+            <div class="stat-info">
+              <span class="stat-value">{{ s.value }}</span>
+              <span class="stat-label">{{ s.label }}</span>
+            </div>
+          </div>
+        }
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── FORM CARD ──────────────────────────────────────────────────────── -->
+  <div class="profile-form-wrap">
+    <mat-card class="profile-form-card cardWithShadow">
+      <mat-card-content class="profile-form-body">
+
+        <!-- Section header -->
+        <div class="form-section-header">
+          <div class="form-section-icon">
+            <i-tabler name="user-edit" class="icon-18 d-flex"></i-tabler>
+          </div>
+          <div>
+            <h2 class="form-section-title">Personal Information</h2>
+            <p class="form-section-sub">Update your profile details below</p>
+          </div>
+        </div>
+
+        <form [formGroup]="ProfileForm" (ngSubmit)="onSubmit()">
+          <div class="profile-form-grid">
+
+            <!-- Name -->
+            <div class="form-field-wrap">
+              <label class="field-label">
+                <i-tabler name="user" class="icon-13 d-flex"></i-tabler>
+                Full Name <span class="req">*</span>
+              </label>
+              <mat-form-field appearance="outline" class="w-100">
+                <input matInput formControlName="name" placeholder="Enter your full name">
+                @if (ProfileForm.get('name')?.hasError('required') && ProfileForm.get('name')?.touched) {
+                  <mat-error>Name is required</mat-error>
+                }
+              </mat-form-field>
+            </div>
+
+            <!-- Email -->
+            <div class="form-field-wrap">
+              <label class="field-label">
+                <i-tabler name="mail" class="icon-13 d-flex"></i-tabler>
+                Email Address
+                <span class="field-readonly-badge">Read only</span>
+              </label>
+              <mat-form-field appearance="outline" class="w-100">
+                <input matInput formControlName="email" placeholder="Email">
+              </mat-form-field>
+            </div>
+
+            <!-- Mobile -->
+            <div class="form-field-wrap">
+              <label class="field-label">
+                <i-tabler name="phone" class="icon-13 d-flex"></i-tabler>
+                Mobile Number
+                <span class="field-readonly-badge">Read only</span>
+              </label>
+              <mat-form-field appearance="outline" class="w-100">
+                <input matInput formControlName="mobilenumber" placeholder="Mobile Number">
+              </mat-form-field>
+            </div>
+
+            <!-- User Type -->
+            <div class="form-field-wrap">
+              <label class="field-label">
+                <i-tabler name="id-badge" class="icon-13 d-flex"></i-tabler>
+                User Type
+                <span class="field-readonly-badge">Read only</span>
+              </label>
+              <mat-form-field appearance="outline" class="w-100">
+                <input matInput formControlName="userType" placeholder="User Type">
+              </mat-form-field>
+            </div>
+
+            <!-- Address — full width -->
+            <div class="form-field-wrap form-field-full">
+              <label class="field-label">
+                <i-tabler name="map-pin" class="icon-13 d-flex"></i-tabler>
+                Address <span class="req">*</span>
+              </label>
+              <mat-form-field appearance="outline" class="w-100">
+                <input matInput formControlName="address" placeholder="Enter your address">
+                @if (ProfileForm.get('address')?.hasError('required') && ProfileForm.get('address')?.touched) {
+                  <mat-error>Address is required</mat-error>
+                }
+              </mat-form-field>
+            </div>
+
+          </div>
+
+          <!-- Actions -->
+          <div class="profile-form-actions">
+            <button type="button" class="btn-reset" (click)="onReset()">
+              <i-tabler name="refresh" class="icon-15 d-flex"></i-tabler>
+              Reset
             </button>
-            <button mat-flat-button color="primary" type="button" (click)="onSubmit(ProfileForm)">
-                Update
+            <button type="submit" class="btn-save" [class.saving]="isSaving">
+              @if (isSaving) {
+                <span class="save-spinner"></span>
+                Saving…
+              } @else {
+                <i-tabler name="check" class="icon-15 d-flex"></i-tabler>
+                Save Changes
+              }
             </button>
-        </div>
-    </form>
-</mat-card-content>
-</mat-card>
+          </div>
+        </form>
+
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+</div>

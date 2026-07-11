@@ -294,7 +294,7 @@ export class FullComponent implements OnInit {
       allowedMenus = [
         { id: 1, name: 'App Admin', path: '/components/admin', icon: 'bi-shield-lock-fill', isActive: true },
         { id: 2, name: 'Branch', path: '/components/branch', icon: 'bi-shop', isActive: true },
-        { id: 3, name: 'Employees', path: '/components/employees', icon: 'bi-people-fill', isActive: true },
+        { id: 3, name: 'Employee', path: '/components/employees', icon: 'bi-people-fill', isActive: true },
         { id: 4, name: 'Roles', path: '/components/roles', icon: 'bi-key-fill', isActive: true },
         { id: 5, name: 'Role Access', path: '/components/role-access', icon: 'bi-shield-check', isActive: true },
         { id: 6, name: 'Profile', path: '/components/profile', icon: 'bi-person-badge-fill', isActive: true },
@@ -321,7 +321,8 @@ export class FullComponent implements OnInit {
         { id: 27, name: 'Approvals', path: '/components/approvals', icon: 'bi-check-square', isActive: true },
         { id: 28, name: 'Workforce Requests', path: '/components/workforce-requests', icon: 'bi-briefcase-fill', isActive: true },
         { id: 29, name: 'Leave Management', path: '/components/leave', icon: 'bi-calendar-x-fill', isActive: true },
-        { id: 30, name: 'CRM Contacts', path: '/components/crm-contacts', icon: 'bi-people-fill', isActive: true }
+        { id: 30, name: 'CRM Contacts', path: '/components/crm-contacts', icon: 'bi-people-fill', isActive: true },
+        { id: 31, name: 'Profit & Loss', path: '/components/profit-loss', icon: 'bi-pie-chart-fill', isActive: true }
       ];
     } else {
       allowedMenus = apiMenus.filter((m: any) => {

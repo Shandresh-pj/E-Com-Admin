@@ -1,11 +1,11 @@
 import { Component, OnInit, ViewEncapsulation } from '@angular/core';
-
 import { RouterModule, ActivatedRoute } from '@angular/router';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, AbstractControl } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { environment } from 'src/environment/environment';
 import { of } from 'rxjs';
 import { catchError, map, debounceTime, take, switchMap } from 'rxjs/operators';
+import { AlertService } from 'src/app/Securities/Services/alert.service';
 
 @Component({
   selector: 'app-contact',
@@ -32,7 +32,8 @@ export class ContactComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     private http: HttpClient,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private alert: AlertService
   ) {}
 
   ngOnInit() {
@@ -113,9 +114,48 @@ export class ContactComponent implements OnInit {
         switchMap(val => 
           this.http.post(`${environment.apiUrl}/contact/check-duplicate`, { [type]: val }).pipe(
             map((res: any) => {
-              if (type === 'email' && res.duplicateEmail) return { duplicateEmail: true };
-              if (type === 'companyName' && res.duplicateCompany) return { duplicateCompany: true };
-              if (type === 'phone' && res.duplicatePhone) return { duplicatePhone: true };
+              if (type === 'email' && res.duplicateEmail) {
+                const details = res.existingDetails;
+                let message = 'This email is already registered in our system.';
+                if (details) {
+                  message = `This email is already registered as a <strong>${details.type}</strong> for <strong>${details.name}</strong> at <strong>${details.company}</strong> (Status: ${details.status}). Please use a different email or log in.`;
+                }
+                this.alert.fire({
+                  icon: 'warning',
+                  title: 'Duplicate Email Detected',
+                  html: message,
+                  confirmButtonText: 'Got it'
+                });
+                return { duplicateEmail: true };
+              }
+              if (type === 'companyName' && res.duplicateCompany) {
+                const details = res.existingDetails;
+                let message = 'This company name is already registered.';
+                if (details) {
+                  message = `This company name is already registered as an active <strong>${details.type}</strong> by <strong>${details.name}</strong>. Please choose a different company/brand name.`;
+                }
+                this.alert.fire({
+                  icon: 'warning',
+                  title: 'Duplicate Company Detected',
+                  html: message,
+                  confirmButtonText: 'Got it'
+                });
+                return { duplicateCompany: true };
+              }
+              if (type === 'phone' && res.duplicatePhone) {
+                const details = res.existingDetails;
+                let message = 'This phone number is already registered.';
+                if (details) {
+                  message = `This phone number is already registered for <strong>${details.name}</strong> at <strong>${details.company}</strong>. Please use another mobile number.`;
+                }
+                this.alert.fire({
+                  icon: 'warning',
+                  title: 'Duplicate Phone Detected',
+                  html: message,
+                  confirmButtonText: 'Got it'
+                });
+                return { duplicatePhone: true };
+              }
               return null;
             }),
             catchError(() => of(null))

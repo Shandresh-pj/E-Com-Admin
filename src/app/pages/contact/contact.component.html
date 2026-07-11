@@ -145,10 +145,19 @@
               <label for="email">Work Email *</label>
               <input id="email" type="email" formControlName="email" placeholder="svkdthworld@gmail.com"
                 [class.invalid]="isFieldInvalid('email')" />
-              @if (isFieldInvalid('email')) {
-              <span class="err-txt">Enter a valid work email</span>
+              @if (contactForm.get('email')?.touched) {
+                @if (contactForm.get('email')?.hasError('required')) {
+                  <span class="err-txt">Email address is required</span>
+                }
+                @if (contactForm.get('email')?.hasError('email')) {
+                  <span class="err-txt">Enter a valid work email</span>
+                }
+                @if (contactForm.get('email')?.hasError('duplicateEmail')) {
+                  <span class="err-txt">Email is already registered</span>
+                }
               }
             </div>
+
           </div>
 
           <div class="row-2">
@@ -156,8 +165,13 @@
               <label for="companyName">Company / Brand Name *</label>
               <input id="companyName" type="text" formControlName="companyName" placeholder="SVK Retail Group Pvt Ltd"
                 [class.invalid]="isFieldInvalid('companyName')" />
-              @if (isFieldInvalid('companyName')) {
-              <span class="err-txt">Company Name is required</span>
+              @if (contactForm.get('companyName')?.touched) {
+                @if (contactForm.get('companyName')?.hasError('required')) {
+                  <span class="err-txt">Company Name is required</span>
+                }
+                @if (contactForm.get('companyName')?.hasError('duplicateCompany')) {
+                  <span class="err-txt">Company Name is already registered</span>
+                }
               }
             </div>
 
@@ -165,11 +179,20 @@
               <label for="phone">Phone / WhatsApp Number *</label>
               <input id="phone" type="tel" formControlName="phone" placeholder="+91 98765 43210"
                 [class.invalid]="isFieldInvalid('phone')" />
-              @if (isFieldInvalid('phone')) {
-              <span class="err-txt">Valid 10-digit phone number required</span>
+              @if (contactForm.get('phone')?.touched) {
+                @if (contactForm.get('phone')?.hasError('required')) {
+                  <span class="err-txt">Phone number is required</span>
+                }
+                @if (contactForm.get('phone')?.hasError('pattern')) {
+                  <span class="err-txt">Valid 10-digit phone number required</span>
+                }
+                @if (contactForm.get('phone')?.hasError('duplicatePhone')) {
+                  <span class="err-txt">Phone number is already registered</span>
+                }
               }
             </div>
           </div>
+
 
           <div class="row-2">
             <div class="field-col">

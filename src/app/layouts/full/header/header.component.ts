@@ -192,7 +192,17 @@ export class HeaderComponent implements OnInit, OnDestroy {
     this.router.navigate(['/authentication/login']);
   }
 
+  get currentUser() {
+    return this.authService.getUser();
+  }
+
+  get initials(): string {
+    const name = this.currentUser?.name || 'Admin';
+    return name.split(' ').map((w: string) => w[0]).join('').toUpperCase().slice(0, 2);
+  }
+
   ProfilePage() {
     this.router.navigate(['/components/profile']);
   }
+
 }

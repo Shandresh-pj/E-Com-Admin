@@ -418,9 +418,6 @@ html .topbar {
 
 /* ── Menu Items ──────────────────────────────────────────────────────────── */
 .profile-menu-item {
-  display: flex !important;
-  align-items: center !important;
-  gap: 8px !important;
   font-size: 12px !important;
   font-weight: 600 !important;
   padding: 8px 12px !important;
@@ -431,6 +428,16 @@ html .topbar {
   color: var(--text-secondary) !important;
   position: relative !important;
   overflow: hidden !important;
+
+  .menu-item-content {
+    display: flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+    width: 100% !important;
+    height: 100% !important;
+    flex-direction: row !important;
+  }
+
 
   .menu-item-icon {
     width: 25px !important;

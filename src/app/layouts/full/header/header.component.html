@@ -176,42 +176,51 @@
     <!-- Profile Button -->
     <button class="profile-avatar-btn" [matMenuTriggerFor]="profilemenu" aria-label="Profile menu">
       <div class="avatar-circle">
-        <span class="avatar-initials">A</span>
+        <span class="avatar-initials">{{ initials }}</span>
       </div>
       <div class="avatar-info d-none d-lg-flex">
-        <span class="avatar-name">Admin</span>
-        <span class="avatar-role">Super Admin</span>
+        <span class="avatar-name">{{ currentUser?.name || 'Admin' }}</span>
+        <span class="avatar-role">{{ currentUser?.userType || 'Super Admin' }}</span>
       </div>
       <i-tabler name="chevron-down" class="icon-14 d-flex avatar-chevron d-none d-lg-flex"></i-tabler>
     </button>
 
     <mat-menu #profilemenu="matMenu" class="profile-menu-panel" xPosition="before">
       <div class="profile-menu-header" (click)="$event.stopPropagation()">
-        <div class="profile-menu-avatar"><span>A</span></div>
+        <div class="profile-menu-avatar"><span>{{ initials }}</span></div>
         <div>
-          <p class="profile-menu-name">Admin User</p>
-          <p class="profile-menu-role">Super Admin</p>
+          <p class="profile-menu-name">{{ currentUser?.name || 'Admin User' }}</p>
+          <p class="profile-menu-role">{{ currentUser?.userType || 'Super Admin' }}</p>
         </div>
       </div>
       <mat-divider></mat-divider>
       <button mat-menu-item (click)="ProfilePage()" class="profile-menu-item">
-        <i-tabler name="user" class="icon-16 d-flex menu-item-icon"></i-tabler>
-        <span>My Profile</span>
+        <div class="menu-item-content">
+          <i-tabler name="user" class="icon-16 d-flex menu-item-icon"></i-tabler>
+          <span>My Profile</span>
+        </div>
       </button>
       <button mat-menu-item [routerLink]="['/components/change-password']" class="profile-menu-item">
-        <i-tabler name="lock" class="icon-16 d-flex menu-item-icon"></i-tabler>
-        <span>Change Password</span>
+        <div class="menu-item-content">
+          <i-tabler name="lock" class="icon-16 d-flex menu-item-icon"></i-tabler>
+          <span>Change Password</span>
+        </div>
       </button>
       <button mat-menu-item [routerLink]="['/components/notifications']" class="profile-menu-item">
-        <i-tabler name="bell" class="icon-16 d-flex menu-item-icon"></i-tabler>
-        <span>Notifications</span>
+        <div class="menu-item-content">
+          <i-tabler name="bell" class="icon-16 d-flex menu-item-icon"></i-tabler>
+          <span>Notifications</span>
+        </div>
       </button>
       <mat-divider></mat-divider>
       <button mat-menu-item (click)="onLogout()" class="profile-menu-item logout-item">
-        <i-tabler name="logout" class="icon-16 d-flex menu-item-icon"></i-tabler>
-        <span>Sign Out</span>
+        <div class="menu-item-content">
+          <i-tabler name="logout" class="icon-16 d-flex menu-item-icon"></i-tabler>
+          <span>Sign Out</span>
+        </div>
       </button>
     </mat-menu>
+
 
   </div>
 

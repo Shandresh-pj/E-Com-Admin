@@ -19,6 +19,7 @@ export class VerifyEmailComponent implements OnInit {
   isSuccess = false;
   autoApproved = false;
   message = '';
+  isAuthFlow = false;
 
   constructor(
     private route: ActivatedRoute,
@@ -27,7 +28,12 @@ export class VerifyEmailComponent implements OnInit {
   ) { }
 
   ngOnInit() {
-    this.token = this.route.snapshot.queryParamMap.get('token') || '';
+    const paramToken = this.route.snapshot.paramMap.get('token');
+    const queryToken = this.route.snapshot.queryParamMap.get('token');
+    
+    this.token = paramToken || queryToken || '';
+    this.isAuthFlow = !!paramToken;
+
     if (!this.token) {
       this.isVerifying = false;
       this.isSuccess = false;
@@ -39,18 +45,33 @@ export class VerifyEmailComponent implements OnInit {
   }
 
   verify() {
-    this.http.post(`${environment.apiUrl}/contact/verify-email`, { token: this.token }).subscribe({
-      next: (res: any) => {
-        this.isVerifying = false;
-        this.isSuccess = true;
-        this.autoApproved = res.autoApproved;
-        this.message = res.message;
-      },
-      error: (err: any) => {
-        this.isVerifying = false;
-        this.isSuccess = false;
-        this.message = err.error?.message || 'Email verification failed. The link may have expired or already been verified.';
-      }
-    });
+    if (this.isAuthFlow) {
+      this.http.get(`${environment.apiUrl}/auth/verify/${this.token}`).subscribe({
+        next: (res: any) => {
+          this.isVerifying = false;
+          this.isSuccess = true;
+          this.message = res.message || 'Email verified successfully!';
+        },
+        error: (err: any) => {
+          this.isVerifying = false;
+          this.isSuccess = false;
+          this.message = err.error?.message || 'Email verification failed. The link may have expired or already been verified.';
+        }
+      });
+    } else {
+      this.http.post(`${environment.apiUrl}/contact/verify-email`, { token: this.token }).subscribe({
+        next: (res: any) => {
+          this.isVerifying = false;
+          this.isSuccess = true;
+          this.autoApproved = res.autoApproved;
+          this.message = res.message;
+        },
+        error: (err: any) => {
+          this.isVerifying = false;
+          this.isSuccess = false;
+          this.message = err.error?.message || 'Email verification failed. The link may have expired or already been verified.';
+        }
+      });
+    }
   }
 }

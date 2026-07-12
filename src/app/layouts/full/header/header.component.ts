@@ -6,6 +6,7 @@ import {
   ViewEncapsulation,
   OnInit,
   OnDestroy,
+  ChangeDetectorRef
 } from '@angular/core';
 import { TablerIconsModule } from 'angular-tabler-icons';
 import { MaterialModule } from 'src/app/material.module';
@@ -16,6 +17,9 @@ import { AuthService } from 'src/app/Securities/Services/auth.service';
 import { CommonService } from 'src/app/Securities/Services/common.service';
 import { CoreService } from 'src/app/services/core.service';
 import { ThemeToggleComponent } from './theme-toggle/theme-toggle.component';
+import { SocketService } from 'src/app/Securities/Services/socket.service';
+import { NotificationService } from 'src/app/services/notification.service';
+import { Subscription } from 'rxjs';
 
 const FIRST_LOGIN_KEY  = 'svk_first_login_ts';
 const PWD_UPDATED_KEY  = 'svk_pwd_updated';
@@ -43,48 +47,15 @@ export class HeaderComponent implements OnInit, OnDestroy {
     private commonService: CommonService,
     private authService: AuthService,
     private alert: AlertService,
-    public coreService: CoreService
+    public coreService: CoreService,
+    private socketService: SocketService,
+    private notificationService: NotificationService,
+    private cdr: ChangeDetectorRef
   ) {}
 
-  // ── Static notifications ────────────────────────────────────────────────
-  notifications: any[] = [
-    {
-      id: 1,
-      icon: 'info-circle',
-      title: 'System updated successfully',
-      time: 'Just now',
-      color: 'primary',
-      unread: true,
-      isPwdReminder: false
-    },
-    {
-      id: 2,
-      icon: 'shopping-cart',
-      title: 'New Order #1024 placed',
-      time: '5 mins ago',
-      color: 'success',
-      unread: true,
-      isPwdReminder: false
-    },
-    {
-      id: 3,
-      icon: 'alert-triangle',
-      title: 'High CPU load detected',
-      time: '1 hour ago',
-      color: 'warning',
-      unread: false,
-      isPwdReminder: false
-    },
-    {
-      id: 4,
-      icon: 'message',
-      title: 'New message from Sarah',
-      time: '2 hours ago',
-      color: 'accent',
-      unread: false,
-      isPwdReminder: false
-    }
-  ];
+  // ── Real notifications ────────────────────────────────────────────────
+  notifications: any[] = [];
+  private socketSubscription: Subscription = Subscription.EMPTY;
 
   // ── Password Reminder countdown ─────────────────────────────────────────
   showPwdReminder = false;
@@ -94,17 +65,66 @@ export class HeaderComponent implements OnInit, OnDestroy {
   private firstLoginTs = 0;
 
   get unreadCount(): number {
-    return this.notifications.filter(n => n.unread).length
+    return this.notifications.filter(n => !n.is_read).length
       + (this.showPwdReminder ? 1 : 0);
   }
 
   // ── Lifecycle ───────────────────────────────────────────────────────────
   ngOnInit(): void {
     this.initPasswordReminder();
+    this.fetchNotifications();
+
+    this.socketService.connect();
+    this.socketSubscription = this.socketService.on('new-notification').subscribe((notif: any) => {
+      this.notifications.unshift(this.formatNotification(notif)); // Add to top
+      this.cdr.detectChanges();
+    });
   }
 
   ngOnDestroy(): void {
     this.stopCountdown();
+    if (this.socketSubscription) {
+      this.socketSubscription.unsubscribe();
+    }
+  }
+
+  fetchNotifications(): void {
+    this.notificationService.getNotifications().subscribe({
+      next: (res: any) => {
+        this.notifications = (res?.data || []).map((n: any) => this.formatNotification(n));
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        console.error('Failed to load notifications:', err);
+      }
+    });
+  }
+
+  formatNotification(notif: any): any {
+    let icon = 'info-circle';
+    let color = 'primary';
+    
+    switch (notif.type) {
+      case 'PRODUCT_ADDED':
+        icon = 'box'; color = 'success'; break;
+      case 'PASSWORD_CHANGE':
+        icon = 'lock'; color = 'warning'; break;
+      case 'SUBSCRIPTION_EXPIRED':
+        icon = 'alert-triangle'; color = 'error'; break;
+      case 'PUBLISHED':
+        icon = 'check'; color = 'success'; break;
+      default:
+        icon = 'bell'; color = 'accent'; break;
+    }
+
+    return {
+      ...notif,
+      title: notif.message,
+      time: new Date(notif.created_at).toLocaleString(),
+      icon,
+      color,
+      unread: !notif.is_read
+    };
   }
 
   // ── First-login password reminder ──────────────────────────────────────
@@ -167,7 +187,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
   }
 
   navigateToChangePassword(): void {
-    this.router.navigate(['/components/change-password']);
+    this.router.navigate(['/change-password']);
   }
 
   // ── Existing methods ────────────────────────────────────────────────────
@@ -176,7 +196,22 @@ export class HeaderComponent implements OnInit, OnDestroy {
   }
 
   clearAll() {
-    this.notifications = this.notifications.map(n => ({ ...n, unread: false }));
+    this.notificationService.markAllAsRead().subscribe({
+      next: () => {
+        this.notifications = this.notifications.map(n => ({ ...n, unread: false, is_read: true }));
+        this.fetchNotifications();
+      }
+    });
+  }
+
+  markAsRead(notif: any) {
+    if (!notif.unread) return;
+    this.notificationService.markAsRead(notif.id).subscribe({
+      next: () => {
+        notif.unread = false;
+        notif.is_read = true;
+      }
+    });
   }
 
   toggleTheme() {
@@ -202,7 +237,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
   }
 
   ProfilePage() {
-    this.router.navigate(['/components/profile']);
+    this.router.navigate(['/profile']);
   }
 
 }

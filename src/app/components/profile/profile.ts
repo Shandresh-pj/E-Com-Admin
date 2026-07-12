@@ -15,6 +15,7 @@ import { CommonModule } from '@angular/common';
 import { AlertService } from 'src/app/Securities/Services/alert.service';
 import { AuthService } from 'src/app/Securities/Services/auth.service';
 import { CommonService } from 'src/app/Securities/Services/common.service';
+import { environment } from 'src/environment/environment';
 
 @Component({
   selector: 'app-profile',
@@ -87,6 +88,10 @@ export class Profile implements OnInit {
           address:      this.ProfileData?.address,
           userType:     this.ProfileData?.userType,
         });
+
+        if (this.ProfileData?.image) {
+          this.avatarPreview = `${environment.socketUrl}${this.ProfileData.image}`;
+        }
       }
     });
   }
@@ -124,10 +129,25 @@ export class Profile implements OnInit {
     }
     this.isSaving = true;
     const payload = this.ProfileForm.getRawValue();
-    this.commonService.putApi(`profile/${this.ProfileId}`, payload).subscribe({
+    
+    const formData = new FormData();
+    if (payload.name) formData.append('name', payload.name);
+    if (payload.email) formData.append('email', payload.email);
+    if (payload.mobilenumber) formData.append('mobilenumber', payload.mobilenumber);
+    if (payload.address) formData.append('address', payload.address);
+    if (payload.userType) formData.append('userType', payload.userType);
+    
+    if (this.avatarFile) {
+      formData.append('image', this.avatarFile);
+    }
+    
+    this.commonService.putFormData(`profile/${this.ProfileId}`, formData).subscribe({
       next: () => {
         this.isSaving = false;
         this.alert.success('Profile updated successfully! 🎉');
+        
+        // Refresh profile data to pick up the new image and details
+        this.getProfile();
       },
       error: (err: any) => {
         this.isSaving = false;

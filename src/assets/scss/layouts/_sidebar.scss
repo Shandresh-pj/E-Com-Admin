@@ -10,12 +10,18 @@
   left: 0;
   border: 0 !important;
   height: 100%;
-  box-shadow: var(--mat-sys-level2) !important;
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.05) !important;
   
-  background: var(--mat-sys-surface-bright) !important;
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
-  border-right: 1px solid var(--mat-sys-outline-variant) !important;
+  background: rgba(255, 255, 255, 0.7) !important;
+  backdrop-filter: blur(30px) saturate(200%);
+  -webkit-backdrop-filter: blur(30px) saturate(200%);
+  border-right: 1px solid rgba(255, 255, 255, 0.4) !important;
+
+  html.dark &, html .dark-theme & {
+    background: rgba(15, 23, 42, 0.75) !important;
+    border-right: 1px solid rgba(255, 255, 255, 0.05) !important;
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3) !important;
+  }
 
   .ng-scroll-content {
     display: block;
@@ -46,22 +52,38 @@ body {
     &.mdc-list {
       margin-top: -24px;
 
-      .mdc-list-group__subheader {
-        margin-top: 24px;
-        margin-bottom: 8px;
+      .mdc-list-group__subheader, .nav-caption {
+        margin-top: 28px;
+        margin-bottom: 12px;
         text-transform: uppercase;
-        font-size: 0.75rem;
-        opacity: 0.5;
-        font-weight: 700;
-        margin-top: 24px;
+        font-size: 0.7rem;
+        font-weight: 800;
+        letter-spacing: 0.08em;
         color: var(--mat-sys-on-background);
-        padding: 3px 16px !important;
+        opacity: 0.5;
+        padding: 4px 22px !important;
+        position: relative;
+        display: flex;
+        align-items: center;
+
+        /* Subtle glowing divider line next to caption */
+        &::after {
+          content: '';
+          flex: 1;
+          height: 1px;
+          background: linear-gradient(90deg, rgba(120, 120, 120, 0.2) 0%, transparent 100%);
+          margin-left: 12px;
+        }
+
+        html.dark &, html .dark-theme & {
+          &::after { background: linear-gradient(90deg, rgba(255, 255, 255, 0.1) 0%, transparent 100%); }
+        }
       }
 
       .menu-list-item {
-        border-radius: 12px;
-        height: 52px;
-        padding: 8px 16px;
+        border-radius: 16px;
+        height: 54px;
+        padding: 8px 18px;
         margin: 8px 16px;
         position: relative;
         overflow: visible;
@@ -72,12 +94,14 @@ body {
         will-change: transform;
         backface-visibility: hidden;
         transform: translateZ(0);
-        transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), border-color 0.4s ease;
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 
         .hide-menu {
-          font-size: 14px;
-          font-weight: 500;
-          letter-spacing: 0.3px;
+          font-size: 14.5px;
+          font-weight: 600;
+          letter-spacing: -0.01em;
+          color: var(--mat-sys-on-background);
+          transition: color 0.3s ease;
         }
 
         &:before {
@@ -91,10 +115,10 @@ body {
           height: 100%;
           opacity: 0;
           z-index: -1;
-          border-radius: 12px;
-          background: rgba(255, 255, 255, 0.3);
-          backdrop-filter: blur(8px);
-          box-shadow: inset 0 2px 4px rgba(255, 255, 255, 0.5), 0 4px 12px rgba(0, 0, 0, 0.05);
+          border-radius: 16px;
+          background: linear-gradient(135deg, rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.15));
+          backdrop-filter: blur(12px);
+          box-shadow: inset 0 2px 4px rgba(255, 255, 255, 0.6), 0 4px 16px rgba(0, 0, 0, 0.05);
           
           /* GPU acceleration for inner pill */
           will-change: transform, opacity;
@@ -105,8 +129,8 @@ body {
 
         html.dark &, html .dark-theme & {
           &:before {
-            background: rgba(15, 23, 42, 0.4);
-            box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.1), 0 4px 12px rgba(0, 0, 0, 0.3);
+            background: linear-gradient(135deg, rgba(30, 41, 59, 0.6), rgba(15, 23, 42, 0.2));
+            box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.05), 0 4px 16px rgba(0, 0, 0, 0.3);
           }
         }
 
@@ -115,7 +139,7 @@ body {
             opacity: 1;
             transform: scale(1) translateZ(0);
           }
-          border-color: rgba(255, 255, 255, 0.3);
+          border-color: rgba(255, 255, 255, 0.4);
           transform: translateX(4px) translateZ(0);
           
           .mdc-list-item__primary-text {
@@ -126,44 +150,50 @@ body {
             transform: scale(1.15) rotate(3deg) translateZ(0);
             will-change: transform;
           }
+          
+          .hide-menu {
+            color: #4f46e5;
+          }
         }
 
         html.dark &.activeMenu, html .dark-theme &.activeMenu {
           border-color: rgba(255, 255, 255, 0.1);
+          .hide-menu { color: #818cf8; }
         }
 
+        /* Color variations for icons */
         &.primary {
-          &.activeMenu:before, &:hover:before { background: rgba(79, 70, 229, 0.15); }
+          &.activeMenu:before, &:hover:before { background: linear-gradient(135deg, rgba(79, 70, 229, 0.15), rgba(79, 70, 229, 0.02)); border: 1px solid rgba(79, 70, 229, 0.2); }
           &.activeMenu, &.expanded, &:hover {
-            .mdc-list-item__primary-text, .mat-mdc-list-item-icon { color: #4f46e5 !important; }
+            .mdc-list-item__primary-text, .mat-mdc-list-item-icon, .hide-menu { color: #4f46e5 !important; }
           }
         }
 
         &.secondary {
-          &.activeMenu:before, &:hover:before { background: rgba(236, 72, 153, 0.15); }
+          &.activeMenu:before, &:hover:before { background: linear-gradient(135deg, rgba(236, 72, 153, 0.15), rgba(236, 72, 153, 0.02)); border: 1px solid rgba(236, 72, 153, 0.2); }
           &.activeMenu, &.expanded, &:hover {
-            .mdc-list-item__primary-text, .mat-mdc-list-item-icon { color: #ec4899 !important; }
+            .mdc-list-item__primary-text, .mat-mdc-list-item-icon, .hide-menu { color: #ec4899 !important; }
           }
         }
 
         &.warning {
-          &.activeMenu:before, &:hover:before { background: rgba(245, 158, 11, 0.15); }
+          &.activeMenu:before, &:hover:before { background: linear-gradient(135deg, rgba(245, 158, 11, 0.15), rgba(245, 158, 11, 0.02)); border: 1px solid rgba(245, 158, 11, 0.2); }
           &.activeMenu, &.expanded, &:hover {
-            .mdc-list-item__primary-text, .mat-mdc-list-item-icon { color: #f59e0b !important; }
+            .mdc-list-item__primary-text, .mat-mdc-list-item-icon, .hide-menu { color: #f59e0b !important; }
           }
         }
 
         &.error, &.danger {
-          &.activeMenu:before, &:hover:before { background: rgba(239, 68, 68, 0.15); }
+          &.activeMenu:before, &:hover:before { background: linear-gradient(135deg, rgba(239, 68, 68, 0.15), rgba(239, 68, 68, 0.02)); border: 1px solid rgba(239, 68, 68, 0.2); }
           &.activeMenu, &.expanded, &:hover {
-            .mdc-list-item__primary-text, .mat-mdc-list-item-icon { color: #ef4444 !important; }
+            .mdc-list-item__primary-text, .mat-mdc-list-item-icon, .hide-menu { color: #ef4444 !important; }
           }
         }
 
         &.success {
-          &.activeMenu:before, &:hover:before { background: rgba(16, 185, 129, 0.15); }
+          &.activeMenu:before, &:hover:before { background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(16, 185, 129, 0.02)); border: 1px solid rgba(16, 185, 129, 0.2); }
           &.activeMenu, &.expanded, &:hover {
-            .mdc-list-item__primary-text, .mat-mdc-list-item-icon { color: #10b981 !important; }
+            .mdc-list-item__primary-text, .mat-mdc-list-item-icon, .hide-menu { color: #10b981 !important; }
           }
         }
 

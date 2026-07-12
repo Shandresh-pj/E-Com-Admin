@@ -38,7 +38,7 @@ export class TemplatePageTitleStrategy extends TitleStrategy {
       return;
     }
 
-    // Derive readable title from URL segments (e.g. /components/crm-contacts -> CRM Contacts)
+    // Derive readable title from URL segments (e.g. /crm-contacts -> CRM Contacts)
     const segments = url
       .split('/')
       .filter(s => s && s !== 'components' && s !== 'pages' && s !== 'dashboard');

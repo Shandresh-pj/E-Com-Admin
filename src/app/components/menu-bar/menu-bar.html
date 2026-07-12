@@ -68,7 +68,7 @@
                 <div class="col-lg-4">
                     <mat-label class="f-w-600 m-b-8 d-block">Path <span class="text-danger">*</span></mat-label>
                     <mat-form-field appearance="outline" class="w-100">
-                        <input matInput formControlName="path" placeholder="Enter Path (e.g. /components/example)">
+                        <input matInput formControlName="path" placeholder="Enter Path (e.g. /example)">
                         @if (MenuForm.get('path')?.hasError('required')) {
                           <mat-error>Path is required</mat-error>
                         }

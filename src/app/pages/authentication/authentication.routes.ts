@@ -42,6 +42,12 @@ export const AuthenticationRoutes: Routes = [
   },
 
   {
+    path: 'verify/:token',
+    loadComponent: () => import('./verify-email/verify-email.component').then(m => m.VerifyEmailComponent),
+    title: 'Verify Email'
+  },
+
+  {
     path: 'setup-password',
     loadComponent: () => import('./setup-password/setup-password.component').then(m => m.SetupPasswordComponent),
     title: 'Setup Password'

@@ -35,7 +35,7 @@
     </button>
 
     <!-- ═══ PREMIUM NOTIFICATION PANEL ═══ -->
-    <mat-menu #notifMenu="matMenu" class="notif-menu-panel" xPosition="before">
+    <mat-menu #notifMenu="matMenu" class="notif-menu-panel" xPosition="before" yPosition="below" [overlapTrigger]="false" backdropClass="notif-backdrop">
       <div class="notif-panel" (click)="$event.stopPropagation()">
 
         <!-- Panel Header -->
@@ -144,7 +144,7 @@
 
           @for (notif of notifications; track notif.id; let i = $index) {
             <div class="notif-item-row" [class.notif-item-unread]="notif.unread"
-                 [style.animation-delay]="(i * 60) + 'ms'">
+                 [style.animation-delay]="(i * 60) + 'ms'" (click)="markAsRead(notif)" style="cursor: pointer;">
               <div class="notif-item-icon-wrap notif-color-{{ notif.color }}">
                 <i-tabler name="{{ notif.icon }}" class="icon-15 d-flex"></i-tabler>
               </div>
@@ -164,7 +164,7 @@
 
         <!-- Panel Footer -->
         <div class="notif-panel-footer">
-          <a class="notif-view-all-btn" [routerLink]="['/components/notifications']">
+          <a class="notif-view-all-btn" [routerLink]="['/notifications']">
             <span>View all notifications</span>
             <i-tabler name="arrow-right" class="icon-14 d-flex"></i-tabler>
           </a>
@@ -200,13 +200,13 @@
           <span>My Profile</span>
         </div>
       </button>
-      <button mat-menu-item [routerLink]="['/components/change-password']" class="profile-menu-item">
+      <button mat-menu-item [routerLink]="['/change-password']" class="profile-menu-item">
         <div class="menu-item-content">
           <i-tabler name="lock" class="icon-16 d-flex menu-item-icon"></i-tabler>
           <span>Change Password</span>
         </div>
       </button>
-      <button mat-menu-item [routerLink]="['/components/notifications']" class="profile-menu-item">
+      <button mat-menu-item [routerLink]="['/notifications']" class="profile-menu-item">
         <div class="menu-item-content">
           <i-tabler name="bell" class="icon-16 d-flex menu-item-icon"></i-tabler>
           <span>Notifications</span>

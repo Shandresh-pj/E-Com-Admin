@@ -1,129 +1,153 @@
-<div class="blank-layout-container justify-content-center align-items-center bg-light">
-  <div class="position-relative row w-100 h-100 bg-gredient justify-content-center">
-    <div class="col-lg-4 d-flex align-items-center">
-      <mat-card class="cardWithShadow boxed-auth">
-        <mat-card-content class="p-32">
-          <div class="text-center">
-            <a [routerLink]="['/dashboard']">
-              <img src="./assets/images/logos/dark-logo.svg" class="align-middle m-2" alt="logo" />
-            </a>
-          </div>
+<!-- Premium Dark Glass Register — matching Login page style -->
+<div class="auth-single-root">
 
-          <div class="row m-t-24 custom-row">
-            <div class="col-12 col-sm-6">
-              <button mat-stroked-button class="w-100">
-                <div class="d-flex align-items-center">
-                  <img src="/assets/images/svgs/google-icon.svg" alt="google" width="16" class="m-r-8" />
-                  Sign in with Google
-                </div>
-              </button>
-            </div>
-            <div class="col-12 col-sm-6">
-              <button mat-stroked-button class="w-100 d-flex align-items-center">
-                <div class="d-flex align-items-center">
-                  <img src="/assets/images/svgs/facebook-icon.svg" alt="facebook" width="40" class="m-r-4" />
-                  Sign in with FB
-                </div>
-              </button>
-            </div>
-          </div>
-
-          <div class="or-border m-t-30">or sign up with</div>
-
-          <form class="m-t-30" [formGroup]="form" (ngSubmit)="submit()">
-
-            <!-- Name -->
-            <mat-label class="f-s-14 f-w-600 m-b-12 d-block">
-              Name
-            </mat-label>
-
-            <mat-form-field appearance="outline" class="w-100" color="primary">
-              <input matInput formControlName="uname" placeholder="Enter your name" />
-
-              @if (f['uname'].hasError('required')) {
-              <mat-error>
-                Name is required
-              </mat-error>
-              }
-
-              @if (f['uname'].hasError('minlength')) {
-              <mat-error>
-                Name must be at least 6 characters
-              </mat-error>
-              }
-
-            </mat-form-field>
-
-            <!-- Email -->
-            <mat-label class="f-s-14 f-w-600 m-b-12 d-block">
-              Email Address
-            </mat-label>
-
-            <mat-form-field appearance="outline" class="w-100" color="primary">
-
-              <input matInput type="email" formControlName="email" placeholder="Enter your email" />
-
-              @if (f['email'].hasError('required')) {
-              <mat-error>
-                Email is required
-              </mat-error>
-              }
-
-              @if (f['email'].hasError('email')) {
-              <mat-error>
-                Enter a valid email address
-              </mat-error>
-              }
-
-            </mat-form-field>
-
-            <!-- Password -->
-            <mat-label class="f-s-14 f-w-600 m-b-12 d-block">
-              Password
-            </mat-label>
-
-            <mat-form-field appearance="outline" class="w-100" color="primary">
-
-              <input matInput [type]="hidePassword ? 'password' : 'text'" formControlName="password"
-                placeholder="Enter your password" />
-
-              <button mat-icon-button matSuffix type="button" (click)="hidePassword = !hidePassword">
-
-                <mat-icon>
-                  {{ hidePassword ? 'visibility_off' : 'visibility' }}
-                </mat-icon>
-
-              </button>
-
-              @if (f['password'].hasError('required')) {
-              <mat-error>
-                Password is required
-              </mat-error>
-              }
-
-              @if (f['password'].hasError('minlength')) {
-              <mat-error>
-                Password must be at least 6 characters
-              </mat-error>
-              }
-
-            </mat-form-field>
-
-            <!-- Submit Button -->
-            <button type="submit" mat-flat-button color="primary" class="w-100">
-
-              Sign Up
-
-            </button>
-
-          </form>
-          <span class="d-block f-w-500 text-center m-t-24">Already have an Account?
-
-            <a [routerLink]="['/authentication/login']" class="text-decoration-none text-primary f-w-500 f-s-14">
-              Sign In</a>
-          </span>
-        </mat-card-content>
-      </mat-card>
-    </div>
+  <!-- Ambient Glowing Aurora & Particle Backdrop -->
+  <div class="auth-ambient-canvas" aria-hidden="true">
+    <div class="ambient-blob blob-purple"></div>
+    <div class="ambient-blob blob-blue"></div>
+    <div class="ambient-blob blob-cyan"></div>
+    <div class="ambient-grid"></div>
+    <div class="cyber-particle p1"></div>
+    <div class="cyber-particle p2"></div>
+    <div class="cyber-particle p3"></div>
+    <div class="cyber-particle p4"></div>
   </div>
-</div>
+
+  <!-- Single Centered Container -->
+  <div class="auth-single-container">
+
+    <!-- Top Brand Bar -->
+    <div class="auth-brand-head">
+      <a routerLink="/" class="auth-logo">
+        <div class="logo-orb">
+          <span class="orb-icon">⚡</span>
+        </div>
+        <div class="logo-text">
+          <span class="brand-name">SVK</span>
+          <span class="brand-sub">E-Com PRO</span>
+        </div>
+      </a>
+      <div class="security-badge">
+        <span class="sec-dot"></span>
+        <span>SECURE PORTAL</span>
+      </div>
+    </div>
+
+    <!-- Premium Glass Card -->
+    <div class="auth-single-card">
+
+      <!-- Animated Top Scanner Beam -->
+      <div class="card-scanner-beam" aria-hidden="true"></div>
+
+      <!-- Card Header -->
+      <div class="quantum-header">
+        <div class="quantum-orb-wrap">
+          <div class="q-ring q-ring-outer"></div>
+          <div class="q-ring q-ring-inner"></div>
+          <div class="q-core-icon">✨</div>
+        </div>
+        <div class="quantum-titles">
+          <div class="telemetry-pill">
+            <span class="radar-dot"></span>
+            <span>ENTERPRISE ONBOARDING</span>
+          </div>
+          <h1 class="card-title">Create Account</h1>
+          <p class="card-subtitle">Join the next-generation workspace platform.</p>
+        </div>
+      </div>
+
+      <!-- Social Login Options -->
+      <div class="social-login-grid">
+        <button type="button" class="social-btn">
+          <img src="/assets/images/svgs/google-icon.svg" alt="google" width="18" />
+          <span>Google</span>
+        </button>
+        <button type="button" class="social-btn">
+          <img src="/assets/images/svgs/facebook-icon.svg" alt="facebook" width="18" />
+          <span>Facebook</span>
+        </button>
+      </div>
+
+      <div class="auth-divider">
+        <span>OR REGISTER WITH EMAIL</span>
+      </div>
+
+      <!-- Form -->
+      <form class="auth-form" [formGroup]="form" (ngSubmit)="submit()">
+
+        <!-- Name -->
+        <div class="form-field-group">
+          <label class="field-label" for="reg-name">Full Name <span style="color:#ef4444">*</span></label>
+          <mat-form-field appearance="outline" class="w-100 field-custom">
+            <input matInput id="reg-name" type="text" formControlName="uname" placeholder="Enter your full name" />
+            <mat-icon matPrefix class="field-icon">person_outline</mat-icon>
+            @if (f['uname'].hasError('required')) {
+              <mat-error>Name is required</mat-error>
+            }
+            @if (f['uname'].hasError('minlength')) {
+              <mat-error>Name must be at least 6 characters</mat-error>
+            }
+          </mat-form-field>
+        </div>
+
+        <!-- Email -->
+        <div class="form-field-group">
+          <label class="field-label" for="reg-email">Work Email <span style="color:#ef4444">*</span></label>
+          <mat-form-field appearance="outline" class="w-100 field-custom">
+            <input matInput id="reg-email" type="email" formControlName="email" placeholder="Enter your email" />
+            <mat-icon matPrefix class="field-icon">mail_outline</mat-icon>
+            @if (f['email'].hasError('required')) {
+              <mat-error>Email is required</mat-error>
+            }
+            @if (f['email'].hasError('email')) {
+              <mat-error>Enter a valid email address</mat-error>
+            }
+          </mat-form-field>
+        </div>
+
+        <!-- Password -->
+        <div class="form-field-group">
+          <label class="field-label" for="reg-pass">Password <span style="color:#ef4444">*</span></label>
+          <mat-form-field appearance="outline" class="w-100 field-custom">
+            <input matInput id="reg-pass" [type]="hidePassword ? 'password' : 'text'" formControlName="password" placeholder="Create a secure password" />
+            <mat-icon matPrefix class="field-icon">lock_outline</mat-icon>
+            <button mat-icon-button matSuffix type="button" (click)="hidePassword = !hidePassword" class="eye-btn">
+              <mat-icon>{{ hidePassword ? 'visibility_off' : 'visibility' }}</mat-icon>
+            </button>
+            @if (f['password'].hasError('required')) {
+              <mat-error>Password is required</mat-error>
+            }
+            @if (f['password'].hasError('minlength')) {
+              <mat-error>Minimum 6 characters required</mat-error>
+            }
+          </mat-form-field>
+        </div>
+
+        <!-- Submit Button -->
+        <button type="submit" mat-raised-button color="primary" class="submit-cta-btn">
+          <span class="cta-shimmer" aria-hidden="true"></span>
+          <span class="cta-inner">
+            <span>Create Account</span>
+            <span class="cta-arrow">→</span>
+          </span>
+        </button>
+
+      </form>
+
+      <!-- Sign In Link -->
+      <div class="auth-footer-link">
+        <span>Already have an account?</span>
+        <a [routerLink]="['/authentication/login']">Sign In</a>
+      </div>
+
+    </div>
+
+    <!-- Bottom Bar -->
+    <div class="auth-bottom-bar">
+      <a routerLink="/" class="back-home-link">← Return to Home Page</a>
+      <span class="copyright-text">© 2026 SVK E-Com Enterprise ERP</span>
+    </div>
+
+  </div>
+
+</div>

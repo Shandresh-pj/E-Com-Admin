@@ -7,24 +7,32 @@ import { AppSettings, defaults } from '../config';
 export class CoreService {
     private optionsSignal = signal<AppSettings>(defaults);
 
-    // Theme signal: 'light' or 'dark', loaded from local storage (defaults to dark to align with the login screen)
+    // Theme signal: 'light' or 'dark', loaded from local storage (defaults to light as requested)
     public themeSignal = signal<'light' | 'dark'>(
-        (localStorage.getItem('theme') as 'light' | 'dark') || 'dark'
+        (localStorage.getItem('theme') as 'light' | 'dark') || 'light'
     );
 
     constructor() {
-        // Automatically sync theme signal changes to localStorage and document element classes
+        // Automatically sync theme signal changes to localStorage, document element, and body classes
         effect(() => {
             const theme = this.themeSignal();
             localStorage.setItem('theme', theme);
 
             const root = document.documentElement;
+            const body = document.body;
+            root.setAttribute('data-theme', theme);
+            root.style.colorScheme = theme;
+
             if (theme === 'dark') {
-                root.classList.add('dark');
-                root.classList.remove('light');
+                root.classList.add('dark', 'dark-theme');
+                root.classList.remove('light', 'light-theme');
+                body.classList.add('dark', 'dark-theme');
+                body.classList.remove('light', 'light-theme');
             } else {
-                root.classList.add('light');
-                root.classList.remove('dark');
+                root.classList.add('light', 'light-theme');
+                root.classList.remove('dark', 'dark-theme');
+                body.classList.add('light', 'light-theme');
+                body.classList.remove('dark', 'dark-theme');
             }
         });
     }

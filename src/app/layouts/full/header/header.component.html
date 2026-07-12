@@ -1,49 +1,227 @@
-<mat-toolbar class="topbar gap-10">
+<mat-toolbar class="topbar">
 
-  <!-- Mobile Menu -->
+  <!-- Mobile Menu Toggle -->
+  @if(showToggle) {
+    <button mat-icon-button (click)="toggleMobileNav.emit()" class="mobile-toggle-btn" aria-label="Toggle navigation">
+      <i-tabler name="menu-2" class="icon-20 d-flex"></i-tabler>
+    </button>
+  }
 
-  <button mat-icon-button (click)="toggleMobileNav.emit()" class="d-flex  justify-content-center">
-    <i-tabler name="menu-2" class="icon-20 d-flex"></i-tabler>
-  </button>
-
-<div class="ms-auto d-flex align-items-center gap-10">
-  <!-- Theme Toggle Switcher -->
-  <app-theme-toggle class="d-flex align-items-center justify-content-center"></app-theme-toggle>
-
-  <button mat-icon-button [matMenuTriggerFor]="menu" aria-label="Notifications" >
-    <i-tabler class="d-flex" name="bell" matBadge="1" matBadgeColor="primary"></i-tabler>
-  </button>
-
-  <mat-menu #menu="matMenu">
-    <button mat-menu-item>Item 1</button>
-    <button mat-menu-item>Item 2</button>
-  </mat-menu>
-</div>
+  <!-- Tagline -->
+  <div class="topbar-title d-none d-md-flex align-items-center gap-8 ms-4">
+    <span class="topbar-brand-dot"></span>
+    <span class="topbar-tagline">Enterprise Command Center</span>
+  </div>
 
   <span class="flex-1-auto"></span>
 
-  <!-- --------------------------------------------------------------- -->
-  <!-- profile Dropdown -->
-  <!-- --------------------------------------------------------------- -->
-  <button class="rounded-pill" mat-mini-fab [matMenuTriggerFor]="profilemenu" aria-label="Notifications">
-    <img src="/assets/images/profile/user-1.jpg" class="rounded-circle object-cover d-block" width="35" />
-  </button>
-  <mat-menu #profilemenu="matMenu" class="cardWithShadow topbar-dd" xPosition="before">
-    <button mat-menu-item (click)="ProfilePage()">
-      <mat-icon class="d-flex align-items-center"><i-tabler name="user" class="icon-18 d-flex"></i-tabler></mat-icon>My
-      Profile
-    </button>
-    <button mat-menu-item>
-      <mat-icon class="d-flex align-items-center"><i-tabler name="mail" class="icon-18 d-flex"></i-tabler></mat-icon>My
-      Account
-    </button>
-    <button mat-menu-item>
-      <mat-icon class="d-flex align-items-center"><i-tabler name="list-check"
-          class="icon-18 d-flex"></i-tabler></mat-icon>My Task
+  <!-- Right Action Group -->
+  <div class="topbar-actions d-flex align-items-center gap-8">
+
+    <!-- Theme Toggle -->
+    <div class="topbar-action-pill">
+      <app-theme-toggle class="d-flex align-items-center justify-content-center"></app-theme-toggle>
+    </div>
+
+    <!-- Notifications Bell -->
+    <button mat-icon-button [matMenuTriggerFor]="notifMenu" class="topbar-icon-btn premium-bell-btn" aria-label="Notifications">
+      <div class="notif-btn-inner" [class.has-unread]="unreadCount > 0">
+        <i-tabler class="d-flex icon-20 bell-icon" name="bell"></i-tabler>
+        @if (unreadCount > 0) {
+          <span class="notif-pulse" aria-hidden="true"></span>
+          <span class="notif-count">{{ unreadCount }}</span>
+        }
+      </div>
     </button>
 
-    <div class="p-x-12 m-t-12">
-      <a (click)="onLogout()" mat-stroked-button class="w-100">Logout</a>
-    </div>
-  </mat-menu>
+    <!-- ═══ PREMIUM NOTIFICATION PANEL ═══ -->
+    <mat-menu #notifMenu="matMenu" class="notif-menu-panel" xPosition="before" yPosition="below" [overlapTrigger]="false" backdropClass="notif-backdrop">
+      <div class="notif-panel" (click)="$event.stopPropagation()">
+
+        <!-- Panel Header -->
+        <div class="notif-panel-header">
+          <div class="notif-panel-header-left">
+            <div class="notif-header-icon-orb">
+              <i-tabler name="bell-ringing" class="icon-16 d-flex"></i-tabler>
+            </div>
+            <div>
+              <h3 class="notif-panel-title">Notifications</h3>
+              @if (unreadCount > 0) {
+                <span class="notif-panel-subtitle">{{ unreadCount }} unread</span>
+              } @else {
+                <span class="notif-panel-subtitle">All caught up</span>
+              }
+            </div>
+          </div>
+          @if (notifications.length > 0) {
+            <button class="notif-clear-btn" (click)="clearAll()">
+              <i-tabler name="trash" class="icon-12 d-flex"></i-tabler>
+              Clear
+            </button>
+          }
+        </div>
+
+        <!-- Segment Tabs -->
+        <div class="notif-tabs">
+          <button class="notif-tab active">All</button>
+          <button class="notif-tab">Unread
+            @if (unreadCount > 0) {
+              <span class="notif-tab-badge">{{ unreadCount }}</span>
+            }
+          </button>
+        </div>
+
+        <!-- Notification List -->
+        <div class="notif-list-scroll">
+
+          <!-- ──── PASSWORD REMINDER CARD (pinned at top) ──── -->
+          @if (showPwdReminder) {
+            <div class="pwd-reminder-card notif-item-unread">
+
+              <!-- Shimmer pulse background -->
+              <div class="pwd-reminder-shimmer"></div>
+
+              <div class="pwd-reminder-header">
+                <div class="pwd-reminder-icon-wrap">
+                  <i-tabler name="shield-lock" class="icon-18 d-flex"></i-tabler>
+                </div>
+                <div class="pwd-reminder-text">
+                  <p class="pwd-reminder-title">Update Your Password</p>
+                  <p class="pwd-reminder-sub">Secure your account on first login</p>
+                </div>
+                <span class="pwd-reminder-priority-dot"></span>
+              </div>
+
+              <!-- Countdown Timer -->
+              <div class="pwd-countdown-wrap" [class.pwd-countdown-urgent]="countdownUrgent">
+                <div class="pwd-countdown-label">
+                  <i-tabler name="clock-hour-4" class="icon-12 d-flex me-1"></i-tabler>
+                  <span>{{ countdownUrgent ? 'Act now! Expires in' : 'Time remaining' }}</span>
+                </div>
+                <div class="pwd-countdown-digits">
+                  <span class="pwd-digit-block">{{ countdownDisplay.split(':')[0] }}<small>h</small></span>
+                  <span class="pwd-colon">:</span>
+                  <span class="pwd-digit-block">{{ countdownDisplay.split(':')[1] }}<small>m</small></span>
+                  <span class="pwd-colon">:</span>
+                  <span class="pwd-digit-block">{{ countdownDisplay.split(':')[2] }}<small>s</small></span>
+                </div>
+              </div>
+
+              <!-- Progress bar -->
+              <div class="pwd-progress-wrap">
+                <div class="pwd-progress-track">
+                  <div class="pwd-progress-fill"
+                       [style.width]="(100 - (countdownDisplay ? 100 : 0)) + '%'"
+                       [class.urgent]="countdownUrgent">
+                  </div>
+                </div>
+              </div>
+
+              <!-- Actions -->
+              <div class="pwd-reminder-actions">
+                <button class="pwd-update-btn" (click)="navigateToChangePassword()">
+                  <i-tabler name="key" class="icon-13 d-flex"></i-tabler>
+                  Update Now
+                </button>
+                <button class="pwd-dismiss-btn" (click)="markPasswordUpdated()">
+                  Done
+                </button>
+              </div>
+
+            </div>
+          }
+
+          <!-- Regular notifications -->
+          @if (notifications.length === 0 && !showPwdReminder) {
+            <div class="notif-empty-state">
+              <div class="notif-empty-orb">
+                <i-tabler name="bell-off" class="icon-28 d-flex"></i-tabler>
+              </div>
+              <p class="notif-empty-title">All caught up!</p>
+              <p class="notif-empty-sub">No new notifications right now</p>
+            </div>
+          }
+
+          @for (notif of notifications; track notif.id; let i = $index) {
+            <div class="notif-item-row" [class.notif-item-unread]="notif.unread"
+                 [style.animation-delay]="(i * 60) + 'ms'" (click)="markAsRead(notif)" style="cursor: pointer;">
+              <div class="notif-item-icon-wrap notif-color-{{ notif.color }}">
+                <i-tabler name="{{ notif.icon }}" class="icon-15 d-flex"></i-tabler>
+              </div>
+              <div class="notif-item-body">
+                <p class="notif-item-title">{{ notif.title }}</p>
+                <span class="notif-item-time">
+                  <i-tabler name="clock" class="icon-11 d-flex me-1"></i-tabler>
+                  {{ notif.time }}
+                </span>
+              </div>
+              @if (notif.unread) {
+                <span class="notif-unread-indicator"></span>
+              }
+            </div>
+          }
+        </div>
+
+        <!-- Panel Footer -->
+        <div class="notif-panel-footer">
+          <a class="notif-view-all-btn" [routerLink]="['/notifications']">
+            <span>View all notifications</span>
+            <i-tabler name="arrow-right" class="icon-14 d-flex"></i-tabler>
+          </a>
+        </div>
+
+      </div>
+    </mat-menu>
+
+    <!-- Profile Button -->
+    <button class="profile-avatar-btn" [matMenuTriggerFor]="profilemenu" aria-label="Profile menu">
+      <div class="avatar-circle">
+        <span class="avatar-initials">{{ initials }}</span>
+      </div>
+      <div class="avatar-info d-none d-lg-flex">
+        <span class="avatar-name">{{ currentUser?.name || 'Admin' }}</span>
+        <span class="avatar-role">{{ currentUser?.userType || 'Super Admin' }}</span>
+      </div>
+      <i-tabler name="chevron-down" class="icon-14 d-flex avatar-chevron d-none d-lg-flex"></i-tabler>
+    </button>
+
+    <mat-menu #profilemenu="matMenu" class="profile-menu-panel" xPosition="before">
+      <div class="profile-menu-header" (click)="$event.stopPropagation()">
+        <div class="profile-menu-avatar"><span>{{ initials }}</span></div>
+        <div>
+          <p class="profile-menu-name">{{ currentUser?.name || 'Admin User' }}</p>
+          <p class="profile-menu-role">{{ currentUser?.userType || 'Super Admin' }}</p>
+        </div>
+      </div>
+      <mat-divider></mat-divider>
+      <button mat-menu-item (click)="ProfilePage()" class="profile-menu-item">
+        <div class="menu-item-content">
+          <i-tabler name="user" class="icon-16 d-flex menu-item-icon"></i-tabler>
+          <span>My Profile</span>
+        </div>
+      </button>
+      <button mat-menu-item [routerLink]="['/change-password']" class="profile-menu-item">
+        <div class="menu-item-content">
+          <i-tabler name="lock" class="icon-16 d-flex menu-item-icon"></i-tabler>
+          <span>Change Password</span>
+        </div>
+      </button>
+      <button mat-menu-item [routerLink]="['/notifications']" class="profile-menu-item">
+        <div class="menu-item-content">
+          <i-tabler name="bell" class="icon-16 d-flex menu-item-icon"></i-tabler>
+          <span>Notifications</span>
+        </div>
+      </button>
+      <mat-divider></mat-divider>
+      <button mat-menu-item (click)="onLogout()" class="profile-menu-item logout-item">
+        <div class="menu-item-content">
+          <i-tabler name="logout" class="icon-16 d-flex menu-item-icon"></i-tabler>
+          <span>Sign Out</span>
+        </div>
+      </button>
+    </mat-menu>
+
+
+  </div>
+
 </mat-toolbar>

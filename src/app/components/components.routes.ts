@@ -1,4 +1,6 @@
 import { Routes } from '@angular/router';
+import { CrmContacts } from './crm-contacts/crm-contacts';
+import { Coupons } from './coupons/coupons';
 import { AppAdmin } from './app-admin/app-admin';
 import { Branch } from './branch/branch';
 import { Employees } from './employees/employees';
@@ -37,7 +39,15 @@ const EM = UserType.EMPLOYEE;
 const DB = UserType.DELIVERY_BOY;
 
 export const ComponentsRoutes: Routes = [
-
+  {
+    path: '',
+    children: [
+      {
+        path: 'profit-loss',
+        loadComponent: () => import('./profit-loss/profit-loss').then(m => m.ProfitLossComponent)
+      }
+    ]
+  },
   {
     path: 'admin',
     component: AppAdmin,
@@ -46,7 +56,7 @@ export const ComponentsRoutes: Routes = [
       title: 'App Admin',
       roles: [SA, A],
       urls: [
-        { title: 'App Admin', url: '/components/admin' }
+        { title: 'App Admin', url: '/admin' }
       ]
     }
   },
@@ -59,7 +69,7 @@ export const ComponentsRoutes: Routes = [
       title: 'Branch',
       roles: [SA, A],
       urls: [
-        { title: 'Branch', url: '/components/branch' }
+        { title: 'Branch', url: '/branch' }
       ]
     }
   },
@@ -72,7 +82,7 @@ export const ComponentsRoutes: Routes = [
       title: 'Employees',
       roles: [SA, A, BM],
       urls: [
-        { title: 'Employees', url: '/components/employees' }
+        { title: 'Employees', url: '/employees' }
       ]
     }
   },
@@ -85,7 +95,7 @@ export const ComponentsRoutes: Routes = [
       title: 'Roles',
       roles: [SA],
       urls: [
-        { title: 'Roles', url: '/components/roles' }
+        { title: 'Roles', url: '/roles' }
       ]
     }
   },
@@ -98,7 +108,7 @@ export const ComponentsRoutes: Routes = [
       title: 'Role Access',
       roles: [SA],
       urls: [
-        { title: 'Role Access', url: '/components/role-access' }
+        { title: 'Role Access', url: '/role-access' }
       ]
     }
   },
@@ -109,7 +119,7 @@ export const ComponentsRoutes: Routes = [
     data: {
       title: 'Profile',
       urls: [
-        { title: 'Profile', url: '/components/profile' }
+        { title: 'Profile', url: '/profile' }
       ]
     }
   },
@@ -122,7 +132,7 @@ export const ComponentsRoutes: Routes = [
       title: 'Menu Bar',
       roles: [SA],
       urls: [
-        { title: 'Menu Bar', url: '/components/menubar' }
+        { title: 'Menu Bar', url: '/menubar' }
       ]
     }
   },
@@ -135,7 +145,7 @@ export const ComponentsRoutes: Routes = [
       title: 'Status',
       roles: [SA, A],
       urls: [
-        { title: 'Status', url: '/components/status' }
+        { title: 'Status', url: '/status' }
       ]
     }
   },
@@ -150,7 +160,7 @@ export const ComponentsRoutes: Routes = [
       urls: [
         {
           title: 'Product Attribute',
-          url: '/components/product-attribute'
+          url: '/product-attribute'
         }
       ]
     }
@@ -166,7 +176,7 @@ export const ComponentsRoutes: Routes = [
       urls: [
         {
           title: 'Attribute Value',
-          url: '/components/attribute-value'
+          url: '/attribute-value'
         }
       ]
     }
@@ -182,7 +192,7 @@ export const ComponentsRoutes: Routes = [
       urls: [
         {
           title: 'Category',
-          url: '/components/category'
+          url: '/category'
         }
       ]
     }
@@ -198,7 +208,7 @@ export const ComponentsRoutes: Routes = [
       urls: [
         {
           title: 'Product',
-          url: '/components/product'
+          url: '/product'
         }
       ]
     }
@@ -214,7 +224,7 @@ export const ComponentsRoutes: Routes = [
       urls: [
         {
           title: 'Orders',
-          url: '/components/orders'
+          url: '/orders'
         }
       ]
     }
@@ -228,7 +238,7 @@ export const ComponentsRoutes: Routes = [
       urls: [
         {
           title: 'Change Password',
-          url: '/components/change-password'
+          url: '/change-password'
         }
       ]
     }
@@ -242,7 +252,7 @@ export const ComponentsRoutes: Routes = [
       title: 'Audit Logs',
       roles: [SA, A],
       urls: [
-        { title: 'Audit Logs', url: '/components/audit-logs' }
+        { title: 'Audit Logs', url: '/audit-logs' }
       ]
     }
   },
@@ -253,7 +263,7 @@ export const ComponentsRoutes: Routes = [
     data: {
       title: 'Alerts',
       roles: [SA, A, BM],
-      urls: [{ title: 'Alerts', url: '/components/alerts' }]
+      urls: [{ title: 'Alerts', url: '/alerts' }]
     }
   },
   {
@@ -263,7 +273,7 @@ export const ComponentsRoutes: Routes = [
     data: {
       title: 'Attendance',
       roles: [SA, A, BM, SK, EM],
-      urls: [{ title: 'Attendance', url: '/components/attendance' }]
+      urls: [{ title: 'Attendance', url: '/attendance' }]
     }
   },
   {
@@ -273,7 +283,7 @@ export const ComponentsRoutes: Routes = [
     data: {
       title: 'Branch Stocks',
       roles: [SA, A, BM, SK],
-      urls: [{ title: 'Branch Stocks', url: '/components/branch-stocks' }]
+      urls: [{ title: 'Branch Stocks', url: '/branch-stocks' }]
     }
   },
   {
@@ -283,7 +293,7 @@ export const ComponentsRoutes: Routes = [
     data: {
       title: 'Stocks',
       roles: [SA, A, BM, SK],
-      urls: [{ title: 'Stocks', url: '/components/stocks' }]
+      urls: [{ title: 'Stocks', url: '/stocks' }]
     }
   },
   {
@@ -293,7 +303,7 @@ export const ComponentsRoutes: Routes = [
     data: {
       title: 'Payroll',
       roles: [SA, A, BM],
-      urls: [{ title: 'Payroll', url: '/components/payroll' }]
+      urls: [{ title: 'Payroll', url: '/payroll' }]
     }
   },
   {
@@ -303,7 +313,7 @@ export const ComponentsRoutes: Routes = [
     data: {
       title: 'Leave',
       roles: [SA, A, BM, SK, EM],
-      urls: [{ title: 'Leave', url: '/components/leave' }]
+      urls: [{ title: 'Leave', url: '/leave' }]
     }
   },
   {
@@ -313,7 +323,7 @@ export const ComponentsRoutes: Routes = [
     data: {
       title: 'Delivery Tracking',
       roles: [SA, A, BM, DB],
-      urls: [{ title: 'Delivery Tracking', url: '/components/delivery-tracking' }]
+      urls: [{ title: 'Delivery Tracking', url: '/delivery-tracking' }]
     }
   },
   {
@@ -323,7 +333,7 @@ export const ComponentsRoutes: Routes = [
     data: {
       title: 'Payments',
       roles: [SA, A, BM, SK],
-      urls: [{ title: 'Payments', url: '/components/payments' }]
+      urls: [{ title: 'Payments', url: '/payments' }]
     }
   },
   {
@@ -332,7 +342,7 @@ export const ComponentsRoutes: Routes = [
     canActivate: [RoleGuard],
     data: {
       title: 'Notifications',
-      urls: [{ title: 'Notifications', url: '/components/notifications' }]
+      urls: [{ title: 'Notifications', url: '/notifications' }]
     }
   },
   {
@@ -342,7 +352,17 @@ export const ComponentsRoutes: Routes = [
     data: {
       title: 'Workforce Console',
       roles: [SA, A, BM],
-      urls: [{ title: 'Workforce Console', url: '/components/workforce' }]
+      urls: [{ title: 'Workforce Console', url: '/workforce' }]
+    }
+  },
+  {
+    path: 'workforce-requests',
+    loadComponent: () => import('./workforce-requests/workforce-requests').then(m => m.WorkforceRequests),
+    canActivate: [RoleGuard],
+    data: {
+      title: 'Workforce Requests',
+      roles: [SA, A, BM],
+      urls: [{ title: 'Workforce Requests', url: '/workforce-requests' }]
     }
   },
   {
@@ -352,7 +372,7 @@ export const ComponentsRoutes: Routes = [
     data: {
       title: 'Invoice Generator',
       roles: [SA, A, BM, SK],
-      urls: [{ title: 'Invoice Generator', url: '/components/invoices' }]
+      urls: [{ title: 'Invoice Generator', url: '/invoices' }]
     }
   },
   {
@@ -362,7 +382,27 @@ export const ComponentsRoutes: Routes = [
     data: {
       title: 'Workflow Approvals',
       roles: [SA, A, BM, SK, EM],
-      urls: [{ title: 'Workflow Approvals', url: '/components/approvals' }]
+      urls: [{ title: 'Workflow Approvals', url: '/approvals' }]
+    }
+  },
+  {
+    path: 'crm-contacts',
+    component: CrmContacts,
+    canActivate: [RoleGuard],
+    data: {
+      title: 'CRM Contacts',
+      roles: [SA, A],
+      urls: [{ title: 'CRM Contacts', url: '/crm-contacts' }]
+    }
+  },
+  {
+    path: 'coupons',
+    component: Coupons,
+    canActivate: [RoleGuard],
+    data: {
+      title: 'Coupons Management',
+      roles: [SA, A, BM, SK],
+      urls: [{ title: 'Coupons', url: '/coupons' }]
     }
   }
 ];

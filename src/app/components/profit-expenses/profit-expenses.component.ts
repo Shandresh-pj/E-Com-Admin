@@ -62,77 +62,98 @@ export class AppProfitExpensesComponent {
 
   constructor() {
 
+    // generate dynamic random data on load
+    const generateSeries = (min: number, max: number, count: number) => {
+      return Array.from({ length: count }, () => Math.floor(Math.random() * (max - min + 1)) + min);
+    };
+
+    const earnings = generateSeries(50, 150, 7);
+    const expenses = generateSeries(20, 80, 7);
+
     // sales overview chart
     this.profitExpanceChart = {
       series: [
         {
-          name: 'Eanings this month',
-          data: [9, 5, 3, 7, 5, 10, 3],
-          color: '#0085db',
+          name: 'Earnings this week (k)',
+          data: earnings,
+          color: '#4f46e5',
         },
         {
-          name: 'Expense this month',
-          data: [6, 3, 9, 5, 4, 6, 4],
-          color: '#fb977d',
+          name: 'Expense this week (k)',
+          data: expenses,
+          color: '#0ea5e9',
         },
       ],
-
       grid: {
-        borderColor: 'rgba(0,0,0,0.1)',
+        borderColor: 'rgba(0,0,0,0.05)',
         strokeDashArray: 3,
+        yaxis: { lines: { show: true } },
+        xaxis: { lines: { show: false } },
       },
-      plotOptions: {
-        bar: {
-          horizontal: false,
-          columnWidth: '30%',
-          borderRadius: 4,
-          endingShape: "rounded",
-        },
-      },
+      plotOptions: {},
       chart: {
-        type: 'bar',
+        type: 'area',
         height: 390,
         offsetY: 10,
-        foreColor: '#adb0bb',
+        foreColor: '#8c98a4',
         fontFamily: 'inherit',
         toolbar: { show: false },
+        dropShadow: {
+          enabled: true,
+          color: '#6366f1',
+          top: 12,
+          left: 0,
+          blur: 10,
+          opacity: 0.1
+        }
       },
       dataLabels: { enabled: false },
-      markers: { size: 0 },
+      markers: { size: 0, hover: { size: 6 } },
       legend: { show: false },
       xaxis: {
         type: 'category',
         categories: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
-        axisTicks: {
-          show: false,
-        },
-        axisBorder: {
-          show: false,
-        },
+        axisTicks: { show: false },
+        axisBorder: { show: false },
         labels: {
-          style: { cssClass: 'grey--text lighten-2--text fill-color' },
+          style: { cssClass: 'grey--text lighten-2--text fill-color', fontSize: '12px' },
         },
+      },
+      yaxis: {
+        labels: {
+          style: { fontSize: '12px' }
+        }
       },
       stroke: {
+        curve: 'smooth',
         show: true,
-        width: 5,
-        colors: ['transparent'],
+        width: 3,
+        colors: ['#4f46e5', '#0ea5e9'],
       },
-      tooltip: { theme: 'light' },
+      fill: {
+        type: 'gradient',
+        gradient: {
+          shade: 'light',
+          type: 'vertical',
+          shadeIntensity: 1,
+          opacityFrom: 0.4,
+          opacityTo: 0.05,
+          stops: [0, 100]
+        }
+      },
+      colors: ['#4f46e5', '#0ea5e9'],
+      tooltip: { theme: 'light', style: { fontSize: '13px' } },
 
       responsive: [
         {
           breakpoint: 600,
           options: {
-            plotOptions: {
-              bar: {
-                borderRadius: 3,
-              },
-            },
+            chart: {
+              height: 300
+            }
           },
         },
       ],
     };
-
   }
 }

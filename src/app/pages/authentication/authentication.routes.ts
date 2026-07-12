@@ -19,17 +19,38 @@ export const AuthenticationRoutes: Routes = [
 
   {
     path: 'login',
-    component: AppSideLoginComponent
+    component: AppSideLoginComponent,
+    title: 'Login'
   },
 
   {
     path: 'register',
-    component: AppSideRegisterComponent
+    redirectTo: 'login',
+    pathMatch: 'full'
   },
 
   {
     path: 'forgot-password',
-    component: ForgetPassword
+    component: ForgetPassword,
+    title: 'Forgot Password'
+  },
+
+  {
+    path: 'verify-email',
+    loadComponent: () => import('./verify-email/verify-email.component').then(m => m.VerifyEmailComponent),
+    title: 'Verify Email'
+  },
+
+  {
+    path: 'verify/:token',
+    loadComponent: () => import('./verify-email/verify-email.component').then(m => m.VerifyEmailComponent),
+    title: 'Verify Email'
+  },
+
+  {
+    path: 'setup-password',
+    loadComponent: () => import('./setup-password/setup-password.component').then(m => m.SetupPasswordComponent),
+    title: 'Setup Password'
   }
 
 ];

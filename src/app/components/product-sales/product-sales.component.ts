@@ -50,45 +50,60 @@ export class AppProductSalesComponent {
 
   constructor() {
 
+    const generateSeries = (min: number, max: number, count: number) => {
+      return Array.from({ length: count }, () => Math.floor(Math.random() * (max - min + 1)) + min);
+    };
+
+    const salesData = generateSeries(10, 80, 7);
+
     this.productsalesChart = {
       series: [
         {
-          name: '',
-          color: '#fb977d',
-          data: [25, 66, 20, 40, 12, 58, 20],
+          name: 'Sales',
+          color: '#8b5cf6',
+          data: salesData,
         },
       ],
 
+      colors: ['#8b5cf6'],
       chart: {
         type: 'area',
         fontFamily: "inherit",
         foreColor: '#adb0bb',
-        toolbar: {
-          show: false,
-        },
-        height: 60,
-        sparkline: {
-          enabled: true,
-        },
+        toolbar: { show: false },
+        height: 80,
+        sparkline: { enabled: true },
         group: 'sparklines',
+        dropShadow: {
+          enabled: true,
+          color: '#8b5cf6',
+          top: 6,
+          left: 0,
+          blur: 6,
+          opacity: 0.3
+        }
       },
       stroke: {
         curve: 'smooth',
-        width: 2,
+        width: 3,
       },
       fill: {
-        colors: ['#fb977d'],
-        type: 'solid',
-        opacity: 0.05,
+        type: 'gradient',
+        gradient: {
+          shade: 'dark',
+          type: 'vertical',
+          shadeIntensity: 1,
+          gradientToColors: ['#3b82f6'],
+          inverseColors: false,
+          opacityFrom: 0.5,
+          opacityTo: 0.05,
+          stops: [0, 100]
+        }
       },
-      markers: {
-        size: 0,
-      },
+      markers: { size: 0 },
       tooltip: {
         theme: 'dark',
-        x: {
-          show: false,
-        },
+        x: { show: false },
       },
     };
 

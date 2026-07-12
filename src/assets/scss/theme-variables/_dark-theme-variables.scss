@@ -1,18 +1,26 @@
-html.dark, html .dark-theme {
+html.dark,
+html .dark-theme {
   color-scheme: dark;
+
+  /* Core Colors - Liquid Glass Setup */
+  --mat-sys-background: #0f172a; // Slate 900
+  --mat-sys-surface-bright: rgba(30, 41, 59, 0.4); // Slate 800 (sidebar background, headers)
+  --mat-sys-surface: rgba(30, 41, 59, 0.5); // Slate 800 (card background)
+  --mat-sys-surface-container: rgba(30, 41, 59, 0.7); // Slate 800 (dropdown panels)
+  --mat-sys-surface-container-low: rgba(15, 23, 42, 0.7); // Slate 900
+  --mat-sys-on-background: #f8fafc; // Slate 50 (text color)
+  --mat-sys-outline: rgba(255, 255, 255, 0.1); // Glass Border
+  --mat-sys-outline-variant: rgba(255, 255, 255, 0.05); // Subtle Glass Border
+
+  /* Layout Backgrounds */
+  --page-bg: #060b17;
+  --page-bg-gradient: linear-gradient(135deg, #060b17 0%, #0a0f1e 50%, #0d0b24 100%);
+  --theme-text-dark: #f8fafc;
+  /* Flips text-dark to white in dark mode */
+
   --mat-sys-corner-small: 7px;
   --mat-sys-corner-medium: 16px;
-  
-  /* Core Colors */
-  --mat-sys-background: #0f172a;              // Slate 900
-  --mat-sys-surface-bright: #1e293b;         // Slate 800 (sidebar background, headers)
-  --mat-sys-surface: #1e293b;                // Slate 800 (card background)
-  --mat-sys-surface-container: #1e293b;       // Slate 800 (dropdown panels)
-  --mat-sys-surface-container-low: #0f172a;   // Slate 900
-  --mat-sys-on-background: #f8fafc;           // Slate 50 (text color)
-  --mat-sys-outline: #334155;                // Slate 700 (borders)
-  --mat-sys-outline-variant: #334155;        // Slate 700 (border grids)
-  
+
   /* Material Component Overrides */
   --mdc-outlined-text-field-hover-outline-color: #475569;
   --mdc-checkbox-unselected-hover-state-layer-color: #475569;
@@ -25,4 +33,30 @@ html.dark, html .dark-theme {
   --mat-stepper-header-hover-state-layer-color: #334155;
   --mdc-dialog-supporting-text-color: var(--mat-sys-on-background);
   --mat-expansion-header-hover-state-layer-color: #334155;
+
+  /* Utility Overrides for Dark Mode */
+  .text-dark,
+  .text-light-dark {
+    color: var(--mat-sys-on-background) !important;
+  }
+
+  .bg-dark {
+    background-color: var(--mat-sys-surface) !important;
+  }
+
+  body,
+  .mat-typography {
+    color: var(--mat-sys-on-background);
+  }
+}
+
+/* Ambient meshes specific to dark mode wrapper */
+html.dark .mainWrapper::before,
+html .dark-theme .mainWrapper::before {
+  background: radial-gradient(circle, rgba(99, 102, 241, 0.10) 0%, transparent 70%);
+}
+
+html.dark .mainWrapper::after,
+html .dark-theme .mainWrapper::after {
+  background: radial-gradient(circle, rgba(139, 92, 246, 0.07) 0%, transparent 70%);
 }

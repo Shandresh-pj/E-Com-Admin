@@ -17,14 +17,14 @@
         "build": {
           "builder": "@angular-devkit/build-angular:browser",
           "options": {
-            "allowedCommonJsDependencies": ["apexcharts", "bezier-easing", "moment"],
+            "allowedCommonJsDependencies": ["apexcharts", "bezier-easing", "moment", "sweetalert2"],
             "outputPath": "dist/Spike",
             "index": "src/index.html",
             "main": "src/main.ts",
             "polyfills": ["zone.js"],
             "tsConfig": "tsconfig.app.json",
             "inlineStyleLanguage": "scss",
-            "assets": ["src/favicon.ico", "src/assets"],
+            "assets": ["src/favicon.ico", "src/assets", "src/.htaccess", "src/_redirects"],
             "styles": ["src/styles.scss", "src/assets/scss/style.scss"],
             "scripts": []
           },
@@ -40,6 +40,12 @@
                   "type": "anyComponentStyle",
                   "maximumWarning": "12mb",
                   "maximumError": "12mb"
+                }
+              ],
+              "fileReplacements": [
+                {
+                  "replace": "src/environment/environment.ts",
+                  "with": "src/environment/environment.prod.ts"
                 }
               ],
               "outputHashing": "all"
@@ -92,11 +98,5 @@
   },
   "cli": {
     "analytics": false
-  },
-  "fileReplacements": [
-  {
-    "replace": "src/environments/environment.ts",
-    "with": "src/environments/environment.prod.ts"
   }
-]
 }

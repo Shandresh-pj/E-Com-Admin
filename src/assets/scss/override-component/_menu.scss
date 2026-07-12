@@ -7,3 +7,17 @@
     container-elevation-shadow: var(--mat-sys-level2),
   )
 );
+
+html {
+  .mat-mdc-menu-panel {
+    background: var(--mat-sys-surface-container) !important;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--mat-sys-outline-variant) !important;
+    box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
+    
+    html.dark & {
+      box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
+    }
+  }
+}

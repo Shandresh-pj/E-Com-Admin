@@ -34,6 +34,11 @@ function handle401(
   refreshSvc: RefreshService,
   authService: AuthService
 ) {
+  // Don't trigger a forced logout for background non-critical requests
+  if (req.url.includes('/auth/me/permissions') || req.url.includes('/notifications')) {
+    return throwError(() => new Error('Background request unauthorized'));
+  }
+
   const refreshToken = tokenService.getRefreshToken();
 
   if (!refreshToken) {

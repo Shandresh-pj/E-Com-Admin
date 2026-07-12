@@ -1,6 +1,6 @@
 import { ChangeDetectorRef, Component } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { CommonModule } from '@angular/common';
+
 import { ReactiveFormsModule, FormsModule, FormGroup, FormArray, FormBuilder, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
@@ -18,12 +18,12 @@ import { toFileUrl } from 'src/utils/file-url';
 import { ViewDetailsDialog } from 'src/utils/view-details-dialog/view-details-dialog';
 import { SocketService } from 'src/app/Securities/Services/socket.service';
 import { Subscription } from 'rxjs';
+import { GeminiAiService } from 'src/app/services/gemini-ai.service';
 
 @Component({
   selector: 'app-product',
   standalone: true,
   imports: [
-    CommonModule,
     ReactiveFormsModule,
     FormsModule,
     MatFormFieldModule,
@@ -33,7 +33,7 @@ import { Subscription } from 'rxjs';
     MatSelectModule,
     MatIconModule,
     MatTable
-  ],
+],
   templateUrl: './product.html',
   styleUrl: './product.scss',
 })
@@ -86,7 +86,8 @@ export class Product {
     private dialog: MatDialog,
     public perm: PermissionService,
     private socketService: SocketService,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private geminiAi: GeminiAiService
   ) {
     this.ProductForm = fb.group({
       name: ['', [Validators.required, Validators.maxLength(200)]],
@@ -212,6 +213,34 @@ export class Product {
           this.cdr.detectChanges();
         }
       });
+    });
+  }
+
+  generateAIDescription() {
+    const name = this.ProductForm.get('name')?.value || '';
+    const category = this.ProductForm.get('category')?.value || 'General';
+    const price = this.ProductForm.get('price')?.value;
+
+    if (!name || name.trim() === '') {
+      this.alert.error('Please enter a Product Name first to generate an AI description.');
+      return;
+    }
+
+    this.aiLoading = true;
+    this.cdr.detectChanges();
+
+    this.geminiAi.generateProductDescription(name, category, price).subscribe({
+      next: (desc) => {
+        this.ProductForm.patchValue({ description: desc });
+        this.aiLoading = false;
+        this.alert.success('AI Product Description generated successfully!');
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.aiLoading = false;
+        this.alert.error('Failed to generate AI description. Using default template.');
+        this.cdr.detectChanges();
+      }
     });
   }
 
@@ -620,51 +649,41 @@ export class Product {
         }
       });
     } else if (product.approval_status === states.PENDING) {
-      const Swal = (window as any).Swal;
-      if (Swal) {
-        Swal.fire({
-          title: 'Review Product Approval',
-          text: `Do you want to Approve or Reject "${product.name}"?`,
-          icon: 'question',
-          showCancelButton: true,
-          showDenyButton: true,
-          confirmButtonText: 'Approve',
-          denyButtonText: 'Reject',
-          cancelButtonText: 'Close'
-        }).then((result: any) => {
-          if (result.isConfirmed) {
-            this.commonService.putApi(`products/${product.id}/approve`, { action: 'APPROVE' }).subscribe({
-              next: () => {
-                this.alert.success("Product Approved successfully");
-                this.getProducts();
-              }
-            });
-          } else if (result.isDenied) {
-            Swal.fire({
-              title: 'Rejection Reason',
-              input: 'text',
-              inputLabel: 'Provide reason for rejection',
-              inputPlaceholder: 'Enter reason...',
-              showCancelButton: true,
-              inputValidator: (value: string) => {
-                if (!value) {
-                  return 'You must enter a reason!';
+      this.alert.fire({
+        title: 'Review Product Approval',
+        text: `Do you want to Approve or Reject "${product.name}"?`,
+        icon: 'question',
+        showCancelButton: true,
+        showDenyButton: true,
+        confirmButtonText: 'Approve',
+        denyButtonText: 'Reject',
+        cancelButtonText: 'Close'
+      }).then((result: any) => {
+        if (result.isConfirmed) {
+          this.commonService.putApi(`products/${product.id}/approve`, { action: 'APPROVE' }).subscribe({
+            next: () => {
+              this.alert.success("Product Approved successfully");
+              this.getProducts();
+            }
+          });
+        } else if (result.isDenied) {
+          this.alert.prompt({
+            title: 'Rejection Reason',
+            label: 'Provide reason for rejection',
+            placeholder: 'Enter reason...',
+            validatorText: 'You must enter a reason!'
+          }).then((inputResult: any) => {
+            if (inputResult.isConfirmed) {
+              this.commonService.putApi(`products/${product.id}/approve`, { action: 'REJECT', rejection_reason: inputResult.value }).subscribe({
+                next: () => {
+                  this.alert.success("Product Rejected successfully");
+                  this.getProducts();
                 }
-                return null;
-              }
-            }).then((inputResult: any) => {
-              if (inputResult.isConfirmed) {
-                this.commonService.putApi(`products/${product.id}/approve`, { action: 'REJECT', rejection_reason: inputResult.value }).subscribe({
-                  next: () => {
-                    this.alert.success("Product Rejected successfully");
-                    this.getProducts();
-                  }
-                });
-              }
-            });
-          }
-        });
-      }
+              });
+            }
+          });
+        }
+      });
     } else if (product.approval_status === states.APPROVED) {
       this.alert.confirm("Publish this approved product?").then((result) => {
         if (result.isConfirmed) {
@@ -774,38 +793,5 @@ export class Product {
         }
       });
     }
-  }
-
-  generateAIDescription() {
-    const name = this.ProductForm.get('name')?.value;
-    const category = this.ProductForm.get('category')?.value;
-    const price = this.ProductForm.get('price')?.value;
-
-    if (!name) {
-      this.alert.warning('Please enter a product name first before generating description.');
-      return;
-    }
-
-    this.aiLoading = true;
-    this.cdr.detectChanges();
-
-    this.commonService.postApi('ai/generate-description', { name, category, price }).subscribe({
-      next: (res: any) => {
-        this.aiLoading = false;
-        if (res.success && res.description) {
-          this.ProductForm.patchValue({ description: res.description });
-          this.alert.success('Description generated successfully by Gemini AI!');
-        } else {
-          this.alert.error('Failed to generate description.');
-        }
-        this.cdr.detectChanges();
-      },
-      error: (err: any) => {
-        this.aiLoading = false;
-        const msg = err?.error?.message || 'Failed to call Gemini API.';
-        this.alert.error(msg);
-        this.cdr.detectChanges();
-      }
-    });
   }
 }

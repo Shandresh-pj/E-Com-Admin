@@ -41,15 +41,18 @@
     }
     @else {
     <mat-card-content class="b-t-1">
-
         <form [formGroup]="ProductForm">
             <div class="row">
                 <div class="col-lg-4">
                     <mat-label class="f-w-600 m-b-8 d-block">Product Name <span class="text-danger">*</span></mat-label>
                     <mat-form-field appearance="outline" class="w-100">
                         <input matInput formControlName="name" placeholder="Enter Product Name">
-                        <mat-error *ngIf="ProductForm.get('name')?.hasError('required')">Product name is required</mat-error>
-                        <mat-error *ngIf="ProductForm.get('name')?.hasError('maxlength')">Product name cannot exceed 200 characters</mat-error>
+                        @if (ProductForm.get('name')?.hasError('required')) {
+                            <mat-error>Product name is required</mat-error>
+                        }
+                        @if (ProductForm.get('name')?.hasError('maxlength')) {
+                            <mat-error>Product name cannot exceed 200 characters</mat-error>
+                        }
                     </mat-form-field>
                 </div>
 
@@ -72,7 +75,9 @@
                             <mat-option value="single">Single</mat-option>
                             <mat-option value="variant">Variant</mat-option>
                         </mat-select>
-                        <mat-error *ngIf="ProductForm.get('product_type')?.hasError('required')">Product type is required</mat-error>
+                        @if (ProductForm.get('product_type')?.hasError('required')) {
+                            <mat-error>Product type is required</mat-error>
+                        }
                     </mat-form-field>
                 </div>
 
@@ -80,8 +85,12 @@
                     <mat-label class="f-w-600 m-b-8 d-block">Price <span class="text-danger">*</span></mat-label>
                     <mat-form-field appearance="outline" class="w-100">
                         <input matInput type="number" formControlName="price" placeholder="Enter Price" min="0">
-                        <mat-error *ngIf="ProductForm.get('price')?.hasError('required')">Price is required</mat-error>
-                        <mat-error *ngIf="ProductForm.get('price')?.hasError('min')">Price must be 0 or greater</mat-error>
+                        @if (ProductForm.get('price')?.hasError('required')) {
+                            <mat-error>Price is required</mat-error>
+                        }
+                        @if (ProductForm.get('price')?.hasError('min')) {
+                            <mat-error>Price must be 0 or greater</mat-error>
+                        }
                     </mat-form-field>
                 </div>
 
@@ -89,8 +98,12 @@
                     <mat-label class="f-w-600 m-b-8 d-block">Stock <span class="text-danger">*</span></mat-label>
                     <mat-form-field appearance="outline" class="w-100">
                         <input matInput type="number" formControlName="stock_in_hand" placeholder="Enter Stock" min="0">
-                        <mat-error *ngIf="ProductForm.get('stock_in_hand')?.hasError('required')">Stock is required</mat-error>
-                        <mat-error *ngIf="ProductForm.get('stock_in_hand')?.hasError('min')">Stock must be 0 or greater</mat-error>
+                        @if (ProductForm.get('stock_in_hand')?.hasError('required')) {
+                            <mat-error>Stock is required</mat-error>
+                        }
+                        @if (ProductForm.get('stock_in_hand')?.hasError('min')) {
+                            <mat-error>Stock must be 0 or greater</mat-error>
+                        }
                     </mat-form-field>
                 </div>
 
@@ -98,7 +111,9 @@
                     <mat-label class="f-w-600 m-b-8 d-block">Barcode</mat-label>
                     <mat-form-field appearance="outline" class="w-100">
                         <input matInput formControlName="barcode" placeholder="Enter Barcode (8-14 digits)">
-                        <mat-error *ngIf="ProductForm.get('barcode')?.hasError('pattern')">Barcode must be 8–14 digits</mat-error>
+                        @if (ProductForm.get('barcode')?.hasError('pattern')) {
+                            <mat-error>Barcode must be 8–14 digits</mat-error>
+                        }
                     </mat-form-field>
                 </div>
 
@@ -109,7 +124,9 @@
                             <mat-option value="active">Active</mat-option>
                             <mat-option value="inactive">Inactive</mat-option>
                         </mat-select>
-                        <mat-error *ngIf="ProductForm.get('status')?.hasError('required')">Status is required</mat-error>
+                        @if (ProductForm.get('status')?.hasError('required')) {
+                            <mat-error>Status is required</mat-error>
+                        }
                     </mat-form-field>
                 </div>
 
@@ -117,8 +134,12 @@
                     <mat-label class="f-w-600 m-b-8 d-block">Low Stock Threshold <span class="text-danger">*</span></mat-label>
                     <mat-form-field appearance="outline" class="w-100">
                         <input matInput type="number" formControlName="low_stock_threshold" placeholder="Enter Low Stock level">
-                        <mat-error *ngIf="ProductForm.get('low_stock_threshold')?.hasError('required')">Low stock threshold is required</mat-error>
-                        <mat-error *ngIf="ProductForm.get('low_stock_threshold')?.hasError('min')">Value must be 0 or greater</mat-error>
+                        @if (ProductForm.get('low_stock_threshold')?.hasError('required')) {
+                            <mat-error>Low stock threshold is required</mat-error>
+                        }
+                        @if (ProductForm.get('low_stock_threshold')?.hasError('min')) {
+                            <mat-error>Value must be 0 or greater</mat-error>
+                        }
                     </mat-form-field>
                 </div>
 
@@ -126,8 +147,12 @@
                     <mat-label class="f-w-600 m-b-8 d-block">Critical Stock Threshold <span class="text-danger">*</span></mat-label>
                     <mat-form-field appearance="outline" class="w-100">
                         <input matInput type="number" formControlName="critical_stock_threshold" placeholder="Enter Critical Stock level">
-                        <mat-error *ngIf="ProductForm.get('critical_stock_threshold')?.hasError('required')">Critical stock threshold is required</mat-error>
-                        <mat-error *ngIf="ProductForm.get('critical_stock_threshold')?.hasError('min')">Value must be 0 or greater</mat-error>
+                        @if (ProductForm.get('critical_stock_threshold')?.hasError('required')) {
+                            <mat-error>Critical stock threshold is required</mat-error>
+                        }
+                        @if (ProductForm.get('critical_stock_threshold')?.hasError('min')) {
+                            <mat-error>Value must be 0 or greater</mat-error>
+                        }
                     </mat-form-field>
                 </div>
 
@@ -140,10 +165,11 @@
                     </div>
                     <mat-form-field appearance="outline" class="w-100">
                         <textarea matInput formControlName="description" placeholder="Enter Description" rows="3"></textarea>
-                        <mat-error *ngIf="ProductForm.get('description')?.hasError('maxlength')">Description cannot exceed 1000 characters</mat-error>
+                        @if (ProductForm.get('description')?.hasError('maxlength')) {
+                            <mat-error>Description cannot exceed 1000 characters</mat-error>
+                        }
                     </mat-form-field>
                 </div>
-
                 <div class="col-lg-12">
                     <mat-label class="f-w-600 m-b-8 d-block">Additional Attributes</mat-label>
                     <div formArrayName="attributeValues">
@@ -285,8 +311,12 @@
                             <mat-label class="f-w-600 m-b-8 d-block">Price <span class="text-danger">*</span></mat-label>
                             <mat-form-field appearance="outline" class="w-100">
                                 <input matInput type="number" formControlName="Price" min="0" placeholder="0.00">
-                                <mat-error *ngIf="variant.get('Price')?.hasError('required')">Price is required</mat-error>
-                                <mat-error *ngIf="variant.get('Price')?.hasError('min')">Price must be 0 or greater</mat-error>
+                                @if (variant.get('Price')?.hasError('required')) {
+                                    <mat-error>Price is required</mat-error>
+                                }
+                                @if (variant.get('Price')?.hasError('min')) {
+                                    <mat-error>Price must be 0 or greater</mat-error>
+                                }
                             </mat-form-field>
                         </div>
 
@@ -294,8 +324,12 @@
                             <mat-label class="f-w-600 m-b-8 d-block">Stock <span class="text-danger">*</span></mat-label>
                             <mat-form-field appearance="outline" class="w-100">
                                 <input matInput type="number" formControlName="Stock" min="0" placeholder="0">
-                                <mat-error *ngIf="variant.get('Stock')?.hasError('required')">Stock is required</mat-error>
-                                <mat-error *ngIf="variant.get('Stock')?.hasError('min')">Stock must be 0 or greater</mat-error>
+                                @if (variant.get('Stock')?.hasError('required')) {
+                                    <mat-error>Stock is required</mat-error>
+                                }
+                                @if (variant.get('Stock')?.hasError('min')) {
+                                    <mat-error>Stock must be 0 or greater</mat-error>
+                                }
                             </mat-form-field>
                         </div>
 

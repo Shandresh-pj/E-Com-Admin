@@ -1,14 +1,549 @@
 @use "../variables" as *;
 
+/* ── Premium Glassmorphic Topbar ─────────────────────────────────────────── */
 html .topbar {
-  background-color: var(--mat-sys-surface);
   position: sticky;
   top: 0;
   z-index: 9;
   height: $header-height;
   border-radius: $border-radius;
-  box-shadow: var(--mat-sys-level2);
+  display: flex;
+  align-items: center;
+  background: var(--mat-sys-surface-bright) !important;
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border-bottom: 1px solid var(--mat-sys-outline-variant);
+  box-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.05);
+  transition: background 0.3s ease, border-color 0.3s ease;
 }
+
+/* ── Topbar Brand Dot + Tagline ──────────────────────────────────────────── */
+.topbar-brand-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #4f46e5, #3b82f6);
+  box-shadow: 0 0 8px rgba(79, 70, 229, 0.5);
+  animation: pulseDot 2.5s infinite ease-out;
+  flex-shrink: 0;
+}
+
+@keyframes pulseDot {
+  0%, 100% { box-shadow: 0 0 8px rgba(79, 70, 229, 0.5); transform: scale(1); }
+  50% { box-shadow: 0 0 16px rgba(79, 70, 229, 0.8); transform: scale(1.15); }
+}
+
+.topbar-tagline {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+/* ── Mobile Toggle ───────────────────────────────────────────────────────── */
+.mobile-toggle-btn {
+  width: 36px !important;
+  height: 36px !important;
+  border-radius: 10px !important;
+  transition: background 150ms ease !important;
+
+  &:hover {
+    background: var(--brand-primary-light) !important;
+    color: var(--brand-primary) !important;
+  }
+}
+
+/* ── Action Pill ─────────────────────────────────────────────────────────── */
+.topbar-action-pill {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  padding: 4px;
+  transition: background var(--transition-fast);
+
+  &:hover { background: var(--brand-primary-light); }
+}
+
+/* ── Notification Bell Button ────────────────────────────────────────────── */
+.topbar-icon-btn {
+  width: 36px !important;
+  height: 36px !important;
+  border-radius: 10px !important;
+  transition: background var(--transition-fast) !important;
+
+  &:hover { background: var(--brand-primary-light) !important; }
+
+  .notif-btn-inner {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+  }
+
+  .notif-dot {
+    position: absolute;
+    top: -2px;
+    right: -3px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #ef4444;
+    border: 2px solid var(--mat-sys-surface, #fff);
+    animation: pulseDot 2s infinite ease-out;
+  }
+}
+
+/* Notification Menu Panel */
+.notif-menu-panel.mat-mdc-menu-panel {
+  min-width: 300px !important;
+  max-width: 340px !important;
+
+  .notif-menu-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 16px;
+
+    .notif-menu-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .notif-badge-count {
+      font-size: 11px;
+      font-weight: 600;
+      color: #4f46e5;
+      background: rgba(79, 70, 229, 0.1);
+      border: 1px solid rgba(79, 70, 229, 0.2);
+      padding: 2px 8px;
+      border-radius: 9999px;
+    }
+  }
+
+  .notif-item {
+    display: flex !important;
+    align-items: center !important;
+    gap: 12px !important;
+    padding: 10px 16px !important;
+    height: auto !important;
+
+    .notif-item-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+
+      &.notif-icon-info {
+        background: rgba(59, 130, 246, 0.1);
+        color: #3b82f6;
+      }
+    }
+
+    .notif-item-content {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+
+      .notif-item-title { font-size: 13px; font-weight: 600; color: var(--text-primary); }
+      .notif-item-time { font-size: 11px; color: var(--text-muted); }
+    }
+  }
+
+  .notif-footer {
+    padding: 10px 16px;
+    border-top: 1px solid var(--glass-border-subtle);
+
+    .notif-view-all {
+      font-size: 12.5px;
+      font-weight: 600;
+      color: #4f46e5;
+      text-decoration: none;
+      transition: color var(--transition-fast);
+
+      &:hover { color: #4338ca; }
+    }
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   PREMIUM PROFILE AVATAR BUTTON
+   ══════════════════════════════════════════════════════════════════════════ */
+.profile-avatar-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--glass-bg);
+  border: 1.5px solid var(--glass-border-subtle);
+  border-radius: 16px;
+  padding: 5px 12px 5px 5px;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.34, 1.3, 0.64, 1);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  position: relative;
+  overflow: hidden;
+
+  /* Shimmer sweep */
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(110deg, transparent 30%, rgba(99,102,241,0.06) 50%, transparent 70%);
+    background-size: 200% 100%;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+    border-radius: inherit;
+  }
+
+  &:hover {
+    background: var(--glass-bg-hover);
+    border-color: rgba(99, 102, 241, 0.3);
+    box-shadow: 0 4px 20px rgba(79, 70, 229, 0.15), 0 0 0 4px rgba(79,70,229,0.06);
+    transform: translateY(-1px);
+
+    &::before { opacity: 1; animation: prof-btn-shimmer 1.5s ease infinite; }
+    .avatar-chevron { transform: rotate(180deg); }
+    .avatar-circle  { box-shadow: 0 6px 20px rgba(79,70,229,0.5); }
+  }
+
+  /* Avatar circle */
+  .avatar-circle {
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #4f46e5 0%, #6366f1 50%, #818cf8 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    box-shadow: 0 3px 10px rgba(79, 70, 229, 0.4);
+    transition: box-shadow 0.3s ease;
+    position: relative;
+
+    /* Online indicator */
+    &::after {
+      content: '';
+      position: absolute;
+      bottom: -1px;
+      right: -1px;
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: #10b981;
+      border: 2px solid var(--glass-bg, #fff);
+      animation: online-pulse 2.5s ease-in-out infinite;
+    }
+
+    .avatar-initials {
+      font-size: 13.5px;
+      font-weight: 800;
+      color: #fff;
+      letter-spacing: -0.01em;
+      font-family: var(--font-display);
+      text-shadow: 0 1px 4px rgba(0,0,0,0.2);
+    }
+  }
+
+  /* Text info — only visible on lg+ */
+  .avatar-info {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1px;
+
+    .avatar-name {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-primary);
+      line-height: 1.2;
+      white-space: nowrap;
+    }
+
+    .avatar-role {
+      font-size: 10px;
+      color: var(--text-muted);
+      font-weight: 600;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+  }
+
+  /* Chevron */
+  .avatar-chevron {
+    color: var(--text-muted);
+    margin-left: 2px;
+    transition: transform 0.3s cubic-bezier(0.34, 1.4, 0.64, 1);
+    flex-shrink: 0;
+  }
+}
+
+@keyframes prof-btn-shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes online-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(16,185,129,0.5); }
+  50%       { box-shadow: 0 0 0 4px rgba(16,185,129,0); }
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   PREMIUM PROFILE MENU PANEL
+   ══════════════════════════════════════════════════════════════════════════ */
+.profile-menu-panel.mat-mdc-menu-panel {
+  min-width: 200px !important;
+  max-width: 210px !important;
+  border-radius: 14px !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  border: none !important;
+}
+
+/* The actual glass panel shell */
+.profile-menu-panel .mat-mdc-menu-content {
+  padding: 0 !important;
+  background: rgba(255,255,255,0.85) !important;
+  backdrop-filter: blur(24px) saturate(200%) !important;
+  -webkit-backdrop-filter: blur(24px) saturate(200%) !important;
+  border: 1px solid rgba(255,255,255,0.6) !important;
+  border-radius: 14px !important;
+  box-shadow:
+    0 4px 6px -1px rgba(0,0,0,0.07),
+    0 16px 48px -8px rgba(79,70,229,0.12),
+    0 0 0 1px rgba(255,255,255,0.5) inset !important;
+  overflow: hidden !important;
+  animation: prof-menu-enter 0.3s cubic-bezier(0.34,1.4,0.64,1) both !important;
+}
+
+@keyframes prof-menu-enter {
+  from { opacity: 0; transform: scale(0.92) translateY(-8px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+/* ── Menu Header ─────────────────────────────────────────────────────────── */
+.profile-menu-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px 10px;
+  border-bottom: 1px solid rgba(0,0,0,0.05);
+  background: linear-gradient(135deg,
+    rgba(79,70,229,0.06) 0%,
+    rgba(99,102,241,0.04) 50%,
+    rgba(139,92,246,0.04) 100%);
+  position: relative;
+  overflow: hidden;
+
+  /* Top shimmer line */
+  &::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 15%; right: 15%;
+    height: 1.5px;
+    background: linear-gradient(90deg, transparent, rgba(99,102,241,0.5), transparent);
+    border-radius: 0 0 100px 100px;
+  }
+
+  .profile-menu-avatar {
+    width: 34px;
+    height: 34px;
+    border-radius: 8px;
+    background: linear-gradient(135deg, #4f46e5, #6366f1, #818cf8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    box-shadow: 0 3px 10px rgba(79,70,229,0.3);
+    position: relative;
+
+    /* Online dot */
+    &::after {
+      content: '';
+      position: absolute;
+      bottom: -1px;
+      right: -1px;
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: #10b981;
+      border: 1.8px solid rgba(255,255,255,0.9);
+      animation: online-pulse 2.5s ease-in-out infinite;
+    }
+
+    span {
+      font-size: 14.5px;
+      font-weight: 800;
+      color: #fff;
+      letter-spacing: -0.02em;
+      font-family: var(--font-display);
+      text-shadow: 0 1px 4px rgba(0,0,0,0.15);
+    }
+  }
+
+  .profile-menu-name {
+    font-size: 12.5px;
+    font-weight: 800;
+    color: var(--text-primary);
+    margin: 0 0 2px;
+    letter-spacing: -0.01em;
+    line-height: 1.2;
+  }
+
+  .profile-menu-role {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    padding: 1.5px 6px;
+    background: linear-gradient(135deg, rgba(79,70,229,0.1), rgba(99,102,241,0.07));
+    border: 1px solid rgba(99,102,241,0.15);
+    border-radius: 500px;
+    font-size: 9px;
+    font-weight: 700;
+    color: var(--brand-primary);
+    margin: 0;
+    letter-spacing: 0.02em;
+  }
+}
+
+/* ── Menu Items ──────────────────────────────────────────────────────────── */
+.profile-menu-item {
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  padding: 8px 12px !important;
+  margin: 2px 5px !important;
+  border-radius: 8px !important;
+  transition: all 0.2s cubic-bezier(0.34, 1.3, 0.64, 1) !important;
+  height: auto !important;
+  color: var(--text-secondary) !important;
+  position: relative !important;
+  overflow: hidden !important;
+
+  .menu-item-content {
+    display: flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+    width: 100% !important;
+    height: 100% !important;
+    flex-direction: row !important;
+  }
+
+
+  .menu-item-icon {
+    width: 25px !important;
+    height: 25px !important;
+    border-radius: 6px !important;
+    background: rgba(100,116,139,0.06) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    color: var(--text-muted) !important;
+    flex-shrink: 0 !important;
+    transition: all 0.2s ease !important;
+    
+    /* Make custom inner icon slightly smaller */
+    ::ng-deep svg, svg, i-tabler {
+      width: 13px !important;
+      height: 13px !important;
+    }
+  }
+
+  &:hover {
+    background: rgba(79,70,229,0.05) !important;
+    color: var(--brand-primary) !important;
+    transform: translateX(2px) !important;
+
+    .menu-item-icon {
+      background: rgba(79,70,229,0.1) !important;
+      color: var(--brand-primary) !important;
+    }
+  }
+
+  /* Logout item */
+  &.logout-item {
+    color: #ef4444 !important;
+    margin-top: 0 !important;
+
+    .menu-item-icon {
+      background: rgba(239,68,68,0.06) !important;
+      color: #ef4444 !important;
+    }
+
+    &:hover {
+      background: rgba(239,68,68,0.05) !important;
+      color: #dc2626 !important;
+
+      .menu-item-icon {
+        background: rgba(239,68,68,0.12) !important;
+        color: #dc2626 !important;
+      }
+    }
+  }
+}
+
+/* ── Dark Mode — Profile Button & Menu ───────────────────────────────────── */
+html.dark {
+  .profile-avatar-btn {
+    background: rgba(15,23,42,0.6);
+    border-color: rgba(255,255,255,0.08);
+
+    &:hover {
+      background: rgba(15,23,42,0.8);
+      border-color: rgba(99,102,241,0.3);
+    }
+
+    .avatar-circle::after { border-color: rgba(15,23,42,0.9); }
+  }
+
+  .profile-menu-panel .mat-mdc-menu-content {
+    background: rgba(10,15,30,0.92) !important;
+    border-color: rgba(255,255,255,0.08) !important;
+    box-shadow:
+      0 4px 6px -1px rgba(0,0,0,0.4),
+      0 16px 48px -8px rgba(0,0,0,0.5),
+      0 0 0 1px rgba(255,255,255,0.05) inset !important;
+  }
+
+  .profile-menu-header {
+    background: rgba(255,255,255,0.03);
+    border-color: rgba(255,255,255,0.06);
+    .profile-menu-avatar::after { border-color: rgba(10,15,30,0.9); }
+  }
+
+  .profile-menu-item {
+    color: var(--text-primary) !important;
+
+    .menu-item-icon {
+      background: rgba(255,255,255,0.05) !important;
+      color: var(--text-muted) !important;
+    }
+
+    &:hover {
+      background: rgba(99,102,241,0.1) !important;
+
+      .menu-item-icon {
+        background: rgba(99,102,241,0.12) !important;
+        color: #818cf8 !important;
+      }
+    }
+
+    &.logout-item {
+      .menu-item-icon { background: rgba(239,68,68,0.1) !important; }
+    }
+  }
+}
+
+
 
 .topbar-dd {
   min-width: 220px !important;
@@ -30,9 +565,6 @@ html .topbar {
   margin-left: -5px;
 }
 
-
-
-// App Topstrip
 
 .app-topstrip {
   position: fixed;

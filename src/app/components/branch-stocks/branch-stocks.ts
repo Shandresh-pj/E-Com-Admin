@@ -262,25 +262,15 @@ export class BranchStocks implements OnInit, OnDestroy {
   }
 
   rejectTransfer(id: number) {
-    const Swal = (window as any).Swal;
-    if (Swal) {
-      Swal.fire({
-        title: 'Reject Transfer Request',
-        input: 'text',
-        inputLabel: 'Provide reason for rejection',
-        inputPlaceholder: 'Enter reason...',
-        showCancelButton: true,
-        inputValidator: (value: string) => {
-          if (!value) {
-            return 'You must enter a reason!';
-          }
-          return null;
-        }
-      }).then((inputResult: any) => {
-        if (inputResult.isConfirmed) {
-          this.approveTransfer(id, 'REJECT', inputResult.value);
-        }
-      });
-    }
+    this.alert.prompt({
+      title: 'Reject Transfer Request',
+      label: 'Provide reason for rejection',
+      placeholder: 'Enter reason...',
+      validatorText: 'You must enter a reason!'
+    }).then((inputResult: any) => {
+      if (inputResult.isConfirmed) {
+        this.approveTransfer(id, 'REJECT', inputResult.value);
+      }
+    });
   }
 }

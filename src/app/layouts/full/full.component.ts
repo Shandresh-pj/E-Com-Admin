@@ -1,5 +1,5 @@
 import { BreakpointObserver, MediaMatcher } from '@angular/cdk/layout';
-import { Component, OnInit, ViewChild, ViewEncapsulation, effect, signal } from '@angular/core';
+import { Component, OnInit, ViewChild, ViewEncapsulation, effect, signal, untracked } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { MatSidenav, MatSidenavContent } from '@angular/material/sidenav';
 import { CoreService } from 'src/app/services/core.service';
@@ -135,7 +135,9 @@ export class FullComponent implements OnInit {
 
     effect(() => {
       this.permissionService.permissionsUpdated();
-      this.loadDynamicMenus();
+      untracked(() => {
+        this.loadDynamicMenus();
+      });
     });
 
     this.router.events
@@ -290,36 +292,37 @@ export class FullComponent implements OnInit {
     let allowedMenus: any[] = [];
     if (isSuperAdmin) {
       allowedMenus = [
-        { id: 1, name: 'App Admin', path: '/components/admin', icon: 'bi-shield-lock-fill', isActive: true },
-        { id: 2, name: 'Branch', path: '/components/branch', icon: 'bi-shop', isActive: true },
-        { id: 3, name: 'Employees', path: '/components/employees', icon: 'bi-people-fill', isActive: true },
-        { id: 4, name: 'Roles', path: '/components/roles', icon: 'bi-key-fill', isActive: true },
-        { id: 5, name: 'Role Access', path: '/components/role-access', icon: 'bi-shield-check', isActive: true },
-        { id: 6, name: 'Profile', path: '/components/profile', icon: 'bi-person-badge-fill', isActive: true },
-        { id: 7, name: 'Menu Bar', path: '/components/menubar', icon: 'bi-list-ul', isActive: true },
-        { id: 8, name: 'Status', path: '/components/status', icon: 'bi-check2-square', isActive: true },
-        { id: 9, name: 'Product Attribute', path: '/components/product-attribute', icon: 'bi-tag-fill', isActive: true },
-        { id: 10, name: 'Attribute Value', path: '/components/attribute-value', icon: 'bi-tags-fill', isActive: true },
-        { id: 11, name: 'Category', path: '/components/category', icon: 'bi-folder-fill', isActive: true },
-        { id: 12, name: 'Product', path: '/components/product', icon: 'bi-box-seam-fill', isActive: true },
-        { id: 13, name: 'Orders', path: '/components/orders', icon: 'bi-cart-fill', isActive: true },
-        { id: 14, name: 'Change Password', path: '/components/change-password', icon: 'bi-lock-fill', isActive: true },
-        { id: 15, name: 'Audit Logs', path: '/components/audit-logs', icon: 'bi-clock-history', isActive: true },
-        { id: 16, name: 'Alerts', path: '/components/alerts', icon: 'bi-exclamation-triangle-fill', isActive: true },
-        { id: 17, name: 'Attendance', path: '/components/attendance', icon: 'bi-calendar-check-fill', isActive: true },
-        { id: 18, name: 'Branch Stocks', path: '/components/branch-stocks', icon: 'bi-house-gear-fill', isActive: true },
-        { id: 19, name: 'Stocks', path: '/components/stocks', icon: 'bi-box2-fill', isActive: true },
-        { id: 20, name: 'Payroll', path: '/components/payroll', icon: 'bi-cash-coin', isActive: true },
-        { id: 21, name: 'Leave', path: '/components/leave', icon: 'bi-airplane-fill', isActive: true },
-        { id: 22, name: 'Delivery Tracking', path: '/components/delivery-tracking', icon: 'bi-truck', isActive: true },
-        { id: 23, name: 'Payments', path: '/components/payments', icon: 'bi-credit-card-2-front-fill', isActive: true },
-        { id: 24, name: 'Notifications', path: '/components/notifications', icon: 'bi-bell-fill', isActive: true },
-        { id: 25, name: 'Workforce Console', path: '/components/workforce', icon: 'bi-gear-wide-connected', isActive: true },
-        { id: 26, name: 'Invoice Generator', path: '/components/invoices', icon: 'bi-file-text', isActive: true },
-        { id: 27, name: 'Approvals', path: '/components/approvals', icon: 'bi-check-square', isActive: true },
-        { id: 28, name: 'Workforce Requests', path: '/components/workforce-requests', icon: 'bi-briefcase-fill', isActive: true },
-        { id: 29, name: 'Leave Management', path: '/components/leave', icon: 'bi-calendar-x-fill', isActive: true },
-
+        { id: 1, name: 'App Admin', path: '/admin', icon: 'bi-shield-lock-fill', isActive: true },
+        { id: 2, name: 'Branch', path: '/branch', icon: 'bi-shop', isActive: true },
+        { id: 3, name: 'Employee', path: '/employees', icon: 'bi-people-fill', isActive: true },
+        { id: 4, name: 'Roles', path: '/roles', icon: 'bi-key-fill', isActive: true },
+        { id: 5, name: 'Role Access', path: '/role-access', icon: 'bi-shield-check', isActive: true },
+        { id: 6, name: 'Profile', path: '/profile', icon: 'bi-person-badge-fill', isActive: true },
+        { id: 7, name: 'Menu Bar', path: '/menubar', icon: 'bi-list-ul', isActive: true },
+        { id: 8, name: 'Status', path: '/status', icon: 'bi-check2-square', isActive: true },
+        { id: 9, name: 'Product Attribute', path: '/product-attribute', icon: 'bi-tag-fill', isActive: true },
+        { id: 10, name: 'Attribute Value', path: '/attribute-value', icon: 'bi-tags-fill', isActive: true },
+        { id: 11, name: 'Category', path: '/category', icon: 'bi-folder-fill', isActive: true },
+        { id: 12, name: 'Product', path: '/product', icon: 'bi-box-seam-fill', isActive: true },
+        { id: 13, name: 'Orders', path: '/orders', icon: 'bi-cart-fill', isActive: true },
+        { id: 14, name: 'Change Password', path: '/change-password', icon: 'bi-lock-fill', isActive: true },
+        { id: 15, name: 'Audit Logs', path: '/audit-logs', icon: 'bi-clock-history', isActive: true },
+        { id: 16, name: 'Alerts', path: '/alerts', icon: 'bi-exclamation-triangle-fill', isActive: true },
+        { id: 17, name: 'Attendance', path: '/attendance', icon: 'bi-calendar-check-fill', isActive: true },
+        { id: 18, name: 'Branch Stocks', path: '/branch-stocks', icon: 'bi-house-gear-fill', isActive: true },
+        { id: 19, name: 'Stocks', path: '/stocks', icon: 'bi-box2-fill', isActive: true },
+        { id: 20, name: 'Payroll', path: '/payroll', icon: 'bi-cash-coin', isActive: true },
+        { id: 21, name: 'Leave', path: '/leave', icon: 'bi-airplane-fill', isActive: true },
+        { id: 22, name: 'Delivery Tracking', path: '/delivery-tracking', icon: 'bi-truck', isActive: true },
+        { id: 23, name: 'Payments', path: '/payments', icon: 'bi-credit-card-2-front-fill', isActive: true },
+        { id: 24, name: 'Notifications', path: '/notifications', icon: 'bi-bell-fill', isActive: true },
+        { id: 25, name: 'Workforce Console', path: '/workforce', icon: 'bi-gear-wide-connected', isActive: true },
+        { id: 26, name: 'Invoice Generator', path: '/invoices', icon: 'bi-file-text', isActive: true },
+        { id: 27, name: 'Approvals', path: '/approvals', icon: 'bi-check-square', isActive: true },
+        { id: 28, name: 'Workforce Requests', path: '/workforce-requests', icon: 'bi-briefcase-fill', isActive: true },
+        { id: 29, name: 'Leave Management', path: '/leave', icon: 'bi-calendar-x-fill', isActive: true },
+        { id: 30, name: 'CRM Contacts', path: '/crm-contacts', icon: 'bi-people-fill', isActive: true },
+        { id: 31, name: 'Profit & Loss', path: '/profit-loss', icon: 'bi-pie-chart-fill', isActive: true }
       ];
     } else {
       allowedMenus = apiMenus.filter((m: any) => {
@@ -327,6 +330,9 @@ export class FullComponent implements OnInit {
         if (m.isActive === false) return false;
         return this.permissionService.hasPermission(m.id, 'READ');
       });
+      // if (this.authService.getUserType() === 'Admin' && !allowedMenus.some(m => m.path === '/crm-contacts')) {
+      //   allowedMenus.push({ id: 30, name: 'CRM Contacts', path: '/crm-contacts', icon: 'bi-people-fill', isActive: true });
+      // }
     }
 
     const norm = (r?: string) => (r || '').toLowerCase().replace(/\/+$/, '');
@@ -343,16 +349,16 @@ export class FullComponent implements OnInit {
       }
     ];
 
-    const hasProductMenu = allowedMenus.some(m => norm(m.path) === '/components/product');
-    const hasStockMenu = allowedMenus.some(m => norm(m.path) === '/components/stocks');
-    const hasBranchStockMenu = allowedMenus.some(m => norm(m.path) === '/components/branch-stocks');
+    const hasProductMenu = allowedMenus.some(m => norm(m.path) === '/product');
+    const hasStockMenu = allowedMenus.some(m => norm(m.path) === '/stocks');
+    const hasBranchStockMenu = allowedMenus.some(m => norm(m.path) === '/branch-stocks');
 
     // These three modules render as parent items with children below, so they
     // can't go through the generic otherItems mapping — but they should still
     // reflect the icon actually configured on the Menu record, not a guess.
-    const productMenuIcon = allowedMenus.find(m => norm(m.path) === '/components/product')?.icon;
-    const stockMenuIcon = allowedMenus.find(m => norm(m.path) === '/components/stocks')?.icon;
-    const branchStockMenuIcon = allowedMenus.find(m => norm(m.path) === '/components/branch-stocks')?.icon;
+    const productMenuIcon = allowedMenus.find(m => norm(m.path) === '/product')?.icon;
+    const stockMenuIcon = allowedMenus.find(m => norm(m.path) === '/stocks')?.icon;
+    const branchStockMenuIcon = allowedMenus.find(m => norm(m.path) === '/branch-stocks')?.icon;
 
     const isAdmin = this.authService.isSuperAdmin() || this.authService.getUserType() === 'Admin';
 
@@ -366,17 +372,17 @@ export class FullComponent implements OnInit {
       finalItems.push({
         displayName: 'Products',
         iconName: this.mapIcon(productMenuIcon || 'box-seam-fill'),
-        route: '/components/product',
+        route: '/product',
         bgcolor: 'primary'
       });
     }
 
     if (hasStockMenu) {
       const stockChildren: NavItem[] = [
-        { displayName: 'Stock List', route: '/components/stocks', queryParams: { view: 'products' }, bgcolor: 'primary' }
+        { displayName: 'Stock List', route: '/stocks', queryParams: { view: 'products' }, bgcolor: 'primary' }
       ];
       if (isAdmin) {
-        stockChildren.push({ displayName: 'Low Stock Alerts', route: '/components/alerts', bgcolor: 'error' });
+        stockChildren.push({ displayName: 'Low Stock Alerts', route: '/alerts', bgcolor: 'error' });
       }
       finalItems.push({
         displayName: 'Stocks',
@@ -390,17 +396,17 @@ export class FullComponent implements OnInit {
       finalItems.push({
         displayName: 'Branch Stocks',
         iconName: this.mapIcon(branchStockMenuIcon || 'shop'),
-        route: '/components/branch-stocks',
+        route: '/branch-stocks',
         bgcolor: 'success'
       });
     }
 
     // Add other allowed modules
     const processedPaths = new Set([
-      '/components/product',
-      '/components/stocks',
-      '/components/branch-stocks',
-      '/components/alerts',
+      '/product',
+      '/stocks',
+      '/branch-stocks',
+      '/alerts',
       '/alerts'
     ]);
 
@@ -432,7 +438,7 @@ export class FullComponent implements OnInit {
     finalItems.push({
       displayName: 'Notifications',
       iconName: 'bi-bell-fill',
-      route: '/components/notifications',
+      route: '/notifications',
       bgcolor: 'error'
     });
 
@@ -443,7 +449,7 @@ export class FullComponent implements OnInit {
     finalItems.push({
       displayName: 'Change Password',
       iconName: 'lock',
-      route: '/components/change-password',
+      route: '/change-password',
       bgcolor: 'success'
     });
 

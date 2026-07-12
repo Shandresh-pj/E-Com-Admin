@@ -8,13 +8,29 @@ import { AuthGuard } from './Securities/Guard/auth.guard';
 import { NonAuthGuard } from './Securities/Guard/nonauth.guard';
 import { UnauthorizedComponent } from './pages/unauthorized/unauthorized.component';
 
+import { HomeComponent } from './pages/home/home.component';
+import { ContactComponent } from './pages/contact/contact.component';
+
 export const routes: Routes = [
 
-  // default
+  // default landing page
   {
     path: '',
-    redirectTo: 'authentication/login',
+    component: HomeComponent,
+    title: 'Enterprise ERP & Multi-Vendor OS',
     pathMatch: 'full'
+  },
+
+  {
+    path: 'home',
+    component: HomeComponent,
+    title: 'Enterprise ERP & Multi-Vendor OS'
+  },
+
+  {
+    path: 'contact',
+    component: ContactComponent,
+    title: 'Enterprise Workspace Request & Zero-Trust Check'
   },
 
   // Public pages
@@ -25,7 +41,7 @@ export const routes: Routes = [
 
     loadChildren: () =>
       import('./pages/authentication/authentication.routes')
-      .then(m => m.AuthenticationRoutes)
+        .then(m => m.AuthenticationRoutes)
   },
 
   // Protected pages
@@ -37,33 +53,34 @@ export const routes: Routes = [
     children: [
 
       {
-        path:'dashboard',
-        loadChildren:() =>
+        path: 'dashboard',
+        loadChildren: () =>
           import('./pages/pages.routes')
-          .then(m => m.PagesRoutes)
+            .then(m => m.PagesRoutes)
       },
 
       {
-        path:'ui-components',
-        loadChildren:() =>
+        path: '',
+        loadChildren: () =>
           import('./pages/ui-components/ui-components.routes')
-          .then(m => m.UiComponentsRoutes)
+            .then(m => m.UiComponentsRoutes)
       },
 
       {
-        path:'extra',
-        loadChildren:() =>
+        path: '',
+        loadChildren: () =>
           import('./pages/extra/extra.routes')
-          .then(m => m.ExtraRoutes)
+            .then(m => m.ExtraRoutes)
       },
 
       {
-        path:'components',
-        loadChildren:() =>
+        path: '',
+        loadChildren: () =>
           import('./components/components.routes')
-          .then(m => m.ComponentsRoutes)
-      }
+            .then(m => m.ComponentsRoutes)
+      },
 
+      // Direct route shortcuts removed since routes are now natively flat.
     ]
   },
 
@@ -77,8 +94,8 @@ export const routes: Routes = [
   },
 
   {
-    path:'**',
-    redirectTo:'authentication/login'
+    path: '**',
+    redirectTo: 'authentication/login'
   }
 
 ];

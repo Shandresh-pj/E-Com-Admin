@@ -21,6 +21,16 @@
 html {
   .mat-mdc-card {
     margin-bottom: 30px;
+    background: var(--mat-sys-surface) !important;
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--mat-sys-outline-variant) !important;
+    box-shadow: 0 4px 24px -1px rgba(0, 0, 0, 0.05), inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
+    
+    html.dark & {
+      box-shadow: 0 8px 32px -4px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.05) !important;
+    }
+
     .mat-mdc-card-header {
       padding: 16px 30px !important;
     }
@@ -33,10 +43,15 @@ html {
   }
 
   .card-hover {
-    transition: box-shadow 300ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;
+    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.3s ease;
+    will-change: transform;
     &:hover {
-      scale: 1.01;
-      transition: all 0.1s ease-in 0s;
+      transform: translateY(-4px);
+      box-shadow: 0 12px 32px -4px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
+      
+      html.dark & {
+        box-shadow: 0 16px 40px -8px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
+      }
     }
   }
 

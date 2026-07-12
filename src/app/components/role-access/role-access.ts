@@ -7,7 +7,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { CommonModule } from '@angular/common';
+
 import { AlertService } from 'src/app/Securities/Services/alert.service';
 import { AuthService } from 'src/app/Securities/Services/auth.service';
 import { CommonService } from 'src/app/Securities/Services/common.service';
@@ -21,7 +21,6 @@ type AccessLevel = 'global' | 'admin' | 'branch' | 'employee';
   selector: 'app-role-access',
   standalone: true,
   imports: [
-    CommonModule,
     FormsModule,
     MatFormFieldModule,
     MatSelectModule,
@@ -29,8 +28,8 @@ type AccessLevel = 'global' | 'admin' | 'branch' | 'employee';
     MatButtonModule,
     MatCardModule,
     MatProgressSpinnerModule,
-    MatTooltipModule,
-  ],
+    MatTooltipModule
+],
   templateUrl: './role-access.html',
   styleUrl: './role-access.scss',
 })
@@ -289,6 +288,28 @@ export class RoleAccess implements OnInit {
       this.workingAssignments.delete(perm.id);
     } else {
       this.workingAssignments.add(perm.id);
+    }
+  }
+
+  /** Returns true if every available permission for this menu row is assigned */
+  isAllAssignedForMenu(menu: any): boolean {
+    const perms = this.actions
+      .map(a => this.getPermission(menu, a))
+      .filter(p => !!p);
+    if (perms.length === 0) return false;
+    return perms.every(p => this.workingAssignments.has(p.id));
+  }
+
+  /** Toggle all available permissions for a menu row on/off */
+  toggleAllForMenu(menu: any): void {
+    const perms = this.actions
+      .map(a => this.getPermission(menu, a))
+      .filter(p => !!p);
+    const allOn = this.isAllAssignedForMenu(menu);
+    if (allOn) {
+      perms.forEach(p => this.workingAssignments.delete(p.id));
+    } else {
+      perms.forEach(p => this.workingAssignments.add(p.id));
     }
   }
 

@@ -157,7 +157,6 @@
                         }
                     </mat-form-field>
                 </div>
-
                 <div class="col-lg-4">
                     <mat-label class="f-w-600 m-b-8 d-block">Role</mat-label>
                     <mat-form-field appearance="outline" class="w-100">
@@ -169,8 +168,21 @@
                     </mat-form-field>
                   </div>
 
-            </div>
+                <div class="col-lg-4">
+                    <mat-label class="f-w-600 m-b-8 d-block">Razorpay Key ID</mat-label>
+                    <mat-form-field appearance="outline" class="w-100">
+                        <input matInput formControlName="razorpay_key_id" placeholder="rzp_test_...">
+                    </mat-form-field>
+                </div>
 
+                <div class="col-lg-4">
+                    <mat-label class="f-w-600 m-b-8 d-block">Razorpay Key Secret</mat-label>
+                    <mat-form-field appearance="outline" class="w-100">
+                        <input matInput type="password" formControlName="razorpay_key_secret" placeholder="Enter key secret">
+                    </mat-form-field>
+                </div>
+
+            </div>
             <div class="m-t-12">
                 <button mat-stroked-button class="me-3 Cancel_Button" (click)="cancelComapny()">
                     Cancel

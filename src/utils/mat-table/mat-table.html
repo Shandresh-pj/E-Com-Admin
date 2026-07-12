@@ -1,4 +1,4 @@
-<div class="mat-elevation-z8">
+<div class="table-container">
 
   <table mat-table [dataSource]="dataSource" matSort>
 
@@ -20,6 +20,7 @@
     </ng-container>
 
     }
+    
     @if(Extra_Column){
       <ng-container matColumnDef="Companies">
     
@@ -27,16 +28,14 @@
           {{ extraColumnHeader }}
         </th>
         <td mat-cell *matCellDef="let row">
-        <button mat-icon-button color="primary" (click)="Add(row)">
-          <mat-icon class="Icons text-primary">
-            account_circle
-          </mat-icon>
-        </button>
-        <button mat-icon-button color="primary" (click)="View(row)">
-          <mat-icon class="Icons text-success">
-            visibility
-          </mat-icon>
-        </button>
+          <div class="action-buttons">
+            <button mat-icon-button color="primary" (click)="Add(row)">
+              <mat-icon class="Icons text-primary">account_circle</mat-icon>
+            </button>
+            <button mat-icon-button color="primary" (click)="View(row)">
+              <mat-icon class="Icons text-success">visibility</mat-icon>
+            </button>
+          </div>
         </td>
     
       </ng-container>
@@ -53,29 +52,25 @@
 
       <td mat-cell *matCellDef="let row">
 
-        @if(showView){
-        <button mat-icon-button color="accent" (click)="View(row)">
-          <mat-icon class="Icons text-info">
-            visibility
-          </mat-icon>
-        </button>
-        }
+        <div class="action-buttons">
+          @if(showView){
+          <button mat-icon-button color="accent" (click)="View(row)">
+            <mat-icon class="Icons text-info">visibility</mat-icon>
+          </button>
+          }
 
-        @if(showEdit){
-        <button mat-icon-button color="primary" (click)="edit(row)">
-          <mat-icon class="Icons text-primary">
-            edit
-          </mat-icon>
-        </button>
-        }
+          @if(showEdit){
+          <button mat-icon-button color="primary" (click)="edit(row)">
+            <mat-icon class="Icons text-primary">edit</mat-icon>
+          </button>
+          }
 
-        @if(showDelete){
-        <button mat-icon-button color="warn" (click)="delete(row)">
-          <mat-icon class="Icons text-danger">
-            delete
-          </mat-icon>
-        </button>
-        }
+          @if(showDelete){
+          <button mat-icon-button color="warn" (click)="delete(row)">
+            <mat-icon class="Icons text-danger">delete</mat-icon>
+          </button>
+          }
+        </div>
 
       </td>
 
@@ -88,7 +83,7 @@
 
     <tr mat-row *matRowDef="let row; columns:displayedColumns"></tr>
 
-    <tr class="mat-no-data-row" *matNoDataRow>
+    <tr class="mat-no-data-row empty-row" *matNoDataRow>
       <td class="no-data-cell" [attr.colspan]="displayedColumns.length">
         No records found
       </td>
@@ -96,7 +91,6 @@
 
   </table>
 
-  <mat-paginator [pageSizeOptions]="[10,25,100]" showFirstLastButtons>
-  </mat-paginator>
+  <mat-paginator [pageSizeOptions]="[10,25,100]" showFirstLastButtons></mat-paginator>
 
 </div>

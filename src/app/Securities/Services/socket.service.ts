@@ -20,6 +20,8 @@ export class SocketService {
   sessionExpired$: Observable<void> = this.sessionExpiredSubject.asObservable();
   sessionRefresh$: Observable<any> = this.sessionRefreshSubject.asObservable();
 
+  private reconnectAttempts = 0;
+
   constructor(private ngZone: NgZone) {}
 
   public connect(token?: string): void {
@@ -29,7 +31,7 @@ export class SocketService {
     if (this.ws || this.isConnected) return;
     if (!this.currentToken) return;
 
-    const socketBase = environment.socketUrl || environment.apiUrl.replace(/\/api$/, '');
+    const socketBase = (environment as any).socketUrl || environment.apiUrl.replace(/\/api$/, '');
     const wsUrl = socketBase.replace(/^http/, 'ws') + '/ws/?EIO=4&transport=websocket';
 
     try {
@@ -43,6 +45,7 @@ export class SocketService {
         this.ngZone.run(() => {
           console.log('[WebSocket] Connected');
           this.isConnected = true;
+          this.reconnectAttempts = 0;
         });
       };
 
@@ -63,29 +66,36 @@ export class SocketService {
         this.ngZone.run(() => {
           console.log('[WebSocket] Disconnected');
           this.cleanup();
-          if (this.currentToken) {
-            setTimeout(() => this.connect(), 3000);
-          }
+          this.scheduleReconnect();
         });
       };
 
     } catch (e) {
       console.error('[WebSocket] Connection failed:', e);
-      setTimeout(() => this.connect(), 3000);
+      this.scheduleReconnect();
     }
+  }
+
+  private scheduleReconnect(): void {
+    if (!this.currentToken || this.reconnectAttempts >= 15) {
+      return;
+    }
+    this.reconnectAttempts++;
+    const delay = Math.min(3000 * Math.pow(1.5, Math.min(this.reconnectAttempts - 1, 5)), 30000);
+    setTimeout(() => this.connect(), delay);
   }
 
   public disconnect(): void {
     this.cleanup();
     this.currentToken = null;
-    if (this.ws) {
-      this.ws.close();
-      this.ws = null;
-    }
   }
 
   private cleanup(): void {
     this.isConnected = false;
+    if (this.ws) {
+      try { this.ws.close(); } catch (e) {}
+      this.ws = null;
+    }
   }
 
   private handleMessage(data: string): void {

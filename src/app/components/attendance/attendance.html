@@ -280,7 +280,7 @@
           <mat-label class="f-w-600 m-b-8 d-block f-s-13">Employee <span class="text-danger">*</span></mat-label>
           <mat-form-field appearance="outline" class="w-100">
             <mat-select formControlName="employee_id" placeholder="Select Employee">
-              @for(e of employees; track e.id) {
+              @for(e of employees; track $index) {
                 <mat-option [value]="e.id">{{ e.name }}</mat-option>
               }
             </mat-select>
@@ -292,7 +292,7 @@
           <mat-label class="f-w-600 m-b-8 d-block f-s-13">Company <span class="text-danger">*</span></mat-label>
           <mat-form-field appearance="outline" class="w-100">
             <mat-select formControlName="company_id" placeholder="Select Company">
-              @for(c of companies; track c.id) {
+              @for(c of companies; track $index) {
                 <mat-option [value]="c.id">{{ c.name }}</mat-option>
               }
             </mat-select>
@@ -304,7 +304,7 @@
           <mat-label class="f-w-600 m-b-8 d-block f-s-13">Branch <span class="text-danger">*</span></mat-label>
           <mat-form-field appearance="outline" class="w-100">
             <mat-select formControlName="branch_id" placeholder="Select Branch">
-              @for(b of branches; track b.id) {
+              @for(b of branches; track $index) {
                 <mat-option [value]="b.id">{{ b.name }}</mat-option>
               }
             </mat-select>
@@ -361,7 +361,7 @@
           <mat-label class="f-w-600 m-b-8 d-block f-s-13">Select Target Company <span class="text-danger">*</span></mat-label>
           <mat-form-field appearance="outline" class="w-100">
             <mat-select formControlName="company_id" placeholder="Select Company">
-              @for(c of companies; track c.id) {
+              @for(c of companies; track $index) {
                 <mat-option [value]="c.id">{{ c.name }}</mat-option>
               }
             </mat-select>
@@ -373,7 +373,7 @@
           <mat-label class="f-w-600 m-b-8 d-block f-s-13">Select Target Branch <span class="text-danger">*</span></mat-label>
           <mat-form-field appearance="outline" class="w-100">
             <mat-select formControlName="branch_id" placeholder="Select Branch">
-              @for(b of branches; track b.id) {
+              @for(b of branches; track $index) {
                 <mat-option [value]="b.id">{{ b.name }}</mat-option>
               }
             </mat-select>
@@ -385,7 +385,7 @@
           <mat-label class="f-w-600 m-b-8 d-block f-s-13">Select Target Employee <span class="text-danger">*</span></mat-label>
           <mat-form-field appearance="outline" class="w-100">
             <mat-select formControlName="employee_id" placeholder="Select Employee" (selectionChange)="loadAttendanceLogs()">
-              @for(e of employees; track e.id) {
+              @for(e of employees; track $index) {
                 <mat-option [value]="e.id">{{ e.name }}</mat-option>
               }
             </mat-select>

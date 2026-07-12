@@ -6,10 +6,11 @@ export const PagesRoutes: Routes = [
   {
     path:'',
     component: StarterComponent,
+    title: 'Dashboard & Executive Analytics Cockpit',
 
     data:{
 
-      title:'Starter Page',
+      title:'Dashboard & Executive Analytics Cockpit',
 
       urls:[
         {

@@ -1,0 +1,344 @@
+<!-- ═══════════════════════════════════════════════════════════════════
+     SVK E-Com Enterprise Console — Liquid Glass Contact & Onboarding Hub
+     Unique SVG Badges | Liquid Glassmorphism | Premium Responsive Layout
+═══════════════════════════════════════════════════════════════════ -->
+<div class="contact-root">
+
+  <!-- Ambient Glowing Aurora Canvas -->
+  <div class="contact-ambient-canvas" aria-hidden="true">
+    <div class="ambient-blob blob-purple"></div>
+    <div class="ambient-blob blob-blue"></div>
+    <div class="ambient-blob blob-cyan"></div>
+    <div class="ambient-grid"></div>
+  </div>
+
+  <div class="layout-grid">
+
+    <!-- Left Info Column: Quantum Liquid Glass Showcase -->
+    <div class="info-col">
+      <div class="brand-badge">
+        <span class="pulse"></span> Enterprise Workspace Request
+      </div>
+
+      <h1>Accelerate Your Multi-Branch Retail Operations</h1>
+      <p class="subtitle">Join SVK E-Com and scale your inventory, workforce, and order fulfillment across India with
+        dedicated liquid-glass architecture.</p>
+
+      <!-- Liquid Glass Feature Cards with Custom SVG Icons -->
+      <div class="features-list">
+
+        <!-- Card 1 -->
+        <div class="feat-item glass-card-item">
+          <div class="svg-icon-wrap wrap-purple">
+            <svg viewBox="0 0 24 24" fill="none" class="feat-svg">
+              <path d="M3 21H21M5 21V7L13 3V21M19 21V11L13 7" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round" />
+              <path d="M9 9V9.01M9 13V13.01M9 17V17.01" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+            </svg>
+          </div>
+          <div class="feat-content">
+            <h3>Dedicated Multi-Tenant Workspace</h3>
+            <p>Custom enterprise subdomain with isolated PostgreSQL schemas and zero-latency syncing across branches.
+            </p>
+          </div>
+        </div>
+
+        <!-- Card 2 -->
+        <div class="feat-item glass-card-item">
+          <div class="svg-icon-wrap wrap-cyan">
+            <svg viewBox="0 0 24 24" fill="none" class="feat-svg">
+              <path d="M12 22S4 18 4 11V5L12 2L20 5V11C20 18 12 22 12 22Z" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round" />
+              <path d="M9 12L11 14L15 10" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                stroke-linejoin="round" />
+            </svg>
+          </div>
+          <div class="feat-content">
+            <h3>Quantum AES-256 Security Shield</h3>
+            <p>Role-Based Access Control (RBAC) with automated SOC2 Type II audit trail compliance and daily vault
+              backups.</p>
+          </div>
+        </div>
+
+        <!-- Card 3 -->
+        <div class="feat-item glass-card-item">
+          <div class="svg-icon-wrap wrap-emerald">
+            <svg viewBox="0 0 24 24" fill="none" class="feat-svg">
+              <path d="M13 2L3 14H12L11 22L21 10H12L13 2Z" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                stroke-linejoin="round" />
+            </svg>
+          </div>
+          <div class="feat-content">
+            <h3>Dedicated AI Engine & SLA Support</h3>
+            <p>Custom Gemini AI demand-forecasting models trained on your SKU catalog with a 99.99% uptime SLA.</p>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Trust Telemetry Banner -->
+      <div class="trust-telemetry-banner">
+        <div class="telemetry-stat">
+          <strong>18.4%</strong>
+          <span>Avg Revenue Uplift</span>
+        </div>
+        <div class="t-divider"></div>
+        <div class="telemetry-stat">
+          <strong>0.12s</strong>
+          <span>Sync Latency</span>
+        </div>
+        <div class="t-divider"></div>
+        <div class="telemetry-stat">
+          <strong>99.99%</strong>
+          <span>Guaranteed SLA</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Form Column: Liquid Glass Request Console -->
+    <div class="form-col">
+      <div class="form-card liquid-glass-form">
+
+        @if (isSuccess) {
+        <div class="success-state">
+          <div class="succ-svg-wrap">
+            <svg viewBox="0 0 24 24" fill="none" class="succ-svg">
+              <circle cx="12" cy="12" r="10" stroke="#10b981" stroke-width="2" />
+              <path d="M8 12L11 15L16 9" stroke="#10b981" stroke-width="2.5" stroke-linecap="round"
+                stroke-linejoin="round" />
+            </svg>
+          </div>
+          <h2>Workspace Request Submitted!</h2>
+          <p>We've dispatched an encrypted verification link to your work email. Click the link to provision your
+            enterprise instance instantly.</p>
+          <a routerLink="/authentication/login" class="btn-return">Access Portal Login →</a>
+        </div>
+        } @else {
+        <div class="form-header">
+          <div class="header-pill">
+            <span class="pill-dot"></span>
+            <span>INSTANT PROVISIONING</span>
+          </div>
+          <h2>Create Workspace Request</h2>
+          <p>Configure your SVK E-Com trial or select custom enterprise pricing tiers.</p>
+        </div>
+
+        @if (errorMessage) {
+        <div class="err-banner">
+          <span>⚠️ {{ errorMessage }}</span>
+        </div>
+        }
+
+        <form [formGroup]="contactForm" (ngSubmit)="onSubmit()" class="form-grid">
+
+          <div class="row-2">
+            <div class="field-col">
+              <label for="fullName">Full Name *</label>
+              <input id="fullName" type="text" formControlName="fullName" placeholder="Shandresh"
+                [class.invalid]="isFieldInvalid('fullName')" />
+              @if (isFieldInvalid('fullName')) {
+              <span class="err-txt">Full Name is required (2+ chars)</span>
+              }
+            </div>
+
+            <div class="field-col">
+              <label for="email">Work Email *</label>
+              <input id="email" type="email" formControlName="email" placeholder="svkdthworld@gmail.com"
+                [class.invalid]="isFieldInvalid('email')" />
+              @if (contactForm.get('email')?.touched) {
+                @if (contactForm.get('email')?.hasError('required')) {
+                  <span class="err-txt">Email address is required</span>
+                }
+                @if (contactForm.get('email')?.hasError('email')) {
+                  <span class="err-txt">Enter a valid work email</span>
+                }
+                @if (contactForm.get('email')?.hasError('duplicateEmail')) {
+                  <span class="err-txt">Email is already registered</span>
+                }
+              }
+            </div>
+
+          </div>
+
+          <div class="row-2">
+            <div class="field-col">
+              <label for="companyName">Company / Brand Name *</label>
+              <input id="companyName" type="text" formControlName="companyName" placeholder="SVK Retail Group Pvt Ltd"
+                [class.invalid]="isFieldInvalid('companyName')" />
+              @if (contactForm.get('companyName')?.touched) {
+                @if (contactForm.get('companyName')?.hasError('required')) {
+                  <span class="err-txt">Company Name is required</span>
+                }
+                @if (contactForm.get('companyName')?.hasError('duplicateCompany')) {
+                  <span class="err-txt">Company Name is already registered</span>
+                }
+              }
+            </div>
+
+            <div class="field-col">
+              <label for="phone">Phone / WhatsApp Number *</label>
+              <input id="phone" type="tel" formControlName="phone" placeholder="+91 98765 43210"
+                [class.invalid]="isFieldInvalid('phone')" />
+              @if (contactForm.get('phone')?.touched) {
+                @if (contactForm.get('phone')?.hasError('required')) {
+                  <span class="err-txt">Phone number is required</span>
+                }
+                @if (contactForm.get('phone')?.hasError('pattern')) {
+                  <span class="err-txt">Valid 10-digit phone number required</span>
+                }
+                @if (contactForm.get('phone')?.hasError('duplicatePhone')) {
+                  <span class="err-txt">Phone number is already registered</span>
+                }
+              }
+            </div>
+          </div>
+
+
+          <div class="row-2">
+            <div class="field-col">
+              <label for="state">State / Province *</label>
+              <input id="state" type="text" formControlName="state" placeholder="e.g. Tamil Nadu"
+                [class.invalid]="isFieldInvalid('state')" />
+              @if (isFieldInvalid('state')) {
+                <span class="err-txt">State is required</span>
+              }
+            </div>
+
+            <div class="field-col">
+              <label for="city">City *</label>
+              <input id="city" type="text" formControlName="city" placeholder="e.g. Chennai"
+                [class.invalid]="isFieldInvalid('city')" />
+              @if (isFieldInvalid('city')) {
+                <span class="err-txt">City is required</span>
+              }
+            </div>
+          </div>
+
+          <div class="row-2">
+            <div class="field-col">
+              <label for="businessType">Business Category</label>
+              <select id="businessType" formControlName="businessType">
+                @for (t of businessTypes; track t) {
+                <option [value]="t">{{ t }}</option>
+                }
+              </select>
+            </div>
+
+            <div class="field-col">
+              <label for="selectedPlan">Selected Enterprise Tier</label>
+              <select id="selectedPlan" formControlName="selectedPlan">
+                @for (p of plans; track p) {
+                <option [value]="p">{{ p }}</option>
+                }
+              </select>
+            </div>
+          </div>
+
+          <div class="field-col">
+            <label>Billing Preference</label>
+            <div class="cycle-tabs">
+              @for (c of billingCycles; track c) {
+              <button type="button" class="tab-btn" [class.active]="contactForm.value.billingCycle === c"
+                (click)="contactForm.patchValue({ billingCycle: c })">
+                {{ c }}
+                @if (c === 'Yearly') {
+                <span class="save-chip">Save 20%</span>
+                }
+              </button>
+              }
+            </div>
+          </div>
+
+          <div class="field-col">
+            <label for="message">Custom Requirements or Multi-Branch Notes (Optional)</label>
+            <textarea id="message" rows="3" formControlName="message"
+              placeholder="Tell us about your branch distribution, warehouse setup, or ERP migration needs..."></textarea>
+          </div>
+
+          <!-- Quantum Cyber-Lock Enterprise Security Verification -->
+          <div class="quantum-security-check" [class.check-verified]="isVerified">
+            <div class="qsec-header">
+              <div class="qsec-badge-row">
+                <div class="qsec-shield-icon" [class.shield-active]="isVerified">
+                  @if (isVerified) {
+                  <svg viewBox="0 0 24 24" fill="none" class="shield-svg verified-svg">
+                    <path d="M12 22C12 22 20 18 20 12V5L12 2L4 5V12C4 18 12 22 12 22Z" fill="url(#secGradGreen)"
+                      stroke="#34d399" stroke-width="1.8" />
+                    <path d="M9 12L11 14L15 10" stroke="#fff" stroke-width="2.5" stroke-linecap="round"
+                      stroke-linejoin="round" />
+                    <defs>
+                      <linearGradient id="secGradGreen" x1="0" y1="0" x2="1" y2="1">
+                        <stop offset="0%" stop-color="#059669" />
+                        <stop offset="100%" stop-color="#10b981" />
+                      </linearGradient>
+                    </defs>
+                  </svg>
+                  } @else {
+                  <svg viewBox="0 0 24 24" fill="none" class="shield-svg">
+                    <path d="M12 22C12 22 20 18 20 12V5L12 2L4 5V12C4 18 12 22 12 22Z" fill="url(#secGradBlue)"
+                      stroke="#6366f1" stroke-width="1.8" />
+                    <path d="M12 8V13M12 16H12.01" stroke="#fff" stroke-width="2.2" stroke-linecap="round" />
+                    <defs>
+                      <linearGradient id="secGradBlue" x1="0" y1="0" x2="1" y2="1">
+                        <stop offset="0%" stop-color="#4f46e5" />
+                        <stop offset="100%" stop-color="#06b6d4" />
+                      </linearGradient>
+                    </defs>
+                  </svg>
+                  }
+                </div>
+                <div class="qsec-titles">
+                  <span class="qsec-main-title">ENTERPRISE ZERO-TRUST SECURITY CHECK</span>
+                  <span class="qsec-sub-title">AES-256 Encrypted Session · Anti-Bot Verification</span>
+                </div>
+              </div>
+
+              <div class="qsec-status-chip" [class.verified-chip]="isVerified">
+                <span class="status-pulse" [class.pulse-green]="isVerified"></span>
+                <span>{{ isVerified ? 'VERIFIED HUMAN IDENTITY' : 'SLIDE RIGHT TO UNLOCK' }}</span>
+              </div>
+            </div>
+
+            <!-- Interactive Quantum Cyber Slider Track -->
+            <div class="qsec-slider-wrap" [class.slider-unlocked]="isVerified">
+              <div class="qsec-track-bg">
+                <span class="track-hint-text">{{ isVerified ? '⚡ SECURITY CLEARANCE GRANTED' : 'SLIDE CYBER-KEY TO
+                  VERIFY >>>' }}</span>
+              </div>
+
+              <div class="qsec-laser-fill" [style.width.%]="sliderValue">
+                <span class="laser-head"></span>
+              </div>
+
+              <input type="range" min="0" max="100" [value]="sliderValue" (input)="onSliderChange($event)"
+                [disabled]="isVerified" class="qsec-range-input" aria-label="Enterprise Security Check Slider" />
+            </div>
+          </div>
+
+          <button type="submit" class="submit-btn" [disabled]="contactForm.invalid || !isVerified || isLoading">
+            <span class="btn-shimmer"></span>
+            @if (isLoading) {
+            <span>Provisioning Workspace...</span>
+            } @else {
+            <span>Submit Workspace Request →</span>
+            }
+          </button>
+
+          <div class="form-footer-line">
+            <svg viewBox="0 0 24 24" fill="none" class="lock-svg">
+              <rect x="5" y="11" width="14" height="10" rx="2" stroke="currentColor" stroke-width="2" />
+              <path d="M8 11V7C8 4.79086 9.79086 3 12 3C14.2091 3 16 4.79086 16 7V11" stroke="currentColor"
+                stroke-width="2" stroke-linecap="round" />
+            </svg>
+            <span>256-bit encrypted submission. No credit card required.</span>
+          </div>
+
+        </form>
+        }
+
+      </div>
+    </div>
+
+  </div>
+
+</div>

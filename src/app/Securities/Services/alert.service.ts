@@ -25,16 +25,16 @@ export class AlertService {
       },
       ...options,
       customClass: {
-        container:     'glass-backdrop',
-        popup:         `glass-popup glass-${icon} ${options.customClass?.popup || ''}`,
-        title:         `glass-title ${options.customClass?.title || ''}`,
+        container: 'glass-backdrop',
+        popup: `glass-popup glass-${icon} ${options.customClass?.popup || ''}`,
+        title: `glass-title ${options.customClass?.title || ''}`,
         htmlContainer: `glass-content ${options.customClass?.htmlContainer || ''}`,
         confirmButton: `glass-btn glass-btn-confirm ${options.customClass?.confirmButton || ''}`,
-        cancelButton:  `glass-btn glass-btn-cancel ${options.customClass?.cancelButton || ''}`,
-        denyButton:    `glass-btn glass-btn-deny ${options.customClass?.denyButton || ''}`,
-        input:         `glass-input ${options.customClass?.input || ''}`,
-        actions:       `glass-actions ${options.customClass?.actions || ''}`,
-        footer:        `glass-footer ${options.customClass?.footer || ''}`,
+        cancelButton: `glass-btn glass-btn-cancel ${options.customClass?.cancelButton || ''}`,
+        denyButton: `glass-btn glass-btn-deny ${options.customClass?.denyButton || ''}`,
+        input: `glass-input ${options.customClass?.input || ''}`,
+        actions: `glass-actions ${options.customClass?.actions || ''}`,
+        footer: `glass-footer ${options.customClass?.footer || ''}`,
         ...options.customClass
       }
     });
@@ -59,8 +59,10 @@ export class AlertService {
       title,
       text: message,
       showConfirmButton: true,
-      confirmButtonText: 'Dismiss',
-      showCancelButton: false
+      showCancelButton: false,
+      showDenyButton: false,
+      showCloseButton: false,
+      confirmButtonText: 'Dismiss'
     });
   }
 
@@ -71,8 +73,10 @@ export class AlertService {
       title,
       text: message,
       showConfirmButton: true,
-      confirmButtonText: 'Got it',
-      showCancelButton: false
+      showCancelButton: false,
+      showDenyButton: false,
+      showCloseButton: false,
+      confirmButtonText: 'Got it'
     });
   }
 
@@ -83,8 +87,10 @@ export class AlertService {
       title,
       text: message,
       showConfirmButton: true,
-      confirmButtonText: 'OK',
-      showCancelButton: false
+      showCancelButton: false,
+      showDenyButton: false,
+      showCloseButton: false,
+      confirmButtonText: 'OK'
     });
   }
 
@@ -95,6 +101,8 @@ export class AlertService {
       title,
       text: message,
       showCancelButton: true,
+      showDenyButton: false,
+      showCloseButton: false,
       confirmButtonText: 'Yes',
       cancelButtonText: 'No'
     });
@@ -108,8 +116,10 @@ export class AlertService {
       inputLabel: options.label,
       inputPlaceholder: options.placeholder || 'Enter details...',
       showCancelButton: true,
-      confirmButtonText: 'Submit',
-      cancelButtonText: 'Cancel',
+      showDenyButton: false,
+      showCloseButton: false,
+      confirmButtonText: 'Yes',
+      cancelButtonText: 'No',
       inputValidator: (value: string) => {
         if (!value) return options.validatorText || 'This field is required!';
         return null;

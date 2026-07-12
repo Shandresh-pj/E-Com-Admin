@@ -47,8 +47,8 @@ export class ContactComponent implements OnInit {
         asyncValidators: [this.duplicateValidator('companyName')],
         updateOn: 'blur'
       }],
-      businessName: ['', [Validators.required, Validators.maxLength(150)]],
-      ownerName: ['', [Validators.required, Validators.maxLength(150)]],
+      businessName: [''],
+      ownerName: [''],
       email: ['', {
         validators: [Validators.required, Validators.email],
         asyncValidators: [this.duplicateValidator('email')],
@@ -60,8 +60,8 @@ export class ContactComponent implements OnInit {
         updateOn: 'blur'
       }],
       country: ['India'],
-      state: [''],
-      city: [''],
+      state: ['', [Validators.required]],
+      city: ['', [Validators.required]],
       businessType: ['E-Commerce', [Validators.required]],
       selectedPlan: [prePlan, [Validators.required]],
       preferredPlan: [prePlan, [Validators.required]],
@@ -124,7 +124,10 @@ export class ContactComponent implements OnInit {
                   icon: 'warning',
                   title: 'Duplicate Email Detected',
                   html: message,
-                  confirmButtonText: 'Got it'
+                  confirmButtonText: 'Got it',
+                  showCancelButton: false,
+                  showDenyButton: false,
+                  showCloseButton: false
                 });
                 return { duplicateEmail: true };
               }
@@ -138,7 +141,10 @@ export class ContactComponent implements OnInit {
                   icon: 'warning',
                   title: 'Duplicate Company Detected',
                   html: message,
-                  confirmButtonText: 'Got it'
+                  confirmButtonText: 'Got it',
+                  showCancelButton: false,
+                  showDenyButton: false,
+                  showCloseButton: false
                 });
                 return { duplicateCompany: true };
               }
@@ -152,7 +158,10 @@ export class ContactComponent implements OnInit {
                   icon: 'warning',
                   title: 'Duplicate Phone Detected',
                   html: message,
-                  confirmButtonText: 'Got it'
+                  confirmButtonText: 'Got it',
+                  showCancelButton: false,
+                  showDenyButton: false,
+                  showCloseButton: false
                 });
                 return { duplicatePhone: true };
               }
@@ -177,19 +186,37 @@ export class ContactComponent implements OnInit {
     this.errorMessage = '';
 
     const payload = { ...this.contactForm.value };
+    payload.businessName = payload.companyName;
+    payload.ownerName = payload.fullName;
     delete payload.terms;
     delete payload.captchaVerify;
 
     this.http.post(`${environment.apiUrl}/contact`, payload).subscribe({
       next: (res: any) => {
         this.isLoading = false;
-        this.isSuccess = true;
+        this.alert.success('We\'ve dispatched an encrypted verification link to your work email.', 'Workspace Request Submitted!');
+        
+        // Reset the form with defaults
+        const prePlan = this.contactForm.get('selectedPlan')?.value;
+        const preCycle = this.contactForm.get('billingCycle')?.value;
+        this.contactForm.reset({
+          country: 'India',
+          businessType: 'E-Commerce',
+          selectedPlan: prePlan,
+          preferredPlan: prePlan,
+          billingCycle: preCycle,
+          terms: false,
+          captchaVerify: ''
+        });
+        this.resetVerification();
       },
       error: (err: any) => {
         this.isLoading = false;
         if (err.status === 0 || err.status === 404) {
           // Graceful fallback when backend API is offline during local testing
-          this.isSuccess = true;
+          this.alert.success('We\'ve dispatched an encrypted verification link to your work email.', 'Workspace Request Submitted!');
+          this.contactForm.reset();
+          this.resetVerification();
         } else {
           this.errorMessage = err.error?.message || 'Something went wrong. Please try again.';
           this.resetVerification();

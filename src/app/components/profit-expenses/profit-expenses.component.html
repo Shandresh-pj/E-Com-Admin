@@ -1,27 +1,30 @@
-<mat-card class="bg-transparent shadow-none border-0 mb-0">
-    <mat-card-content>
-        <div class="d-flex w-100">
-            <mat-card-title>Profit & Expenses</mat-card-title>
-            <div class="m-l-auto">
-                <button mat-icon-button [matMenuTriggerFor]="menu" aria-label="Example icon-button with a menu">
-                    <i-tabler name="dots-vertical"></i-tabler>
-                </button>
-                <mat-menu #menu="matMenu" xPosition="before">
-                    <button mat-menu-item>
-                        <span>Action</span>
-                    </button>
-                    <button mat-menu-item>
-                        <span>Another Action</span>
-                    </button>
-                    <button mat-menu-item>
-                        <span>Something else here</span>
-                    </button>
-                </mat-menu>
-            </div>
+<div class="w-100 h-100 d-flex flex-column position-relative z-index-2">
+  <div class="d-flex align-items-center justify-content-between p-24 pb-0">
+    <div>
+      <h3 class="f-w-700 m-b-0 f-s-16 text-dark d-flex align-items-center gap-8">
+        <div class="bg-light-primary text-primary p-8 rounded-circle shadow-sm">
+          <mat-icon class="icon-18">trending_up</mat-icon>
         </div>
-        <apx-chart [series]="profitExpanceChart.series" [dataLabels]="profitExpanceChart.dataLabels"
-            [chart]="profitExpanceChart.chart" [legend]="profitExpanceChart.legend" [xaxis]="profitExpanceChart.xaxis"
-            [yaxis]="profitExpanceChart.yaxis" [grid]="profitExpanceChart.grid" [stroke]="profitExpanceChart.stroke"
-            [tooltip]="profitExpanceChart.tooltip" [plotOptions]="profitExpanceChart.plotOptions"></apx-chart>
-    </mat-card-content>
-</mat-card>
+        Profit & Expenses
+      </h3>
+      <p class="f-s-13 text-muted m-t-4 m-b-0">Current financial year performance</p>
+    </div>
+    
+    <!-- Glass Menu Button -->
+    <button mat-icon-button [matMenuTriggerFor]="menu" class="glass-icon-btn shadow-sm" aria-label="Options">
+      <i-tabler name="dots-vertical" class="icon-20 text-muted"></i-tabler>
+    </button>
+    <mat-menu #menu="matMenu" class="premium-glass-menu" xPosition="before">
+      <button mat-menu-item class="f-s-13"><mat-icon class="icon-18 text-muted">download</mat-icon> Download Report</button>
+      <button mat-menu-item class="f-s-13"><mat-icon class="icon-18 text-muted">share</mat-icon> Share Chart</button>
+      <button mat-menu-item class="f-s-13 text-danger"><mat-icon class="icon-18 text-danger">filter_alt_off</mat-icon> Reset Filters</button>
+    </mat-menu>
+  </div>
+  
+  <div class="flex-grow-1 p-24 pt-16 position-relative z-index-1">
+    <apx-chart [series]="profitExpanceChart.series" [dataLabels]="profitExpanceChart.dataLabels"
+        [chart]="profitExpanceChart.chart" [legend]="profitExpanceChart.legend" [xaxis]="profitExpanceChart.xaxis"
+        [yaxis]="profitExpanceChart.yaxis" [grid]="profitExpanceChart.grid" [stroke]="profitExpanceChart.stroke"
+        [tooltip]="profitExpanceChart.tooltip" [plotOptions]="profitExpanceChart.plotOptions"></apx-chart>
+  </div>
+</div>

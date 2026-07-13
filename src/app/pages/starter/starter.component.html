@@ -82,128 +82,149 @@
       </div>
     </div>
 
-    <!-- Analytics Charts Row -->
-    <div class="row m-b-24 animate-fade-in-up delay-5">
-      <div class="col-lg-8 m-b-24 m-lg-b-0">
-        <div class="dashboard-graph-card h-100">
-          <app-profit-expenses></app-profit-expenses>
+    <!-- Premium Analytics Bento Grid -->
+    <div class="row m-b-24 align-items-stretch">
+      <!-- Main Profit & Expenses -->
+      <div class="col-12 col-xl-8 m-b-24 m-xl-b-0 animate-zoom-in delay-2">
+        <div class="liquid-glass-card h-100 d-flex flex-column">
+          <app-profit-expenses class="d-block flex-grow-1 w-100"></app-profit-expenses>
         </div>
       </div>
-      <div class="col-lg-4 d-flex flex-column gap-24">
-        <div class="dashboard-graph-card">
-          <app-traffic-distribution></app-traffic-distribution>
+      
+      <!-- Secondary Analytics Column -->
+      <div class="col-12 col-xl-4 d-flex flex-column gap-24 animate-slide-in-right delay-3">
+        <!-- Traffic perfectly fills remaining top space -->
+        <div class="liquid-glass-card flex-grow-1 d-flex flex-column">
+          <app-traffic-distribution class="d-block flex-grow-1 w-100"></app-traffic-distribution>
         </div>
-        <div class="dashboard-graph-card">
-          <app-product-sales></app-product-sales>
+        <!-- Sales card locked to bottom -->
+        <div class="liquid-glass-card d-flex flex-column" style="min-height: 140px;">
+          <app-product-sales class="d-block flex-grow-1 w-100"></app-product-sales>
         </div>
       </div>
     </div>
 
-    <!-- Audit Logs & Quick Actions Panel -->
-    <div class="row m-b-24 animate-fade-in-up delay-5">
-      <!-- Audit Logs Timeline -->
-      <div class="col-lg-7">
-        <mat-card class="cardWithShadow theme-card h-100">
-          <mat-card-header class="p-x-24 p-y-16">
-            <mat-card-title class="m-b-0 f-w-600 f-s-15">Real-time Platform Audit Log</mat-card-title>
+    <!-- Smart Widgets: Audit Logs & Quick Actions -->
+    <div class="row m-b-24">
+      
+      <!-- Smart Mini Audit Log -->
+      <div class="col-12 col-lg-6 m-b-24 m-lg-b-0 animate-slide-in-right delay-4">
+        <mat-card class="smart-widget-card h-100">
+          <mat-card-header class="widget-header">
+            <div class="d-flex align-items-center justify-content-between w-100">
+              <div class="d-flex align-items-center gap-8">
+                <div class="widget-icon-bg bg-light-primary text-primary">
+                  <mat-icon class="icon-18">radar</mat-icon>
+                </div>
+                <mat-card-title class="m-b-0 f-w-700 f-s-14 text-dark">Live Audit</mat-card-title>
+              </div>
+              <span class="live-ping-badge"><span class="ping-dot"></span> Live</span>
+            </div>
           </mat-card-header>
-          <mat-card-content class="p-24 b-t-1">
+          <mat-card-content class="p-0 position-relative custom-scroll" style="height: 280px; overflow-y: auto;">
             @if (recentAuditLogs.length > 0) {
-              <div class="timeline-log-list">
-                @for(log of recentAuditLogs; track log.id) {
-                  <div class="timeline-log-item modern-log-card d-flex gap-16 m-b-12 animate-fade-in-up" [style.animation-delay]="($index * 0.1) + 's'">
-                    <div class="timeline-indicator-box">
-                      <span class="timeline-dot" [ngClass]="{
-                        'border-primary text-primary': log.action === 'CREATE',
-                        'border-warning text-warning': log.action === 'UPDATE',
-                        'border-danger text-danger': log.action === 'DELETE'
-                      }"></span>
-                      <span class="timeline-bar" [ngClass]="{
-                        'text-primary': log.action === 'CREATE',
-                        'text-warning': log.action === 'UPDATE',
-                        'text-danger': log.action === 'DELETE'
-                      }"></span>
-                    </div>
-                    <div class="timeline-log-body w-100">
-                      <div class="d-flex justify-content-between align-items-center m-b-4">
-                        <span class="f-w-700 f-s-13 text-uppercase tracking-wider" [ngClass]="{
-                            'text-primary': log.action === 'CREATE',
-                            'text-warning': log.action === 'UPDATE',
-                            'text-danger': log.action === 'DELETE'
-                          }">{{ log.action }} <span class="text-muted fw-normal">— {{ log.module }}</span></span>
-                        <span class="f-s-11 text-muted f-w-600 bg-light-primary rounded-8 px-2 py-1">{{ log.createdAt | date:'shortTime' }}</span>
+              <div class="p-16">
+                @for(log of recentAuditLogs; track log.id; let isLast = $last) {
+                  <div class="smart-log-item d-flex gap-12 mb-3 animate-fade-in-up" [style.animation-delay]="($index * 0.08) + 's'">
+                    <div class="log-status-ring" [ngClass]="{
+                      'ring-primary': log.action === 'CREATE',
+                      'ring-warning': log.action === 'UPDATE',
+                      'ring-danger': log.action === 'DELETE'
+                    }"></div>
+                    <div class="log-content w-100 pb-2" [class.border-bottom]="!isLast">
+                      <div class="d-flex justify-content-between align-items-center mb-1">
+                        <span class="f-w-700 f-s-13 text-dark">{{ log.module }} <span class="badge-action" [ngClass]="{
+                          'bg-light-primary text-primary': log.action === 'CREATE',
+                          'bg-light-warning text-warning': log.action === 'UPDATE',
+                          'bg-light-danger text-danger': log.action === 'DELETE'
+                        }">{{ log.action }}</span></span>
+                        <span class="f-s-11 text-muted">{{ log.createdAt | date:'HH:mm' }}</span>
                       </div>
-                      <p class="f-s-13 text-light-dark m-b-0">Ref: <span class="f-w-600 text-dark">#{{ log.recordId }}</span> — Executed by User #{{ log.userId }}</p>
+                      <p class="f-s-12 text-muted m-b-0 text-truncate">Ref: <b>#{{ log.recordId }}</b> by User <b>#{{ log.userId }}</b></p>
                     </div>
                   </div>
                 }
               </div>
             } @else {
-              <div class="p-24 text-center">
-                <mat-icon class="text-muted icon-48">receipt_long</mat-icon>
-                <p class="text-muted m-t-8 m-b-0">No platform actions logged today.</p>
+              <div class="h-100 d-flex flex-column align-items-center justify-content-center p-24 text-center">
+                <mat-icon class="text-muted icon-32 mb-2 opacity-50">data_usage</mat-icon>
+                <p class="text-muted f-s-12 m-b-0">Awaiting system events...</p>
               </div>
             }
           </mat-card-content>
         </mat-card>
       </div>
 
-      <!-- Quick Action Controls -->
-      <div class="col-lg-5">
-        <mat-card class="cardWithShadow theme-card h-100">
-          <mat-card-header class="p-x-24 p-y-16">
-            <mat-card-title class="m-b-0 f-w-600 f-s-15">Quick Portal Navigation</mat-card-title>
+      <!-- Smart Quick Navigation Pills -->
+      <div class="col-12 col-lg-6 animate-slide-in-right delay-5">
+        <mat-card class="smart-widget-card h-100">
+          <mat-card-header class="widget-header">
+            <div class="d-flex align-items-center gap-8">
+              <div class="widget-icon-bg bg-light-success text-success">
+                <mat-icon class="icon-18">flash_on</mat-icon>
+              </div>
+              <mat-card-title class="m-b-0 f-w-700 f-s-14 text-dark">Quick Launch</mat-card-title>
+            </div>
           </mat-card-header>
-          <mat-card-content class="p-24 b-t-1">
-            <div class="admin-quick-actions-grid">
-              <a routerLink="/attendance" class="action-row-btn animate-fade-in-up delay-1">
-                <div class="action-btn-icon bg-light-primary text-primary"><mat-icon>history</mat-icon></div>
-                <span class="f-w-700 f-s-14 m-b-4 text-dark">Attendance</span>
-                <span class="f-s-12 text-muted">View terminal logs</span>
-                <mat-icon class="action-chevron text-muted icon-20">chevron_right</mat-icon>
-              </a>
-              <a routerLink="/employees" class="action-row-btn animate-fade-in-up delay-2">
-                <div class="action-btn-icon bg-light-success text-success"><mat-icon>badge</mat-icon></div>
-                <span class="f-w-700 f-s-14 m-b-4 text-dark">Employees</span>
-                <span class="f-s-12 text-muted">Manage workforce</span>
-                <mat-icon class="action-chevron text-muted icon-20">chevron_right</mat-icon>
-              </a>
-              <a routerLink="/payroll" class="action-row-btn animate-fade-in-up delay-3">
-                <div class="action-btn-icon bg-light-warn text-warning"><mat-icon>payments</mat-icon></div>
-                <span class="f-w-700 f-s-14 m-b-4 text-dark">Payrolls</span>
-                <span class="f-s-12 text-muted">Generate slips</span>
-                <mat-icon class="action-chevron text-muted icon-20">chevron_right</mat-icon>
-              </a>
-              <a routerLink="/audit-logs" class="action-row-btn animate-fade-in-up delay-4">
-                <div class="action-btn-icon bg-light-danger text-danger"><mat-icon>receipt_long</mat-icon></div>
-                <span class="f-w-700 f-s-14 m-b-4 text-dark">Audit Logs</span>
-                <span class="f-s-12 text-muted">System registry</span>
-                <mat-icon class="action-chevron text-muted icon-20">chevron_right</mat-icon>
-              </a>
-              <a routerLink="/orders" class="action-row-btn animate-fade-in-up delay-5">
-                <div class="action-btn-icon bg-light-info text-info"><mat-icon>shopping_cart</mat-icon></div>
-                <span class="f-w-700 f-s-14 m-b-4 text-dark">Orders</span>
-                <span class="f-s-12 text-muted">Manage purchases</span>
-                <mat-icon class="action-chevron text-muted icon-20">chevron_right</mat-icon>
-              </a>
-              <a routerLink="/product" class="action-row-btn animate-fade-in-up delay-6">
-                <div class="action-btn-icon bg-light-primary text-primary" style="background: rgba(139, 92, 246, 0.1); color: #8b5cf6;"><mat-icon>inventory_2</mat-icon></div>
-                <span class="f-w-700 f-s-14 m-b-4 text-dark">Products</span>
-                <span class="f-s-12 text-muted">Stock catalog</span>
-                <mat-icon class="action-chevron text-muted icon-20">chevron_right</mat-icon>
-              </a>
-              <a routerLink="/category" class="action-row-btn animate-fade-in-up delay-7">
-                <div class="action-btn-icon bg-light-success text-success" style="background: rgba(236, 72, 153, 0.1); color: #ec4899;"><mat-icon>category</mat-icon></div>
-                <span class="f-w-700 f-s-14 m-b-4 text-dark">Categories</span>
-                <span class="f-s-12 text-muted">Groupings & tags</span>
-                <mat-icon class="action-chevron text-muted icon-20">chevron_right</mat-icon>
-              </a>
-              <a routerLink="/invoices" class="action-row-btn animate-fade-in-up delay-8">
-                <div class="action-btn-icon bg-light-warn text-warning" style="background: rgba(16, 185, 129, 0.1); color: #10b981;"><mat-icon>receipt</mat-icon></div>
-                <span class="f-w-700 f-s-14 m-b-4 text-dark">Invoices</span>
-                <span class="f-s-12 text-muted">Billing records</span>
-                <mat-icon class="action-chevron text-muted icon-20">chevron_right</mat-icon>
-              </a>
+          <mat-card-content class="p-16">
+            <div class="smart-nav-grid">
+              
+              @if (perm.hasRoleAction('canRead', '/attendance')) {
+                <a routerLink="/attendance" class="smart-nav-pill animate-zoom-in delay-1">
+                  <div class="pill-icon text-primary"><mat-icon>history</mat-icon></div>
+                  <span class="pill-text">Attendance</span>
+                </a>
+              }
+
+              @if (perm.hasRoleAction('canRead', '/employees')) {
+                <a routerLink="/employees" class="smart-nav-pill animate-zoom-in delay-2">
+                  <div class="pill-icon text-success"><mat-icon>badge</mat-icon></div>
+                  <span class="pill-text">Employees</span>
+                </a>
+              }
+
+              @if (perm.hasRoleAction('canRead', '/payroll')) {
+                <a routerLink="/payroll" class="smart-nav-pill animate-zoom-in delay-3">
+                  <div class="pill-icon text-warning"><mat-icon>payments</mat-icon></div>
+                  <span class="pill-text">Payrolls</span>
+                </a>
+              }
+
+              @if (perm.hasRoleAction('canRead', '/audit-logs')) {
+                <a routerLink="/audit-logs" class="smart-nav-pill animate-zoom-in delay-4">
+                  <div class="pill-icon text-danger"><mat-icon>receipt_long</mat-icon></div>
+                  <span class="pill-text">Audit</span>
+                </a>
+              }
+
+              @if (perm.hasRoleAction('canRead', '/orders')) {
+                <a routerLink="/orders" class="smart-nav-pill animate-zoom-in delay-5">
+                  <div class="pill-icon text-info"><mat-icon>shopping_cart</mat-icon></div>
+                  <span class="pill-text">Orders</span>
+                </a>
+              }
+
+              @if (perm.hasRoleAction('canRead', '/product')) {
+                <a routerLink="/product" class="smart-nav-pill animate-zoom-in delay-6">
+                  <div class="pill-icon text-primary" style="color: #8b5cf6;"><mat-icon>inventory_2</mat-icon></div>
+                  <span class="pill-text">Products</span>
+                </a>
+              }
+
+              @if (perm.hasRoleAction('canRead', '/category')) {
+                <a routerLink="/category" class="smart-nav-pill animate-zoom-in delay-7">
+                  <div class="pill-icon text-success" style="color: #ec4899;"><mat-icon>category</mat-icon></div>
+                  <span class="pill-text">Categories</span>
+                </a>
+              }
+
+              @if (perm.hasRoleAction('canRead', '/invoices')) {
+                <a routerLink="/invoices" class="smart-nav-pill animate-zoom-in delay-8">
+                  <div class="pill-icon text-warning" style="color: #10b981;"><mat-icon>receipt</mat-icon></div>
+                  <span class="pill-text">Invoices</span>
+                </a>
+              }
+
             </div>
           </mat-card-content>
         </mat-card>

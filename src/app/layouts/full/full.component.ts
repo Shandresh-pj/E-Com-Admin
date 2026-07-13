@@ -266,16 +266,6 @@ export class FullComponent implements OnInit {
     });
   }
 
-  toggleCollapsed() {
-    this.isContentWidthFixed = false;
-    this.options.sidenavCollapsed = !this.options.sidenavCollapsed;
-    this.resetCollapsedState();
-  }
-
-  resetCollapsedState(timer = 400) {
-    setTimeout(() => this.settings.setOptions(this.options), timer);
-  }
-
   onSidenavClosedStart() {
     this.isContentWidthFixed = false;
   }

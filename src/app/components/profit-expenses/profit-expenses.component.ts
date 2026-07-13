@@ -93,7 +93,7 @@ export class AppProfitExpensesComponent {
       plotOptions: {},
       chart: {
         type: 'area',
-        height: 390,
+        height: '100%',
         offsetY: 10,
         foreColor: '#8c98a4',
         fontFamily: 'inherit',

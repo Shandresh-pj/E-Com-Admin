@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
@@ -37,7 +37,8 @@ export interface LeadContact {
   standalone: true,
   imports: [CommonModule, RouterModule, FormsModule, MatTableModule, MatCheckboxModule, MatSortModule, MatIconModule],
   templateUrl: './crm-contacts.html',
-  styleUrls: ['./crm-contacts.scss']
+  styleUrls: ['./crm-contacts.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class CrmContacts implements OnInit {
   leads: LeadContact[] = [];
@@ -64,7 +65,7 @@ export class CrmContacts implements OnInit {
   // Bulk action selection
   selectedIds = new Set<number>();
 
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient, private cdr: ChangeDetectorRef) { }
 
   ngOnInit() {
     this.fetchLeads();
@@ -77,8 +78,10 @@ export class CrmContacts implements OnInit {
     });
   }
 
-  fetchLeads() {
-    this.isLoading = true;
+  fetchLeads(silent: boolean = false) {
+    if (!silent) {
+      this.isLoading = true;
+    }
     this.errorMessage = '';
 
     const params: any = {
@@ -103,11 +106,15 @@ export class CrmContacts implements OnInit {
         this.totalPages = res.totalPages;
         this.stats = res.stats;
         this.isLoading = false;
-        this.selectedIds.clear();
+        if (!silent) {
+          this.selectedIds.clear();
+        }
+        this.cdr.markForCheck();
       },
       error: (err) => {
         this.errorMessage = err.error?.message || 'Failed to load lead contacts.';
         this.isLoading = false;
+        this.cdr.markForCheck();
       }
     });
   }
@@ -182,16 +189,20 @@ export class CrmContacts implements OnInit {
     if (leadIndex !== -1) {
       originalStatus = this.leads[leadIndex].status;
       this.leads[leadIndex].status = 'APPROVED';
+      this.leads = [...this.leads];
       this.showToast('Lead marked as approved. Sending password setup email...');
     }
 
     this.http.post(`${environment.apiUrl}/contacts/${id}/approve`, {}, { headers: this.getHeaders() }).subscribe({
       next: (res: any) => {
-        this.fetchLeads();
+        this.fetchLeads(true);
       },
       error: (err) => {
         // Rollback
-        if (leadIndex !== -1) this.leads[leadIndex].status = originalStatus;
+        if (leadIndex !== -1) {
+          this.leads[leadIndex].status = originalStatus;
+          this.leads = [...this.leads];
+        }
         this.errorMessage = err.error?.message || 'Failed to approve lead.';
       }
     });
@@ -204,15 +215,19 @@ export class CrmContacts implements OnInit {
     if (leadIndex !== -1) {
       originalStatus = this.leads[leadIndex].status;
       this.leads[leadIndex].status = 'REJECTED';
+      this.leads = [...this.leads];
       this.showToast('Lead marked as rejected.');
     }
 
     this.http.post(`${environment.apiUrl}/contacts/${id}/reject`, {}, { headers: this.getHeaders() }).subscribe({
       next: (res: any) => {
-        this.fetchLeads();
+        this.fetchLeads(true);
       },
       error: (err) => {
-        if (leadIndex !== -1) this.leads[leadIndex].status = originalStatus;
+        if (leadIndex !== -1) {
+          this.leads[leadIndex].status = originalStatus;
+          this.leads = [...this.leads];
+        }
         this.errorMessage = err.error?.message || 'Failed to reject lead.';
       }
     });
@@ -226,7 +241,7 @@ export class CrmContacts implements OnInit {
 
     this.http.delete(`${environment.apiUrl}/contacts/${id}`, { headers: this.getHeaders() }).subscribe({
       next: (res: any) => {
-        this.fetchLeads();
+        this.fetchLeads(true);
       },
       error: (err) => {
         this.leads = originalLeads;
@@ -239,7 +254,7 @@ export class CrmContacts implements OnInit {
     this.http.post(`${environment.apiUrl}/contacts/${id}/restore`, {}, { headers: this.getHeaders() }).subscribe({
       next: (res: any) => {
         this.showToast('Lead contact restored successfully.');
-        this.fetchLeads();
+        this.fetchLeads(true);
       },
       error: (err) => {
         this.errorMessage = err.error?.message || 'Failed to restore lead.';
@@ -261,7 +276,7 @@ export class CrmContacts implements OnInit {
         this.isLoading = false;
         this.selectedIds.clear();
         this.showToast(`Bulk ${action} operation completed.`);
-        this.fetchLeads();
+        this.fetchLeads(true);
       }
     };
 
@@ -328,8 +343,10 @@ export class CrmContacts implements OnInit {
 
   showToast(message: string) {
     this.successMessage = message;
+    this.cdr.markForCheck();
     setTimeout(() => {
       if (this.successMessage === message) this.successMessage = '';
+      this.cdr.markForCheck();
     }, 4000);
   }
 }

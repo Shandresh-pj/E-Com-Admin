@@ -101,43 +101,47 @@ html.dark, html .dark-theme {
 
 // ─── Liquid Glass Base Theme ────────────────────────────────────────────────
 .liquid-glass-card {
-  background: rgba(255, 255, 255, 0.4) !important;
-  backdrop-filter: blur(24px) saturate(180%);
-  -webkit-backdrop-filter: blur(24px) saturate(180%);
-  border: 1px solid rgba(255, 255, 255, 0.4) !important;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.7) 0%, rgba(255, 255, 255, 0.25) 100%) !important;
+  backdrop-filter: blur(40px) saturate(200%);
+  -webkit-backdrop-filter: blur(40px) saturate(200%);
+  border: 1px solid rgba(255, 255, 255, 0.6) !important;
   box-shadow: 
-    0 8px 32px 0 rgba(31, 38, 135, 0.05),
-    inset 0 1px 1px rgba(255, 255, 255, 0.6) !important;
+    0 16px 40px 0 rgba(31, 38, 135, 0.07),
+    inset 0 1px 1px rgba(255, 255, 255, 0.9),
+    inset 1px 0 2px rgba(255, 255, 255, 0.8) !important;
   border-radius: 20px !important;
   position: relative;
   overflow: hidden;
   
   /* 120fps Hardware Acceleration */
-  will-change: transform, backdrop-filter;
+  will-change: transform, backdrop-filter, box-shadow;
   backface-visibility: hidden;
   transform: translateZ(0);
   
   /* Premium Spring Physics */
-  transition: transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275), background 0.6s ease;
+  transition: transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275), 
+              box-shadow 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275), 
+              background 0.6s ease;
   
   &::before {
     content: '';
     position: absolute;
     top: 0; left: -150%; width: 50%; height: 100%;
-    background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.3), transparent);
-    transform: skewX(-20deg);
+    background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.5), transparent);
+    transform: skewX(-25deg);
     transition: left 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     z-index: 10;
     pointer-events: none;
   }
 
   &:hover {
-    background: rgba(255, 255, 255, 0.6) !important;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.85) 0%, rgba(255, 255, 255, 0.4) 100%) !important;
     box-shadow: 
-      0 12px 40px 0 rgba(31, 38, 135, 0.08),
-      inset 0 1px 1px rgba(255, 255, 255, 0.9) !important;
-    border-color: rgba(255, 255, 255, 0.6) !important;
-    transform: translateY(-4px) translateZ(0);
+      0 24px 60px 0 rgba(31, 38, 135, 0.12),
+      inset 0 2px 2px rgba(255, 255, 255, 1),
+      inset 2px 0 4px rgba(255, 255, 255, 0.9) !important;
+    border-color: rgba(255, 255, 255, 0.9) !important;
+    transform: translateY(-6px) translateZ(0);
     
     &::before {
       left: 150%;
@@ -152,23 +156,24 @@ html.dark, html .dark-theme {
 
 html.dark, html .dark-theme {
   .liquid-glass-card {
-    background: rgba(15, 23, 42, 0.5) !important;
-    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    background: linear-gradient(135deg, rgba(15, 23, 42, 0.7) 0%, rgba(15, 23, 42, 0.3) 100%) !important;
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
     box-shadow: 
-      0 8px 32px 0 rgba(0, 0, 0, 0.4),
-      inset 0 1px 1px rgba(255, 255, 255, 0.05) !important;
+      0 16px 40px 0 rgba(0, 0, 0, 0.5),
+      inset 0 1px 1px rgba(255, 255, 255, 0.08),
+      inset 1px 0 2px rgba(255, 255, 255, 0.05) !important;
       
     &::before {
-      background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.03), transparent);
+      background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.05), transparent);
     }
     
     &:hover {
-      background: rgba(30, 41, 59, 0.6) !important;
-      border-color: rgba(99, 102, 241, 0.4) !important;
+      background: linear-gradient(135deg, rgba(30, 41, 59, 0.8) 0%, rgba(15, 23, 42, 0.5) 100%) !important;
+      border-color: rgba(99, 102, 241, 0.5) !important;
       box-shadow: 
-        0 12px 40px 0 rgba(0, 0, 0, 0.6),
-        0 0 20px 0 rgba(99, 102, 241, 0.2),
-        inset 0 1px 1px rgba(255, 255, 255, 0.1) !important;
+        0 24px 60px 0 rgba(0, 0, 0, 0.7),
+        0 0 30px 0 rgba(99, 102, 241, 0.25),
+        inset 0 1px 1px rgba(255, 255, 255, 0.15) !important;
     }
   }
 }
@@ -289,13 +294,6 @@ html.dark, html .dark-theme {
 // ─── Dashboard Modern Graph Containers ────────────────────────────────────────
 .dashboard-graph-card, .theme-card {
   @extend .liquid-glass-card;
-  position: relative;
-  overflow: hidden;
-  background: rgba(255, 255, 255, 0.4);
-  border: 1px solid rgba(255, 255, 255, 0.6);
-  border-radius: 18px;
-  box-shadow: inset 0 2px 10px rgba(255,255,255,0.7), 0 8px 32px rgba(0,0,0,0.05);
-  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   
   // Floating ambient glows
   &::before {
@@ -328,9 +326,6 @@ html.dark, html .dark-theme {
   }
 
   &:hover {
-    background: rgba(255, 255, 255, 0.6);
-    transform: translateY(-5px);
-    
     &::before {
       transform: scale(1.3);
       background: rgba(99, 102, 241, 0.4);
@@ -344,15 +339,10 @@ html.dark, html .dark-theme {
 
 html.dark, html .dark-theme {
   .dashboard-graph-card, .theme-card {
-    background: rgba(15, 23, 42, 0.6);
-    border-color: rgba(255, 255, 255, 0.05);
-    box-shadow: inset 0 1px 2px rgba(255,255,255,0.1), 0 8px 32px rgba(0,0,0,0.3);
-
     &::before { background: rgba(99, 102, 241, 0.15); }
     &::after { background: rgba(236, 72, 153, 0.1); }
-
+    
     &:hover {
-      background: rgba(30, 41, 59, 0.8);
       &::before { background: rgba(99, 102, 241, 0.25); }
       &::after { background: rgba(236, 72, 153, 0.2); }
     }
@@ -598,11 +588,231 @@ html.dark, html .dark-theme {
 .delay-3 { animation-delay: 0.24s; }
 .delay-4 { animation-delay: 0.32s; }
 .delay-5 { animation-delay: 0.4s; }
+.delay-6 { animation-delay: 0.48s; }
+.delay-7 { animation-delay: 0.56s; }
+.delay-8 { animation-delay: 0.64s; }
+
+// ─── Smart Widgets Styles ───────────────────────────────────────────────────
+.smart-widget-card {
+  @extend .liquid-glass-card;
+  border-radius: 16px !important;
+  
+  .widget-header {
+    padding: 16px;
+    border-bottom: 1px solid rgba(0,0,0,0.04);
+    
+    .widget-icon-bg {
+      width: 32px;
+      height: 32px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+  }
+}
+
+.live-ping-badge {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #10b981;
+  background: rgba(16, 185, 129, 0.1);
+  padding: 4px 10px;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  
+  .ping-dot {
+    width: 6px;
+    height: 6px;
+    background: #10b981;
+    border-radius: 50%;
+    animation: pingDot 1.5s cubic-bezier(0, 0, 0.2, 1) infinite;
+  }
+}
+
+@keyframes pingDot {
+  75%, 100% {
+    transform: scale(2.5);
+    opacity: 0;
+  }
+}
+
+.smart-log-item {
+  position: relative;
+  transition: transform 0.3s ease;
+  
+  &:hover {
+    transform: translateX(4px);
+    .log-status-ring {
+      transform: scale(1.2);
+    }
+  }
+}
+
+.log-status-ring {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 3px solid #fff;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  flex-shrink: 0;
+  margin-top: 4px;
+  transition: transform 0.3s ease;
+  
+  &.ring-primary { background: #6366f1; }
+  &.ring-warning { background: #f59e0b; }
+  &.ring-danger { background: #ef4444; }
+}
+
+.badge-action {
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 6px;
+  font-weight: 700;
+  margin-left: 4px;
+}
+
+/* Custom Scrollbar for mini widgets */
+.custom-scroll {
+  &::-webkit-scrollbar {
+    width: 4px;
+  }
+  &::-webkit-scrollbar-track {
+    background: rgba(0,0,0,0.02);
+  }
+  &::-webkit-scrollbar-thumb {
+    background: rgba(0,0,0,0.1);
+    border-radius: 10px;
+  }
+}
+
+/* Smart Nav Grid */
+.smart-nav-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+  gap: 12px;
+}
+
+.smart-nav-pill {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  background: rgba(255, 255, 255, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  padding: 12px;
+  border-radius: 14px;
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+  text-align: center;
+  
+  .pill-icon {
+    width: 38px;
+    height: 38px;
+    background: #fff;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 8px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.04);
+    transition: transform 0.3s ease;
+  }
+  
+  .pill-text {
+    font-size: 12px;
+    font-weight: 700;
+    color: #334155;
+  }
+  
+  &:hover {
+    transform: translateY(-4px) scale(1.03);
+    background: #fff;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.06);
+    
+    .pill-icon {
+      transform: scale(1.1) rotate(-5deg);
+    }
+    .pill-text {
+      color: #6366f1;
+    }
+  }
+}
+
+.animate-zoom-in {
+  opacity: 0;
+  transform: scale(0.8) translateY(10px);
+  animation: zoomInBounce 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+@keyframes zoomInBounce {
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+html.dark, html .dark-theme {
+  .smart-widget-card {
+    .widget-header { border-bottom-color: rgba(255,255,255,0.05); }
+  }
+  
+  .smart-nav-pill {
+    background: rgba(30, 41, 59, 0.6);
+    border-color: rgba(255,255,255,0.05);
+    
+    .pill-icon { background: rgba(15, 23, 42, 0.8); }
+    .pill-text { color: #e2e8f0; }
+    
+    &:hover {
+      background: rgba(51, 65, 85, 0.8);
+    }
+  }
+}
 
 @keyframes fadeInUp {
   to {
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+// ─── Live Pulse Animation ───────────────────────────────────────────────────
+.pulse-indicator {
+  animation: pulseLive 2s infinite cubic-bezier(0.66, 0, 0, 1);
+}
+
+@keyframes pulseLive {
+  0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+  70% { box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+}
+
+// ─── Slide In Right Animation ───────────────────────────────────────────────
+.animate-slide-in-right {
+  opacity: 0;
+  transform: translateX(30px) scale(0.95);
+  animation: slideInRight 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+@keyframes slideInRight {
+  to {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+}
+
+// ─── Floating Animation for Icons ───────────────────────────────────────────
+.action-row-btn:hover .action-btn-icon {
+  animation: floatIcon 2s ease-in-out infinite alternate;
+}
+
+@keyframes floatIcon {
+  0% { transform: translateY(0) scale(1.1) rotate(-5deg); }
+  100% { transform: translateY(-4px) scale(1.15) rotate(0deg); }
 }
 

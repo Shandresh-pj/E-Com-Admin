@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectorRef, ViewEncapsulation } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, ViewEncapsulation, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { MaterialModule } from '../../material.module';
@@ -9,9 +9,9 @@ import { AppProfitExpensesComponent } from 'src/app/components/profit-expenses/p
 import { AppTrafficDistributionComponent } from 'src/app/components/traffic-distribution/traffic-distribution.component';
 import { AppProductSalesComponent } from 'src/app/components/product-sales/product-sales.component';
 
-// Services
 import { AuthService } from 'src/app/Securities/Services/auth.service';
 import { CommonService } from 'src/app/Securities/Services/common.service';
+import { PermissionService } from 'src/app/Securities/Services/permissions.service';
 import { UserType } from 'src/app/Securities/Models/role-access';
 
 @Component({
@@ -29,6 +29,7 @@ import { UserType } from 'src/app/Securities/Models/role-access';
   templateUrl: './starter.component.html',
   styleUrl: './starter.component.scss',
   encapsulation: ViewEncapsulation.None,
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class StarterComponent implements OnInit {
   userRole: string = '';
@@ -63,7 +64,8 @@ export class StarterComponent implements OnInit {
   constructor(
     private auth: AuthService,
     private common: CommonService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    public perm: PermissionService
   ) { }
 
   ngOnInit() {

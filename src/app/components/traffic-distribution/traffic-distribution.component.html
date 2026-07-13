@@ -1,85 +1,71 @@
-<mat-card class="cardWithShadow traffic-card">
-  <mat-card-content class="traffic-card-body">
+<div class="w-100 h-100 d-flex flex-column position-relative z-index-2 p-24">
+  <!-- Header Row -->
+  <div class="d-flex align-items-center justify-content-between mb-3">
+    <h3 class="f-w-700 m-b-0 f-s-16 text-dark d-flex align-items-center gap-8">
+      Traffic Distribution
+    </h3>
+    <span class="live-ping-badge" style="background: rgba(99, 102, 241, 0.1); color: #6366f1;">
+      <span class="ping-dot" style="background: #6366f1;"></span>Live
+    </span>
+  </div>
 
-    <!-- Header Row -->
-    <div class="traffic-header">
-      <div class="traffic-header-left">
-        <div class="traffic-title-row">
-          <span class="traffic-title">Traffic Distribution</span>
-          <span class="traffic-live-badge">
-            <span class="live-dot"></span>Live
-          </span>
-        </div>
-        <div class="traffic-revenue">$36,358</div>
-        <div class="traffic-growth">
-          <span class="growth-chip">
-            <i-tabler name="trending-up" class="icon-13 d-flex"></i-tabler>
-            +9%
-          </span>
-          <span class="growth-label">vs last year</span>
-        </div>
-      </div>
-
-      <!-- Radial Chart -->
-      <div class="traffic-chart-wrap">
-        <apx-chart
-          [series]="trafficdistributionChart.series"
-          [labels]="trafficdistributionChart.labels"
-          [dataLabels]="trafficdistributionChart.dataLabels"
-          [chart]="trafficdistributionChart.chart"
-          [legend]="trafficdistributionChart.legend"
-          [colors]="trafficdistributionChart.colors"
-          [stroke]="trafficdistributionChart.stroke"
-          [tooltip]="trafficdistributionChart.tooltip"
-          [plotOptions]="trafficdistributionChart.plotOptions"
-          [responsive]="trafficdistributionChart.responsive">
-        </apx-chart>
+  <div class="d-flex justify-content-between align-items-end mb-4">
+    <div>
+      <h2 class="f-w-800 m-b-0 f-s-24">$36,358</h2>
+      <div class="d-flex align-items-center gap-8 m-t-4">
+        <span class="badge bg-light-success text-success fw-bold d-flex align-items-center px-2 py-1 border rounded-pill">
+          <mat-icon class="icon-14 m-r-4">trending_up</mat-icon> +9%
+        </span>
+        <span class="f-s-12 text-muted fw-bold">vs last year</span>
       </div>
     </div>
+  </div>
 
-    <!-- Channel breakdown bars -->
-    <div class="traffic-channels">
+  <!-- Radial Chart -->
+  <div class="flex-grow-1 position-relative d-flex justify-content-center align-items-center mb-4">
+    <apx-chart
+      [series]="trafficdistributionChart.series"
+      [labels]="trafficdistributionChart.labels"
+      [dataLabels]="trafficdistributionChart.dataLabels"
+      [chart]="trafficdistributionChart.chart"
+      [legend]="trafficdistributionChart.legend"
+      [colors]="trafficdistributionChart.colors"
+      [stroke]="trafficdistributionChart.stroke"
+      [tooltip]="trafficdistributionChart.tooltip"
+      [plotOptions]="trafficdistributionChart.plotOptions"
+      [responsive]="trafficdistributionChart.responsive">
+    </apx-chart>
+  </div>
 
-      <div class="traffic-channel-row">
-        <div class="channel-meta">
-          <span class="channel-dot" style="background: #4f46e5;"></span>
-          <span class="channel-name">Organic</span>
-        </div>
-        <div class="channel-bar-wrap">
-          <div class="channel-bar">
-            <div class="channel-bar-fill organic" [style.width]="trafficdistributionChart.series[0] + '%'"></div>
-          </div>
-          <span class="channel-pct">{{ trafficdistributionChart.series[0] }}%</span>
-        </div>
+  <!-- Channel breakdown bars -->
+  <div class="d-flex flex-column gap-16 w-100 mt-auto">
+    
+    <div class="d-flex align-items-center justify-content-between w-100">
+      <div class="d-flex align-items-center gap-8" style="width: 80px;">
+        <span class="rounded-circle" style="width: 8px; height: 8px; background: #4f46e5;"></span>
+        <span class="f-s-13 f-w-600 text-dark">Organic</span>
       </div>
-
-      <div class="traffic-channel-row">
-        <div class="channel-meta">
-          <span class="channel-dot" style="background: #ec4899;"></span>
-          <span class="channel-name">Referral</span>
-        </div>
-        <div class="channel-bar-wrap">
-          <div class="channel-bar">
-            <div class="channel-bar-fill referral" [style.width]="trafficdistributionChart.series[1] + '%'"></div>
-          </div>
-          <span class="channel-pct">{{ trafficdistributionChart.series[1] }}%</span>
-        </div>
-      </div>
-
-      <div class="traffic-channel-row">
-        <div class="channel-meta">
-          <span class="channel-dot" style="background: #10b981;"></span>
-          <span class="channel-name">Social</span>
-        </div>
-        <div class="channel-bar-wrap">
-          <div class="channel-bar">
-            <div class="channel-bar-fill social" [style.width]="trafficdistributionChart.series[2] + '%'"></div>
-          </div>
-          <span class="channel-pct">{{ trafficdistributionChart.series[2] }}%</span>
-        </div>
-      </div>
-
+      <mat-progress-bar mode="determinate" [value]="trafficdistributionChart.series[0]" color="primary" class="flex-grow-1 mx-3 rounded-pill"></mat-progress-bar>
+      <span class="f-s-13 f-w-700 text-muted" style="width: 30px; text-align: right;">{{ trafficdistributionChart.series[0] }}%</span>
     </div>
 
-  </mat-card-content>
-</mat-card>
+    <div class="d-flex align-items-center justify-content-between w-100">
+      <div class="d-flex align-items-center gap-8" style="width: 80px;">
+        <span class="rounded-circle" style="width: 8px; height: 8px; background: #ec4899;"></span>
+        <span class="f-s-13 f-w-600 text-dark">Referral</span>
+      </div>
+      <mat-progress-bar mode="determinate" [value]="trafficdistributionChart.series[1]" color="accent" class="flex-grow-1 mx-3 rounded-pill" style="--mdc-linear-progress-active-indicator-color: #ec4899;"></mat-progress-bar>
+      <span class="f-s-13 f-w-700 text-muted" style="width: 30px; text-align: right;">{{ trafficdistributionChart.series[1] }}%</span>
+    </div>
+
+    <div class="d-flex align-items-center justify-content-between w-100">
+      <div class="d-flex align-items-center gap-8" style="width: 80px;">
+        <span class="rounded-circle" style="width: 8px; height: 8px; background: #10b981;"></span>
+        <span class="f-s-13 f-w-600 text-dark">Social</span>
+      </div>
+      <mat-progress-bar mode="determinate" [value]="trafficdistributionChart.series[2]" class="flex-grow-1 mx-3 rounded-pill" style="--mdc-linear-progress-active-indicator-color: #10b981;"></mat-progress-bar>
+      <span class="f-s-13 f-w-700 text-muted" style="width: 30px; text-align: right;">{{ trafficdistributionChart.series[2] }}%</span>
+    </div>
+
+  </div>
+</div>

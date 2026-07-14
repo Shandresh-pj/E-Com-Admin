@@ -1,44 +1,194 @@
-<div class="premium-liquid-glass-wrapper">
-  <mat-card class="cardWithShadow liquid-glass-card">
-    <mat-card-content>
-      <div class="flex items-center justify-between m-b-24">
-        <mat-card-title>Coupons Management</mat-card-title>
-        <button mat-flat-button color="primary" (click)="openCouponDialog()">
+<mat-card class="cardWithShadow theme-card">
+
+  <mat-card-header>
+    <div class="header-container">
+      <mat-card-title class="m-b-0">Coupons Management</mat-card-title>
+      @if (!Coupon_Form) {
+        <button mat-flat-button class="btn-rounded btn-gradient" (click)="openForm()">
           <mat-icon>add</mat-icon> Add Coupon
+        </button>
+      }
+    </div>
+  </mat-card-header>
+
+  <!-- ─── TABLE VIEW ─── -->
+  @if (!Coupon_Form) {
+  <mat-card-content class="b-t-1">
+
+    <!-- Loading -->
+    @if (isLoading) {
+      <div class="d-flex justify-content-center p-32">
+        <mat-spinner [diameter]="40"></mat-spinner>
+      </div>
+    }
+
+    <!-- Empty State -->
+    @if (!isLoading && coupons.length === 0) {
+      <div class="d-flex flex-column align-items-center justify-content-center p-48" style="gap: 16px;">
+        <mat-icon style="font-size: 48px; width: 48px; height: 48px; color: var(--text-secondary);">local_offer</mat-icon>
+        <p class="f-s-16 m-0" style="color: var(--text-secondary);">No coupons found.</p>
+        <button mat-stroked-button class="btn-rounded" style="color: var(--brand-primary);" (click)="openForm()">
+          Create your first coupon
+        </button>
+      </div>
+    }
+
+    <!-- Table -->
+    @if (!isLoading && coupons.length > 0) {
+      <div class="table-responsive">
+        <app-mat-table
+          [columns]="tableColumns"
+          [tableData]="coupons"
+          [showAction]="true"
+          [showView]="false"
+          [Extra_Column]="false"
+          [showEdit]="true"
+          [showDelete]="true"
+          (editClick)="openForm($event)"
+          (deleteClick)="deleteCoupon($event)">
+        </app-mat-table>
+      </div>
+    }
+
+  </mat-card-content>
+  }
+
+  <!-- ─── INLINE FORM VIEW ─── -->
+  @else {
+  <mat-card-content class="b-t-1">
+    <form [formGroup]="couponForm" class="premium-form-grid p-t-24">
+
+      <div class="divider">
+        <span>{{ editingCoupon ? 'Edit Coupon' : 'Create New Coupon' }}</span>
+      </div>
+
+      <!-- Code & Status -->
+      <div class="form-row">
+        <div class="field-container">
+          <mat-label class="f-w-600 m-b-8 d-block">Coupon Code <span class="text-danger">*</span></mat-label>
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-icon matPrefix style="margin-right: 8px;">tag</mat-icon>
+            <input matInput formControlName="code" placeholder="e.g. SUMMER2026" style="text-transform: uppercase; font-weight: 600;">
+            @if (couponForm.get('code')?.invalid && couponForm.get('code')?.touched) {
+              <mat-error>Coupon code is required</mat-error>
+            }
+          </mat-form-field>
+        </div>
+
+        <div class="field-container">
+          <mat-label class="f-w-600 m-b-8 d-block">Status</mat-label>
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-select formControlName="is_active">
+              <mat-option [value]="true">
+                <div class="flex items-center gap-8">
+                  <span class="status-dot bg-success"></span> Active
+                </div>
+              </mat-option>
+              <mat-option [value]="false">
+                <div class="flex items-center gap-8">
+                  <span class="status-dot bg-warn"></span> Inactive
+                </div>
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+      </div>
+
+      <div class="divider">
+        <span>Discount Configuration</span>
+      </div>
+
+      <!-- Type & Value -->
+      <div class="form-row">
+        <div class="field-container">
+          <mat-label class="f-w-600 m-b-8 d-block">Discount Type <span class="text-danger">*</span></mat-label>
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-select formControlName="type">
+              <mat-option value="percent">
+                <div class="flex items-center gap-8"><mat-icon>percent</mat-icon> Percentage (%)</div>
+              </mat-option>
+              <mat-option value="flat">
+                <div class="flex items-center gap-8"><mat-icon>attach_money</mat-icon> Fixed Amount</div>
+              </mat-option>
+              <mat-option value="bogo">
+                <div class="flex items-center gap-8"><mat-icon>filter_2</mat-icon> Buy X Get Y</div>
+              </mat-option>
+              <mat-option value="free_shipping">
+                <div class="flex items-center gap-8"><mat-icon>local_shipping</mat-icon> Free Shipping</div>
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+
+        @if (couponForm.get('type')?.value === 'percent' || couponForm.get('type')?.value === 'flat') {
+        <div class="field-container">
+          <mat-label class="f-w-600 m-b-8 d-block">Discount Value</mat-label>
+          <mat-form-field appearance="outline" class="w-100">
+            <span matTextPrefix class="m-r-4">{{ couponForm.get('type')?.value === 'flat' ? '₹' : '' }}</span>
+            <input matInput type="number" formControlName="value" placeholder="0.00">
+            <span matTextSuffix class="m-l-4">{{ couponForm.get('type')?.value === 'percent' ? '%' : '' }}</span>
+          </mat-form-field>
+        </div>
+        }
+      </div>
+
+      <!-- BOGO Fields -->
+      @if (couponForm.get('type')?.value === 'bogo') {
+      <div class="form-row">
+        <div class="field-container">
+          <mat-label class="f-w-600 m-b-8 d-block">Buy X Items</mat-label>
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-icon matPrefix style="margin-right: 8px;">shopping_basket</mat-icon>
+            <input matInput type="number" formControlName="buy_x" placeholder="e.g. 2">
+          </mat-form-field>
+        </div>
+        <div class="field-container">
+          <mat-label class="f-w-600 m-b-8 d-block">Get Y Items Free</mat-label>
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-icon matPrefix style="margin-right: 8px; color: #10b981;">redeem</mat-icon>
+            <input matInput type="number" formControlName="get_y" placeholder="e.g. 1">
+          </mat-form-field>
+        </div>
+      </div>
+      }
+
+      <div class="divider">
+        <span>Limits &amp; Expiry</span>
+      </div>
+
+      <div class="form-row">
+        <div class="field-container">
+          <mat-label class="f-w-600 m-b-8 d-block">Expiry Date</mat-label>
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-icon matPrefix style="margin-right: 8px;">event</mat-icon>
+            <input matInput [matDatepicker]="picker" formControlName="expiry_date" placeholder="Select date">
+            <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+            <mat-datepicker #picker></mat-datepicker>
+          </mat-form-field>
+        </div>
+
+        <div class="field-container">
+          <mat-label class="f-w-600 m-b-8 d-block">Usage Limit</mat-label>
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-icon matPrefix style="margin-right: 8px;">people</mat-icon>
+            <input matInput type="number" formControlName="usage_limit" placeholder="Leave blank for unlimited">
+            <mat-icon matSuffix matTooltip="Maximum number of times this coupon can be used by all customers.">info</mat-icon>
+          </mat-form-field>
+        </div>
+      </div>
+
+      <div class="flex m-t-12" style="justify-content: flex-end; gap: 16px;">
+        <button mat-stroked-button class="btn-rounded Cancel_Button" type="button" (click)="closeForm()">
+          <mat-icon>close</mat-icon> Cancel
+        </button>
+        <button mat-flat-button class="btn-rounded btn-gradient" type="button" [disabled]="couponForm.invalid" (click)="saveCoupon()">
+          <mat-icon>{{ editingCoupon ? 'save' : 'add' }}</mat-icon>
+          {{ editingCoupon ? 'Save Changes' : 'Create Coupon' }}
         </button>
       </div>
 
-      <div class="table-responsive">
-        @if (!isLoading && coupons.length > 0) {
-          <app-mat-table
-            [columns]="tableColumns"
-            [tableData]="coupons"
-            [showAction]="true"
-            [showView]="false"
-            [Extra_Column]="false"
-            [showEdit]="true"
-            [showDelete]="true"
-            (editClick)="openCouponDialog($event)"
-            (deleteClick)="deleteCoupon($event)">
-          </app-mat-table>
-        }
+    </form>
+  </mat-card-content>
+  }
 
-        <!-- Loading State -->
-        @if (isLoading) {
-          <div class="p-24 flex justify-center items-center">
-            <p class="text-muted">Loading coupons...</p>
-          </div>
-        }
-
-        <!-- Empty State -->
-        @if (!isLoading && coupons.length === 0) {
-          <div class="p-24 flex justify-center items-center flex-col">
-            <mat-icon class="text-muted f-s-32 m-b-8" style="height: auto; width: auto;">local_offer</mat-icon>
-            <p class="text-muted f-s-16">No coupons found.</p>
-            <button mat-stroked-button color="primary" class="m-t-12" (click)="openCouponDialog()">Create your first coupon</button>
-          </div>
-        }
-      </div>
-    </mat-card-content>
-  </mat-card>
-</div>
+</mat-card>

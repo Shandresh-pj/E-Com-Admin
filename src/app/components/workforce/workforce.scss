@@ -33,3 +33,62 @@
     transform: translateY(-1px);
   }
 }
+
+// ─── RESPONSIVE WORKFORCE CONSOLE TABLE & CARD LAYOUT ───────────────────────
+.table-responsive {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  position: relative;
+  min-height: 200px;
+
+  /* Ensure smooth scrolling and prevent clipping of table shadows/badges */
+  padding-bottom: 8px;
+}
+
+/* Tablet Layout (768px to 1199px) */
+@media screen and (max-width: 1199px) {
+  .row {
+    margin-left: -8px;
+    margin-right: -8px;
+    > [class*="col-"] {
+      padding-left: 8px;
+      padding-right: 8px;
+    }
+  }
+
+  .table-responsive {
+    margin-bottom: 24px;
+    border-radius: 16px;
+  }
+}
+
+/* Mobile Layout (< 768px) */
+@media screen and (max-width: 767px) {
+  .p-24 {
+    padding: 16px !important;
+  }
+  .p-20 {
+    padding: 14px !important;
+  }
+  
+  .table-responsive {
+    margin-bottom: 16px;
+    border-radius: 12px;
+    
+    app-mat-table {
+      min-width: 650px;
+      display: block;
+    }
+  }
+
+  .d-flex.justify-content-between {
+    flex-direction: column;
+    align-items: flex-start !important;
+    gap: 12px;
+    
+    button {
+      width: 100%;
+    }
+  }
+}

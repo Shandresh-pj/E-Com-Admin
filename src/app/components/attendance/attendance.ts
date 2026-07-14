@@ -114,6 +114,7 @@ export class Attendance implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.currentUser = this.auth.getUser();
+    this.detectEmployeeMapping();
     this.loadInitialData();
     this.startDigitalClock();
     this.requestGeolocation();
@@ -189,20 +190,33 @@ export class Attendance implements OnInit, OnDestroy {
   detectEmployeeMapping() {
     if (!this.currentUser) return;
     
-    const mapped = this.employees.find(
-      e => e.email?.toLowerCase() === this.currentUser.email?.toLowerCase()
+    const mapped = (this.employees || []).find(
+      e => e.email?.toLowerCase() === this.currentUser.email?.toLowerCase() ||
+           e.id === this.currentUser.userId ||
+           e.id === this.currentUser.user_id
     );
+
+    const isSuper = this.currentUser.userType === 'SUPER_ADMIN' || this.currentUser.role === 'SUPER_ADMIN';
+    const compId = mapped?.company_id ?? mapped?.companyId ?? mapped?.company?.id ?? (!isSuper ? (this.currentUser.company_id ?? this.currentUser.companyId) : '');
+    const bId = mapped?.branch_id ?? mapped?.branchId ?? mapped?.branch?.id ?? (!isSuper ? (this.currentUser.branch_id ?? this.currentUser.branchId) : '');
+    const empId = mapped?.id ?? (!isSuper ? (this.currentUser.userId ?? this.currentUser.user_id) : '');
 
     if (mapped) {
       this.detectedEmployee = mapped;
-      const compId = mapped.company_id ?? mapped.companyId ?? mapped.company?.id;
-      const bId = mapped.branch_id ?? mapped.branchId ?? mapped.branch?.id;
+    } else if (empId && !isSuper) {
+      this.detectedEmployee = { id: empId, name: this.currentUser.name || 'Current Employee', email: this.currentUser.email };
+    }
+
+    if (empId || compId || bId) {
       this.attendanceForm.patchValue({
-        employee_id: mapped.id ? Number(mapped.id) : '',
-        company_id: compId ? Number(compId) : '',
-        branch_id: bId ? Number(bId) : ''
+        employee_id: empId ? Number(empId) : this.attendanceForm.value.employee_id,
+        company_id: compId ? Number(compId) : this.attendanceForm.value.company_id,
+        branch_id: bId ? Number(bId) : this.attendanceForm.value.branch_id
       });
-      this.loadEmployeeShiftAndPolicy(mapped.id);
+    }
+
+    if (empId) {
+      this.loadEmployeeShiftAndPolicy(Number(empId));
     }
   }
 
@@ -310,6 +324,11 @@ export class Attendance implements OnInit, OnDestroy {
   }
 
   checkIn() {
+    const isSuper = this.currentUser?.userType === 'SUPER_ADMIN' || this.currentUser?.role === 'SUPER_ADMIN';
+    if (!isSuper) {
+      this.detectEmployeeMapping();
+    }
+
     if (this.attendanceForm.get('employee_id')?.invalid ||
         this.attendanceForm.get('company_id')?.invalid ||
         this.attendanceForm.get('branch_id')?.invalid) {

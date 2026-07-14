@@ -138,6 +138,7 @@ export class Category {
         const status = this.Statuses?.find((s: any) => s.Id === data?.StatusId);
         this.dialog.open(ViewDetailsDialog, {
           width: '600px',
+          panelClass: 'premium-dialog-extended',
           data: {
             title: 'Category Details',
             fields: [

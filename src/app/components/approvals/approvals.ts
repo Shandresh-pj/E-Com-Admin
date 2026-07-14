@@ -8,9 +8,8 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatIconModule } from '@angular/material/icon';
 import { MatCheckboxModule } from '@angular/material/checkbox';
-import { MatTableModule } from '@angular/material/table';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
+import { MatPaginatorModule } from '@angular/material/paginator';
 import { SelectionModel } from '@angular/cdk/collections';
 import { AlertService } from 'src/app/Securities/Services/alert.service';
 import { AuthService } from 'src/app/Securities/Services/auth.service';
@@ -18,6 +17,7 @@ import { CommonService } from 'src/app/Securities/Services/common.service';
 import { PermissionService } from 'src/app/Securities/Services/permissions.service';
 import { SocketService } from 'src/app/Securities/Services/socket.service';
 import { Subscription } from 'rxjs';
+import { MatTable, TableColumn } from 'src/utils/mat-table/mat-table';
 
 @Component({
   selector: 'app-approvals',
@@ -33,9 +33,9 @@ import { Subscription } from 'rxjs';
     MatSelectModule,
     MatIconModule,
     MatCheckboxModule,
-    MatTableModule,
     MatTooltipModule,
-    MatPaginatorModule
+    MatPaginatorModule,
+    MatTable
   ],
   templateUrl: './approvals.html',
   styleUrl: './approvals.scss'
@@ -68,15 +68,12 @@ export class Approvals implements OnInit, OnDestroy {
 
   private socketSub!: Subscription;
 
-  displayedColumns: string[] = [
-    'select',
-    'id',
-    'action_type',
-    'status',
-    'requested_by',
-    'requested_date',
-    'branch',
-    'actions'
+  tableColumns: TableColumn[] = [
+    { columnDef: 'action_type', header: 'Type', type: 'custom' },
+    { columnDef: 'status', header: 'Status', type: 'badge' },
+    { columnDef: 'requested_by', header: 'Requested By' },
+    { columnDef: 'requested_date', header: 'Submitted Date', type: 'custom' },
+    { columnDef: 'branch', header: 'Branch Owner', type: 'custom' }
   ];
 
   constructor(
@@ -91,11 +88,6 @@ export class Approvals implements OnInit, OnDestroy {
   ngOnInit() {
     this.isAdmin = this.authService.isSuperAdmin() || this.authService.getUserType() === 'Admin';
     this.isSuperAdmin = this.authService.isSuperAdmin();
-
-    // If not admin, hide bulk select checkbox columns
-    if (!this.isAdmin) {
-      this.displayedColumns = this.displayedColumns.filter(c => c !== 'select');
-    }
 
     this.loadRequests();
     this.setupRealtimeSocket();
@@ -145,7 +137,7 @@ export class Approvals implements OnInit, OnDestroy {
     });
   }
 
-  onPageChange(event: PageEvent) {
+  onPageChange(event: any) {
     this.currentPage = event.pageIndex + 1;
     this.pageSize = event.pageSize;
     this.loadRequests();
@@ -154,25 +146,6 @@ export class Approvals implements OnInit, OnDestroy {
   onFilterChange() {
     this.currentPage = 1;
     this.loadRequests();
-  }
-
-  // ── Bulk Selection Helpers ───────────────────────────────────────────
-  isAllSelected() {
-    const numSelected = this.selection.selected.length;
-    const numRows = this.requests.filter(r => r.status === 'Pending').length;
-    return numSelected === numRows;
-  }
-
-  masterToggle() {
-    if (this.isAllSelected()) {
-      this.selection.clear();
-    } else {
-      this.requests.forEach(row => {
-        if (row.status === 'Pending') {
-          this.selection.select(row);
-        }
-      });
-    }
   }
 
   // ── Actions ──────────────────────────────────────────────────────────
@@ -191,6 +164,10 @@ export class Approvals implements OnInit, OnDestroy {
         this.cdr.detectChanges();
       }
     });
+  }
+
+  viewDetailsEvent(row: any) {
+    this.viewDetails(row.id);
   }
 
   closeDetails() {

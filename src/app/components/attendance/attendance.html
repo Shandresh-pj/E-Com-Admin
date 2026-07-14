@@ -101,7 +101,7 @@
                 color="primary" 
                 class="btn-terminal shadow-primary" 
                 (click)="checkIn()" 
-                [disabled]="loading || attendanceForm.get('employee_id')?.invalid || attendanceForm.get('company_id')?.invalid || attendanceForm.get('branch_id')?.invalid"
+                [disabled]="loading || ((currentUser?.userType === 'SUPER_ADMIN' || currentUser?.role === 'SUPER_ADMIN') && (attendanceForm.get('employee_id')?.invalid || attendanceForm.get('company_id')?.invalid || attendanceForm.get('branch_id')?.invalid))"
               >
                 <mat-icon class="m-r-4">login</mat-icon> Punch Check-In
               </button>
@@ -275,6 +275,7 @@
           </mat-form-field>
         </div>
 
+        @if (currentUser?.userType === 'SUPER_ADMIN' || currentUser?.role === 'SUPER_ADMIN') {
         <!-- Employee selection -->
         <div class="col-lg-4 col-md-6 col-sm-12">
           <mat-label class="f-w-600 m-b-8 d-block f-s-13">Employee <span class="text-danger">*</span></mat-label>
@@ -310,6 +311,7 @@
             </mat-select>
           </mat-form-field>
         </div>
+        }
 
         <!-- Check-in Time -->
         <div class="col-lg-4 col-md-6 col-sm-12">

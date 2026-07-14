@@ -332,100 +332,60 @@
   <!-- Main Table View -->
   @else {
     <mat-card-content class="b-t-1">
-      <div class="table-responsive">
-        <table mat-table [dataSource]="requests" class="w-100 custom-table">
-          
-          <!-- Checkbox Column -->
-          <ng-container matColumnDef="select">
-            <th mat-header-cell *matHeaderCellDef width="5%">
-              <mat-checkbox (change)="$event ? masterToggle() : null"
-                            [checked]="selection.hasValue() && isAllSelected()"
-                            [indeterminate]="selection.hasValue() && !isAllSelected()">
-              </mat-checkbox>
-            </th>
-            <td mat-cell *matCellDef="let row">
-              <mat-checkbox (click)="$event.stopPropagation()"
-                            (change)="$event ? selection.toggle(row) : null"
-                            [checked]="selection.isSelected(row)"
-                            [disabled]="row.status !== 'Pending'">
-              </mat-checkbox>
-            </td>
-          </ng-container>
+      <app-mat-table
+        [columns]="tableColumns"
+        [tableData]="requests"
+        [showAction]="false"
+        [showSearch]="true"
+        [isLoading]="loading"
+        [showSelection]="isAdmin"
+        [selection]="selection"
+        [customTemplates]="{ 
+          action_type: actionTypeTpl, 
+          status: statusTpl, 
+          requested_date: dateTpl, 
+          branch: branchTpl, 
+          actions: actionsTpl 
+        }">
+      </app-mat-table>
 
-          <!-- ID -->
-          <ng-container matColumnDef="id">
-            <th mat-header-cell *matHeaderCellDef width="8%">No</th>
-            <td mat-cell *matCellDef="let row; let i = index">{{ i + 1 }}</td>
-          </ng-container>
-
-          <!-- Type -->
-          <ng-container matColumnDef="action_type">
-            <th mat-header-cell *matHeaderCellDef width="15%">Type</th>
-            <td mat-cell *matCellDef="let row">
-              <span class="type-badge">{{ row.action_type }}</span>
-            </td>
-          </ng-container>
-
-          <!-- Status -->
-          <ng-container matColumnDef="status">
-            <th mat-header-cell *matHeaderCellDef width="15%">Status</th>
-            <td mat-cell *matCellDef="let row">
-              <span class="badge font-weight-bold" 
-                    [ngClass]="{
-                      'bg-light-warning text-warning': row.status === 'Pending',
-                      'bg-light-success text-success': row.status === 'Approved',
-                      'bg-light-error text-error': row.status === 'Rejected' || row.status === 'Cancelled',
-                      'bg-light-primary text-primary': row.status === 'Changes Requested'
-                    }">
-                {{ row.status }}
-              </span>
-            </td>
-          </ng-container>
-
-          <!-- Requested By -->
-          <ng-container matColumnDef="requested_by">
-            <th mat-header-cell *matHeaderCellDef width="15%">Requested By</th>
-            <td mat-cell *matCellDef="let row">{{ row.requested_by }}</td>
-          </ng-container>
-
-          <!-- Requested Date -->
-          <ng-container matColumnDef="requested_date">
-            <th mat-header-cell *matHeaderCellDef width="15%">Submitted Date</th>
-            <td mat-cell *matCellDef="let row">{{ row.requested_date | date:'mediumDate' }}</td>
-          </ng-container>
-
-          <!-- Branch -->
-          <ng-container matColumnDef="branch">
-            <th mat-header-cell *matHeaderCellDef width="17%">Branch Owner</th>
-            <td mat-cell *matCellDef="let row">Branch #{{ row.branch_id || 'N/A' }}</td>
-          </ng-container>
-
-          <!-- Actions -->
-          <ng-container matColumnDef="actions">
-            <th mat-header-cell *matHeaderCellDef width="15%">Actions</th>
-            <td mat-cell *matCellDef="let row">
-              <button mat-icon-button color="accent" matTooltip="Review Changes" (click)="viewDetails(row.id)">
-                <mat-icon class="text-info">rate_review</mat-icon>
-              </button>
-            </td>
-          </ng-container>
-
-          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-          <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
-
-          <tr class="mat-no-data-row" *matNoDataRow>
-            <td class="no-data-cell" colspan="8">No pending workflow requests found</td>
-          </tr>
-        </table>
-      </div>
-
-      <!-- Server-side Pagination -->
+      <!-- Pagination -->
       <mat-paginator [length]="totalRequests"
                      [pageSize]="pageSize"
                      [pageSizeOptions]="[5, 10, 20]"
                      (page)="onPageChange($event)"
                      aria-label="Select page of approvals">
       </mat-paginator>
+
+      <ng-template #actionTypeTpl let-row>
+        <span class="type-badge">{{ row.action_type }}</span>
+      </ng-template>
+
+      <ng-template #statusTpl let-row>
+        <span class="badge font-weight-bold" 
+              [ngClass]="{
+                'bg-light-warning text-warning': row.status === 'Pending',
+                'bg-light-success text-success': row.status === 'Approved',
+                'bg-light-error text-error': row.status === 'Rejected' || row.status === 'Cancelled',
+                'bg-light-primary text-primary': row.status === 'Changes Requested'
+              }">
+          {{ row.status }}
+        </span>
+      </ng-template>
+
+      <ng-template #dateTpl let-row>
+        {{ row.requested_date | date:'mediumDate' }}
+      </ng-template>
+
+      <ng-template #branchTpl let-row>
+        Branch #{{ row.branch_id || 'N/A' }}
+      </ng-template>
+
+      <ng-template #actionsTpl let-row>
+        <button mat-icon-button color="accent" matTooltip="Review Changes" (click)="viewDetailsEvent(row)">
+          <mat-icon class="text-info">rate_review</mat-icon>
+        </button>
+      </ng-template>
     </mat-card-content>
   }
 </mat-card>

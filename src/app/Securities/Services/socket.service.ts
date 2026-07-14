@@ -32,10 +32,17 @@ export class SocketService {
     if (!this.currentToken) return;
 
     const socketBase = (environment as any).socketUrl || environment.apiUrl.replace(/\/api$/, '');
-    const wsUrl = socketBase.replace(/^http/, 'ws') + '/ws/?EIO=4&transport=websocket';
+
+    // Convert http:// → ws:// and https:// → wss://
+    // The path must NOT have a trailing slash before the query string.
+    // Wrong: /ws/?EIO=4&transport=websocket (causes 404 on Render)
+    // Right: /ws?EIO=4&transport=websocket
+    const wsBase = socketBase.replace(/^https?/, (p: string) => p === 'https' ? 'wss' : 'ws');
+    const wsUrl = `${wsBase}/ws?EIO=4&transport=websocket`;
 
     try {
       this.ws = new WebSocket(wsUrl);
+
 
       // The native WebSocket isn't reliably zone-patched, so its callbacks can
       // run outside Angular's zone — state updates happen but nothing tells
@@ -58,20 +65,26 @@ export class SocketService {
 
       this.ws.onerror = (err) => {
         this.ngZone.run(() => {
-          console.error('[WebSocket] Error:', err);
+          if (this.reconnectAttempts === 0) {
+            console.log('[WebSocket] Backend offline or unreachable (retrying silently in background...)');
+          }
         });
       };
 
       this.ws.onclose = () => {
         this.ngZone.run(() => {
-          console.log('[WebSocket] Disconnected');
+          if (this.isConnected) {
+            console.log('[WebSocket] Disconnected from server');
+          }
           this.cleanup();
           this.scheduleReconnect();
         });
       };
 
     } catch (e) {
-      console.error('[WebSocket] Connection failed:', e);
+      if (this.reconnectAttempts === 0) {
+        console.log('[WebSocket] Connection attempt failed, scheduling silent retries...');
+      }
       this.scheduleReconnect();
     }
   }

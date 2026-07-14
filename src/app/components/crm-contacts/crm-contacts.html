@@ -41,12 +41,6 @@
     }
 
     <div class="toolbar">
-      <div class="search-box">
-        <span class="search-icon">🔍</span>
-        <input type="text" [(ngModel)]="searchQuery" (input)="onFilterChange()"
-          placeholder="Search by company, owner, email or phone...">
-      </div>
-
       <div class="filter-group">
         <select [(ngModel)]="statusFilter" (change)="onFilterChange()">
           <option value="">All Statuses</option>
@@ -87,131 +81,57 @@
       </div>
     }
 
-    <div class="table-container">
-      @if (isLoading) {
-        <div class="loading-overlay">
-          <div class="loader"></div>
-          <span>Loading lead database...</span>
+    <app-mat-table
+      [columns]="tableColumns"
+      [tableData]="leads"
+      [showAction]="false" 
+      [showSelection]="true"
+      [showSearch]="true"
+      [isLoading]="isLoading"
+      [customTemplates]="{ company: companyTpl, email: emailTpl, plan: planTpl, crm_actions: actionsTpl }"
+      (selectionChange)="onSelectionChange($event)">
+    </app-mat-table>
+
+    <!-- Custom Cell Templates -->
+    <ng-template #companyTpl let-lead>
+      <div class="company-cell">
+        <span class="name">{{ lead.companyName }}</span>
+        <span class="sub">{{ lead.businessName }} · {{ lead.businessType }}</span>
+      </div>
+    </ng-template>
+
+    <ng-template #emailTpl let-lead>
+      <div class="email-cell">
+        <span class="email">{{ lead.email }}</span>
+        <span class="badge-verified" [class.verified]="lead.emailVerified">
+          {{ lead.emailVerified ? 'Verified' : 'Unverified' }}
+        </span>
+      </div>
+    </ng-template>
+
+    <ng-template #planTpl let-lead>
+      <span class="badge-plan" [class.trial]="lead.preferredPlan.includes('Trial')"
+        [class.professional]="lead.preferredPlan === 'Professional'">
+        {{ lead.preferredPlan }}
+      </span>
+    </ng-template>
+
+    <ng-template #actionsTpl let-lead>
+      @if (!lead.isDeleted) {
+        <div class="action-btns">
+          @if (lead.status === 'PENDING') {
+            <button type="button" class="btn-action approve" (click)="approveLead(lead.id)" title="Approve Lead">Approve</button>
+            <button type="button" class="btn-action reject" (click)="rejectLead(lead.id)" title="Reject Lead">Reject</button>
+          }
+          <button type="button" class="btn-action delete" (click)="deleteLead(lead.id)" title="Soft Delete">Delete</button>
         </div>
       }
-
-      <table mat-table [dataSource]="leads" matSort (matSortChange)="sortData($event)" class="crm-table">
-        
-        <!-- Checkbox Column -->
-        <ng-container matColumnDef="select">
-          <th mat-header-cell *matHeaderCellDef class="col-chk">
-            <mat-checkbox (change)="toggleSelectAll($event)"></mat-checkbox>
-          </th>
-          <td mat-cell *matCellDef="let lead" class="col-chk">
-            <mat-checkbox [checked]="isSelected(lead.id)" (change)="toggleSelect(lead.id)"></mat-checkbox>
-          </td>
-        </ng-container>
-
-        <!-- Company Column -->
-        <ng-container matColumnDef="company">
-          <th mat-header-cell *matHeaderCellDef mat-sort-header="companyName"> Company Name </th>
-          <td mat-cell *matCellDef="let lead">
-            <div class="company-cell">
-              <span class="name">{{ lead.companyName }}</span>
-              <span class="sub">{{ lead.businessName }} · {{ lead.businessType }}</span>
-            </div>
-          </td>
-        </ng-container>
-
-        <!-- Owner Column -->
-        <ng-container matColumnDef="owner">
-          <th mat-header-cell *matHeaderCellDef mat-sort-header="ownerName"> Owner Name </th>
-          <td mat-cell *matCellDef="let lead"> {{ lead.ownerName }} </td>
-        </ng-container>
-
-        <!-- Email Column -->
-        <ng-container matColumnDef="email">
-          <th mat-header-cell *matHeaderCellDef mat-sort-header="email"> Contact Email </th>
-          <td mat-cell *matCellDef="let lead">
-            <div class="email-cell">
-              <span class="email">{{ lead.email }}</span>
-              <span class="badge-verified" [class.verified]="lead.emailVerified">
-                {{ lead.emailVerified ? 'Verified' : 'Unverified' }}
-              </span>
-            </div>
-          </td>
-        </ng-container>
-
-        <!-- Phone Column -->
-        <ng-container matColumnDef="phone">
-          <th mat-header-cell *matHeaderCellDef> Phone </th>
-          <td mat-cell *matCellDef="let lead"> {{ lead.phone }} </td>
-        </ng-container>
-
-        <!-- Plan Column -->
-        <ng-container matColumnDef="plan">
-          <th mat-header-cell *matHeaderCellDef mat-sort-header="preferredPlan"> Preferred Plan </th>
-          <td mat-cell *matCellDef="let lead">
-            <span class="badge-plan" [class.trial]="lead.preferredPlan.includes('Trial')"
-              [class.professional]="lead.preferredPlan === 'Professional'">
-              {{ lead.preferredPlan }}
-            </span>
-          </td>
-        </ng-container>
-
-        <!-- Billing Column -->
-        <ng-container matColumnDef="billing">
-          <th mat-header-cell *matHeaderCellDef> Billing Cycle </th>
-          <td mat-cell *matCellDef="let lead"> {{ lead.billingCycle }} </td>
-        </ng-container>
-
-        <!-- Status Column -->
-        <ng-container matColumnDef="status">
-          <th mat-header-cell *matHeaderCellDef> Status </th>
-          <td mat-cell *matCellDef="let lead">
-            <span class="badge-status" [class.pending]="lead.status === 'PENDING'"
-              [class.approved]="lead.status === 'APPROVED'" [class.converted]="lead.status === 'CONVERTED'"
-              [class.rejected]="lead.status === 'REJECTED'">
-              {{ lead.status }}
-            </span>
-          </td>
-        </ng-container>
-
-        <!-- Date Column -->
-        <ng-container matColumnDef="date">
-          <th mat-header-cell *matHeaderCellDef mat-sort-header="createdAt"> Date Registered </th>
-          <td mat-cell *matCellDef="let lead"> {{ lead.createdAt | date:'dd MMM yyyy, HH:mm' }} </td>
-        </ng-container>
-
-        <!-- Actions Column -->
-        <ng-container matColumnDef="actions">
-          <th mat-header-cell *matHeaderCellDef class="col-actions"> Actions </th>
-          <td mat-cell *matCellDef="let lead" class="col-actions">
-            @if (!lead.isDeleted) {
-              <div class="action-btns">
-                @if (lead.status === 'PENDING') {
-                  <button type="button" class="btn-action approve" (click)="approveLead(lead.id)" title="Approve Lead">Approve</button>
-                  <button type="button" class="btn-action reject" (click)="rejectLead(lead.id)" title="Reject Lead">Reject</button>
-                }
-                <button type="button" class="btn-action delete" (click)="deleteLead(lead.id)" title="Soft Delete">Delete</button>
-              </div>
-            }
-            @if (lead.isDeleted) {
-              <div class="action-btns">
-                <button type="button" class="btn-action restore" (click)="restoreLead(lead.id)" title="Restore Lead">Restore</button>
-              </div>
-            }
-          </td>
-        </ng-container>
-
-        <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
-        <tr mat-row *matRowDef="let row; columns: displayedColumns;" [class.selected]="isSelected(row.id)" [class.deleted]="row.isDeleted"></tr>
-
-        <!-- No Data Row -->
-        <tr class="mat-row empty-row" *matNoDataRow>
-          <td class="mat-cell" colspan="10">
-            @if (!isLoading) {
-              <div>No lead registrations found matching the filters.</div>
-            }
-          </td>
-        </tr>
-      </table>
-    </div>
+      @if (lead.isDeleted) {
+        <div class="action-btns">
+          <button type="button" class="btn-action restore" (click)="restoreLead(lead.id)" title="Restore Lead">Restore</button>
+        </div>
+      }
+    </ng-template>
 
     <div class="pagination">
       <span class="page-info">Showing Page {{ page }} of {{ totalPages }} (Total {{ totalLeads }} leads)</span>

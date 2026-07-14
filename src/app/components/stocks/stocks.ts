@@ -8,13 +8,13 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatIconModule } from '@angular/material/icon';
-import { MatTableModule } from '@angular/material/table';
 import { CommonService } from 'src/app/Securities/Services/common.service';
 import { AlertService } from 'src/app/Securities/Services/alert.service';
 import { PermissionService } from 'src/app/Securities/Services/permissions.service';
 import { AuthService } from 'src/app/Securities/Services/auth.service';
 import { SocketService } from 'src/app/Securities/Services/socket.service';
 import { Subscription } from 'rxjs';
+import { MatTable, TableColumn } from 'src/utils/mat-table/mat-table';
 
 @Component({
   selector: 'app-stocks',
@@ -29,7 +29,7 @@ import { Subscription } from 'rxjs';
     MatInputModule,
     MatSelectModule,
     MatIconModule,
-    MatTableModule
+    MatTable
   ],
   templateUrl: './stocks.html',
   styleUrl: './stocks.scss',
@@ -37,7 +37,26 @@ import { Subscription } from 'rxjs';
 export class Stocks implements OnInit, OnDestroy {
   products: any[] = [];
   stockLogs: any[] = [];
-  
+
+  productColumns = [
+    { columnDef: 'name', header: 'Product Name' },
+    { columnDef: 'stock', header: 'Current Stock', type: 'custom' },
+    { columnDef: 'price', header: 'Price ($)', type: 'currency', format: 'USD' },
+    { columnDef: 'low_threshold', header: 'Low Threshold', type: 'custom' },
+    { columnDef: 'critical_threshold', header: 'Critical Threshold', type: 'custom' }
+  ];
+
+  logColumns = [
+    { columnDef: 'product_name', header: 'Product' },
+    { columnDef: 'old_stock', header: 'Old Stock' },
+    { columnDef: 'added_stock', header: 'Adjusted Qty', type: 'custom' },
+    { columnDef: 'new_stock', header: 'New Stock' },
+    { columnDef: 'action', header: 'Type', type: 'custom' },
+    { columnDef: 'status', header: 'Status', type: 'badge' },
+    { columnDef: 'created_at', header: 'Timestamp' },
+    { columnDef: 'actions', header: 'Review', type: 'custom' }
+  ];
+
   stockForm: FormGroup;
   showForm = false;
   viewMode: 'products' | 'logs' = 'products';
@@ -80,9 +99,6 @@ export class Stocks implements OnInit, OnDestroy {
       })
     );
 
-    // Sidebar submenu items (Stock List / Stock History / Add Stock) all
-    // route here and distinguish themselves via query params since they
-    // share one page.
     this.socketSub.add(
       this.route.queryParamMap.subscribe((params) => {
         const view = params.get('view');

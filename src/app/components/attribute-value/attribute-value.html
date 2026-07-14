@@ -9,8 +9,8 @@
             </mat-card-title>
 
             @if (!AttributeValue_Forms && perm.hasRoleAction('canCreate')) {
-            <button mat-flat-button color="primary" (click)="AddNewUser()">
-                Add New Value
+            <button mat-flat-button class="btn-rounded btn-gradient" (click)="AddNewUser()">
+                <mat-icon>add</mat-icon> Add New Value
             </button>
             }
 
@@ -31,9 +31,14 @@
     @else {
     <mat-card-content class="b-t-1">
 
-        <form [formGroup]="AttributeValueForm">
-            <div class="row">
-                <div class="col-lg-4">
+        <form [formGroup]="AttributeValueForm" class="premium-form-grid p-t-24">
+            
+            <div class="divider">
+                <span>Value Details</span>
+            </div>
+
+            <div class="form-row">
+                <div class="field-container">
                     <mat-label class="f-w-600 m-b-8 d-block">Attribute <span class="text-danger">*</span></mat-label>
                     <mat-form-field appearance="outline" class="w-100">
                         <mat-select formControlName="ProductAttributeId" placeholder="Select Attribute">
@@ -47,7 +52,7 @@
                     </mat-form-field>
                 </div>
 
-                <div class="col-lg-4">
+                <div class="field-container">
                     <mat-label class="f-w-600 m-b-8 d-block">Value Code <span class="text-danger">*</span></mat-label>
                     <mat-form-field appearance="outline" class="w-100">
                         <input matInput formControlName="AttributeValueCode" placeholder="Enter Value Code">
@@ -58,8 +63,10 @@
                         }
                     </mat-form-field>
                 </div>
+            </div>
 
-                <div class="col-lg-4">
+            <div class="form-row single-col">
+                <div class="field-container">
                     <mat-label class="f-w-600 m-b-8 d-block">Name <span class="text-danger">*</span></mat-label>
                     <mat-form-field appearance="outline" class="w-100">
                         <input matInput formControlName="Name" placeholder="Enter Value Name">
@@ -72,12 +79,13 @@
                 </div>
             </div>
 
-            <div class="m-t-12">
-                <button mat-stroked-button class="me-3 Cancel_Button" (click)="cancelAttributeValue()">
-                    Cancel
+            <div class="flex m-t-12" style="justify-content: flex-end; gap: 16px;">
+                <button mat-stroked-button class="btn-rounded Cancel_Button" type="button" (click)="cancelAttributeValue()">
+                    <mat-icon>close</mat-icon> Cancel
                 </button>
-                <button mat-flat-button color="primary" (click)="submit(AttributeValueForm)">
-                    {{Update_button ? 'Update' : 'Submit'}}
+                <button mat-flat-button class="btn-rounded btn-gradient" type="submit" (click)="submit(AttributeValueForm)">
+                    <mat-icon>{{Update_button ? 'save' : 'add'}}</mat-icon>
+                    {{Update_button ? 'Update Value' : 'Save Value'}}
                 </button>
             </div>
         </form>

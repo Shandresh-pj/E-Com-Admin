@@ -228,15 +228,14 @@ export class MenuBar implements OnInit {
 
     this.alert.confirm(`Are you sure you want to add ${missing.length} default routes?`).then((result) => {
       if (result.isConfirmed) {
-        const requests = missing.map(dr => this.commonService.postApi('menus', dr));
-        forkJoin(requests).subscribe({
-          next: () => {
-            this.alert.success("Default routes added successfully");
+        this.commonService.postApi('menus/bulk', missing).subscribe({
+          next: (res: any) => {
+            this.alert.success(res.message || "Default routes added successfully");
             this.loadMenus();
           },
-          error: (err) => {
+          error: (err: any) => {
             console.error('Failed to seed routes:', err);
-            this.alert.error("Some routes failed to add or already exist");
+            this.alert.error("Some routes failed to add or an error occurred");
             this.loadMenus();
           }
         });

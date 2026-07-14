@@ -75,7 +75,9 @@
                             <div class="col-12 m-b-16">
                               <mat-label class="f-w-600 m-b-6 d-block f-s-12">Effective Start Date (DD:MM:YYYY) <span class="text-danger">*</span></mat-label>
                               <mat-form-field appearance="outline" class="w-100">
-                                <input matInput formControlName="effective_from" placeholder="e.g. 05:07:2026">
+                                <input matInput [matDatepicker]="effectivePicker" formControlName="effective_from" placeholder="DD-MM-YYYY" readonly (click)="effectivePicker.open()">
+                                <mat-datepicker-toggle matIconSuffix [for]="effectivePicker"></mat-datepicker-toggle>
+                                <mat-datepicker #effectivePicker></mat-datepicker>
                               </mat-form-field>
                             </div>
                           </div>

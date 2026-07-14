@@ -40,7 +40,7 @@ export class Workforce implements OnInit {
     { columnDef: 'max_duration_minutes', header: 'Max Duration' },
     { columnDef: 'max_frequency', header: 'Max Frequency' },
     { columnDef: 'is_paid', header: 'Paid Status' },
-    { columnDef: 'is_active', header: 'Status' }
+    { columnDef: 'is_active', header: 'Status', type: 'badge' }
   ];
 
   deviceColumns = [
@@ -252,9 +252,25 @@ export class Workforce implements OnInit {
     }
   }
 
+  formatDateForBackend(dateVal: any): string {
+    if (!dateVal) return '';
+    if (typeof dateVal === 'string') return dateVal.split('T')[0];
+    if (dateVal instanceof Date && !isNaN(dateVal.getTime())) {
+      const year = dateVal.getFullYear();
+      const month = String(dateVal.getMonth() + 1).padStart(2, '0');
+      const day = String(dateVal.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    }
+    return String(dateVal);
+  }
+
   submitShiftAssign() {
     if (this.shiftAssignForm.invalid) return;
-    const payload = this.shiftAssignForm.getRawValue();
+    const raw = this.shiftAssignForm.getRawValue();
+    const payload = {
+      ...raw,
+      effective_from: this.formatDateForBackend(raw.effective_from)
+    };
     
     this.commonService.postApi('shifts/assign', payload).subscribe({
       next: () => {

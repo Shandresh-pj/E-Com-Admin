@@ -1,70 +1,44 @@
-<mat-card class="cardWithShadow">
-    <mat-card-content>
-        <div>
-            <div class="d-flex align-items-center justify-content-between w-100">
-                <mat-card-title>Top Paying Clients</mat-card-title>
-                <button mat-icon-button color="inherit" aria-label="Example icon-button with a menu">
-                    <mat-icon class="f-s-24 d-flex align-items-center justify-content-center">more_vert</mat-icon>
-                </button>
-            </div>
+<mat-card class="cardWithShadow theme-card">
+  <mat-card-header>
+    <div class="header-container">
+      <mat-card-title class="m-b-0">Top Paying Clients</mat-card-title>
+      <div class="actions">
+        <button mat-icon-button color="inherit">
+          <mat-icon>more_vert</mat-icon>
+        </button>
+      </div>
+    </div>
+  </mat-card-header>
+  
+  <mat-card-content class="b-t-1">
+    <app-mat-table 
+      [columns]="tableColumns"
+      [tableData]="dataSource"
+      [showAction]="false"
+      [customTemplates]="{ profile: profileTpl, hrate: hrateTpl, status: statusTpl }">
+    </app-mat-table>
+
+    <!-- Custom Templates -->
+    <ng-template #profileTpl let-element>
+      <div class="d-flex align-items-center">
+        <img [src]="element.imagePath" alt="users" width="50" class="rounded-circle" />
+        <div class="m-l-16">
+          <h6 class="text-truncate-2 f-s-14 f-w-600 m-b-0">
+            {{ element.uname }}
+          </h6>
+          <span class="f-s-12 text-muted">{{ element.position }}</span>
         </div>
-        <div class="table-responsive">
-            <table mat-table [dataSource]="dataSource" class="w-100">
-                <!-- Profile Column -->
-                <ng-container matColumnDef="profile">
-                    <th mat-header-cell *matHeaderCellDef class="f-w-600 f-s-16">
-                        Profile
-                    </th>
-                    <td mat-cell *matCellDef="let element">
-                        <div class="d-flex align-items-center">
-                            <img [src]="element.imagePath" alt="users" width="50" class="rounded-circle" />
-                            <div class="m-l-16">
-                                <h6 class="text-truncate-2 f-s-14 f-w-600">
-                                    {{ element.uname }}
-                                </h6>
-                                <span class="f-s-14">{{ element.position }}</span>
-                            </div>
-                        </div>
-                    </td>
-                </ng-container>
+      </div>
+    </ng-template>
 
-                <!-- Hour Rate Column -->
-                <ng-container matColumnDef="hrate">
-                    <th mat-header-cell *matHeaderCellDef class="f-w-600 f-s-16">
-                        Hour Rate
-                    </th>
-                    <td mat-cell *matCellDef="let element">
-                        <span><span class="f-w-600 f-s-14">${{ element.hrate }}</span>/hour</span>
-                    </td>
-                </ng-container>
+    <ng-template #hrateTpl let-element>
+      <span><span class="f-w-600 f-s-14">${{ element.hrate }}</span>/hour</span>
+    </ng-template>
 
-                <!-- Symbol Column -->
-                <ng-container matColumnDef="skills">
-                    <th mat-header-cell *matHeaderCellDef class="f-w-600 f-s-16">
-                        Skills
-                    </th>
-                    <td mat-cell *matCellDef="let element">
-                        <span class="f-s-14">{{ element.skills }}</span>
-                    </td>
-                </ng-container>
-
-                <!-- Weight Column -->
-                <ng-container matColumnDef="status">
-                    <th mat-header-cell *matHeaderCellDef class="f-w-600 f-s-16">
-                        Status
-                    </th>
-                    <td mat-cell *matCellDef="let element">
-                        <span class="bg-light-{{ element.progress }} text-{{
-                  element.progress
-                }} border-{{ element.progress }} rounded f-w-600 p-6 p-y-4 f-s-12">
-                            {{ element.priority | titlecase }}
-                        </span>
-                    </td>
-                </ng-container>
-
-                <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-                <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
-            </table>
-        </div>
-    </mat-card-content>
+    <ng-template #statusTpl let-element>
+      <span class="bg-light-{{ element.progress }} text-{{ element.progress }} border-{{ element.progress }} rounded f-w-600 p-6 p-y-4 f-s-12">
+        {{ element.priority | titlecase }}
+      </span>
+    </ng-template>
+  </mat-card-content>
 </mat-card>

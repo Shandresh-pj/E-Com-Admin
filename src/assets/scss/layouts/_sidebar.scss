@@ -1,9 +1,16 @@
 @use "../variables" as *;
 
+/* ═══════════════════════════════════════════════════════════════════════════
+   120 FPS Ultra-Smooth Liquid Spring Mechanics & 3D Floating Drawer
+   ═══════════════════════════════════════════════════════════════════════════ */
+$fluid-spring: cubic-bezier(0.16, 1, 0.3, 1);
+$bounce-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+.mat-drawer-transition .mat-drawer.sidebarNav,
 .mat-drawer.sidebarNav {
   width: $sidenav-desktop;
   flex-shrink: 0;
-  transition: width .4s cubic-bezier(.25,.8,.25,1);
+  transition: transform 0.48s $fluid-spring, width 0.48s $fluid-spring, opacity 0.38s ease, box-shadow 0.48s $fluid-spring !important;
   position: absolute;
   overflow-x: hidden;
   top: 0 !important;
@@ -11,6 +18,12 @@
   border: 0 !important;
   height: 100%;
   box-shadow: 0 4px 30px rgba(0, 0, 0, 0.05) !important;
+  
+  /* 120 FPS GPU Hardware Acceleration */
+  will-change: transform, opacity, width;
+  backface-visibility: hidden;
+  transform-origin: left center;
+  transform: translate3d(0, 0, 0) scale(1);
   
   background: rgba(255, 255, 255, 0.7) !important;
   backdrop-filter: blur(30px) saturate(200%);
@@ -37,13 +50,37 @@
   }
 }
 
+/* Unique 3D Scale & Tilt Liquid Exit when closing / hidden */
+.mat-drawer-transition .mat-drawer.sidebarNav.mat-drawer-closed,
+.mat-drawer.sidebarNav.mat-drawer-closed,
+.mainWrapper.sidebar-closed .mat-drawer.sidebarNav {
+  transform: translate3d(-112%, 0, 0) scale(0.92) rotateY(-8deg) !important;
+  opacity: 0 !important;
+  pointer-events: none;
+}
+
 .branding {
   padding: 20px;
 }
 
+.mat-drawer-transition .mat-drawer-content.contentWrapper,
+.mat-drawer-content.contentWrapper,
+.contentWrapper {
+  /* 120 FPS GPU Promotion */
+  will-change: margin-left, transform, width;
+  backface-visibility: hidden;
+  transform: translateZ(0);
+  transition: margin-left 0.48s $fluid-spring, transform 0.48s $fluid-spring, width 0.48s $fluid-spring !important;
+}
+
 @media (min-width: 1024px) {
-  .contentWrapper {
+  .mainWrapper:not(.sidebar-closed) .contentWrapper {
     margin-left: calc(#{$sidenav-desktop} + #{$layout-padding}) !important;
+    width: calc(100% - #{$sidenav-desktop} - #{$layout-padding}) !important;
+  }
+  .mainWrapper.sidebar-closed .contentWrapper {
+    margin-left: 0 !important;
+    width: 100% !important;
   }
 }
 

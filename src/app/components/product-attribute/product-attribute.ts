@@ -5,6 +5,7 @@ import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
+import { MatIconModule } from '@angular/material/icon';
 import { MatDialog } from '@angular/material/dialog';
 import { AlertService } from 'src/app/Securities/Services/alert.service';
 import { AuthService } from 'src/app/Securities/Services/auth.service';
@@ -24,6 +25,7 @@ import { ViewDetailsDialog } from 'src/utils/view-details-dialog/view-details-di
     MatButtonModule,
     MatCardModule,
     MatSelectModule,
+    MatIconModule,
     MatTable
   ],
   templateUrl: './product-attribute.html',
@@ -96,6 +98,7 @@ export class ProductAttribute {
         const data = res?.data;
         this.dialog.open(ViewDetailsDialog, {
           width: '600px',
+          panelClass: 'premium-dialog-extended',
           data: {
             title: 'Product Attribute Details',
             fields: [

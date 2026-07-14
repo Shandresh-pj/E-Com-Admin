@@ -1,11 +1,11 @@
-import { Component } from '@angular/core';
-
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { MatCardModule } from '@angular/material/card';
-import { MatTableModule } from '@angular/material/table';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { MatChipsModule } from '@angular/material/chips';
 import { TablerIconsModule } from 'angular-tabler-icons';
+import { MatTable, TableColumn } from 'src/utils/mat-table/mat-table';
+import { CommonService } from 'src/app/Securities/Services/common.service';
+import { AlertService } from 'src/app/Securities/Services/alert.service';
 
 export interface WorkforceRequest {
   id: string;
@@ -15,38 +15,83 @@ export interface WorkforceRequest {
   status: string;
 }
 
-const REQUEST_DATA: WorkforceRequest[] = [
-  { id: 'REQ-1021', employeeName: 'Sarah Jenkins', type: 'Leave', date: 'Oct 12 - Oct 15', status: 'Pending' },
-  { id: 'REQ-1022', employeeName: 'Marcus Cole', type: 'Shift Swap', date: 'Oct 14', status: 'Approved' },
-  { id: 'REQ-1023', employeeName: 'Elena Rodriguez', type: 'Overtime', date: 'Oct 10', status: 'Approved' },
-  { id: 'REQ-1024', employeeName: 'David Kim', type: 'Leave', date: 'Nov 01 - Nov 05', status: 'Rejected' },
-  { id: 'REQ-1025', employeeName: 'Aisha Patel', type: 'Equipment', date: 'Oct 11', status: 'Pending' },
-];
-
 @Component({
   selector: 'app-workforce-requests',
   standalone: true,
   imports: [
     MatCardModule,
-    MatTableModule,
     MatButtonModule,
     MatIconModule,
-    MatChipsModule,
-    TablerIconsModule
-],
+    TablerIconsModule,
+    MatTable
+  ],
   templateUrl: './workforce-requests.html',
   styleUrl: './workforce-requests.scss',
 })
-export class WorkforceRequests {
-  displayedColumns: string[] = ['id', 'employeeName', 'type', 'date', 'status', 'actions'];
-  dataSource = REQUEST_DATA;
+export class WorkforceRequests implements OnInit {
+  tableColumns: TableColumn[] = [
+    { columnDef: 'id', header: 'Request ID' },
+    { columnDef: 'employeeName', header: 'Employee Name' },
+    { columnDef: 'type', header: 'Type' },
+    { columnDef: 'date', header: 'Date' },
+    { columnDef: 'status', header: 'Status', type: 'badge' }
+  ];
+  
+  dataSource: WorkforceRequest[] = [];
+  loading = false;
 
-  getStatusColor(status: string): string {
-    switch (status) {
-      case 'Approved': return 'bg-light-success text-success';
-      case 'Pending': return 'bg-light-warning text-warning';
-      case 'Rejected': return 'bg-light-error text-error';
-      default: return 'bg-light-primary text-primary';
+  constructor(
+    private commonService: CommonService,
+    private alert: AlertService,
+    private cdr: ChangeDetectorRef
+  ) {}
+
+  ngOnInit(): void {
+    this.loadRequests();
+  }
+
+  loadRequests() {
+    this.loading = true;
+    this.commonService.getApi('leave').subscribe({
+      next: (res: any) => {
+        const leaves = (res?.data || []).map((l: any) => ({
+          id: `REQ-${l.id}`,
+          employeeName: l.employee_name || l.employee?.name || `Employee #${l.employee_id}`,
+          type: l.leave_type || 'Leave',
+          date: `${l.start_date} - ${l.end_date}`,
+          status: l.status || 'Pending',
+          rawId: l.id
+        }));
+        this.dataSource = leaves;
+        this.loading = false;
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.dataSource = [];
+        this.loading = false;
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  viewRequest(row: any) {
+    console.log('View', row);
+  }
+
+  deleteRequest(row: any) {
+    if (row.rawId) {
+      this.commonService.deleteApi(`leave/${row.rawId}`).subscribe({
+        next: () => {
+          this.alert.success('Request deleted successfully');
+          this.loadRequests();
+        },
+        error: (err: any) => {
+          this.alert.error('Failed to delete request');
+        }
+      });
+    } else {
+      this.dataSource = this.dataSource.filter(d => d.id !== row.id);
+      this.cdr.detectChanges();
     }
   }
 }

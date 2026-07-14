@@ -3,9 +3,9 @@ import {
   provideZoneChangeDetection,
   importProvidersFrom,
 } from '@angular/core';
+import { provideNativeDateAdapter, MAT_DATE_LOCALE } from '@angular/material/core';
 
 import {
-  HTTP_INTERCEPTORS,
   provideHttpClient,
   withInterceptors,
   withInterceptorsFromDi,
@@ -35,7 +35,6 @@ import {
   ReactiveFormsModule
 } from '@angular/forms';
 
-import { ErrorInterceptor } from './Securities/Interceptor/error.interceptor';
 import { authInterceptor } from './Securities/Interceptor/auth.interceptor';
 
 export const appConfig: ApplicationConfig = {
@@ -88,11 +87,22 @@ export const appConfig: ApplicationConfig = {
 
     ),
 
-    {
-      provide: HTTP_INTERCEPTORS,
-      useClass: ErrorInterceptor,
-      multi: true
-    }
+      // ErrorInterceptor is intentionally NOT registered here as an HTTP_INTERCEPTORS
+      // provider. The functional authInterceptor (above) handles 401 with token
+      // refresh and logout. Adding the class interceptor here caused double
+      // error handling — the class interceptor fired first, did nothing for 401
+      // (case 401: break), then re-threw the error which the functional interceptor
+      // caught again, triggering two consecutive logout calls.
 
+    provideNativeDateAdapter({
+      parse: { dateInput: 'DD-MM-YYYY' },
+      display: {
+        dateInput: 'DD-MM-YYYY',
+        monthYearLabel: 'MMM YYYY',
+        dateA11yLabel: 'LL',
+        monthYearA11yLabel: 'MMMM YYYY',
+      }
+    }),
+    { provide: MAT_DATE_LOCALE, useValue: 'en-GB' }
   ]
 };

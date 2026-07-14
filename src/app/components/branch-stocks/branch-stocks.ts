@@ -8,14 +8,13 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatIconModule } from '@angular/material/icon';
-import { MatTableModule } from '@angular/material/table';
 import { CommonService } from 'src/app/Securities/Services/common.service';
 import { AlertService } from 'src/app/Securities/Services/alert.service';
 import { PermissionService } from 'src/app/Securities/Services/permissions.service';
 import { AuthService } from 'src/app/Securities/Services/auth.service';
 import { SocketService } from 'src/app/Securities/Services/socket.service';
 import { Subscription } from 'rxjs';
-import { MatTable } from 'src/utils/mat-table/mat-table';
+import { MatTable, TableColumn } from 'src/utils/mat-table/mat-table';
 
 @Component({
   selector: 'app-branch-stocks',
@@ -30,19 +29,27 @@ import { MatTable } from 'src/utils/mat-table/mat-table';
     MatInputModule,
     MatSelectModule,
     MatIconModule,
-    MatTableModule,
     MatTable
   ],
   templateUrl: './branch-stocks.html',
   styleUrl: './branch-stocks.scss',
 })
 export class BranchStocks implements OnInit, OnDestroy {
-  tableColumns = [
-    { columnDef: 'id', header: 'No' },
+  inventoryColumns: TableColumn[] = [
     { columnDef: 'branch_name', header: 'Branch Name' },
     { columnDef: 'product_name', header: 'Product' },
     { columnDef: 'stock', header: 'Stock Level' },
     { columnDef: 'updated_at', header: 'Last Updated' }
+  ];
+
+  transferColumns: TableColumn[] = [
+    { columnDef: 'product_name', header: 'Product' },
+    { columnDef: 'from_branch', header: 'From Branch' },
+    { columnDef: 'to_branch', header: 'To Branch' },
+    { columnDef: 'quantity', header: 'Quantity' },
+    { columnDef: 'status', header: 'Status', type: 'badge' },
+    { columnDef: 'created_at', header: 'Requested At', type: 'custom' },
+    { columnDef: 'actions', header: 'Review', type: 'custom' }
   ];
 
   branchStocks: any[] = [];

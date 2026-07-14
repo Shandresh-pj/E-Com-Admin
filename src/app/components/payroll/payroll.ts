@@ -25,9 +25,9 @@ export class Payroll implements OnInit {
     { columnDef: 'id', header: 'No' },
     { columnDef: 'employee_name', header: 'Employee' },
     { columnDef: 'month_year', header: 'Period' },
-    { columnDef: 'basic_salary', header: 'Basic Salary (₹)' },
-    { columnDef: 'final_salary', header: 'Net Payout (₹)' },
-    { columnDef: 'payment_status', header: 'Status' }
+    { columnDef: 'basic_salary', header: 'Basic Salary (₹)', type: 'currency', format: 'INR' },
+    { columnDef: 'final_salary', header: 'Net Payout (₹)', type: 'currency', format: 'INR' },
+    { columnDef: 'payment_status', header: 'Status', type: 'badge' }
   ];
 
   payrolls: any[] = [];
@@ -100,7 +100,9 @@ export class Payroll implements OnInit {
           return {
             ...item,
             employee_name: emp ? emp.name : `Employee ID: ${item.employee_id}`,
-            month_year: `${item.month} ${item.year || ''}`
+            month_year: `${item.month} ${item.year || ''}`,
+            final_salary: item.net_salary ?? item.final_salary ?? 0,
+            payment_status: item.status ?? item.payment_status ?? 'DRAFT'
           };
         });
         this.loading = false;
@@ -149,7 +151,10 @@ export class Payroll implements OnInit {
     this.selectedPayroll = row;
     this.commonService.getApi(`payroll/slip/${row.id}`).subscribe({
       next: (res: any) => {
-        this.payslipDetails = res?.data || null;
+        const p = res?.data?.payroll || res?.data || {};
+        p.final_salary = p.net_salary ?? p.final_salary ?? 0;
+        p.payment_status = p.status ?? p.payment_status ?? 'DRAFT';
+        this.payslipDetails = p;
         this.viewDetailsMode = true;
         this.showForm = false;
         this.loading = false;

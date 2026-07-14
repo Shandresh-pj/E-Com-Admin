@@ -155,89 +155,58 @@
 
       <!-- Branch Inventory Table -->
       @if (viewMode === 'inventory') {
-        <div class="table-responsive">
-          <app-mat-table
-            [columns]="tableColumns"
-            [tableData]="branchStocks"
-            [showAction]="false"
-            [showView]="false"
-            [Extra_Column]="false">
-          </app-mat-table>
-        </div>
+        <app-mat-table
+          [columns]="inventoryColumns"
+          [tableData]="branchStocks"
+          [showAction]="false"
+          [showView]="false"
+          [showSearch]="true"
+          [isLoading]="loading">
+        </app-mat-table>
       }
 
       <!-- Stock Transfer Requests Table -->
       @if (viewMode === 'transfers') {
-        <div class="table-responsive p-24">
-          <table mat-table [dataSource]="transfers" class="w-100 text-nowrap">
+        <app-mat-table
+          [columns]="transferColumns"
+          [tableData]="transfers"
+          [showAction]="false"
+          [showView]="false"
+          [showSearch]="true"
+          [isLoading]="loading"
+          [customTemplates]="{ status: statusTpl, created_at: createdAtTpl, actions: actionsTpl }">
+        </app-mat-table>
 
-            <ng-container matColumnDef="id">
-              <th mat-header-cell *matHeaderCellDef class="f-w-600"> No </th>
-              <td mat-cell *matCellDef="let element; let i = index"> {{ i + 1 }} </td>
-            </ng-container>
+        <ng-template #statusTpl let-element>
+          <span class="badge font-weight-bold"
+                [ngClass]="{
+                  'bg-light-warning text-warning': element.status === 'Pending Approval',
+                  'bg-light-success text-success': element.status === 'Approved',
+                  'bg-light-error text-error': element.status === 'Rejected'
+                }">
+            {{ element.status }}
+          </span>
+          @if (element.status === 'Rejected') {
+            <span class="d-block text-muted f-s-12 m-t-4" style="max-width: 200px; white-space: normal;">
+              Reason: {{ element.rejection_reason }}
+            </span>
+          }
+        </ng-template>
 
-            <ng-container matColumnDef="product_name">
-              <th mat-header-cell *matHeaderCellDef class="f-w-600"> Product </th>
-              <td mat-cell *matCellDef="let element"> {{ element.product_name }} </td>
-            </ng-container>
+        <ng-template #createdAtTpl let-element>
+          {{ element.created_at | date:'medium' }}
+        </ng-template>
 
-            <ng-container matColumnDef="from_branch">
-              <th mat-header-cell *matHeaderCellDef class="f-w-600"> From Branch </th>
-              <td mat-cell *matCellDef="let element"> {{ element.from_branch }} </td>
-            </ng-container>
-
-            <ng-container matColumnDef="to_branch">
-              <th mat-header-cell *matHeaderCellDef class="f-w-600"> To Branch </th>
-              <td mat-cell *matCellDef="let element"> {{ element.to_branch }} </td>
-            </ng-container>
-
-            <ng-container matColumnDef="quantity">
-              <th mat-header-cell *matHeaderCellDef class="f-w-600"> Quantity </th>
-              <td mat-cell *matCellDef="let element"> {{ element.quantity }} </td>
-            </ng-container>
-
-            <ng-container matColumnDef="status">
-              <th mat-header-cell *matHeaderCellDef class="f-w-600"> Status </th>
-              <td mat-cell *matCellDef="let element">
-                <span class="badge font-weight-bold"
-                      [ngClass]="{
-                        'bg-light-warning text-warning': element.status === 'Pending Approval',
-                        'bg-light-success text-success': element.status === 'Approved',
-                        'bg-light-error text-error': element.status === 'Rejected'
-                      }">
-                  {{ element.status }}
-                </span>
-                @if (element.status === 'Rejected') {
-                  <span class="d-block text-muted f-s-12 m-t-4" style="max-width: 200px; white-space: normal;">
-                    Reason: {{ element.rejection_reason }}
-                  </span>
-                }
-              </td>
-            </ng-container>
-
-            <ng-container matColumnDef="created_at">
-              <th mat-header-cell *matHeaderCellDef class="f-w-600"> Requested At </th>
-              <td mat-cell *matCellDef="let element"> {{ element.created_at | date:'medium' }} </td>
-            </ng-container>
-
-            <ng-container matColumnDef="actions">
-              <th mat-header-cell *matHeaderCellDef class="f-w-600"> Review </th>
-              <td mat-cell *matCellDef="let element">
-                @if (element.status === 'Pending Approval' && isAdmin) {
-                  <button mat-icon-button color="primary" (click)="approveTransfer(element.id, 'APPROVE')" title="Approve">
-                    <mat-icon>done</mat-icon>
-                  </button>
-                  <button mat-icon-button color="warn" (click)="rejectTransfer(element.id)" title="Reject">
-                    <mat-icon>close</mat-icon>
-                  </button>
-                }
-              </td>
-            </ng-container>
-
-            <tr mat-header-row *matHeaderRowDef="['id', 'product_name', 'from_branch', 'to_branch', 'quantity', 'status', 'created_at', 'actions']"></tr>
-            <tr mat-row *matRowDef="let row; columns: ['id', 'product_name', 'from_branch', 'to_branch', 'quantity', 'status', 'created_at', 'actions'];"></tr>
-          </table>
-        </div>
+        <ng-template #actionsTpl let-element>
+          @if (element.status === 'Pending Approval' && isAdmin) {
+            <button mat-icon-button color="primary" (click)="approveTransfer(element.id, 'APPROVE')" title="Approve">
+              <mat-icon>done</mat-icon>
+            </button>
+            <button mat-icon-button color="warn" (click)="rejectTransfer(element.id)" title="Reject">
+              <mat-icon>close</mat-icon>
+            </button>
+          }
+        </ng-template>
       }
 
     </mat-card-content>

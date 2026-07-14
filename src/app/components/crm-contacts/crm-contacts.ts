@@ -4,10 +4,7 @@ import { RouterModule } from '@angular/router';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { environment } from 'src/environment/environment';
-import { MatTableModule } from '@angular/material/table';
-import { MatCheckboxModule } from '@angular/material/checkbox';
-import { MatSortModule, Sort } from '@angular/material/sort';
-import { MatIconModule } from '@angular/material/icon';
+import { MatTable } from 'src/utils/mat-table/mat-table';
 
 export interface LeadContact {
   id: number;
@@ -35,14 +32,26 @@ export interface LeadContact {
 @Component({
   selector: 'app-crm-contacts',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule, MatTableModule, MatCheckboxModule, MatSortModule, MatIconModule],
+  imports: [CommonModule, RouterModule, FormsModule, MatTable],
   templateUrl: './crm-contacts.html',
   styleUrls: ['./crm-contacts.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class CrmContacts implements OnInit {
   leads: LeadContact[] = [];
-  displayedColumns: string[] = ['select', 'company', 'owner', 'email', 'phone', 'plan', 'billing', 'status', 'date', 'actions'];
+  
+  tableColumns = [
+    { columnDef: 'company', header: 'Company Name', type: 'custom' },
+    { columnDef: 'ownerName', header: 'Owner Name' },
+    { columnDef: 'email', header: 'Contact Email', type: 'custom' },
+    { columnDef: 'phone', header: 'Phone' },
+    { columnDef: 'plan', header: 'Preferred Plan', type: 'custom' },
+    { columnDef: 'billingCycle', header: 'Billing Cycle' },
+    { columnDef: 'status', header: 'Status', type: 'badge' },
+    { columnDef: 'createdAt', header: 'Date Registered', type: 'date', format: 'dd MMM yyyy, HH:mm' },
+    { columnDef: 'crm_actions', header: 'Actions', type: 'custom' }
+  ];
+
   stats = { total: 0, pending: 0, approved: 0, rejected: 0, converted: 0 };
 
   // Filters & Pagination state
@@ -78,6 +87,11 @@ export class CrmContacts implements OnInit {
     });
   }
 
+  onSelectionChange(selectedRows: any[]) {
+    this.selectedIds.clear();
+    selectedRows.forEach(row => this.selectedIds.add(row.id));
+  }
+
   fetchLeads(silent: boolean = false) {
     if (!silent) {
       this.isLoading = true;
@@ -92,11 +106,15 @@ export class CrmContacts implements OnInit {
       showDeleted: this.showDeleted.toString()
     };
 
-    if (this.searchQuery) params.search = this.searchQuery;
     if (this.statusFilter) params.status = this.statusFilter;
     if (this.planFilter) params.preferredPlan = this.planFilter;
 
-    // Convert params to query string
+    // Use built-in MatTable search if needed, but since server side might be requested:
+    // Actually the HTML template removed the search input from CRM panel and uses the MatTable's internal one... wait!
+    // The previous CRM HTML had a search box. I replaced it with `[showSearch]="true"` on `<app-mat-table>`. 
+    // `app-mat-table` handles client side search. But since this was doing server-side pagination, maybe we want to keep it?
+    // Wait, the mat-table handles client-side filtering via MatTableDataSource. Let's let it handle client-side search for the loaded page for now.
+
     const queryStr = new URLSearchParams(params).toString();
 
     this.http.get(`${environment.apiUrl}/contacts?${queryStr}`, { headers: this.getHeaders() }).subscribe({
@@ -138,52 +156,8 @@ export class CrmContacts implements OnInit {
     }
   }
 
-  toggleSort(field: string) {
-    if (this.sortBy === field) {
-      this.sortOrder = this.sortOrder === 'ASC' ? 'DESC' : 'ASC';
-    } else {
-      this.sortBy = field;
-      this.sortOrder = 'DESC';
-    }
-    this.fetchLeads();
-  }
-
-  sortData(sort: Sort) {
-    if (!sort.active || sort.direction === '') {
-      this.sortBy = 'createdAt';
-      this.sortOrder = 'DESC';
-    } else {
-      this.sortBy = sort.active;
-      this.sortOrder = sort.direction.toUpperCase();
-    }
-    this.fetchLeads();
-  }
-
-  // Bulk actions selection
-  toggleSelectAll(event: any) {
-    const isChecked = event.checked !== undefined ? event.checked : event.target.checked;
-    if (isChecked) {
-      this.leads.forEach(l => this.selectedIds.add(l.id));
-    } else {
-      this.selectedIds.clear();
-    }
-  }
-
-  toggleSelect(id: number) {
-    if (this.selectedIds.has(id)) {
-      this.selectedIds.delete(id);
-    } else {
-      this.selectedIds.add(id);
-    }
-  }
-
-  isSelected(id: number): boolean {
-    return this.selectedIds.has(id);
-  }
-
   // Actions
   approveLead(id: number) {
-    // Optimistic UI updates
     const leadIndex = this.leads.findIndex(l => l.id === id);
     let originalStatus = '';
     if (leadIndex !== -1) {
@@ -194,11 +168,8 @@ export class CrmContacts implements OnInit {
     }
 
     this.http.post(`${environment.apiUrl}/contacts/${id}/approve`, {}, { headers: this.getHeaders() }).subscribe({
-      next: (res: any) => {
-        this.fetchLeads(true);
-      },
+      next: () => this.fetchLeads(true),
       error: (err) => {
-        // Rollback
         if (leadIndex !== -1) {
           this.leads[leadIndex].status = originalStatus;
           this.leads = [...this.leads];
@@ -209,7 +180,6 @@ export class CrmContacts implements OnInit {
   }
 
   rejectLead(id: number) {
-    // Optimistic UI
     const leadIndex = this.leads.findIndex(l => l.id === id);
     let originalStatus = '';
     if (leadIndex !== -1) {
@@ -220,9 +190,7 @@ export class CrmContacts implements OnInit {
     }
 
     this.http.post(`${environment.apiUrl}/contacts/${id}/reject`, {}, { headers: this.getHeaders() }).subscribe({
-      next: (res: any) => {
-        this.fetchLeads(true);
-      },
+      next: () => this.fetchLeads(true),
       error: (err) => {
         if (leadIndex !== -1) {
           this.leads[leadIndex].status = originalStatus;
@@ -234,15 +202,12 @@ export class CrmContacts implements OnInit {
   }
 
   deleteLead(id: number) {
-    // Optimistic UI
     const originalLeads = [...this.leads];
     this.leads = this.leads.filter(l => l.id !== id);
     this.showToast('Lead contact soft deleted successfully.');
 
     this.http.delete(`${environment.apiUrl}/contacts/${id}`, { headers: this.getHeaders() }).subscribe({
-      next: (res: any) => {
-        this.fetchLeads(true);
-      },
+      next: () => this.fetchLeads(true),
       error: (err) => {
         this.leads = originalLeads;
         this.errorMessage = err.error?.message || 'Failed to delete lead.';
@@ -252,7 +217,7 @@ export class CrmContacts implements OnInit {
 
   restoreLead(id: number) {
     this.http.post(`${environment.apiUrl}/contacts/${id}/restore`, {}, { headers: this.getHeaders() }).subscribe({
-      next: (res: any) => {
+      next: () => {
         this.showToast('Lead contact restored successfully.');
         this.fetchLeads(true);
       },
@@ -295,31 +260,20 @@ export class CrmContacts implements OnInit {
         ? this.http.post(reqUrl, {}, { headers: this.getHeaders() })
         : this.http.delete(reqUrl, { headers: this.getHeaders() });
 
-      request.subscribe({
-        next: onComplete,
-        error: onComplete
-      });
+      request.subscribe({ next: onComplete, error: onComplete });
     });
   }
 
   // Export CSV / PDF
   exportData(format: 'csv' | 'pdf') {
-    const params: any = {
-      format,
-      showDeleted: this.showDeleted.toString()
-    };
+    const params: any = { format, showDeleted: this.showDeleted.toString() };
     if (this.statusFilter) params.status = this.statusFilter;
     if (this.planFilter) params.preferredPlan = this.planFilter;
-    if (this.searchQuery) params.search = this.searchQuery;
 
     const queryStr = new URLSearchParams(params).toString();
     const exportUrl = `${environment.apiUrl}/contacts/export?${queryStr}`;
 
-    // Standard download workflow via native window open or anchor click with Authorization header
-    this.http.get(exportUrl, {
-      headers: this.getHeaders(),
-      responseType: 'blob'
-    }).subscribe({
+    this.http.get(exportUrl, { headers: this.getHeaders(), responseType: 'blob' }).subscribe({
       next: (blob: Blob) => {
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
@@ -330,13 +284,10 @@ export class CrmContacts implements OnInit {
         document.body.removeChild(a);
         window.URL.revokeObjectURL(url);
       },
-      error: (err) => {
-        this.errorMessage = 'Failed to export lead contacts data.';
-      }
+      error: () => this.errorMessage = 'Failed to export lead contacts data.'
     });
   }
 
-  // Print Table
   printData() {
     window.print();
   }

@@ -7,10 +7,10 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatIconModule } from '@angular/material/icon';
-import { MatTableModule } from '@angular/material/table';
 import { CommonService } from 'src/app/Securities/Services/common.service';
 import { AlertService } from 'src/app/Securities/Services/alert.service';
 import { PermissionService } from 'src/app/Securities/Services/permissions.service';
+import { MatTable, TableColumn } from 'src/utils/mat-table/mat-table';
 
 declare var Razorpay: any;
 
@@ -27,7 +27,7 @@ declare var Razorpay: any;
     MatInputModule,
     MatSelectModule,
     MatIconModule,
-    MatTableModule
+    MatTable
   ],
   templateUrl: './payments.html',
   styleUrl: './payments.scss',
@@ -36,10 +36,21 @@ export class Payments implements OnInit {
   payments: any[] = [];
   orders: any[] = [];
   employees: any[] = [];
+  
+  tableColumns: TableColumn[] = [
+    { columnDef: 'invoice_no', header: 'Invoice / Order' },
+    { columnDef: 'user_name', header: 'Payer' },
+    { columnDef: 'amount', header: 'Amount', type: 'currency', format: 'USD' },
+    { columnDef: 'method', header: 'Method', type: 'custom' },
+    { columnDef: 'details', header: 'Txn ID / Gateway', type: 'custom' },
+    { columnDef: 'created_at', header: 'Paid At' },
+    { columnDef: 'status', header: 'Status', type: 'badge' }
+  ];
 
   paymentForm: FormGroup;
   showForm = false;
   loading = false;
+  
   constructor(
     private fb: FormBuilder,
     private commonService: CommonService,
@@ -69,6 +80,7 @@ export class Payments implements OnInit {
       }
     });
   }
+  
   ngOnInit() {
     this.loadPayments();
     this.loadLookups();
@@ -139,6 +151,7 @@ export class Payments implements OnInit {
       });
     }
   }
+  
   recordPayment() {
     if (this.paymentForm.invalid) {
       this.paymentForm.markAllAsTouched();
@@ -197,7 +210,6 @@ export class Payments implements OnInit {
       return;
     }
 
-    // Call backend to create Razorpay Order
     this.commonService.postApi('payments/razorpay/create-order', {
       order_id: payload.order_id
     }).subscribe({

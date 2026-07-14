@@ -44,8 +44,8 @@ export class Product {
     { columnDef: 'price', header: 'Price' },
     { columnDef: 'stock_in_hand', header: 'Stock' },
     { columnDef: 'product_type', header: 'Type' },
-    { columnDef: 'approval_status', header: 'Approval State' },
-    { columnDef: 'status', header: 'Status' },
+    { columnDef: 'approval_status', header: 'Approval State', type: 'badge' },
+    { columnDef: 'status', header: 'Status', type: 'badge' },
   ];
 
   ProductForm: FormGroup;

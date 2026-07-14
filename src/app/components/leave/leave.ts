@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormsModule, FormGroup, FormBuilder, Validators } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
@@ -7,12 +7,15 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatIconModule } from '@angular/material/icon';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatNativeDateModule } from '@angular/material/core';
 import { CommonService } from 'src/app/Securities/Services/common.service';
 import { AlertService } from 'src/app/Securities/Services/alert.service';
 import { PermissionService } from 'src/app/Securities/Services/permissions.service';
 import { AuthService } from 'src/app/Securities/Services/auth.service';
-import { MatTableModule } from '@angular/material/table';
-import { MatTable } from 'src/utils/mat-table/mat-table';
+import { SocketService } from 'src/app/Securities/Services/socket.service';
+import { Subscription } from 'rxjs';
+import { MatTable, TableColumn } from 'src/utils/mat-table/mat-table';
 
 @Component({
   selector: 'app-leave',
@@ -27,21 +30,22 @@ import { MatTable } from 'src/utils/mat-table/mat-table';
     MatInputModule,
     MatSelectModule,
     MatIconModule,
-    MatTableModule,
-    // AppMatTable
+    MatDatepickerModule,
+    MatNativeDateModule,
+    MatTable
   ],
   templateUrl: './leave.html',
   styleUrl: './leave.scss',
 })
 export class Leave implements OnInit {
-  tableColumns = [
-    { columnDef: 'id', header: 'No' },
+  tableColumns: TableColumn[] = [
     { columnDef: 'employee_name', header: 'Employee' },
-    { columnDef: 'leave_type', header: 'Type' },
-    { columnDef: 'date_range', header: 'Period' },
-    { columnDef: 'total_days', header: 'Days' },
-    { columnDef: 'reason', header: 'Reason' },
-    { columnDef: 'status', header: 'Status' }
+    { columnDef: 'start_date', header: 'Start Date' },
+    { columnDef: 'end_date', header: 'End Date' },
+    { columnDef: 'total_days', header: 'Duration' },
+    { columnDef: 'leave_type', header: 'Type', type: 'custom' },
+    { columnDef: 'status', header: 'Status', type: 'custom' },
+    { columnDef: 'reason', header: 'Reason' }
   ];
 
   leaveRequests: any[] = [];
@@ -120,7 +124,6 @@ export class Leave implements OnInit {
   }
 
   setupDateListeners() {
-    // Dynamically calculate total days when from_date or to_date changes
     const calcDays = () => {
       const from = this.leaveForm.get('from_date')?.value;
       const to = this.leaveForm.get('to_date')?.value;
@@ -149,7 +152,9 @@ export class Leave implements OnInit {
           return {
             ...item,
             employee_name: emp ? emp.name : `Employee ID: ${item.employee_id}`,
-            date_range: `${item.from_date} to ${item.to_date}`
+            start_date: item.from_date || item.start_date || '',
+            end_date: item.to_date || item.end_date || '',
+            date_range: `${item.from_date || item.start_date} to ${item.to_date || item.end_date}`
           };
         });
         this.loading = false;
@@ -169,6 +174,18 @@ export class Leave implements OnInit {
     }
   }
 
+  formatDateForBackend(dateVal: any): string {
+    if (!dateVal) return '';
+    if (typeof dateVal === 'string') return dateVal.split('T')[0];
+    if (dateVal instanceof Date && !isNaN(dateVal.getTime())) {
+      const year = dateVal.getFullYear();
+      const month = String(dateVal.getMonth() + 1).padStart(2, '0');
+      const day = String(dateVal.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    }
+    return String(dateVal);
+  }
+
   submitLeaveRequest() {
     if (this.leaveForm.invalid) {
       this.leaveForm.markAllAsTouched();
@@ -176,7 +193,11 @@ export class Leave implements OnInit {
     }
 
     this.loading = true;
-    const payload = this.leaveForm.getRawValue();
+    const payload = {
+      ...this.leaveForm.getRawValue(),
+      from_date: this.formatDateForBackend(this.leaveForm.get('from_date')?.value),
+      to_date: this.formatDateForBackend(this.leaveForm.get('to_date')?.value)
+    };
 
     this.commonService.postApi('leave/apply', payload).subscribe({
       next: () => {
@@ -230,4 +251,3 @@ export class Leave implements OnInit {
     });
   }
 }
-

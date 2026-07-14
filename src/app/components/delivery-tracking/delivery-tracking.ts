@@ -7,11 +7,11 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatIconModule } from '@angular/material/icon';
-import { MatTableModule } from '@angular/material/table';
 import { CommonService } from 'src/app/Securities/Services/common.service';
 import { AlertService } from 'src/app/Securities/Services/alert.service';
 import { PermissionService } from 'src/app/Securities/Services/permissions.service';
 import { AuthService } from 'src/app/Securities/Services/auth.service';
+import { MatTable, TableColumn } from 'src/utils/mat-table/mat-table';
 
 @Component({
   selector: 'app-delivery-tracking',
@@ -26,12 +26,20 @@ import { AuthService } from 'src/app/Securities/Services/auth.service';
     MatInputModule,
     MatSelectModule,
     MatIconModule,
-    MatTableModule
+    MatTable
   ],
   templateUrl: './delivery-tracking.html',
   styleUrl: './delivery-tracking.scss',
 })
 export class DeliveryTracking implements OnInit {
+  tableColumns: TableColumn[] = [
+    { columnDef: 'invoice_no', header: 'Invoice / Order' },
+    { columnDef: 'delivery_boy_name', header: 'Agent' },
+    { columnDef: 'coordinates', header: 'Coordinates', type: 'custom' },
+    { columnDef: 'created_at', header: 'Dispatched At' },
+    { columnDef: 'status', header: 'Status', type: 'badge' }
+  ];
+
   trackings: any[] = [];
   orders: any[] = [];
   employees: any[] = [];

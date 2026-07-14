@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatButtonModule } from '@angular/material/button';
 import { MaterialModule } from 'src/app/material.module';
+import { MatTable } from 'src/utils/mat-table/mat-table';
 
 export interface productsData {
   id: number;
@@ -61,10 +62,16 @@ const ELEMENT_DATA: productsData[] = [
 @Component({
   selector: 'app-top-employees',
   standalone: true,
-  imports: [CommonModule, MatMenuModule, MatButtonModule, MaterialModule],
+  imports: [CommonModule, MatMenuModule, MatButtonModule, MaterialModule, MatTable],
   templateUrl: './top-employees.component.html',
 })
 export class AppTopEmployeesComponent {
-  displayedColumns: string[] = ['profile', 'hrate', 'skills', 'status'];
+  tableColumns = [
+    { columnDef: 'profile', header: 'Profile', type: 'custom' },
+    { columnDef: 'hrate', header: 'Hour Rate', type: 'custom' },
+    { columnDef: 'skills', header: 'Skills' },
+    { columnDef: 'status', header: 'Status', type: 'badge' }
+  ];
+  
   dataSource = ELEMENT_DATA;
 }

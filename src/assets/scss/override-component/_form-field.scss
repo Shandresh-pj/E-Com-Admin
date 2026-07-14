@@ -1,36 +1,122 @@
 @use "sass:map";
 @use "@angular/material" as mat;
 
-@include mat.form-field-overrides((container-height: 37px,
-    outlined-container-shape: var(--mat-sys-corner-medium),
-    container-vertical-padding: 6px,
-  ));
+@include mat.form-field-overrides((
+  container-height: 44px,
+  outlined-container-shape: 12px,
+  container-vertical-padding: 10px,
+));
 
-// forms
+// Premium sleek form fields (Single border, no double/triple outlines)
 html {
-  .mat-mdc-text-field-wrapper {
-    background-color: var(--mat-sys-surface-bright) !important;
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+  .mat-mdc-form-field {
+    width: 100%;
     
-    &.mdc-text-field--focused {
-      background-color: var(--mat-sys-surface) !important;
-      box-shadow: 0 0 0 1px var(--mat-sys-primary) inset, 0 4px 12px rgba(0,0,0,0.05) !important;
-    }
-  }
+    .mat-mdc-text-field-wrapper {
+      background: linear-gradient(135deg, var(--glass-bg, rgba(255, 255, 255, 0.85)) 0%, rgba(255, 255, 255, 0.6) 100%) !important;
+      backdrop-filter: blur(16px) saturate(180%) !important;
+      -webkit-backdrop-filter: blur(16px) saturate(180%) !important;
+      border-radius: 14px !important;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.02), inset 0 1px 0 rgba(255, 255, 255, 0.7) !important;
+      transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
 
-  .mdc-notched-outline__leading,
-  .mdc-notched-outline__notch,
-  .mdc-notched-outline__trailing {
-    border-color: var(--mat-sys-outline-variant) !important;
-    transition: border-color 0.3s ease;
-  }
-  
-  .mdc-text-field--focused .mdc-notched-outline__leading,
-  .mdc-text-field--focused .mdc-notched-outline__notch,
-  .mdc-text-field--focused .mdc-notched-outline__trailing {
-    border-color: var(--mat-sys-primary) !important;
+      html.dark &, .dark-theme & {
+        background: linear-gradient(135deg, rgba(30, 41, 59, 0.85) 0%, rgba(15, 23, 42, 0.95) 100%) !important;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.08) !important;
+      }
+
+      &:hover {
+        background: linear-gradient(135deg, var(--glass-bg-hover, rgba(255, 255, 255, 0.95)) 0%, rgba(255, 255, 255, 0.75) 100%) !important;
+        transform: translateY(-1.5px) !important;
+        box-shadow: 0 8px 20px rgba(99, 102, 241, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.9) !important;
+
+        html.dark &, .dark-theme & {
+          background: linear-gradient(135deg, rgba(30, 41, 59, 0.95) 0%, rgba(15, 23, 42, 0.98) 100%) !important;
+        }
+      }
+
+      &.mdc-text-field--focused {
+        background: linear-gradient(135deg, var(--glass-bg-hover, rgba(255, 255, 255, 0.98)) 0%, rgba(255, 255, 255, 0.88) 100%) !important;
+        transform: translateY(-2px) !important;
+        box-shadow: 0 12px 28px rgba(99, 102, 241, 0.16), inset 0 1px 0 rgba(255, 255, 255, 1) !important;
+
+        html.dark &, .dark-theme & {
+          background: linear-gradient(135deg, rgba(30, 41, 59, 0.98) 0%, rgba(15, 23, 42, 1) 100%) !important;
+          box-shadow: 0 12px 28px rgba(99, 102, 241, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.12) !important;
+        }
+      }
+    }
+
+    /* Single unified outline with dynamic animated border */
+    .mdc-notched-outline__leading {
+      border-top-left-radius: 12px !important;
+      border-bottom-left-radius: 12px !important;
+      border-color: var(--glass-border, rgba(148, 163, 184, 0.35)) !important;
+      transition: border-color 0.3s ease, border-width 0.3s ease !important;
+    }
+    .mdc-notched-outline__notch {
+      border-color: var(--glass-border, rgba(148, 163, 184, 0.35)) !important;
+      transition: border-color 0.3s ease, border-width 0.3s ease !important;
+    }
+    .mdc-notched-outline__trailing {
+      border-top-right-radius: 12px !important;
+      border-bottom-right-radius: 12px !important;
+      border-color: var(--glass-border, rgba(148, 163, 184, 0.35)) !important;
+      transition: border-color 0.3s ease, border-width 0.3s ease !important;
+    }
+
+    &:hover:not(.mat-focused) {
+      .mdc-notched-outline__leading,
+      .mdc-notched-outline__notch,
+      .mdc-notched-outline__trailing {
+        border-color: var(--brand-primary, #6366f1) !important;
+      }
+    }
+
+    &.mat-focused {
+      .mdc-notched-outline__leading,
+      .mdc-notched-outline__notch,
+      .mdc-notched-outline__trailing {
+        border-color: var(--brand-primary, #6366f1) !important;
+        border-width: 2px !important;
+      }
+      .mdc-notched-outline {
+        filter: drop-shadow(0 0 12px var(--brand-primary-glow, rgba(99, 102, 241, 0.35))) !important;
+      }
+      .mat-mdc-floating-label {
+        color: var(--brand-primary, #6366f1) !important;
+        font-weight: 700 !important;
+        letter-spacing: 0.04em !important;
+      }
+    }
+
+    /* Prefix, Suffix & Datepicker Icon Micro-Animations */
+    .mat-datepicker-toggle button,
+    .mat-mdc-form-field-icon-prefix,
+    .mat-mdc-form-field-icon-suffix {
+      transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), color 0.3s ease !important;
+    }
+
+    &:hover .mat-datepicker-toggle button,
+    &.mat-focused .mat-datepicker-toggle button {
+      transform: scale(1.15) rotate(8deg) !important;
+      color: var(--brand-primary, #6366f1) !important;
+    }
+
+    /* Inner input stripped of all rogue borders/shadows + custom caret */
+    .mat-mdc-input-element,
+    input.mdc-text-field__input,
+    textarea.mdc-text-field__input {
+      border: none !important;
+      box-shadow: none !important;
+      background: transparent !important;
+      padding: 0 !important;
+      color: var(--text-primary) !important;
+      caret-color: var(--brand-primary, #6366f1) !important;
+      font-family: var(--font-primary, 'Plus Jakarta Sans', sans-serif) !important;
+      font-size: 14.5px !important;
+      font-weight: 500 !important;
+    }
   }
 
   .hide-hint {

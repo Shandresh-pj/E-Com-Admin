@@ -1,17 +1,15 @@
-import { Component, OnInit, Inject, ViewEncapsulation } from '@angular/core';
-
+import { Component, OnInit, ViewEncapsulation } from '@angular/core';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { MatTableModule } from '@angular/material/table';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatCardModule } from '@angular/material/card';
-import { MatDialogModule, MatDialog, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
-import { MatChipsModule } from '@angular/material/chips';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { CouponService, Coupon } from '../../services/coupon.service';
 import { MatTable } from 'src/utils/mat-table/mat-table';
 
@@ -19,14 +17,20 @@ import { MatTable } from 'src/utils/mat-table/mat-table';
   selector: 'app-coupons',
   standalone: true,
   imports: [
-    MatTableModule,
+    FormsModule,
+    ReactiveFormsModule,
     MatButtonModule,
     MatIconModule,
     MatCardModule,
-    MatDialogModule,
-    MatChipsModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatSelectModule,
+    MatDatepickerModule,
+    MatNativeDateModule,
+    MatTooltipModule,
+    MatProgressSpinnerModule,
     MatTable
-],
+  ],
   templateUrl: './coupons.html',
   styleUrls: ['./coupons.scss'],
   encapsulation: ViewEncapsulation.None
@@ -42,10 +46,71 @@ export class Coupons implements OnInit {
   ];
   isLoading = false;
 
-  constructor(private couponService: CouponService, private dialog: MatDialog) {}
+  // Inline form state — replaces MatDialog
+  Coupon_Form = false;
+  editingCoupon: Coupon | null = null;
+  couponForm: FormGroup;
+
+  constructor(
+    private couponService: CouponService,
+    private fb: FormBuilder
+  ) {
+    this.couponForm = this.buildForm(null);
+  }
 
   ngOnInit(): void {
     this.loadCoupons();
+  }
+
+  private buildForm(coupon: Coupon | null): FormGroup {
+    return this.fb.group({
+      id: [coupon?.id ?? null],
+      code: [coupon?.code || '', Validators.required],
+      type: [coupon?.type || 'percent', Validators.required],
+      value: [coupon?.value ?? null],
+      buy_x: [coupon?.buy_x ?? null],
+      get_y: [coupon?.get_y ?? null],
+      expiry_date: [coupon?.expiry_date ?? null],
+      usage_limit: [coupon?.usage_limit ?? null],
+      is_active: [coupon !== null ? coupon.is_active : true]
+    });
+  }
+
+  openForm(coupon?: Coupon): void {
+    this.editingCoupon = coupon ?? null;
+    this.couponForm = this.buildForm(coupon ?? null);
+    this.Coupon_Form = true;
+  }
+
+  closeForm(): void {
+    this.Coupon_Form = false;
+    this.editingCoupon = null;
+    this.couponForm = this.buildForm(null);
+  }
+
+  saveCoupon(): void {
+    if (this.couponForm.invalid) {
+      this.couponForm.markAllAsTouched();
+      return;
+    }
+
+    const payload = { ...this.couponForm.value };
+    // Ensure numeric value for non-monetary types
+    if (payload.type === 'bogo' || payload.type === 'free_shipping') {
+      payload.value = 0;
+    }
+
+    if (payload.id) {
+      this.couponService.updateCoupon(payload.id, payload).subscribe(() => {
+        this.closeForm();
+        this.loadCoupons();
+      });
+    } else {
+      this.couponService.createCoupon(payload).subscribe(() => {
+        this.closeForm();
+        this.loadCoupons();
+      });
+    }
   }
 
   loadCoupons(): void {
@@ -53,35 +118,26 @@ export class Coupons implements OnInit {
     this.couponService.getCoupons().subscribe({
       next: (res: any) => {
         const rawData = res.data ? res.data : res;
-        this.coupons = rawData.map((c: any) => ({
-          ...c,
-          _discountStr: c.discountType === 'PERCENTAGE' ? `${c.discountValue}%` : `$${c.discountValue}`,
-          _expiryStr: new Date(c.expiryDate).toLocaleDateString(),
-          _usageStr: `${c.usedCount || 0} / ${c.usageLimit ? c.usageLimit : '∞'}`,
-          _statusStr: c.isActive ? 'Active' : 'Inactive'
-        }));
+        this.coupons = rawData.map((c: any) => {
+          let discountStr = '';
+          if (c.type === 'percent') discountStr = `${c.value}%`;
+          else if (c.type === 'flat') discountStr = `₹${c.value}`;
+          else if (c.type === 'bogo') discountStr = `Buy ${c.buy_x} Get ${c.get_y}`;
+          else if (c.type === 'free_shipping') discountStr = `Free Shipping`;
+
+          return {
+            ...c,
+            _discountStr: discountStr,
+            _expiryStr: c.expiry_date ? new Date(c.expiry_date).toLocaleDateString() : 'No Expiry',
+            _usageStr: `${c.usage_count || 0} / ${c.usage_limit ? c.usage_limit : '∞'}`,
+            _statusStr: c.is_active ? 'Active' : 'Inactive'
+          };
+        });
         this.isLoading = false;
       },
       error: (err) => {
         console.error('Failed to load coupons', err);
         this.isLoading = false;
-      }
-    });
-  }
-
-  openCouponDialog(coupon?: Coupon): void {
-    const dialogRef = this.dialog.open(CouponDialogComponent, {
-      width: '400px',
-      data: coupon ? { ...coupon } : null
-    });
-
-    dialogRef.afterClosed().subscribe(result => {
-      if (result) {
-        if (result.id) {
-          this.couponService.updateCoupon(result.id, result).subscribe(() => this.loadCoupons());
-        } else {
-          this.couponService.createCoupon(result).subscribe(() => this.loadCoupons());
-        }
       }
     });
   }
@@ -92,102 +148,6 @@ export class Coupons implements OnInit {
       this.couponService.deleteCoupon(id).subscribe(() => {
         this.loadCoupons();
       });
-    }
-  }
-}
-
-// Dialog Component for Create/Edit
-@Component({
-  selector: 'app-coupon-dialog',
-  standalone: true,
-  imports: [
-    FormsModule,
-    ReactiveFormsModule,
-    MatDialogModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatSelectModule,
-    MatButtonModule,
-    MatDatepickerModule,
-    MatNativeDateModule
-],
-  template: `
-    <h2 mat-dialog-title>{{ data ? 'Edit Coupon' : 'Create Coupon' }}</h2>
-    <mat-dialog-content>
-      <form [formGroup]="couponForm" class="flex flex-col gap-4 mt-2">
-        <mat-form-field appearance="outline">
-          <mat-label>Coupon Code</mat-label>
-          <input matInput formControlName="code" placeholder="e.g. SUMMER2026" required>
-        </mat-form-field>
-        
-        <div class="flex gap-4">
-          <mat-form-field appearance="outline" class="flex-1">
-            <mat-label>Discount Type</mat-label>
-            <mat-select formControlName="discountType">
-              <mat-option value="PERCENTAGE">Percentage (%)</mat-option>
-              <mat-option value="FIXED">Fixed Amount</mat-option>
-            </mat-select>
-          </mat-form-field>
-          
-          <mat-form-field appearance="outline" class="flex-1">
-            <mat-label>Value</mat-label>
-            <input matInput type="number" formControlName="discountValue" required>
-          </mat-form-field>
-        </div>
-
-        <mat-form-field appearance="outline">
-          <mat-label>Expiry Date</mat-label>
-          <input matInput [matDatepicker]="picker" formControlName="expiryDate" required>
-          <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
-          <mat-datepicker #picker></mat-datepicker>
-        </mat-form-field>
-
-        <mat-form-field appearance="outline">
-          <mat-label>Usage Limit</mat-label>
-          <input matInput type="number" formControlName="usageLimit" placeholder="Optional">
-        </mat-form-field>
-        
-        <mat-form-field appearance="outline">
-          <mat-label>Status</mat-label>
-          <mat-select formControlName="isActive">
-            <mat-option [value]="true">Active</mat-option>
-            <mat-option [value]="false">Inactive</mat-option>
-          </mat-select>
-        </mat-form-field>
-      </form>
-    </mat-dialog-content>
-    <mat-dialog-actions align="end">
-      <button mat-button (click)="onCancel()">Cancel</button>
-      <button mat-flat-button color="primary" [disabled]="couponForm.invalid" (click)="onSave()">Save</button>
-    </mat-dialog-actions>
-  `
-})
-export class CouponDialogComponent {
-  couponForm: FormGroup;
-
-  constructor(
-    private fb: FormBuilder,
-    public dialogRef: MatDialogRef<CouponDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: Coupon | null
-  ) {
-    this.couponForm = this.fb.group({
-      id: [data?.id],
-      code: [data?.code || '', Validators.required],
-      discountType: [data?.discountType || 'PERCENTAGE', Validators.required],
-      discountValue: [data?.discountValue || '', [Validators.required, Validators.min(0)]],
-      expiryDate: [data?.expiryDate || '', Validators.required],
-      usageLimit: [data?.usageLimit || null],
-      isActive: [data !== null ? data.isActive : true]
-    });
-  }
-
-  onCancel(): void {
-    this.dialogRef.close();
-  }
-
-  onSave(): void {
-    if (this.couponForm.valid) {
-      this.dialogRef.close(this.couponForm.value);
     }
   }
 }

@@ -7,11 +7,11 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatIconModule } from '@angular/material/icon';
-import { MatTableModule } from '@angular/material/table';
 import { CommonService } from 'src/app/Securities/Services/common.service';
 import { AlertService } from 'src/app/Securities/Services/alert.service';
 import { PermissionService } from 'src/app/Securities/Services/permissions.service';
 import { environment } from 'src/environment/environment';
+import { MatTable, TableColumn } from 'src/utils/mat-table/mat-table';
 
 @Component({
   selector: 'app-orders',
@@ -26,7 +26,7 @@ import { environment } from 'src/environment/environment';
     MatInputModule,
     MatSelectModule,
     MatIconModule,
-    MatTableModule
+    MatTable
   ],
   templateUrl: './orders.html',
   styleUrl: './orders.scss',
@@ -36,6 +36,15 @@ export class Orders implements OnInit {
   products: any[] = [];
   companies: any[] = [];
   coupons: any[] = [];
+
+  tableColumns: TableColumn[] = [
+    { columnDef: 'invoice_no', header: 'Invoice' },
+    { columnDef: 'company_name', header: 'Company' },
+    { columnDef: 'total', header: 'Total', type: 'currency', format: 'USD' },
+    { columnDef: 'payment_status', header: 'Pay Status', type: 'badge' },
+    { columnDef: 'delivery_status', header: 'Delivery', type: 'badge' },
+    { columnDef: 'created_at', header: 'Date', type: 'custom' }
+  ];
 
   orderForm: FormGroup;
   showCreateForm = false;

@@ -9,8 +9,8 @@
             </mat-card-title>
 
             @if (!Product_Forms && perm.hasRoleAction('canCreate')) {
-            <button mat-flat-button color="primary" (click)="AddNewUser()">
-                Add New Product
+            <button mat-flat-button class="btn-rounded btn-gradient" (click)="AddNewUser()">
+                <mat-icon>add</mat-icon> Add New Product
             </button>
             }
 
@@ -21,14 +21,14 @@
     @if (!Product_Forms) {
     <mat-card-content class="b-t-1">
 
-        <div class="d-flex align-items-center justify-content-start m-b-16 bg-light p-12 rounded border" style="gap: 8px;">
-            <span class="f-w-600 m-r-16 text-muted">Filter Approval Status:</span>
-            <button mat-stroked-button [color]="selectedStatusFilter === 'all' ? 'primary' : ''" (click)="filterByStatus('all')">All</button>
-            <button mat-stroked-button [color]="selectedStatusFilter === 'Draft' ? 'primary' : ''" (click)="filterByStatus('Draft')">Draft</button>
-            <button mat-stroked-button [color]="selectedStatusFilter === 'Pending Approval' ? 'primary' : ''" (click)="filterByStatus('Pending Approval')">Pending Approval</button>
-            <button mat-stroked-button [color]="selectedStatusFilter === 'Approved' ? 'primary' : ''" (click)="filterByStatus('Approved')">Approved</button>
-            <button mat-stroked-button [color]="selectedStatusFilter === 'Published' ? 'primary' : ''" (click)="filterByStatus('Published')">Published</button>
-            <button mat-stroked-button [color]="selectedStatusFilter === 'Rejected' ? 'primary' : ''" (click)="filterByStatus('Rejected')">Rejected</button>
+        <div class="filter-bar m-b-16" style="background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border-subtle); border-radius: 12px; padding: 12px 16px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+            <span class="f-w-600 m-r-16" style="color: var(--text-secondary);">Filter Approval Status:</span>
+            <button mat-stroked-button [color]="selectedStatusFilter === 'all' ? 'primary' : ''" (click)="filterByStatus('all')" [class.active-filter]="selectedStatusFilter === 'all'" style="border-radius: 20px;">All</button>
+            <button mat-stroked-button [color]="selectedStatusFilter === 'Draft' ? 'primary' : ''" (click)="filterByStatus('Draft')" [class.active-filter]="selectedStatusFilter === 'Draft'" style="border-radius: 20px;">Draft</button>
+            <button mat-stroked-button [color]="selectedStatusFilter === 'Pending Approval' ? 'primary' : ''" (click)="filterByStatus('Pending Approval')" [class.active-filter]="selectedStatusFilter === 'Pending Approval'" style="border-radius: 20px;">Pending Approval</button>
+            <button mat-stroked-button [color]="selectedStatusFilter === 'Approved' ? 'primary' : ''" (click)="filterByStatus('Approved')" [class.active-filter]="selectedStatusFilter === 'Approved'" style="border-radius: 20px;">Approved</button>
+            <button mat-stroked-button [color]="selectedStatusFilter === 'Published' ? 'primary' : ''" (click)="filterByStatus('Published')" [class.active-filter]="selectedStatusFilter === 'Published'" style="border-radius: 20px;">Published</button>
+            <button mat-stroked-button [color]="selectedStatusFilter === 'Rejected' ? 'primary' : ''" (click)="filterByStatus('Rejected')" [class.active-filter]="selectedStatusFilter === 'Rejected'" style="border-radius: 20px;">Rejected</button>
         </div>
 
         <app-mat-table [columns]="tableColumns" [tableData]="Products" [showAction]="true" [showView]="perm.hasRoleAction('canRead')"
@@ -41,9 +41,14 @@
     }
     @else {
     <mat-card-content class="b-t-1">
-        <form [formGroup]="ProductForm">
-            <div class="row">
-                <div class="col-lg-4">
+        <form [formGroup]="ProductForm" class="premium-form-grid p-t-24">
+            
+            <div class="divider">
+                <span>General Information</span>
+            </div>
+
+            <div class="form-row">
+                <div class="field-container">
                     <mat-label class="f-w-600 m-b-8 d-block">Product Name <span class="text-danger">*</span></mat-label>
                     <mat-form-field appearance="outline" class="w-100">
                         <input matInput formControlName="name" placeholder="Enter Product Name">
@@ -56,7 +61,7 @@
                     </mat-form-field>
                 </div>
 
-                <div class="col-lg-4">
+                <div class="field-container">
                     <mat-label class="f-w-600 m-b-8 d-block">Category</mat-label>
                     <mat-form-field appearance="outline" class="w-100">
                         <mat-select formControlName="category" placeholder="Select Category">
@@ -66,8 +71,14 @@
                         </mat-select>
                     </mat-form-field>
                 </div>
+            </div>
 
-                <div class="col-lg-4">
+            <div class="divider">
+                <span>Pricing & Inventory</span>
+            </div>
+
+            <div class="form-row">
+                <div class="field-container">
                     <mat-label class="f-w-600 m-b-8 d-block">Product Type <span class="text-danger">*</span></mat-label>
                     <mat-form-field appearance="outline" class="w-100">
                         <mat-select formControlName="product_type"
@@ -81,7 +92,7 @@
                     </mat-form-field>
                 </div>
 
-                <div class="col-lg-4">
+                <div class="field-container">
                     <mat-label class="f-w-600 m-b-8 d-block">Price <span class="text-danger">*</span></mat-label>
                     <mat-form-field appearance="outline" class="w-100">
                         <input matInput type="number" formControlName="price" placeholder="Enter Price" min="0">
@@ -93,8 +104,10 @@
                         }
                     </mat-form-field>
                 </div>
+            </div>
 
-                <div class="col-lg-4">
+            <div class="form-row">
+                <div class="field-container">
                     <mat-label class="f-w-600 m-b-8 d-block">Stock <span class="text-danger">*</span></mat-label>
                     <mat-form-field appearance="outline" class="w-100">
                         <input matInput type="number" formControlName="stock_in_hand" placeholder="Enter Stock" min="0">
@@ -107,7 +120,7 @@
                     </mat-form-field>
                 </div>
 
-                <div class="col-lg-4">
+                <div class="field-container">
                     <mat-label class="f-w-600 m-b-8 d-block">Barcode</mat-label>
                     <mat-form-field appearance="outline" class="w-100">
                         <input matInput formControlName="barcode" placeholder="Enter Barcode (8-14 digits)">
@@ -116,21 +129,10 @@
                         }
                     </mat-form-field>
                 </div>
+            </div>
 
-                <div class="col-lg-4">
-                    <mat-label class="f-w-600 m-b-8 d-block">Status <span class="text-danger">*</span></mat-label>
-                    <mat-form-field appearance="outline" class="w-100">
-                        <mat-select formControlName="status" placeholder="Select Status">
-                            <mat-option value="active">Active</mat-option>
-                            <mat-option value="inactive">Inactive</mat-option>
-                        </mat-select>
-                        @if (ProductForm.get('status')?.hasError('required')) {
-                            <mat-error>Status is required</mat-error>
-                        }
-                    </mat-form-field>
-                </div>
-
-                <div class="col-lg-4">
+            <div class="form-row">
+                <div class="field-container">
                     <mat-label class="f-w-600 m-b-8 d-block">Low Stock Threshold <span class="text-danger">*</span></mat-label>
                     <mat-form-field appearance="outline" class="w-100">
                         <input matInput type="number" formControlName="low_stock_threshold" placeholder="Enter Low Stock level">
@@ -143,7 +145,7 @@
                     </mat-form-field>
                 </div>
 
-                <div class="col-lg-4">
+                <div class="field-container">
                     <mat-label class="f-w-600 m-b-8 d-block">Critical Stock Threshold <span class="text-danger">*</span></mat-label>
                     <mat-form-field appearance="outline" class="w-100">
                         <input matInput type="number" formControlName="critical_stock_threshold" placeholder="Enter Critical Stock level">
@@ -155,11 +157,40 @@
                         }
                     </mat-form-field>
                 </div>
+            </div>
 
-                <div class="col-lg-8">
+            <div class="divider">
+                <span>Details & Settings</span>
+            </div>
+
+            <div class="form-row">
+                <div class="field-container">
+                    <mat-label class="f-w-600 m-b-8 d-block">Status <span class="text-danger">*</span></mat-label>
+                    <mat-form-field appearance="outline" class="w-100">
+                        <mat-select formControlName="status" placeholder="Select Status">
+                            <mat-option value="active">
+                                <div class="flex items-center gap-8">
+                                    <span class="status-dot bg-success"></span> Active
+                                </div>
+                            </mat-option>
+                            <mat-option value="inactive">
+                                <div class="flex items-center gap-8">
+                                    <span class="status-dot bg-warn"></span> Inactive
+                                </div>
+                            </mat-option>
+                        </mat-select>
+                        @if (ProductForm.get('status')?.hasError('required')) {
+                            <mat-error>Status is required</mat-error>
+                        }
+                    </mat-form-field>
+                </div>
+            </div>
+
+            <div class="form-row single-col">
+                <div class="field-container">
                     <div class="d-flex align-items-center justify-content-between m-b-8">
                         <mat-label class="f-w-600 m-b-0">Description</mat-label>
-                        <button type="button" mat-stroked-button color="primary" class="ai-btn" (click)="generateAIDescription()" [disabled]="aiLoading">
+                        <button type="button" mat-stroked-button class="btn-rounded" style="height: 32px; border-color: rgba(99, 102, 241, 0.4); color: var(--brand-primary);" (click)="generateAIDescription()" [disabled]="aiLoading">
                             <mat-icon class="icon-16 m-r-4">auto_awesome</mat-icon> AI Generate
                         </button>
                     </div>
@@ -170,12 +201,74 @@
                         }
                     </mat-form-field>
                 </div>
-                <div class="col-lg-12">
-                    <mat-label class="f-w-600 m-b-8 d-block">Additional Attributes</mat-label>
-                    <div formArrayName="attributeValues">
+            </div>
+            <div class="divider">
+                <span>Product Media</span>
+            </div>
+
+            <div class="form-row">
+                <div class="field-container">
+                    <mat-label class="f-w-600 m-b-8 d-block">Main Image</mat-label>
+                    <input type="file" accept="image/*" (change)="detectImage($event)" style="padding: 8px 0;">
+                    @if (imagePreviewUrl || existingImageUrl) {
+                    <div class="m-t-8" style="position: relative; display: inline-block;">
+                        <img [src]="imagePreviewUrl || existingImageUrl" alt="Product Image"
+                            style="max-width: 120px; max-height: 120px; border-radius: 8px; border: 1px solid var(--glass-border-subtle);">
+                        <button mat-mini-fab color="warn" (click)="removeImage()" type="button" style="position: absolute; top: -10px; right: -10px; transform: scale(0.7);">
+                            <mat-icon>close</mat-icon>
+                        </button>
+                    </div>
+                    }
+                </div>
+
+                <div class="field-container">
+                    <mat-label class="f-w-600 m-b-8 d-block">Gallery Images</mat-label>
+                    <input type="file" accept="image/*" multiple (change)="detectGalleryFiles($event)" style="padding: 8px 0;">
+                    <div class="m-t-8 d-flex" style="gap: 12px; flex-wrap: wrap;">
+                        @for(img of ExistingGalleryImages; track $index) {
+                        <div style="position: relative; display: inline-block;">
+                            <img [src]="toFileUrl(img)" alt="Gallery Image" style="max-width: 80px; max-height: 80px; border-radius: 8px; border: 1px solid var(--glass-border-subtle);">
+                            <button mat-mini-fab color="warn" (click)="removeExistingGalleryImage($index)"
+                                type="button" style="position: absolute; top: -10px; right: -10px; transform: scale(0.6);">
+                                <mat-icon>close</mat-icon>
+                            </button>
+                        </div>
+                        }
+                        @for(img of GalleryPreviews; track $index) {
+                        <div style="position: relative; display: inline-block;">
+                            <img [src]="img" alt="New Gallery Image" style="max-width: 80px; max-height: 80px; border-radius: 8px; border: 1px solid var(--glass-border-subtle);">
+                            <button mat-mini-fab color="warn" (click)="removeNewGalleryImage($index)" type="button" style="position: absolute; top: -10px; right: -10px; transform: scale(0.6);">
+                                <mat-icon>close</mat-icon>
+                            </button>
+                        </div>
+                        }
+                    </div>
+                </div>
+
+                <div class="field-container">
+                    <mat-label class="f-w-600 m-b-8 d-block">Video</mat-label>
+                    <input type="file" accept="video/*" (change)="detectVideo($event)" style="padding: 8px 0;">
+                    @if (videoPreviewUrl || existingVideoUrl) {
+                    <div class="m-t-8" style="position: relative; display: inline-block;">
+                        <video [src]="videoPreviewUrl || existingVideoUrl" controls style="max-width: 160px; border-radius: 8px; border: 1px solid var(--glass-border-subtle);"></video>
+                        <button mat-mini-fab color="warn" (click)="removeVideo()" type="button" style="position: absolute; top: -10px; right: -10px; transform: scale(0.7);">
+                            <mat-icon>close</mat-icon>
+                        </button>
+                    </div>
+                    }
+                </div>
+            </div>
+
+            <div class="divider">
+                <span>Additional Attributes</span>
+            </div>
+
+            <div class="form-row single-col">
+                <div class="field-container">
+                    <div formArrayName="attributeValues" style="display: flex; flex-direction: column; gap: 12px;">
                         @for(av of attributeValues.controls; track av) {
-                        <div class="row align-items-center" [formGroupName]="$index">
-                            <div class="col-lg-5">
+                        <div class="form-row" [formGroupName]="$index" style="align-items: center;">
+                            <div class="field-container">
                                 <mat-form-field appearance="outline" class="w-100">
                                     <mat-select formControlName="ProductAttributeId" placeholder="Attribute"
                                         (selectionChange)="onSingleAttrRowChange($event.value, $index)">
@@ -185,7 +278,7 @@
                                     </mat-select>
                                 </mat-form-field>
                             </div>
-                            <div class="col-lg-5">
+                            <div class="field-container">
                                 <mat-form-field appearance="outline" class="w-100">
                                     <mat-select formControlName="ProductAttributeValueId" placeholder="Value">
                                         @for(option of SingleAttrValuesByRow[$index]; track option.Id) {
@@ -194,7 +287,7 @@
                                     </mat-select>
                                 </mat-form-field>
                             </div>
-                            <div class="col-lg-2 d-flex align-items-center">
+                            <div style="padding-top: 12px;">
                                 <button mat-icon-button color="warn" (click)="removeAttrValueRow($index)"
                                     type="button">
                                     <mat-icon>delete</mat-icon>
@@ -203,70 +296,22 @@
                         </div>
                         }
                     </div>
-                    <button mat-flat-button color="primary" type="button" (click)="addAttrValueRow()" class="m-t-4 mb-4"
-                        [disabled]="allAttributesUsed">
-                        + Add Attribute
+                    <button mat-stroked-button type="button" (click)="addAttrValueRow()" class="m-t-12"
+                        [disabled]="allAttributesUsed" style="color: var(--brand-primary); border-color: rgba(99, 102, 241, 0.4);">
+                        <mat-icon>add</mat-icon> Add Attribute
                     </button>
-                </div>
-
-                <div class="col-lg-4">
-                    <mat-label class="f-w-600 m-b-8 d-block">Main Image</mat-label>
-                    <input type="file" accept="image/*" (change)="detectImage($event)">
-                    @if (imagePreviewUrl || existingImageUrl) {
-                    <div class="m-t-8">
-                        <img [src]="imagePreviewUrl || existingImageUrl" alt="Product Image"
-                            style="max-width: 100px; max-height: 100px;">
-                        <button mat-icon-button color="warn" (click)="removeImage()" type="button">
-                            <mat-icon>delete</mat-icon>
-                        </button>
-                    </div>
-                    }
-                </div>
-
-                <div class="col-lg-4">
-                    <mat-label class="f-w-600 m-b-8 d-block">Gallery Images</mat-label>
-                    <input type="file" accept="image/*" multiple (change)="detectGalleryFiles($event)">
-                    <div class="m-t-8 d-flex" style="gap: 8px; flex-wrap: wrap;">
-                        @for(img of ExistingGalleryImages; track $index) {
-                        <div>
-                            <img [src]="toFileUrl(img)" alt="Gallery Image" style="max-width: 80px; max-height: 80px;">
-                            <button mat-icon-button color="warn" (click)="removeExistingGalleryImage($index)"
-                                type="button">
-                                <mat-icon>delete</mat-icon>
-                            </button>
-                        </div>
-                        }
-                        @for(img of GalleryPreviews; track $index) {
-                        <div>
-                            <img [src]="img" alt="New Gallery Image" style="max-width: 80px; max-height: 80px;">
-                            <button mat-icon-button color="warn" (click)="removeNewGalleryImage($index)" type="button">
-                                <mat-icon>delete</mat-icon>
-                            </button>
-                        </div>
-                        }
-                    </div>
-                </div>
-
-                <div class="col-lg-4">
-                    <mat-label class="f-w-600 m-b-8 d-block">Video</mat-label>
-                    <input type="file" accept="video/*" (change)="detectVideo($event)">
-                    @if (videoPreviewUrl || existingVideoUrl) {
-                    <div class="m-t-8">
-                        <video [src]="videoPreviewUrl || existingVideoUrl" controls style="max-width: 160px;"></video>
-                        <button mat-icon-button color="warn" (click)="removeVideo()" type="button">
-                            <mat-icon>delete</mat-icon>
-                        </button>
-                    </div>
-                    }
                 </div>
             </div>
 
             @if (ProductForm.get('product_type')?.value === 'variant') {
             <div class="m-t-16">
+                <div class="divider">
+                    <span>Variant Configuration</span>
+                </div>
 
                 <!-- Generic Attribute + Value multi-selects -->
-                <div class="row">
-                    <div class="col-lg-6">
+                <div class="form-row">
+                    <div class="field-container">
                         <mat-label class="f-w-600 m-b-8 d-block">Attribute</mat-label>
                         <mat-form-field appearance="outline" class="w-100">
                             <mat-select multiple [value]="SelectedVariantAttributeIds"
@@ -277,7 +322,7 @@
                             </mat-select>
                         </mat-form-field>
                     </div>
-                    <div class="col-lg-6">
+                    <div class="field-container">
                         <mat-label class="f-w-600 m-b-8 d-block">Value</mat-label>
                         <mat-form-field appearance="outline" class="w-100">
                             <mat-select multiple [value]="getVariantValueSelectionKeys()"
@@ -297,17 +342,17 @@
 
                 <!-- Generated variant rows with Combination / Price / Stock / Barcode -->
                 @if (variants.length > 0) {
-                <div formArrayName="variants" class="m-t-8">
+                <div formArrayName="variants" class="m-t-16" style="display: flex; flex-direction: column; gap: 16px;">
                     @for(variant of variants.controls; track $index) {
-                    <div class="row" [formGroupName]="$index">
-                        <div class="col-lg-4">
-                            <mat-label class="f-w-600 m-b-8 d-block">Attribute Value Combination</mat-label>
+                    <div class="form-row" [formGroupName]="$index" style="align-items: flex-start; background: rgba(0,0,0,0.02); padding: 16px; border-radius: 12px; border: 1px solid var(--glass-border-subtle);">
+                        <div class="field-container">
+                            <mat-label class="f-w-600 m-b-8 d-block">Combination</mat-label>
                             <mat-form-field appearance="outline" class="w-100">
-                                <input matInput [value]="getVariantCombinationLabel(variant)" readonly>
+                                <input matInput [value]="getVariantCombinationLabel(variant)" readonly style="color: var(--text-primary); font-weight: 500;">
                             </mat-form-field>
                         </div>
 
-                        <div class="col-lg-3">
+                        <div class="field-container">
                             <mat-label class="f-w-600 m-b-8 d-block">Price <span class="text-danger">*</span></mat-label>
                             <mat-form-field appearance="outline" class="w-100">
                                 <input matInput type="number" formControlName="Price" min="0" placeholder="0.00">
@@ -320,7 +365,7 @@
                             </mat-form-field>
                         </div>
 
-                        <div class="col-lg-2">
+                        <div class="field-container">
                             <mat-label class="f-w-600 m-b-8 d-block">Stock <span class="text-danger">*</span></mat-label>
                             <mat-form-field appearance="outline" class="w-100">
                                 <input matInput type="number" formControlName="Stock" min="0" placeholder="0">
@@ -333,27 +378,26 @@
                             </mat-form-field>
                         </div>
 
-                        <div class="col-lg-3">
+                        <div class="field-container">
                             <mat-label class="f-w-600 m-b-8 d-block">Barcode</mat-label>
                             <mat-form-field appearance="outline" class="w-100">
-                                <input matInput formControlName="Barcode" placeholder="8-14 digits (optional)">
+                                <input matInput formControlName="Barcode" placeholder="8-14 digits (opt)">
                             </mat-form-field>
                         </div>
                     </div>
                     }
                 </div>
                 }
-
             </div>
             }
 
-
-            <div class="m-t-12">
-                <button mat-stroked-button class="me-3 Cancel_Button" (click)="cancelProduct()">
-                    Cancel
+            <div class="flex m-t-24" style="justify-content: flex-end; gap: 16px;">
+                <button mat-stroked-button class="btn-rounded Cancel_Button" type="button" (click)="cancelProduct()">
+                    <mat-icon>close</mat-icon> Cancel
                 </button>
-                <button mat-flat-button color="primary" (click)="submit(ProductForm)">
-                    {{Update_button ? 'Update' : 'Submit'}}
+                <button mat-flat-button class="btn-rounded btn-gradient" type="submit" (click)="submit(ProductForm)">
+                    <mat-icon>{{Update_button ? 'save' : 'add'}}</mat-icon>
+                    {{Update_button ? 'Update Product' : 'Save Product'}}
                 </button>
             </div>
         </form>

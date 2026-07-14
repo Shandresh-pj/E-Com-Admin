@@ -9,8 +9,8 @@
             </mat-card-title>
 
             @if (!ProductAttribute_Forms && perm.hasRoleAction('canCreate')) {
-            <button mat-flat-button color="primary" (click)="AddNewUser()">
-                Add New Attribute
+            <button mat-flat-button class="btn-rounded btn-gradient" (click)="AddNewUser()">
+                <mat-icon>add</mat-icon> Add New Attribute
             </button>
             }
 
@@ -31,9 +31,14 @@
     @else {
     <mat-card-content class="b-t-1">
 
-        <form [formGroup]="ProductAttributeForm">
-            <div class="row">
-                <div class="col-lg-4">
+        <form [formGroup]="ProductAttributeForm" class="premium-form-grid p-t-24">
+            
+            <div class="divider">
+                <span>Attribute Details</span>
+            </div>
+
+            <div class="form-row">
+                <div class="field-container">
                     <mat-label class="f-w-600 m-b-8 d-block">Attribute Code <span class="text-danger">*</span></mat-label>
                     <mat-form-field appearance="outline" class="w-100">
                         <input matInput formControlName="AttributeNameCode" placeholder="Enter Attribute Code">
@@ -45,7 +50,7 @@
                     </mat-form-field>
                 </div>
 
-                <div class="col-lg-4">
+                <div class="field-container">
                     <mat-label class="f-w-600 m-b-8 d-block">Name <span class="text-danger">*</span></mat-label>
                     <mat-form-field appearance="outline" class="w-100">
                         <input matInput formControlName="Name" placeholder="Enter Attribute Name">
@@ -58,12 +63,13 @@
                 </div>
             </div>
 
-            <div class="m-t-12">
-                <button mat-stroked-button class="me-3 Cancel_Button" (click)="cancelProductAttribute()">
-                    Cancel
+            <div class="flex m-t-12" style="justify-content: flex-end; gap: 16px;">
+                <button mat-stroked-button class="btn-rounded Cancel_Button" type="button" (click)="cancelProductAttribute()">
+                    <mat-icon>close</mat-icon> Cancel
                 </button>
-                <button mat-flat-button color="primary" (click)="submit(ProductAttributeForm)">
-                    {{Update_button ? 'Update' : 'Submit'}}
+                <button mat-flat-button class="btn-rounded btn-gradient" type="submit" (click)="submit(ProductAttributeForm)">
+                    <mat-icon>{{Update_button ? 'save' : 'add'}}</mat-icon>
+                    {{Update_button ? 'Update Attribute' : 'Save Attribute'}}
                 </button>
             </div>
         </form>

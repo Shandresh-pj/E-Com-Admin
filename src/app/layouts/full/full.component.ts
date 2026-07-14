@@ -295,6 +295,7 @@ export class FullComponent implements OnInit {
         { id: 11, name: 'Category', path: '/category', icon: 'bi-folder-fill', isActive: true },
         { id: 12, name: 'Product', path: '/product', icon: 'bi-box-seam-fill', isActive: true },
         { id: 13, name: 'Orders', path: '/orders', icon: 'bi-cart-fill', isActive: true },
+        { id: 99, name: 'Coupons', path: '/coupons', icon: 'bi-ticket-detailed-fill', isActive: true },
         { id: 14, name: 'Change Password', path: '/change-password', icon: 'bi-lock-fill', isActive: true },
         { id: 15, name: 'Audit Logs', path: '/audit-logs', icon: 'bi-clock-history', isActive: true },
         { id: 16, name: 'Alerts', path: '/alerts', icon: 'bi-exclamation-triangle-fill', isActive: true },
@@ -339,71 +340,74 @@ export class FullComponent implements OnInit {
       }
     ];
 
-    const hasProductMenu = allowedMenus.some(m => norm(m.path) === '/product');
-    const hasStockMenu = allowedMenus.some(m => norm(m.path) === '/stocks');
-    const hasBranchStockMenu = allowedMenus.some(m => norm(m.path) === '/branch-stocks');
-
-    // These three modules render as parent items with children below, so they
-    // can't go through the generic otherItems mapping — but they should still
-    // reflect the icon actually configured on the Menu record, not a guess.
-    const productMenuIcon = allowedMenus.find(m => norm(m.path) === '/product')?.icon;
-    const stockMenuIcon = allowedMenus.find(m => norm(m.path) === '/stocks')?.icon;
-    const branchStockMenuIcon = allowedMenus.find(m => norm(m.path) === '/branch-stocks')?.icon;
+    // Instead of hardcoding 'Inventory' and dumping the rest in 'Other Modules',
+    // let's group dynamically based on path to provide a clean Liquid Glass UI sidebar.
+    const groupings = [
+      {
+        navCap: 'Admin & Core',
+        paths: ['/admin', '/roles', '/role-access', '/branch', '/menubar', '/audit-logs', '/status', '/profile']
+      },
+      {
+        navCap: 'Catalog',
+        paths: ['/category', '/product-attribute', '/attribute-value', '/product', '/coupons']
+      },
+      {
+        navCap: 'Inventory & Operations',
+        paths: ['/stocks', '/branch-stocks', '/alerts', '/delivery-tracking']
+      },
+      {
+        navCap: 'Sales & Finance',
+        paths: ['/orders', '/payments', '/invoices', '/profit-loss', '/crm-contacts']
+      },
+      {
+        navCap: 'HR & Workforce',
+        paths: ['/employees', '/attendance', '/leave', '/payroll', '/workforce', '/workforce-requests', '/approvals']
+      }
+    ];
 
     const isAdmin = this.authService.isSuperAdmin() || this.authService.getUserType() === 'Admin';
-
-    if (hasProductMenu || hasStockMenu || hasBranchStockMenu) {
-      finalItems.push({
-        navCap: 'Inventory'
-      });
-    }
-
-    if (hasProductMenu) {
-      finalItems.push({
-        displayName: 'Products',
-        iconName: this.mapIcon(productMenuIcon || 'box-seam-fill'),
-        route: '/product',
-        bgcolor: 'primary'
-      });
-    }
-
-    if (hasStockMenu) {
-      const stockChildren: NavItem[] = [
-        { displayName: 'Stock List', route: '/stocks', queryParams: { view: 'products' }, bgcolor: 'primary' }
-      ];
-      if (isAdmin) {
-        stockChildren.push({ displayName: 'Low Stock Alerts', route: '/alerts', bgcolor: 'error' });
-      }
-      finalItems.push({
-        displayName: 'Stocks',
-        iconName: this.mapIcon(stockMenuIcon || 'card-list'),
-        bgcolor: 'warning',
-        children: stockChildren
-      });
-    }
-
-    if (hasBranchStockMenu) {
-      finalItems.push({
-        displayName: 'Branch Stocks',
-        iconName: this.mapIcon(branchStockMenuIcon || 'shop'),
-        route: '/branch-stocks',
-        bgcolor: 'success'
-      });
-    }
-
-    // Add other allowed modules
-    const processedPaths = new Set([
-      '/product',
-      '/stocks',
-      '/branch-stocks',
-      '/alerts',
-      '/alerts'
-    ]);
-
     let colorToggle = true;
-    const otherItems: NavItem[] = allowedMenus
-      .filter((m: any) => !processedPaths.has(norm(m.path)))
-      .map((m: any) => {
+
+    for (const group of groupings) {
+      const groupItems = allowedMenus
+        .filter(m => group.paths.includes(norm(m.path)))
+        .map(m => {
+          const bgcolor = colorToggle ? 'primary' : 'success';
+          colorToggle = !colorToggle;
+
+          const item: NavItem = {
+            displayName: m.name,
+            route: m.path,
+            iconName: this.mapIcon(m.icon),
+            bgcolor: bgcolor
+          };
+
+          // Special logic for Stocks -> Low Stock Alerts child
+          if (norm(m.path) === '/stocks') {
+            const stockChildren: NavItem[] = [
+              { displayName: 'Stock List', route: '/stocks', queryParams: { view: 'products' }, bgcolor: 'primary' }
+            ];
+            if (isAdmin) {
+              stockChildren.push({ displayName: 'Low Stock Alerts', route: '/alerts', bgcolor: 'error' });
+            }
+            item.children = stockChildren;
+            item.bgcolor = 'warning';
+          }
+
+          return item;
+        });
+
+      if (groupItems.length > 0) {
+        finalItems.push({ navCap: group.navCap });
+        finalItems.push(...groupItems);
+      }
+    }
+
+    // Add any remaining un-grouped menus under "Other Modules"
+    const groupedPaths = new Set(groupings.flatMap(g => g.paths));
+    const otherItems = allowedMenus
+      .filter(m => !groupedPaths.has(norm(m.path)))
+      .map(m => {
         const bgcolor = colorToggle ? 'primary' : 'success';
         colorToggle = !colorToggle;
         return {
@@ -415,33 +419,31 @@ export class FullComponent implements OnInit {
       });
 
     if (otherItems.length > 0) {
-      finalItems.push({
-        navCap: 'Other Modules'
-      });
+      finalItems.push({ navCap: 'Other Modules' });
       finalItems.push(...otherItems);
     }
 
     // Notifications Link
-    finalItems.push({
-      navCap: 'Notifications'
-    });
-    finalItems.push({
-      displayName: 'Notifications',
-      iconName: 'bi-bell-fill',
-      route: '/notifications',
-      bgcolor: 'error'
-    });
+    // finalItems.push({
+    //   navCap: 'Notifications'
+    // });
+    // finalItems.push({
+    //   displayName: 'Notifications',
+    //   iconName: 'bi-bell-fill',
+    //   route: '/notifications',
+    //   bgcolor: 'error'
+    // });
 
-    finalItems.push({
-      navCap: 'Settings'
-    });
+    // finalItems.push({
+    //   navCap: 'Settings'
+    // });
 
-    finalItems.push({
-      displayName: 'Change Password',
-      iconName: 'lock',
-      route: '/change-password',
-      bgcolor: 'success'
-    });
+    // finalItems.push({
+    //   displayName: 'Change Password',
+    //   iconName: 'lock',
+    //   route: '/change-password',
+    //   bgcolor: 'success'
+    // });
 
     // Prune duplicates
     const seen = new Set<string>();

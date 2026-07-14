@@ -105,9 +105,8 @@ export class ForgetPassword implements OnInit, OnDestroy {
       .pipe(take(60))
       .subscribe({
         next: () => {
-          this.countdown--;
-          if (this.countdown <= 0) {
-            this.otpSent = false;
+          if (this.countdown > 0) {
+            this.countdown--;
           }
         }
       });

@@ -1,170 +1,195 @@
-<div class="page-container liquid-bg">
-  <div class="content-header">
-    <div class="header-text">
-      <h1 class="liquid-title">Profit & Loss Dashboard</h1>
-      <p class="liquid-subtitle">Track, manage, and analyze your financial performance.</p>
+<mat-card class="cardWithShadow theme-card">
+
+  <mat-card-header>
+    <div class="header-container">
+      <mat-card-title class="m-b-0">Profit &amp; Loss</mat-card-title>
+      @if (!PL_Form) {
+        <div class="d-flex" style="gap: 12px;">
+          <button mat-stroked-button class="btn-rounded" (click)="openForm('auto')">
+            <mat-icon>auto_graph</mat-icon> Auto Calculate
+          </button>
+          <button mat-flat-button class="btn-rounded btn-gradient" (click)="openForm('manual')">
+            <mat-icon>add</mat-icon> Manual Entry
+          </button>
+        </div>
+      }
     </div>
-    <div class="header-actions">
-      <button mat-flat-button class="liquid-btn-secondary" (click)="showManualEntryModal = true">
-        <mat-icon>add</mat-icon> Manual Entry
-      </button>
-      <button mat-flat-button class="liquid-btn-primary" (click)="showAutoCalcModal = true">
-        <mat-icon>calculator</mat-icon> Auto Calculate
-      </button>
-    </div>
-  </div>
+  </mat-card-header>
 
-  <mat-card class="liquid-card mt-24">
-    <mat-card-content>
-      <div class="table-container">
-        <table mat-table [dataSource]="dataSource" class="liquid-table">
-          
-          <!-- Date Column -->
-          <ng-container matColumnDef="record_date">
-            <th mat-header-cell *matHeaderCellDef> Date </th>
-            <td mat-cell *matCellDef="let element"> {{element.record_date}} </td>
-          </ng-container>
+  <!-- ─── TABLE VIEW ─── -->
+  @if (!PL_Form) {
+  <mat-card-content class="b-t-1">
 
-          <!-- Revenue Column -->
-          <ng-container matColumnDef="revenue">
-            <th mat-header-cell *matHeaderCellDef> Revenue </th>
-            <td mat-cell *matCellDef="let element" class="text-success fw-bold"> 
-              {{element.revenue | currency:'INR'}} 
-            </td>
-          </ng-container>
+    <app-mat-table
+      [columns]="tableColumns"
+      [tableData]="dataSource"
+      [showAction]="true"
+      [showEdit]="false"
+      [showView]="false"
+      [showDelete]="true"
+      [showSearch]="true"
+      [isLoading]="isLoading"
+      [customTemplates]="{ net_profit: netProfitTpl, entry_type: entryTypeTpl }"
+      (deleteClick)="deleteRecord($event)">
+    </app-mat-table>
 
-          <!-- Expenses Column -->
-          <ng-container matColumnDef="expenses">
-            <th mat-header-cell *matHeaderCellDef> Expenses </th>
-            <td mat-cell *matCellDef="let element" class="text-danger fw-bold"> 
-              {{element.expenses | currency:'INR'}} 
-            </td>
-          </ng-container>
+    <!-- Custom Templates -->
+    <ng-template #netProfitTpl let-row>
+      <span class="f-w-700 f-s-16" [style.color]="row.net_profit >= 0 ? '#10b981' : '#ef4444'">
+        {{ row.net_profit | currency:'INR' }}
+      </span>
+    </ng-template>
 
-          <!-- Net Profit Column -->
-          <ng-container matColumnDef="net_profit">
-            <th mat-header-cell *matHeaderCellDef> Net Profit </th>
-            <td mat-cell *matCellDef="let element" [ngClass]="element.net_profit >= 0 ? 'text-success' : 'text-danger'" class="fw-bold fs-16"> 
-              {{element.net_profit | currency:'INR'}} 
-            </td>
-          </ng-container>
+    <ng-template #entryTypeTpl let-row>
+      <span class="status-badge"
+        [style.background]="row.entry_type === 'AUTO' ? 'rgba(59,130,246,0.1)' : 'rgba(139,92,246,0.1)'"
+        [style.color]="row.entry_type === 'AUTO' ? '#2563eb' : '#7c3aed'"
+        [style.border]="row.entry_type === 'AUTO' ? '1px solid rgba(59,130,246,0.25)' : '1px solid rgba(139,92,246,0.25)'">
+        <mat-icon style="font-size: 13px; width: 13px; height: 13px; margin-right: 4px;">
+          {{ row.entry_type === 'AUTO' ? 'auto_awesome' : 'edit_note' }}
+        </mat-icon>
+        {{ row.entry_type }}
+      </span>
+    </ng-template>
 
-          <!-- Entry Type Column -->
-          <ng-container matColumnDef="entry_type">
-            <th mat-header-cell *matHeaderCellDef> Source </th>
-            <td mat-cell *matCellDef="let element"> 
-              <span class="badge" [ngClass]="element.entry_type === 'AUTO' ? 'badge-auto' : 'badge-manual'">
-                {{element.entry_type}}
-              </span>
-            </td>
-          </ng-container>
+  </mat-card-content>
+  }
 
-          <!-- Actions Column -->
-          <ng-container matColumnDef="actions">
-            <th mat-header-cell *matHeaderCellDef> Actions </th>
-            <td mat-cell *matCellDef="let element">
-              <button mat-icon-button class="text-danger action-btn" (click)="deleteRecord(element.id)">
-                <i-tabler name="trash" class="icon-18"></i-tabler>
-              </button>
-            </td>
-          </ng-container>
+  <!-- ─── INLINE FORM VIEW ─── -->
+  @else {
+  <mat-card-content class="b-t-1">
 
-          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-          <tr mat-row *matRowDef="let row; columns: displayedColumns;" class="liquid-row"></tr>
-        </table>
+    @if (activeFormType === 'manual') {
+    <!-- MANUAL ENTRY FORM -->
+    <form (ngSubmit)="submitManualEntry()" #manual="ngForm" class="premium-form-grid p-t-24">
 
-        <!-- Loading State -->
-        @if (isLoading) {
-          <div class="empty-state">
-            <div class="spinner"></div>
-            <p>Loading financial data...</p>
-          </div>
-        }
-
-        <!-- Empty State -->
-        @if (!isLoading && dataSource.length === 0) {
-          <div class="empty-state">
-            <i-tabler name="cash" class="icon-48 text-muted"></i-tabler>
-            <p>No Profit & Loss records found.</p>
-            <button mat-stroked-button class="liquid-btn-outline" (click)="showManualEntryModal = true">
-              Create First Entry
-            </button>
-          </div>
-        }
+      <div class="divider">
+        <span>Manual P&amp;L Entry</span>
       </div>
-    </mat-card-content>
-  </mat-card>
-</div>
 
-<!-- Manual Entry Modal -->
-@if (showManualEntryModal) {
-<div class="liquid-modal-overlay">
-  <div class="liquid-modal">
-    <div class="modal-header">
-      <h2>Add Manual P&L Entry</h2>
-      <button mat-icon-button (click)="showManualEntryModal = false"><mat-icon>close</mat-icon></button>
-    </div>
-    <div class="modal-body">
-      <form (ngSubmit)="submitManualEntry()" #manual="ngForm" class="liquid-form">
-        <mat-form-field appearance="outline" class="w-100 mb-16">
-          <mat-label>Record Date</mat-label>
-          <input matInput type="date" [(ngModel)]="manualForm.record_date" name="record_date" required>
-        </mat-form-field>
-        
-        <mat-form-field appearance="outline" class="w-100 mb-16">
-          <mat-label>Revenue (INR)</mat-label>
-          <input matInput type="number" [(ngModel)]="manualForm.revenue" name="revenue" required>
-        </mat-form-field>
-
-        <mat-form-field appearance="outline" class="w-100 mb-16">
-          <mat-label>Expenses (INR)</mat-label>
-          <input matInput type="number" [(ngModel)]="manualForm.expenses" name="expenses" required>
-        </mat-form-field>
-
-        <mat-form-field appearance="outline" class="w-100 mb-24">
-          <mat-label>Notes (Optional)</mat-label>
-          <textarea matInput [(ngModel)]="manualForm.notes" name="notes" rows="3"></textarea>
-        </mat-form-field>
-
-        <div class="modal-actions">
-          <button mat-button type="button" (click)="showManualEntryModal = false">Cancel</button>
-          <button mat-flat-button class="liquid-btn-primary" type="submit" [disabled]="!manual.valid">Save Entry</button>
+      <div class="form-row">
+        <div class="field-container">
+          <mat-label class="f-w-600 m-b-8 d-block">Record Date <span class="text-danger">*</span></mat-label>
+          <mat-form-field appearance="outline" class="w-100">
+            <input matInput [matDatepicker]="recordPicker" [(ngModel)]="manualForm.record_date" name="record_date" placeholder="DD-MM-YYYY" required readonly (click)="recordPicker.open()">
+            <mat-datepicker-toggle matIconSuffix [for]="recordPicker"></mat-datepicker-toggle>
+            <mat-datepicker #recordPicker></mat-datepicker>
+          </mat-form-field>
         </div>
-      </form>
-    </div>
-  </div>
-</div>
-}
 
-<!-- Auto Calc Modal -->
-@if (showAutoCalcModal) {
-<div class="liquid-modal-overlay">
-  <div class="liquid-modal">
-    <div class="modal-header">
-      <h2>Auto-Calculate P&L</h2>
-      <button mat-icon-button (click)="showAutoCalcModal = false"><mat-icon>close</mat-icon></button>
-    </div>
-    <div class="modal-body">
-      <p class="modal-desc">
-        Select a date range. The system will automatically fetch all delivered orders for revenue, and employee salaries for expenses, then calculate the net profit.
-      </p>
-      <form (ngSubmit)="submitAutoCalc()" #auto="ngForm" class="liquid-form mt-16">
-        <mat-form-field appearance="outline" class="w-100 mb-16">
-          <mat-label>Start Date</mat-label>
-          <input matInput type="date" [(ngModel)]="autoCalcForm.start_date" name="start_date" required>
-        </mat-form-field>
-        
-        <mat-form-field appearance="outline" class="w-100 mb-24">
-          <mat-label>End Date</mat-label>
-          <input matInput type="date" [(ngModel)]="autoCalcForm.end_date" name="end_date" required>
-        </mat-form-field>
-
-        <div class="modal-actions">
-          <button mat-button type="button" (click)="showAutoCalcModal = false">Cancel</button>
-          <button mat-flat-button class="liquid-btn-primary" type="submit" [disabled]="!auto.valid">Calculate Now</button>
+        <div class="field-container">
+          <mat-label class="f-w-600 m-b-8 d-block">Revenue (INR) <span class="text-danger">*</span></mat-label>
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-icon matPrefix style="margin-right: 8px; color: #10b981;">currency_rupee</mat-icon>
+            <input matInput type="number" [(ngModel)]="manualForm.revenue" name="revenue" placeholder="0.00" required>
+          </mat-form-field>
         </div>
-      </form>
-    </div>
-  </div>
-</div>
-}
+      </div>
+
+      <div class="form-row">
+        <div class="field-container">
+          <mat-label class="f-w-600 m-b-8 d-block">Expenses (INR) <span class="text-danger">*</span></mat-label>
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-icon matPrefix style="margin-right: 8px; color: #ef4444;">currency_rupee</mat-icon>
+            <input matInput type="number" [(ngModel)]="manualForm.expenses" name="expenses" placeholder="0.00" required>
+          </mat-form-field>
+        </div>
+
+        <div class="field-container">
+          <mat-label class="f-w-600 m-b-8 d-block">Notes (Optional)</mat-label>
+          <mat-form-field appearance="outline" class="w-100">
+            <textarea matInput [(ngModel)]="manualForm.notes" name="notes" rows="3" placeholder="Add any notes..."></textarea>
+          </mat-form-field>
+        </div>
+      </div>
+
+      <!-- Live Preview -->
+      @if (manualForm.revenue !== null && manualForm.expenses !== null) {
+      <div class="pl-preview-row">
+        <div class="pl-preview-card revenue">
+          <mat-icon>trending_up</mat-icon>
+          <div>
+            <p>Revenue</p>
+            <strong>{{ manualForm.revenue | currency:'INR' }}</strong>
+          </div>
+        </div>
+        <div class="pl-preview-card expenses">
+          <mat-icon>trending_down</mat-icon>
+          <div>
+            <p>Expenses</p>
+            <strong>{{ manualForm.expenses | currency:'INR' }}</strong>
+          </div>
+        </div>
+        <div class="pl-preview-card" [class.profit]="(manualForm.revenue! - manualForm.expenses!) >= 0" [class.loss]="(manualForm.revenue! - manualForm.expenses!) < 0">
+          <mat-icon>{{ (manualForm.revenue! - manualForm.expenses!) >= 0 ? 'emoji_events' : 'warning' }}</mat-icon>
+          <div>
+            <p>Net {{ (manualForm.revenue! - manualForm.expenses!) >= 0 ? 'Profit' : 'Loss' }}</p>
+            <strong>{{ (manualForm.revenue! - manualForm.expenses!) | currency:'INR' }}</strong>
+          </div>
+        </div>
+      </div>
+      }
+
+      <div class="flex m-t-12" style="justify-content: flex-end; gap: 16px;">
+        <button mat-stroked-button class="btn-rounded Cancel_Button" type="button" (click)="closeForm()">
+          <mat-icon>close</mat-icon> Cancel
+        </button>
+        <button mat-flat-button class="btn-rounded btn-gradient" type="submit" [disabled]="!manual.valid">
+          <mat-icon>save</mat-icon> Save Entry
+        </button>
+      </div>
+    </form>
+    }
+
+    @if (activeFormType === 'auto') {
+    <!-- AUTO CALCULATE FORM -->
+    <form (ngSubmit)="submitAutoCalc()" #auto="ngForm" class="premium-form-grid p-t-24">
+
+      <div class="divider">
+        <span>Auto-Calculate P&amp;L</span>
+      </div>
+
+      <div class="form-row single-col">
+        <div class="field-container">
+          <div class="pl-info-box">
+            <mat-icon>info</mat-icon>
+            <p>Select a date range. The system will automatically fetch all delivered orders for revenue, and employee salaries for expenses, then calculate the net profit.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="field-container">
+          <mat-label class="f-w-600 m-b-8 d-block">Start Date <span class="text-danger">*</span></mat-label>
+          <mat-form-field appearance="outline" class="w-100">
+            <input matInput [matDatepicker]="startPicker" [(ngModel)]="autoCalcForm.start_date" name="start_date" placeholder="DD-MM-YYYY" required readonly (click)="startPicker.open()">
+            <mat-datepicker-toggle matIconSuffix [for]="startPicker"></mat-datepicker-toggle>
+            <mat-datepicker #startPicker></mat-datepicker>
+          </mat-form-field>
+        </div>
+
+        <div class="field-container">
+          <mat-label class="f-w-600 m-b-8 d-block">End Date <span class="text-danger">*</span></mat-label>
+          <mat-form-field appearance="outline" class="w-100">
+            <input matInput [matDatepicker]="endPicker" [(ngModel)]="autoCalcForm.end_date" name="end_date" placeholder="DD-MM-YYYY" required readonly (click)="endPicker.open()">
+            <mat-datepicker-toggle matIconSuffix [for]="endPicker"></mat-datepicker-toggle>
+            <mat-datepicker #endPicker></mat-datepicker>
+          </mat-form-field>
+        </div>
+      </div>
+
+      <div class="flex m-t-12" style="justify-content: flex-end; gap: 16px;">
+        <button mat-stroked-button class="btn-rounded Cancel_Button" type="button" (click)="closeForm()">
+          <mat-icon>close</mat-icon> Cancel
+        </button>
+        <button mat-flat-button class="btn-rounded btn-gradient" type="submit" [disabled]="!auto.valid">
+          <mat-icon>auto_graph</mat-icon> Calculate Now
+        </button>
+      </div>
+    </form>
+    }
+
+  </mat-card-content>
+  }
+
+</mat-card>

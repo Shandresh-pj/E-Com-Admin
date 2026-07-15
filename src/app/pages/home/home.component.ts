@@ -13,8 +13,12 @@ import {
   ChangeDetectorRef,
   NgZone,
 } from '@angular/core';
-import { isPlatformBrowser } from '@angular/common';
+import { isPlatformBrowser, CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
+import { MatDialog } from '@angular/material/dialog';
+import { MaterialModule } from 'src/app/material.module';
+import { SubscriptionService, SubscriptionPlan } from 'src/app/services/subscription.service';
+import { SubscriptionCheckoutModalComponent } from 'src/app/components/subscription-checkout-modal/subscription-checkout-modal.component';
 
 export interface AiFeature {
   icon: string;
@@ -48,7 +52,7 @@ export interface FaqItem {
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [RouterModule],
+  imports: [RouterModule, CommonModule, MaterialModule],
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -78,17 +82,33 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
 
   // Owl-Carousel Pricing state
   activePriceSlide = signal(1); // 0: Starter, 1: Professional (default), 2: Business, 3: Enterprise
+  pricingPlans = signal<SubscriptionPlan[]>([]);
 
   nextPriceSlide() {
-    this.activePriceSlide.set((this.activePriceSlide() + 1) % 4);
+    const len = this.pricingPlans().length || 4;
+    this.activePriceSlide.set((this.activePriceSlide() + 1) % len);
   }
 
   prevPriceSlide() {
-    this.activePriceSlide.set((this.activePriceSlide() - 1 + 4) % 4);
+    const len = this.pricingPlans().length || 4;
+    this.activePriceSlide.set((this.activePriceSlide() - 1 + len) % len);
   }
 
   goToPriceSlide(index: number) {
     this.activePriceSlide.set(index);
+  }
+
+  openSubscriptionModal(plan: SubscriptionPlan, mode: 'trial' | 'pay') {
+    this.dialog.open(SubscriptionCheckoutModalComponent, {
+      width: '580px',
+      maxWidth: '95vw',
+      panelClass: 'cyber-modal-overlay',
+      data: {
+        plan,
+        billingCycle: this.billingCycle(),
+        initialMode: mode
+      }
+    });
   }
 
   // Visibility tracking
@@ -284,10 +304,17 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
   constructor(
     @Inject(PLATFORM_ID) private platformId: Object,
     private cdr: ChangeDetectorRef,
-    private ngZone: NgZone
+    private ngZone: NgZone,
+    private subscriptionService: SubscriptionService,
+    private dialog: MatDialog
   ) {}
 
   ngOnInit() {
+    this.subscriptionService.getPlans().subscribe((plans) => {
+      this.pricingPlans.set(plans);
+      this.cdr.markForCheck();
+    });
+
     if (!isPlatformBrowser(this.platformId)) return;
 
     // Scroll listener for nav
@@ -329,10 +356,22 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
           }
         });
       },
-      { threshold: 0.1, rootMargin: '0px 0px -40px 0px' }
+      { threshold: 0.05, rootMargin: '0px 0px -20px 0px' }
     );
 
-    revealTargets.forEach((el) => obs.observe(el));
+    revealTargets.forEach((el) => {
+      obs.observe(el);
+      // Fallback check for elements already in viewport on load
+      const rect = el.getBoundingClientRect();
+      if (rect.top <= window.innerHeight * 0.95) {
+        el.classList.add('revealed');
+        const sectionId = (el as HTMLElement).dataset['reveal'];
+        if ((sectionId === 'stats' || sectionId === 'telemetry') && !this.countersStarted) {
+          this.countersStarted = true;
+          this.startCounters();
+        }
+      }
+    });
     this.observers.push(obs);
   }
 
@@ -410,6 +449,28 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
     // Lock/unlock body scroll
     if (isPlatformBrowser(this.platformId)) {
       document.body.style.overflow = next ? 'hidden' : '';
+    }
+  }
+
+  scrollToSection(event: Event, sectionId: string) {
+    if (event) {
+      event.preventDefault();
+    }
+    if (this.mobileMenuOpen()) {
+      this.toggleMobileMenu();
+    }
+    if (isPlatformBrowser(this.platformId)) {
+      const el = document.getElementById(sectionId);
+      if (el) {
+        const navHeight = 110;
+        const elementPosition = el.getBoundingClientRect().top;
+        const offsetPosition = elementPosition + window.pageYOffset - navHeight;
+
+        window.scrollTo({
+          top: offsetPosition,
+          behavior: 'smooth'
+        });
+      }
     }
   }
 

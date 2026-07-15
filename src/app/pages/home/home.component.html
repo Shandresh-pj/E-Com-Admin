@@ -34,25 +34,25 @@
       <!-- Island Center Navigation Pills -->
       <ul class="island-links" role="list">
         <li>
-          <a href="#features" class="island-link">
+          <a href="#features" class="island-link" (click)="scrollToSection($event, 'features')">
             <span class="link-txt">Architecture</span>
             <span class="link-beam"></span>
           </a>
         </li>
         <li>
-          <a href="#modules" class="island-link">
+          <a href="#modules" class="island-link" (click)="scrollToSection($event, 'modules')">
             <span class="link-txt">18 AI Modules</span>
             <span class="link-beam"></span>
           </a>
         </li>
         <li>
-          <a href="#pricing" class="island-link">
+          <a href="#pricing" class="island-link" (click)="scrollToSection($event, 'pricing')">
             <span class="link-txt">Transparent Pricing</span>
             <span class="link-beam"></span>
           </a>
         </li>
         <li>
-          <a href="#faq" class="island-link">
+          <a href="#faq" class="island-link" (click)="scrollToSection($event, 'faq')">
             <span class="link-txt">Knowledge Base</span>
             <span class="link-beam"></span>
           </a>
@@ -104,22 +104,22 @@
       </div>
 
       <nav class="lg-drawer__nav" aria-label="Mobile navigation links">
-        <a href="#features" class="lg-drawer__link" (click)="toggleMobileMenu()">
+        <a href="#features" class="lg-drawer__link" (click)="scrollToSection($event, 'features')">
           <span class="lg-drawer__link-icon">✦</span>
           <span>Features</span>
           <span class="lg-drawer__link-arrow">→</span>
         </a>
-        <a href="#modules" class="lg-drawer__link" (click)="toggleMobileMenu()">
+        <a href="#modules" class="lg-drawer__link" (click)="scrollToSection($event, 'modules')">
           <span class="lg-drawer__link-icon">⬡</span>
           <span>Modules</span>
           <span class="lg-drawer__link-arrow">→</span>
         </a>
-        <a href="#pricing" class="lg-drawer__link" (click)="toggleMobileMenu()">
+        <a href="#pricing" class="lg-drawer__link" (click)="scrollToSection($event, 'pricing')">
           <span class="lg-drawer__link-icon">◈</span>
           <span>Pricing</span>
           <span class="lg-drawer__link-arrow">→</span>
         </a>
-        <a href="#faq" class="lg-drawer__link" (click)="toggleMobileMenu()">
+        <a href="#faq" class="lg-drawer__link" (click)="scrollToSection($event, 'faq')">
           <span class="lg-drawer__link-icon">◎</span>
           <span>FAQ</span>
           <span class="lg-drawer__link-arrow">→</span>
@@ -337,7 +337,7 @@
 
       <div class="ai-grid">
         @for (f of aiFeatures; track $index; let i = $index) {
-        <div class="ai-card" [style.animation-delay]="(i * 40) + 'ms'" data-reveal="ai-c">
+        <div class="ai-card" [style.animation-delay]="(i * 40) + 'ms'" [style.--card-delay]="(i * 40) + 'ms'" data-reveal="ai-c">
           <div class="ai-glow"></div>
           <span class="ai-icon">{{f.icon}}</span>
           <span class="ai-tag">{{f.tag}}</span>
@@ -359,7 +359,7 @@
 
       <div class="mod-grid">
         @for (m of modules; track $index; let i = $index) {
-        <div class="mod-card" [style.animation-delay]="(i * 35) + 'ms'" data-reveal="mod-c">
+        <div class="mod-card" [style.animation-delay]="(i * 35) + 'ms'" [style.--card-delay]="(i * 35) + 'ms'" data-reveal="mod-c">
           <span class="mod-icon">{{m.icon}}</span>
           <div class="mod-name">{{m.title}}</div>
           <div class="mod-desc">{{m.desc}}</div>
@@ -623,7 +623,7 @@
 
       <div class="workflow-grid">
         @for (s of workflowSteps; track $index; let i = $index) {
-        <div class="wf-card" [style.animation-delay]="(i * 80) + 'ms'" data-reveal="wf-c">
+        <div class="wf-card" [style.animation-delay]="(i * 80) + 'ms'" [style.--card-delay]="(i * 80) + 'ms'" data-reveal="wf-c">
           <div class="wf-num">{{s.num}}</div>
           <div class="wf-title">{{s.title}}</div>
           <div class="wf-desc">{{s.desc}}</div>
@@ -657,7 +657,7 @@
         {icon:'🌐',title:'Multi-Branch Ready',desc:'Manage unlimited branches, warehouses, and regions from a single
         unified platform.',pts:['Consolidated reporting','Branch-level permissions','Inter-branch stock transfers']}
         ]; track $index; let i = $index) {
-        <div class="feat-card" [style.animation-delay]="(i * 70) + 'ms'" data-reveal="feat-c">
+        <div class="feat-card" [style.animation-delay]="(i * 70) + 'ms'" [style.--card-delay]="(i * 70) + 'ms'" data-reveal="feat-c">
           <div class="feat-icon-box"><span>{{f.icon}}</span></div>
           <div class="feat-title">{{f.title}}</div>
           <div class="feat-desc">{{f.desc}}</div>
@@ -882,9 +882,10 @@
 
       <div class="testi-grid">
         @for (t of testimonials; track $index; let i = $index) {
-        <div class="testi-card" [style.animation-delay]="(i * 70) + 'ms'" data-reveal="testi-c">
-          <div class="t-stars">@for (s of [1,2,3,4,5]; track s) {
-            <span>★</span>
+        <div class="testi-card" [style.animation-delay]="(i * 70) + 'ms'" [style.--card-delay]="(i * 70) + 'ms'" data-reveal="testi-c">
+          <div class="t-stars">
+            @for (s of [1,2,3,4,5]; track s) {
+              <span>★</span>
             }
           </div>
           <p class="t-text">"{{t.text}}"</p>
@@ -925,173 +926,58 @@
             Yearly Billing <span class="save-chip liquid-save">SAVE 20%</span>
           </span>
         </div>
+
+        <!-- 14-Day Free Trial Highlight Banner -->
+        <div class="trial-highlight-banner liquid-trial-banner">
+          <div class="trial-banner-icon">🎁</div>
+          <div class="trial-banner-content">
+            <span class="trial-banner-title">14-Day Free Trial Available on All Standard & Pro Plans</span>
+            <span class="trial-banner-desc">No credit card or payment authorization required to start your trial. Test all 18 AI & ERP modules instantly!</span>
+          </div>
+          <div class="trial-banner-badge">INSTANT ACCESS</div>
+        </div>
       </div>
-
-      <!-- Owl-Carousel Navigation Header -->
-      <!-- <div class="owl-carousel-header">
-                                          <div class="owl-slide-pills">
-                                            <button type="button" class="owl-pill" [class.active]="activePriceSlide() === 0" (click)="goToPriceSlide(0)">
-                                              <span>14-Day Free</span>
-                                            </button>
-                                            <button type="button" class="owl-pill pop-pill" [class.active]="activePriceSlide() === 1"
-                                              (click)="goToPriceSlide(1)">
-                                              <span>Professional ★ RECOMMENDED</span>
-                                            </button>
-                                            <button type="button" class="owl-pill" [class.active]="activePriceSlide() === 2" (click)="goToPriceSlide(2)">
-                                              <span>Business Scale</span>
-                                            </button>
-                                            <button type="button" class="owl-pill" [class.active]="activePriceSlide() === 3" (click)="goToPriceSlide(3)">
-                                              <span>Enterprise Custom</span>
-                                            </button>
-                                          </div>
-
-                                          <div class="owl-arrows">
-                                            <button type="button" class="owl-arrow-btn" (click)="prevPriceSlide()" aria-label="Previous Pricing Tier">
-                                              <svg viewBox="0 0 24 24" fill="none">
-                                                <path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
-                                                  stroke-linejoin="round" />
-                                                </svg>
-                                              </button>
-                                              <span class="owl-slide-indicator">{{ activePriceSlide() + 1 }} / 4</span>
-                                              <button type="button" class="owl-arrow-btn" (click)="nextPriceSlide()" aria-label="Next Pricing Tier">
-                                                <svg viewBox="0 0 24 24" fill="none">
-                                                  <path d="M9 18L15 12L9 6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
-                                                    stroke-linejoin="round" />
-                                                  </svg>
-                                                </button>
-                                              </div>
-                                            </div> -->
 
       <!-- Owl-Carousel Interactive Stage -->
       <div class="owl-pricing-stage">
-        <!-- Slide 0: Starter / Trial Hybrid -->
-        <div class="owl-slide-item" [class.active-slide]="activePriceSlide() === 0">
-          <div class="price-card liquid-price-card owl-card">
-            <div class="pc-tier-badge">INSTANT TRIAL TO STARTER</div>
-            <div class="pc-name">Starter Hub</div>
+        @for (plan of pricingPlans(); track plan.id; let i = $index) {
+        <div class="owl-slide-item" [class.active-slide]="activePriceSlide() === i">
+          <div class="price-card liquid-price-card owl-card" [class.pop-liquid-card]="plan.recommended" [class.featured-owl-card]="plan.recommended">
+            <div [class]="plan.recommended ? 'pc-pop-badge' : 'pc-tier-badge'">{{ plan.badge }}</div>
+            <div class="pc-name">{{ plan.name }}</div>
             <div class="pc-price">
-              {{ billingCycle() === 'Monthly' ? '₹299' : '₹1,599' }}
-              <span class="per">/ month</span>
+              @if (plan.monthlyPrice === 0) {
+                Custom<span class="per">/ year</span>
+              } @else {
+                ₹{{ billingCycle() === 'Monthly' ? plan.monthlyPrice.toLocaleString('en-IN') : plan.yearlyPrice.toLocaleString('en-IN') }}
+                <span class="per">/ month</span>
+              }
             </div>
-            <div class="pc-desc">Designed for independent retail locations scaling digital & offline operations.</div>
+            <div class="pc-desc">{{ plan.description }}</div>
             <ul class="pc-feats">
-              <li><svg viewBox="0 0 24 24" fill="none" class="feat-check">
-                  <path d="M5 13L9 17L19 7" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
-                    stroke-linejoin="round" />
-                </svg> Up to 1,000 SKUs</li>
-              <li><svg viewBox="0 0 24 24" fill="none" class="feat-check">
-                  <path d="M5 13L9 17L19 7" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
-                    stroke-linejoin="round" />
-                </svg> 1 primary branch access</li>
-              <li><svg viewBox="0 0 24 24" fill="none" class="feat-check">
-                  <path d="M5 13L9 17L19 7" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
-                    stroke-linejoin="round" />
-                </svg> 5 team user accounts</li>
-              <li><svg viewBox="0 0 24 24" fill="none" class="feat-check">
-                  <path d="M5 13L9 17L19 7" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
-                    stroke-linejoin="round" />
-                </svg> Automated GST e-invoicing</li>
+              @for (feat of plan.features; track feat.text) {
+              <li>
+                <svg viewBox="0 0 24 24" fill="none" class="feat-check" [class.text-purple]="feat.highlight || plan.recommended">
+                  <path d="M5 13L9 17L19 7" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+                <span [class.feat-highlight]="feat.highlight">{{ feat.text }}</span>
+              </li>
+              }
             </ul>
-            <a [routerLink]="['/contact']" [queryParams]="{ plan: 'Starter', cycle: billingCycle() }"
-              class="pc-cta liquid-cta">Launch Starter Tier →</a>
-          </div>
-        </div>
 
-        <!-- Slide 1: Professional (Recommended) -->
-        <div class="owl-slide-item" [class.active-slide]="activePriceSlide() === 1">
-          <div class="price-card liquid-price-card pop-liquid-card owl-card featured-owl-card">
-            <div class="pc-pop-badge">RECOMMENDED MULTI-BRANCH ERP</div>
-            <div class="pc-name">Professional</div>
-            <div class="pc-price">
-              {{ billingCycle() === 'Monthly' ? '₹499' : '₹5,499' }}
-              <span class="per">/ month</span>
+            <div class="pc-cta-group">
+              @if (plan.hasFreeTrial) {
+              <button type="button" class="pc-cta trial-cta" (click)="openSubscriptionModal(plan, 'trial')">
+                🎁 14-Day Free Trial
+              </button>
+              }
+              <button type="button" class="pc-cta pay-cta" [class.liquid-cta-pop]="plan.recommended" [class.liquid-cta]="!plan.recommended" (click)="openSubscriptionModal(plan, 'pay')">
+                {{ plan.monthlyPrice === 0 ? '💬 Request Quote →' : '⚡ Pay via Razorpay →' }}
+              </button>
             </div>
-            <div class="pc-desc">Perfect for multi-location businesses needing live omnichannel sync.</div>
-            <ul class="pc-feats">
-              <li><svg viewBox="0 0 24 24" fill="none" class="feat-check text-purple">
-                  <path d="M5 13L9 17L19 7" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
-                    stroke-linejoin="round" />
-                </svg> Up to 10,000 SKUs</li>
-              <li><svg viewBox="0 0 24 24" fill="none" class="feat-check text-purple">
-                  <path d="M5 13L9 17L19 7" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
-                    stroke-linejoin="round" />
-                </svg> Up to 3 branch locations</li>
-              <li><svg viewBox="0 0 24 24" fill="none" class="feat-check text-purple">
-                  <path d="M5 13L9 17L19 7" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
-                    stroke-linejoin="round" />
-                </svg> 20 team user accounts</li>
-              <li><svg viewBox="0 0 24 24" fill="none" class="feat-check text-purple">
-                  <path d="M5 13L9 17L19 7" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
-                    stroke-linejoin="round" />
-                </svg> Gemini AI Autopilot forecasting</li>
-              <li><svg viewBox="0 0 24 24" fill="none" class="feat-check text-purple">
-                  <path d="M5 13L9 17L19 7" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
-                    stroke-linejoin="round" />
-                </svg> Multi-level PO approvals</li>
-            </ul>
-            <a [routerLink]="['/contact']" [queryParams]="{ plan: 'Professional', cycle: billingCycle() }"
-              class="pc-cta liquid-cta-pop">Deploy Professional Suite →</a>
           </div>
         </div>
-
-        <!-- Slide 2: Business -->
-        <div class="owl-slide-item" [class.active-slide]="activePriceSlide() === 2">
-          <div class="price-card liquid-price-card owl-card">
-            <div class="pc-tier-badge">SCALING ENTERPRISE CHAINS</div>
-            <div class="pc-name">Business Scale</div>
-            <div class="pc-price">
-              {{ billingCycle() === 'Monthly' ? '₹799' : '₹8,499' }}
-              <span class="per">/ month</span>
-            </div>
-            <div class="pc-desc">Full 18-module ERP access for growing enterprise chains across India.</div>
-            <ul class="pc-feats">
-              <li><svg viewBox="0 0 24 24" fill="none" class="feat-check">
-                  <path d="M5 13L9 17L19 7" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
-                    stroke-linejoin="round" />
-                </svg> Unlimited SKUs</li>
-              <li><svg viewBox="0 0 24 24" fill="none" class="feat-check">
-                  <path d="M5 13L9 17L19 7" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
-                    stroke-linejoin="round" />
-                </svg> Up to 10 branch locations</li>
-              <li><svg viewBox="0 0 24 24" fill="none" class="feat-check">
-                  <path d="M5 13L9 17L19 7" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
-                    stroke-linejoin="round" />
-                </svg> 50 team user accounts</li>
-              <li><svg viewBox="0 0 24 24" fill="none" class="feat-check">
-                  <path d="M5 13L9 17L19 7" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
-                    stroke-linejoin="round" />
-                </svg> Complete 18 AI ERP modules</li>
-            </ul>
-            <a [routerLink]="['/contact']" [queryParams]="{ plan: 'Business', cycle: billingCycle() }"
-              class="pc-cta liquid-cta">Choose Business Suite →</a>
-          </div>
-        </div>
-
-        <!-- Slide 3: Enterprise Custom -->
-        <div class="owl-slide-item" [class.active-slide]="activePriceSlide() === 3">
-          <div class="price-card liquid-price-card owl-card">
-            <div class="pc-tier-badge">BESPOKE ARCHITECTURE</div>
-            <div class="pc-name">Enterprise Custom</div>
-            <div class="pc-price">Custom<span class="per">/ year</span></div>
-            <div class="pc-desc">Dedicated cloud instance, custom SLA, bespoke SAP/Oracle sync.</div>
-            <ul class="pc-feats">
-              <li><svg viewBox="0 0 24 24" fill="none" class="feat-check">
-                  <path d="M5 13L9 17L19 7" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
-                    stroke-linejoin="round" />
-                </svg> Unlimited branch locations</li>
-              <li><svg viewBox="0 0 24 24" fill="none" class="feat-check">
-                  <path d="M5 13L9 17L19 7" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
-                    stroke-linejoin="round" />
-                </svg> Custom private cloud VPC</li>
-              <li><svg viewBox="0 0 24 24" fill="none" class="feat-check">
-                  <path d="M5 13L9 17L19 7" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
-                    stroke-linejoin="round" />
-                </svg> Dedicated Solutions Architect</li>
-            </ul>
-            <a [routerLink]="['/contact']" [queryParams]="{ plan: 'Enterprise', cycle: billingCycle() }"
-              class="pc-cta liquid-cta">Request Enterprise Quote →</a>
-          </div>
-        </div>
+        }
       </div>
 
       <div class="pricing-referral-note liquid-note">
@@ -1262,19 +1148,19 @@
       <div class="footer-col">
         <h4>Enterprise Core</h4>
         <ul>
-          <li><a href="#features" class="footer-link">Quantum Features</a></li>
-          <li><a href="#modules" class="footer-link">18 ERP Modules</a></li>
-          <li><a href="#pricing" class="footer-link">Transparent Tiers</a></li>
-          <li><a href="#ai" class="footer-link">Gemini AI Autopilot</a></li>
+          <li><a href="#features" class="footer-link" (click)="scrollToSection($event, 'features')">Quantum Features</a></li>
+          <li><a href="#modules" class="footer-link" (click)="scrollToSection($event, 'modules')">18 ERP Modules</a></li>
+          <li><a href="#pricing" class="footer-link" (click)="scrollToSection($event, 'pricing')">Transparent Tiers</a></li>
+          <li><a href="#ai" class="footer-link" (click)="scrollToSection($event, 'ai')">Gemini AI Autopilot</a></li>
         </ul>
       </div>
 
       <div class="footer-col">
         <h4>Solutions & Sync</h4>
         <ul>
-          <li><a href="#features" class="footer-link">Multi-Branch Retail</a></li>
-          <li><a href="#features" class="footer-link">Wholesale & B2B</a></li>
-          <li><a href="#features" class="footer-link">Automated Invoicing</a></li>
+          <li><a href="#features" class="footer-link" (click)="scrollToSection($event, 'features')">Multi-Branch Retail</a></li>
+          <li><a href="#features" class="footer-link" (click)="scrollToSection($event, 'features')">Wholesale & B2B</a></li>
+          <li><a href="#features" class="footer-link" (click)="scrollToSection($event, 'features')">Automated Invoicing</a></li>
           <li><a routerLink="/contact" class="footer-link">Custom API Gateway</a></li>
         </ul>
       </div>

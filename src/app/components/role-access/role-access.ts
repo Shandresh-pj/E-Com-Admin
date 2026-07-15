@@ -336,61 +336,46 @@ export class RoleAccess implements OnInit {
 
     this.matrixLoading = true;
 
-    const requests: any[] = [];
-
-    // Grant newly-checked permissions (CREATE only — backend sets status ACTIVE on creation)
+    const grants: any[] = [];
     for (const permId of this.workingAssignments) {
       if (this.assignedMap.has(permId)) continue; // already exists, no change needed
 
       const details = this.findPermissionDetails(permId);
       if (!details) continue;
 
-      const payload = {
-        role_id: this.selectedRoleId,
+      grants.push({
         permission_id: permId,
-        company_id: this.selectedCompanyId,
-        branch_id: this.selectedBranchId,
-        user_id: this.selectedUserId,
         canApprove: details.action === 'APPROVE',
-      };
-
-      requests.push(
-        this.commonService.postApi('role-access', payload).pipe(
-          catchError((err) => of({ error: true, id: permId, message: err?.error?.message }))
-        )
-      );
+      });
     }
 
-    // Revoke unchecked permissions (DELETE)
+    const revokes: number[] = [];
     for (const [permId, recordId] of this.assignedMap.entries()) {
       if (this.workingAssignments.has(permId)) continue; // still checked, keep it
-
-      requests.push(
-        this.commonService.deleteApi(`role-access/${recordId}`).pipe(
-          catchError((err) => of({ error: true, id: permId, message: err?.error?.message }))
-        )
-      );
+      revokes.push(recordId);
     }
 
-    if (requests.length === 0) {
+    if (grants.length === 0 && revokes.length === 0) {
       this.matrixLoading = false;
       this.cdr.detectChanges();
       return;
     }
 
-    const results: any[] = [];
-    concat(...requests).subscribe({
-      next: (res: any) => { results.push(res); },
-      complete: () => {
+    const payload = {
+      role_id: this.selectedRoleId,
+      company_id: this.selectedCompanyId,
+      branch_id: this.selectedBranchId,
+      user_id: this.selectedUserId,
+      grants,
+      revokes,
+    };
+
+    this.commonService.postApi('role-access', payload).subscribe({
+      next: (res: any) => {
         this.matrixLoading = false;
         this.cdr.detectChanges();
-        const failed = results.filter(r => r && r.error);
-        if (failed.length > 0) {
-          this.alert.error(`Some changes failed: ${failed.map(f => f.message || 'Unknown error').join(', ')}`);
-        } else {
-          this.alert.success('Permissions updated successfully');
-          this.permissionService.permissionsUpdated.set(Date.now());
-        }
+        this.alert.success(res?.message || 'Permissions updated successfully');
+        this.permissionService.permissionsUpdated.set(Date.now());
         this.tryLoadMatrix();
       },
       error: (err: any) => {

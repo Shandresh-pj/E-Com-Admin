@@ -16,8 +16,16 @@
   align-items: center;
   justify-content: center;
   overflow-x: hidden;
+  overflow-y: auto; // Bug fix: allow scroll when content overflows viewport height
   padding: 30px 16px;
   box-sizing: border-box;
+
+  // Bug Fix: Prevent horizontal overflow on all screen sizes
+  @media (max-width: 400px) {
+    padding: 20px 12px;
+    align-items: flex-start; // Allow scroll on small screens
+    padding-top: 24px;
+  }
 
   * {
     box-sizing: border-box;
@@ -77,7 +85,7 @@
     mask-image: radial-gradient(circle at center, black 45%, transparent 88%);
   }
 
-  // Animated Cyber Particles
+  // Animated Cyber Particles — bug fix: added x-axis drift
   .cyber-particle {
     position: absolute;
     width: 4px;
@@ -90,13 +98,25 @@
 
   .p1 { top: 20%; left: 15%; animation-delay: 0s; }
   .p2 { top: 75%; left: 80%; background: #93c5fd; box-shadow: 0 0 12px #93c5fd; animation-delay: -3s; }
-  .p3 { top: 80%; left: 25%; background: #c4b5fd; box-shadow: 0 0 12px #c4b5fd; animation-delay: -6s; }
-  .p4 { top: 25%; left: 85%; background: #6ee7b7; box-shadow: 0 0 12px #6ee7b7; animation-delay: -2s; }
+  .p3 { top: 80%; left: 25%; background: #c4b5fd; box-shadow: 0 0 12px #c4b5fd; animation-delay: -6s; animation-name: floatParticle2; }
+  .p4 { top: 25%; left: 85%; background: #6ee7b7; box-shadow: 0 0 12px #6ee7b7; animation-delay: -2s; animation-name: floatParticle3; }
 }
 
 @keyframes floatParticle {
-  0%, 100% { transform: translateY(0) scale(1); opacity: 0.8; }
-  50% { transform: translateY(-40px) scale(1.5); opacity: 1; }
+  0%, 100% { transform: translateY(0) translateX(0) scale(1); opacity: 0.8; }
+  33% { transform: translateY(-30px) translateX(18px) scale(1.3); opacity: 1; }
+  66% { transform: translateY(-20px) translateX(-12px) scale(1.1); opacity: 0.9; }
+}
+
+@keyframes floatParticle2 {
+  0%, 100% { transform: translateY(0) translateX(0) scale(1); opacity: 0.8; }
+  40% { transform: translateY(-40px) translateX(-20px) scale(1.5); opacity: 1; }
+  70% { transform: translateY(-10px) translateX(15px) scale(0.9); opacity: 0.7; }
+}
+
+@keyframes floatParticle3 {
+  0%, 100% { transform: translateY(0) translateX(0) scale(1); opacity: 0.8; }
+  50% { transform: translateY(-24px) translateX(10px) scale(1.4); opacity: 1; }
 }
 
 @keyframes authFloat {
@@ -114,9 +134,19 @@
   display: flex;
   flex-direction: column;
   gap: 20px;
-  animation: authScaleUp 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  // Bug Fix: prevent overflow on very small screens
+  padding: 0;
+  box-sizing: border-box;
+
+  @media (max-width: 400px) {
+    max-width: 100%;
+    gap: 16px;
+  }
+
+  animation: morphIn 0.7s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
+// Premium morphIn 3D perspective entrance (replaces authScaleUp)
 @keyframes authScaleUp {
   from {
     opacity: 0;
@@ -125,6 +155,19 @@
   to {
     opacity: 1;
     transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes morphIn {
+  0% {
+    opacity: 0;
+    transform: perspective(800px) rotateX(6deg) translateY(28px) scale(0.96);
+    filter: blur(4px);
+  }
+  100% {
+    opacity: 1;
+    transform: perspective(800px) rotateX(0deg) translateY(0) scale(1);
+    filter: blur(0);
   }
 }
 
@@ -228,15 +271,21 @@
     position: absolute;
     top: 0;
     left: -100%;
-    width: 60%;
+    // Bug fix: widened beam to cover full card width
+    width: 80%;
     height: 2px;
-    background: linear-gradient(90deg, transparent, #06b6d4, #6ee7b7, transparent);
-    animation: scannerBeam 4s infinite cubic-bezier(0.4, 0, 0.2, 1);
+    background: linear-gradient(90deg, transparent, #06b6d4, #6ee7b7, #818cf8, transparent);
+    animation: scannerBeam 3.5s infinite cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   @media (max-width: 480px) {
-    padding: 26px 20px;
+    padding: 26px 18px;
     border-radius: 18px;
+  }
+
+  @media (max-width: 360px) {
+    padding: 22px 14px;
+    border-radius: 14px;
   }
 }
 
@@ -378,11 +427,20 @@
     }
   }
 
-  // Material field custom styling inside dark glass
+  // Bug Fix: Material field focus color corrected to brand purple
   .field-custom {
     .mat-mdc-text-field-wrapper {
       background: rgba(255, 255, 255, 0.05) !important;
       border-radius: 10px !important;
+    }
+
+    // Override Material's default blue focus ring with brand purple
+    &.mat-focused .mat-mdc-notched-outline .mat-mdc-notched-outline-thick {
+      border-color: #6366f1 !important;
+    }
+
+    .mat-mdc-form-field-focus-overlay {
+      background-color: rgba(99, 102, 241, 0.05) !important;
     }
 
     input {
@@ -409,6 +467,7 @@
     position: relative;
     width: 100%;
     height: 52px;
+    min-height: 52px; // Bug fix: prevent collapse on small screens
     border-radius: 12px !important;
     font-size: 15px !important;
     font-weight: 700 !important;
@@ -528,6 +587,14 @@
   gap: 12px;
   padding: 0 4px;
   font-size: 12.5px;
+
+  // Bug fix: prevent overflow on very small screens
+  @media (max-width: 400px) {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 6px;
+  }
 
   .back-home-link {
     color: #94a3b8;

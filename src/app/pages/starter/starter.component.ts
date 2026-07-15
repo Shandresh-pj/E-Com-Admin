@@ -8,6 +8,7 @@ import { TablerIconsModule } from 'angular-tabler-icons';
 import { AppProfitExpensesComponent } from 'src/app/components/profit-expenses/profit-expenses.component';
 import { AppTrafficDistributionComponent } from 'src/app/components/traffic-distribution/traffic-distribution.component';
 import { AppProductSalesComponent } from 'src/app/components/product-sales/product-sales.component';
+import { SubscriptionPlansComponent } from '../subscription-plans/subscription-plans.component';
 
 import { AuthService } from 'src/app/Securities/Services/auth.service';
 import { CommonService } from 'src/app/Securities/Services/common.service';
@@ -25,6 +26,7 @@ import { UserType } from 'src/app/Securities/Models/role-access';
     AppProfitExpensesComponent,
     AppTrafficDistributionComponent,
     AppProductSalesComponent,
+    SubscriptionPlansComponent,
   ],
   templateUrl: './starter.component.html',
   styleUrl: './starter.component.scss',

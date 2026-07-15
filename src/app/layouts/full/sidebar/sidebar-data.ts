@@ -130,6 +130,20 @@ export const navItems: NavItem[] = [
     bgcolor: 'warning',
     roles: [SA, A, BM, SK]
   },
+  {
+    displayName: 'Manage Plans',
+    iconName: 'diamond',
+    route: '/manage-subscription-plans',
+    bgcolor: 'secondary',
+    roles: [SA, A]
+  },
+  {
+    displayName: 'Upgrade Plan',
+    iconName: 'premium-rights',
+    route: '/subscription-plans',
+    bgcolor: 'primary',
+    roles: [SA, A, BM]
+  },
 
   { navCap: 'Audit', roles: [SA, A] },
   {

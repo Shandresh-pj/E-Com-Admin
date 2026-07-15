@@ -60,6 +60,15 @@ export const routes: Routes = [
       },
 
       {
+        path: 'subscription-plans',
+        loadComponent: () => 
+          import('./pages/subscription-plans/subscription-plans.component')
+            .then(m => m.SubscriptionPlansComponent),
+        title: 'Subscription Plans'
+      },
+
+
+      {
         path: '',
         loadChildren: () =>
           import('./pages/ui-components/ui-components.routes')

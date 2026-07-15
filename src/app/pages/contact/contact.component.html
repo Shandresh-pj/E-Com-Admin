@@ -311,6 +311,7 @@
               </div>
 
               <input type="range" min="0" max="100" [value]="sliderValue" (input)="onSliderChange($event)"
+                (mouseup)="onSliderRelease($event)" (touchend)="onSliderRelease($event)"
                 [disabled]="isVerified" class="qsec-range-input" aria-label="Enterprise Security Check Slider" />
             </div>
           </div>

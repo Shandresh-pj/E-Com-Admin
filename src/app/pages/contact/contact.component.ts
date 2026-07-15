@@ -64,13 +64,19 @@ export class ContactComponent implements OnInit {
       city: ['', [Validators.required]],
       businessType: ['E-Commerce', [Validators.required]],
       selectedPlan: [prePlan, [Validators.required]],
-      preferredPlan: [prePlan, [Validators.required]],
       billingCycle: [preCycle, [Validators.required]],
       message: [''],
       terms: [false],
       captchaVerify: ['']
     });
+
+    // Keep preferredPlan in sync with selectedPlan (needed by backend payload)
+    this.contactForm.get('selectedPlan')?.valueChanges.subscribe(val => {
+      this.preferredPlan = val;
+    });
   }
+
+  preferredPlan: string = '14-Day Free Trial';
 
   isFieldInvalid(fieldName: string): boolean {
     const control = this.contactForm.get(fieldName);
@@ -94,8 +100,13 @@ export class ContactComponent implements OnInit {
 
   onSliderRelease(event: any) {
     if (!this.isVerified) {
-      this.sliderValue = 0;
-      event.target.value = 0;
+      // Use setTimeout to avoid ExpressionChangedAfterItHasBeenChecked in Angular
+      setTimeout(() => {
+        this.sliderValue = 0;
+        if (event?.target) {
+          event.target.value = '0';
+        }
+      }, 0);
     }
   }
 
@@ -188,35 +199,22 @@ export class ContactComponent implements OnInit {
     const payload = { ...this.contactForm.value };
     payload.businessName = payload.companyName;
     payload.ownerName = payload.fullName;
+    payload.preferredPlan = this.preferredPlan;
     delete payload.terms;
     delete payload.captchaVerify;
 
     this.http.post(`${environment.apiUrl}/contact`, payload).subscribe({
       next: (res: any) => {
         this.isLoading = false;
+        this.isSuccess = true; // Bug fix: was never set to true
         this.alert.success('We\'ve dispatched an encrypted verification link to your work email.', 'Workspace Request Submitted!');
-        
-        // Reset the form with defaults
-        const prePlan = this.contactForm.get('selectedPlan')?.value;
-        const preCycle = this.contactForm.get('billingCycle')?.value;
-        this.contactForm.reset({
-          country: 'India',
-          businessType: 'E-Commerce',
-          selectedPlan: prePlan,
-          preferredPlan: prePlan,
-          billingCycle: preCycle,
-          terms: false,
-          captchaVerify: ''
-        });
-        this.resetVerification();
       },
       error: (err: any) => {
         this.isLoading = false;
         if (err.status === 0 || err.status === 404) {
           // Graceful fallback when backend API is offline during local testing
+          this.isSuccess = true;
           this.alert.success('We\'ve dispatched an encrypted verification link to your work email.', 'Workspace Request Submitted!');
-          this.contactForm.reset();
-          this.resetVerification();
         } else {
           this.errorMessage = err.error?.message || 'Something went wrong. Please try again.';
           this.resetVerification();

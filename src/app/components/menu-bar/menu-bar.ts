@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
+﻿import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { forkJoin } from 'rxjs';
 import { ReactiveFormsModule, FormsModule, FormGroup, FormBuilder, Validators } from '@angular/forms';
 import { CommonModule } from '@angular/common';
@@ -87,7 +87,9 @@ export class MenuBar implements OnInit {
     { name: 'Workforce Console', path: '/workforce', icon: 'settings', isActive: true },
     { name: 'Invoice Generator', path: '/invoices', icon: 'file-text', isActive: true },
     { name: 'Approvals', path: '/approvals', icon: 'checkbox', isActive: true },
-    { name: 'Profit & Loss', path: '/profit-loss', icon: 'chart-pie', isActive: true }
+    { name: 'Profit & Loss', path: '/profit-loss', icon: 'chart-pie', isActive: true },
+    { name: 'Manage Plans', path: '/manage-subscription-plans', icon: 'diamond', isActive: true },
+    { name: 'Upgrade Plan', path: '/subscription-plans', icon: 'star', isActive: true }
   ];
 
   constructor(
@@ -243,3 +245,4 @@ export class MenuBar implements OnInit {
     });
   }
 }
+

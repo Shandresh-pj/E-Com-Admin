@@ -1,0 +1,161 @@
+<div class="cyber-modal-container liquid-glass-panel">
+  <!-- Modal Header -->
+  <div class="modal-header">
+    <div class="hdr-title-box">
+      <div class="hdr-icon" [class.pay-icon]="mode() === 'pay'">
+        {{ mode() === 'trial' ? '🎁' : '⚡' }}
+      </div>
+      <div>
+        <h2 class="modal-title">
+          {{ mode() === 'trial' ? 'Activate 14-Day Free Trial' : 'Instant Cyber Checkout' }}
+        </h2>
+        <div class="modal-sub">
+          {{ data.plan.name }} Suite &bull; {{ data.billingCycle }} Plan
+        </div>
+      </div>
+    </div>
+    <button type="button" class="close-btn" (click)="onClose()" aria-label="Close dialog">
+      &times;
+    </button>
+  </div>
+
+  <!-- Success Screen -->
+  @if (isSuccess()) {
+  <div class="success-screen">
+    <div class="confetti-icon">🎉</div>
+    <h3 class="success-title">{{ successMessage() }}</h3>
+    <p class="success-desc">
+      Your enterprise environment has been provisioned and synced. All 18 AI & ERP modules are now operational.
+    </p>
+
+    <!-- Receipt Card -->
+    <div class="receipt-card liquid-receipt">
+      <div class="receipt-row">
+        <span>Subscribed Plan</span>
+        <strong>{{ receiptData()?.plan }}</strong>
+      </div>
+      <div class="receipt-row">
+        <span>Billing Cycle</span>
+        <strong>{{ receiptData()?.cycle }}</strong>
+      </div>
+      @if (receiptData()?.amount) {
+      <div class="receipt-row">
+        <span>Total Paid</span>
+        <strong class="text-emerald">{{ receiptData()?.amount }}</strong>
+      </div>
+      } @else {
+      <div class="receipt-row">
+        <span>Trial Expiry Date</span>
+        <strong class="text-cyan">{{ receiptData()?.expiry }}</strong>
+      </div>
+      }
+      <div class="receipt-row border-top">
+        <span>Transaction Reference</span>
+        <code>{{ receiptData()?.transactionId }}</code>
+      </div>
+    </div>
+
+    <div class="success-actions">
+      <a routerLink="/" (click)="onClose()" class="btn-dashboard">
+        <span>Launch Enterprise Console</span>
+        <span class="arrow">→</span>
+      </a>
+      <button type="button" class="btn-ghost" (click)="onClose()">Close Dialog</button>
+    </div>
+  </div>
+  } @else {
+  <!-- Mode Switcher Tabs -->
+  @if (data.plan.hasFreeTrial) {
+  <div class="mode-tabs">
+    <button type="button" class="tab-btn" [class.active]="mode() === 'trial'" (click)="setMode('trial')">
+      <span>🎁 14-Day Free Trial</span>
+      <span class="badge-tag">₹0 TODAY</span>
+    </button>
+    <button type="button" class="tab-btn" [class.active]="mode() === 'pay'" (click)="setMode('pay')">
+      <span>⚡ Pay via Razorpay</span>
+      <span class="badge-tag save-tag">SAVE 20%</span>
+    </button>
+  </div>
+  }
+
+  <!-- Form & Summary Grid -->
+  <form [formGroup]="checkoutForm" (ngSubmit)="onSubmit()" class="modal-form">
+    <div class="form-grid">
+      <div class="form-group">
+        <label for="name">Full Name *</label>
+        <input id="name" type="text" formControlName="name" placeholder="Shandresh PJ" class="cyber-input" />
+        @if (checkoutForm.get('name')?.touched && checkoutForm.get('name')?.invalid) {
+        <span class="err-text">Full name is required</span>
+        }
+      </div>
+
+      <div class="form-group">
+        <label for="email">Work Email *</label>
+        <input id="email" type="email" formControlName="email" placeholder="admin@svkecom.io" class="cyber-input" />
+        @if (checkoutForm.get('email')?.touched && checkoutForm.get('email')?.invalid) {
+        <span class="err-text">Valid work email required</span>
+        }
+      </div>
+
+      <div class="form-group">
+        <label for="phone">Mobile Number *</label>
+        <input id="phone" type="tel" formControlName="phone" placeholder="9876543210" class="cyber-input" />
+        @if (checkoutForm.get('phone')?.touched && checkoutForm.get('phone')?.invalid) {
+        <span class="err-text">10-digit phone number required</span>
+        }
+      </div>
+
+      <div class="form-group">
+        <label for="company">Company / Branch Name</label>
+        <input id="company" type="text" formControlName="company" placeholder="SVK E-Com Retail HQ" class="cyber-input" />
+      </div>
+
+      @if (mode() === 'pay') {
+      <div class="form-group full-width">
+        <label for="gstin">GSTIN (For 18% Input Tax Credit)</label>
+        <input id="gstin" type="text" formControlName="gstin" placeholder="29AAACT1234A1Z1" class="cyber-input" />
+      </div>
+      }
+    </div>
+
+    <!-- Summary Box -->
+    <div class="summary-box liquid-summary">
+      <div class="summary-title">Plan Summary</div>
+      <div class="summary-line">
+        <span>{{ data.plan.name }} Suite ({{ data.billingCycle }})</span>
+        <span>{{ mode() === 'trial' ? '₹0.00 (14 Days)' : '₹' + formattedPrice }}</span>
+      </div>
+      @if (mode() === 'pay') {
+      <div class="summary-line text-sm">
+        <span>GST (18% Included)</span>
+        <span>Included</span>
+      </div>
+      }
+      <div class="summary-total">
+        <span>Amount Due Today</span>
+        <span class="total-val">{{ mode() === 'trial' ? '₹0' : '₹' + formattedPrice }}</span>
+      </div>
+    </div>
+
+    <div class="security-note">
+      <svg viewBox="0 0 24 24" fill="none" class="sec-svg">
+        <path d="M12 22C12 22 20 18 20 12V5L12 2L4 5V12C4 18 12 22 12 22Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M9 12L11 14L15 10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <span>{{ mode() === 'trial' ? 'Instant 14-day trial without credit card lock-in.' : 'Razorpay 256-bit SSL Banking Grade Gateway.' }}</span>
+    </div>
+
+    <!-- Actions -->
+    <div class="form-actions">
+      <button type="button" class="btn-cancel" (click)="onClose()" [disabled]="loading()">Cancel</button>
+      <button type="submit" class="btn-submit" [class.btn-pay]="mode() === 'pay'" [disabled]="loading() || checkoutForm.invalid">
+        @if (loading()) {
+        <span class="spinner"></span> Processing...
+        } @else {
+        <span>{{ mode() === 'trial' ? '🎁 Activate 14-Day Free Trial' : '⚡ Proceed to Razorpay (₹' + formattedPrice + ')' }}</span>
+        }
+      </button>
+    </div>
+  </form>
+  }
+</div>

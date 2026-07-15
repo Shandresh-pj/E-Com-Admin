@@ -1,0 +1,83 @@
+<div class="pricing-page-wrapper">
+  <div class="section-wrap">
+    <div class="section-header">
+      <div class="s-badge liquid-badge">
+        <svg viewBox="0 0 24 24" fill="none" class="badge-svg">
+          <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"
+            stroke="currentColor" stroke-width="2" stroke-linejoin="round" />
+        </svg>
+        <span>TRANSPARENT ENTERPRISE TIERS</span>
+      </div>
+      <h2 class="s-title">Simple, <span class="gradient-text">Transparent Pricing</span></h2>
+      <p class="s-sub">Enterprise-grade multi-branch scaling with zero hidden costs. All tiers include automated SSL & daily backups.</p>
+
+      <div class="billing-toggle-container liquid-toggle">
+        <span class="toggle-lbl" [class.active]="billingCycle === 'Monthly'">Monthly Billing</span>
+        <button type="button" class="billing-switch" (click)="setBillingCycle(billingCycle === 'Monthly' ? 'Yearly' : 'Monthly')"
+          [attr.aria-label]="'Current billing cycle is ' + billingCycle">
+          <span class="switch-dot" [class.yearly]="billingCycle === 'Yearly'"></span>
+        </button>
+        <span class="toggle-lbl" [class.active]="billingCycle === 'Yearly'">
+          Yearly Billing <span class="save-chip liquid-save">SAVE 20%</span>
+        </span>
+      </div>
+
+      <!-- 14-Day Free Trial Highlight Banner -->
+      <div class="trial-highlight-banner liquid-trial-banner">
+        <div class="trial-banner-icon">🎁</div>
+        <div class="trial-banner-content">
+          <span class="trial-banner-title">14-Day Free Trial Available on All Standard & Pro Plans</span>
+          <span class="trial-banner-desc">No credit card or payment authorization required to start your trial. Test all 18 AI & ERP modules instantly!</span>
+        </div>
+        <div class="trial-banner-badge">INSTANT ACCESS</div>
+      </div>
+    </div>
+
+    <!-- Owl-Carousel Interactive Stage (Grid Layout for Standalone Page) -->
+    <div class="price-grid">
+      <ng-container *ngFor="let plan of plans; let i = index">
+      <div class="price-card liquid-price-card owl-card" [class.pc-pop]="plan.recommended" [class.pop-liquid-card]="plan.recommended" [class.featured-owl-card]="plan.recommended">
+        <div [class]="plan.recommended ? 'pc-pop-badge' : 'pc-tier-badge'">{{ plan.badge || (plan.recommended ? 'Most Popular' : 'Tier') }}</div>
+        <div class="pc-name">{{ plan.name }}</div>
+        <div class="pc-price">
+          <ng-container *ngIf="plan.monthlyPrice === 0">
+            Custom<span class="per">/ year</span>
+          </ng-container>
+          <ng-container *ngIf="plan.monthlyPrice > 0">
+            ₹{{ billingCycle === 'Monthly' ? (plan.monthlyPrice | number) : (plan.yearlyPrice | number) }}
+            <span class="per">/ month</span>
+          </ng-container>
+        </div>
+        <div class="pc-desc">{{ plan.description }}</div>
+        <ul class="pc-feats">
+          <li *ngFor="let feat of plan.features">
+            <svg viewBox="0 0 24 24" fill="none" class="feat-check" [class.text-purple]="feat.highlight || plan.recommended">
+              <path d="M5 13L9 17L19 7" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+            <span [class.feat-highlight]="feat.highlight">{{ feat.text ? feat.text : feat }}</span>
+          </li>
+        </ul>
+
+        <div class="pc-cta-group">
+          <ng-container *ngIf="plan.hasFreeTrial || (plan.monthlyPrice > 0 && plan.monthlyPrice < 5000)">
+            <button type="button" class="pc-cta trial-cta" (click)="openSubscriptionModal(plan, 'trial')">
+              🎁 14-Day Free Trial
+            </button>
+          </ng-container>
+          <button type="button" class="pc-cta pay-cta" [class.liquid-cta-pop]="plan.recommended" [class.liquid-cta]="!plan.recommended" (click)="openSubscriptionModal(plan, 'pay')">
+            {{ plan.monthlyPrice === 0 ? '💬 Request Quote →' : '⚡ Pay via Razorpay →' }}
+          </button>
+        </div>
+      </div>
+      </ng-container>
+    </div>
+
+    <div class="pricing-referral-note liquid-note">
+      <svg viewBox="0 0 24 24" fill="none" class="note-svg">
+        <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" stroke="currentColor" stroke-width="2" />
+        <path d="M12 8V12L15 15" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+      </svg>
+      <span>Have a referral code or multi-brand chain discount? Apply it during onboarding setup with our dedicated sales engineering team.</span>
+    </div>
+  </div>
+</div>

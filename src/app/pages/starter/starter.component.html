@@ -225,9 +225,23 @@
                 </a>
               }
 
+              @if (perm.hasRoleAction('canRead', '/subscription-plans')) {
+                <a routerLink="/subscription-plans" class="smart-nav-pill animate-zoom-in delay-8">
+                  <div class="pill-icon text-primary" style="color: #6366f1;"><mat-icon>diamond</mat-icon></div>
+                  <span class="pill-text">Subscription Plans</span>
+                </a>
+              }
+
             </div>
           </mat-card-content>
         </mat-card>
+      </div>
+    </div>
+
+    <!-- Subscription Plans Dynamic Injection -->
+    <div class="row m-b-24 animate-fade-in-up delay-6">
+      <div class="col-12">
+        <app-subscription-plans></app-subscription-plans>
       </div>
     </div>
   }

@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 import { CrmContacts } from './crm-contacts/crm-contacts';
 import { Coupons } from './coupons/coupons';
+import { SubscriptionPlansComponent } from './subscription-plans/subscription-plans';
 import { AppAdmin } from './app-admin/app-admin';
 import { Branch } from './branch/branch';
 import { Employees } from './employees/employees';
@@ -403,6 +404,16 @@ export const ComponentsRoutes: Routes = [
       title: 'Coupons Management',
       roles: [SA, A, BM, SK],
       urls: [{ title: 'Coupons', url: '/coupons' }]
+    }
+  },
+  {
+    path: 'manage-subscription-plans',
+    component: SubscriptionPlansComponent,
+    canActivate: [RoleGuard],
+    data: {
+      title: 'Subscription Plans Management',
+      roles: [SA, A],
+      urls: [{ title: 'Manage Plans', url: '/manage-subscription-plans' }]
     }
   }
 ];

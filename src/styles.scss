@@ -92,13 +92,20 @@ html.dark, html .dark-theme {
 }
 
 /* ── Base Reset ────────────────────────────────────────────────────────── */
-html, body {
-  height: 100%;
+html {
+  min-height: 100%;
+  overflow-y: auto;
+  scroll-behavior: smooth;
+}
+
+body {
+  min-height: 100vh;
   margin: 0;
   font-family: var(--font-primary);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
+  overflow-x: hidden;
 }
 
 /* ── Scrollbar Styling ─────────────────────────────────────────────────── */
@@ -111,11 +118,60 @@ html, body {
 }
 ::-webkit-scrollbar-thumb:hover { background: rgba(79, 70, 229, 0.5); }
 
-/* ── Blank Layout Wrapper ──────────────────────────────────────────────── */
+/* \u2500\u2500 Blank Layout Wrapper \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */
 .blank-wrapper {
   min-height: 100vh;
   width: 100%;
   display: block;
+  overflow-x: hidden;
+}
+
+/* \u2500\u2500 SCROLL FIX: Angular Router + Mat-Sidenav chain \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+   Root cause: mat-sidenav-container uses position:absolute on its
+   content panel + overflow:hidden, which locks the login page
+   scroll. The blank layout wraps login in mat-sidenav-container
+   so we must override it for non-sidebar layouts.
+   Also: app-root host element must not clip the document.
+   \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */
+
+/* app-root must never clip its children */
+app-root {
+  display: block;
+  min-height: 100vh;
+  overflow: visible !important;
+}
+
+/* mat-sidenav-container: override Angular Material's default
+   overflow:hidden that kills scroll on pages using blank layout */
+mat-sidenav-container.mat-sidenav-container,
+.mat-sidenav-container {
+  height: auto !important;
+  min-height: 100vh !important;
+  overflow: visible !important;
+  position: relative !important;
+}
+
+/* mat-sidenav-content: this is the actual scrollable region inside
+   the sidenav container — must be allowed to scroll */
+mat-sidenav-content,
+.mat-sidenav-content,
+.mat-drawer-content {
+  overflow: auto !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  min-height: 100vh !important;
+  /* Remove the absolute positioning that Material sets by default */
+  position: relative !important;
+  /* Ensure content height grows with children */
+  height: auto !important;
+}
+
+/* Home, Contact pages route directly (no layout) — ensure their
+   host elements scroll freely */
+app-home, app-contact {
+  display: block;
+  min-height: 100vh;
+  overflow-y: visible;
   overflow-x: hidden;
 }
 

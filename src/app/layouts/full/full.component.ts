@@ -1,4 +1,4 @@
-import { BreakpointObserver, MediaMatcher } from '@angular/cdk/layout';
+﻿import { BreakpointObserver, MediaMatcher } from '@angular/cdk/layout';
 import { Component, OnInit, ViewChild, ViewEncapsulation, effect, signal, untracked } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { MatSidenav, MatSidenavContent } from '@angular/material/sidenav';
@@ -47,14 +47,14 @@ const TABLET_VIEW = 'screen and (min-width: 769px) and (max-width: 1024px)';
 })
 export class FullComponent implements OnInit {
   // A signal (not a plain field) so the sidebar updates the instant a
-  // socket-driven permissions refresh rebuilds it — a plain field mutated
+  // socket-driven permissions refresh rebuilds it â€” a plain field mutated
   // inside an effect() isn't guaranteed to be picked up by the same
   // change-detection pass the effect ran in (Angular Signals gotcha).
   navItems = signal<NavItem[]>([]);
 
   /**
    * Sidebar items come from two sources, merged:
-   *  1. Menus granted through Permission Management (JWT `menus` — matched by path).
+   *  1. Menus granted through Permission Management (JWT `menus` â€” matched by path).
    *     Granting a menu to an admin/branch/employee makes it appear on their next login.
    *  2. The static role matrix in sidebar-data.ts (legacy fallback).
    * Super Admin always sees everything. Captions without any visible item under
@@ -313,7 +313,9 @@ export class FullComponent implements OnInit {
         { id: 28, name: 'Workforce Requests', path: '/workforce-requests', icon: 'bi-briefcase-fill', isActive: true },
         { id: 29, name: 'Leave Management', path: '/leave', icon: 'bi-calendar-x-fill', isActive: true },
         { id: 30, name: 'CRM Contacts', path: '/crm-contacts', icon: 'bi-people-fill', isActive: true },
-        { id: 31, name: 'Profit & Loss', path: '/profit-loss', icon: 'bi-pie-chart-fill', isActive: true }
+        { id: 31, name: 'Profit & Loss', path: '/profit-loss', icon: 'bi-pie-chart-fill', isActive: true },
+        { id: 32, name: 'Manage Plans', path: '/manage-subscription-plans', icon: 'bi-gem', isActive: true },
+        { id: 33, name: 'Upgrade Plan', path: '/subscription-plans', icon: 'bi-star-fill', isActive: true }
       ];
     } else {
       allowedMenus = apiMenus.filter((m: any) => {
@@ -357,7 +359,7 @@ export class FullComponent implements OnInit {
       },
       {
         navCap: 'Sales & Finance',
-        paths: ['/orders', '/payments', '/invoices', '/profit-loss', '/crm-contacts']
+        paths: ['/orders', '/payments', '/invoices', '/profit-loss', '/crm-contacts', '/subscription-plans', '/manage-subscription-plans']
       },
       {
         navCap: 'HR & Workforce',
@@ -459,7 +461,7 @@ export class FullComponent implements OnInit {
   }
 
   // A handful of Menu records store an icon "name" that was never a real
-  // Bootstrap Icons glyph (e.g. "Badge", "settings", "shopping-cart") — those
+  // Bootstrap Icons glyph (e.g. "Badge", "settings", "shopping-cart") â€” those
   // resolve to no ::before content at all (not just the wrong icon, an empty
   // slot), because bootstrap-icons only defines rules for its actual glyph
   // names. Map the known-bad ones to a real equivalent; everything else
@@ -486,3 +488,6 @@ export class FullComponent implements OnInit {
   }
 
 }
+
+
+

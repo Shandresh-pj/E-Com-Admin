@@ -1,0 +1,510 @@
+<!-- ════════════════════════════════════════════════════════════
+     Subscription Plans Management — Premium Quantum/Liquid Glass
+     Full CRUD with Live Preview, Tabbed Form, API Integration
+     ════════════════════════════════════════════════════════════ -->
+
+<div class="sp-page-wrapper">
+
+  <!-- ── Page Header ────────────────────────────────────────── -->
+  <div class="sp-page-header">
+    <div class="sp-header-left">
+      <div class="sp-header-icon">
+        <mat-icon>diamond</mat-icon>
+      </div>
+      <div>
+        <h1 class="sp-page-title">Subscription Plans</h1>
+        <p class="sp-page-subtitle">
+          @if (Subscription_Form) {
+            {{ editingPlan ? 'Edit plan — ' + editingPlan.name : 'Create a new subscription tier' }}
+          } @else {
+            Manage billing tiers, pricing &amp; Razorpay gateway IDs
+          }
+        </p>
+      </div>
+    </div>
+    <div class="sp-header-actions">
+      @if (!Subscription_Form) {
+        <button class="sp-btn sp-btn-primary" (click)="openForm()" [disabled]="isLoading">
+          <mat-icon>add_circle</mat-icon>
+          <span>New Plan</span>
+        </button>
+      } @else {
+        <button class="sp-btn sp-btn-ghost" (click)="closeForm()" [disabled]="isLoading">
+          <mat-icon>arrow_back</mat-icon>
+          <span>Back to Plans</span>
+        </button>
+      }
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════
+       TABLE VIEW
+       ═══════════════════════════════════════════════════════ -->
+  @if (!Subscription_Form) {
+
+    <!-- Stats Summary Bar -->
+    <div class="sp-stats-bar">
+      <div class="sp-stat-chip">
+        <mat-icon>layers</mat-icon>
+        <span>{{ plans.length }} Plans</span>
+      </div>
+      <div class="sp-stat-chip sp-stat-success">
+        <mat-icon>star</mat-icon>
+        <span>{{ getFeaturedCount() }} Featured</span>
+      </div>
+      <div class="sp-stat-chip sp-stat-info">
+        <mat-icon>card_giftcard</mat-icon>
+        <span>{{ plans.length > 0 ? 'Trial Active' : 'No Plans Yet' }}</span>
+      </div>
+    </div>
+
+    <!-- Loading Skeleton -->
+    @if (isLoading) {
+      <div class="sp-loading-grid">
+        @for (i of [1,2,3,4]; track i) {
+          <div class="sp-skeleton-card">
+            <div class="sk-badge"></div>
+            <div class="sk-title"></div>
+            <div class="sk-price"></div>
+            <div class="sk-line"></div>
+            <div class="sk-line sk-short"></div>
+          </div>
+        }
+      </div>
+    }
+
+    <!-- Empty State -->
+    @if (!isLoading && plans.length === 0) {
+      <div class="sp-empty-state">
+        <div class="sp-empty-icon-ring">
+          <mat-icon>diamond</mat-icon>
+        </div>
+        <h2>No Subscription Plans Yet</h2>
+        <p>Build your first pricing tier. Connect to <code>/api/subscriptions/plans</code> or create plans manually below.</p>
+        <button class="sp-btn sp-btn-primary" (click)="openForm()">
+          <mat-icon>add_circle</mat-icon>
+          <span>Create First Plan</span>
+        </button>
+      </div>
+    }
+
+    <!-- Plans Card Grid -->
+    @if (!isLoading && plans.length > 0) {
+      <div class="sp-plans-grid">
+        @for (plan of plans; track plan.id) {
+          <div class="sp-plan-card" [class.sp-plan-featured]="plan.recommended">
+            @if (plan.recommended) {
+              <div class="sp-featured-ribbon">
+                <mat-icon>star</mat-icon> Featured
+              </div>
+            }
+            <div class="sp-plan-badge">{{ plan.badge }}</div>
+            <div class="sp-plan-name">{{ plan.name }}</div>
+
+            <div class="sp-plan-price-row">
+              <div class="sp-price-block">
+                <span class="sp-price-label">Monthly</span>
+                <span class="sp-price-val">{{ plan._monthlyPriceStr }}</span>
+              </div>
+              <div class="sp-price-divider"></div>
+              <div class="sp-price-block">
+                <span class="sp-price-label">Yearly</span>
+                <span class="sp-price-val">{{ plan._yearlyPriceStr }}</span>
+              </div>
+            </div>
+
+            <p class="sp-plan-desc">{{ plan.description }}</p>
+
+            @if (plan.features?.length) {
+              <ul class="sp-plan-feats">
+                @for (feat of plan.features.slice(0, 4); track $index) {
+                  <li [class.feat-hl]="feat.highlight">
+                    <mat-icon class="feat-ic">{{ feat.highlight ? 'auto_awesome' : 'check_circle' }}</mat-icon>
+                    {{ feat.text }}
+                  </li>
+                }
+                @if (plan.features.length > 4) {
+                  <li class="feat-more">+{{ plan.features.length - 4 }} more features</li>
+                }
+              </ul>
+            }
+
+            <div class="sp-plan-meta">
+              <span class="sp-meta-tag" [class.meta-green]="plan.hasFreeTrial">
+                <mat-icon>{{ plan.hasFreeTrial ? 'card_giftcard' : 'block' }}</mat-icon>
+                {{ plan._freeTrialStr }}
+              </span>
+              <span class="sp-meta-tag" [class.meta-purple]="plan.recommended">
+                <mat-icon>{{ plan.recommended ? 'star' : 'label' }}</mat-icon>
+                {{ plan._recommendedStr }}
+              </span>
+            </div>
+
+            <div class="sp-plan-card-actions">
+              <button class="sp-icon-btn sp-edit-btn" (click)="openForm(plan)" matTooltip="Edit Plan">
+                <mat-icon>edit</mat-icon>
+              </button>
+              <button class="sp-icon-btn sp-delete-btn" (click)="deletePlan(plan)" matTooltip="Delete Plan">
+                <mat-icon>delete_outline</mat-icon>
+              </button>
+            </div>
+          </div>
+        }
+      </div>
+
+      <!-- Also show as sortable table for quick reference -->
+      <div class="sp-table-section">
+        <div class="sp-table-header">
+          <mat-icon>table_rows</mat-icon>
+          <span>Plan Catalog Overview</span>
+        </div>
+        <div class="table-responsive">
+          <app-mat-table
+            [columns]="tableColumns"
+            [tableData]="plans"
+            [showAction]="true"
+            [showView]="false"
+            [Extra_Column]="false"
+            [showEdit]="true"
+            [showDelete]="true"
+            (editClick)="openForm($event)"
+            (deleteClick)="deletePlan($event)">
+          </app-mat-table>
+        </div>
+      </div>
+    }
+
+  }
+
+  <!-- ═══════════════════════════════════════════════════════
+       INLINE FORM & LIVE PREVIEW VIEW
+       ═══════════════════════════════════════════════════════ -->
+  @else {
+
+    <div class="sp-form-wrapper">
+
+      <!-- ── Left: Tabbed Form Controls ── -->
+      <div class="sp-form-panel">
+
+        <!-- Tab Nav -->
+        <div class="sp-tab-nav">
+          <button class="sp-tab" [class.active]="activeFormTab==='basic'" (click)="setTab('basic')">
+            <mat-icon>info</mat-icon> Basic Info
+          </button>
+          <button class="sp-tab" [class.active]="activeFormTab==='pricing'" (click)="setTab('pricing')">
+            <mat-icon>payments</mat-icon> Pricing
+          </button>
+          <button class="sp-tab" [class.active]="activeFormTab==='features'" (click)="setTab('features')">
+            <mat-icon>checklist</mat-icon> Features
+          </button>
+        </div>
+
+        <form [formGroup]="planForm" class="sp-form" autocomplete="off">
+
+          <!-- ── TAB: Basic Info ── -->
+          @if (activeFormTab === 'basic') {
+            <div class="sp-tab-panel animate-fade">
+
+              <div class="sp-field-group">
+                <label class="sp-label">Plan Slug / ID <span class="req">*</span></label>
+                <mat-form-field appearance="outline" class="w-100">
+                  <mat-icon matPrefix>fingerprint</mat-icon>
+                  <input matInput formControlName="id" placeholder="e.g. professional-plan" [readonly]="!!editingPlan">
+                  <mat-hint>Lowercase letters, hyphens, underscores only. Cannot be changed after creation.</mat-hint>
+                  @if (planForm.get('id')?.invalid && planForm.get('id')?.touched) {
+                    <mat-error>Valid unique ID required (lowercase, hyphens allowed)</mat-error>
+                  }
+                </mat-form-field>
+              </div>
+
+              <div class="sp-field-row">
+                <div class="sp-field-group">
+                  <label class="sp-label">Display Name <span class="req">*</span></label>
+                  <mat-form-field appearance="outline" class="w-100">
+                    <mat-icon matPrefix>diamond</mat-icon>
+                    <input matInput formControlName="name" placeholder="e.g. Professional">
+                    @if (planForm.get('name')?.invalid && planForm.get('name')?.touched) {
+                      <mat-error>Plan name is required</mat-error>
+                    }
+                  </mat-form-field>
+                </div>
+                <div class="sp-field-group">
+                  <label class="sp-label">Tier Badge Label <span class="req">*</span></label>
+                  <mat-form-field appearance="outline" class="w-100">
+                    <mat-icon matPrefix>military_tech</mat-icon>
+                    <input matInput formControlName="badge" placeholder="e.g. RECOMMENDED MULTI-BRANCH ERP">
+                    @if (planForm.get('badge')?.invalid && planForm.get('badge')?.touched) {
+                      <mat-error>Badge label is required</mat-error>
+                    }
+                  </mat-form-field>
+                </div>
+              </div>
+
+              <div class="sp-field-group">
+                <label class="sp-label">Plan Description <span class="req">*</span></label>
+                <mat-form-field appearance="outline" class="w-100">
+                  <textarea matInput formControlName="description" rows="3"
+                    placeholder="Short value proposition for this tier (appears on pricing cards)..."></textarea>
+                  @if (planForm.get('description')?.invalid && planForm.get('description')?.touched) {
+                    <mat-error>Description is required</mat-error>
+                  }
+                </mat-form-field>
+              </div>
+
+              <div class="sp-field-row">
+                <div class="sp-field-group">
+                  <label class="sp-label">Featured / Recommended</label>
+                  <mat-form-field appearance="outline" class="w-100">
+                    <mat-select formControlName="recommended">
+                      <mat-option [value]="false">Standard (subtle card)</mat-option>
+                      <mat-option [value]="true">★ Featured (highlighted + glow border)</mat-option>
+                    </mat-select>
+                  </mat-form-field>
+                </div>
+                <div class="sp-field-group">
+                  <label class="sp-label">Free Trial Access</label>
+                  <mat-form-field appearance="outline" class="w-100">
+                    <mat-select formControlName="hasFreeTrial">
+                      <mat-option [value]="true">✅ Enable Free Trial</mat-option>
+                      <mat-option [value]="false">❌ No Trial (Direct Pay / Quote)</mat-option>
+                    </mat-select>
+                  </mat-form-field>
+                </div>
+              </div>
+
+            </div>
+          }
+
+          <!-- ── TAB: Pricing ── -->
+          @if (activeFormTab === 'pricing') {
+            <div class="sp-tab-panel animate-fade">
+
+              <div class="sp-pricing-highlight">
+                <mat-icon>info_outline</mat-icon>
+                Enter <strong>0</strong> for both prices to show <em>"Custom / contact us"</em> on the public pricing page (Enterprise tier).
+              </div>
+
+              <div class="sp-field-row">
+                <div class="sp-field-group">
+                  <label class="sp-label">Monthly Price (₹) <span class="req">*</span></label>
+                  <mat-form-field appearance="outline" class="w-100">
+                    <span matPrefix class="rupee-pfx">₹</span>
+                    <input matInput type="number" formControlName="monthlyPrice" placeholder="299" min="0">
+                    <mat-hint>Per user / per month billed monthly</mat-hint>
+                    @if (planForm.get('monthlyPrice')?.invalid && planForm.get('monthlyPrice')?.touched) {
+                      <mat-error>Valid price (≥ 0) required</mat-error>
+                    }
+                  </mat-form-field>
+                </div>
+                <div class="sp-field-group">
+                  <label class="sp-label">Yearly Price (₹) <span class="req">*</span></label>
+                  <mat-form-field appearance="outline" class="w-100">
+                    <span matPrefix class="rupee-pfx">₹</span>
+                    <input matInput type="number" formControlName="yearlyPrice" placeholder="2499" min="0">
+                    <mat-hint>Total annual billing amount</mat-hint>
+                    @if (planForm.get('yearlyPrice')?.invalid && planForm.get('yearlyPrice')?.touched) {
+                      <mat-error>Valid price (≥ 0) required</mat-error>
+                    }
+                  </mat-form-field>
+                </div>
+              </div>
+
+              <div class="sp-field-row">
+                <div class="sp-field-group">
+                  <label class="sp-label">Trial Duration (Days)</label>
+                  <mat-form-field appearance="outline" class="w-100">
+                    <mat-icon matPrefix>schedule</mat-icon>
+                    <input matInput type="number" formControlName="freeTrialDays" placeholder="14" min="0">
+                    <mat-hint>Default: 14 days. Set 0 if hasFreeTrial = false.</mat-hint>
+                  </mat-form-field>
+                </div>
+              </div>
+
+              <div class="sp-section-title">
+                <mat-icon>credit_card</mat-icon> Razorpay Gateway Plan IDs
+              </div>
+              <p class="sp-field-hint">Copy the plan IDs from your Razorpay Dashboard → Subscriptions → Plans. These are used to initiate recurring billing checkout.</p>
+
+              <div class="sp-field-row">
+                <div class="sp-field-group">
+                  <label class="sp-label">Razorpay Monthly Plan ID</label>
+                  <mat-form-field appearance="outline" class="w-100">
+                    <mat-icon matPrefix>payment</mat-icon>
+                    <input matInput formControlName="razorpayPlanIdMonthly" placeholder="plan_Xxxxxxxxxxxx">
+                    <mat-hint>e.g. plan_QProMonthly123</mat-hint>
+                  </mat-form-field>
+                </div>
+                <div class="sp-field-group">
+                  <label class="sp-label">Razorpay Yearly Plan ID</label>
+                  <mat-form-field appearance="outline" class="w-100">
+                    <mat-icon matPrefix>payment</mat-icon>
+                    <input matInput formControlName="razorpayPlanIdYearly" placeholder="plan_Xxxxxxxxxxxx">
+                    <mat-hint>e.g. plan_QProYearly456</mat-hint>
+                  </mat-form-field>
+                </div>
+              </div>
+
+            </div>
+          }
+
+          <!-- ── TAB: Features ── -->
+          @if (activeFormTab === 'features') {
+            <div class="sp-tab-panel animate-fade">
+
+              <div class="sp-pricing-highlight">
+                <mat-icon>auto_awesome</mat-icon>
+                Add feature bullet points that appear on the public pricing card. Toggle <strong>Highlight</strong> to make a feature stand out in purple.
+              </div>
+
+              <div formArrayName="features" class="sp-features-list">
+                @for (feature of featuresArray.controls; track $index; let i = $index) {
+                  <div [formGroupName]="i" class="sp-feature-row">
+                    <span class="sp-feat-num">{{ i + 1 }}</span>
+                    <mat-form-field appearance="outline" class="sp-feat-input">
+                      <mat-icon matPrefix>check_circle_outline</mat-icon>
+                      <input matInput formControlName="text" [placeholder]="'Feature bullet #' + (i + 1)">
+                      @if (feature.get('text')?.invalid && feature.get('text')?.touched) {
+                        <mat-error>Feature text required</mat-error>
+                      }
+                    </mat-form-field>
+                    <div class="sp-feat-toggle">
+                      <mat-checkbox formControlName="highlight" class="highlight-cb">
+                        <mat-icon class="cb-icon">auto_awesome</mat-icon>
+                      </mat-checkbox>
+                    </div>
+                    <button type="button" class="sp-feat-remove" (click)="removeFeature(i)"
+                      [disabled]="featuresArray.length <= 1" matTooltip="Remove feature">
+                      <mat-icon>close</mat-icon>
+                    </button>
+                  </div>
+                }
+              </div>
+
+              <button type="button" class="sp-add-feat-btn" (click)="addFeature()">
+                <mat-icon>add_circle_outline</mat-icon>
+                Add Feature Bullet
+              </button>
+
+            </div>
+          }
+
+          <!-- ── Form Actions ── -->
+          <div class="sp-form-actions">
+            <button type="button" class="sp-btn sp-btn-ghost" (click)="closeForm()" [disabled]="isLoading">
+              Cancel
+            </button>
+            <div class="sp-tab-nav-btns">
+              @if (activeFormTab !== 'basic') {
+                <button type="button" class="sp-btn sp-btn-outline" (click)="setTab(activeFormTab === 'features' ? 'pricing' : 'basic')" [disabled]="isLoading">
+                  <mat-icon>chevron_left</mat-icon> Previous
+                </button>
+              }
+              @if (activeFormTab !== 'features') {
+                <button type="button" class="sp-btn sp-btn-outline" (click)="setTab(activeFormTab === 'basic' ? 'pricing' : 'features')" [disabled]="isLoading">
+                  Next <mat-icon>chevron_right</mat-icon>
+                </button>
+              }
+            </div>
+            <button type="button" class="sp-btn sp-btn-primary" (click)="savePlan()" [disabled]="isLoading">
+              @if (isLoading) {
+                <mat-spinner [diameter]="20"></mat-spinner>
+              } @else {
+                <mat-icon>{{ editingPlan ? 'save' : 'publish' }}</mat-icon>
+              }
+              <span>{{ editingPlan ? 'Update Plan' : 'Publish Plan' }}</span>
+            </button>
+          </div>
+
+        </form>
+      </div>
+
+      <!-- ── Right: Live Quantum Card Preview ── -->
+      <div class="sp-preview-panel">
+        <div class="sp-preview-header">
+          <span class="sp-live-dot"></span>
+          <span class="sp-preview-title">Live Card Preview</span>
+          <span class="sp-preview-badge">Customer View</span>
+        </div>
+        <p class="sp-preview-caption">Real-time preview of how this plan card appears on the public pricing page and checkout modal.</p>
+
+        <div class="sp-preview-stage">
+          <div class="sp-qc" [class.sp-qc-featured]="livePreviewPlan.recommended">
+            @if (livePreviewPlan.recommended) {
+              <div class="sp-qc-top-badge">
+                <mat-icon>auto_awesome</mat-icon> Recommended
+              </div>
+            }
+            <div class="sp-qc-badge" [class.pop]="livePreviewPlan.recommended">{{ livePreviewPlan.badge }}</div>
+            <div class="sp-qc-name">{{ livePreviewPlan.name }}</div>
+            <div class="sp-qc-price">
+              @if (livePreviewPlan.monthlyPrice === 0) {
+                <span class="qc-amount">Custom</span>
+                <span class="qc-per">/ year</span>
+              } @else {
+                <span class="qc-currency">₹</span>
+                <span class="qc-amount">{{ livePreviewPlan.monthlyPrice.toLocaleString('en-IN') }}</span>
+                <span class="qc-per">/ mo</span>
+              }
+            </div>
+            @if (livePreviewPlan.yearlyPrice > 0) {
+              <div class="sp-qc-yearly">
+                ₹{{ livePreviewPlan.yearlyPrice.toLocaleString('en-IN') }} billed yearly
+                <span class="save-badge">Save {{ ((1 - (livePreviewPlan.yearlyPrice / (livePreviewPlan.monthlyPrice * 12))) * 100 | number:'1.0-0') }}%</span>
+              </div>
+            }
+            <p class="sp-qc-desc">{{ livePreviewPlan.description }}</p>
+
+            <ul class="sp-qc-feats">
+              @for (feat of livePreviewPlan.features; track $index) {
+                <li>
+                  <svg viewBox="0 0 24 24" fill="none" class="qc-check" [class.purple]="feat.highlight || livePreviewPlan.recommended">
+                    <path d="M5 13L9 17L19 7" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                  <span [class.feat-hl-text]="feat.highlight">{{ feat.text }}</span>
+                </li>
+              }
+            </ul>
+
+            <div class="sp-qc-ctas">
+              @if (livePreviewPlan.hasFreeTrial) {
+                <button class="qc-trial-btn">
+                  🎁 {{ livePreviewPlan.freeTrialDays }}-Day Free Trial
+                </button>
+              }
+              <button class="qc-pay-btn" [class.qc-pop]="livePreviewPlan.recommended">
+                {{ livePreviewPlan.monthlyPrice === 0 ? '💬 Request Quote →' : '⚡ Pay via Razorpay →' }}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- API Endpoint Reference -->
+        <div class="sp-api-ref">
+          <div class="sp-api-ref-title">
+            <mat-icon>api</mat-icon> Backend API Endpoints
+          </div>
+          <div class="sp-api-list">
+            <div class="sp-api-row">
+              <span class="http-get">GET</span>
+              <code>/api/subscriptions/plans</code>
+            </div>
+            <div class="sp-api-row">
+              <span class="http-post">POST</span>
+              <code>/api/subscriptions/plans</code>
+            </div>
+            <div class="sp-api-row">
+              <span class="http-put">PUT</span>
+              <code>/api/subscriptions/plans/:id</code>
+            </div>
+            <div class="sp-api-row">
+              <span class="http-delete">DEL</span>
+              <code>/api/subscriptions/plans/:id</code>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  }
+
+</div>

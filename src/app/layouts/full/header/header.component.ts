@@ -19,6 +19,7 @@ import { CoreService } from 'src/app/services/core.service';
 import { ThemeToggleComponent } from './theme-toggle/theme-toggle.component';
 import { SocketService } from 'src/app/Securities/Services/socket.service';
 import { NotificationService } from 'src/app/services/notification.service';
+import { environment } from 'src/environment/environment';
 import { Subscription } from 'rxjs';
 
 const FIRST_LOGIN_KEY  = 'svk_first_login_ts';
@@ -238,6 +239,29 @@ export class HeaderComponent implements OnInit, OnDestroy {
 
   ProfilePage() {
     this.router.navigate(['/profile']);
+  }
+
+  get avatarUrl(): string | null {
+    const user = this.currentUser;
+    if (!user) return null;
+    const path = user.image || user.profile_image || user.profileImage || user.avatar;
+    if (!path) return null;
+    if (path.startsWith('http://') || path.startsWith('https://') || path.startsWith('data:image')) {
+      return path;
+    }
+    const baseUrl = environment.socketUrl.replace(/\/+$/, '');
+    const cleanPath = path.startsWith('/') ? path : `/${path}`;
+    return `${baseUrl}${cleanPath}`;
+  }
+
+  onAvatarError(): void {
+    const user = this.currentUser;
+    if (user) {
+      user.image = null;
+      user.profile_image = null;
+      user.profileImage = null;
+      user.avatar = null;
+    }
   }
 
 }

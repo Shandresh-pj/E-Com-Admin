@@ -120,6 +120,9 @@ export class ProductAttribute {
           next: (res: any) => {
             this.alert.success("Product Attribute deleted successfully");
             this.getProductAttributes();
+          },
+          error: (err: any) => {
+            this.alert.error(err?.error?.message || "Failed to delete attribute");
           }
         });
       }
@@ -147,6 +150,9 @@ export class ProductAttribute {
         next: (res: any) => {
           this.alert.success("Product Attribute Created Successfully");
           this.refreshAndClose();
+        },
+        error: (err: any) => {
+          this.alert.error(err?.error?.message || "Failed to create attribute");
         }
       });
     } else {
@@ -154,6 +160,9 @@ export class ProductAttribute {
         next: (res: any) => {
           this.alert.success("Product Attribute Updated Successfully");
           this.refreshAndClose();
+        },
+        error: (err: any) => {
+          this.alert.error(err?.error?.message || "Failed to update attribute");
         }
       });
     }

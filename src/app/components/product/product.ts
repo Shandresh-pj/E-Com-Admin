@@ -60,6 +60,7 @@ export class Product {
   SingleAttrValuesByRow: { [index: number]: any[] } = {};
   SelectedProductId: any;
   SelectedVariantAttributeIds: number[] = [];
+  showAdditionalAttributes: boolean = false;
 
   ImageFile: File | null = null;
   imagePreviewUrl: string | null = null;
@@ -167,8 +168,13 @@ export class Product {
 
   getProducts(onLoaded?: () => void) {
     const params: any = {};
-    if (this.selectedStatusFilter !== 'all') {
-      params.status = this.selectedStatusFilter;
+    if (this.selectedStatusFilter === 'deleted') {
+      params.is_deleted = 'true';
+    } else {
+      if (this.selectedStatusFilter !== 'all') {
+        params.status = this.selectedStatusFilter;
+      }
+      params.is_deleted = 'false';
     }
     this.commonService.getApi(`products`, params).subscribe({
       next: (res: any) => {
@@ -266,6 +272,13 @@ export class Product {
         this.cdr.detectChanges();
       }
     });
+  }
+
+  toggleAdditionalAttributes() {
+    this.showAdditionalAttributes = !this.showAdditionalAttributes;
+    if (this.showAdditionalAttributes && this.attributeValues.length === 0) {
+      this.addAttrValueRow();
+    }
   }
 
   addAttrValueRow() {
@@ -486,10 +499,20 @@ export class Product {
 
   AddNewUser() {
     this.Product_Forms = true;
+    this.showAdditionalAttributes = false;
     this.addAttrValueRow();
   }
 
   editUser(product: any) {
+    if (product?.is_deleted || this.selectedStatusFilter === 'deleted') {
+      this.alert.confirm("This product is currently in Trash. Do you want to restore it from trash?").then((result) => {
+        if (result.isConfirmed) {
+          this.restoreUser(product);
+        }
+      });
+      return;
+    }
+
     this.SelectedProductId = product?.id;
     this.Product_Forms = true;
     this.Update_button = true;
@@ -545,6 +568,7 @@ export class Product {
     const extraAttrs: any[] = product?.Attributes || [];
 
     if (extraAttrs.length) {
+      this.showAdditionalAttributes = true;
       extraAttrs.forEach((av: any, index: number) => {
         this.attributeValues.push(this.fb.group({
           ProductAttributeId: [av?.ProductAttributeId || null],
@@ -560,6 +584,7 @@ export class Product {
         }
       });
     } else {
+      this.showAdditionalAttributes = false;
       // Always show at least one empty row
       this.addAttrValueRow();
     }
@@ -699,11 +724,16 @@ export class Product {
   }
 
   deleteUser(product: any) {
-    this.alert.confirm("Are you sure you want to delete this product?").then((result) => {
+    const isDeleted = product?.is_deleted || this.selectedStatusFilter === 'deleted';
+    const confirmMsg = isDeleted
+      ? "Are you sure you want to permanently delete this product? This action cannot be undone."
+      : "Are you sure you want to move this product to trash?";
+    this.alert.confirm(confirmMsg).then((result) => {
       if (result.isConfirmed) {
-        this.commonService.deleteApi(`products/${product?.id}`).subscribe({
+        const url = isDeleted ? `products/${product?.id}?permanent=true` : `products/${product?.id}`;
+        this.commonService.deleteApi(url).subscribe({
           next: (res: any) => {
-            this.alert.success("Product deleted successfully");
+            this.alert.success(isDeleted ? "Product permanently deleted" : "Product moved to trash successfully");
             this.getProducts();
           }
         });
@@ -711,9 +741,81 @@ export class Product {
     });
   }
 
+  restoreUser(product: any) {
+    this.commonService.putApi(`products/${product?.id}/restore`, {}).subscribe({
+      next: (res: any) => {
+        this.alert.success("Product restored successfully");
+        this.getProducts();
+      }
+    });
+  }
+
+  exportProducts(format: string = 'csv') {
+    window.open(`${this.commonService.apiUrl}/products/export?format=${format}`, '_blank');
+  }
+
+  triggerImport() {
+    const fileInput = document.createElement('input');
+    fileInput.type = 'file';
+    fileInput.accept = '.json,.csv';
+    fileInput.onchange = (e: any) => {
+      const file = e.target?.files?.[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (event: any) => {
+        try {
+          const content = event.target.result;
+          let products = [];
+          if (file.name.endsWith('.csv')) {
+            products = this.parseCSV(content);
+          } else {
+            products = JSON.parse(content);
+          }
+          this.commonService.postApi('products/import', { products }).subscribe({
+            next: (res: any) => {
+              this.alert.success(res?.message || 'Products imported successfully');
+              this.getProducts();
+            },
+            error: (err: any) => {
+              this.alert.error(err?.error?.message || 'Import failed');
+            }
+          });
+        } catch (err: any) {
+          this.alert.error('Invalid file format: ' + err.message);
+        }
+      };
+      reader.readAsText(file);
+    };
+    fileInput.click();
+  }
+
+  parseCSV(csvText: string): any[] {
+    const lines = csvText.split(/\r\n|\n/).filter(l => l.trim().length > 0);
+    if (lines.length < 2) return [];
+    const headers = lines[0].split(',').map(h => h.replace(/^"|"$/g, '').trim().toLowerCase());
+    const products = [];
+    for (let i = 1; i < lines.length; i++) {
+      const values = lines[i].split(',').map(v => v.replace(/^"|"$/g, '').trim());
+      const obj: any = {};
+      headers.forEach((h, idx) => {
+        if (h === 'name') obj.name = values[idx];
+        else if (h === 'price') obj.price = Number(values[idx]) || 0;
+        else if (h === 'stock') obj.stock = Number(values[idx]) || 0;
+        else if (h === 'barcode') obj.barcode = values[idx];
+        else if (h === 'category') obj.category = values[idx];
+        else if (h === 'product type' || h === 'product_type') obj.product_type = values[idx] || 'single';
+      });
+      if (obj.name && obj.price !== undefined) {
+        products.push(obj);
+      }
+    }
+    return products;
+  }
+
   cancelProduct() {
     this.Product_Forms = false;
     this.Update_button = false;
+    this.showAdditionalAttributes = false;
     this.variants.clear();
     this.attributeValues.clear();
     this.SelectedAttrValues = {};
@@ -739,6 +841,21 @@ export class Product {
     }
 
     const value = form.value;
+
+    if (value.product_type === 'variant' && value.variants?.length) {
+      const barcodes = new Set<string>();
+      for (const v of value.variants) {
+        if (v.Barcode && String(v.Barcode).trim()) {
+          const bc = String(v.Barcode).trim();
+          if (barcodes.has(bc)) {
+            this.alert.error(`Duplicate barcode '${bc}' found in variant entries. Each variant must have a unique barcode.`);
+            return;
+          }
+          barcodes.add(bc);
+        }
+      }
+    }
+
     const formData = new FormData();
     formData.append('name', value.name);
     formData.append('description', value.description || '');
@@ -783,6 +900,9 @@ export class Product {
         next: (res: any) => {
           this.alert.success("Product Created Successfully");
           this.getProducts(() => this.cancelProduct());
+        },
+        error: (err: any) => {
+          this.alert.error(err?.error?.message || "Failed to create product");
         }
       });
     } else {
@@ -790,6 +910,9 @@ export class Product {
         next: (res: any) => {
           this.alert.success("Product Updated Successfully");
           this.getProducts(() => this.cancelProduct());
+        },
+        error: (err: any) => {
+          this.alert.error(err?.error?.message || "Failed to update product");
         }
       });
     }

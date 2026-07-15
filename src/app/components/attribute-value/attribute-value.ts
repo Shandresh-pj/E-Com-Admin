@@ -141,6 +141,9 @@ export class AttributeValue {
           next: (res: any) => {
             this.alert.success("Attribute Value deleted successfully");
             this.getAttributeValues();
+          },
+          error: (err: any) => {
+            this.alert.error(err?.error?.message || "Failed to delete attribute value");
           }
         });
       }
@@ -168,6 +171,9 @@ export class AttributeValue {
         next: (res: any) => {
           this.alert.success("Attribute Value Created Successfully");
           this.getAttributeValues(() => this.cancelAttributeValue());
+        },
+        error: (err: any) => {
+          this.alert.error(err?.error?.message || "Failed to create attribute value");
         }
       });
     } else {
@@ -175,6 +181,9 @@ export class AttributeValue {
         next: (res: any) => {
           this.alert.success("Attribute Value Updated Successfully");
           this.getAttributeValues(() => this.cancelAttributeValue());
+        },
+        error: (err: any) => {
+          this.alert.error(err?.error?.message || "Failed to update attribute value");
         }
       });
     }

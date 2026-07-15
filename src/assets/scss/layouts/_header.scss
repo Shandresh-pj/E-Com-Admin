@@ -251,6 +251,13 @@ html .topbar {
       font-family: var(--font-display);
       text-shadow: 0 1px 4px rgba(0,0,0,0.2);
     }
+
+    .avatar-header-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: inherit;
+    }
   }
 
   /* Text info — only visible on lg+ */
@@ -388,6 +395,13 @@ html .topbar {
       letter-spacing: -0.02em;
       font-family: var(--font-display);
       text-shadow: 0 1px 4px rgba(0,0,0,0.15);
+    }
+
+    .avatar-header-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: inherit;
     }
   }
 

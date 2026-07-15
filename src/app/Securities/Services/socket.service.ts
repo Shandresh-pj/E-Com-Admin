@@ -38,7 +38,7 @@ export class SocketService {
     // Wrong: /ws/?EIO=4&transport=websocket (causes 404 on Render)
     // Right: /ws?EIO=4&transport=websocket
     const wsBase = socketBase.replace(/^https?/, (p: string) => p === 'https' ? 'wss' : 'ws');
-    const wsUrl = `${wsBase}/ws?EIO=4&transport=websocket`;
+    const wsUrl = `${wsBase}/ws?EIO=4&transport=websocket&token=${encodeURIComponent(this.currentToken)}`;
 
     try {
       this.ws = new WebSocket(wsUrl);

@@ -176,7 +176,11 @@
     <!-- Profile Button -->
     <button class="profile-avatar-btn" [matMenuTriggerFor]="profilemenu" aria-label="Profile menu">
       <div class="avatar-circle">
-        <span class="avatar-initials">{{ initials }}</span>
+        @if (avatarUrl) {
+          <img [src]="avatarUrl" alt="Avatar" class="avatar-header-img" (error)="onAvatarError()">
+        } @else {
+          <span class="avatar-initials">{{ initials }}</span>
+        }
       </div>
       <div class="avatar-info d-none d-lg-flex">
         <span class="avatar-name">{{ currentUser?.name || 'Admin' }}</span>
@@ -187,7 +191,13 @@
 
     <mat-menu #profilemenu="matMenu" class="profile-menu-panel" xPosition="before">
       <div class="profile-menu-header" (click)="$event.stopPropagation()">
-        <div class="profile-menu-avatar"><span>{{ initials }}</span></div>
+        <div class="profile-menu-avatar">
+          @if (avatarUrl) {
+            <img [src]="avatarUrl" alt="Avatar" class="avatar-header-img" (error)="onAvatarError()">
+          } @else {
+            <span>{{ initials }}</span>
+          }
+        </div>
         <div>
           <p class="profile-menu-name">{{ currentUser?.name || 'Admin User' }}</p>
           <p class="profile-menu-role">{{ currentUser?.userType || 'Super Admin' }}</p>

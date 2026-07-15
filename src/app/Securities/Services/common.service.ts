@@ -14,7 +14,7 @@ import { environment } from 'src/environment/environment';
 })
 export class CommonService {
 
-  private apiUrl = environment.apiUrl;
+  public apiUrl = environment.apiUrl;
   private cache = new Map<string, any>();
 
   constructor(private http: HttpClient) {}

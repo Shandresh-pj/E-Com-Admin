@@ -35,7 +35,9 @@ export class Category {
   tableColumns = [
     { columnDef: 'id', header: 'No' },
     { columnDef: 'name', header: 'Name' },
+    { columnDef: 'parentName', header: 'Parent' },
     { columnDef: 'description', header: 'Description' },
+    { columnDef: 'statusText', header: 'Status', type: 'badge' },
   ];
 
   CategoryForm: FormGroup;
@@ -65,14 +67,22 @@ export class Category {
   }
 
   ngOnInit() {
-    this.getCategories();
     this.getStatuses();
+    this.getCategories();
   }
 
   getCategories(onLoaded?: () => void) {
     this.commonService.getApi(`categories`).subscribe({
       next: (res: any) => {
-        this.Categories = res?.data;
+        const rawList = res?.data || [];
+        this.Categories = rawList.map((c: any) => {
+          const statusObj = this.Statuses?.find((s: any) => s.Id === c.StatusId);
+          return {
+            ...c,
+            parentName: c?.parent?.name || 'Root',
+            statusText: statusObj ? statusObj.StatusCode : (c?.status ? 'Active' : 'Inactive')
+          };
+        });
         onLoaded?.();
         this.cdr.detectChanges();
       }
@@ -83,6 +93,15 @@ export class Category {
     this.commonService.getApi(`Status/All`).subscribe({
       next: (res: any) => {
         this.Statuses = res?.data?.data;
+        if (this.Categories) {
+          this.Categories = this.Categories.map((c: any) => {
+            const statusObj = this.Statuses?.find((s: any) => s.Id === c.StatusId);
+            return {
+              ...c,
+              statusText: statusObj ? statusObj.StatusCode : (c?.status ? 'Active' : 'Inactive')
+            };
+          });
+        }
         this.cdr.detectChanges();
       }
     });
@@ -144,8 +163,8 @@ export class Category {
             fields: [
               { label: 'Name', value: data?.name },
               { label: 'Description', value: data?.description },
-              { label: 'Parent Category', value: data?.parent?.name },
-              { label: 'Status', value: status?.StatusCode },
+              { label: 'Parent Category', value: data?.parent?.name || 'Root' },
+              { label: 'Status', value: status?.StatusCode || (data?.status ? 'Active' : 'Inactive') },
               { label: 'Image', value: toFileUrl(data?.image), isImage: true },
             ],
           },
@@ -161,6 +180,9 @@ export class Category {
           next: (res: any) => {
             this.alert.success("Category deleted successfully");
             this.getCategories();
+          },
+          error: (err: any) => {
+            this.alert.error(err?.error?.message || "Failed to delete category");
           }
         });
       }
@@ -185,7 +207,7 @@ export class Category {
     const formData = new FormData();
     formData.append('name', value.name);
     formData.append('description', value.description || '');
-    if (value.parent_id) {
+    if (value.parent_id !== null && value.parent_id !== undefined && value.parent_id !== '') {
       formData.append('parent_id', value.parent_id);
     }
     formData.append('StatusId', value.StatusId);
@@ -198,6 +220,9 @@ export class Category {
         next: (res: any) => {
           this.alert.success("Category Created Successfully");
           this.getCategories(() => this.cancelCategory());
+        },
+        error: (err: any) => {
+          this.alert.error(err?.error?.message || "Failed to create category");
         }
       });
     } else {
@@ -205,6 +230,9 @@ export class Category {
         next: (res: any) => {
           this.alert.success("Category Updated Successfully");
           this.getCategories(() => this.cancelCategory());
+        },
+        error: (err: any) => {
+          this.alert.error(err?.error?.message || "Failed to update category");
         }
       });
     }

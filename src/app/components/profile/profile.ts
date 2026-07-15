@@ -15,6 +15,7 @@ import { CommonModule } from '@angular/common';
 import { AlertService } from 'src/app/Securities/Services/alert.service';
 import { AuthService } from 'src/app/Securities/Services/auth.service';
 import { CommonService } from 'src/app/Securities/Services/common.service';
+import { SessionService } from 'src/app/Securities/Services/session.service';
 import { environment } from 'src/environment/environment';
 
 @Component({
@@ -59,6 +60,7 @@ export class Profile implements OnInit {
     private authService: AuthService,
     private alert: AlertService,
     private commonService: CommonService,
+    private sessionService: SessionService,
     private fb: FormBuilder
   ) {
     this.ProfileForm = this.fb.group({
@@ -77,6 +79,26 @@ export class Profile implements OnInit {
     this.getProfile();
   }
 
+  /** Format backend image paths cleanly */
+  formatImageUrl(path: string | null | undefined): string | null {
+    if (!path) return null;
+    if (path.startsWith('http://') || path.startsWith('https://') || path.startsWith('data:image')) {
+      return path;
+    }
+    const baseUrl = environment.socketUrl.replace(/\/+$/, '');
+    const cleanPath = path.startsWith('/') ? path : `/${path}`;
+    return `${baseUrl}${cleanPath}`;
+  }
+
+  /** Fallback handler if image fails to load */
+  onImageError(type: string): void {
+    if (type === 'avatar') {
+      this.avatarPreview = null;
+    } else if (type === 'cover') {
+      this.coverPreview = null;
+    }
+  }
+
   getProfile(): void {
     this.commonService.getApi(`profile/${this.ProfileId}`).subscribe({
       next: (res: any) => {
@@ -89,8 +111,24 @@ export class Profile implements OnInit {
           userType:     this.ProfileData?.userType,
         });
 
-        if (this.ProfileData?.image) {
-          this.avatarPreview = `${environment.socketUrl}${this.ProfileData.image}`;
+        // Set Avatar Image
+        const imgPath = this.ProfileData?.image || this.ProfileData?.profile_image || this.ProfileData?.profileImage || this.ProfileData?.avatar;
+        if (imgPath && !this.avatarFile) {
+          this.avatarPreview = this.formatImageUrl(imgPath);
+        }
+
+        // Set Background Cover Image
+        const coverPath = this.ProfileData?.background_image || this.ProfileData?.backgroundImage || this.ProfileData?.cover_image || this.ProfileData?.profile_cover;
+        if (coverPath && !this.coverFile) {
+          this.coverPreview = this.formatImageUrl(coverPath);
+        }
+
+        // Keep session user data in sync so top header also gets updated
+        const currentUser = this.authService.getUser();
+        if (currentUser && this.ProfileData) {
+          this.sessionService.setSession({
+            user: { ...currentUser, ...this.ProfileData }
+          });
         }
       }
     });
@@ -139,13 +177,29 @@ export class Profile implements OnInit {
     
     if (this.avatarFile) {
       formData.append('image', this.avatarFile);
+      formData.append('profile_image', this.avatarFile);
+    }
+
+    if (this.coverFile) {
+      formData.append('background_image', this.coverFile);
+      formData.append('cover_image', this.coverFile);
     }
     
     this.commonService.putFormData(`profile/${this.ProfileId}`, formData).subscribe({
-      next: () => {
+      next: (res: any) => {
         this.isSaving = false;
         this.alert.success('Profile updated successfully! 🎉');
+        this.avatarFile = null;
+        this.coverFile = null;
         
+        // Update session immediately if backend returned data
+        if (res?.data || res?.user) {
+          const currentUser = this.authService.getUser();
+          this.sessionService.setSession({
+            user: { ...currentUser, ...(res.data || res.user) }
+          });
+        }
+
         // Refresh profile data to pick up the new image and details
         this.getProfile();
       },
@@ -157,8 +211,8 @@ export class Profile implements OnInit {
   }
 
   onReset(): void {
+    this.avatarFile = null;
+    this.coverFile = null;
     this.getProfile();
-    this.avatarPreview = null;
-    this.coverPreview  = null;
   }
 }

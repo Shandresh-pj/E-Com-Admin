@@ -9,8 +9,10 @@ export interface Coupon {
   value?: number;
   buy_x?: number;
   get_y?: number;
+  start_date?: Date | string | null;
   expiry_date?: Date | string | null;
   usage_limit?: number | null;
+  per_user_limit?: number | null;
   usage_count?: number;
   is_active: boolean;
   company_id?: number | null;
@@ -33,11 +35,18 @@ export class CouponService {
   }
 
   updateCoupon(id: number | string, updateData: any): Observable<any> {
-    // The backend doesn't have PUT /coupons/:id yet, but keeping this for future use if added.
     return this.commonService.putApi(`coupons/${id}`, updateData);
   }
 
   deleteCoupon(id: number | string): Observable<any> {
     return this.commonService.deleteApi(`coupons/${id}`);
+  }
+
+  toggleStatus(id: number | string, is_active?: boolean): Observable<any> {
+    return this.commonService.putApi(`coupons/${id}/status`, is_active !== undefined ? { is_active } : {});
+  }
+
+  calculateDiscount(payload: { code: string; items: any[]; user_id?: number }): Observable<any> {
+    return this.commonService.postApi('coupons/calculate', payload);
   }
 }

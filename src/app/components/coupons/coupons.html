@@ -158,21 +158,42 @@
 
       <div class="form-row">
         <div class="field-container">
-          <mat-label class="f-w-600 m-b-8 d-block">Expiry Date</mat-label>
+          <mat-label class="f-w-600 m-b-8 d-block">Start Date</mat-label>
           <mat-form-field appearance="outline" class="w-100">
-            <mat-icon matPrefix style="margin-right: 8px;">event</mat-icon>
-            <input matInput [matDatepicker]="picker" formControlName="expiry_date" placeholder="Select date">
-            <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
-            <mat-datepicker #picker></mat-datepicker>
+            <mat-icon matPrefix style="margin-right: 8px;">event_available</mat-icon>
+            <input matInput [matDatepicker]="startPicker" formControlName="start_date" placeholder="Select start date">
+            <mat-datepicker-toggle matIconSuffix [for]="startPicker"></mat-datepicker-toggle>
+            <mat-datepicker #startPicker></mat-datepicker>
           </mat-form-field>
         </div>
 
         <div class="field-container">
-          <mat-label class="f-w-600 m-b-8 d-block">Usage Limit</mat-label>
+          <mat-label class="f-w-600 m-b-8 d-block">Expiry Date</mat-label>
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-icon matPrefix style="margin-right: 8px;">event_busy</mat-icon>
+            <input matInput [matDatepicker]="picker" formControlName="expiry_date" placeholder="Select expiry date">
+            <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+            <mat-datepicker #picker></mat-datepicker>
+          </mat-form-field>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="field-container">
+          <mat-label class="f-w-600 m-b-8 d-block">Total Usage Limit</mat-label>
           <mat-form-field appearance="outline" class="w-100">
             <mat-icon matPrefix style="margin-right: 8px;">people</mat-icon>
             <input matInput type="number" formControlName="usage_limit" placeholder="Leave blank for unlimited">
             <mat-icon matSuffix matTooltip="Maximum number of times this coupon can be used by all customers.">info</mat-icon>
+          </mat-form-field>
+        </div>
+
+        <div class="field-container">
+          <mat-label class="f-w-600 m-b-8 d-block">Per-User Usage Limit</mat-label>
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-icon matPrefix style="margin-right: 8px;">person</mat-icon>
+            <input matInput type="number" formControlName="per_user_limit" placeholder="Leave blank for unlimited per user">
+            <mat-icon matSuffix matTooltip="Maximum number of times a single customer can use this coupon.">info</mat-icon>
           </mat-form-field>
         </div>
       </div>

@@ -19,7 +19,7 @@
         <div class="avatar-glow-ring">
           <div class="avatar-inner">
             @if (avatarPreview) {
-              <img [src]="avatarPreview" alt="Profile" class="avatar-img">
+              <img [src]="avatarPreview" alt="Profile" class="avatar-img" (error)="onImageError('avatar')">
             } @else {
               <span class="avatar-text">{{ initials }}</span>
             }

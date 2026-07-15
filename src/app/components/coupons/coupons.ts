@@ -40,8 +40,10 @@ export class Coupons implements OnInit {
   tableColumns = [
     { columnDef: 'code', header: 'Coupon Code' },
     { columnDef: '_discountStr', header: 'Discount' },
+    { columnDef: '_startDateStr', header: 'Start Date' },
     { columnDef: '_expiryStr', header: 'Expiry Date' },
     { columnDef: '_usageStr', header: 'Usage' },
+    { columnDef: '_perUserLimitStr', header: 'User Limit' },
     { columnDef: '_statusStr', header: 'Status' }
   ];
   isLoading = false;
@@ -70,8 +72,10 @@ export class Coupons implements OnInit {
       value: [coupon?.value ?? null],
       buy_x: [coupon?.buy_x ?? null],
       get_y: [coupon?.get_y ?? null],
+      start_date: [coupon?.start_date ?? null],
       expiry_date: [coupon?.expiry_date ?? null],
       usage_limit: [coupon?.usage_limit ?? null],
+      per_user_limit: [coupon?.per_user_limit ?? null],
       is_active: [coupon !== null ? coupon.is_active : true]
     });
   }
@@ -128,8 +132,10 @@ export class Coupons implements OnInit {
           return {
             ...c,
             _discountStr: discountStr,
+            _startDateStr: c.start_date ? new Date(c.start_date).toLocaleDateString() : 'Immediate',
             _expiryStr: c.expiry_date ? new Date(c.expiry_date).toLocaleDateString() : 'No Expiry',
             _usageStr: `${c.usage_count || 0} / ${c.usage_limit ? c.usage_limit : '∞'}`,
+            _perUserLimitStr: c.per_user_limit ? `${c.per_user_limit} / user` : 'No Limit',
             _statusStr: c.is_active ? 'Active' : 'Inactive'
           };
         });
@@ -149,5 +155,12 @@ export class Coupons implements OnInit {
         this.loadCoupons();
       });
     }
+  }
+
+  toggleStatus(couponOrId: any): void {
+    const id = typeof couponOrId === 'string' ? couponOrId : (couponOrId?.id || couponOrId);
+    this.couponService.toggleStatus(id).subscribe(() => {
+      this.loadCoupons();
+    });
   }
 }

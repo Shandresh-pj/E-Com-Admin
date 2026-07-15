@@ -9,9 +9,17 @@
             </mat-card-title>
 
             @if (!Product_Forms && perm.hasRoleAction('canCreate')) {
-            <button mat-flat-button class="btn-rounded btn-gradient" (click)="AddNewUser()">
-                <mat-icon>add</mat-icon> Add New Product
-            </button>
+            <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+                <button mat-stroked-button color="primary" class="btn-rounded" (click)="triggerImport()" style="border: 1px solid var(--primary-color);">
+                    <mat-icon>upload</mat-icon> Import
+                </button>
+                <button mat-stroked-button color="accent" class="btn-rounded" (click)="exportProducts('csv')" style="border: 1px solid var(--accent-color);">
+                    <mat-icon>download</mat-icon> Export CSV
+                </button>
+                <button mat-flat-button class="btn-rounded btn-gradient" (click)="AddNewUser()">
+                    <mat-icon>add</mat-icon> Add New Product
+                </button>
+            </div>
             }
 
         </div>
@@ -29,9 +37,13 @@
             <button mat-stroked-button [color]="selectedStatusFilter === 'Approved' ? 'primary' : ''" (click)="filterByStatus('Approved')" [class.active-filter]="selectedStatusFilter === 'Approved'" style="border-radius: 20px;">Approved</button>
             <button mat-stroked-button [color]="selectedStatusFilter === 'Published' ? 'primary' : ''" (click)="filterByStatus('Published')" [class.active-filter]="selectedStatusFilter === 'Published'" style="border-radius: 20px;">Published</button>
             <button mat-stroked-button [color]="selectedStatusFilter === 'Rejected' ? 'primary' : ''" (click)="filterByStatus('Rejected')" [class.active-filter]="selectedStatusFilter === 'Rejected'" style="border-radius: 20px;">Rejected</button>
+            <button mat-stroked-button [color]="selectedStatusFilter === 'deleted' ? 'warn' : ''" (click)="filterByStatus('deleted')" [class.active-filter]="selectedStatusFilter === 'deleted'" style="border-radius: 20px;">
+                <mat-icon style="font-size: 16px; width: 16px; height: 16px; margin-right: 4px;">delete_outline</mat-icon> Trash
+            </button>
         </div>
 
         <app-mat-table [columns]="tableColumns" [tableData]="Products" [showAction]="true" [showView]="perm.hasRoleAction('canRead')"
+            [showSearch]="true" [enableExport]="true"
             [Extra_Column]="false" [showEdit]="perm.hasRoleAction('canUpdate')" [showDelete]="perm.hasRoleAction('canDelete')"
             (editClick)="editUser($event)" (deleteClick)="deleteUser($event)"
             (ViewClick)="viewItem($event)">
@@ -203,74 +215,211 @@
                 </div>
             </div>
             <div class="divider">
-                <span>Product Media</span>
+                <span>Product Media Studio</span>
             </div>
 
-            <div class="form-row">
-                <div class="field-container">
-                    <mat-label class="f-w-600 m-b-8 d-block">Main Image</mat-label>
-                    <input type="file" accept="image/*" (change)="detectImage($event)" style="padding: 8px 0;">
+            <!-- Alternative Premium Studio Grid Layout -->
+            <div class="studio-media-grid m-t-16">
+                <!-- 1. Primary Product Display (Main Image) -->
+                <div class="media-studio-card primary-media-card">
+                    <div class="media-card-header">
+                        <div class="header-left">
+                            <mat-icon class="brand-icon">photo_camera</mat-icon>
+                            <div>
+                                <span class="card-title">Primary Display</span>
+                                <span class="card-subtitle">Main showcase photo</span>
+                            </div>
+                        </div>
+                        <span class="badge-pill badge-required">Required</span>
+                    </div>
+
+                    <input #mainImageInput type="file" accept="image/*" (change)="detectImage($event)" class="hidden-file-input">
+
                     @if (imagePreviewUrl || existingImageUrl) {
-                    <div class="m-t-8" style="position: relative; display: inline-block;">
-                        <img [src]="imagePreviewUrl || existingImageUrl" alt="Product Image"
-                            style="max-width: 120px; max-height: 120px; border-radius: 8px; border: 1px solid var(--glass-border-subtle);">
-                        <button mat-mini-fab color="warn" (click)="removeImage()" type="button" style="position: absolute; top: -10px; right: -10px; transform: scale(0.7);">
-                            <mat-icon>close</mat-icon>
-                        </button>
+                    <div class="media-preview-container">
+                        <div class="media-image-frame">
+                            <img [src]="imagePreviewUrl || existingImageUrl" alt="Main Product Image">
+                            <div class="frame-overlay">
+                                <button mat-stroked-button class="btn-replace" type="button" (click)="mainImageInput.click()">
+                                    <mat-icon>cached</mat-icon> Replace
+                                </button>
+                                <button mat-mini-fab color="warn" class="btn-remove" type="button" (click)="removeImage()" matTooltip="Remove Primary Image">
+                                    <mat-icon>delete</mat-icon>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="media-meta">
+                            <mat-icon class="status-icon success">check_circle</mat-icon>
+                            <span>Primary image ready for publishing</span>
+                        </div>
+                    </div>
+                    } @else {
+                    <div class="media-dropzone-card" (click)="mainImageInput.click()">
+                        <div class="dropzone-icon-ring">
+                            <mat-icon class="pulse-icon">add_photo_alternate</mat-icon>
+                        </div>
+                        <span class="drop-title">Upload Primary Photo</span>
+                        <span class="drop-desc">Click to browse or drag &amp; drop</span>
+                        <span class="drop-formats">Supports PNG, JPG, WEBP (Max 5MB)</span>
                     </div>
                     }
                 </div>
 
-                <div class="field-container">
-                    <mat-label class="f-w-600 m-b-8 d-block">Gallery Images</mat-label>
-                    <input type="file" accept="image/*" multiple (change)="detectGalleryFiles($event)" style="padding: 8px 0;">
-                    <div class="m-t-8 d-flex" style="gap: 12px; flex-wrap: wrap;">
+                <!-- 2. Multi-Angle Showcase (Gallery Images) -->
+                <div class="media-studio-card gallery-media-card">
+                    <div class="media-card-header">
+                        <div class="header-left">
+                            <mat-icon class="brand-icon">collections</mat-icon>
+                            <div>
+                                <span class="card-title">Gallery Showcase</span>
+                                <span class="card-subtitle">Multiple angles &amp; details</span>
+                            </div>
+                        </div>
+                        <span class="badge-pill badge-count">{{ ExistingGalleryImages.length + GalleryPreviews.length }} Photos</span>
+                    </div>
+
+                    <input #galleryFileInput type="file" accept="image/*" multiple (change)="detectGalleryFiles($event)" class="hidden-file-input">
+
+                    <div class="gallery-showcase-grid">
+                        <!-- Add Tile -->
+                        <div class="gallery-add-tile" (click)="galleryFileInput.click()" matTooltip="Add gallery photos">
+                            <mat-icon class="add-icon">add_to_photos</mat-icon>
+                            <span>Add Photos</span>
+                        </div>
+
+                        <!-- Existing Gallery Images -->
                         @for(img of ExistingGalleryImages; track $index) {
-                        <div style="position: relative; display: inline-block;">
-                            <img [src]="toFileUrl(img)" alt="Gallery Image" style="max-width: 80px; max-height: 80px; border-radius: 8px; border: 1px solid var(--glass-border-subtle);">
-                            <button mat-mini-fab color="warn" (click)="removeExistingGalleryImage($index)"
-                                type="button" style="position: absolute; top: -10px; right: -10px; transform: scale(0.6);">
-                                <mat-icon>close</mat-icon>
-                            </button>
+                        <div class="gallery-thumb-card">
+                            <img [src]="toFileUrl(img)" alt="Gallery Angle">
+                            <div class="thumb-overlay">
+                                <button mat-mini-fab color="warn" class="btn-thumb-remove" type="button" (click)="removeExistingGalleryImage($index)" matTooltip="Delete image">
+                                    <mat-icon>close</mat-icon>
+                                </button>
+                            </div>
+                            <span class="thumb-badge">Saved</span>
                         </div>
                         }
+
+                        <!-- New Previews -->
                         @for(img of GalleryPreviews; track $index) {
-                        <div style="position: relative; display: inline-block;">
-                            <img [src]="img" alt="New Gallery Image" style="max-width: 80px; max-height: 80px; border-radius: 8px; border: 1px solid var(--glass-border-subtle);">
-                            <button mat-mini-fab color="warn" (click)="removeNewGalleryImage($index)" type="button" style="position: absolute; top: -10px; right: -10px; transform: scale(0.6);">
-                                <mat-icon>close</mat-icon>
-                            </button>
+                        <div class="gallery-thumb-card new-upload">
+                            <img [src]="img" alt="New Gallery Angle">
+                            <div class="thumb-overlay">
+                                <button mat-mini-fab color="warn" class="btn-thumb-remove" type="button" (click)="removeNewGalleryImage($index)" matTooltip="Discard new upload">
+                                    <mat-icon>close</mat-icon>
+                                </button>
+                            </div>
+                            <span class="thumb-badge new">New</span>
                         </div>
                         }
                     </div>
+                    @if (ExistingGalleryImages.length === 0 && GalleryPreviews.length === 0) {
+                    <div class="gallery-empty-hint" (click)="galleryFileInput.click()">
+                        <p class="m-0">No gallery images uploaded yet. Click to add multiple product angles!</p>
+                    </div>
+                    }
                 </div>
 
-                <div class="field-container">
-                    <mat-label class="f-w-600 m-b-8 d-block">Video</mat-label>
-                    <input type="file" accept="video/*" (change)="detectVideo($event)" style="padding: 8px 0;">
+                <!-- 3. Cinematic Video Preview (Product Video) -->
+                <div class="media-studio-card video-media-card">
+                    <div class="media-card-header">
+                        <div class="header-left">
+                            <mat-icon class="brand-icon">videocam</mat-icon>
+                            <div>
+                                <span class="card-title">Cinematic Video</span>
+                                <span class="card-subtitle">Product demo &amp; preview</span>
+                            </div>
+                        </div>
+                        <span class="badge-pill badge-optional">Optional</span>
+                    </div>
+
+                    <input #videoFileInput type="file" accept="video/*" (change)="detectVideo($event)" class="hidden-file-input">
+
                     @if (videoPreviewUrl || existingVideoUrl) {
-                    <div class="m-t-8" style="position: relative; display: inline-block;">
-                        <video [src]="videoPreviewUrl || existingVideoUrl" controls style="max-width: 160px; border-radius: 8px; border: 1px solid var(--glass-border-subtle);"></video>
-                        <button mat-mini-fab color="warn" (click)="removeVideo()" type="button" style="position: absolute; top: -10px; right: -10px; transform: scale(0.7);">
-                            <mat-icon>close</mat-icon>
-                        </button>
+                    <div class="media-preview-container video-preview">
+                        <div class="video-frame">
+                            <video [src]="videoPreviewUrl || existingVideoUrl" controls class="studio-video-player"></video>
+                            <div class="video-overlay-actions">
+                                <button mat-stroked-button class="btn-replace" type="button" (click)="videoFileInput.click()">
+                                    <mat-icon>cached</mat-icon> Replace
+                                </button>
+                                <button mat-mini-fab color="warn" class="btn-remove" type="button" (click)="removeVideo()" matTooltip="Remove Video">
+                                    <mat-icon>delete</mat-icon>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="media-meta">
+                            <mat-icon class="status-icon success">play_circle</mat-icon>
+                            <span>HD video demo attached</span>
+                        </div>
+                    </div>
+                    } @else {
+                    <div class="media-dropzone-card video-dropzone" (click)="videoFileInput.click()">
+                        <div class="dropzone-icon-ring video-ring">
+                            <mat-icon class="pulse-icon">play_arrow</mat-icon>
+                        </div>
+                        <span class="drop-title">Upload Demo Video</span>
+                        <span class="drop-desc">Showcase features in motion</span>
+                        <span class="drop-formats">MP4, WEBM up to 100MB</span>
                     </div>
                     }
                 </div>
             </div>
 
-            <div class="divider">
-                <span>Additional Attributes</span>
+            <div class="divider m-t-24">
+                <span>Specifications &amp; Custom Attributes</span>
             </div>
 
-            <div class="form-row single-col">
-                <div class="field-container">
-                    <div formArrayName="attributeValues" style="display: flex; flex-direction: column; gap: 12px;">
-                        @for(av of attributeValues.controls; track av) {
-                        <div class="form-row" [formGroupName]="$index" style="align-items: center;">
-                            <div class="field-container">
+            <!-- Animated Trigger Banner for Additional Attributes -->
+            <div class="attribute-trigger-banner m-t-16 m-b-16" (click)="toggleAdditionalAttributes()" [class.active-banner]="showAdditionalAttributes">
+                <div class="banner-content">
+                    <div class="banner-icon-box">
+                        <mat-icon>tune</mat-icon>
+                    </div>
+                    <div class="banner-text">
+                        <h4 class="m-0 f-w-600">Additional Specifications &amp; Custom Attributes</h4>
+                        <p class="m-0 text-secondary f-s-13">Configure custom specs like Material, Warranty, Weight, Brand, or Technical Features</p>
+                    </div>
+                </div>
+                <div class="banner-action">
+                    @if (attributeValues.length > 0) {
+                    <span class="attr-count-badge">{{ attributeValues.length }} Active Specs</span>
+                    }
+                    <button type="button" mat-flat-button class="btn-rounded btn-gradient-subtle" (click)="$event.stopPropagation(); toggleAdditionalAttributes()">
+                        <mat-icon>{{ showAdditionalAttributes ? 'expand_less' : 'add_circle' }}</mat-icon>
+                        {{ showAdditionalAttributes ? 'Hide Attributes' : 'Configure Attributes' }}
+                    </button>
+                </div>
+            </div>
+
+            <!-- Expandable Additional Attributes Container -->
+            @if (showAdditionalAttributes) {
+            <div class="attribute-studio-box animated-expand">
+                <div class="attribute-box-header">
+                    <div class="flex items-center gap-8">
+                        <mat-icon class="header-icon">playlist_add_check</mat-icon>
+                        <span class="f-w-600">Attribute Key-Value Mapping</span>
+                    </div>
+                    <button mat-stroked-button type="button" (click)="addAttrValueRow()" class="btn-rounded btn-add-attr" [disabled]="allAttributesUsed">
+                        <mat-icon>add</mat-icon> Add Another Attribute
+                    </button>
+                </div>
+
+                <div formArrayName="attributeValues" class="attribute-rows-container">
+                    @if (attributeValues.controls.length === 0) {
+                    <div class="empty-attr-hint">
+                        <mat-icon>info_outline</mat-icon>
+                        <span>No additional attributes added. Click "Add Another Attribute" above to start mapping specifications.</span>
+                    </div>
+                    }
+                    @for(av of attributeValues.controls; track av) {
+                    <div class="attribute-row-card" [formGroupName]="$index">
+                        <div class="row-index-badge">#{{ $index + 1 }}</div>
+                        <div class="row-fields">
+                            <div class="field-container attr-select">
+                                <mat-label class="f-w-600 m-b-4 d-block f-s-12">Attribute Name</mat-label>
                                 <mat-form-field appearance="outline" class="w-100">
-                                    <mat-select formControlName="ProductAttributeId" placeholder="Attribute"
+                                    <mat-select formControlName="ProductAttributeId" placeholder="Select Attribute (e.g. Material)"
                                         (selectionChange)="onSingleAttrRowChange($event.value, $index)">
                                         @for(option of getAvailableAttributes($index); track option.Id) {
                                         <mat-option [value]="option.Id">{{option.Name}}</mat-option>
@@ -278,30 +427,28 @@
                                     </mat-select>
                                 </mat-form-field>
                             </div>
-                            <div class="field-container">
+                            <div class="field-container value-select">
+                                <mat-label class="f-w-600 m-b-4 d-block f-s-12">Attribute Value</mat-label>
                                 <mat-form-field appearance="outline" class="w-100">
-                                    <mat-select formControlName="ProductAttributeValueId" placeholder="Value">
+                                    <mat-select formControlName="ProductAttributeValueId" placeholder="Select Value (e.g. Pure Cotton)"
+                                        [disabled]="!av.get('ProductAttributeId')?.value">
                                         @for(option of SingleAttrValuesByRow[$index]; track option.Id) {
                                         <mat-option [value]="option.Id">{{option.Name}}</mat-option>
                                         }
                                     </mat-select>
                                 </mat-form-field>
                             </div>
-                            <div style="padding-top: 12px;">
-                                <button mat-icon-button color="warn" (click)="removeAttrValueRow($index)"
-                                    type="button">
-                                    <mat-icon>delete</mat-icon>
-                                </button>
-                            </div>
                         </div>
-                        }
+                        <div class="row-actions">
+                            <button mat-icon-button color="warn" (click)="removeAttrValueRow($index)" type="button" matTooltip="Remove specification" class="btn-row-delete">
+                                <mat-icon>delete_outline</mat-icon>
+                            </button>
+                        </div>
                     </div>
-                    <button mat-stroked-button type="button" (click)="addAttrValueRow()" class="m-t-12"
-                        [disabled]="allAttributesUsed" style="color: var(--brand-primary); border-color: rgba(99, 102, 241, 0.4);">
-                        <mat-icon>add</mat-icon> Add Attribute
-                    </button>
+                    }
                 </div>
             </div>
+            }
 
             @if (ProductForm.get('product_type')?.value === 'variant') {
             <div class="m-t-16">

@@ -52,11 +52,9 @@
 
         <select [(ngModel)]="planFilter" (change)="onFilterChange()">
           <option value="">All Plans</option>
-          <option value="14-Day Free Trial">14-Day Free Trial</option>
-          <option value="Starter">Starter</option>
-          <option value="Professional">Professional</option>
-          <option value="Business">Business</option>
-          <option value="Enterprise">Enterprise</option>
+          @for (p of filterPlans; track p) {
+            <option [value]="p">{{ p }}</option>
+          }
         </select>
 
         <label class="chk-deleted">

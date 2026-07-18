@@ -17,12 +17,41 @@ export const PagesRoutes: Routes = [
           title:'Dashboard'
         },
         {
-          title:'Starter Page'
+          title: 'Starter Page'
         }
       ]
 
     }
+  },
 
+  {
+    path: 'subscription-coupons',
+    loadComponent: () => import('./subscription-coupons/subscription-coupons').then(m => m.SubscriptionCouponsComponent),
+    title: 'Subscription Coupons Management',
+    data: {
+      title: 'Subscription Coupons Management',
+      urls: [{ title: 'Dashboard', url: '/dashboard' }, { title: 'Coupons' }]
+    }
+  },
+
+  {
+    path: 'billing-history',
+    loadComponent: () => import('./billing-history/billing-history').then(m => m.BillingHistoryComponent),
+    title: 'Billing & Invoice History',
+    data: {
+      title: 'Billing & Invoice History',
+      urls: [{ title: 'Dashboard', url: '/dashboard' }, { title: 'Billing' }]
+    }
+  },
+
+  {
+    path: 'checkout',
+    loadComponent: () => import('../components/standard-checkout/standard-checkout').then(m => m.StandardCheckoutComponent),
+    title: 'Standard Payment Checkout',
+    data: {
+      title: 'Standard Payment Checkout',
+      urls: [{ title: 'Dashboard', url: '/dashboard' }, { title: 'Checkout' }]
+    }
   }
 
 ];

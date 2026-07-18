@@ -14,7 +14,7 @@ import {
   NgZone,
 } from '@angular/core';
 import { isPlatformBrowser, CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { RouterModule, Router } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { MaterialModule } from 'src/app/material.module';
 import { SubscriptionService, SubscriptionPlan } from 'src/app/services/subscription.service';
@@ -99,14 +99,12 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   openSubscriptionModal(plan: SubscriptionPlan, mode: 'trial' | 'pay') {
-    this.dialog.open(SubscriptionCheckoutModalComponent, {
-      width: '580px',
-      maxWidth: '95vw',
-      panelClass: 'cyber-modal-overlay',
-      data: {
-        plan,
-        billingCycle: this.billingCycle(),
-        initialMode: mode
+    // Redirect to contact page with pre-filled plan details
+    this.router.navigate(['/contact'], {
+      queryParams: {
+        plan_id: plan.id,
+        plan_name: plan.name,
+        cycle: this.billingCycle()
       }
     });
   }
@@ -306,7 +304,8 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
     private cdr: ChangeDetectorRef,
     private ngZone: NgZone,
     private subscriptionService: SubscriptionService,
-    private dialog: MatDialog
+    private dialog: MatDialog,
+    private router: Router
   ) {}
 
   ngOnInit() {
@@ -462,14 +461,7 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
     if (isPlatformBrowser(this.platformId)) {
       const el = document.getElementById(sectionId);
       if (el) {
-        const navHeight = 110;
-        const elementPosition = el.getBoundingClientRect().top;
-        const offsetPosition = elementPosition + window.pageYOffset - navHeight;
-
-        window.scrollTo({
-          top: offsetPosition,
-          behavior: 'smooth'
-        });
+        el.scrollIntoView({ behavior: 'smooth' });
       }
     }
   }

@@ -1,5 +1,6 @@
 import { Component, OnInit, OnDestroy, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
@@ -23,7 +24,8 @@ export class SubscriptionPlansComponent implements OnInit, OnDestroy {
   constructor(
     private subscriptionService: SubscriptionService,
     private dialog: MatDialog,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private router: Router
   ) {}
 
   ngOnInit(): void {
@@ -51,14 +53,11 @@ export class SubscriptionPlansComponent implements OnInit, OnDestroy {
   }
 
   openSubscriptionModal(plan: SubscriptionPlan, mode: 'trial' | 'pay') {
-    this.dialog.open(SubscriptionCheckoutModalComponent, {
-      width: '580px',
-      maxWidth: '95vw',
-      panelClass: 'cyber-modal-overlay',
-      data: {
-        plan,
-        billingCycle: this.billingCycle,
-        initialMode: mode
+    this.router.navigate(['/contact'], {
+      queryParams: {
+        plan_id: plan.id,
+        plan_name: plan.name,
+        cycle: this.billingCycle
       }
     });
   }

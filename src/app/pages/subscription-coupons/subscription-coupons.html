@@ -1,0 +1,120 @@
+<div class="glass-container">
+  <div class="header">
+    <h2>Subscription Coupons Management</h2>
+    <button (click)="showForm.set(!showForm())">
+      <mat-icon style="vertical-align: middle; margin-right: 4px;">{{ showForm() ? 'close' : 'add' }}</mat-icon>
+      {{ showForm() ? 'Cancel' : 'Create New Coupon' }}
+    </button>
+  </div>
+
+  <div class="form-card" *ngIf="showForm()">
+    <h3>Create New Coupon</h3>
+    <form [formGroup]="couponForm" (ngSubmit)="onSubmit()">
+      <div class="form-grid">
+        
+        <mat-form-field appearance="outline">
+          <mat-label>Coupon Code</mat-label>
+          <input matInput formControlName="code" placeholder="e.g. SUMMER50" style="text-transform: uppercase;">
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Discount Type</mat-label>
+          <mat-select formControlName="discount_type">
+            <mat-option *ngFor="let type of discountTypes" [value]="type.value">
+              {{ type.label }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" *ngIf="['percentage', 'flat', 'extra_days', 'extra_months', 'renewal', 'first_purchase', 'referral'].includes(couponForm.get('discount_type')?.value)">
+          <mat-label>Discount Value</mat-label>
+          <input matInput type="number" formControlName="discount_value">
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" *ngIf="couponForm.get('discount_type')?.value === 'buy_x_get_y'">
+          <mat-label>Buy X Months</mat-label>
+          <input matInput type="number" formControlName="buy_x_months">
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" *ngIf="couponForm.get('discount_type')?.value === 'buy_x_get_y'">
+          <mat-label>Get Y Months</mat-label>
+          <input matInput type="number" formControlName="get_y_months">
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" *ngIf="couponForm.get('discount_type')?.value === 'free_trial_extension'">
+          <mat-label>Free Trial Days</mat-label>
+          <input matInput type="number" formControlName="free_trial_days">
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Usage Limit (0 for unlimited)</mat-label>
+          <input matInput type="number" formControlName="usage_limit">
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Min Order Value</mat-label>
+          <input matInput type="number" formControlName="min_order_value">
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Valid From</mat-label>
+          <input matInput type="date" formControlName="valid_from">
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Valid Until</mat-label>
+          <input matInput type="date" formControlName="valid_until">
+        </mat-form-field>
+      </div>
+
+      <div class="form-actions">
+        <button type="button" class="btn-cancel" (click)="showForm.set(false)">Cancel</button>
+        <button type="submit" class="btn-submit" [disabled]="couponForm.invalid || isLoading()">
+          Create Coupon
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <div class="loading-overlay" *ngIf="isLoading()">
+    <mat-spinner diameter="40"></mat-spinner>
+  </div>
+
+  <div class="coupons-grid" *ngIf="!isLoading()">
+    <div class="coupon-card" *ngFor="let coupon of coupons()">
+      <div class="status-badge" [ngClass]="coupon.is_active ? 'active' : 'inactive'">
+        {{ coupon.is_active ? 'Active' : 'Inactive' }}
+      </div>
+      
+      <div class="coupon-code">{{ coupon.code }}</div>
+      <div class="coupon-type">{{ coupon.discount_type | uppercase }}</div>
+
+      <div class="coupon-details">
+        <div class="detail-row" *ngIf="coupon.discount_value">
+          <span>Value:</span>
+          <span>{{ coupon.discount_value }}</span>
+        </div>
+        <div class="detail-row" *ngIf="coupon.buy_x_months">
+          <span>Buy X:</span>
+          <span>{{ coupon.buy_x_months }} months</span>
+        </div>
+        <div class="detail-row" *ngIf="coupon.get_y_months">
+          <span>Get Y:</span>
+          <span>{{ coupon.get_y_months }} months</span>
+        </div>
+        <div class="detail-row" *ngIf="coupon.free_trial_days">
+          <span>Extra Trial:</span>
+          <span>{{ coupon.free_trial_days }} days</span>
+        </div>
+        <div class="detail-row">
+          <span>Usage:</span>
+          <span>{{ coupon.used_count }} / {{ coupon.usage_limit > 0 ? coupon.usage_limit : '∞' }}</span>
+        </div>
+        <div class="detail-row" *ngIf="coupon.min_order_value">
+          <span>Min Value:</span>
+          <span>{{ coupon.min_order_value | currency:'INR' }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

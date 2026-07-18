@@ -1,0 +1,18 @@
+<div class="glass-container">
+  <h2>Standard Razorpay Checkout</h2>
+  
+  <div class="input-group">
+    <label>Amount to Pay (INR)</label>
+    <div class="amount-wrapper">
+      <span>₹</span>
+      <input type="number" [(ngModel)]="amountToPay" min="1" step="1">
+    </div>
+  </div>
+
+  <button class="btn-pay" (click)="payNow()" [disabled]="isLoading()">
+    <ng-container *ngIf="!isLoading()">
+      Pay ₹{{ amountToPay() }} Now
+    </ng-container>
+    <mat-spinner *ngIf="isLoading()" diameter="24" color="accent"></mat-spinner>
+  </button>
+</div>

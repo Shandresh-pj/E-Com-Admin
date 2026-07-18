@@ -6,6 +6,7 @@ import { environment } from 'src/environment/environment';
 import { of } from 'rxjs';
 import { catchError, map, debounceTime, take, switchMap } from 'rxjs/operators';
 import { AlertService } from 'src/app/Securities/Services/alert.service';
+import { SubscriptionService } from 'src/app/services/subscription.service';
 
 @Component({
   selector: 'app-contact',
@@ -33,11 +34,12 @@ export class ContactComponent implements OnInit {
     private fb: FormBuilder,
     private http: HttpClient,
     private route: ActivatedRoute,
-    private alert: AlertService
+    private alert: AlertService,
+    private subscriptionService: SubscriptionService
   ) {}
 
   ngOnInit() {
-    const prePlan = this.route.snapshot.queryParamMap.get('plan') || '14-Day Free Trial';
+    const prePlan = this.route.snapshot.queryParamMap.get('plan_name') || this.route.snapshot.queryParamMap.get('plan') || '14-Day Free Trial';
     const preCycle = this.route.snapshot.queryParamMap.get('cycle') || 'Monthly';
 
     this.contactForm = this.fb.group({
@@ -70,13 +72,15 @@ export class ContactComponent implements OnInit {
       captchaVerify: ['']
     });
 
-    // Keep preferredPlan in sync with selectedPlan (needed by backend payload)
-    this.contactForm.get('selectedPlan')?.valueChanges.subscribe(val => {
-      this.preferredPlan = val;
+    // We don't need a separate variable, we can just use the form value on submit.
+
+    this.subscriptionService.getPlans().subscribe(plansList => {
+      this.plans = ['14-Day Free Trial', ...plansList.map(p => p.name)];
+      if (prePlan && !this.plans.includes(prePlan)) {
+        this.plans.push(prePlan);
+      }
     });
   }
-
-  preferredPlan: string = '14-Day Free Trial';
 
   isFieldInvalid(fieldName: string): boolean {
     const control = this.contactForm.get(fieldName);
@@ -199,7 +203,8 @@ export class ContactComponent implements OnInit {
     const payload = { ...this.contactForm.value };
     payload.businessName = payload.companyName;
     payload.ownerName = payload.fullName;
-    payload.preferredPlan = this.preferredPlan;
+    payload.preferredPlan = payload.selectedPlan; // Read directly from form
+    payload.billingCycle = payload.billingCycle.toLowerCase();
     delete payload.terms;
     delete payload.captchaVerify;
 

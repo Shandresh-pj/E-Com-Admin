@@ -5,6 +5,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { environment } from 'src/environment/environment';
 import { MatTable } from 'src/utils/mat-table/mat-table';
+import { SubscriptionService } from 'src/app/services/subscription.service';
 
 export interface LeadContact {
   id: number;
@@ -73,10 +74,20 @@ export class CrmContacts implements OnInit {
 
   // Bulk action selection
   selectedIds = new Set<number>();
+  
+  filterPlans: string[] = ['14-Day Free Trial'];
 
-  constructor(private http: HttpClient, private cdr: ChangeDetectorRef) { }
+  constructor(
+    private http: HttpClient, 
+    private cdr: ChangeDetectorRef,
+    private subscriptionService: SubscriptionService
+  ) { }
 
   ngOnInit() {
+    this.subscriptionService.getPlans().subscribe(plans => {
+      this.filterPlans = ['14-Day Free Trial', ...plans.map(p => p.name)];
+      this.cdr.markForCheck();
+    });
     this.fetchLeads();
   }
 

@@ -1,0 +1,127 @@
+<div class="glass-container">
+  <div class="header">
+    <h2>Billing & Invoice History</h2>
+  </div>
+
+  <div class="loading-overlay" *ngIf="isLoading()">
+    <mat-spinner diameter="40"></mat-spinner>
+  </div>
+
+  <div class="table-card" *ngIf="!isLoading()">
+    <table>
+      <thead>
+        <tr>
+          <th>Invoice #</th>
+          <th>Date</th>
+          <th>Amount</th>
+          <th>Status</th>
+          <th>Plan</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let invoice of invoices()">
+          <td>{{ invoice.invoice_number || 'N/A' }}</td>
+          <td>{{ invoice.created_at | date:'mediumDate' }}</td>
+          <td>{{ invoice.amount | currency:invoice.currency }}</td>
+          <td>
+            <span class="status" [ngClass]="invoice.status">{{ invoice.status | uppercase }}</span>
+          </td>
+          <td>{{ invoice.subscription?.plan?.name || 'Subscription' }}</td>
+          <td>
+            <button class="btn-view" (click)="viewInvoice(invoice)">View Invoice</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    
+    <div *ngIf="invoices().length === 0" style="padding: 40px; text-align: center; color: var(--theme-color-text-muted);">
+      No billing history found.
+    </div>
+  </div>
+</div>
+
+<!-- INVOICE MODAL -->
+<div class="invoice-overlay" *ngIf="selectedInvoice()">
+  <div class="invoice-modal">
+    <div class="modal-actions">
+      <h3>Invoice Details</h3>
+      <div class="buttons">
+        <button (click)="printInvoice()"><mat-icon>print</mat-icon> Print</button>
+        <button class="btn-primary" (click)="downloadPDF()"><mat-icon>download</mat-icon> Download PDF</button>
+        <button (click)="closeInvoice()"><mat-icon>close</mat-icon> Close</button>
+      </div>
+    </div>
+    
+    <div class="invoice-scroll">
+      <div class="invoice-document" #invoicePdf>
+        
+        <div class="invoice-header">
+          <div class="company-info">
+            <h1>{{ selectedInvoice().company?.name || 'Your Company' }}</h1>
+            <p>{{ selectedInvoice().company?.email || 'admin@company.com' }}</p>
+            <p>{{ selectedInvoice().company?.phone || '+91 0000000000' }}</p>
+          </div>
+          <div class="invoice-meta">
+            <h2>INVOICE</h2>
+            <p><strong>Invoice Number:</strong> {{ selectedInvoice().invoice_number || 'N/A' }}</p>
+            <p><strong>Date:</strong> {{ selectedInvoice().created_at | date:'longDate' }}</p>
+            <p><strong>Order ID:</strong> {{ selectedInvoice().razorpay_order_id || 'N/A' }}</p>
+          </div>
+        </div>
+
+        <div class="bill-to">
+          <h3>Billed To:</h3>
+          <p class="customer-name">{{ selectedInvoice().company?.contact_name || 'Customer' }}</p>
+          <p>{{ selectedInvoice().company?.address || 'Billing Address Not Provided' }}</p>
+        </div>
+
+        <table class="invoice-table">
+          <thead>
+            <tr>
+              <th>Description</th>
+              <th class="text-right">Amount</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>
+                Subscription: {{ selectedInvoice().plan_details?.name || 'Custom Plan' }}
+                <br>
+                <small style="color: #6b7280;">Billing Cycle: {{ selectedInvoice().subscription?.billing_cycle | titlecase }}</small>
+              </td>
+              <td class="text-right">{{ (selectedInvoice().subtotal + selectedInvoice().discount_amount) | currency:selectedInvoice().currency }}</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="invoice-summary">
+          <div class="summary-box">
+            <div class="summary-row">
+              <span>Subtotal:</span>
+              <span>{{ (selectedInvoice().subtotal + selectedInvoice().discount_amount) | currency:selectedInvoice().currency }}</span>
+            </div>
+            <div class="summary-row discount" *ngIf="selectedInvoice().discount_amount > 0">
+              <span>Discount ({{ selectedInvoice().coupon_applied?.code || 'Promo' }}):</span>
+              <span>-{{ selectedInvoice().discount_amount | currency:selectedInvoice().currency }}</span>
+            </div>
+            <div class="summary-row">
+              <span>GST (18%):</span>
+              <span>{{ selectedInvoice().gst_amount | currency:selectedInvoice().currency }}</span>
+            </div>
+            <div class="summary-row total">
+              <span>Total Paid:</span>
+              <span>{{ selectedInvoice().amount | currency:selectedInvoice().currency }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="invoice-footer">
+          <p>Thank you for your business!</p>
+          <p>If you have any questions about this invoice, please contact support.</p>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>

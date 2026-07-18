@@ -1,6 +1,6 @@
 import { Component, Inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators, FormsModule, ReactiveFormsModule, FormControl } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { SubscriptionPlan, SubscriptionService } from 'src/app/services/subscription.service';
@@ -29,6 +29,12 @@ export class SubscriptionCheckoutModalComponent implements OnInit {
   successMessage = signal('');
   receiptData = signal<any>(null);
 
+  couponControl = new FormControl('');
+  applyingCoupon = signal(false);
+  appliedCoupon = signal<any>(null);
+  discountAmount = signal(0);
+  finalAmount = signal(0);
+
   constructor(
     private fb: FormBuilder,
     private dialogRef: MatDialogRef<SubscriptionCheckoutModalComponent>,
@@ -48,20 +54,55 @@ export class SubscriptionCheckoutModalComponent implements OnInit {
     });
   }
 
-  ngOnInit(): void {}
+  ngOnInit(): void {
+    this.finalAmount.set(this.originalPrice);
+  }
 
   setMode(m: 'trial' | 'pay') {
     this.mode.set(m);
   }
 
-  get price(): number {
+  get originalPrice(): number {
     return this.data.billingCycle === 'Monthly'
       ? this.data.plan.monthlyPrice
       : this.data.plan.yearlyPrice;
   }
 
+  get price(): number {
+    return this.finalAmount();
+  }
+
+  get formattedOriginalPrice(): string {
+    return this.originalPrice.toLocaleString('en-IN');
+  }
+
   get formattedPrice(): string {
     return this.price.toLocaleString('en-IN');
+  }
+
+  applyCoupon(): void {
+    const code = this.couponControl.value;
+    if (!code) return;
+
+    this.applyingCoupon.set(true);
+    // Assuming subscriptionService has a method to validate coupon
+    this.subscriptionService.validateCoupon(code, this.originalPrice).subscribe({
+      next: (res: any) => {
+        this.applyingCoupon.set(false);
+        if (res.success) {
+          this.appliedCoupon.set(res.data.coupon);
+          this.discountAmount.set(res.data.discount_amount);
+          this.finalAmount.set(res.data.final_amount);
+          this.snackBar.open('Coupon Applied Successfully!', 'Close', { duration: 3000 });
+        } else {
+          this.snackBar.open(res.message || 'Invalid coupon.', 'Close', { duration: 3000 });
+        }
+      },
+      error: (err: any) => {
+        this.applyingCoupon.set(false);
+        this.snackBar.open(err.error?.message || 'Error applying coupon.', 'Close', { duration: 3000 });
+      }
+    });
   }
 
   onClose(): void {
@@ -114,7 +155,8 @@ export class SubscriptionCheckoutModalComponent implements OnInit {
         name: val.name,
         email: val.email,
         phone: val.phone,
-        company: val.company
+        company: val.company,
+        coupon_code: this.appliedCoupon()?.code
       }).subscribe({
         next: async (orderRes) => {
           // Open Razorpay Checkout overlay

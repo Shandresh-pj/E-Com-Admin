@@ -118,18 +118,44 @@
       }
     </div>
 
+    @if (mode() === 'pay') {
+    <!-- Coupon Section -->
+    <div class="coupon-section">
+      <div class="form-group" style="margin-bottom: 0;">
+        <label for="coupon">Have a Coupon Code?</label>
+        <div class="coupon-input-group">
+          <input id="coupon" type="text" [formControl]="couponControl" placeholder="ENTER CODE" class="cyber-input" />
+          <button type="button" class="btn-apply-coupon" (click)="applyCoupon()" [disabled]="applyingCoupon() || !couponControl.value">
+            {{ applyingCoupon() ? '...' : 'Apply' }}
+          </button>
+        </div>
+        @if (appliedCoupon()) {
+          <div class="coupon-success-msg text-emerald mt-2 text-sm">
+            ✅ Coupon applied! Saving ₹{{ discountAmount().toLocaleString('en-IN') }}
+          </div>
+        }
+      </div>
+    </div>
+    }
+
     <!-- Summary Box -->
     <div class="summary-box liquid-summary">
       <div class="summary-title">Plan Summary</div>
       <div class="summary-line">
         <span>{{ data.plan.name }} Suite ({{ data.billingCycle }})</span>
-        <span>{{ mode() === 'trial' ? '₹0.00 (14 Days)' : '₹' + formattedPrice }}</span>
+        <span>{{ mode() === 'trial' ? '₹0.00 (14 Days)' : '₹' + formattedOriginalPrice }}</span>
       </div>
       @if (mode() === 'pay') {
-      <div class="summary-line text-sm">
-        <span>GST (18% Included)</span>
-        <span>Included</span>
-      </div>
+        @if (appliedCoupon()) {
+        <div class="summary-line text-sm text-emerald">
+          <span>Discount ({{ appliedCoupon().code }})</span>
+          <span>- ₹{{ discountAmount().toLocaleString('en-IN') }}</span>
+        </div>
+        }
+        <div class="summary-line text-sm">
+          <span>GST (18% Included)</span>
+          <span>Included</span>
+        </div>
       }
       <div class="summary-total">
         <span>Amount Due Today</span>

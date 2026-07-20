@@ -415,5 +415,35 @@ export const ComponentsRoutes: Routes = [
       roles: [SA, A],
       urls: [{ title: 'Manage Plans', url: '/manage-subscription-plans' }]
     }
+  },
+  {
+    path: 'billing-history',
+    loadComponent: () => import('../pages/billing-history/billing-history').then(m => m.BillingHistoryComponent),
+    canActivate: [RoleGuard],
+    data: {
+      title: 'Billing & Invoice History',
+      roles: [SA, A, BM, SK, EM, DB],
+      urls: [{ title: 'Billing & Invoices', url: '/billing-history' }]
+    }
+  },
+  {
+    path: 'subscription-coupons',
+    loadComponent: () => import('../pages/subscription-coupons/subscription-coupons').then(m => m.SubscriptionCouponsComponent),
+    canActivate: [RoleGuard],
+    data: {
+      title: 'Subscription Coupons',
+      roles: [SA, A],
+      urls: [{ title: 'Coupons', url: '/subscription-coupons' }]
+    }
+  },
+  {
+    path: 'checkout',
+    loadComponent: () => import('./standard-checkout/standard-checkout').then(m => m.StandardCheckoutComponent),
+    canActivate: [RoleGuard],
+    data: {
+      title: 'Standard Payment Checkout',
+      roles: [SA, A, BM, SK, EM, DB],
+      urls: [{ title: 'Checkout', url: '/checkout' }]
+    }
   }
 ];

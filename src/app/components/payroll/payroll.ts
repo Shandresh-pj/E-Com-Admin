@@ -134,13 +134,12 @@ export class Payroll implements OnInit {
 
     this.commonService.postApi('payroll/generate', payload).subscribe({
       next: () => {
-        this.alert.success("Payroll generated successfully");
+        this.alert.success('Payroll generated successfully');
         this.toggleForm();
         this.loadPayrolls();
       },
-      error: (err) => {
-        console.error('Payroll generation failed:', err);
-        this.alert.error("Payroll generation failed: " + (err.error?.message || "Internal error"));
+      error: () => {
+        // errorInterceptor already shows the toast for HTTP errors — just reset loading state
         this.loading = false;
       }
     });

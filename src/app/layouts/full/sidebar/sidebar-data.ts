@@ -149,7 +149,21 @@ export const navItems: NavItem[] = [
     iconName: 'receipt',
     route: '/billing-history',
     bgcolor: 'success',
+    roles: [SA, A, BM, SK]
+  },
+  {
+    displayName: 'Subscription Coupons',
+    iconName: 'ticket',
+    route: '/subscription-coupons',
+    bgcolor: 'warning',
     roles: [SA, A]
+  },
+  {
+    displayName: 'Payment Checkout',
+    iconName: 'credit-card',
+    route: '/checkout',
+    bgcolor: 'info',
+    roles: [SA, A, BM, SK]
   },
 
   { navCap: 'Audit', roles: [SA, A] },

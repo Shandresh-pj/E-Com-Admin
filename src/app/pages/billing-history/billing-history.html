@@ -89,6 +89,11 @@
           </div>
           <h3>No invoices found</h3>
           <p>Your billing history will appear here after your first payment.</p>
+          <div style="margin-top: 16px;">
+            <a routerLink="/subscription-plans" class="bh-refresh-btn" style="display: inline-flex; text-decoration: none; background: #6366f1; color: #fff; border-color: #6366f1; padding: 10px 20px; font-weight: 700;">
+              Browse Subscription Plans
+            </a>
+          </div>
         </div>
       } @else {
         <div class="bh-table-wrapper">
@@ -114,7 +119,7 @@
                     <span class="bh-plan-name">{{ invoice.plan_details?.name || invoice.subscription?.plan?.name || 'Subscription' }}</span>
                     <span class="bh-cycle">{{ invoice.subscription?.billing_cycle | titlecase }}</span>
                   </td>
-                  <td class="bh-amount">₹{{ (+invoice.amount).toLocaleString('en-IN') }}</td>
+                  <td class="bh-amount">₹{{ (+invoice.amount || 0).toLocaleString('en-IN') }}</td>
                   <td>
                     <span class="bh-status-badge" [ngClass]="'status-' + invoice.status">
                       {{ invoice.status | uppercase }}

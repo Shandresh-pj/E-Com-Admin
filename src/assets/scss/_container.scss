@@ -89,13 +89,17 @@ body {
 }
 
 .pageWrapper {
-  padding: 24px;
-  /* Use min-height instead of fixed height so content can grow naturally
-     but never causes the contentWrapper itself to overflow prematurely */
+  // Mobile-first: tight padding scales up as viewport widens
+  padding: 12px;
   min-height: 100%;
   margin: 0 auto;
   position: relative;
   z-index: 2;
+
+  @media (min-width: 480px) { padding: 14px; }
+  @media (min-width: 640px) { padding: 16px; }
+  @media (min-width: 992px) { padding: 20px 24px; }
+  @media (min-width: 1200px) { padding: 24px; }
 
   &.maxWidth {
     max-width: $boxedWidth;

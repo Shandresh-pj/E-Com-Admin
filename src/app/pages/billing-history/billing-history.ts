@@ -1,5 +1,6 @@
 import { Component, OnInit, OnDestroy, signal, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule, TitleCasePipe } from '@angular/common';
+import { RouterLink } from '@angular/router';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { MaterialModule } from '../../material.module';
@@ -10,7 +11,7 @@ import { SocketService } from '../../Securities/Services/socket.service';
 @Component({
   selector: 'app-billing-history',
   standalone: true,
-  imports: [CommonModule, MaterialModule, TitleCasePipe],
+  imports: [CommonModule, MaterialModule, TitleCasePipe, RouterLink],
   templateUrl: './billing-history.html',
   styleUrls: ['./billing-history.scss']
 })
@@ -58,7 +59,7 @@ export class BillingHistoryComponent implements OnInit, OnDestroy {
       },
       error: () => {
         this.isLoading.set(false);
-        this.alert.error('Failed to load billing history. Please refresh.');
+        // Rely on global errorInterceptor for user alert toast
       }
     });
   }

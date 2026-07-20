@@ -1,13 +1,25 @@
 // ══════════════════════════════════════════════════════════════════════════
 // Dashboard Page — Premium Quantum Liquid Glass Design System
-// Matches Reference Color Palette and Neumorphic 3D Card Format Exactly
+// Full Mobile-First Responsive — All Breakpoints Covered
+// Breakpoints: xs <480px | sm <640px | md <768px | lg <992px | xl <1200px
 // ══════════════════════════════════════════════════════════════════════════
+
+// ─── Mobile-First Base: page content padding ────────────────────────────
+:host {
+  display: block;
+  width: 100%;
+}
 
 .dashboard-container {
   position: relative;
   z-index: 1;
+  // Mobile: tight padding — more room on wider screens
+  padding: 12px;
 
-  // Background Ambient Glowing Radial Orbs
+  @media (min-width: 640px)  { padding: 16px; }
+  @media (min-width: 992px)  { padding: 20px 24px; }
+  @media (min-width: 1200px) { padding: 24px; }
+
   &::before, &::after {
     content: '';
     position: fixed;
@@ -34,8 +46,8 @@
 }
 
 @keyframes liquidGlowPulse {
-  0% { transform: scale(1) translate(0, 0); opacity: 0.7; }
-  50% { transform: scale(1.15) translate(30px, -20px); opacity: 0.9; }
+  0%   { transform: scale(1) translate(0, 0); opacity: 0.7; }
+  50%  { transform: scale(1.15) translate(30px, -20px); opacity: 0.9; }
   100% { transform: scale(0.95) translate(-20px, 25px); opacity: 0.6; }
 }
 
@@ -49,41 +61,42 @@
     0 16px 40px 0 rgba(31, 38, 135, 0.07),
     inset 0 1.5px 1.5px rgba(255, 255, 255, 0.95),
     inset 1px 0 2px rgba(255, 255, 255, 0.85) !important;
-  border-radius: 24px !important;
+  border-radius: 20px !important;
   position: relative;
   overflow: hidden;
-
-  /* Spring Physics */
   transition: transform 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275),
               box-shadow 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275),
               border-color 0.35s ease !important;
 
-  /* Sheen Reflection Line */
-  &::before {
-    content: '';
-    position: absolute;
-    top: 0; left: -150%; width: 60%; height: 100%;
-    background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.65), transparent);
-    transform: skewX(-25deg);
-    transition: left 0.8s ease;
-    z-index: 5;
-    pointer-events: none;
-  }
+  @media (min-width: 992px) {
+    border-radius: 24px !important;
 
-  &:hover {
-    box-shadow:
-      0 24px 60px 0 rgba(31, 38, 135, 0.12),
-      inset 0 2px 2px rgba(255, 255, 255, 1) !important;
-    border-color: rgba(255, 255, 255, 1) !important;
-    transform: translateY(-4px) !important;
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0; left: -150%; width: 60%; height: 100%;
+      background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.65), transparent);
+      transform: skewX(-25deg);
+      transition: left 0.8s ease;
+      z-index: 5;
+      pointer-events: none;
+    }
 
-    &::before { left: 150%; }
+    &:hover {
+      box-shadow:
+        0 24px 60px 0 rgba(31, 38, 135, 0.12),
+        inset 0 2px 2px rgba(255, 255, 255, 1) !important;
+      border-color: rgba(255, 255, 255, 1) !important;
+      transform: translateY(-4px) !important;
+
+      &::before { left: 150%; }
+    }
   }
 
   > * { position: relative; z-index: 1; }
 }
 
-// ─── Welcome Banner ────────────────────────────────────────────────────────
+// ─── Welcome Banner ─────────────────────────────────────────────────────────
 .welcome-banner {
   @extend .liquid-glass-card;
   color: #0f172a;
@@ -91,10 +104,48 @@
   border-color: rgba(99, 102, 241, 0.35) !important;
 
   .welcome-title {
-    font-size: clamp(22px, 3vw, 32px);
-    letter-spacing: -0.8px;
+    font-size: clamp(18px, 5vw, 32px);
+    letter-spacing: -0.5px;
     font-family: 'Outfit', 'Plus Jakarta Sans', sans-serif;
     font-weight: 900;
+    line-height: 1.2;
+  }
+}
+
+.welcome-banner mat-card-content {
+  // Mobile: tighter padding
+  padding: 16px !important;
+
+  @media (min-width: 640px) { padding: 20px !important; }
+  @media (min-width: 992px) { padding: 24px !important; }
+}
+
+// ── Banner inner layout ─────────────────────────────────────────────────────
+.banner-inner {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+
+  @media (min-width: 640px) {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+  }
+}
+
+.banner-left {
+  flex: 1;
+  min-width: 0; // prevent overflow
+}
+
+.banner-right {
+  flex-shrink: 0;
+
+  // Stack horizontally on mobile — full width pill
+  .liquid-badge {
+    width: 100%;
+    @media (min-width: 640px) { width: auto; }
   }
 }
 
@@ -109,10 +160,10 @@
 .badge-role-pill {
   background: rgba(99, 102, 241, 0.14);
   color: #4f46e5;
-  padding: 4px 14px;
+  padding: 4px 12px;
   border-radius: 24px;
-  font-size: 12px;
-  letter-spacing: 0.8px;
+  font-size: 11px;
+  letter-spacing: 0.6px;
   text-transform: uppercase;
   border: 1px solid rgba(99, 102, 241, 0.3);
   font-weight: 800;
@@ -132,59 +183,84 @@
   pointer-events: none;
 
   &.circle-1 {
-    width: 340px; height: 340px;
-    top: -130px; right: -60px;
+    width: 260px; height: 260px;
+    top: -100px; right: -40px;
     animation: liquidCircleGlow 8s infinite alternate linear;
+
+    @media (min-width: 768px) {
+      width: 340px; height: 340px;
+      top: -130px; right: -60px;
+    }
   }
 
   &.circle-2 {
-    width: 240px; height: 240px;
-    bottom: -100px; left: 15%;
+    width: 180px; height: 180px;
+    bottom: -80px; left: 10%;
     animation: liquidCircleGlow 6s infinite alternate-reverse linear;
+
+    @media (min-width: 768px) {
+      width: 240px; height: 240px;
+      bottom: -100px; left: 15%;
+    }
   }
 }
 
 @keyframes liquidCircleGlow {
-  0% { transform: scale(1) translate(0, 0); opacity: 0.5; }
+  0%   { transform: scale(1) translate(0, 0); opacity: 0.5; }
   100% { transform: scale(1.15) translate(15px, -15px); opacity: 0.85; }
 }
 
 // ══════════════════════════════════════════════════════════════════════════
-// ─── Premium Neumorphic Liquid Glass KPI Grid (Matches Reference Image) ───
+// ─── Premium Neumorphic Liquid Glass KPI Grid (Strict 2 Cards Per Row) ────
 // ══════════════════════════════════════════════════════════════════════════
 .liquid-kpi-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  // Strictly 2 cards per row (2 columns) for all viewports >= 400px
+  grid-template-columns: 1fr;
   gap: 16px;
   align-items: stretch;
 
-  @media (max-width: 576px) {
-    grid-template-columns: 1fr;
+  @media (min-width: 400px) {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 16px;
+  }
+
+  &.kpi-grid-6 {
+    @media (min-width: 400px) {
+      grid-template-columns: repeat(2, 1fr) !important;
+      gap: 16px;
+    }
   }
 }
 
 .glass-kpi-card {
   position: relative;
-  border-radius: 26px;
-  padding: 22px 24px;
+  border-radius: 24px;
+  padding: 20px 22px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 16px;
+  gap: 14px;
   backdrop-filter: blur(28px) saturate(190%);
   -webkit-backdrop-filter: blur(28px) saturate(190%);
   box-shadow:
-    0 12px 36px 0 rgba(31, 38, 135, 0.06),
+    0 10px 30px 0 rgba(31, 38, 135, 0.07),
     inset 0 2px 2px rgba(255, 255, 255, 0.95),
     inset 1px 0 2px rgba(255, 255, 255, 0.85);
   transition: transform 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275),
               box-shadow 0.35s ease,
               border-color 0.35s ease;
   overflow: hidden;
+  min-height: 96px;
 
-  &:hover {
-    transform: translateY(-5px) scale(1.02);
-    box-shadow: 0 20px 45px rgba(31, 38, 135, 0.14), inset 0 2px 2.5px rgba(255, 255, 255, 1);
+  @media (min-width: 992px) {
+    padding: 22px 24px;
+    border-radius: 26px;
+
+    &:hover {
+      transform: translateY(-4px) scale(1.02);
+      box-shadow: 0 20px 45px rgba(31, 38, 135, 0.14), inset 0 2px 2.5px rgba(255, 255, 255, 1);
+    }
   }
 
   .kpi-content {
@@ -198,25 +274,28 @@
     text-transform: uppercase;
     letter-spacing: 0.8px;
     margin: 0 0 6px;
-    line-height: 1.2;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    line-height: 1.25;
+    word-break: break-word;
+
+    @media (min-width: 640px) { font-size: 11px; letter-spacing: 0.8px; }
   }
 
   .kpi-value {
-    font-size: 26px;
+    font-size: 22px;
     font-weight: 900;
-    letter-spacing: -0.6px;
+    letter-spacing: -0.5px;
     margin: 0;
     line-height: 1.1;
-    white-space: nowrap;
+    word-break: break-word;
+
+    @media (min-width: 640px) { font-size: 24px; }
+    @media (min-width: 992px) { font-size: 25px; }
   }
 
   .kpi-icon-3d {
-    width: 48px;
-    height: 48px;
-    border-radius: 16px;
+    width: 40px;
+    height: 40px;
+    border-radius: 14px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -224,10 +303,15 @@
     transform: rotate(3deg);
     transition: transform 0.35s ease;
 
+    @media (min-width: 640px) { width: 44px; height: 44px; }
+    @media (min-width: 992px) { width: 48px; height: 48px; border-radius: 16px; }
+
     mat-icon {
-      font-size: 24px;
-      width: 24px;
-      height: 24px;
+      font-size: 20px;
+      width: 20px;
+      height: 20px;
+      @media (min-width: 640px) { font-size: 22px; width: 22px; height: 22px; }
+      @media (min-width: 992px) { font-size: 24px; width: 24px; height: 24px; }
     }
   }
 
@@ -235,93 +319,82 @@
     transform: rotate(0deg) scale(1.1);
   }
 
-  // ── 1. Indigo / Periwinkle (Company Size) ────────────────────────────────
+  // Color variants
   &.glass-kpi-indigo {
     background: linear-gradient(135deg, rgba(230, 230, 255, 0.8) 0%, rgba(240, 240, 255, 0.5) 100%);
     border: 2px solid rgba(165, 160, 245, 0.65);
-
     .kpi-label { color: #474676; }
     .kpi-value { color: #5544d4; }
     .kpi-icon-3d {
       background: rgba(185, 180, 255, 0.65);
       color: #5544d4;
       border: 1px solid rgba(165, 160, 245, 0.75);
-      box-shadow: 0 8px 20px rgba(85, 68, 212, 0.25);
+      box-shadow: 0 6px 16px rgba(85, 68, 212, 0.25);
     }
   }
 
-  // ── 2. Mint / Seafoam (Staff On Duty) ───────────────────────────────────
   &.glass-kpi-emerald {
     background: linear-gradient(135deg, rgba(225, 248, 240, 0.8) 0%, rgba(240, 252, 248, 0.5) 100%);
     border: 2px solid rgba(115, 215, 185, 0.65);
-
     .kpi-label { color: #2c5950; }
     .kpi-value { color: #008e5a; }
     .kpi-icon-3d {
       background: rgba(165, 235, 210, 0.65);
       color: #008e5a;
       border: 1px solid rgba(115, 215, 185, 0.75);
-      box-shadow: 0 8px 20px rgba(0, 142, 90, 0.25);
+      box-shadow: 0 6px 16px rgba(0, 142, 90, 0.25);
     }
   }
 
-  // ── 3. Soft Peach / Amber (Low Stock Items) ────────────────────────────
   &.glass-kpi-amber {
     background: linear-gradient(135deg, rgba(255, 243, 230, 0.8) 0%, rgba(255, 248, 240, 0.5) 100%);
     border: 2px solid rgba(245, 200, 150, 0.65);
-
     .kpi-label { color: #594231; }
     .kpi-value { color: #d66200; }
     .kpi-icon-3d {
       background: rgba(255, 215, 175, 0.65);
       color: #d66200;
       border: 1px solid rgba(245, 200, 150, 0.75);
-      box-shadow: 0 8px 20px rgba(214, 98, 0, 0.25);
+      box-shadow: 0 6px 16px rgba(214, 98, 0, 0.25);
     }
   }
 
-  // ── 4. Soft Rose / Crimson (Pending Approvals) ─────────────────────────
   &.glass-kpi-rose {
     background: linear-gradient(135deg, rgba(255, 230, 235, 0.8) 0%, rgba(255, 240, 245, 0.5) 100%);
     border: 2px solid rgba(245, 160, 175, 0.65);
-
     .kpi-label { color: #5c3239; }
     .kpi-value { color: #d01c1c; }
     .kpi-icon-3d {
       background: rgba(255, 185, 195, 0.65);
       color: #d01c1c;
       border: 1px solid rgba(245, 160, 175, 0.75);
-      box-shadow: 0 8px 20px rgba(208, 28, 28, 0.25);
+      box-shadow: 0 6px 16px rgba(208, 28, 28, 0.25);
     }
   }
 
-  // ── 5. Sky Blue / Cerulean (Active Branches) ───────────────────────────
   &.glass-kpi-sky {
     background: linear-gradient(135deg, rgba(225, 244, 255, 0.8) 0%, rgba(240, 248, 255, 0.5) 100%);
     border: 2px solid rgba(150, 210, 245, 0.65);
-
     .kpi-label { color: #204b62; }
     .kpi-value { color: #007fb6; }
     .kpi-icon-3d {
       background: rgba(185, 230, 255, 0.65);
       color: #007fb6;
       border: 1px solid rgba(150, 210, 245, 0.75);
-      box-shadow: 0 8px 20px rgba(0, 127, 182, 0.25);
+      box-shadow: 0 6px 16px rgba(0, 127, 182, 0.25);
     }
   }
 
-  // ── 6. Violet / Bright Purple (Duty Shifts) ────────────────────────────
   &.glass-kpi-purple {
     background: linear-gradient(135deg, rgba(240, 230, 255, 0.8) 0%, rgba(248, 240, 255, 0.5) 100%);
     border: 2px solid rgba(195, 160, 245, 0.65);
-
     .kpi-label { color: #422b60; }
     .kpi-value { color: #7928ca; }
     .kpi-icon-3d {
       background: rgba(215, 185, 255, 0.65);
       color: #7928ca;
       border: 1px solid rgba(195, 160, 245, 0.75);
-      box-shadow: 0 8px 20px rgba(121, 40, 202, 0.25);
+      box-shadow: 0 6px 16px rgba(121, 40, 202, 0.25);
     }
   }
 }
@@ -331,33 +404,41 @@
   @extend .liquid-glass-card;
 
   .widget-header {
-    padding: 16px 20px;
+    padding: 14px 16px;
     border-bottom: 1px solid rgba(0,0,0,0.04);
 
+    @media (min-width: 640px) { padding: 16px 20px; }
+
     .widget-icon-bg {
-      width: 36px;
-      height: 36px;
+      width: 32px;
+      height: 32px;
       border-radius: 10px;
       display: flex;
       align-items: center;
       justify-content: center;
+      flex-shrink: 0;
+
+      @media (min-width: 640px) { width: 36px; height: 36px; }
     }
   }
 }
 
 // ─── Live Audit Radar Ping Badge ────────────────────────────────────────────
 .live-ping-badge {
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 800;
   text-transform: uppercase;
   color: #10b981;
   background: rgba(16, 185, 129, 0.14);
   border: 1px solid rgba(16, 185, 129, 0.3);
-  padding: 4px 12px;
+  padding: 3px 10px;
   border-radius: 20px;
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 5px;
+  white-space: nowrap;
+
+  @media (min-width: 640px) { font-size: 11px; padding: 4px 12px; }
 
   .ping-dot {
     width: 6px;
@@ -365,6 +446,7 @@
     background: #10b981;
     border-radius: 50%;
     box-shadow: 0 0 6px #10b981;
+    flex-shrink: 0;
     animation: pingDot 1.5s cubic-bezier(0, 0, 0.2, 1) infinite;
   }
 }
@@ -376,15 +458,25 @@
   }
 }
 
+// ─── Audit Log scroll area ────────────────────────────────────────────────
+.audit-log-scroll {
+  // On mobile: auto-height (no fixed height clipping)
+  max-height: 320px;
+  overflow-y: auto;
+  height: auto;
+
+  @media (min-width: 992px) {
+    height: 280px;
+  }
+}
+
 .smart-log-item {
   position: relative;
   transition: transform 0.3s ease;
 
   &:hover {
     transform: translateX(4px);
-    .log-status-ring {
-      transform: scale(1.25);
-    }
+    .log-status-ring { transform: scale(1.25); }
   }
 }
 
@@ -399,8 +491,8 @@
   transition: transform 0.3s ease;
 
   &.ring-primary { background: #6366f1; }
-  &.ring-warning { background: #f59e0b; }
-  &.ring-danger { background: #ef4444; }
+  &.ring-warning  { background: #f59e0b; }
+  &.ring-danger   { background: #ef4444; }
 }
 
 .badge-action {
@@ -411,11 +503,20 @@
   margin-left: 4px;
 }
 
-// ─── Smart Quick Nav Grid ──────────────────────────────────────────────────
+// ─── Smart Quick Nav Grid — Full Responsive ────────────────────────────────
 .smart-nav-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(115px, 1fr));
-  gap: 12px;
+  // xs: 3 cols → sm+: auto-fill with min 100px
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+
+  @media (min-width: 480px) {
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: 12px;
+  }
+  @media (min-width: 768px) {
+    grid-template-columns: repeat(auto-fill, minmax(115px, 1fr));
+  }
 }
 
 .smart-nav-pill {
@@ -427,77 +528,162 @@
   background: rgba(255, 255, 255, 0.6);
   backdrop-filter: blur(16px);
   border: 1px solid rgba(255, 255, 255, 0.85);
-  padding: 14px 10px;
-  border-radius: 16px;
+  padding: 12px 8px;
+  border-radius: 14px;
   transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   box-shadow: 0 2px 10px rgba(0,0,0,0.03);
   text-align: center;
+  min-width: 0;
+
+  @media (min-width: 640px) { padding: 14px 10px; border-radius: 16px; }
 
   .pill-icon {
-    width: 40px;
-    height: 40px;
+    width: 36px;
+    height: 36px;
     background: #fff;
-    border-radius: 12px;
+    border-radius: 10px;
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-bottom: 8px;
+    margin-bottom: 6px;
     box-shadow: 0 4px 12px rgba(0,0,0,0.05);
     transition: transform 0.3s ease;
+    flex-shrink: 0;
+
+    @media (min-width: 640px) { width: 40px; height: 40px; border-radius: 12px; margin-bottom: 8px; }
   }
 
   .pill-text {
-    font-size: 12px;
+    font-size: 10px;
     font-weight: 800;
     color: #334155;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+
+    @media (min-width: 480px) { font-size: 11px; }
+    @media (min-width: 640px) { font-size: 12px; }
   }
 
   &:hover {
-    transform: translateY(-4px) scale(1.04);
-    background: #fff;
-    border-color: rgba(99, 102, 241, 0.4);
-    box-shadow: 0 12px 24px rgba(99, 102, 241, 0.15);
+    @media (min-width: 992px) {
+      transform: translateY(-4px) scale(1.04);
+      background: #fff;
+      border-color: rgba(99, 102, 241, 0.4);
+      box-shadow: 0 12px 24px rgba(99, 102, 241, 0.15);
 
-    .pill-icon {
-      transform: scale(1.15) rotate(-5deg);
-    }
-    .pill-text {
-      color: #6366f1;
+      .pill-icon  { transform: scale(1.15) rotate(-5deg); }
+      .pill-text  { color: #6366f1; }
     }
   }
+}
+
+// ─── Row & Column Generous Vertical Spacing System ────────────────────────
+.dashboard-container {
+  .row {
+    margin-bottom: 24px !important;
+
+    @media (min-width: 992px) {
+      margin-bottom: 28px !important;
+    }
+
+    &:last-child {
+      margin-bottom: 0 !important;
+    }
+  }
+
+  // Ensures stacked columns always have 24px vertical space between them
+  [class*='col-'] {
+    margin-bottom: 24px;
+  }
+
+  // Remove column margin-bottom ONLY when columns sit side-by-side in the same row
+  @media (min-width: 992px) {
+    .col-lg-4, .col-lg-6, .col-lg-8 {
+      margin-bottom: 0;
+    }
+  }
+
+  @media (min-width: 1200px) {
+    .col-xl-4, .col-xl-5, .col-xl-6, .col-xl-7, .col-xl-8 {
+      margin-bottom: 0;
+    }
+  }
+}
+
+.m-b-16 { margin-bottom: 16px !important; }
+.m-b-24 { margin-bottom: 24px !important; }
+.m-b-32 { margin-bottom: 32px !important; }
+
+// Leave table — mobile card transform ─────────────────────────────────────
+.leave-table-wrapper {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+
+  table {
+    min-width: 520px; // allow horizontal scroll on tiny screens
+  }
+}
+
+// Employee attendance table responsive ────────────────────────────────────
+.attendance-table-wrapper {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+
+  table {
+    min-width: 420px;
+  }
+}
+
+// Customer orders table ────────────────────────────────────────────────────
+.orders-table-wrapper {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+// Branch terminal controls responsive ─────────────────────────────────────
+.branch-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+
+  a, button { width: 100%; justify-content: center; }
 }
 
 // ─── Animations ─────────────────────────────────────────────────────────────
 .animate-fade-in-up {
   opacity: 0;
-  transform: translateY(24px);
-  animation: fadeInUp 0.75s cubic-bezier(0.19, 1, 0.22, 1) forwards;
+  transform: translateY(20px);
+  animation: fadeInUp 0.6s cubic-bezier(0.19, 1, 0.22, 1) forwards;
 }
 
 .animate-zoom-in {
   opacity: 0;
-  transform: scale(0.85) translateY(10px);
-  animation: zoomInBounce 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+  transform: scale(0.88) translateY(8px);
+  animation: zoomInBounce 0.55s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
 }
 
 .animate-slide-in-right {
   opacity: 0;
-  transform: translateX(30px) scale(0.96);
-  animation: slideInRight 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+  transform: translateX(20px) scale(0.97);
+  animation: slideInRight 0.55s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
 }
 
-.delay-1 { animation-delay: 0.08s; }
-.delay-2 { animation-delay: 0.16s; }
-.delay-3 { animation-delay: 0.24s; }
-.delay-4 { animation-delay: 0.32s; }
-.delay-5 { animation-delay: 0.40s; }
-.delay-6 { animation-delay: 0.48s; }
+.delay-1 { animation-delay: 0.06s; }
+.delay-2 { animation-delay: 0.12s; }
+.delay-3 { animation-delay: 0.18s; }
+.delay-4 { animation-delay: 0.24s; }
+.delay-5 { animation-delay: 0.30s; }
+.delay-6 { animation-delay: 0.36s; }
+.delay-7 { animation-delay: 0.42s; }
+.delay-8 { animation-delay: 0.48s; }
 
-@keyframes fadeInUp { to { opacity: 1; transform: translateY(0); } }
+@keyframes fadeInUp    { to { opacity: 1; transform: translateY(0); } }
 @keyframes zoomInBounce { to { opacity: 1; transform: scale(1) translateY(0); } }
 @keyframes slideInRight { to { opacity: 1; transform: translateX(0) scale(1); } }
 
-// ─── Dark Theme Liquid Glass ───────────────────────────────────────────────
+// ─── Dark Theme Liquid Glass ────────────────────────────────────────────────
 html.dark, html .dark-theme {
   .glass-kpi-card {
     background: rgba(15, 23, 42, 0.75) !important;
@@ -505,41 +691,28 @@ html.dark, html .dark-theme {
 
     .kpi-label { color: #94a3b8; }
     .kpi-value { color: #f8fafc; }
+
+    .kpi-icon-3d {
+      background: rgba(255, 255, 255, 0.08) !important;
+      border-color: rgba(255, 255, 255, 0.12) !important;
+    }
   }
 
   .smart-nav-pill {
     background: rgba(30, 41, 59, 0.6);
-    border-color: rgba(255,255,255,0.08);
+    border-color: rgba(255, 255, 255, 0.08);
 
-    .pill-icon { background: rgba(15, 23, 42, 0.85); }
-    .pill-text { color: #e2e8f0; }
+    .pill-icon  { background: rgba(15, 23, 42, 0.85); }
+    .pill-text  { color: #e2e8f0; }
 
     &:hover {
       background: rgba(51, 65, 85, 0.85);
       .pill-text { color: #818cf8; }
     }
   }
-}
 
-// ─── Responsive Overrides ─────────────────────────────────────────────────
-@media (max-width: 768px) {
-  .liquid-kpi-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  .welcome-banner {
-    padding: 20px 16px !important;
-
-    .welcome-title { font-size: 1.6rem; }
-  }
-
-  .smart-nav-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-@media (max-width: 480px) {
-  .liquid-kpi-grid {
-    grid-template-columns: 1fr;
+  .liquid-glass-card, .cardWithShadow {
+    background: linear-gradient(135deg, rgba(15, 23, 42, 0.75) 0%, rgba(15, 23, 42, 0.55) 100%) !important;
+    border-color: rgba(255, 255, 255, 0.10) !important;
   }
 }

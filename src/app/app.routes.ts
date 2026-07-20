@@ -67,6 +67,30 @@ export const routes: Routes = [
         title: 'Subscription Plans'
       },
 
+      {
+        path: 'billing-history',
+        loadComponent: () => 
+          import('./pages/billing-history/billing-history')
+            .then(m => m.BillingHistoryComponent),
+        title: 'Billing & Invoice History'
+      },
+
+      {
+        path: 'subscription-coupons',
+        loadComponent: () => 
+          import('./pages/subscription-coupons/subscription-coupons')
+            .then(m => m.SubscriptionCouponsComponent),
+        title: 'Subscription Coupons'
+      },
+
+      {
+        path: 'checkout',
+        loadComponent: () => 
+          import('./components/standard-checkout/standard-checkout')
+            .then(m => m.StandardCheckoutComponent),
+        title: 'Standard Payment Checkout'
+      },
+
 
       {
         path: '',

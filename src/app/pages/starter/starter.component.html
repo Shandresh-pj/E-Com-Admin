@@ -1,24 +1,31 @@
 <!-- Dashboard Container -->
 <div class="dashboard-container p-t-16">
 
-  <!-- Welcome / Title Row -->
-  <div class="row m-b-24 animate-fade-in-up">
-    <div class="col-lg-12">
+  <!-- ── Welcome / Title Row ── -->
+  <div class="row m-b-16 m-md-b-24 animate-fade-in-up">
+    <div class="col-12">
       <mat-card class="cardWithShadow welcome-banner overflow-hidden border-0">
-        <mat-card-content class="p-24 position-relative">
-          <div class="d-flex flex-wrap align-items-center justify-content-between gap-16 position-relative z-index-2">
-            <div>
-              <p class="f-s-13 text-primary text-uppercase tracking-wider m-b-4 f-w-800">WORKFORCE COMMAND PLATFORM</p>
-              <h2 class="f-w-800 m-b-0 welcome-title">Welcome back, <span class="text-gradient">{{ currentUser?.name || 'User' }}</span></h2>
-              <p class="f-s-14 font-weight-bold m-t-8 m-b-0">
-                You are currently logged in with authorization role level: <span class="badge-role-pill f-w-800">{{ displayRole }}</span>
+        <mat-card-content class="position-relative">
+          <!-- banner-inner handles column→row stacking -->
+          <div class="banner-inner position-relative" style="z-index:2">
+            <div class="banner-left">
+              <p class="f-s-11 f-sm-s-13 text-primary text-uppercase tracking-wider m-b-4 f-w-800">
+                WORKFORCE COMMAND PLATFORM
+              </p>
+              <h2 class="f-w-800 m-b-0 welcome-title">
+                Welcome back, <span class="text-gradient">{{ currentUser?.name || 'User' }}</span>
+              </h2>
+              <p class="f-s-12 f-sm-s-14 font-weight-bold m-t-6 m-b-0">
+                Logged in as: <span class="badge-role-pill f-w-800">{{ displayRole }}</span>
               </p>
             </div>
-            <div class="d-flex align-items-center gap-12 liquid-badge p-12 rounded-12">
-              <mat-icon class="text-primary icon-24">shield</mat-icon>
-              <div class="text-start">
-                <p class="f-s-11 text-uppercase m-b-0 text-muted f-w-700">Scope Context</p>
-                <p class="f-s-14 f-w-800 m-b-0">Company #{{ currentUser?.companyId || 'Global' }}</p>
+            <div class="banner-right">
+              <div class="d-flex align-items-center gap-12 liquid-badge p-12 rounded-12">
+                <mat-icon class="text-primary icon-20 icon-md-24">shield</mat-icon>
+                <div class="text-start">
+                  <p class="f-s-11 text-uppercase m-b-0 text-muted f-w-700">Scope Context</p>
+                  <p class="f-s-13 f-w-800 m-b-0">Company #{{ currentUser?.companyId || 'Global' }}</p>
+                </div>
               </div>
             </div>
           </div>
@@ -30,22 +37,22 @@
     </div>
   </div>
 
-  <!-- ══════════════════════════════════════════════════════════════════════════ -->
-  <!-- 1. ADMIN / SUPER ADMIN DASHBOARD PANEL -->
-  <!-- ══════════════════════════════════════════════════════════════════════════ -->
+  <!-- ════════════════════════════════════════════════════════════════════════ -->
+  <!-- 1. ADMIN / SUPER ADMIN DASHBOARD PANEL                                  -->
+  <!-- ════════════════════════════════════════════════════════════════════════ -->
   @if (isAdminDashboard) {
 
-    <!-- ── Combined Row: Left Subscription Details | Right Assigned KPI Cards ── -->
-    <div class="row m-b-24 align-items-stretch">
-      
-      <!-- Left Side: Subscription Plan Details -->
-      <div class="col-12 col-xl-5 col-lg-6 m-b-24 m-lg-b-0 animate-fade-in-up">
+    <!-- ── Row: Subscription Widget | KPI Cards ── -->
+    <div class="row m-b-16 m-md-b-24 align-items-stretch row-gap-mobile">
+
+      <!-- Left: Subscription Plan Details -->
+      <div class="col-12 col-lg-6 col-xl-5 animate-fade-in-up">
         <app-subscription-widget class="d-block h-100"></app-subscription-widget>
       </div>
 
-      <!-- Right Side: Assigned Neumorphic KPI Cards Grid -->
-      <div class="col-12 col-xl-7 col-lg-6 animate-fade-in-up delay-1">
-        <div class="liquid-kpi-grid h-100">
+      <!-- Right: 6-card KPI Grid -->
+      <div class="col-12 col-lg-6 col-xl-7 animate-fade-in-up delay-1">
+        <div class="liquid-kpi-grid kpi-grid-6 h-100">
 
           <!-- 1. Company Size -->
           <div class="glass-kpi-card glass-kpi-indigo">
@@ -53,9 +60,7 @@
               <p class="kpi-label">COMPANY SIZE</p>
               <h3 class="kpi-value">{{ totalEmployees }} Staff</h3>
             </div>
-            <div class="kpi-icon-3d">
-              <mat-icon>groups</mat-icon>
-            </div>
+            <div class="kpi-icon-3d"><mat-icon>groups</mat-icon></div>
           </div>
 
           <!-- 2. Staff On Duty -->
@@ -64,86 +69,76 @@
               <p class="kpi-label">STAFF ON DUTY</p>
               <h3 class="kpi-value">{{ presentTodayCount }} Present</h3>
             </div>
-            <div class="kpi-icon-3d">
-              <mat-icon>check_circle</mat-icon>
-            </div>
+            <div class="kpi-icon-3d"><mat-icon>check_circle</mat-icon></div>
           </div>
 
           <!-- 3. Low Stock Items -->
           <div class="glass-kpi-card glass-kpi-amber">
             <div class="kpi-content">
-              <p class="kpi-label">LOW STOCK ITEMS</p>
+              <p class="kpi-label">LOW STOCK</p>
               <h3 class="kpi-value">{{ lowStockAlertsCount }} Alerts</h3>
             </div>
-            <div class="kpi-icon-3d">
-              <mat-icon>warning</mat-icon>
-            </div>
+            <div class="kpi-icon-3d"><mat-icon>warning</mat-icon></div>
           </div>
 
           <!-- 4. Pending Approvals -->
           <div class="glass-kpi-card glass-kpi-rose">
             <div class="kpi-content">
-              <p class="kpi-label">PENDING APPROVALS</p>
+              <p class="kpi-label">PENDING</p>
               <h3 class="kpi-value">{{ pendingApprovalsCount }} Products</h3>
             </div>
-            <div class="kpi-icon-3d">
-              <mat-icon>assignment_turned_in</mat-icon>
-            </div>
+            <div class="kpi-icon-3d"><mat-icon>assignment_turned_in</mat-icon></div>
           </div>
 
           <!-- 5. Active Branches -->
           <div class="glass-kpi-card glass-kpi-sky">
             <div class="kpi-content">
-              <p class="kpi-label">ACTIVE BRANCHES</p>
-              <h3 class="kpi-value">{{ activeBranchesCount }} Branches</h3>
+              <p class="kpi-label">BRANCHES</p>
+              <h3 class="kpi-value">{{ activeBranchesCount }} Active</h3>
             </div>
-            <div class="kpi-icon-3d">
-              <mat-icon>storefront</mat-icon>
-            </div>
+            <div class="kpi-icon-3d"><mat-icon>storefront</mat-icon></div>
           </div>
 
-          <!-- 6. Active Shifts -->
+          <!-- 6. Duty Shifts -->
           <div class="glass-kpi-card glass-kpi-purple">
             <div class="kpi-content">
               <p class="kpi-label">DUTY SHIFTS</p>
               <h3 class="kpi-value">{{ activeShiftsCount }} Templates</h3>
             </div>
-            <div class="kpi-icon-3d">
-              <mat-icon>schedule</mat-icon>
-            </div>
+            <div class="kpi-icon-3d"><mat-icon>schedule</mat-icon></div>
           </div>
 
         </div>
       </div>
     </div>
 
-    <!-- Premium Analytics Bento Grid -->
-    <div class="row m-b-24 align-items-stretch">
-      <!-- Main Profit & Expenses -->
-      <div class="col-12 col-xl-8 m-b-24 m-xl-b-0 animate-zoom-in delay-2">
+    <!-- ── Analytics Bento Grid ── -->
+    <div class="row m-b-16 m-md-b-24 align-items-stretch row-gap-mobile">
+      <!-- Main Chart -->
+      <div class="col-12 col-xl-8 animate-zoom-in delay-2">
         <div class="liquid-glass-card h-100 d-flex flex-column">
           <app-profit-expenses class="d-block flex-grow-1 w-100"></app-profit-expenses>
         </div>
       </div>
-      
+
       <!-- Secondary Analytics Column -->
-      <div class="col-12 col-xl-4 d-flex flex-column gap-24 animate-slide-in-right delay-3">
-        <!-- Traffic perfectly fills remaining top space -->
-        <div class="liquid-glass-card flex-grow-1 d-flex flex-column">
-          <app-traffic-distribution class="d-block flex-grow-1 w-100"></app-traffic-distribution>
-        </div>
-        <!-- Sales card locked to bottom -->
-        <div class="liquid-glass-card d-flex flex-column" style="min-height: 140px;">
-          <app-product-sales class="d-block flex-grow-1 w-100"></app-product-sales>
+      <div class="col-12 col-xl-4 animate-slide-in-right delay-3">
+        <div class="d-flex flex-column gap-16 h-100">
+          <div class="liquid-glass-card flex-grow-1 d-flex flex-column" style="min-width:0">
+            <app-traffic-distribution class="d-block flex-grow-1 w-100"></app-traffic-distribution>
+          </div>
+          <div class="liquid-glass-card d-flex flex-column" style="min-width:0; min-height:120px;">
+            <app-product-sales class="d-block flex-grow-1 w-100"></app-product-sales>
+          </div>
         </div>
       </div>
     </div>
 
-    <!-- Smart Widgets: Audit Logs & Quick Actions -->
-    <div class="row m-b-24">
-      
-      <!-- Smart Mini Audit Log -->
-      <div class="col-12 col-lg-6 m-b-24 m-lg-b-0 animate-slide-in-right delay-4">
+    <!-- ── Smart Widgets: Audit Log & Quick Actions ── -->
+    <div class="row m-b-16 m-md-b-24 row-gap-mobile">
+
+      <!-- Live Audit Log -->
+      <div class="col-12 col-lg-6 animate-slide-in-right delay-4">
         <mat-card class="smart-widget-card h-100">
           <mat-card-header class="widget-header">
             <div class="d-flex align-items-center justify-content-between w-100">
@@ -151,14 +146,14 @@
                 <div class="widget-icon-bg bg-light-primary text-primary">
                   <mat-icon class="icon-18">radar</mat-icon>
                 </div>
-                <mat-card-title class="m-b-0 f-w-700 f-s-14 text-dark">Live Audit</mat-card-title>
+                <mat-card-title class="m-b-0 f-w-700 f-s-13 f-md-s-14 text-dark">Live Audit</mat-card-title>
               </div>
               <span class="live-ping-badge"><span class="ping-dot"></span> Live</span>
             </div>
           </mat-card-header>
-          <mat-card-content class="p-0 position-relative custom-scroll" style="height: 280px; overflow-y: auto;">
+          <mat-card-content class="p-0 position-relative custom-scroll audit-log-scroll">
             @if (recentAuditLogs.length > 0) {
-              <div class="p-16">
+              <div class="p-12 p-md-16">
                 @for(log of recentAuditLogs; track log.id; let isLast = $last) {
                   <div class="smart-log-item d-flex gap-12 mb-3 animate-fade-in-up" [style.animation-delay]="($index * 0.08) + 's'">
                     <div class="log-status-ring" [ngClass]="{
@@ -167,21 +162,25 @@
                       'ring-danger': log.action === 'DELETE'
                     }"></div>
                     <div class="log-content w-100 pb-2" [class.border-bottom]="!isLast">
-                      <div class="d-flex justify-content-between align-items-center mb-1">
-                        <span class="f-w-700 f-s-13 text-dark">{{ log.module }} <span class="badge-action" [ngClass]="{
-                          'bg-light-primary text-primary': log.action === 'CREATE',
-                          'bg-light-warning text-warning': log.action === 'UPDATE',
-                          'bg-light-danger text-danger': log.action === 'DELETE'
-                        }">{{ log.action }}</span></span>
-                        <span class="f-s-11 text-muted">{{ log.createdAt | date:'HH:mm' }}</span>
+                      <div class="d-flex justify-content-between align-items-start align-items-sm-center mb-1 gap-8">
+                        <span class="f-w-700 f-s-12 f-sm-s-13 text-dark">{{ log.module }}
+                          <span class="badge-action" [ngClass]="{
+                            'bg-light-primary text-primary': log.action === 'CREATE',
+                            'bg-light-warning text-warning': log.action === 'UPDATE',
+                            'bg-light-danger text-danger':  log.action === 'DELETE'
+                          }">{{ log.action }}</span>
+                        </span>
+                        <span class="f-s-11 text-muted flex-shrink-0">{{ log.createdAt | date:'HH:mm' }}</span>
                       </div>
-                      <p class="f-s-12 text-muted m-b-0 text-truncate">Ref: <b>#{{ log.recordId }}</b> by User <b>#{{ log.userId }}</b></p>
+                      <p class="f-s-12 text-muted m-b-0 text-truncate">
+                        Ref: <b>#{{ log.recordId }}</b> by User <b>#{{ log.userId }}</b>
+                      </p>
                     </div>
                   </div>
                 }
               </div>
             } @else {
-              <div class="h-100 d-flex flex-column align-items-center justify-content-center p-24 text-center">
+              <div class="h-100 d-flex flex-column align-items-center justify-content-center p-24 text-center" style="min-height:180px">
                 <mat-icon class="text-muted icon-32 mb-2 opacity-50">data_usage</mat-icon>
                 <p class="text-muted f-s-12 m-b-0">Awaiting system events...</p>
               </div>
@@ -190,7 +189,7 @@
         </mat-card>
       </div>
 
-      <!-- Smart Quick Navigation Pills -->
+      <!-- Quick Launch Pills -->
       <div class="col-12 col-lg-6 animate-slide-in-right delay-5">
         <mat-card class="smart-widget-card h-100">
           <mat-card-header class="widget-header">
@@ -198,12 +197,12 @@
               <div class="widget-icon-bg bg-light-success text-success">
                 <mat-icon class="icon-18">flash_on</mat-icon>
               </div>
-              <mat-card-title class="m-b-0 f-w-700 f-s-14 text-dark">Quick Launch</mat-card-title>
+              <mat-card-title class="m-b-0 f-w-700 f-s-13 f-md-s-14 text-dark">Quick Launch</mat-card-title>
             </div>
           </mat-card-header>
-          <mat-card-content class="p-16">
+          <mat-card-content class="p-12 p-md-16">
             <div class="smart-nav-grid">
-              
+
               @if (perm.hasRoleAction('canRead', '/attendance')) {
                 <a routerLink="/attendance" class="smart-nav-pill animate-zoom-in delay-1">
                   <div class="pill-icon text-primary"><mat-icon>history</mat-icon></div>
@@ -241,29 +240,29 @@
 
               @if (perm.hasRoleAction('canRead', '/product')) {
                 <a routerLink="/product" class="smart-nav-pill animate-zoom-in delay-6">
-                  <div class="pill-icon text-primary" style="color: #8b5cf6;"><mat-icon>inventory_2</mat-icon></div>
+                  <div class="pill-icon" style="color:#8b5cf6"><mat-icon>inventory_2</mat-icon></div>
                   <span class="pill-text">Products</span>
                 </a>
               }
 
               @if (perm.hasRoleAction('canRead', '/category')) {
                 <a routerLink="/category" class="smart-nav-pill animate-zoom-in delay-7">
-                  <div class="pill-icon text-success" style="color: #ec4899;"><mat-icon>category</mat-icon></div>
+                  <div class="pill-icon" style="color:#ec4899"><mat-icon>category</mat-icon></div>
                   <span class="pill-text">Categories</span>
                 </a>
               }
 
               @if (perm.hasRoleAction('canRead', '/invoices')) {
                 <a routerLink="/invoices" class="smart-nav-pill animate-zoom-in delay-8">
-                  <div class="pill-icon text-warning" style="color: #10b981;"><mat-icon>receipt</mat-icon></div>
+                  <div class="pill-icon" style="color:#10b981"><mat-icon>receipt</mat-icon></div>
                   <span class="pill-text">Invoices</span>
                 </a>
               }
 
               @if (perm.hasRoleAction('canRead', '/subscription-plans')) {
                 <a routerLink="/subscription-plans" class="smart-nav-pill animate-zoom-in delay-8">
-                  <div class="pill-icon text-primary" style="color: #6366f1;"><mat-icon>diamond</mat-icon></div>
-                  <span class="pill-text">Subscription Plans</span>
+                  <div class="pill-icon" style="color:#6366f1"><mat-icon>diamond</mat-icon></div>
+                  <span class="pill-text">Plans</span>
                 </a>
               }
 
@@ -273,19 +272,19 @@
       </div>
     </div>
 
-    <!-- Subscription Plans Dynamic Injection -->
-    <div class="row m-b-24 animate-fade-in-up delay-6" id="subscription-plans-section">
+    <!-- Subscription Plans Section -->
+    <div class="row m-b-16 m-md-b-24 animate-fade-in-up delay-6" id="subscription-plans-section">
       <div class="col-12">
         <app-subscription-plans></app-subscription-plans>
       </div>
     </div>
   }
 
-  <!-- ══════════════════════════════════════════════════════════════════════════ -->
-  <!-- 2. BRANCH MANAGER / SHOPKEEPER DASHBOARD PANEL -->
-  <!-- ══════════════════════════════════════════════════════════════════════════ -->
+  <!-- ════════════════════════════════════════════════════════════════════════ -->
+  <!-- 2. BRANCH MANAGER / SHOPKEEPER DASHBOARD PANEL                          -->
+  <!-- ════════════════════════════════════════════════════════════════════════ -->
   @if (isBranchDashboard) {
-    <div class="liquid-kpi-grid m-b-24">
+    <div class="liquid-kpi-grid m-b-16 m-md-b-24">
       <div class="glass-kpi-card glass-kpi-indigo animate-fade-in-up delay-1">
         <div class="kpi-content">
           <p class="kpi-label">BRANCH STAFF</p>
@@ -295,14 +294,14 @@
       </div>
       <div class="glass-kpi-card glass-kpi-emerald animate-fade-in-up delay-2">
         <div class="kpi-content">
-          <p class="kpi-label">STAFF ACTIVE TODAY</p>
+          <p class="kpi-label">ACTIVE TODAY</p>
           <h3 class="kpi-value">{{ presentTodayCount }} Present</h3>
         </div>
         <div class="kpi-icon-3d"><mat-icon>done_all</mat-icon></div>
       </div>
       <div class="glass-kpi-card glass-kpi-amber animate-fade-in-up delay-3">
         <div class="kpi-content">
-          <p class="kpi-label">LEAVE APPROVALS</p>
+          <p class="kpi-label">LEAVE QUEUE</p>
           <h3 class="kpi-value">{{ pendingLeaves.length }} Pending</h3>
         </div>
         <div class="kpi-icon-3d"><mat-icon>time_to_leave</mat-icon></div>
@@ -310,72 +309,74 @@
       <div class="glass-kpi-card glass-kpi-sky animate-fade-in-up delay-4">
         <div class="kpi-content">
           <p class="kpi-label">SCOPE BRANCH</p>
-          <h3 class="kpi-value text-truncate max-w-150">{{ branchName || 'Loading...' }}</h3>
+          <h3 class="kpi-value text-truncate">{{ branchName || 'Loading...' }}</h3>
         </div>
         <div class="kpi-icon-3d"><mat-icon>store</mat-icon></div>
       </div>
     </div>
 
-    <!-- Manager Actions / Leave list -->
-    <div class="row m-b-24 animate-fade-in-up delay-5">
-      <div class="col-lg-8">
+    <!-- Manager: Leave approvals & quick controls -->
+    <div class="row m-b-16 m-md-b-24 row-gap-mobile animate-fade-in-up delay-5">
+
+      <!-- Leave Approvals Table -->
+      <div class="col-12 col-lg-8">
         <mat-card class="cardWithShadow theme-card">
-          <mat-card-header class="p-x-24 p-y-16">
-            <mat-card-title class="m-b-0 f-w-600 f-s-15">Pending Leave Approvals Queue</mat-card-title>
+          <mat-card-header class="p-x-16 p-md-x-24 p-y-14 p-md-y-16">
+            <mat-card-title class="m-b-0 f-w-600 f-s-14 f-md-s-15">Pending Leave Approvals Queue</mat-card-title>
           </mat-card-header>
-          <mat-card-content class="p-24 b-t-1">
+          <mat-card-content class="p-16 p-md-24 b-t-1">
             @if (pendingLeaves.length > 0) {
-              <div class="table-responsive">
-                <table class="table align-middle text-nowrap m-b-0">
+              <div class="leave-table-wrapper">
+                <table class="table align-middle m-b-0">
                   <thead>
                     <tr>
-                      <th class="f-w-600 f-s-13 text-muted">Emp ID</th>
-                      <th class="f-w-600 f-s-13 text-muted">Leave Type</th>
-                      <th class="f-w-600 f-s-13 text-muted">From</th>
-                      <th class="f-w-600 f-s-13 text-muted">To</th>
-                      <th class="f-w-600 f-s-13 text-muted">Days</th>
-                      <th class="f-w-600 f-s-13 text-muted">Reason</th>
+                      <th class="f-w-600 f-s-12 text-muted">Emp ID</th>
+                      <th class="f-w-600 f-s-12 text-muted">Type</th>
+                      <th class="f-w-600 f-s-12 text-muted">From</th>
+                      <th class="f-w-600 f-s-12 text-muted">To</th>
+                      <th class="f-w-600 f-s-12 text-muted">Days</th>
+                      <th class="f-w-600 f-s-12 text-muted">Reason</th>
                     </tr>
                   </thead>
                   <tbody>
                     @for(l of pendingLeaves; track l.id) {
                       <tr>
-                        <td class="f-s-13">Employee #{{ l.employee_id }}</td>
-                        <td><span class="badge-role">{{ l.leave_type }}</span></td>
-                        <td class="f-s-13">{{ l.from_date }}</td>
-                        <td class="f-s-13">{{ l.to_date }}</td>
-                        <td class="f-w-600 f-s-13 text-primary">{{ l.total_days }} days</td>
-                        <td class="f-s-12 text-muted text-truncate max-w-200">{{ l.reason }}</td>
+                        <td class="f-s-12">#{{ l.employee_id }}</td>
+                        <td><span class="badge-role f-s-11">{{ l.leave_type }}</span></td>
+                        <td class="f-s-12">{{ l.from_date }}</td>
+                        <td class="f-s-12">{{ l.to_date }}</td>
+                        <td class="f-w-600 f-s-12 text-primary">{{ l.total_days }}d</td>
+                        <td class="f-s-11 text-muted text-truncate" style="max-width:120px">{{ l.reason }}</td>
                       </tr>
                     }
                   </tbody>
                 </table>
               </div>
             } @else {
-              <div class="p-24 text-center">
-                <mat-icon class="text-success icon-48">done_all</mat-icon>
-                <p class="text-muted m-t-8 m-b-0">Excellent! All employee leave requests have been approved.</p>
+              <div class="p-16 text-center">
+                <mat-icon class="text-success icon-40">done_all</mat-icon>
+                <p class="text-muted m-t-8 m-b-0 f-s-13">All leave requests have been approved.</p>
               </div>
             }
           </mat-card-content>
         </mat-card>
       </div>
 
-      <!-- Quick controls for Manager -->
-      <div class="col-lg-4">
+      <!-- Quick Controls for Manager -->
+      <div class="col-12 col-lg-4">
         <mat-card class="cardWithShadow theme-card">
-          <mat-card-header class="p-x-24 p-y-16">
-            <mat-card-title class="m-b-0 f-w-600 f-s-15">Branch Terminal Controls</mat-card-title>
+          <mat-card-header class="p-x-16 p-md-x-24 p-y-14 p-md-y-16">
+            <mat-card-title class="m-b-0 f-w-600 f-s-14 f-md-s-15">Branch Terminal Controls</mat-card-title>
           </mat-card-header>
-          <mat-card-content class="p-24 b-t-1">
-            <div class="d-flex flex-column gap-12">
-              <a routerLink="/attendance" mat-flat-button color="primary" class="w-100 text-center py-8">
+          <mat-card-content class="p-16 p-md-24 b-t-1">
+            <div class="branch-controls">
+              <a routerLink="/attendance" mat-flat-button color="primary" class="text-center py-8">
                 <mat-icon class="m-r-8">schedule</mat-icon> Attendance Terminal
               </a>
-              <a routerLink="/branch-stocks" mat-flat-button color="accent" class="w-100 text-center py-8">
+              <a routerLink="/branch-stocks" mat-flat-button color="accent" class="text-center py-8">
                 <mat-icon class="m-r-8">inventory</mat-icon> Manage Branch Stock
               </a>
-              <a routerLink="/leave" mat-stroked-button class="w-100 text-center py-8">
+              <a routerLink="/leave" mat-stroked-button class="text-center py-8">
                 <mat-icon class="m-r-8">time_to_leave</mat-icon> Go To Leave Center
               </a>
             </div>
@@ -385,99 +386,102 @@
     </div>
   }
 
-  <!-- ══════════════════════════════════════════════════════════════════════════ -->
-  <!-- 3. EMPLOYEE / DELIVERY BOY PERSONAL DASHBOARD PANEL -->
-  <!-- ══════════════════════════════════════════════════════════════════════════ -->
+  <!-- ════════════════════════════════════════════════════════════════════════ -->
+  <!-- 3. EMPLOYEE / DELIVERY BOY PERSONAL DASHBOARD PANEL                     -->
+  <!-- ════════════════════════════════════════════════════════════════════════ -->
   @if (isEmployeeDashboard) {
-    <div class="row m-b-24">
+    <div class="row m-b-16 m-md-b-24 row-gap-mobile">
+
       <!-- Active Shift Box -->
-      <div class="col-lg-6 animate-fade-in-up delay-1">
+      <div class="col-12 col-sm-6 animate-fade-in-up delay-1">
         <mat-card class="cardWithShadow theme-card h-100">
-          <mat-card-header class="p-x-24 p-y-16">
-            <mat-card-title class="m-b-0 f-w-600 f-s-15">Your Active Duty Shift</mat-card-title>
+          <mat-card-header class="p-x-16 p-md-x-24 p-y-14 p-md-y-16">
+            <mat-card-title class="m-b-0 f-w-600 f-s-14 f-md-s-15">Your Active Duty Shift</mat-card-title>
           </mat-card-header>
-          <mat-card-content class="p-24 b-t-1">
+          <mat-card-content class="p-16 p-md-24 b-t-1">
             @if (employeeShift) {
               <div class="d-flex flex-column gap-12">
-                <div class="d-flex justify-content-between align-items-center">
-                  <span class="text-muted f-s-13">Shift Plan:</span>
-                  <span class="f-w-600 text-primary">{{ employeeShift.name }} ({{ employeeShift.type }})</span>
+                <div class="d-flex justify-content-between align-items-start gap-8">
+                  <span class="text-muted f-s-12 flex-shrink-0">Shift Plan:</span>
+                  <span class="f-w-600 text-primary f-s-13 text-end">{{ employeeShift.name }} ({{ employeeShift.type }})</span>
                 </div>
-                <div class="d-flex justify-content-between align-items-center">
-                  <span class="text-muted f-s-13">Timings Schedule:</span>
-                  <span class="f-w-600 text-dark">{{ employeeShift.start_time }} to {{ employeeShift.end_time }}</span>
+                <div class="d-flex justify-content-between align-items-start gap-8">
+                  <span class="text-muted f-s-12 flex-shrink-0">Timings:</span>
+                  <span class="f-w-600 text-dark f-s-13 text-end">{{ employeeShift.start_time }} – {{ employeeShift.end_time }}</span>
                 </div>
-                <div class="d-flex justify-content-between align-items-center">
-                  <span class="text-muted f-s-13">Grace Period:</span>
-                  <span class="badge-role">{{ employeeShift.grace_period_minutes }} minutes</span>
+                <div class="d-flex justify-content-between align-items-center gap-8">
+                  <span class="text-muted f-s-12 flex-shrink-0">Grace Period:</span>
+                  <span class="badge-role f-s-12">{{ employeeShift.grace_period_minutes }} min</span>
                 </div>
               </div>
             } @else {
-              <div class="p-16 text-center">
+              <div class="p-8 text-center">
                 <mat-icon class="text-muted">alarm_off</mat-icon>
-                <p class="text-muted m-t-8 m-b-0">No active shift assignment found. Contact HR Manager.</p>
+                <p class="text-muted m-t-8 m-b-0 f-s-12">No active shift. Contact HR Manager.</p>
               </div>
             }
           </mat-card-content>
         </mat-card>
       </div>
 
-      <!-- Current Session status box -->
-      <div class="col-lg-6 animate-fade-in-up delay-2">
+      <!-- Today's Session Status -->
+      <div class="col-12 col-sm-6 animate-fade-in-up delay-2">
         <mat-card class="cardWithShadow theme-card h-100">
-          <mat-card-header class="p-x-24 p-y-16">
-            <mat-card-title class="m-b-0 f-w-600 f-s-15">Today's Session State</mat-card-title>
+          <mat-card-header class="p-x-16 p-md-x-24 p-y-14 p-md-y-16">
+            <mat-card-title class="m-b-0 f-w-600 f-s-14 f-md-s-15">Today's Session State</mat-card-title>
           </mat-card-header>
-          <mat-card-content class="p-24 b-t-1">
-            <div class="d-flex align-items-center justify-content-between">
-              <div>
-                <p class="f-s-12 text-muted m-b-2">CURRENT STATE</p>
-                <h3 class="f-w-700" [ngClass]="attendanceToday ? 'text-success' : 'text-danger'">
-                  {{ attendanceToday ? 'DOCKED PRESENT (' + attendanceToday.status + ')' : 'NOT CHECKED IN YET' }}
+          <mat-card-content class="p-16 p-md-24 b-t-1">
+            <div class="d-flex flex-column flex-sm-row align-items-start align-items-sm-center justify-content-between gap-12">
+              <div class="flex-grow-1 min-w-0">
+                <p class="f-s-11 text-muted m-b-2">CURRENT STATE</p>
+                <h3 class="f-w-700 f-s-16 m-b-0 text-truncate" [ngClass]="attendanceToday ? 'text-success' : 'text-danger'">
+                  {{ attendanceToday ? 'PRESENT (' + attendanceToday.status + ')' : 'NOT CHECKED IN' }}
                 </h3>
                 @if (attendanceToday) {
-                  <p class="f-s-12 text-muted m-b-0">Punch In Time: {{ attendanceToday.check_in }}</p>
+                  <p class="f-s-12 text-muted m-b-0 m-t-4">In: {{ attendanceToday.check_in }}</p>
                 }
               </div>
-              <a routerLink="/attendance" mat-flat-button color="primary">Go To Terminal</a>
+              <a routerLink="/attendance" mat-flat-button color="primary" class="flex-shrink-0">
+                Terminal
+              </a>
             </div>
           </mat-card-content>
         </mat-card>
       </div>
     </div>
 
-    <!-- Personal check-in logs list -->
-    <div class="row m-b-24 animate-fade-in-up delay-3">
-      <div class="col-lg-12">
+    <!-- Employee Attendance Logs -->
+    <div class="row m-b-16 m-md-b-24 animate-fade-in-up delay-3">
+      <div class="col-12">
         <mat-card class="cardWithShadow theme-card">
-          <mat-card-header class="p-x-24 p-y-16">
-            <mat-card-title class="m-b-0 f-w-600 f-s-15">Your Recent Attendance Logs</mat-card-title>
+          <mat-card-header class="p-x-16 p-md-x-24 p-y-14 p-md-y-16">
+            <mat-card-title class="m-b-0 f-w-600 f-s-14 f-md-s-15">Your Recent Attendance Logs</mat-card-title>
           </mat-card-header>
-          <mat-card-content class="p-24 b-t-1">
+          <mat-card-content class="p-16 p-md-24 b-t-1">
             @if (recentLogs.length > 0) {
-              <div class="table-responsive">
-                <table class="table align-middle text-nowrap m-b-0">
+              <div class="attendance-table-wrapper">
+                <table class="table align-middle m-b-0">
                   <thead>
                     <tr>
-                      <th class="f-w-600 f-s-13 text-muted">Date</th>
-                      <th class="f-w-600 f-s-13 text-muted">Punch In</th>
-                      <th class="f-w-600 f-s-13 text-muted">Punch Out</th>
-                      <th class="f-w-600 f-s-13 text-muted">Breaks</th>
-                      <th class="f-w-600 f-s-13 text-muted">Duty Status</th>
+                      <th class="f-w-600 f-s-12 text-muted">Date</th>
+                      <th class="f-w-600 f-s-12 text-muted">In</th>
+                      <th class="f-w-600 f-s-12 text-muted">Out</th>
+                      <th class="f-w-600 f-s-12 text-muted">Breaks</th>
+                      <th class="f-w-600 f-s-12 text-muted">Status</th>
                     </tr>
                   </thead>
                   <tbody>
                     @for(log of recentLogs; track log.id) {
                       <tr>
-                        <td class="f-s-13 f-w-600">{{ log.attendance_date }}</td>
-                        <td class="f-s-13 text-success">{{ log.check_in || '--:--' }}</td>
-                        <td class="f-s-13 text-danger">{{ log.check_out || '--:--' }}</td>
-                        <td class="f-s-13">{{ log.break_minutes || 0 }} min</td>
+                        <td class="f-s-12 f-w-600">{{ log.attendance_date }}</td>
+                        <td class="f-s-12 text-success">{{ log.check_in || '--:--' }}</td>
+                        <td class="f-s-12 text-danger">{{ log.check_out || '--:--' }}</td>
+                        <td class="f-s-12">{{ log.break_minutes || 0 }}m</td>
                         <td>
-                          <span class="badge-rules" [ngClass]="{
+                          <span class="badge-rules f-s-11" [ngClass]="{
                             'bg-light-success text-success': log.status === 'PRESENT',
                             'bg-light-warning text-warning': log.status === 'LATE',
-                            'bg-light-danger text-danger': log.status === 'ABSENT'
+                            'bg-light-danger text-danger':  log.status === 'ABSENT'
                           }">{{ log.status }}</span>
                         </td>
                       </tr>
@@ -486,9 +490,9 @@
                 </table>
               </div>
             } @else {
-              <div class="p-24 text-center">
+              <div class="p-16 text-center">
                 <mat-icon class="text-muted icon-40">calendar_today</mat-icon>
-                <p class="text-muted m-t-8 m-b-0">No attendance logs registered in database.</p>
+                <p class="text-muted m-t-8 m-b-0 f-s-13">No attendance logs registered.</p>
               </div>
             }
           </mat-card-content>
@@ -497,11 +501,11 @@
     </div>
   }
 
-  <!-- ══════════════════════════════════════════════════════════════════════════ -->
-  <!-- 4. CUSTOMER VIEW -->
-  <!-- ══════════════════════════════════════════════════════════════════════════ -->
+  <!-- ════════════════════════════════════════════════════════════════════════ -->
+  <!-- 4. CUSTOMER VIEW                                                         -->
+  <!-- ════════════════════════════════════════════════════════════════════════ -->
   @if (isCustomerDashboard) {
-    <div class="liquid-kpi-grid m-b-24">
+    <div class="liquid-kpi-grid m-b-16 m-md-b-24">
       <div class="glass-kpi-card glass-kpi-indigo">
         <div class="kpi-content">
           <p class="kpi-label">YOUR ORDERS</p>
@@ -511,36 +515,36 @@
       </div>
       <div class="glass-kpi-card glass-kpi-amber">
         <div class="kpi-content">
-          <p class="kpi-label">LOYALTY REWARDS</p>
-          <h3 class="kpi-value">{{ loyaltyPoints }} Points</h3>
+          <p class="kpi-label">LOYALTY</p>
+          <h3 class="kpi-value">{{ loyaltyPoints }} Pts</h3>
         </div>
         <div class="kpi-icon-3d"><mat-icon>stars</mat-icon></div>
       </div>
       <div class="glass-kpi-card glass-kpi-emerald">
         <div class="kpi-content">
-          <p class="kpi-label">SHOP CATALOG</p>
-          <h3 class="kpi-value">Active Store</h3>
+          <p class="kpi-label">SHOP STATUS</p>
+          <h3 class="kpi-value">Active</h3>
         </div>
         <div class="kpi-icon-3d"><mat-icon>shopping_bag</mat-icon></div>
       </div>
     </div>
 
-    <!-- Active Orders list -->
-    <div class="row m-b-24">
-      <div class="col-lg-12">
+    <!-- Customer Orders -->
+    <div class="row m-b-16 m-md-b-24">
+      <div class="col-12">
         <mat-card class="cardWithShadow theme-card">
-          <mat-card-header class="p-x-24 p-y-16">
-            <mat-card-title class="m-b-0 f-w-600 f-s-15">Your Purchase History Tracker</mat-card-title>
+          <mat-card-header class="p-x-16 p-md-x-24 p-y-14 p-md-y-16">
+            <mat-card-title class="m-b-0 f-w-600 f-s-14 f-md-s-15">Your Purchase History</mat-card-title>
           </mat-card-header>
-          <mat-card-content class="p-24 b-t-1">
+          <mat-card-content class="p-16 p-md-24 b-t-1">
             @if (customerOrders.length > 0) {
-              <div class="table-responsive">
-                <table class="table align-middle text-nowrap m-b-0">
+              <div class="orders-table-wrapper">
+                <table class="table align-middle m-b-0">
                   <thead>
                     <tr>
-                      <th class="f-w-600 f-s-13 text-muted">Order ID</th>
-                      <th class="f-w-600 f-s-13 text-muted">Total Price</th>
-                      <th class="f-w-600 f-s-13 text-muted">Status</th>
+                      <th class="f-w-600 f-s-12 text-muted">Order ID</th>
+                      <th class="f-w-600 f-s-12 text-muted">Total</th>
+                      <th class="f-w-600 f-s-12 text-muted">Status</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -548,16 +552,16 @@
                       <tr>
                         <td class="f-s-13 f-w-600">#{{ o.id }}</td>
                         <td class="f-s-13 text-primary f-w-600">₹{{ o.total_price }}</td>
-                        <td><span class="badge-role">{{ o.status }}</span></td>
+                        <td><span class="badge-role f-s-11">{{ o.status }}</span></td>
                       </tr>
                     }
                   </tbody>
                 </table>
               </div>
             } @else {
-              <div class="p-24 text-center">
+              <div class="p-16 text-center">
                 <mat-icon class="text-muted icon-40">shopping_cart</mat-icon>
-                <p class="text-muted m-t-8 m-b-0">You have no registered purchases yet. Visit our shop catalog!</p>
+                <p class="text-muted m-t-8 m-b-0 f-s-13">No purchases yet. Visit our shop catalog!</p>
               </div>
             }
           </mat-card-content>

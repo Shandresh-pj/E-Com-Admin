@@ -87,7 +87,15 @@ export class PermissionService {
     const targetNormalized = target.toLowerCase().replace(/\/+$/, '');
 
     // Default universal paths fallback to role permissions matrix
-    const defaultPaths = ['/dashboard', '/change-password', '/profile'];
+    const defaultPaths = [
+      '/dashboard',
+      '/change-password',
+      '/profile',
+      '/billing-history',
+      '/subscription-plans',
+      '/subscription-coupons',
+      '/checkout'
+    ];
     if (defaultPaths.some(p => targetNormalized === p || targetNormalized.startsWith(p + '/'))) {
       const userType = this.auth.getUserType() as UserType;
       return ROLE_PERMISSIONS[userType]?.[action] ?? false;

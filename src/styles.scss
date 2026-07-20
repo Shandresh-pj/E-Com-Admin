@@ -1064,246 +1064,257 @@ html .mat-mdc-menu-item {
 
 /* ── Backdrop ─────────────────────────────────────────────────────────── */
 .glass-backdrop {
-  background: rgba(8, 14, 44, 0.4) !important;
-  backdrop-filter: blur(16px) saturate(180%) brightness(0.9) !important;
-  -webkit-backdrop-filter: blur(16px) saturate(180%) brightness(0.9) !important;
+  background: rgba(5, 8, 22, 0.75) !important;
+  backdrop-filter: blur(20px) saturate(180%) brightness(0.85) !important;
+  -webkit-backdrop-filter: blur(20px) saturate(180%) brightness(0.85) !important;
+  z-index: 999999 !important;
 }
 
 /* ── Core Popup ───────────────────────────────────────────────────────── */
 .glass-popup {
   position: relative !important;
-  background: rgba(255, 255, 255, 0.55) !important;
-  backdrop-filter: blur(24px) saturate(200%) !important;
-  -webkit-backdrop-filter: blur(24px) saturate(200%) !important;
-  border: 1px solid rgba(255, 255, 255, 0.5) !important;
+  background: radial-gradient(circle at 50% 0%, rgba(30, 41, 59, 0.88) 0%, rgba(15, 23, 42, 0.95) 100%) !important;
+  backdrop-filter: blur(30px) saturate(200%) !important;
+  -webkit-backdrop-filter: blur(30px) saturate(200%) !important;
+  border: 1.5px solid rgba(255, 255, 255, 0.18) !important;
   box-shadow:
-    0 4px 6px -1px rgba(0, 0, 0, 0.05),
-    0 20px 60px -10px rgba(31, 38, 135, 0.15),
-    0 0 0 1px rgba(255, 255, 255, 0.3) inset,
-    0 2px 0 0 rgba(255, 255, 255, 0.8) inset !important;
+    0 24px 70px -10px rgba(0, 0, 0, 0.6),
+    0 0 0 1px rgba(255, 255, 255, 0.08) inset,
+    0 1.5px 0 0 rgba(255, 255, 255, 0.3) inset !important;
   border-radius: 28px !important;
-  color: #1e293b !important;
-  font-family: 'Inter', 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif !important;
-  padding: 2.75rem 2.25rem 2rem !important;
-  max-width: 90vw !important;
-  width: 460px !important;
+  color: #f8fafc !important;
+  font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif !important;
+  padding: 2.5rem 2.25rem 2rem !important;
+  max-width: 92vw !important;
+  width: 440px !important;
   overflow: hidden !important;
 
-  /* Top shimmer line */
+  /* Top Glowing Border Shimmer Line */
   &::before {
-    content: '';
+    content: '' !important;
     position: absolute !important;
     top: 0 !important;
-    left: 10% !important;
-    right: 10% !important;
+    left: 12% !important;
+    right: 12% !important;
     height: 2px !important;
     border-radius: 0 0 100px 100px !important;
-    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.9), transparent) !important;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.8), transparent) !important;
   }
 
-  /* Ambient glow orb — positioned bottom-right */
+  /* Ambient Glowing Light Orb */
   &::after {
     content: '' !important;
     position: absolute !important;
-    bottom: -60px !important;
-    right: -40px !important;
-    width: 180px !important;
+    top: -60px !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    width: 220px !important;
     height: 180px !important;
     border-radius: 50% !important;
-    filter: blur(50px) !important;
-    opacity: 0.25 !important;
+    filter: blur(60px) !important;
+    opacity: 0.35 !important;
     pointer-events: none !important;
     background: radial-gradient(circle, #6366f1, transparent 70%) !important;
   }
 
+  /* Icon Badge Container */
   .swal2-icon {
     border-width: 2px !important;
-    margin: 0.5rem auto 1.25rem !important;
-    animation: swal-icon-entrance 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both, swal-icon-float 3.5s ease-in-out 0.5s infinite !important;
+    margin: 0.25rem auto 1.25rem !important;
     position: relative !important;
-    z-index: 1 !important;
-  }
-
-  /* ── Type-specific color themes ────────────────────────────── */
-  &.glass-success {
-    background: linear-gradient(145deg, rgba(236, 253, 245, 0.8) 0%, rgba(209, 250, 229, 0.6) 100%) !important;
-    border-color: rgba(52, 211, 153, 0.35) !important;
-    box-shadow:
-      0 20px 60px -10px rgba(16, 185, 129, 0.2),
-      0 0 0 1px rgba(52, 211, 153, 0.2) inset !important;
-    &::after { background: radial-gradient(circle, #10b981, transparent 70%) !important; }
-    &::before { background: linear-gradient(90deg, transparent, rgba(52, 211, 153, 0.6), transparent) !important; }
-    .swal2-icon.swal2-success {
-      border-color: rgba(52, 211, 153, 0.9) !important;
-      color: #059669 !important;
-      [class^='swal2-success-line'] { background-color: #059669 !important; }
-      .swal2-success-ring { border-color: rgba(52, 211, 153, 0.25) !important; }
-    }
-  }
-
-  &.glass-error {
-    background: linear-gradient(145deg, rgba(255, 241, 242, 0.8) 0%, rgba(254, 226, 226, 0.6) 100%) !important;
-    border-color: rgba(248, 113, 113, 0.35) !important;
-    box-shadow:
-      0 20px 60px -10px rgba(220, 38, 38, 0.2),
-      0 0 0 1px rgba(248, 113, 113, 0.2) inset !important;
-    &::after { background: radial-gradient(circle, #ef4444, transparent 70%) !important; }
-    &::before { background: linear-gradient(90deg, transparent, rgba(248, 113, 113, 0.6), transparent) !important; }
-    .swal2-icon.swal2-error {
-      border-color: rgba(248, 113, 113, 0.9) !important;
-      color: #dc2626 !important;
-      [class^='swal2-x-mark-line'] { background-color: #dc2626 !important; }
-    }
-  }
-
-  &.glass-warning {
-    background: linear-gradient(145deg, rgba(255, 251, 235, 0.8) 0%, rgba(254, 243, 199, 0.6) 100%) !important;
-    border-color: rgba(251, 191, 36, 0.35) !important;
-    box-shadow:
-      0 20px 60px -10px rgba(245, 158, 11, 0.2),
-      0 0 0 1px rgba(251, 191, 36, 0.2) inset !important;
-    &::after { background: radial-gradient(circle, #f59e0b, transparent 70%) !important; }
-    &::before { background: linear-gradient(90deg, transparent, rgba(251, 191, 36, 0.6), transparent) !important; }
-    .swal2-icon.swal2-warning {
-      border-color: rgba(251, 191, 36, 0.9) !important;
-      color: #d97706 !important;
-    }
-  }
-
-  &.glass-question {
-    background: linear-gradient(145deg, rgba(239, 246, 255, 0.8) 0%, rgba(219, 234, 254, 0.6) 100%) !important;
-    border-color: rgba(99, 102, 241, 0.35) !important;
-    box-shadow:
-      0 20px 60px -10px rgba(99, 102, 241, 0.2),
-      0 0 0 1px rgba(99, 102, 241, 0.2) inset !important;
-    &::after { background: radial-gradient(circle, #6366f1, transparent 70%) !important; }
-    &::before { background: linear-gradient(90deg, transparent, rgba(99, 102, 241, 0.6), transparent) !important; }
-    .swal2-icon.swal2-question {
-      border-color: rgba(99, 102, 241, 0.9) !important;
-      color: #4f46e5 !important;
-    }
-  }
-
-  &.glass-info {
-    background: linear-gradient(145deg, rgba(239, 246, 255, 0.8) 0%, rgba(219, 234, 254, 0.6) 100%) !important;
-    border-color: rgba(56, 189, 248, 0.35) !important;
-    box-shadow:
-      0 20px 60px -10px rgba(2, 132, 199, 0.2),
-      0 0 0 1px rgba(56, 189, 248, 0.2) inset !important;
-    &::after { background: radial-gradient(circle, #0ea5e9, transparent 70%) !important; }
-    &::before { background: linear-gradient(90deg, transparent, rgba(56, 189, 248, 0.6), transparent) !important; }
-    .swal2-icon.swal2-info {
-      border-color: rgba(56, 189, 248, 0.9) !important;
-      color: #0284c7 !important;
-    }
+    z-index: 2 !important;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3) !important;
+    animation: swal-icon-entrance 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both !important;
   }
 }
 
-/* ── Show / Hide Animations ───────────────────────────────────────────── */
-.glass-popup-show {
-  animation: swal-popup-drop 0.55s cubic-bezier(0.22, 1.4, 0.36, 1) both !important;
+/* ── Alert Type Variants (Matching Attached UI Design) ───────────────────── */
+
+/* 1. Success / Payment (Emerald Green) */
+.glass-popup.glass-success,
+.glass-popup.glass-payment-popup {
+  background: radial-gradient(circle at 50% 0%, rgba(6, 78, 59, 0.88) 0%, rgba(15, 23, 42, 0.95) 100%) !important;
+  border-color: rgba(52, 211, 153, 0.45) !important;
+  box-shadow:
+    0 24px 70px -10px rgba(16, 185, 129, 0.3),
+    0 0 0 1.5px rgba(52, 211, 153, 0.3) inset !important;
+
+  &::after { background: radial-gradient(circle, #10b981, transparent 70%) !important; }
+  &::before { background: linear-gradient(90deg, transparent, rgba(52, 211, 153, 0.9), transparent) !important; }
+
+  .swal2-icon.swal2-success {
+    border-color: rgba(52, 211, 153, 0.9) !important;
+    color: #34d399 !important;
+    [class^='swal2-success-line'] { background-color: #34d399 !important; }
+    .swal2-success-ring { border-color: rgba(52, 211, 153, 0.3) !important; }
+  }
+
+  .glass-btn-confirm {
+    background: linear-gradient(135deg, #059669 0%, #10b981 50%, #34d399 100%) !important;
+    box-shadow: 0 4px 20px rgba(16, 185, 129, 0.45) !important;
+  }
 }
 
-.glass-popup-hide {
-  animation: swal-popup-vanish 0.35s cubic-bezier(0.4, 0, 1, 1) both !important;
+/* 2. Error (Crimson Red) */
+.glass-popup.glass-error {
+  background: radial-gradient(circle at 50% 0%, rgba(127, 29, 29, 0.88) 0%, rgba(15, 23, 42, 0.95) 100%) !important;
+  border-color: rgba(248, 113, 113, 0.45) !important;
+  box-shadow:
+    0 24px 70px -10px rgba(239, 68, 68, 0.3),
+    0 0 0 1.5px rgba(248, 113, 113, 0.3) inset !important;
+
+  &::after { background: radial-gradient(circle, #ef4444, transparent 70%) !important; }
+  &::before { background: linear-gradient(90deg, transparent, rgba(248, 113, 113, 0.9), transparent) !important; }
+
+  .swal2-icon.swal2-error {
+    border-color: rgba(248, 113, 113, 0.9) !important;
+    color: #f87171 !important;
+    [class^='swal2-x-mark-line'] { background-color: #f87171 !important; }
+  }
+
+  .glass-btn-confirm {
+    background: linear-gradient(135deg, #dc2626 0%, #ef4444 50%, #f87171 100%) !important;
+    box-shadow: 0 4px 20px rgba(239, 68, 68, 0.45) !important;
+  }
 }
 
-.glass-backdrop-show {
-  animation: swal-backdrop-in 0.45s ease-out both !important;
+/* 3. Warning / Delete (Amber & Gold) */
+.glass-popup.glass-warning,
+.glass-popup.glass-delete-popup {
+  background: radial-gradient(circle at 50% 0%, rgba(120, 53, 4, 0.88) 0%, rgba(15, 23, 42, 0.95) 100%) !important;
+  border-color: rgba(251, 191, 36, 0.45) !important;
+  box-shadow:
+    0 24px 70px -10px rgba(245, 158, 11, 0.3),
+    0 0 0 1.5px rgba(251, 191, 36, 0.3) inset !important;
+
+  &::after { background: radial-gradient(circle, #f59e0b, transparent 70%) !important; }
+  &::before { background: linear-gradient(90deg, transparent, rgba(251, 191, 36, 0.9), transparent) !important; }
+
+  .swal2-icon.swal2-warning {
+    border-color: rgba(251, 191, 36, 0.9) !important;
+    color: #fbbf24 !important;
+  }
+
+  .glass-btn-confirm, .glass-btn-danger {
+    background: linear-gradient(135deg, #d97706 0%, #f59e0b 50%, #fbbf24 100%) !important;
+    box-shadow: 0 4px 20px rgba(245, 158, 11, 0.45) !important;
+  }
 }
 
-.glass-backdrop-hide {
-  animation: swal-backdrop-out 0.35s ease-in both !important;
+/* 4. Info / Notification (Sapphire & Deep Blue) */
+.glass-popup.glass-info,
+.glass-popup.glass-notification-popup {
+  background: radial-gradient(circle at 50% 0%, rgba(30, 58, 138, 0.88) 0%, rgba(15, 23, 42, 0.95) 100%) !important;
+  border-color: rgba(56, 189, 248, 0.45) !important;
+  box-shadow:
+    0 24px 70px -10px rgba(14, 165, 233, 0.3),
+    0 0 0 1.5px rgba(56, 189, 248, 0.3) inset !important;
+
+  &::after { background: radial-gradient(circle, #0ea5e9, transparent 70%) !important; }
+  &::before { background: linear-gradient(90deg, transparent, rgba(56, 189, 248, 0.9), transparent) !important; }
+
+  .swal2-icon.swal2-info {
+    border-color: rgba(56, 189, 248, 0.9) !important;
+    color: #38bdf8 !important;
+  }
+
+  .glass-btn-confirm {
+    background: linear-gradient(135deg, #0284c7 0%, #0ea5e9 50%, #38bdf8 100%) !important;
+    box-shadow: 0 4px 20px rgba(14, 165, 233, 0.45) !important;
+  }
 }
 
-/* ── Keyframes ────────────────────────────────────────────────────────── */
-@keyframes swal-popup-drop {
-  0%   { opacity: 0; transform: scale(0.75) translateY(-40px) rotateX(12deg); filter: blur(4px); }
-  60%  { opacity: 1; transform: scale(1.03) translateY(6px)   rotateX(-3deg); filter: blur(0); }
-  80%  { transform: scale(0.98) translateY(-2px); }
-  100% { opacity: 1; transform: scale(1)    translateY(0)      rotateX(0deg); }
+/* 5. Question / Confirm / Auth / Subscription (Cosmic Violet & Purple) */
+.glass-popup.glass-question,
+.glass-popup.glass-auth-popup,
+.glass-popup.glass-subscription-popup {
+  background: radial-gradient(circle at 50% 0%, rgba(76, 29, 149, 0.88) 0%, rgba(15, 23, 42, 0.95) 100%) !important;
+  border-color: rgba(167, 139, 250, 0.45) !important;
+  box-shadow:
+    0 24px 70px -10px rgba(139, 92, 246, 0.3),
+    0 0 0 1.5px rgba(167, 139, 250, 0.3) inset !important;
+
+  &::after { background: radial-gradient(circle, #8b5cf6, transparent 70%) !important; }
+  &::before { background: linear-gradient(90deg, transparent, rgba(167, 139, 250, 0.9), transparent) !important; }
+
+  .swal2-icon.swal2-question {
+    border-color: rgba(167, 139, 250, 0.9) !important;
+    color: #a78bfa !important;
+  }
+
+  .glass-btn-confirm, .glass-btn-primary {
+    background: linear-gradient(135deg, #6d28d9 0%, #8b5cf6 50%, #a78bfa 100%) !important;
+    box-shadow: 0 4px 20px rgba(139, 92, 246, 0.45) !important;
+  }
 }
 
-@keyframes swal-popup-vanish {
-  0%   { opacity: 1; transform: scale(1)    translateY(0)   rotateX(0deg); filter: blur(0); }
-  100% { opacity: 0; transform: scale(0.88) translateY(24px) rotateX(8deg); filter: blur(6px); }
-}
+/* 6. Prompt Input Dialog (Cyan / Teal) */
+.glass-popup.glass-prompt-popup {
+  background: radial-gradient(circle at 50% 0%, rgba(19, 78, 88, 0.88) 0%, rgba(15, 23, 42, 0.95) 100%) !important;
+  border-color: rgba(45, 212, 191, 0.45) !important;
+  box-shadow:
+    0 24px 70px -10px rgba(20, 184, 166, 0.3),
+    0 0 0 1.5px rgba(45, 212, 191, 0.3) inset !important;
 
-@keyframes swal-backdrop-in {
-  from { opacity: 0; backdrop-filter: blur(0px); }
-  to   { opacity: 1; backdrop-filter: blur(16px) saturate(180%); }
-}
+  &::after { background: radial-gradient(circle, #14b8a6, transparent 70%) !important; }
+  &::before { background: linear-gradient(90deg, transparent, rgba(45, 212, 191, 0.9), transparent) !important; }
 
-@keyframes swal-backdrop-out {
-  from { opacity: 1; }
-  to   { opacity: 0; }
-}
+  .swal2-icon.swal2-question {
+    border-color: rgba(45, 212, 191, 0.9) !important;
+    color: #2dd4bf !important;
+  }
 
-@keyframes swal-icon-entrance {
-  0%   { opacity: 0; transform: scale(0.3) rotate(-20deg); }
-  70%  { transform: scale(1.12) rotate(4deg); }
-  100% { opacity: 1; transform: scale(1) rotate(0deg); }
-}
-
-@keyframes swal-icon-float {
-  0%, 100% { transform: translateY(0px);   }
-  50%       { transform: translateY(-6px);  }
-}
-
-@keyframes swal-shimmer {
-  0%   { background-position: -200% center; }
-  100% { background-position: 200%  center; }
-}
-
-@keyframes swal-glow-pulse-blue {
-  0%, 100% { box-shadow: 0 4px 16px rgba(79, 70, 229, 0.4), 0 0 0 0 rgba(79, 70, 229, 0.15); }
-  50%       { box-shadow: 0 8px 28px rgba(79, 70, 229, 0.6), 0 0 0 6px rgba(79, 70, 229, 0); }
-}
-
-@keyframes swal-glow-pulse-red {
-  0%, 100% { box-shadow: 0 4px 16px rgba(239, 68, 68, 0.4), 0 0 0 0 rgba(239, 68, 68, 0.15); }
-  50%       { box-shadow: 0 8px 28px rgba(239, 68, 68, 0.6), 0 0 0 6px rgba(239, 68, 68, 0); }
+  .glass-btn-confirm {
+    background: linear-gradient(135deg, #0d9488 0%, #14b8a6 50%, #2dd4bf 100%) !important;
+    box-shadow: 0 4px 20px rgba(20, 184, 166, 0.45) !important;
+  }
 }
 
 /* ── Typography ───────────────────────────────────────────────────────── */
 .glass-title {
-  font-size: 1.5rem !important;
+  font-size: 1.45rem !important;
   font-weight: 800 !important;
-  color: #0f172a !important;
+  color: #f8fafc !important;
   letter-spacing: -0.02em !important;
   line-height: 1.25 !important;
   margin-top: 0.25rem !important;
   margin-bottom: 0.5rem !important;
   padding: 0 !important;
   position: relative !important;
-  z-index: 1 !important;
+  z-index: 2 !important;
 }
 
 .glass-content {
-  font-size: 0.95rem !important;
+  font-size: 0.925rem !important;
   font-weight: 500 !important;
-  line-height: 1.65 !important;
-  color: #475569 !important;
+  line-height: 1.6 !important;
+  color: #cbd5e1 !important;
   padding: 0 !important;
   margin-bottom: 0.25rem !important;
   position: relative !important;
-  z-index: 1 !important;
+  z-index: 2 !important;
 }
 
-/* ── Actions ──────────────────────────────────────────────────────────── */
+/* ── Actions (Strict 1 or 2 Buttons Only) ───────────────────────────── */
 .glass-actions {
   display: flex !important;
   gap: 12px !important;
   justify-content: center !important;
-  margin-top: 1.75rem !important;
-  flex-wrap: wrap !important;
+  align-items: center !important;
+  margin-top: 1.5rem !important;
   position: relative !important;
-  z-index: 1 !important;
+  z-index: 2 !important;
+  width: 100% !important;
+
+  // Never show Deny button
+  .swal2-deny, .glass-btn-deny {
+    display: none !important;
+  }
 }
 
-/* ── Buttons ──────────────────────────────────────────────────────────── */
+/* ── Buttons (Pill Design with Glow & Shimmer) ────────────────────────── */
 .glass-btn {
-  padding: 0.72rem 1.75rem !important;
+  padding: 0.7rem 1.6rem !important;
   font-size: 0.875rem !important;
   font-weight: 700 !important;
   border-radius: 500px !important;
@@ -1312,14 +1323,16 @@ html .mat-mdc-menu-item {
   cursor: pointer !important;
   letter-spacing: 0.02em !important;
   min-width: 110px !important;
+  flex: 1 !important;
+  max-width: 180px !important;
   display: inline-flex !important;
   align-items: center !important;
   justify-content: center !important;
   outline: none !important;
   position: relative !important;
   overflow: hidden !important;
+  color: #ffffff !important;
 
-  /* Shimmer sweep on hover */
   &::after {
     content: '' !important;
     position: absolute !important;
@@ -1333,210 +1346,79 @@ html .mat-mdc-menu-item {
 
   &:hover::after { left: 150% !important; }
   &:hover  { transform: translateY(-3px) scale(1.02) !important; }
-  &:active { transform: translateY(0)    scale(0.98) !important; }
-}
-
-.glass-btn-confirm {
-  background: linear-gradient(135deg, #4f46e5 0%, #6366f1 50%, #818cf8 100%) !important;
-  background-size: 200% 100% !important;
-  color: #ffffff !important;
-  box-shadow: 0 4px 18px rgba(79, 70, 229, 0.45) !important;
-  animation: swal-glow-pulse-blue 2.5s ease-in-out infinite !important;
-
-  &:hover {
-    background-position: right center !important;
-    box-shadow: 0 8px 30px rgba(79, 70, 229, 0.65) !important;
-    animation: none !important;
-  }
+  &:active { transform: translateY(0) scale(0.98) !important; }
 }
 
 .glass-btn-cancel {
-  background: rgba(255, 255, 255, 0.65) !important;
-  color: #64748b !important;
-  border: 1.5px solid rgba(148, 163, 184, 0.3) !important;
-  backdrop-filter: blur(8px) !important;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.06) !important;
+  background: rgba(255, 255, 255, 0.12) !important;
+  color: #cbd5e1 !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  backdrop-filter: blur(12px) !important;
 
   &:hover {
-    background: rgba(255, 255, 255, 0.95) !important;
-    color: #334155 !important;
-    border-color: rgba(148, 163, 184, 0.5) !important;
-    box-shadow: 0 4px 16px rgba(0,0,0,0.1) !important;
+    background: rgba(255, 255, 255, 0.22) !important;
+    color: #ffffff !important;
+    border-color: rgba(255, 255, 255, 0.35) !important;
   }
 }
 
-.glass-btn-deny {
-  background: linear-gradient(135deg, #ef4444 0%, #f87171 50%, #fca5a5 100%) !important;
-  background-size: 200% 100% !important;
-  color: #ffffff !important;
-  box-shadow: 0 4px 18px rgba(239, 68, 68, 0.45) !important;
-  animation: swal-glow-pulse-red 2.5s ease-in-out infinite !important;
-
-  &:hover {
-    background-position: right center !important;
-    box-shadow: 0 8px 30px rgba(239, 68, 68, 0.65) !important;
-    animation: none !important;
-  }
+/* ── Progress Bar ─────────────────────────────────────────────────────── */
+.swal2-timer-progress-bar-container {
+  position: absolute !important;
+  bottom: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  height: 4px !important;
+  overflow: hidden !important;
+  border-bottom-left-radius: 28px !important;
+  border-bottom-right-radius: 28px !important;
+  background: transparent !important;
 }
 
-/* ── Input ────────────────────────────────────────────────────────────── */
+.swal2-timer-progress-bar,
+.glass-progress-bar {
+  background: linear-gradient(90deg, #10b981 0%, #34d399 50%, #6ee7b7 100%) !important;
+  height: 100% !important;
+  border-radius: 0 0 28px 28px !important;
+  box-shadow: 0 0 12px rgba(16, 185, 129, 0.9) !important;
+}
+
+/* ── Inputs ───────────────────────────────────────────────────────────── */
 .glass-input {
-  background: rgba(255, 255, 255, 0.55) !important;
-  border: 1.5px solid rgba(148, 163, 184, 0.25) !important;
-  border-radius: 16px !important;
-  padding: 0.85rem 1.1rem !important;
-  font-size: 0.925rem !important;
+  background: rgba(15, 23, 42, 0.7) !important;
+  border: 1.5px solid rgba(255, 255, 255, 0.18) !important;
+  border-radius: 14px !important;
+  padding: 0.8rem 1.1rem !important;
+  font-size: 0.9rem !important;
   font-weight: 500 !important;
-  color: #1e293b !important;
+  color: #f8fafc !important;
   outline: none !important;
   transition: all 0.3s ease !important;
   width: 100% !important;
-  box-sizing: border-box !important;
   margin-top: 1rem !important;
-  backdrop-filter: blur(4px) !important;
+  box-sizing: border-box !important;
 
   &:focus {
-    border-color: #6366f1 !important;
-    background: rgba(255, 255, 255, 0.85) !important;
-    box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.15), 0 4px 12px rgba(0,0,0,0.06) !important;
+    border-color: #2dd4bf !important;
+    background: rgba(15, 23, 42, 0.9) !important;
+    box-shadow: 0 0 0 4px rgba(45, 212, 191, 0.25) !important;
   }
 }
 
-/* ── Validation message ───────────────────────────────────────────────── */
-.swal2-validation-message {
-  background: rgba(254, 242, 242, 0.85) !important;
-  color: #ef4444 !important;
-  border: 1px solid rgba(239, 68, 68, 0.2) !important;
-  border-radius: 12px !important;
-  padding: 0.6rem 1rem !important;
-  font-size: 0.85rem !important;
-  font-weight: 600 !important;
-  margin-top: 0.75rem !important;
-  backdrop-filter: blur(8px) !important;
-  animation: swal-icon-entrance 0.35s ease both !important;
-}
+/* ── Footer ───────────────────────────────────────────────────────────── */
+.glass-footer {
+  margin-top: 1.25rem !important;
+  padding-top: 0.85rem !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
 
-/* ── Dark Mode ────────────────────────────────────────────────────────── */
-html.dark, .dark-theme {
-  .glass-popup {
-    background: rgba(15, 23, 42, 0.7) !important;
-    border-color: rgba(255, 255, 255, 0.1) !important;
-    color: #f1f5f9 !important;
-    box-shadow:
-      0 4px 6px -1px rgba(0, 0, 0, 0.3),
-      0 20px 60px -10px rgba(0, 0, 0, 0.5),
-      0 0 0 1px rgba(255, 255, 255, 0.07) inset,
-      0 1px 0 0 rgba(255, 255, 255, 0.12) inset !important;
-
-    &::before { background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent) !important; }
-
-    .glass-title   { color: #f8fafc !important; }
-    .glass-content { color: #94a3b8 !important; }
-
-    .glass-btn-cancel {
-      background: rgba(30, 41, 59, 0.7) !important;
-      color: #94a3b8 !important;
-      border-color: rgba(255, 255, 255, 0.1) !important;
-      &:hover {
-        background: rgba(30, 41, 59, 0.95) !important;
-        color: #f8fafc !important;
-        border-color: rgba(255, 255, 255, 0.18) !important;
-      }
-    }
-
-    .glass-input {
-      background: rgba(15, 23, 42, 0.65) !important;
-      border-color: rgba(255, 255, 255, 0.1) !important;
-      color: #f8fafc !important;
-      &:focus {
-        border-color: #818cf8 !important;
-        background: rgba(15, 23, 42, 0.9) !important;
-        box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.2) !important;
-      }
-    }
-
-    &.glass-success {
-      background: linear-gradient(145deg, rgba(6, 78, 59, 0.7), rgba(5, 150, 105, 0.4)) !important;
-      border-color: rgba(52, 211, 153, 0.2) !important;
-      &::after { opacity: 0.15 !important; }
-      .swal2-icon.swal2-success {
-        border-color: rgba(52, 211, 153, 0.8) !important;
-        color: #34d399 !important;
-        [class^='swal2-success-line'] { background-color: #34d399 !important; }
-        .swal2-success-ring { border-color: rgba(52, 211, 153, 0.25) !important; }
-      }
-    }
-
-    &.glass-error {
-      background: linear-gradient(145deg, rgba(127, 29, 29, 0.7), rgba(185, 28, 28, 0.4)) !important;
-      border-color: rgba(248, 113, 113, 0.2) !important;
-      &::after { opacity: 0.15 !important; }
-      .swal2-icon.swal2-error {
-        border-color: rgba(248, 113, 113, 0.8) !important;
-        color: #f87171 !important;
-        [class^='swal2-x-mark-line'] { background-color: #f87171 !important; }
-      }
-    }
-
-    &.glass-warning {
-      background: linear-gradient(145deg, rgba(120, 53, 4, 0.7), rgba(180, 83, 9, 0.4)) !important;
-      border-color: rgba(251, 191, 36, 0.2) !important;
-      &::after { opacity: 0.15 !important; }
-      .swal2-icon.swal2-warning {
-        border-color: rgba(251, 191, 36, 0.8) !important;
-        color: #fbbf24 !important;
-      }
-    }
-
-    &.glass-question, &.glass-info {
-      background: linear-gradient(145deg, rgba(30, 27, 75, 0.7), rgba(49, 46, 129, 0.4)) !important;
-      border-color: rgba(129, 140, 248, 0.2) !important;
-      &::after { opacity: 0.15 !important; }
-      .swal2-icon.swal2-question,
-      .swal2-icon.swal2-info {
-        border-color: rgba(129, 140, 248, 0.8) !important;
-        color: #818cf8 !important;
-      }
-    }
-  }
-
-  .swal2-validation-message {
-    background: rgba(127, 29, 29, 0.6) !important;
-    color: #fca5a5 !important;
-    border-color: rgba(248, 113, 113, 0.25) !important;
-  }
-}
-
-/* ── Responsive ───────────────────────────────────────────────────────── */
-@media (max-width: 520px) {
-  .glass-popup {
-    padding: 2rem 1.5rem 1.75rem !important;
-    border-radius: 22px !important;
-    width: calc(100vw - 32px) !important;
-    max-width: 100% !important;
-
-    .glass-title   { font-size: 1.25rem !important; }
-    .glass-content { font-size: 0.875rem !important; }
-  }
-
-  .glass-actions {
-    flex-direction: column !important;
-    gap: 10px !important;
-  }
-
-  .glass-btn {
+  .glass-footer-content {
+    font-size: 0.8rem !important;
+    color: #94a3b8 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
     width: 100% !important;
-    padding: 0.85rem !important;
-    font-size: 0.9rem !important;
   }
-}
-
-@media (max-width: 360px) {
-  .glass-popup {
-    padding: 1.5rem 1.1rem !important;
-    border-radius: 18px !important;
-  }
-  .glass-title { font-size: 1.1rem !important; }
 }
 
 

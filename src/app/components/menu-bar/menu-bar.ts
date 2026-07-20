@@ -1,4 +1,4 @@
-﻿import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { forkJoin } from 'rxjs';
 import { ReactiveFormsModule, FormsModule, FormGroup, FormBuilder, Validators } from '@angular/forms';
 import { CommonModule } from '@angular/common';
@@ -90,7 +90,9 @@ export class MenuBar implements OnInit {
     { name: 'Profit & Loss', path: '/profit-loss', icon: 'chart-pie', isActive: true },
     { name: 'Manage Plans', path: '/manage-subscription-plans', icon: 'diamond', isActive: true },
     { name: 'Upgrade Plan', path: '/subscription-plans', icon: 'star', isActive: true },
-    { name: 'Billing History', path: '/billing-history', icon: 'receipt', isActive: true }
+    { name: 'Billing History', path: '/billing-history', icon: 'receipt', isActive: true },
+    { name: 'Subscription Coupons', path: '/subscription-coupons', icon: 'ticket', isActive: true },
+    { name: 'Standard Checkout', path: '/checkout', icon: 'credit-card', isActive: true }
   ];
 
   constructor(

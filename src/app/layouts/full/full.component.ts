@@ -1,4 +1,4 @@
-﻿import { BreakpointObserver, MediaMatcher } from '@angular/cdk/layout';
+import { BreakpointObserver, MediaMatcher } from '@angular/cdk/layout';
 import { Component, OnInit, ViewChild, ViewEncapsulation, effect, signal, untracked } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { MatSidenav, MatSidenavContent } from '@angular/material/sidenav';
@@ -316,7 +316,9 @@ export class FullComponent implements OnInit {
         { id: 31, name: 'Profit & Loss', path: '/profit-loss', icon: 'bi-pie-chart-fill', isActive: true },
         { id: 32, name: 'Manage Plans', path: '/manage-subscription-plans', icon: 'bi-gem', isActive: true },
         { id: 33, name: 'Upgrade Plan', path: '/subscription-plans', icon: 'bi-star-fill', isActive: true },
-        { id: 34, name: 'Billing History', path: '/billing-history', icon: 'receipt', isActive: true }
+        { id: 34, name: 'Billing History', path: '/billing-history', icon: 'receipt', isActive: true },
+        { id: 35, name: 'Subscription Coupons', path: '/subscription-coupons', icon: 'ticket', isActive: true },
+        { id: 36, name: 'Standard Checkout', path: '/checkout', icon: 'credit-card', isActive: true }
 
       ];
     } else {

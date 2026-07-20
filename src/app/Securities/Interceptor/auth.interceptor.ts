@@ -56,6 +56,10 @@ function handle401(
         const newToken = res.accessToken;
         tokenService.setToken(newToken);
         refreshSubject.next(newToken);
+        // Persist the rotated refresh token if the server returned one
+        if ((res as any).refreshToken) {
+          tokenService.setRefreshToken((res as any).refreshToken);
+        }
         return next(attachToken(req, newToken));
       }),
       catchError((err) => {

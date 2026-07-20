@@ -315,7 +315,9 @@ export class FullComponent implements OnInit {
         { id: 30, name: 'CRM Contacts', path: '/crm-contacts', icon: 'bi-people-fill', isActive: true },
         { id: 31, name: 'Profit & Loss', path: '/profit-loss', icon: 'bi-pie-chart-fill', isActive: true },
         { id: 32, name: 'Manage Plans', path: '/manage-subscription-plans', icon: 'bi-gem', isActive: true },
-        { id: 33, name: 'Upgrade Plan', path: '/subscription-plans', icon: 'bi-star-fill', isActive: true }
+        { id: 33, name: 'Upgrade Plan', path: '/subscription-plans', icon: 'bi-star-fill', isActive: true },
+        { id: 34, name: 'Billing History', path: '/billing-history', icon: 'receipt', isActive: true }
+
       ];
     } else {
       allowedMenus = apiMenus.filter((m: any) => {

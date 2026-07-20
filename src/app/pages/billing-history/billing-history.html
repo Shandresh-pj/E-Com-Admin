@@ -1,127 +1,299 @@
-<div class="glass-container">
-  <div class="header">
-    <h2>Billing & Invoice History</h2>
-  </div>
+<div class="bh-page">
 
-  <div class="loading-overlay" *ngIf="isLoading()">
-    <mat-spinner diameter="40"></mat-spinner>
-  </div>
-
-  <div class="table-card" *ngIf="!isLoading()">
-    <table>
-      <thead>
-        <tr>
-          <th>Invoice #</th>
-          <th>Date</th>
-          <th>Amount</th>
-          <th>Status</th>
-          <th>Plan</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let invoice of invoices()">
-          <td>{{ invoice.invoice_number || 'N/A' }}</td>
-          <td>{{ invoice.created_at | date:'mediumDate' }}</td>
-          <td>{{ invoice.amount | currency:invoice.currency }}</td>
-          <td>
-            <span class="status" [ngClass]="invoice.status">{{ invoice.status | uppercase }}</span>
-          </td>
-          <td>{{ invoice.subscription?.plan?.name || 'Subscription' }}</td>
-          <td>
-            <button class="btn-view" (click)="viewInvoice(invoice)">View Invoice</button>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-    
-    <div *ngIf="invoices().length === 0" style="padding: 40px; text-align: center; color: var(--theme-color-text-muted);">
-      No billing history found.
-    </div>
-  </div>
-</div>
-
-<!-- INVOICE MODAL -->
-<div class="invoice-overlay" *ngIf="selectedInvoice()">
-  <div class="invoice-modal">
-    <div class="modal-actions">
-      <h3>Invoice Details</h3>
-      <div class="buttons">
-        <button (click)="printInvoice()"><mat-icon>print</mat-icon> Print</button>
-        <button class="btn-primary" (click)="downloadPDF()"><mat-icon>download</mat-icon> Download PDF</button>
-        <button (click)="closeInvoice()"><mat-icon>close</mat-icon> Close</button>
+  <!-- Page Header -->
+  <div class="bh-header">
+    <div class="bh-title-group">
+      <div class="bh-icon-badge">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+      </div>
+      <div>
+        <h1 class="bh-title">Billing &amp; Invoices</h1>
+        <p class="bh-subtitle">All subscription payment history and downloadable invoices</p>
       </div>
     </div>
-    
-    <div class="invoice-scroll">
-      <div class="invoice-document" #invoicePdf>
-        
-        <div class="invoice-header">
-          <div class="company-info">
-            <h1>{{ selectedInvoice().company?.name || 'Your Company' }}</h1>
-            <p>{{ selectedInvoice().company?.email || 'admin@company.com' }}</p>
-            <p>{{ selectedInvoice().company?.phone || '+91 0000000000' }}</p>
-          </div>
-          <div class="invoice-meta">
-            <h2>INVOICE</h2>
-            <p><strong>Invoice Number:</strong> {{ selectedInvoice().invoice_number || 'N/A' }}</p>
-            <p><strong>Date:</strong> {{ selectedInvoice().created_at | date:'longDate' }}</p>
-            <p><strong>Order ID:</strong> {{ selectedInvoice().razorpay_order_id || 'N/A' }}</p>
-          </div>
-        </div>
+    <button class="bh-refresh-btn" (click)="fetchInvoices()" [disabled]="isLoading()">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" [class.spinning]="isLoading()"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+      Refresh
+    </button>
+  </div>
 
-        <div class="bill-to">
-          <h3>Billed To:</h3>
-          <p class="customer-name">{{ selectedInvoice().company?.contact_name || 'Customer' }}</p>
-          <p>{{ selectedInvoice().company?.address || 'Billing Address Not Provided' }}</p>
-        </div>
-
-        <table class="invoice-table">
-          <thead>
-            <tr>
-              <th>Description</th>
-              <th class="text-right">Amount</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>
-                Subscription: {{ selectedInvoice().plan_details?.name || 'Custom Plan' }}
-                <br>
-                <small style="color: #6b7280;">Billing Cycle: {{ selectedInvoice().subscription?.billing_cycle | titlecase }}</small>
-              </td>
-              <td class="text-right">{{ (selectedInvoice().subtotal + selectedInvoice().discount_amount) | currency:selectedInvoice().currency }}</td>
-            </tr>
-          </tbody>
-        </table>
-
-        <div class="invoice-summary">
-          <div class="summary-box">
-            <div class="summary-row">
-              <span>Subtotal:</span>
-              <span>{{ (selectedInvoice().subtotal + selectedInvoice().discount_amount) | currency:selectedInvoice().currency }}</span>
-            </div>
-            <div class="summary-row discount" *ngIf="selectedInvoice().discount_amount > 0">
-              <span>Discount ({{ selectedInvoice().coupon_applied?.code || 'Promo' }}):</span>
-              <span>-{{ selectedInvoice().discount_amount | currency:selectedInvoice().currency }}</span>
-            </div>
-            <div class="summary-row">
-              <span>GST (18%):</span>
-              <span>{{ selectedInvoice().gst_amount | currency:selectedInvoice().currency }}</span>
-            </div>
-            <div class="summary-row total">
-              <span>Total Paid:</span>
-              <span>{{ selectedInvoice().amount | currency:selectedInvoice().currency }}</span>
-            </div>
-          </div>
-        </div>
-
-        <div class="invoice-footer">
-          <p>Thank you for your business!</p>
-          <p>If you have any questions about this invoice, please contact support.</p>
-        </div>
-
+  <!-- Stats Strip -->
+  <div class="bh-stats">
+    <div class="bh-stat-card bh-stat-total">
+      <div class="bh-stat-icon">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+      </div>
+      <div>
+        <p class="bh-stat-label">Total Invoices</p>
+        <p class="bh-stat-value">{{ invoices().length }}</p>
+      </div>
+    </div>
+    <div class="bh-stat-card bh-stat-paid">
+      <div class="bh-stat-icon">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+      </div>
+      <div>
+        <p class="bh-stat-label">Paid</p>
+        <p class="bh-stat-value">{{ getPaidCount() }}</p>
+      </div>
+    </div>
+    <div class="bh-stat-card bh-stat-pending">
+      <div class="bh-stat-icon">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      </div>
+      <div>
+        <p class="bh-stat-label">Pending</p>
+        <p class="bh-stat-value">{{ getPendingCount() }}</p>
+      </div>
+    </div>
+    <div class="bh-stat-card bh-stat-amount">
+      <div class="bh-stat-icon">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+      </div>
+      <div>
+        <p class="bh-stat-label">Total Paid</p>
+        <p class="bh-stat-value">₹{{ getTotalPaid().toLocaleString('en-IN') }}</p>
       </div>
     </div>
   </div>
+
+  <!-- Search Bar -->
+  <div class="bh-search-bar">
+    <svg class="bh-search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    <input class="bh-search-input" type="text" placeholder="Search by invoice #, status, plan..."
+      [value]="searchQuery()" (input)="searchQuery.set($any($event.target).value)" />
+  </div>
+
+  <!-- Loading Skeleton -->
+  @if (isLoading()) {
+    <div class="bh-skeleton-list">
+      @for (n of [1,2,3,4,5]; track n) {
+        <div class="bh-skeleton-row">
+          <div class="bh-skeleton-cell w-20"></div>
+          <div class="bh-skeleton-cell w-30"></div>
+          <div class="bh-skeleton-cell w-20"></div>
+          <div class="bh-skeleton-cell w-15"></div>
+          <div class="bh-skeleton-cell w-15"></div>
+        </div>
+      }
+    </div>
+  }
+
+  <!-- Invoice Table -->
+  @if (!isLoading()) {
+    <div class="bh-table-card">
+      @if (filteredInvoices.length === 0) {
+        <div class="bh-empty">
+          <div class="bh-empty-icon">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          </div>
+          <h3>No invoices found</h3>
+          <p>Your billing history will appear here after your first payment.</p>
+        </div>
+      } @else {
+        <div class="bh-table-wrapper">
+          <table class="bh-table">
+            <thead>
+              <tr>
+                <th>Invoice #</th>
+                <th>Date</th>
+                <th>Plan</th>
+                <th>Amount</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (invoice of filteredInvoices; track invoice.id) {
+                <tr class="bh-row" (click)="viewInvoice(invoice)">
+                  <td>
+                    <span class="bh-inv-num">{{ invoice.invoice_number || ('INV-' + invoice.id) }}</span>
+                  </td>
+                  <td class="bh-date">{{ invoice.created_at | date:'dd MMM yyyy' }}</td>
+                  <td>
+                    <span class="bh-plan-name">{{ invoice.plan_details?.name || invoice.subscription?.plan?.name || 'Subscription' }}</span>
+                    <span class="bh-cycle">{{ invoice.subscription?.billing_cycle | titlecase }}</span>
+                  </td>
+                  <td class="bh-amount">₹{{ (+invoice.amount).toLocaleString('en-IN') }}</td>
+                  <td>
+                    <span class="bh-status-badge" [ngClass]="'status-' + invoice.status">
+                      {{ invoice.status | uppercase }}
+                    </span>
+                  </td>
+                  <td>
+                    <button class="bh-action-btn" (click)="viewInvoice(invoice); $event.stopPropagation()">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                      View
+                    </button>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </div>
+  }
 </div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- INVOICE DETAIL MODAL -->
+<!-- ═══════════════════════════════════════════════════════ -->
+@if (selectedInvoice()) {
+  <div class="inv-overlay" (click)="closeInvoice()">
+    <div class="inv-modal" (click)="$event.stopPropagation()">
+
+      <!-- Modal Toolbar -->
+      <div class="inv-toolbar">
+        <div class="inv-toolbar-left">
+          <span class="inv-toolbar-title">Invoice Details</span>
+          <span class="bh-status-badge ml-8" [ngClass]="'status-' + selectedInvoice().status">
+            {{ selectedInvoice().status | uppercase }}
+          </span>
+        </div>
+        <div class="inv-toolbar-actions">
+          <button class="inv-btn inv-btn-outline" (click)="printInvoice()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+            Print
+          </button>
+          <button class="inv-btn inv-btn-primary" (click)="downloadPDF()" [disabled]="isDownloading()">
+            @if (isDownloading()) {
+              <span class="inv-spinner"></span> Generating...
+            } @else {
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              Download PDF
+            }
+          </button>
+          <button class="inv-btn inv-btn-ghost" (click)="closeInvoice()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Invoice Document Preview -->
+      <div class="inv-body" #invoicePrintArea>
+        <div class="inv-doc">
+
+          <!-- Doc Header -->
+          <div class="inv-doc-header">
+            <div class="inv-brand">
+              <div class="inv-brand-logo">SVK</div>
+              <div>
+                <div class="inv-brand-name">SVK Cyber E-Com</div>
+                <div class="inv-brand-sub">Subscription Platform</div>
+              </div>
+            </div>
+            <div class="inv-doc-meta">
+              <div class="inv-doc-label">INVOICE</div>
+              <div class="inv-doc-rows">
+                <div class="inv-doc-row"><span>Invoice #</span><strong>{{ selectedInvoice().invoice_number || ('INV-' + selectedInvoice().id) }}</strong></div>
+                <div class="inv-doc-row"><span>Date</span><strong>{{ selectedInvoice().created_at | date:'dd MMMM yyyy' }}</strong></div>
+                @if (selectedInvoice().razorpay_order_id) {
+                  <div class="inv-doc-row"><span>Order ID</span><strong>{{ selectedInvoice().razorpay_order_id }}</strong></div>
+                }
+              </div>
+            </div>
+          </div>
+
+          <!-- Bill Parties -->
+          <div class="inv-parties">
+            <div class="inv-party">
+              <div class="inv-party-label">FROM</div>
+              <div class="inv-party-name">SVK Cyber Technology</div>
+              <div class="inv-party-detail">E-Commerce SaaS Platform</div>
+              <div class="inv-party-detail">Chennai, Tamil Nadu, India</div>
+              <div class="inv-party-detail">support&#64;svkcyber.com</div>
+            </div>
+            <div class="inv-party inv-party-right">
+              <div class="inv-party-label">BILLED TO</div>
+              <div class="inv-party-name">
+                {{ selectedInvoice().customer_details?.name || selectedInvoice().customer_details?.company || 'Valued Customer' }}
+              </div>
+              @if (selectedInvoice().customer_details?.email) {
+                <div class="inv-party-detail">{{ selectedInvoice().customer_details.email }}</div>
+              }
+              @if (selectedInvoice().customer_details?.phone) {
+                <div class="inv-party-detail">{{ selectedInvoice().customer_details.phone }}</div>
+              }
+              @if (selectedInvoice().customer_details?.company) {
+                <div class="inv-party-detail">{{ selectedInvoice().customer_details.company }}</div>
+              }
+              @if (selectedInvoice().customer_details?.gstin) {
+                <div class="inv-party-detail">GSTIN: {{ selectedInvoice().customer_details.gstin }}</div>
+              }
+            </div>
+          </div>
+
+          <!-- Line Items -->
+          <table class="inv-items-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Description</th>
+                <th>Billing Cycle</th>
+                <th class="text-right">Amount</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>1</td>
+                <td>
+                  <strong>{{ selectedInvoice().plan_details?.name || selectedInvoice().subscription?.plan?.name || 'Subscription Plan' }}</strong>
+                  <div class="inv-item-sub">Software as a Service (SaaS) — Subscription</div>
+                </td>
+                <td style="text-transform:capitalize">{{ selectedInvoice().subscription?.billing_cycle || 'Monthly' }}</td>
+                <td class="text-right">₹{{ ((+selectedInvoice().subtotal || 0) + (+selectedInvoice().discount_amount || 0)).toLocaleString('en-IN') }}</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <!-- Summary -->
+          <div class="inv-summary">
+            <div class="inv-summary-box">
+              <div class="inv-summary-row">
+                <span>Subtotal</span>
+                <span>₹{{ ((+selectedInvoice().subtotal || 0) + (+selectedInvoice().discount_amount || 0)).toLocaleString('en-IN') }}</span>
+              </div>
+              @if (+selectedInvoice().discount_amount > 0) {
+                <div class="inv-summary-row inv-discount">
+                  <span>Discount ({{ selectedInvoice().coupon_applied?.code || 'Promo' }})</span>
+                  <span>-₹{{ (+selectedInvoice().discount_amount).toLocaleString('en-IN') }}</span>
+                </div>
+              }
+              @if (+selectedInvoice().gst_amount > 0) {
+                <div class="inv-summary-row">
+                  <span>GST (18%)</span>
+                  <span>₹{{ (+selectedInvoice().gst_amount).toLocaleString('en-IN') }}</span>
+                </div>
+              }
+              <div class="inv-summary-row inv-total">
+                <span>Total Paid</span>
+                <span>₹{{ (+selectedInvoice().amount).toLocaleString('en-IN') }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Payment Info -->
+          @if (selectedInvoice().razorpay_payment_id) {
+            <div class="inv-payment-box">
+              <div class="inv-payment-label">Payment Information</div>
+              <div class="inv-payment-grid">
+                <div><span>Payment ID</span><strong>{{ selectedInvoice().razorpay_payment_id }}</strong></div>
+                <div><span>Method</span><strong>Razorpay — Online</strong></div>
+                <div><span>Status</span><strong>{{ selectedInvoice().status | uppercase }}</strong></div>
+                <div><span>Currency</span><strong>{{ selectedInvoice().currency || 'INR' }}</strong></div>
+              </div>
+            </div>
+          }
+
+          <!-- Footer -->
+          <div class="inv-doc-footer">
+            <p>Thank you for subscribing to SVK Cyber E-Commerce Platform!</p>
+            <p>Questions about this invoice? Contact us at support&#64;svkcyber.com</p>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+}

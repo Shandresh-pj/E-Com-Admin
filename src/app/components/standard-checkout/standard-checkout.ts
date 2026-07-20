@@ -1,10 +1,10 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { MaterialModule } from '../../material.module';
 import { CommonService } from '../../Securities/Services/common.service';
 import { AlertService } from '../../Securities/Services/alert.service';
-import { RazorpayService } from '../../services/razorpay.service';
-import { FormsModule } from '@angular/forms';
+import { RazorpayService, RazorpayPaymentError } from '../../services/razorpay.service';
 import { environment } from '../../../environment/environment';
 
 @Component({
@@ -16,7 +16,7 @@ import { environment } from '../../../environment/environment';
 })
 export class StandardCheckoutComponent {
   amountToPay = signal(100); // Default ₹100
-  isLoading = signal(false);
+  isLoading   = signal(false);
 
   constructor(
     private commonService: CommonService,
@@ -32,49 +32,50 @@ export class StandardCheckoutComponent {
 
     this.isLoading.set(true);
 
-    const createOrderPayload = {
+    // Step 1 – Create order on backend
+    this.commonService.postApi('payment/create-order', {
       amount:   this.amountToPay() * 100, // INR → paise
       currency: 'INR',
       receipt:  `rcpt_${Date.now()}`
-    };
-
-    this.commonService.postApi('payment/create-order', createOrderPayload).subscribe({
+    }).subscribe({
       next: async (res: any) => {
-        if (!res.success) {
+        if (!res?.success || !res.order_id) {
           this.isLoading.set(false);
-          this.alert.error(res.message || 'Failed to create payment order.');
+          this.alert.error(res?.message || 'Failed to create payment order.');
           return;
         }
 
-        const keyId = environment.razorpayKeyId || 'rzp_test_simulated_key';
+        const keyId = environment.razorpayKeyId || res.key_id || 'rzp_test_simulated_key';
 
         try {
-          await this.razorpayService.openCheckout({
+          // Step 2 – Open Razorpay checkout (Promise resolves on success, rejects on failure/dismiss)
+          const rzpResp = await this.razorpayService.openCheckout({
             key:         keyId,
             amount:      res.amount,
-            currency:    res.currency,
+            currency:    res.currency || 'INR',
             name:        'SVK E-Commerce Store',
             description: 'Standard Payment Checkout',
             order_id:    res.order_id,
-            prefill: {
-              name:    '',
-              email:   '',
-              contact: ''
-            },
-            theme: { color: '#6366f1' },
-            handler: (response: any) => {
-              this.verifyPayment(response);
-            },
-            modal: {
-              ondismiss: () => {
-                this.isLoading.set(false);
-                this.alert.warning('Payment was cancelled. No charges were made.');
-              }
-            }
+            prefill:     { name: '', email: '', contact: '' },
+            theme:       { color: '#6366f1' },
+            modal:       { backdropclose: false, escape: true, animation: true },
+            retry:       { enabled: true, max_count: 3 }
           });
+
+          // Step 3 – Verify signature on backend
+          this.verifyPayment(rzpResp);
+
         } catch (err: any) {
           this.isLoading.set(false);
-          this.alert.error('Failed to open payment gateway. Please try again.');
+
+          if (err?.dismissed === true) {
+            this.alert.warning('Payment was cancelled. No charges were made.', 'Cancelled');
+          } else {
+            // payment.failed event from Razorpay
+            const rzpErr = err as RazorpayPaymentError;
+            const msg = rzpErr?.description || 'Payment could not be completed. Please try a different method.';
+            this.alert.error(msg, 'Payment Failed');
+          }
         }
       },
       error: (err: any) => {
@@ -84,25 +85,23 @@ export class StandardCheckoutComponent {
     });
   }
 
-  verifyPayment(paymentResponse: any): void {
-    const payload = {
+  private verifyPayment(paymentResponse: { razorpay_order_id: string; razorpay_payment_id: string; razorpay_signature: string }): void {
+    this.commonService.postApi('payment/verify-payment', {
       razorpay_order_id:   paymentResponse.razorpay_order_id,
       razorpay_payment_id: paymentResponse.razorpay_payment_id,
       razorpay_signature:  paymentResponse.razorpay_signature
-    };
-
-    this.commonService.postApi('payment/verify-payment', payload).subscribe({
+    }).subscribe({
       next: (res: any) => {
         this.isLoading.set(false);
-        if (res.success) {
-          this.alert.success('Payment successful and verified! Thank you for your purchase.');
+        if (res?.success) {
+          this.alert.success('Payment successful and verified! Thank you for your purchase.', 'Success 🎉');
         } else {
-          this.alert.error('Payment verification failed. Please contact support.');
+          this.alert.error(res?.message || 'Payment verification failed. Please contact support.', 'Verification Failed');
         }
       },
       error: (err: any) => {
         this.isLoading.set(false);
-        this.alert.error(err?.error?.message || 'Signature mismatch or verification error. Contact support.');
+        this.alert.error(err?.error?.message || 'Signature mismatch or verification error. Contact support.', 'Verification Error');
       }
     });
   }

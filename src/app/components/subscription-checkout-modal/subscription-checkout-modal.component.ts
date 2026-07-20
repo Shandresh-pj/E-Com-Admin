@@ -6,7 +6,7 @@ import {
 } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { SubscriptionPlan, SubscriptionService } from 'src/app/services/subscription.service';
-import { RazorpayService } from 'src/app/services/razorpay.service';
+import { RazorpayService, RazorpayPaymentError } from 'src/app/services/razorpay.service';
 import { AlertService } from 'src/app/Securities/Services/alert.service';
 import { MaterialModule } from 'src/app/material.module';
 import { RouterModule } from '@angular/router';
@@ -15,6 +15,7 @@ export interface SubscriptionModalData {
   plan: SubscriptionPlan;
   billingCycle: 'Monthly' | 'Yearly';
   initialMode: 'trial' | 'pay';
+  hasActiveTrialOrSub?: boolean;
 }
 
 @Component({
@@ -27,7 +28,9 @@ export interface SubscriptionModalData {
 export class SubscriptionCheckoutModalComponent implements OnInit {
   checkoutForm: FormGroup;
   mode = signal<'trial' | 'pay'>('trial');
+  hasActiveTrialOrSub = signal(false);
   loading = signal(false);
+  razorpayOpen = signal(false);
   isSuccess = signal(false);
   successMessage = signal('');
   receiptData = signal<any>(null);
@@ -46,7 +49,9 @@ export class SubscriptionCheckoutModalComponent implements OnInit {
     private razorpayService: RazorpayService,
     private alert: AlertService
   ) {
-    this.mode.set(data.initialMode);
+    const isTrialDisabled = data.hasActiveTrialOrSub === true;
+    this.hasActiveTrialOrSub.set(isTrialDisabled);
+    this.mode.set(isTrialDisabled ? 'pay' : data.initialMode);
 
     this.checkoutForm = this.fb.group({
       name:    ['', [Validators.required, Validators.minLength(2)]],
@@ -61,9 +66,7 @@ export class SubscriptionCheckoutModalComponent implements OnInit {
     this.finalAmount.set(this.originalPrice);
   }
 
-  setMode(m: 'trial' | 'pay'): void {
-    this.mode.set(m);
-  }
+  setMode(m: 'trial' | 'pay'): void { this.mode.set(m); }
 
   get originalPrice(): number {
     return this.data.billingCycle === 'Monthly'
@@ -71,17 +74,9 @@ export class SubscriptionCheckoutModalComponent implements OnInit {
       : this.data.plan.yearlyPrice;
   }
 
-  get price(): number {
-    return this.finalAmount();
-  }
-
-  get formattedOriginalPrice(): string {
-    return this.originalPrice.toLocaleString('en-IN');
-  }
-
-  get formattedPrice(): string {
-    return this.price.toLocaleString('en-IN');
-  }
+  get price(): number { return this.finalAmount(); }
+  get formattedOriginalPrice(): string { return this.originalPrice.toLocaleString('en-IN'); }
+  get formattedPrice(): string { return this.price.toLocaleString('en-IN'); }
 
   applyCoupon(): void {
     const code = this.couponControl.value?.trim();
@@ -114,9 +109,7 @@ export class SubscriptionCheckoutModalComponent implements OnInit {
     this.couponControl.setValue('');
   }
 
-  onClose(): void {
-    this.dialogRef.close();
-  }
+  onClose(): void { this.dialogRef.close(); }
 
   async onSubmit(): Promise<void> {
     if (this.checkoutForm.invalid) {
@@ -128,15 +121,15 @@ export class SubscriptionCheckoutModalComponent implements OnInit {
     const val = this.checkoutForm.value;
     this.loading.set(true);
 
+    // ─── Free Trial ────────────────────────────────────────────────────────
     if (this.mode() === 'trial') {
-      // ─── Start 14-Day Free Trial ─────────────────────────────
       this.subscriptionService.startFreeTrial({
-        planId: this.data.plan.id,
+        planId:       this.data.plan.id,
         billingCycle: this.data.billingCycle,
-        name: val.name,
-        email: val.email,
-        phone: val.phone,
-        company: val.company
+        name:         val.name,
+        email:        val.email,
+        phone:        val.phone,
+        company:      val.company
       }).subscribe({
         next: (res) => {
           this.loading.set(false);
@@ -151,81 +144,133 @@ export class SubscriptionCheckoutModalComponent implements OnInit {
             expiry,
             transactionId: res.trialId || `TRIAL-${Date.now()}`
           });
+          this.subscriptionService.notifySubscriptionUpdated();
+          this.alert.success(
+            `Your 14-day free trial for ${this.data.plan.name} has been activated!`,
+            'Free Trial Activated 🎉'
+          );
         },
         error: (err: any) => {
           this.loading.set(false);
-          this.alert.error(err?.error?.message || 'Failed to activate trial. Please try again.');
+          const msg = err?.error?.message || 'Free trial already activated. Please purchase a plan.';
+          this.alert.warning(msg, 'Trial Unavailable');
         }
       });
-
-    } else {
-      // ─── Initiate Razorpay Payment ───────────────────────────
-      this.subscriptionService.createRazorpayOrder({
-        planId:        this.data.plan.id,
-        billingCycle:  this.data.billingCycle,
-        amount:        this.price,
-        name:          val.name,
-        email:         val.email,
-        phone:         val.phone,
-        company:       val.company,
-        coupon_code:   this.appliedCoupon()?.code
-      }).subscribe({
-        next: async (orderRes) => {
-          try {
-            await this.razorpayService.openCheckout({
-              key:         orderRes.keyId || 'rzp_test_simulated_key',
-              amount:      orderRes.amount,
-              currency:    orderRes.currency || 'INR',
-              name:        'SVK Cyber E-Com Admin',
-              description: `${this.data.plan.name} (${this.data.billingCycle})`,
-              order_id:    orderRes.orderId,
-              prefill: {
-                name:    val.name,
-                email:   val.email,
-                contact: val.phone
-              },
-              theme: { color: '#6366f1' },
-              handler: (rzpResp) => {
-                // Verify on backend after Razorpay success
-                this.subscriptionService.verifyPayment({
-                  ...rzpResp,
-                  planId: this.data.plan.id,
-                  email:  val.email
-                }).subscribe({
-                  next: () => {
-                    this.loading.set(false);
-                    this.isSuccess.set(true);
-                    this.successMessage.set(`⚡ Payment Verified! ${this.data.plan.name} Plan activated.`);
-                    this.receiptData.set({
-                      plan:          this.data.plan.name,
-                      cycle:         `${this.data.billingCycle} Subscription`,
-                      amount:        `₹${this.formattedPrice}`,
-                      transactionId: rzpResp.razorpay_payment_id || `PAY-${Date.now()}`
-                    });
-                  },
-                  error: (err: any) => {
-                    this.loading.set(false);
-                    this.alert.error(err?.error?.message || 'Payment verification failed. Contact support with your payment ID.');
-                  }
-                });
-              },
-              modal: {
-                ondismiss: () => {
-                  this.loading.set(false);
-                  this.alert.warning('Payment was cancelled. Your order has not been placed.');
-                }
-              }
-            });
-          } catch (err: any) {
-            this.loading.set(false);
-            this.alert.error('Failed to open payment gateway. Please try again.');
-          }
-        },
-        error: (err: any) => {
-          this.loading.set(false);
-          this.alert.error(err?.error?.message || 'Failed to initialize payment order. Please try again.');
-        }
-      });
+      return;
     }
+
+    // ─── Razorpay Payment ─────────────────────────────────────────────────
+    this.subscriptionService.createRazorpayOrder({
+      planId:       this.data.plan.id,
+      billingCycle: this.data.billingCycle,
+      amount:       this.price,
+      name:         val.name,
+      email:        val.email,
+      phone:        val.phone,
+      company:      val.company,
+      coupon_code:  this.appliedCoupon()?.code
+    }).subscribe({
+      next: async (orderRes) => {
+        this.loading.set(false);
+
+        if (!orderRes?.orderId) {
+          this.alert.error('Failed to create payment order. Please try again.', 'Order Error');
+          return;
+        }
+
+        // Hide our dialog while Razorpay modal is open
+        this.razorpayOpen.set(true);
+        this.dialogRef.addPanelClass('hidden-dialog');
+
+        try {
+          // Opens Razorpay checkout; resolves on payment success, rejects on failure/dismiss
+          const rzpResp = await this.razorpayService.openCheckout({
+            key:         orderRes.keyId,
+            amount:      orderRes.amount,
+            currency:    orderRes.currency || 'INR',
+            name:        'SVK Cyber E-Com Admin',
+            description: `${this.data.plan.name} – ${this.data.billingCycle} Plan`,
+            order_id:    orderRes.orderId,
+            prefill: {
+              name:    val.name,
+              email:   val.email,
+              contact: val.phone
+            },
+            notes: {
+              plan_name:     this.data.plan.name,
+              billing_cycle: this.data.billingCycle
+            },
+            theme:  { color: '#6366f1' },
+            modal:  { backdropclose: false, escape: true, animation: true },
+            retry:  { enabled: true, max_count: 3 }
+          });
+
+          // Payment succeeded – verify signature on backend
+          this.loading.set(true);
+          this.subscriptionService.verifyPayment({
+            razorpay_payment_id: rzpResp.razorpay_payment_id,
+            razorpay_order_id:   rzpResp.razorpay_order_id,
+            razorpay_signature:  rzpResp.razorpay_signature,
+            planId: this.data.plan.id,
+            email:  val.email
+          }).subscribe({
+            next: () => {
+              this.razorpayOpen.set(false);
+              this.dialogRef.removePanelClass('hidden-dialog');
+              this.loading.set(false);
+              this.isSuccess.set(true);
+              this.successMessage.set(`⚡ Payment Verified! ${this.data.plan.name} Plan activated.`);
+              this.receiptData.set({
+                plan:          this.data.plan.name,
+                cycle:         `${this.data.billingCycle} Subscription`,
+                amount:        `₹${this.formattedPrice}`,
+                transactionId: rzpResp.razorpay_payment_id
+              });
+              this.subscriptionService.notifySubscriptionUpdated();
+              this.alert.success(
+                `Payment of ₹${this.formattedPrice} verified! ${this.data.plan.name} (${this.data.billingCycle}) is now active.`,
+                'Payment Successful! 🎉'
+              );
+            },
+            error: (err: any) => {
+              this.razorpayOpen.set(false);
+              this.dialogRef.removePanelClass('hidden-dialog');
+              this.loading.set(false);
+              const errMsg = err?.error?.message || 'Signature verification failed. Contact support with your Payment ID.';
+              this.alert.error(errMsg, 'Verification Failed');
+            }
+          });
+
+        } catch (err: any) {
+          // Restore our dialog on every failure path
+          this.razorpayOpen.set(false);
+          this.dialogRef.removePanelClass('hidden-dialog');
+          this.loading.set(false);
+
+          if (err?.dismissed === true) {
+            this.alert.warning('Payment cancelled. You can try again anytime.', 'Cancelled');
+          } else {
+            // RazorpayPaymentError from the payment.failed event
+            const rzpErr = err as RazorpayPaymentError;
+            const userMsg = rzpErr?.description
+              || 'Payment could not be completed. Please try a different payment method.';
+            this.alert.error(userMsg, 'Payment Failed');
+          }
+        }
+      },
+
+      error: (err: any) => {
+        this.loading.set(false);
+        const httpStatus = err?.status;
+        const message    = err?.error?.message || 'Failed to initialize payment. Please try again.';
+        if (httpStatus === 401) {
+          this.alert.error('Payment gateway authentication failed. Contact support.', 'Auth Error');
+        } else if (httpStatus === 400) {
+          this.alert.warning(message, 'Invalid Request');
+        } else {
+          this.alert.error(message, 'Order Error');
+        }
+      }
+    });
   }
 }

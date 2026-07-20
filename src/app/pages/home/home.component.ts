@@ -104,7 +104,8 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
       queryParams: {
         plan_id: plan.id,
         plan_name: plan.name,
-        cycle: this.billingCycle()
+        cycle: this.billingCycle(),
+        mode: mode
       }
     });
   }

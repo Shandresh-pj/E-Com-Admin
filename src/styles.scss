@@ -164,12 +164,12 @@ app-root {
 }
 
 /* ── FULL LAYOUT (Dashboard/App pages) ────────────────────────────────────
-   The .mainWrapper clips at 100vh and .contentWrapper in _container.scss
-   is the single scrollable surface. All children must NOT create a
-   second scroll context. */
+   The .mainWrapper clips at 100vh and mat-sidenav-content (.contentWrapper)
+   is the single, smooth scrollable surface for the entire application. */
 .mainWrapper mat-sidenav-container.mat-sidenav-container,
 .mainWrapper .mat-sidenav-container {
-  height: 100% !important;
+  height: 100vh !important;
+  max-height: 100vh !important;
   overflow: hidden !important;
   position: relative !important;
 }
@@ -178,8 +178,10 @@ app-root {
 .mainWrapper .mat-sidenav-content,
 .mainWrapper .mat-drawer-content {
   height: 100% !important;
-  overflow: hidden !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
   position: relative !important;
+  -webkit-overflow-scrolling: touch;
 }
 
 /* Home, Contact pages route directly (no layout) — ensure their
@@ -205,10 +207,15 @@ app-home, app-contact {
    All mat-card.cardWithShadow.theme-card automatically upgrades
    ──────────────────────────────────────────────────────────────────────── */
 
-/* Core glass card — replaces cardWithShadow for a premium look */
+/* Core glass card — applies premium Liquid Glass globally across all components */
 .liquid-glass-card,
+mat-card,
+.mat-mdc-card,
 mat-card.cardWithShadow,
-mat-card.theme-card {
+mat-card.theme-card,
+.glass-card,
+.form-card,
+.table-card {
   background: var(--glass-bg) !important;
   backdrop-filter: var(--glass-blur) !important;
   -webkit-backdrop-filter: var(--glass-blur) !important;
@@ -246,6 +253,171 @@ mat-card.theme-card {
     &:hover {
       border-color: rgba(99, 102, 241, 0.25) !important;
     }
+  }
+}
+
+/* ── Global Neumorphic Liquid Glass Unique Color Variants ─────────────────── */
+.glass-kpi-card, .glass-kpi-variant {
+  position: relative;
+  border-radius: 26px;
+  padding: 22px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  backdrop-filter: blur(28px) saturate(190%);
+  -webkit-backdrop-filter: blur(28px) saturate(190%);
+  box-shadow:
+    0 12px 36px 0 rgba(31, 38, 135, 0.06),
+    inset 0 2px 2px rgba(255, 255, 255, 0.95),
+    inset 1px 0 2px rgba(255, 255, 255, 0.85);
+  transition: transform 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275),
+              box-shadow 0.35s ease,
+              border-color 0.35s ease;
+  overflow: hidden;
+
+  &:hover {
+    transform: translateY(-5px) scale(1.02);
+    box-shadow: 0 20px 45px rgba(31, 38, 135, 0.14), inset 0 2px 2.5px rgba(255, 255, 255, 1);
+  }
+
+  .kpi-content {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .kpi-label {
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    margin: 0 0 6px;
+    line-height: 1.2;
+  }
+
+  .kpi-value {
+    font-size: 26px;
+    font-weight: 900;
+    letter-spacing: -0.6px;
+    margin: 0;
+    line-height: 1.1;
+  }
+
+  .kpi-icon-3d {
+    width: 48px;
+    height: 48px;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transform: rotate(3deg);
+    transition: transform 0.35s ease;
+
+    mat-icon { font-size: 24px; width: 24px; height: 24px; }
+  }
+
+  &:hover .kpi-icon-3d {
+    transform: rotate(0deg) scale(1.1);
+  }
+
+  /* 1. Indigo / Lavender */
+  &.glass-kpi-indigo, &.glass-card-indigo {
+    background: linear-gradient(135deg, rgba(230, 230, 255, 0.8) 0%, rgba(240, 240, 255, 0.5) 100%) !important;
+    border: 2px solid rgba(165, 160, 245, 0.65) !important;
+
+    .kpi-label { color: #474676; }
+    .kpi-value { color: #5544d4; }
+    .kpi-icon-3d {
+      background: rgba(185, 180, 255, 0.65);
+      color: #5544d4;
+      border: 1px solid rgba(165, 160, 245, 0.75);
+      box-shadow: 0 8px 20px rgba(85, 68, 212, 0.25);
+    }
+  }
+
+  /* 2. Mint / Seafoam */
+  &.glass-kpi-emerald, &.glass-card-emerald {
+    background: linear-gradient(135deg, rgba(225, 248, 240, 0.8) 0%, rgba(240, 252, 248, 0.5) 100%) !important;
+    border: 2px solid rgba(115, 215, 185, 0.65) !important;
+
+    .kpi-label { color: #2c5950; }
+    .kpi-value { color: #008e5a; }
+    .kpi-icon-3d {
+      background: rgba(165, 235, 210, 0.65);
+      color: #008e5a;
+      border: 1px solid rgba(115, 215, 185, 0.75);
+      box-shadow: 0 8px 20px rgba(0, 142, 90, 0.25);
+    }
+  }
+
+  /* 3. Peach / Warm Amber */
+  &.glass-kpi-amber, &.glass-card-amber {
+    background: linear-gradient(135deg, rgba(255, 243, 230, 0.8) 0%, rgba(255, 248, 240, 0.5) 100%) !important;
+    border: 2px solid rgba(245, 200, 150, 0.65) !important;
+
+    .kpi-label { color: #594231; }
+    .kpi-value { color: #d66200; }
+    .kpi-icon-3d {
+      background: rgba(255, 215, 175, 0.65);
+      color: #d66200;
+      border: 1px solid rgba(245, 200, 150, 0.75);
+      box-shadow: 0 8px 20px rgba(214, 98, 0, 0.25);
+    }
+  }
+
+  /* 4. Rose / Crimson */
+  &.glass-kpi-rose, &.glass-card-rose {
+    background: linear-gradient(135deg, rgba(255, 230, 235, 0.8) 0%, rgba(255, 240, 245, 0.5) 100%) !important;
+    border: 2px solid rgba(245, 160, 175, 0.65) !important;
+
+    .kpi-label { color: #5c3239; }
+    .kpi-value { color: #d01c1c; }
+    .kpi-icon-3d {
+      background: rgba(255, 185, 195, 0.65);
+      color: #d01c1c;
+      border: 1px solid rgba(245, 160, 175, 0.75);
+      box-shadow: 0 8px 20px rgba(208, 28, 28, 0.25);
+    }
+  }
+
+  /* 5. Sky / Cerulean */
+  &.glass-kpi-sky, &.glass-card-sky {
+    background: linear-gradient(135deg, rgba(225, 244, 255, 0.8) 0%, rgba(240, 248, 255, 0.5) 100%) !important;
+    border: 2px solid rgba(150, 210, 245, 0.65) !important;
+
+    .kpi-label { color: #204b62; }
+    .kpi-value { color: #007fb6; }
+    .kpi-icon-3d {
+      background: rgba(185, 230, 255, 0.65);
+      color: #007fb6;
+      border: 1px solid rgba(150, 210, 245, 0.75);
+      box-shadow: 0 8px 20px rgba(0, 127, 182, 0.25);
+    }
+  }
+
+  /* 6. Violet / Bright Purple */
+  &.glass-kpi-purple, &.glass-card-purple {
+    background: linear-gradient(135deg, rgba(240, 230, 255, 0.8) 0%, rgba(248, 240, 255, 0.5) 100%) !important;
+    border: 2px solid rgba(195, 160, 245, 0.65) !important;
+
+    .kpi-label { color: #422b60; }
+    .kpi-value { color: #7928ca; }
+    .kpi-icon-3d {
+      background: rgba(215, 185, 255, 0.65);
+      color: #7928ca;
+      border: 1px solid rgba(195, 160, 245, 0.75);
+      box-shadow: 0 8px 20px rgba(121, 40, 202, 0.25);
+    }
+  }
+
+  /* Dark mode overrides */
+  html.dark &, html .dark-theme & {
+    background: rgba(15, 23, 42, 0.78) !important;
+    border-color: rgba(255, 255, 255, 0.12) !important;
+
+    .kpi-label { color: #94a3b8; }
+    .kpi-value { color: #f8fafc; }
   }
 }
 
@@ -3130,3 +3302,17 @@ html.dark {
     }
   }
 }
+
+/* ── Checkout Dialog Overlay Container Styling ──────────────────────────── */
+.checkout-dialog-panel {
+  .mat-mdc-dialog-container,
+  .mdc-dialog__surface {
+    padding: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    overflow: visible !important;
+    border-radius: 24px !important;
+    max-height: 90vh !important;
+  }
+}
+

@@ -1,83 +1,171 @@
-<div class="pricing-page-wrapper">
-  <div class="section-wrap">
-    <div class="section-header">
-      <div class="s-badge liquid-badge">
-        <svg viewBox="0 0 24 24" fill="none" class="badge-svg">
-          <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"
-            stroke="currentColor" stroke-width="2" stroke-linejoin="round" />
-        </svg>
-        <span>TRANSPARENT ENTERPRISE TIERS</span>
-      </div>
-      <h2 class="s-title">Simple, <span class="gradient-text">Transparent Pricing</span></h2>
-      <p class="s-sub">Enterprise-grade multi-branch scaling with zero hidden costs. All tiers include automated SSL & daily backups.</p>
+<!-- ══════════════════════════════════════════════════════════════════════
+  Subscription Plans — Premium Dashboard Section (Admin Only)
+  Fully Responsive Grid | Glassmorphism Cards | Razorpay Pay Button
+══════════════════════════════════════════════════════════════════════ -->
+<div class="plans-section">
 
-      <div class="billing-toggle-container liquid-toggle">
-        <span class="toggle-lbl" [class.active]="billingCycle === 'Monthly'">Monthly Billing</span>
-        <button type="button" class="billing-switch" (click)="setBillingCycle(billingCycle === 'Monthly' ? 'Yearly' : 'Monthly')"
-          [attr.aria-label]="'Current billing cycle is ' + billingCycle">
-          <span class="switch-dot" [class.yearly]="billingCycle === 'Yearly'"></span>
-        </button>
-        <span class="toggle-lbl" [class.active]="billingCycle === 'Yearly'">
-          Yearly Billing <span class="save-chip liquid-save">SAVE 20%</span>
-        </span>
-      </div>
-
-      <!-- 14-Day Free Trial Highlight Banner -->
-      <div class="trial-highlight-banner liquid-trial-banner">
-        <div class="trial-banner-icon">🎁</div>
-        <div class="trial-banner-content">
-          <span class="trial-banner-title">14-Day Free Trial Available on All Standard & Pro Plans</span>
-          <span class="trial-banner-desc">No credit card or payment authorization required to start your trial. Test all 18 AI & ERP modules instantly!</span>
-        </div>
-        <div class="trial-banner-badge">INSTANT ACCESS</div>
-      </div>
+  <!-- Section Header -->
+  <div class="plans-section__header">
+    <div class="plans-section__title-group">
+      <span class="plans-section__eyebrow">
+        <mat-icon class="plans-section__eyebrow-icon">diamond</mat-icon>
+        Subscription Plans
+      </span>
+      <h2 class="plans-section__title">
+        Enterprise-Grade <span class="plans-section__gradient-text">Pricing</span>
+      </h2>
+      <p class="plans-section__subtitle">
+        Transparent, scalable tiers — all plans include AI modules, multi-branch ERP & daily backups.
+      </p>
     </div>
 
-    <!-- Owl-Carousel Interactive Stage (Grid Layout for Standalone Page) -->
-    <div class="price-grid">
-      <ng-container *ngFor="let plan of plans; let i = index">
-      <div class="price-card liquid-price-card owl-card" [class.pc-pop]="plan.recommended" [class.pop-liquid-card]="plan.recommended" [class.featured-owl-card]="plan.recommended">
-        <div [class]="plan.recommended ? 'pc-pop-badge' : 'pc-tier-badge'">{{ plan.badge || (plan.recommended ? 'Most Popular' : 'Tier') }}</div>
-        <div class="pc-name">{{ plan.name }}</div>
-        <div class="pc-price">
-          <ng-container *ngIf="plan.monthlyPrice === 0">
-            Custom<span class="per">/ year</span>
-          </ng-container>
-          <ng-container *ngIf="plan.monthlyPrice > 0">
-            ₹{{ billingCycle === 'Monthly' ? (plan.monthlyPrice | number) : (plan.yearlyPrice | number) }}
-            <span class="per">/ month</span>
-          </ng-container>
-        </div>
-        <div class="pc-desc">{{ plan.description }}</div>
-        <ul class="pc-feats">
-          <li *ngFor="let feat of plan.features">
-            <svg viewBox="0 0 24 24" fill="none" class="feat-check" [class.text-purple]="feat.highlight || plan.recommended">
-              <path d="M5 13L9 17L19 7" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
-            </svg>
-            <span [class.feat-highlight]="feat.highlight">{{ feat.text ? feat.text : feat }}</span>
-          </li>
-        </ul>
-
-        <div class="pc-cta-group">
-          <ng-container *ngIf="plan.hasFreeTrial || (plan.monthlyPrice > 0 && plan.monthlyPrice < 5000)">
-            <button type="button" class="pc-cta trial-cta" (click)="openSubscriptionModal(plan, 'trial')">
-              🎁 14-Day Free Trial
-            </button>
-          </ng-container>
-          <button type="button" class="pc-cta pay-cta" [class.liquid-cta-pop]="plan.recommended" [class.liquid-cta]="!plan.recommended" (click)="openSubscriptionModal(plan, 'pay')">
-            {{ plan.monthlyPrice === 0 ? '💬 Request Quote →' : '⚡ Pay via Razorpay →' }}
-          </button>
-        </div>
-      </div>
-      </ng-container>
-    </div>
-
-    <div class="pricing-referral-note liquid-note">
-      <svg viewBox="0 0 24 24" fill="none" class="note-svg">
-        <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" stroke="currentColor" stroke-width="2" />
-        <path d="M12 8V12L15 15" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
-      </svg>
-      <span>Have a referral code or multi-brand chain discount? Apply it during onboarding setup with our dedicated sales engineering team.</span>
+    <!-- Billing Toggle -->
+    <div class="plans-section__toggle">
+      <button
+        class="plans-section__toggle-btn"
+        [class.active]="billingCycle === 'Monthly'"
+        (click)="setBillingCycle('Monthly')"
+      >Monthly</button>
+      <button
+        class="plans-section__toggle-btn"
+        [class.active]="billingCycle === 'Yearly'"
+        (click)="setBillingCycle('Yearly')"
+      >
+        Yearly
+        <span class="plans-section__save-chip">Save 20%</span>
+      </button>
     </div>
   </div>
+
+  <!-- Free Trial Banner -->
+  <div class="plans-section__trial-banner">
+    <span class="plans-section__trial-emoji">🎁</span>
+    <div>
+      <strong>14-Day Free Trial</strong> available on all plans —
+      <span>No credit card required. Instant access to all 18+ modules.</span>
+    </div>
+    <span class="plans-section__trial-pill">INSTANT ACCESS</span>
+  </div>
+
+  <!-- Loading State -->
+  @if (loading) {
+    <div class="plans-grid">
+      @for (_ of [1,2,3,4]; track $index) {
+        <div class="plan-card plan-card--skeleton">
+          <div class="sk-line w-30 h-16 mb-8"></div>
+          <div class="sk-line w-50 h-28 mb-4"></div>
+          <div class="sk-line w-80 h-12 mb-16"></div>
+          <div class="sk-line w-70 h-10 mb-8"></div>
+          <div class="sk-line w-60 h-10 mb-8"></div>
+          <div class="sk-line w-75 h-10 mb-8"></div>
+          <div class="sk-line w-100 h-40 mt-auto"></div>
+        </div>
+      }
+    </div>
+  }
+
+  <!-- Plans Grid -->
+  @if (!loading) {
+    @if (plans.length === 0) {
+      <div class="plans-section__empty">
+        <mat-icon>inventory</mat-icon>
+        <p>No subscription plans available. <a routerLink="/subscription-management">Configure plans</a> in admin settings.</p>
+      </div>
+    } @else {
+      <div class="plans-grid">
+        @for (plan of plans; track plan.id; let i = $index) {
+          <div
+            class="plan-card"
+            [class.plan-card--popular]="plan.recommended"
+          >
+            <!-- Popular Badge -->
+            @if (plan.recommended) {
+              <div class="plan-card__popular-badge">
+                <mat-icon>bolt</mat-icon>
+                Most Popular
+              </div>
+            }
+
+            <!-- Plan Name & Badge -->
+            <div class="plan-card__badge">{{ plan.badge || 'Standard' }}</div>
+            <h3 class="plan-card__name">{{ plan.name }}</h3>
+
+            <!-- Price -->
+            <div class="plan-card__price-row">
+              @if (plan.monthlyPrice === 0) {
+                <span class="plan-card__price">Custom</span>
+                <span class="plan-card__per">/ quote</span>
+              } @else {
+                <span class="plan-card__currency">₹</span>
+                <span class="plan-card__price">
+                  {{ billingCycle === 'Monthly'
+                    ? (plan.monthlyPrice | number)
+                    : (plan.yearlyPrice | number) }}
+                </span>
+                <span class="plan-card__per">/ mo</span>
+              }
+            </div>
+            @if (billingCycle === 'Yearly' && plan.yearlyPrice > 0) {
+              <div class="plan-card__billed-note">
+                Billed ₹{{ plan.yearlyPrice * 12 | number }} annually
+              </div>
+            }
+
+            <p class="plan-card__desc">{{ plan.description }}</p>
+
+            <!-- Divider -->
+            <div class="plan-card__divider"></div>
+
+            <!-- Features -->
+            <ul class="plan-card__features">
+              @for (feat of plan.features; track $index) {
+                <li class="plan-card__feature-item" [class.highlighted]="feat.highlight">
+                  <svg class="plan-card__check" viewBox="0 0 24 24" fill="none">
+                    <path d="M5 13L9 17L19 7" stroke="currentColor" stroke-width="2.5"
+                      stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                  <span>{{ feat.text || feat }}</span>
+                </li>
+              }
+            </ul>
+
+            <!-- CTA Buttons -->
+            <div class="plan-card__cta-group">
+              @if (!hasActiveTrialOrSub && plan.hasFreeTrial) {
+                <button
+                  type="button"
+                  class="plan-card__btn plan-card__btn--trial"
+                  (click)="openSubscriptionModal(plan, 'trial')"
+                >
+                  <mat-icon>card_giftcard</mat-icon>
+                  Start Free Trial
+                </button>
+              }
+              <button
+                type="button"
+                class="plan-card__btn"
+                [class.plan-card__btn--pay]="!plan.recommended"
+                [class.plan-card__btn--pay-pop]="plan.recommended"
+                (click)="openSubscriptionModal(plan, 'pay')"
+              >
+                @if (plan.monthlyPrice === 0) {
+                  <mat-icon>chat</mat-icon>
+                  Request Quote
+                } @else {
+                  <mat-icon>credit_card</mat-icon>
+                  Pay via Razorpay
+                }
+              </button>
+            </div>
+          </div>
+        }
+      </div>
+    }
+  }
+
+  <!-- Note -->
+  <p class="plans-section__note">
+    <mat-icon class="plans-section__note-icon">info</mat-icon>
+    Have a referral code or multi-branch discount? Apply it in the checkout popup.
+  </p>
 </div>

@@ -23,14 +23,21 @@ export interface SubscriptionPlan {
   razorpayPlanIdYearly: string;
 }
 
+import { Subject } from 'rxjs';
+
 @Injectable({
   providedIn: 'root'
 })
 export class SubscriptionService {
 
   private fallbackPlans: SubscriptionPlan[] = [];
+  public subscriptionUpdated$ = new Subject<void>();
 
   constructor(private commonService: CommonService) {}
+
+  notifySubscriptionUpdated(): void {
+    this.subscriptionUpdated$.next();
+  }
 
   /**
    * Fetch subscription plans from backend API, or fallback to enterprise tier definitions
@@ -59,6 +66,16 @@ export class SubscriptionService {
         return [];
       }),
       catchError(() => of([]))
+    );
+  }
+
+  /**
+   * Fetch active or trialing subscription for logged-in company
+   */
+  getCurrentSubscription(): Observable<any> {
+    return this.commonService.getApi('subscriptions/current').pipe(
+      map(res => (res && res.success && res.data) ? res.data : null),
+      catchError(() => of(null))
     );
   }
 

@@ -229,42 +229,22 @@
           </div>
         }
 
-        <!-- Scope Summary Banner -->
-        <div class="scope-banner">
-          <div class="sb-left">
-            <span class="sb-live-dot"></span>
-            <span class="sb-label">Active Scope:</span>
+        <!-- Scope Summary & Legend Top Bar (Matches Reference Image) -->
+        <div class="matrix-top-bar">
+          <div class="mtb-left">
+            <span class="scope-dot"></span>
+            <span class="scope-title">ACTIVE SCOPE:</span>
+            <div class="scope-values">
+              @for (part of scopeSummary.split('  ·  '); track part) {
+                <span class="scope-val-item">{{ part }}</span>
+              }
+            </div>
           </div>
-          <div class="sb-chips">
-            @for (part of scopeSummary.split('  ·  '); track part) {
-              <span class="sb-chip">{{ part }}</span>
-            }
-          </div>
-          <div class="sb-right">
-            @if (hasChanges) {
-              <span class="unsaved-pill">
-                <svg viewBox="0 0 12 12" fill="none" class="unsaved-dot-svg">
-                  <circle cx="6" cy="6" r="5" fill="#f59e0b"/>
-                </svg>
-                Unsaved
-              </span>
-            }
-          </div>
-        </div>
 
-        <!-- Legend -->
-        <div class="matrix-legend">
-          <div class="legend-item">
-            <span class="legend-color lc-granted"></span>
-            <span>Granted</span>
-          </div>
-          <div class="legend-item">
-            <span class="legend-color lc-denied"></span>
-            <span>Denied</span>
-          </div>
-          <div class="legend-item">
-            <span class="legend-color lc-na"></span>
-            <span>N/A</span>
+          <div class="mtb-right">
+            <span class="legend-pill pill-granted">GRANTED</span>
+            <span class="legend-pill pill-denied">DENIED</span>
+            <span class="legend-na">N/A</span>
           </div>
         </div>
 
@@ -276,27 +256,25 @@
                 <th class="col-module">
                   <div class="th-module-inner">
                     <svg viewBox="0 0 20 20" fill="none" class="th-icon">
-                      <rect x="2" y="2" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.5"/>
-                      <rect x="11" y="2" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.5"/>
-                      <rect x="2" y="11" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.5"/>
-                      <rect x="11" y="11" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.5"/>
+                      <rect x="2" y="2" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.8"/>
+                      <rect x="11" y="2" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.8"/>
+                      <rect x="2" y="11" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.8"/>
+                      <rect x="11" y="11" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.8"/>
                     </svg>
-                    Module / Menu
+                    MODULE / MENU
                   </div>
                 </th>
                 @for (action of actions; track action) {
                   <th [class]="'col-action action-' + action.toLowerCase()">
                     <div class="th-action-inner">
-                      <span class="action-badge" [class]="'ab-' + action.toLowerCase()">
-                        {{ action }}
-                      </span>
+                      {{ action }}
                     </div>
                   </th>
                 }
                 <!-- Select All column -->
                 <th class="col-select-all">
                   <div class="th-action-inner">
-                    <span class="action-badge ab-selectall">ALL</span>
+                    <span class="all-header-pill">ALL</span>
                   </div>
                 </th>
               </tr>

@@ -3,10 +3,12 @@ import {
   ChangeDetectionStrategy, ChangeDetectorRef
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
-import { HttpClient } from '@angular/common/http';
-import { environment } from 'src/environment/environment';
+import { Router, RouterModule } from '@angular/router';
+import { Subject, merge } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 import { MaterialModule } from 'src/app/material.module';
+import { SubscriptionService } from 'src/app/services/subscription.service';
+import { SocketService } from 'src/app/Securities/Services/socket.service';
 
 @Component({
   selector: 'app-subscription-widget',
@@ -19,21 +21,39 @@ import { MaterialModule } from 'src/app/material.module';
 export class SubscriptionWidgetComponent implements OnInit, OnDestroy {
   subscription: any = null;
   loading = true;
-  daysRemaining = 0;
-  hoursRemaining = 0;
+  daysRemaining    = 0;
+  hoursRemaining   = 0;
   minutesRemaining = 0;
+  secondsRemaining = 0;
 
-  /** Hold the interval ref so we can clear it on destroy */
   private countdownInterval: ReturnType<typeof setInterval> | null = null;
+  private destroy$ = new Subject<void>();
 
-  constructor(private http: HttpClient, private cdr: ChangeDetectorRef) {}
+  constructor(
+    private subscriptionService: SubscriptionService,
+    private socketService: SocketService,
+    private cdr: ChangeDetectorRef,
+    private router: Router
+  ) {}
 
   ngOnInit(): void {
     this.fetchSubscription();
+
+    // ── Listen for local Subject updates AND real-time socket events ───────
+    merge(
+      this.subscriptionService.subscriptionUpdated$,
+      this.socketService.on('subscription.activated'),
+      this.socketService.on('subscription.trial.started')
+    )
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => {
+        this.fetchSubscription();
+      });
   }
 
   ngOnDestroy(): void {
-    // Prevent memory leaks — clear the countdown timer when component is removed
+    this.destroy$.next();
+    this.destroy$.complete();
     if (this.countdownInterval) {
       clearInterval(this.countdownInterval);
       this.countdownInterval = null;
@@ -42,24 +62,23 @@ export class SubscriptionWidgetComponent implements OnInit, OnDestroy {
 
   fetchSubscription(): void {
     this.loading = true;
-    this.http.get(`${environment.apiUrl}/subscriptions/current`).subscribe({
-      next: (res: any) => {
-        if (res.success && res.data) {
-          this.subscription = res.data;
+    this.subscriptionService.getCurrentSubscription().subscribe({
+      next: (sub: any) => {
+        if (sub) {
+          this.subscription = sub;
           this.calculateRemainingTime();
 
-          // Clear any existing interval before starting a new one
-          if (this.countdownInterval) {
-            clearInterval(this.countdownInterval);
-          }
-          // Update countdown every minute
-          this.countdownInterval = setInterval(() => this.calculateRemainingTime(), 60_000);
+          if (this.countdownInterval) clearInterval(this.countdownInterval);
+          // Tick every second to display real-time live countdown with seconds
+          this.countdownInterval = setInterval(() => this.calculateRemainingTime(), 1000);
+        } else {
+          this.subscription = null;
         }
         this.loading = false;
         this.cdr.markForCheck();
       },
       error: () => {
-        // Widget gracefully hides itself when no subscription data is available
+        this.subscription = null;
         this.loading = false;
         this.cdr.markForCheck();
       }
@@ -73,22 +92,19 @@ export class SubscriptionWidgetComponent implements OnInit, OnDestroy {
       ? new Date(this.subscription.trial_end)
       : new Date(this.subscription.end_date);
 
-    const now = new Date();
+    const now  = new Date();
     const diff = targetDate.getTime() - now.getTime();
 
     if (diff > 0) {
       this.daysRemaining    = Math.floor(diff / (1000 * 60 * 60 * 24));
       this.hoursRemaining   = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
       this.minutesRemaining = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+      this.secondsRemaining = Math.floor((diff % (1000 * 60)) / 1000);
     } else {
-      this.daysRemaining    = 0;
-      this.hoursRemaining   = 0;
-      this.minutesRemaining = 0;
-      // Mark locally as expired if backend hasn't updated yet
+      this.daysRemaining = this.hoursRemaining = this.minutesRemaining = this.secondsRemaining = 0;
       if (this.subscription.status !== 'expired' && this.subscription.status !== 'canceled') {
         this.subscription = { ...this.subscription, status: 'expired' };
       }
-      // Stop ticking — no need to keep updating after expiry
       if (this.countdownInterval) {
         clearInterval(this.countdownInterval);
         this.countdownInterval = null;
@@ -97,17 +113,25 @@ export class SubscriptionWidgetComponent implements OnInit, OnDestroy {
     this.cdr.markForCheck();
   }
 
-  /** Get CSS status class for the badge */
+  /** Scroll smoothly to subscription plans section on dashboard */
+  scrollToPlans(): void {
+    const targetEl = document.getElementById('subscription-plans-section') || document.querySelector('app-subscription-plans');
+    if (targetEl) {
+      targetEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    } else {
+      this.router.navigate(['/subscription-plans']);
+    }
+  }
+
   get statusClass(): string {
     const s = this.subscription?.status ?? '';
-    if (s === 'trialing')  return 'status-trial';
-    if (s === 'active')    return 'status-active';
-    if (s === 'expired')   return 'status-expired';
-    if (s === 'canceled')  return 'status-cancelled';
+    if (s === 'trialing') return 'status-trial';
+    if (s === 'active')   return 'status-active';
+    if (s === 'expired')  return 'status-expired';
+    if (s === 'canceled') return 'status-cancelled';
     return 'status-inactive';
   }
 
-  /** Formatted expiry date string */
   get expiryDateFormatted(): string {
     const date = this.subscription?.status === 'trialing'
       ? this.subscription?.trial_end

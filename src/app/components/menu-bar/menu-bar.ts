@@ -89,7 +89,8 @@ export class MenuBar implements OnInit {
     { name: 'Approvals', path: '/approvals', icon: 'checkbox', isActive: true },
     { name: 'Profit & Loss', path: '/profit-loss', icon: 'chart-pie', isActive: true },
     { name: 'Manage Plans', path: '/manage-subscription-plans', icon: 'diamond', isActive: true },
-    { name: 'Upgrade Plan', path: '/subscription-plans', icon: 'star', isActive: true }
+    { name: 'Upgrade Plan', path: '/subscription-plans', icon: 'star', isActive: true },
+    { name: 'Billing History', path: '/billing-history', icon: 'receipt', isActive: true }
   ];
 
   constructor(

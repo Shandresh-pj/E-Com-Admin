@@ -144,6 +144,13 @@ export const navItems: NavItem[] = [
     bgcolor: 'primary',
     roles: [SA, A, BM]
   },
+  {
+    displayName: 'Billing & Invoices',
+    iconName: 'receipt',
+    route: '/billing-history',
+    bgcolor: 'success',
+    roles: [SA, A]
+  },
 
   { navCap: 'Audit', roles: [SA, A] },
   {

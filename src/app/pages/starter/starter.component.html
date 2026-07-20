@@ -34,58 +34,86 @@
   <!-- 1. ADMIN / SUPER ADMIN DASHBOARD PANEL -->
   <!-- ══════════════════════════════════════════════════════════════════════════ -->
   @if (isAdminDashboard) {
-    <!-- Subscription Widget -->
-    <div class="row m-b-24">
-      <div class="col-12 animate-fade-in-up">
-        <app-subscription-widget></app-subscription-widget>
-      </div>
-    </div>
 
-    <!-- KPIs Stats Grid -->
-    <div class="row m-b-24">
-      <div class="col-lg-3 col-sm-6 animate-fade-in-up delay-1">
-        <mat-card class="cardWithShadow stats-kpi kpi-primary">
-          <div class="kpi-inner-glass">
-            <div>
-              <p class="f-s-12 text-muted m-b-4 text-uppercase f-w-700 tracking-wider">Company Size</p>
-              <h3 class="f-w-800 m-b-0 kpi-value">{{ totalEmployees }} Staff</h3>
-            </div>
-            <div class="kpi-icon-orb"><mat-icon>groups</mat-icon></div>
-          </div>
-        </mat-card>
+    <!-- ── Combined Row: Left Subscription Details | Right Assigned KPI Cards ── -->
+    <div class="row m-b-24 align-items-stretch">
+      
+      <!-- Left Side: Subscription Plan Details -->
+      <div class="col-12 col-xl-5 col-lg-6 m-b-24 m-lg-b-0 animate-fade-in-up">
+        <app-subscription-widget class="d-block h-100"></app-subscription-widget>
       </div>
-      <div class="col-lg-3 col-sm-6 animate-fade-in-up delay-2">
-        <mat-card class="cardWithShadow stats-kpi kpi-success">
-          <div class="kpi-inner-glass">
-            <div>
-              <p class="f-s-12 text-muted m-b-4 text-uppercase f-w-700 tracking-wider">Staff On Duty</p>
-              <h3 class="f-w-800 m-b-0 kpi-value">{{ presentTodayCount }} Present</h3>
+
+      <!-- Right Side: Assigned Neumorphic KPI Cards Grid -->
+      <div class="col-12 col-xl-7 col-lg-6 animate-fade-in-up delay-1">
+        <div class="liquid-kpi-grid h-100">
+
+          <!-- 1. Company Size -->
+          <div class="glass-kpi-card glass-kpi-indigo">
+            <div class="kpi-content">
+              <p class="kpi-label">COMPANY SIZE</p>
+              <h3 class="kpi-value">{{ totalEmployees }} Staff</h3>
             </div>
-            <div class="kpi-icon-orb"><mat-icon>check_circle</mat-icon></div>
-          </div>
-        </mat-card>
-      </div>
-      <div class="col-lg-3 col-sm-6 animate-fade-in-up delay-3">
-        <mat-card class="cardWithShadow stats-kpi kpi-warning">
-          <div class="kpi-inner-glass">
-            <div>
-              <p class="f-s-12 text-muted m-b-4 text-uppercase f-w-700 tracking-wider">Low Stock Items</p>
-              <h3 class="f-w-800 m-b-0 kpi-value">{{ lowStockAlertsCount }} Alerts</h3>
+            <div class="kpi-icon-3d">
+              <mat-icon>groups</mat-icon>
             </div>
-            <div class="kpi-icon-orb"><mat-icon>warning</mat-icon></div>
           </div>
-        </mat-card>
-      </div>
-      <div class="col-lg-3 col-sm-6 animate-fade-in-up delay-4">
-        <mat-card class="cardWithShadow stats-kpi kpi-danger">
-          <div class="kpi-inner-glass">
-            <div>
-              <p class="f-s-12 text-muted m-b-4 text-uppercase f-w-700 tracking-wider">Pending Approvals</p>
-              <h3 class="f-w-800 m-b-0 kpi-value">{{ pendingApprovalsCount }} Products</h3>
+
+          <!-- 2. Staff On Duty -->
+          <div class="glass-kpi-card glass-kpi-emerald">
+            <div class="kpi-content">
+              <p class="kpi-label">STAFF ON DUTY</p>
+              <h3 class="kpi-value">{{ presentTodayCount }} Present</h3>
             </div>
-            <div class="kpi-icon-orb"><mat-icon>pending_actions</mat-icon></div>
+            <div class="kpi-icon-3d">
+              <mat-icon>check_circle</mat-icon>
+            </div>
           </div>
-        </mat-card>
+
+          <!-- 3. Low Stock Items -->
+          <div class="glass-kpi-card glass-kpi-amber">
+            <div class="kpi-content">
+              <p class="kpi-label">LOW STOCK ITEMS</p>
+              <h3 class="kpi-value">{{ lowStockAlertsCount }} Alerts</h3>
+            </div>
+            <div class="kpi-icon-3d">
+              <mat-icon>warning</mat-icon>
+            </div>
+          </div>
+
+          <!-- 4. Pending Approvals -->
+          <div class="glass-kpi-card glass-kpi-rose">
+            <div class="kpi-content">
+              <p class="kpi-label">PENDING APPROVALS</p>
+              <h3 class="kpi-value">{{ pendingApprovalsCount }} Products</h3>
+            </div>
+            <div class="kpi-icon-3d">
+              <mat-icon>assignment_turned_in</mat-icon>
+            </div>
+          </div>
+
+          <!-- 5. Active Branches -->
+          <div class="glass-kpi-card glass-kpi-sky">
+            <div class="kpi-content">
+              <p class="kpi-label">ACTIVE BRANCHES</p>
+              <h3 class="kpi-value">{{ activeBranchesCount }} Branches</h3>
+            </div>
+            <div class="kpi-icon-3d">
+              <mat-icon>storefront</mat-icon>
+            </div>
+          </div>
+
+          <!-- 6. Active Shifts -->
+          <div class="glass-kpi-card glass-kpi-purple">
+            <div class="kpi-content">
+              <p class="kpi-label">DUTY SHIFTS</p>
+              <h3 class="kpi-value">{{ activeShiftsCount }} Templates</h3>
+            </div>
+            <div class="kpi-icon-3d">
+              <mat-icon>schedule</mat-icon>
+            </div>
+          </div>
+
+        </div>
       </div>
     </div>
 
@@ -246,7 +274,7 @@
     </div>
 
     <!-- Subscription Plans Dynamic Injection -->
-    <div class="row m-b-24 animate-fade-in-up delay-6">
+    <div class="row m-b-24 animate-fade-in-up delay-6" id="subscription-plans-section">
       <div class="col-12">
         <app-subscription-plans></app-subscription-plans>
       </div>
@@ -257,50 +285,34 @@
   <!-- 2. BRANCH MANAGER / SHOPKEEPER DASHBOARD PANEL -->
   <!-- ══════════════════════════════════════════════════════════════════════════ -->
   @if (isBranchDashboard) {
-    <div class="row m-b-24">
-      <div class="col-lg-3 col-sm-6 animate-fade-in-up delay-1">
-        <mat-card class="cardWithShadow stats-kpi kpi-primary">
-          <div class="kpi-inner-glass">
-            <div>
-              <p class="f-s-12 text-muted m-b-4 text-uppercase f-w-700 tracking-wider">Branch Staff</p>
-              <h3 class="f-w-800 m-b-0 kpi-value">{{ totalEmployees }} Staff</h3>
-            </div>
-            <div class="kpi-icon-orb"><mat-icon>badge</mat-icon></div>
-          </div>
-        </mat-card>
+    <div class="liquid-kpi-grid m-b-24">
+      <div class="glass-kpi-card glass-kpi-indigo animate-fade-in-up delay-1">
+        <div class="kpi-content">
+          <p class="kpi-label">BRANCH STAFF</p>
+          <h3 class="kpi-value">{{ totalEmployees }} Staff</h3>
+        </div>
+        <div class="kpi-icon-3d"><mat-icon>badge</mat-icon></div>
       </div>
-      <div class="col-lg-3 col-sm-6 animate-fade-in-up delay-2">
-        <mat-card class="cardWithShadow stats-kpi kpi-success">
-          <div class="kpi-inner-glass">
-            <div>
-              <p class="f-s-12 text-muted m-b-4 text-uppercase f-w-700 tracking-wider">Staff Active Today</p>
-              <h3 class="f-w-800 m-b-0 kpi-value">{{ presentTodayCount }} Present</h3>
-            </div>
-            <div class="kpi-icon-orb"><mat-icon>done_all</mat-icon></div>
-          </div>
-        </mat-card>
+      <div class="glass-kpi-card glass-kpi-emerald animate-fade-in-up delay-2">
+        <div class="kpi-content">
+          <p class="kpi-label">STAFF ACTIVE TODAY</p>
+          <h3 class="kpi-value">{{ presentTodayCount }} Present</h3>
+        </div>
+        <div class="kpi-icon-3d"><mat-icon>done_all</mat-icon></div>
       </div>
-      <div class="col-lg-3 col-sm-6 animate-fade-in-up delay-3">
-        <mat-card class="cardWithShadow stats-kpi kpi-warning">
-          <div class="kpi-inner-glass">
-            <div>
-              <p class="f-s-12 text-muted m-b-4 text-uppercase f-w-700 tracking-wider">Leave Approvals</p>
-              <h3 class="f-w-800 m-b-0 kpi-value">{{ pendingLeaves.length }} Pending</h3>
-            </div>
-            <div class="kpi-icon-orb"><mat-icon>time_to_leave</mat-icon></div>
-          </div>
-        </mat-card>
+      <div class="glass-kpi-card glass-kpi-amber animate-fade-in-up delay-3">
+        <div class="kpi-content">
+          <p class="kpi-label">LEAVE APPROVALS</p>
+          <h3 class="kpi-value">{{ pendingLeaves.length }} Pending</h3>
+        </div>
+        <div class="kpi-icon-3d"><mat-icon>time_to_leave</mat-icon></div>
       </div>
-      <div class="col-lg-3 col-sm-6 animate-fade-in-up delay-4">
-        <mat-card class="cardWithShadow stats-kpi kpi-primary">
-          <div class="kpi-inner-glass">
-            <div>
-              <p class="f-s-12 text-muted m-b-4 text-uppercase f-w-700 tracking-wider">Scope Branch</p>
-              <h3 class="f-w-800 m-b-0 kpi-value text-truncate max-w-150">{{ branchName || 'Loading...' }}</h3>
-            </div>
-            <div class="kpi-icon-orb"><mat-icon>store</mat-icon></div>
-          </div>
-        </mat-card>
+      <div class="glass-kpi-card glass-kpi-sky animate-fade-in-up delay-4">
+        <div class="kpi-content">
+          <p class="kpi-label">SCOPE BRANCH</p>
+          <h3 class="kpi-value text-truncate max-w-150">{{ branchName || 'Loading...' }}</h3>
+        </div>
+        <div class="kpi-icon-3d"><mat-icon>store</mat-icon></div>
       </div>
     </div>
 
@@ -489,39 +501,27 @@
   <!-- 4. CUSTOMER VIEW -->
   <!-- ══════════════════════════════════════════════════════════════════════════ -->
   @if (isCustomerDashboard) {
-    <div class="row m-b-24">
-      <div class="col-lg-4 col-sm-12">
-        <mat-card class="cardWithShadow stats-kpi kpi-primary">
-          <div class="kpi-inner-glass">
-            <div>
-              <p class="f-s-12 text-muted m-b-4 text-uppercase f-w-700 tracking-wider">Your Orders</p>
-              <h3 class="f-w-800 m-b-0 kpi-value">{{ customerOrders.length }} Items</h3>
-            </div>
-            <div class="kpi-icon-orb"><mat-icon>local_shipping</mat-icon></div>
-          </div>
-        </mat-card>
+    <div class="liquid-kpi-grid m-b-24">
+      <div class="glass-kpi-card glass-kpi-indigo">
+        <div class="kpi-content">
+          <p class="kpi-label">YOUR ORDERS</p>
+          <h3 class="kpi-value">{{ customerOrders.length }} Items</h3>
+        </div>
+        <div class="kpi-icon-3d"><mat-icon>local_shipping</mat-icon></div>
       </div>
-      <div class="col-lg-4 col-sm-12">
-        <mat-card class="cardWithShadow stats-kpi kpi-warning">
-          <div class="kpi-inner-glass">
-            <div>
-              <p class="f-s-12 text-muted m-b-4 text-uppercase f-w-700 tracking-wider">Loyalty Rewards</p>
-              <h3 class="f-w-800 m-b-0 kpi-value">{{ loyaltyPoints }} Points</h3>
-            </div>
-            <div class="kpi-icon-orb"><mat-icon>stars</mat-icon></div>
-          </div>
-        </mat-card>
+      <div class="glass-kpi-card glass-kpi-amber">
+        <div class="kpi-content">
+          <p class="kpi-label">LOYALTY REWARDS</p>
+          <h3 class="kpi-value">{{ loyaltyPoints }} Points</h3>
+        </div>
+        <div class="kpi-icon-3d"><mat-icon>stars</mat-icon></div>
       </div>
-      <div class="col-lg-4 col-sm-12">
-        <mat-card class="cardWithShadow stats-kpi kpi-success">
-          <div class="kpi-inner-glass">
-            <div>
-              <p class="f-s-12 text-muted m-b-4 text-uppercase f-w-700 tracking-wider">Shop Catalog</p>
-              <h3 class="f-w-800 m-b-0 kpi-value">Active Store</h3>
-            </div>
-            <div class="kpi-icon-orb"><mat-icon>shopping_bag</mat-icon></div>
-          </div>
-        </mat-card>
+      <div class="glass-kpi-card glass-kpi-emerald">
+        <div class="kpi-content">
+          <p class="kpi-label">SHOP CATALOG</p>
+          <h3 class="kpi-value">Active Store</h3>
+        </div>
+        <div class="kpi-icon-3d"><mat-icon>shopping_bag</mat-icon></div>
       </div>
     </div>
 

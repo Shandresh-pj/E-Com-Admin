@@ -3,69 +3,70 @@ import { isPlatformBrowser } from '@angular/common';
 
 declare let window: any;
 
-export interface RazorpayOptions {
-  key: string;
-  amount: number; // in paise
-  currency: string;
-  name: string;
-  description: string;
-  image?: string;
-  order_id: string;
-  handler: (response: any) => void;
-  prefill?: {
-    name?: string;
-    email?: string;
-    contact?: string;
-  };
-  notes?: {
-    [key: string]: string;
-  };
-  theme?: {
-    color: string;
-  };
-  modal?: {
-    ondismiss?: () => void;
-  };
+export interface RazorpayPaymentSuccess {
+  razorpay_payment_id: string;
+  razorpay_order_id:   string;
+  razorpay_signature:  string;
 }
 
-@Injectable({
-  providedIn: 'root'
-})
+export interface RazorpayPaymentError {
+  code:        string;
+  description: string;
+  reason:      string;
+  source:      string;
+  step:        string;
+  metadata:    { order_id?: string; payment_id?: string };
+}
+
+export interface RazorpayOptions {
+  key:          string;
+  amount:       number; // in paise
+  currency:     string;
+  name:         string;
+  description:  string;
+  image?:       string;
+  order_id:     string;
+  prefill?: {
+    name?:    string;
+    email?:   string;
+    contact?: string;
+  };
+  notes?: Record<string, string>;
+  theme?: { color: string; hide_topbar?: boolean };
+  modal?: {
+    ondismiss?:      () => void;
+    backdropclose?:  boolean;
+    escape?:         boolean;
+    animation?:      boolean;
+  };
+  retry?: { enabled: boolean; max_count?: number };
+  remember_customer?: boolean;
+}
+
+@Injectable({ providedIn: 'root' })
 export class RazorpayService {
-  private scriptLoaded = false;
+  private scriptLoaded          = false;
   private scriptLoadingPromise: Promise<boolean> | null = null;
 
   constructor(@Inject(PLATFORM_ID) private platformId: Object) {}
 
-  /**
-   * Dynamically loads the Razorpay checkout script if not already loaded
-   */
+  // ─── Load Razorpay SDK script once ───────────────────────────────────────
   loadScript(): Promise<boolean> {
-    if (!isPlatformBrowser(this.platformId)) {
-      return Promise.resolve(false);
-    }
+    if (!isPlatformBrowser(this.platformId)) return Promise.resolve(false);
 
     if (this.scriptLoaded || typeof window.Razorpay !== 'undefined') {
       this.scriptLoaded = true;
       return Promise.resolve(true);
     }
 
-    if (this.scriptLoadingPromise) {
-      return this.scriptLoadingPromise;
-    }
+    if (this.scriptLoadingPromise) return this.scriptLoadingPromise;
 
     this.scriptLoadingPromise = new Promise((resolve) => {
-      const script = document.createElement('script');
-      script.src = 'https://checkout.razorpay.com/v1/checkout.js';
-      script.async = true;
-      script.onload = () => {
-        this.scriptLoaded = true;
-        resolve(true);
-      };
-      script.onerror = () => {
-        console.warn('Razorpay SDK failed to load from CDN. Will use high-fidelity simulation mode.');
-        resolve(false);
-      };
+      const script    = document.createElement('script');
+      script.src      = 'https://checkout.razorpay.com/v1/checkout.js';
+      script.async    = true;
+      script.onload   = () => { this.scriptLoaded = true; resolve(true);  };
+      script.onerror  = () => { resolve(false); };
       document.body.appendChild(script);
     });
 
@@ -73,143 +74,170 @@ export class RazorpayService {
   }
 
   /**
-   * Opens the Razorpay checkout modal or high-fidelity simulation overlay
+   * Opens Razorpay Standard Checkout.
+   * Returns a Promise that:
+   *   – resolves with RazorpayPaymentSuccess on successful payment
+   *   – rejects  with RazorpayPaymentError  on payment.failed event
+   *   – rejects  with { dismissed: true }   when user closes the modal
    */
-  async openCheckout(options: RazorpayOptions): Promise<void> {
+  async openCheckout(options: RazorpayOptions): Promise<RazorpayPaymentSuccess> {
     const loaded = await this.loadScript();
 
-    // If SDK loaded and not using our simulated test key, open official Razorpay Checkout
-    if (loaded && typeof window.Razorpay !== 'undefined' && options.key !== 'rzp_test_simulated_key') {
-      try {
-        const rzp = new window.Razorpay(options);
-        rzp.open();
-        return;
-      } catch (err) {
-        console.warn('Error opening native Razorpay checkout, falling back to simulation:', err);
-      }
+    if (!loaded || typeof window.Razorpay === 'undefined') {
+      // SDK not available – fall back to simulation
+      return this.openSimulatedCheckout(options);
     }
 
-    // High-Fidelity Cyber Simulation Mode (when offline, adblocked, or test simulation key is passed)
-    this.openSimulatedCheckout(options);
+    return new Promise<RazorpayPaymentSuccess>((resolve, reject) => {
+      const rzpOptions = {
+        ...options,
+        retry:             { enabled: true, max_count: 3 },
+        remember_customer: false,
+
+        // Success callback — resolve the promise with payment data
+        handler: (response: RazorpayPaymentSuccess) => {
+          resolve(response);
+        },
+
+        modal: {
+          ...(options.modal || {}),
+          // Dismissed without paying
+          ondismiss: () => {
+            reject({ dismissed: true, message: 'Payment cancelled by user.' });
+          },
+          backdropclose: false,
+          escape:        true,
+          animation:     true,
+        }
+      };
+
+      let rzp: any;
+      try {
+        rzp = new window.Razorpay(rzpOptions);
+      } catch (err: any) {
+        reject({ dismissed: false, message: err?.message || 'Failed to initialize Razorpay.' });
+        return;
+      }
+
+      // payment.failed event — reject with error details
+      if (rzp && typeof rzp.on === 'function') {
+        rzp.on('payment.failed', (resp: any) => {
+          const err: RazorpayPaymentError = {
+            code:        resp?.error?.code        || 'PAYMENT_FAILED',
+            description: resp?.error?.description || 'Payment could not be completed.',
+            reason:      resp?.error?.reason      || '',
+            source:      resp?.error?.source      || '',
+            step:        resp?.error?.step        || '',
+            metadata:    resp?.error?.metadata    || {}
+          };
+          console.error('[RazorpayService] payment.failed:', err);
+          reject(err);
+        });
+      }
+
+      rzp.open();
+    });
   }
 
-  /**
-   * Cyber-Glass Razorpay Checkout Simulation Overlay
-   */
-  private openSimulatedCheckout(options: RazorpayOptions) {
-    if (!isPlatformBrowser(this.platformId)) return;
+  // ─── Simulated checkout (offline / test simulation key) ──────────────────
+  private openSimulatedCheckout(options: RazorpayOptions): Promise<RazorpayPaymentSuccess> {
+    if (!isPlatformBrowser(this.platformId)) {
+      return Promise.reject({ dismissed: false, message: 'Not a browser environment.' });
+    }
 
-    // Create backdrop
-    const backdrop = document.createElement('div');
-    backdrop.style.cssText = `
-      position: fixed;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(10, 15, 30, 0.85);
-      backdrop-filter: blur(12px);
-      z-index: 100000;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 20px;
-      animation: fadeIn 0.3s ease-out;
-    `;
+    return new Promise<RazorpayPaymentSuccess>((resolve, reject) => {
+      const backdrop = document.createElement('div');
+      backdrop.style.cssText = `
+        position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+        background: rgba(10, 15, 30, 0.88);
+        backdrop-filter: blur(14px);
+        z-index: 100000;
+        display: flex; align-items: center; justify-content: center;
+        padding: 20px;
+      `;
 
-    const modal = document.createElement('div');
-    modal.style.cssText = `
-      width: 100%;
-      max-width: 440px;
-      background: linear-gradient(145deg, rgba(30, 41, 59, 0.95), rgba(15, 23, 42, 0.98));
-      border: 1px solid rgba(99, 102, 241, 0.4);
-      border-radius: 20px;
-      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.7), 0 0 40px rgba(99, 102, 241, 0.2);
-      padding: 28px;
-      color: #fff;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      position: relative;
-    `;
+      const amountInRupees = (options.amount / 100).toLocaleString('en-IN');
 
-    const amountInRupees = (options.amount / 100).toLocaleString('en-IN');
+      const modal = document.createElement('div');
+      modal.style.cssText = `
+        width: 100%; max-width: 420px;
+        background: linear-gradient(145deg, rgba(30,41,59,0.97), rgba(15,23,42,0.99));
+        border: 1px solid rgba(99,102,241,0.4);
+        border-radius: 20px;
+        box-shadow: 0 25px 60px rgba(0,0,0,0.7), 0 0 40px rgba(99,102,241,0.2);
+        padding: 28px;
+        color: #fff;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      `;
 
-    modal.innerHTML = `
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 16px;">
-        <div style="display: flex; align-items: center; gap: 10px;">
-          <div style="width: 32px; height: 32px; border-radius: 8px; background: #3b82f6; display: flex; align-items: center; justify-content: center; font-weight: bold; color: #fff;">₹</div>
-          <div>
-            <div style="font-weight: 700; font-size: 16px; color: #f8fafc;">Razorpay Cyber Checkout</div>
-            <div style="font-size: 11px; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px;">Test Simulation Gateway</div>
+      modal.innerHTML = `
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;border-bottom:1px solid rgba(255,255,255,0.1);padding-bottom:14px;">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <div style="width:32px;height:32px;border-radius:8px;background:#3b82f6;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px;">₹</div>
+            <div>
+              <div style="font-weight:700;font-size:15px;color:#f8fafc;">Razorpay Checkout</div>
+              <div style="font-size:10px;color:#94a3b8;letter-spacing:0.5px;text-transform:uppercase;">Test Simulation Mode</div>
+            </div>
+          </div>
+          <button id="rzp-sim-close" style="background:none;border:none;color:#94a3b8;font-size:22px;cursor:pointer;line-height:1;">×</button>
+        </div>
+
+        <div style="background:rgba(15,23,42,0.6);border:1px solid rgba(255,255,255,0.07);border-radius:12px;padding:16px;margin-bottom:18px;">
+          <div style="font-size:12px;color:#94a3b8;margin-bottom:4px;">Paying for</div>
+          <div style="font-size:15px;font-weight:600;color:#fff;margin-bottom:10px;">${options.description}</div>
+          <div style="display:flex;justify-content:space-between;align-items:baseline;border-top:1px dashed rgba(255,255,255,0.1);padding-top:10px;">
+            <span style="font-size:13px;color:#cbd5e1;">Amount Payable</span>
+            <span style="font-size:22px;font-weight:700;color:#60a5fa;">₹${amountInRupees}</span>
           </div>
         </div>
-        <button id="rzp-close-btn" style="background: none; border: none; color: #94a3b8; font-size: 24px; cursor: pointer;">&times;</button>
-      </div>
 
-      <div style="background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255,255,255,0.07); border-radius: 12px; padding: 16px; margin-bottom: 20px;">
-        <div style="font-size: 13px; color: #94a3b8; margin-bottom: 4px;">Payment For</div>
-        <div style="font-size: 16px; font-weight: 600; color: #fff; margin-bottom: 12px;">${options.description}</div>
-        <div style="display: flex; justify-content: space-between; align-items: baseline; border-top: 1px dashed rgba(255,255,255,0.1); padding-top: 12px;">
-          <span style="font-size: 14px; color: #cbd5e1;">Total Amount Payable</span>
-          <span style="font-size: 24px; font-weight: 700; color: #60a5fa;">₹${amountInRupees}</span>
+        <div style="margin-bottom:18px;">
+          <div style="font-size:11px;color:#64748b;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px;">Customer</div>
+          <div style="font-size:13px;color:#e2e8f0;">👤 ${options.prefill?.name  || 'User'}</div>
+          <div style="font-size:13px;color:#e2e8f0;margin-top:4px;">✉️ ${options.prefill?.email || ''}</div>
+          ${options.prefill?.contact ? `<div style="font-size:13px;color:#e2e8f0;margin-top:4px;">📱 ${options.prefill.contact}</div>` : ''}
         </div>
-      </div>
 
-      <div style="margin-bottom: 24px;">
-        <div style="font-size: 12px; color: #94a3b8; margin-bottom: 8px;">USER DETAILS</div>
-        <div style="font-size: 13px; color: #e2e8f0;">👤 ${options.prefill?.name || 'Valued Enterprise User'}</div>
-        <div style="font-size: 13px; color: #e2e8f0; margin-top: 4px;">✉️ ${options.prefill?.email || 'admin@enterprise.io'}</div>
-        ${options.prefill?.contact ? `<div style="font-size: 13px; color: #e2e8f0; margin-top: 4px;">📱 ${options.prefill.contact}</div>` : ''}
-      </div>
+        <div style="background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.3);border-radius:10px;padding:12px;margin-bottom:20px;font-size:12px;color:#6ee7b7;display:flex;gap:8px;align-items:center;">
+          <span>🔒</span><span>Sandbox environment – no real money charged.</span>
+        </div>
 
-      <div style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 10px; padding: 12px; margin-bottom: 24px; font-size: 12px; color: #6ee7b7; display: flex; gap: 8px; align-items: center;">
-        <span>🔒</span>
-        <span>256-bit Quantum Encrypted Checkout Simulation. Click below to simulate instant verification.</span>
-      </div>
+        <button id="rzp-sim-pay" style="
+          width:100%;padding:14px;
+          background:linear-gradient(135deg,#3b82f6,#6366f1);
+          border:none;border-radius:12px;color:#fff;
+          font-size:15px;font-weight:600;cursor:pointer;
+          box-shadow:0 4px 15px rgba(99,102,241,0.4);transition:opacity 0.2s;
+        ">Pay ₹${amountInRupees} →</button>
+      `;
 
-      <button id="rzp-pay-btn" style="
-        width: 100%;
-        padding: 14px;
-        background: linear-gradient(135deg, #3b82f6, #6366f1);
-        border: none;
-        border-radius: 12px;
-        color: #fff;
-        font-size: 16px;
-        font-weight: 600;
-        cursor: pointer;
-        box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
-        transition: all 0.2s;
-      ">Simulate Payment (₹${amountInRupees}) →</button>
-    `;
+      backdrop.appendChild(modal);
+      document.body.appendChild(backdrop);
 
-    backdrop.appendChild(modal);
-    document.body.appendChild(backdrop);
+      const cleanup = () => {
+        if (document.body.contains(backdrop)) document.body.removeChild(backdrop);
+      };
 
-    const closeBtn = modal.querySelector('#rzp-close-btn');
-    const payBtn = modal.querySelector('#rzp-pay-btn') as HTMLButtonElement;
-
-    const cleanup = () => {
-      if (document.body.contains(backdrop)) {
-        document.body.removeChild(backdrop);
-      }
-    };
-
-    closeBtn?.addEventListener('click', () => {
-      cleanup();
-      if (options.modal?.ondismiss) {
-        options.modal.ondismiss();
-      }
-    });
-
-    payBtn?.addEventListener('click', () => {
-      payBtn.disabled = true;
-      payBtn.innerText = 'Processing Cyber Signature...';
-      payBtn.style.opacity = '0.8';
-
-      setTimeout(() => {
+      modal.querySelector('#rzp-sim-close')?.addEventListener('click', () => {
         cleanup();
-        options.handler({
-          razorpay_order_id: options.order_id,
-          razorpay_payment_id: `pay_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`,
-          razorpay_signature: `sig_verified_${Date.now()}`
-        });
-      }, 1400);
+        reject({ dismissed: true, message: 'Payment cancelled by user.' });
+      });
+
+      const payBtn = modal.querySelector('#rzp-sim-pay') as HTMLButtonElement;
+      payBtn?.addEventListener('click', () => {
+        payBtn.disabled    = true;
+        payBtn.textContent = 'Verifying…';
+        payBtn.style.opacity = '0.7';
+
+        setTimeout(() => {
+          cleanup();
+          resolve({
+            razorpay_order_id:   options.order_id,
+            razorpay_payment_id: `pay_sim_${Date.now()}`,
+            razorpay_signature:  `sig_verified_${Date.now()}`
+          });
+        }, 1200);
+      });
     });
   }
 }

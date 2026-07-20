@@ -65,7 +65,7 @@
   </div>
   } @else {
   <!-- Mode Switcher Tabs -->
-  @if (data.plan.hasFreeTrial) {
+  @if (data.plan.hasFreeTrial && !hasActiveTrialOrSub()) {
   <div class="mode-tabs">
     <button type="button" class="tab-btn" [class.active]="mode() === 'trial'" (click)="setMode('trial')">
       <span>🎁 14-Day Free Trial</span>

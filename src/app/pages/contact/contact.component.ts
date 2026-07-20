@@ -39,7 +39,9 @@ export class ContactComponent implements OnInit {
   ) {}
 
   ngOnInit() {
-    const prePlan = this.route.snapshot.queryParamMap.get('plan_name') || this.route.snapshot.queryParamMap.get('plan') || '14-Day Free Trial';
+    const rawMode = this.route.snapshot.queryParamMap.get('mode');
+    const rawPlan = this.route.snapshot.queryParamMap.get('plan_name') || this.route.snapshot.queryParamMap.get('plan');
+    const prePlan = rawPlan || (rawMode === 'trial' ? '14-Day Free Trial' : 'Starter');
     const preCycle = this.route.snapshot.queryParamMap.get('cycle') || 'Monthly';
 
     this.contactForm = this.fb.group({

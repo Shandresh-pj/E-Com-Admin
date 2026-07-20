@@ -1,41 +1,100 @@
+// ══════════════════════════════════════════════════════════════════════════
+// Dashboard Page — Premium Quantum Liquid Glass Design System
+// Matches Reference Color Palette and Neumorphic 3D Card Format Exactly
+// ══════════════════════════════════════════════════════════════════════════
+
 .dashboard-container {
   position: relative;
+  z-index: 1;
+
+  // Background Ambient Glowing Radial Orbs
   &::before, &::after {
     content: '';
     position: fixed;
     border-radius: 50%;
-    filter: blur(100px);
+    filter: blur(110px);
     z-index: -1;
     pointer-events: none;
-    will-change: transform;
-    backface-visibility: hidden;
-    transform: translateZ(0);
-    animation: pulseGlow 15s infinite alternate linear;
+    will-change: transform, opacity;
+    animation: liquidGlowPulse 14s infinite alternate ease-in-out;
   }
-  
+
   &::before {
-    top: -10%; left: -10%;
+    top: -12%; left: -10%;
     width: 60vw; height: 60vw;
-    background: radial-gradient(circle, rgba(99, 102, 241, 0.15), transparent 70%);
+    background: radial-gradient(circle, rgba(99, 102, 241, 0.18) 0%, rgba(139, 92, 246, 0.08) 50%, transparent 70%);
   }
-  
+
   &::after {
-    bottom: -10%; right: -10%;
-    width: 50vw; height: 50vw;
-    background: radial-gradient(circle, rgba(236, 72, 153, 0.15), transparent 70%);
-    animation-delay: -5s;
+    bottom: -12%; right: -10%;
+    width: 55vw; height: 55vw;
+    background: radial-gradient(circle, rgba(236, 72, 153, 0.16) 0%, rgba(99, 102, 241, 0.06) 50%, transparent 70%);
+    animation-delay: -7s;
   }
 }
 
-// ─── Command Center Welcome Banner ──────────────────────────────────────────
+@keyframes liquidGlowPulse {
+  0% { transform: scale(1) translate(0, 0); opacity: 0.7; }
+  50% { transform: scale(1.15) translate(30px, -20px); opacity: 0.9; }
+  100% { transform: scale(0.95) translate(-20px, 25px); opacity: 0.6; }
+}
+
+// ─── Liquid Glass Base Card System ─────────────────────────────────────────
+.liquid-glass-card, .cardWithShadow {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.75) 0%, rgba(255, 255, 255, 0.4) 100%) !important;
+  backdrop-filter: blur(30px) saturate(190%);
+  -webkit-backdrop-filter: blur(30px) saturate(190%);
+  border: 1.5px solid rgba(255, 255, 255, 0.8) !important;
+  box-shadow:
+    0 16px 40px 0 rgba(31, 38, 135, 0.07),
+    inset 0 1.5px 1.5px rgba(255, 255, 255, 0.95),
+    inset 1px 0 2px rgba(255, 255, 255, 0.85) !important;
+  border-radius: 24px !important;
+  position: relative;
+  overflow: hidden;
+
+  /* Spring Physics */
+  transition: transform 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275),
+              box-shadow 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275),
+              border-color 0.35s ease !important;
+
+  /* Sheen Reflection Line */
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0; left: -150%; width: 60%; height: 100%;
+    background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.65), transparent);
+    transform: skewX(-25deg);
+    transition: left 0.8s ease;
+    z-index: 5;
+    pointer-events: none;
+  }
+
+  &:hover {
+    box-shadow:
+      0 24px 60px 0 rgba(31, 38, 135, 0.12),
+      inset 0 2px 2px rgba(255, 255, 255, 1) !important;
+    border-color: rgba(255, 255, 255, 1) !important;
+    transform: translateY(-4px) !important;
+
+    &::before { left: 150%; }
+  }
+
+  > * { position: relative; z-index: 1; }
+}
+
+// ─── Welcome Banner ────────────────────────────────────────────────────────
 .welcome-banner {
   @extend .liquid-glass-card;
-  color: var(--mat-sys-on-surface);
-  
+  color: #0f172a;
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.14) 0%, rgba(236, 72, 153, 0.08) 50%, rgba(255, 255, 255, 0.6) 100%) !important;
+  border-color: rgba(99, 102, 241, 0.35) !important;
+
   .welcome-title {
-    font-size: 2.25rem;
-    letter-spacing: -1px;
+    font-size: clamp(22px, 3vw, 32px);
+    letter-spacing: -0.8px;
     font-family: 'Outfit', 'Plus Jakarta Sans', sans-serif;
+    font-weight: 900;
   }
 }
 
@@ -43,567 +102,241 @@
   background: linear-gradient(135deg, #6366f1 0%, #ec4899 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
+  background-clip: text;
   display: inline-block;
 }
 
 .badge-role-pill {
-  background: rgba(99, 102, 241, 0.1);
-  color: #6366f1;
-  padding: 4px 12px;
+  background: rgba(99, 102, 241, 0.14);
+  color: #4f46e5;
+  padding: 4px 14px;
   border-radius: 24px;
   font-size: 12px;
-  letter-spacing: 1px;
+  letter-spacing: 0.8px;
   text-transform: uppercase;
-  border: 1px solid rgba(99, 102, 241, 0.2);
+  border: 1px solid rgba(99, 102, 241, 0.3);
+  font-weight: 800;
 }
 
 .liquid-badge {
-  background: rgba(255, 255, 255, 0.5);
-  border: 1px solid rgba(255, 255, 255, 0.6);
-  backdrop-filter: blur(12px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  background: rgba(255, 255, 255, 0.65);
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(16px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
 }
 
-html.dark, html .dark-theme {
-  .liquid-badge {
-    background: rgba(15, 23, 42, 0.6);
-    border-color: rgba(255, 255, 255, 0.1);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-  }
-}
-
-// Glowing background decorations
 .glass-bg-circle {
   position: absolute;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(129, 140, 248, 0.2) 0%, rgba(99, 102, 241, 0) 70%);
+  background: radial-gradient(circle, rgba(129, 140, 248, 0.25) 0%, rgba(99, 102, 241, 0) 70%);
   pointer-events: none;
-  will-change: transform;
-  backface-visibility: hidden;
-  transform: translateZ(0);
-  
+
   &.circle-1 {
-    width: 320px;
-    height: 320px;
-    top: -120px;
-    right: -60px;
-    animation: pulseGlow 8s infinite alternate linear;
+    width: 340px; height: 340px;
+    top: -130px; right: -60px;
+    animation: liquidCircleGlow 8s infinite alternate linear;
   }
-  
+
   &.circle-2 {
-    width: 220px;
-    height: 220px;
-    bottom: -90px;
-    left: 15%;
-    animation: pulseGlow 6s infinite alternate-reverse linear;
+    width: 240px; height: 240px;
+    bottom: -100px; left: 15%;
+    animation: liquidCircleGlow 6s infinite alternate-reverse linear;
   }
 }
 
-// ─── Liquid Glass Base Theme ────────────────────────────────────────────────
-.liquid-glass-card {
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.7) 0%, rgba(255, 255, 255, 0.25) 100%) !important;
-  backdrop-filter: blur(40px) saturate(200%);
-  -webkit-backdrop-filter: blur(40px) saturate(200%);
-  border: 1px solid rgba(255, 255, 255, 0.6) !important;
-  box-shadow: 
-    0 16px 40px 0 rgba(31, 38, 135, 0.07),
-    inset 0 1px 1px rgba(255, 255, 255, 0.9),
-    inset 1px 0 2px rgba(255, 255, 255, 0.8) !important;
-  border-radius: 20px !important;
-  position: relative;
-  overflow: hidden;
-  
-  /* 120fps Hardware Acceleration */
-  will-change: transform, backdrop-filter, box-shadow;
-  backface-visibility: hidden;
-  transform: translateZ(0);
-  
-  /* Premium Spring Physics */
-  transition: transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275), 
-              box-shadow 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275), 
-              background 0.6s ease;
-  
-  &::before {
-    content: '';
-    position: absolute;
-    top: 0; left: -150%; width: 50%; height: 100%;
-    background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.5), transparent);
-    transform: skewX(-25deg);
-    transition: left 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    z-index: 10;
-    pointer-events: none;
-  }
-
-  &:hover {
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.85) 0%, rgba(255, 255, 255, 0.4) 100%) !important;
-    box-shadow: 
-      0 24px 60px 0 rgba(31, 38, 135, 0.12),
-      inset 0 2px 2px rgba(255, 255, 255, 1),
-      inset 2px 0 4px rgba(255, 255, 255, 0.9) !important;
-    border-color: rgba(255, 255, 255, 0.9) !important;
-    transform: translateY(-6px) translateZ(0);
-    
-    &::before {
-      left: 150%;
-    }
-  }
-
-  > * {
-    position: relative;
-    z-index: 1;
-  }
-}
-
-html.dark, html .dark-theme {
-  .liquid-glass-card {
-    background: linear-gradient(135deg, rgba(15, 23, 42, 0.7) 0%, rgba(15, 23, 42, 0.3) 100%) !important;
-    border: 1px solid rgba(255, 255, 255, 0.12) !important;
-    box-shadow: 
-      0 16px 40px 0 rgba(0, 0, 0, 0.5),
-      inset 0 1px 1px rgba(255, 255, 255, 0.08),
-      inset 1px 0 2px rgba(255, 255, 255, 0.05) !important;
-      
-    &::before {
-      background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.05), transparent);
-    }
-    
-    &:hover {
-      background: linear-gradient(135deg, rgba(30, 41, 59, 0.8) 0%, rgba(15, 23, 42, 0.5) 100%) !important;
-      border-color: rgba(99, 102, 241, 0.5) !important;
-      box-shadow: 
-        0 24px 60px 0 rgba(0, 0, 0, 0.7),
-        0 0 30px 0 rgba(99, 102, 241, 0.25),
-        inset 0 1px 1px rgba(255, 255, 255, 0.15) !important;
-    }
-  }
-}
-
-@keyframes pulseGlow {
+@keyframes liquidCircleGlow {
   0% { transform: scale(1) translate(0, 0); opacity: 0.5; }
-  33% { transform: scale(1.1) translate(20px, -20px); opacity: 0.8; }
-  66% { transform: scale(0.95) translate(-10px, 15px); opacity: 0.6; }
-  100% { transform: scale(1) translate(0, 0); opacity: 0.5; }
+  100% { transform: scale(1.15) translate(15px, -15px); opacity: 0.85; }
 }
 
-// ─── Premium Multi-Layered KPI Cards ──────────────────────────────────────────
-.stats-kpi {
-  @extend .liquid-glass-card;
-  position: relative;
-  overflow: hidden;
-  padding: 2px !important; // Thin border effect
-  border: none !important;
-
-  .kpi-inner-glass {
-    background: rgba(255, 255, 255, 0.4);
-    border: 1px solid rgba(255, 255, 255, 0.6);
-    border-radius: 18px;
-    padding: 24px;
-    height: 100%;
-    position: relative;
-    z-index: 2;
-    box-shadow: inset 0 2px 10px rgba(255,255,255,0.7);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  }
-
-  // Floating ambient glow behind the inner glass
-  &::after {
-    content: '';
-    position: absolute;
-    width: 150px;
-    height: 150px;
-    border-radius: 50%;
-    top: -50px;
-    right: -50px;
-    filter: blur(40px);
-    z-index: 1;
-    opacity: 0.6;
-    transition: all 0.5s ease;
-  }
-
-  &:hover {
-    .kpi-inner-glass {
-      background: rgba(255, 255, 255, 0.6);
-      transform: scale(1.02);
-    }
-    &::after {
-      transform: scale(1.5);
-      opacity: 0.9;
-    }
-    .kpi-icon-orb {
-      transform: rotate(5deg) scale(1.1);
-    }
-  }
-
-  &.kpi-primary {
-    &::after { background: #4f46e5; }
-    .kpi-icon-orb { background: rgba(79, 70, 229, 0.15); color: #4f46e5; border-color: rgba(79, 70, 229, 0.3); }
-    .kpi-value { background: linear-gradient(135deg, #4f46e5, #818cf8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-  }
-  &.kpi-success {
-    &::after { background: #10b981; }
-    .kpi-icon-orb { background: rgba(16, 185, 129, 0.15); color: #10b981; border-color: rgba(16, 185, 129, 0.3); }
-    .kpi-value { background: linear-gradient(135deg, #10b981, #34d399); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-  }
-  &.kpi-warning {
-    &::after { background: #f59e0b; }
-    .kpi-icon-orb { background: rgba(245, 158, 11, 0.15); color: #f59e0b; border-color: rgba(245, 158, 11, 0.3); }
-    .kpi-value { background: linear-gradient(135deg, #f59e0b, #fbbf24); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-  }
-  &.kpi-danger {
-    &::after { background: #ef4444; }
-    .kpi-icon-orb { background: rgba(239, 68, 68, 0.15); color: #ef4444; border-color: rgba(239, 68, 68, 0.3); }
-    .kpi-value { background: linear-gradient(135deg, #ef4444, #f87171); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-  }
-}
-
-html.dark, html .dark-theme {
-  .stats-kpi {
-    .kpi-inner-glass {
-      background: rgba(15, 23, 42, 0.6);
-      border-color: rgba(255, 255, 255, 0.05);
-      box-shadow: inset 0 1px 2px rgba(255,255,255,0.1);
-    }
-    
-    &.kpi-primary .kpi-value { background: linear-gradient(135deg, #818cf8, #c7d2fe); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-    &.kpi-success .kpi-value { background: linear-gradient(135deg, #34d399, #a7f3d0); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-    &.kpi-warning .kpi-value { background: linear-gradient(135deg, #fbbf24, #fde68a); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-    &.kpi-danger .kpi-value { background: linear-gradient(135deg, #f87171, #fecaca); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-    
-    &:hover .kpi-inner-glass {
-      background: rgba(30, 41, 59, 0.8);
-    }
-  }
-}
-
-.kpi-icon-orb {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 56px;
-  height: 56px;
-  border-radius: 50%;
-  border: 1px solid transparent;
-  box-shadow: 0 8px 16px rgba(0,0,0,0.1);
-  backdrop-filter: blur(8px);
-  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-}
-
-// ─── Dashboard Modern Graph Containers ────────────────────────────────────────
-.dashboard-graph-card, .theme-card {
-  @extend .liquid-glass-card;
-  
-  // Floating ambient glows
-  &::before {
-    content: '';
-    position: absolute;
-    width: 250px;
-    height: 250px;
-    border-radius: 50%;
-    bottom: -50px;
-    left: -50px;
-    filter: blur(60px);
-    z-index: -1;
-    background: rgba(99, 102, 241, 0.3);
-    transition: all 0.5s ease;
-    pointer-events: none;
-  }
-  &::after {
-    content: '';
-    position: absolute;
-    width: 200px;
-    height: 200px;
-    border-radius: 50%;
-    top: -50px;
-    right: -50px;
-    filter: blur(50px);
-    z-index: -1;
-    background: rgba(236, 72, 153, 0.2);
-    transition: all 0.5s ease;
-    pointer-events: none;
-  }
-
-  &:hover {
-    &::before {
-      transform: scale(1.3);
-      background: rgba(99, 102, 241, 0.4);
-    }
-    &::after {
-      transform: scale(1.4);
-      background: rgba(236, 72, 153, 0.3);
-    }
-  }
-}
-
-html.dark, html .dark-theme {
-  .dashboard-graph-card, .theme-card {
-    &::before { background: rgba(99, 102, 241, 0.15); }
-    &::after { background: rgba(236, 72, 153, 0.1); }
-    
-    &:hover {
-      &::before { background: rgba(99, 102, 241, 0.25); }
-      &::after { background: rgba(236, 72, 153, 0.2); }
-    }
-  }
-}
-
-// ─── Real-Time Audit Log Timeline (Ultra-Modern) ────────────────────────────
-.timeline-log-list {
-  padding-left: 12px;
-  position: relative;
-}
-
-.timeline-log-item {
-  position: relative;
-  transition: all 0.3s ease;
-  
-  &:last-child {
-    .timeline-bar { display: none; }
-  }
-}
-
-.modern-log-card {
-  background: transparent;
-  border-radius: 12px;
-  padding: 8px 0;
-  
-  &:hover {
-    .timeline-log-body {
-      background: rgba(99, 102, 241, 0.05);
-      border-color: rgba(99, 102, 241, 0.2);
-      transform: translateX(6px);
-    }
-    .timeline-dot {
-      transform: scale(1.3);
-      box-shadow: 0 0 12px currentColor;
-    }
-  }
-}
-
-.timeline-indicator-box {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: 24px;
-  flex-shrink: 0;
-  position: relative;
-}
-
-.timeline-dot {
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  border: 2px solid var(--mat-sys-surface);
-  box-shadow: 0 0 0 2px currentColor, 0 0 8px currentColor;
-  z-index: 2;
-  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  background-color: var(--mat-sys-surface) !important;
-  
-  &.border-primary { color: #6366f1; border-color: #6366f1; }
-  &.border-warning { color: #f59e0b; border-color: #f59e0b; }
-  &.border-danger { color: #ef4444; border-color: #ef4444; }
-}
-
-.timeline-bar {
-  width: 2px;
-  flex-grow: 1;
-  background: linear-gradient(180deg, currentColor 0%, rgba(255,255,255,0) 100%);
-  margin-top: 4px;
-  margin-bottom: -16px;
-  z-index: 1;
-  opacity: 0.3;
-}
-
-.timeline-log-body {
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.4);
-  border-radius: 12px;
-  padding: 12px 16px;
-  transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
-  background: rgba(255, 255, 255, 0.3);
-  backdrop-filter: blur(12px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
-}
-
-html.dark, html .dark-theme {
-  .timeline-log-body {
-    background: rgba(15, 23, 42, 0.4);
-    border-color: rgba(255, 255, 255, 0.05);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-  }
-}
-
-// ─── Actions Navigation List (Grid Style) ───────────────────────────────────
-.admin-quick-actions-grid {
+// ══════════════════════════════════════════════════════════════════════════
+// ─── Premium Neumorphic Liquid Glass KPI Grid (Matches Reference Image) ───
+// ══════════════════════════════════════════════════════════════════════════
+.liquid-kpi-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 16px;
-}
+  align-items: stretch;
 
-.action-row-btn {
-  background: rgba(255, 255, 255, 0.4);
-  backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.4);
-  border-radius: 16px;
-  text-decoration: none;
-  color: var(--mat-sys-on-surface);
-  transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
-  box-shadow: 0 4px 12px rgba(31, 38, 135, 0.05), inset 0 1px 1px rgba(255, 255, 255, 0.6);
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start !important;
-  justify-content: center !important;
-  padding: 20px !important;
-  position: relative;
-  overflow: hidden;
-  
-  &::before {
-    content: '';
-    position: absolute;
-    top: 0; left: -100%; right: 0; bottom: 0;
-    width: 50%; height: 100%;
-    background: linear-gradient(to right, transparent, rgba(255,255,255,0.4), transparent);
-    transform: skewX(-20deg);
-    pointer-events: none;
-    transition: all 0.7s ease;
-  }
-  
-  &:hover {
-    transform: translateY(-4px) scale(1.02);
-    border-color: rgba(255, 255, 255, 0.8);
-    box-shadow: 0 12px 24px rgba(31, 38, 135, 0.1), inset 0 1px 1px rgba(255, 255, 255, 0.9);
-    background: rgba(255, 255, 255, 0.6);
-    
-    &::before { left: 150%; }
-    
-    .action-btn-icon {
-      transform: scale(1.1) rotate(-5deg);
-      box-shadow: 0 8px 16px currentColor;
-    }
-    
-    .action-chevron {
-      transform: translateX(4px);
-      color: #6366f1 !important;
-    }
-  }
-  
-  .action-chevron {
-    position: absolute;
-    right: 16px;
-    bottom: 16px;
-    transition: transform 0.3s ease, color 0.3s ease;
-  }
-}
-
-html.dark, html .dark-theme {
-  .action-row-btn {
-    background: rgba(15, 23, 42, 0.4);
-    border-color: rgba(255, 255, 255, 0.08);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2), inset 0 1px 1px rgba(255, 255, 255, 0.05);
-
-    &::before {
-      background: linear-gradient(to right, transparent, rgba(255,255,255,0.05), transparent);
-    }
-    
-    &:hover {
-      background: rgba(30, 41, 59, 0.6);
-      border-color: rgba(99, 102, 241, 0.4);
-      box-shadow: 0 12px 24px rgba(0, 0, 0, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.1);
-    }
-  }
-}
-
-.action-btn-icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 44px;
-  height: 44px;
-  border-radius: 12px !important;
-  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  margin-bottom: 12px;
-}
-
-// Badges
-.badge-role {
-  background: rgba(79, 70, 229, 0.06);
-  color: #4f46e5;
-  padding: 4px 10px;
-  border-radius: 8px;
-  font-size: 11px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  border: 1px solid rgba(79, 70, 229, 0.1);
-}
-
-.badge-rules {
-  background: rgba(16, 185, 129, 0.06);
-  color: #10b981;
-  padding: 4px 10px;
-  border-radius: 8px;
-  font-size: 11px;
-  font-weight: 700;
-  border: 1px solid rgba(16, 185, 129, 0.1);
-}
-
-// Responsive layout scaling overrides
-@media (max-width: 768px) {
-  .dashboard-container {
-    &::before { width: 150vw; height: 150vw; top: -20%; left: -20%; }
-    &::after { width: 120vw; height: 120vw; bottom: -20%; right: -20%; }
-  }
-
-  .welcome-banner {
-    text-align: center;
-    padding: 24px 16px !important;
-    
-    .mat-mdc-card-content > .d-flex, .mat-card-content > .d-flex {
-      justify-content: center !important;
-      flex-direction: column;
-      gap: 20px !important;
-    }
-    
-    .welcome-title {
-      font-size: 1.75rem;
-    }
-  }
-
-  .admin-quick-actions-grid {
+  @media (max-width: 576px) {
     grid-template-columns: 1fr;
   }
 }
 
-// ─── Entry Staggered Slide Animations ───────────────────────────────────────
-.animate-fade-in-up {
-  opacity: 0;
-  transform: translateY(24px);
-  animation: fadeInUp 0.75s cubic-bezier(0.19, 1, 0.22, 1) forwards;
+.glass-kpi-card {
+  position: relative;
+  border-radius: 26px;
+  padding: 22px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  backdrop-filter: blur(28px) saturate(190%);
+  -webkit-backdrop-filter: blur(28px) saturate(190%);
+  box-shadow:
+    0 12px 36px 0 rgba(31, 38, 135, 0.06),
+    inset 0 2px 2px rgba(255, 255, 255, 0.95),
+    inset 1px 0 2px rgba(255, 255, 255, 0.85);
+  transition: transform 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275),
+              box-shadow 0.35s ease,
+              border-color 0.35s ease;
+  overflow: hidden;
+
+  &:hover {
+    transform: translateY(-5px) scale(1.02);
+    box-shadow: 0 20px 45px rgba(31, 38, 135, 0.14), inset 0 2px 2.5px rgba(255, 255, 255, 1);
+  }
+
+  .kpi-content {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .kpi-label {
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    margin: 0 0 6px;
+    line-height: 1.2;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .kpi-value {
+    font-size: 26px;
+    font-weight: 900;
+    letter-spacing: -0.6px;
+    margin: 0;
+    line-height: 1.1;
+    white-space: nowrap;
+  }
+
+  .kpi-icon-3d {
+    width: 48px;
+    height: 48px;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transform: rotate(3deg);
+    transition: transform 0.35s ease;
+
+    mat-icon {
+      font-size: 24px;
+      width: 24px;
+      height: 24px;
+    }
+  }
+
+  &:hover .kpi-icon-3d {
+    transform: rotate(0deg) scale(1.1);
+  }
+
+  // ── 1. Indigo / Periwinkle (Company Size) ────────────────────────────────
+  &.glass-kpi-indigo {
+    background: linear-gradient(135deg, rgba(230, 230, 255, 0.8) 0%, rgba(240, 240, 255, 0.5) 100%);
+    border: 2px solid rgba(165, 160, 245, 0.65);
+
+    .kpi-label { color: #474676; }
+    .kpi-value { color: #5544d4; }
+    .kpi-icon-3d {
+      background: rgba(185, 180, 255, 0.65);
+      color: #5544d4;
+      border: 1px solid rgba(165, 160, 245, 0.75);
+      box-shadow: 0 8px 20px rgba(85, 68, 212, 0.25);
+    }
+  }
+
+  // ── 2. Mint / Seafoam (Staff On Duty) ───────────────────────────────────
+  &.glass-kpi-emerald {
+    background: linear-gradient(135deg, rgba(225, 248, 240, 0.8) 0%, rgba(240, 252, 248, 0.5) 100%);
+    border: 2px solid rgba(115, 215, 185, 0.65);
+
+    .kpi-label { color: #2c5950; }
+    .kpi-value { color: #008e5a; }
+    .kpi-icon-3d {
+      background: rgba(165, 235, 210, 0.65);
+      color: #008e5a;
+      border: 1px solid rgba(115, 215, 185, 0.75);
+      box-shadow: 0 8px 20px rgba(0, 142, 90, 0.25);
+    }
+  }
+
+  // ── 3. Soft Peach / Amber (Low Stock Items) ────────────────────────────
+  &.glass-kpi-amber {
+    background: linear-gradient(135deg, rgba(255, 243, 230, 0.8) 0%, rgba(255, 248, 240, 0.5) 100%);
+    border: 2px solid rgba(245, 200, 150, 0.65);
+
+    .kpi-label { color: #594231; }
+    .kpi-value { color: #d66200; }
+    .kpi-icon-3d {
+      background: rgba(255, 215, 175, 0.65);
+      color: #d66200;
+      border: 1px solid rgba(245, 200, 150, 0.75);
+      box-shadow: 0 8px 20px rgba(214, 98, 0, 0.25);
+    }
+  }
+
+  // ── 4. Soft Rose / Crimson (Pending Approvals) ─────────────────────────
+  &.glass-kpi-rose {
+    background: linear-gradient(135deg, rgba(255, 230, 235, 0.8) 0%, rgba(255, 240, 245, 0.5) 100%);
+    border: 2px solid rgba(245, 160, 175, 0.65);
+
+    .kpi-label { color: #5c3239; }
+    .kpi-value { color: #d01c1c; }
+    .kpi-icon-3d {
+      background: rgba(255, 185, 195, 0.65);
+      color: #d01c1c;
+      border: 1px solid rgba(245, 160, 175, 0.75);
+      box-shadow: 0 8px 20px rgba(208, 28, 28, 0.25);
+    }
+  }
+
+  // ── 5. Sky Blue / Cerulean (Active Branches) ───────────────────────────
+  &.glass-kpi-sky {
+    background: linear-gradient(135deg, rgba(225, 244, 255, 0.8) 0%, rgba(240, 248, 255, 0.5) 100%);
+    border: 2px solid rgba(150, 210, 245, 0.65);
+
+    .kpi-label { color: #204b62; }
+    .kpi-value { color: #007fb6; }
+    .kpi-icon-3d {
+      background: rgba(185, 230, 255, 0.65);
+      color: #007fb6;
+      border: 1px solid rgba(150, 210, 245, 0.75);
+      box-shadow: 0 8px 20px rgba(0, 127, 182, 0.25);
+    }
+  }
+
+  // ── 6. Violet / Bright Purple (Duty Shifts) ────────────────────────────
+  &.glass-kpi-purple {
+    background: linear-gradient(135deg, rgba(240, 230, 255, 0.8) 0%, rgba(248, 240, 255, 0.5) 100%);
+    border: 2px solid rgba(195, 160, 245, 0.65);
+
+    .kpi-label { color: #422b60; }
+    .kpi-value { color: #7928ca; }
+    .kpi-icon-3d {
+      background: rgba(215, 185, 255, 0.65);
+      color: #7928ca;
+      border: 1px solid rgba(195, 160, 245, 0.75);
+      box-shadow: 0 8px 20px rgba(121, 40, 202, 0.25);
+    }
+  }
 }
 
-.delay-1 { animation-delay: 0.08s; }
-.delay-2 { animation-delay: 0.16s; }
-.delay-3 { animation-delay: 0.24s; }
-.delay-4 { animation-delay: 0.32s; }
-.delay-5 { animation-delay: 0.4s; }
-.delay-6 { animation-delay: 0.48s; }
-.delay-7 { animation-delay: 0.56s; }
-.delay-8 { animation-delay: 0.64s; }
-
-// ─── Smart Widgets Styles ───────────────────────────────────────────────────
-.smart-widget-card {
+// ─── Dashboard Graph Containers & Widgets ─────────────────────────────────
+.dashboard-graph-card, .theme-card, .smart-widget-card {
   @extend .liquid-glass-card;
-  border-radius: 16px !important;
-  
+
   .widget-header {
-    padding: 16px;
+    padding: 16px 20px;
     border-bottom: 1px solid rgba(0,0,0,0.04);
-    
+
     .widget-icon-bg {
-      width: 32px;
-      height: 32px;
+      width: 36px;
+      height: 36px;
       border-radius: 10px;
       display: flex;
       align-items: center;
@@ -612,23 +345,26 @@ html.dark, html .dark-theme {
   }
 }
 
+// ─── Live Audit Radar Ping Badge ────────────────────────────────────────────
 .live-ping-badge {
   font-size: 11px;
-  font-weight: 700;
+  font-weight: 800;
   text-transform: uppercase;
   color: #10b981;
-  background: rgba(16, 185, 129, 0.1);
-  padding: 4px 10px;
+  background: rgba(16, 185, 129, 0.14);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  padding: 4px 12px;
   border-radius: 20px;
   display: flex;
   align-items: center;
   gap: 6px;
-  
+
   .ping-dot {
     width: 6px;
     height: 6px;
     background: #10b981;
     border-radius: 50%;
+    box-shadow: 0 0 6px #10b981;
     animation: pingDot 1.5s cubic-bezier(0, 0, 0.2, 1) infinite;
   }
 }
@@ -643,25 +379,25 @@ html.dark, html .dark-theme {
 .smart-log-item {
   position: relative;
   transition: transform 0.3s ease;
-  
+
   &:hover {
     transform: translateX(4px);
     .log-status-ring {
-      transform: scale(1.2);
+      transform: scale(1.25);
     }
   }
 }
 
 .log-status-ring {
-  width: 14px;
-  height: 14px;
+  width: 12px;
+  height: 12px;
   border-radius: 50%;
-  border: 3px solid #fff;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  border: 2px solid #fff;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
   flex-shrink: 0;
-  margin-top: 4px;
+  margin-top: 5px;
   transition: transform 0.3s ease;
-  
+
   &.ring-primary { background: #6366f1; }
   &.ring-warning { background: #f59e0b; }
   &.ring-danger { background: #ef4444; }
@@ -669,30 +405,16 @@ html.dark, html .dark-theme {
 
 .badge-action {
   font-size: 10px;
-  padding: 2px 6px;
+  padding: 2px 7px;
   border-radius: 6px;
-  font-weight: 700;
+  font-weight: 800;
   margin-left: 4px;
 }
 
-/* Custom Scrollbar for mini widgets */
-.custom-scroll {
-  &::-webkit-scrollbar {
-    width: 4px;
-  }
-  &::-webkit-scrollbar-track {
-    background: rgba(0,0,0,0.02);
-  }
-  &::-webkit-scrollbar-thumb {
-    background: rgba(0,0,0,0.1);
-    border-radius: 10px;
-  }
-}
-
-/* Smart Nav Grid */
+// ─── Smart Quick Nav Grid ──────────────────────────────────────────────────
 .smart-nav-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(115px, 1fr));
   gap: 12px;
 }
 
@@ -703,39 +425,41 @@ html.dark, html .dark-theme {
   justify-content: center;
   text-decoration: none;
   background: rgba(255, 255, 255, 0.6);
-  border: 1px solid rgba(255, 255, 255, 0.9);
-  padding: 12px;
-  border-radius: 14px;
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.85);
+  padding: 14px 10px;
+  border-radius: 16px;
   transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+  box-shadow: 0 2px 10px rgba(0,0,0,0.03);
   text-align: center;
-  
+
   .pill-icon {
-    width: 38px;
-    height: 38px;
+    width: 40px;
+    height: 40px;
     background: #fff;
-    border-radius: 10px;
+    border-radius: 12px;
     display: flex;
     align-items: center;
     justify-content: center;
     margin-bottom: 8px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.04);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
     transition: transform 0.3s ease;
   }
-  
+
   .pill-text {
     font-size: 12px;
-    font-weight: 700;
+    font-weight: 800;
     color: #334155;
   }
-  
+
   &:hover {
-    transform: translateY(-4px) scale(1.03);
+    transform: translateY(-4px) scale(1.04);
     background: #fff;
-    box-shadow: 0 10px 20px rgba(0,0,0,0.06);
-    
+    border-color: rgba(99, 102, 241, 0.4);
+    box-shadow: 0 12px 24px rgba(99, 102, 241, 0.15);
+
     .pill-icon {
-      transform: scale(1.1) rotate(-5deg);
+      transform: scale(1.15) rotate(-5deg);
     }
     .pill-text {
       color: #6366f1;
@@ -743,76 +467,79 @@ html.dark, html .dark-theme {
   }
 }
 
+// ─── Animations ─────────────────────────────────────────────────────────────
+.animate-fade-in-up {
+  opacity: 0;
+  transform: translateY(24px);
+  animation: fadeInUp 0.75s cubic-bezier(0.19, 1, 0.22, 1) forwards;
+}
+
 .animate-zoom-in {
   opacity: 0;
-  transform: scale(0.8) translateY(10px);
+  transform: scale(0.85) translateY(10px);
   animation: zoomInBounce 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
 }
 
-@keyframes zoomInBounce {
-  to {
-    opacity: 1;
-    transform: scale(1) translateY(0);
-  }
+.animate-slide-in-right {
+  opacity: 0;
+  transform: translateX(30px) scale(0.96);
+  animation: slideInRight 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
 }
 
+.delay-1 { animation-delay: 0.08s; }
+.delay-2 { animation-delay: 0.16s; }
+.delay-3 { animation-delay: 0.24s; }
+.delay-4 { animation-delay: 0.32s; }
+.delay-5 { animation-delay: 0.40s; }
+.delay-6 { animation-delay: 0.48s; }
+
+@keyframes fadeInUp { to { opacity: 1; transform: translateY(0); } }
+@keyframes zoomInBounce { to { opacity: 1; transform: scale(1) translateY(0); } }
+@keyframes slideInRight { to { opacity: 1; transform: translateX(0) scale(1); } }
+
+// ─── Dark Theme Liquid Glass ───────────────────────────────────────────────
 html.dark, html .dark-theme {
-  .smart-widget-card {
-    .widget-header { border-bottom-color: rgba(255,255,255,0.05); }
+  .glass-kpi-card {
+    background: rgba(15, 23, 42, 0.75) !important;
+    border-color: rgba(255, 255, 255, 0.12) !important;
+
+    .kpi-label { color: #94a3b8; }
+    .kpi-value { color: #f8fafc; }
   }
-  
+
   .smart-nav-pill {
     background: rgba(30, 41, 59, 0.6);
-    border-color: rgba(255,255,255,0.05);
-    
-    .pill-icon { background: rgba(15, 23, 42, 0.8); }
+    border-color: rgba(255,255,255,0.08);
+
+    .pill-icon { background: rgba(15, 23, 42, 0.85); }
     .pill-text { color: #e2e8f0; }
-    
+
     &:hover {
-      background: rgba(51, 65, 85, 0.8);
+      background: rgba(51, 65, 85, 0.85);
+      .pill-text { color: #818cf8; }
     }
   }
 }
 
-@keyframes fadeInUp {
-  to {
-    opacity: 1;
-    transform: translateY(0);
+// ─── Responsive Overrides ─────────────────────────────────────────────────
+@media (max-width: 768px) {
+  .liquid-kpi-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .welcome-banner {
+    padding: 20px 16px !important;
+
+    .welcome-title { font-size: 1.6rem; }
+  }
+
+  .smart-nav-grid {
+    grid-template-columns: repeat(2, 1fr);
   }
 }
 
-// ─── Live Pulse Animation ───────────────────────────────────────────────────
-.pulse-indicator {
-  animation: pulseLive 2s infinite cubic-bezier(0.66, 0, 0, 1);
-}
-
-@keyframes pulseLive {
-  0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
-  70% { box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); }
-  100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
-}
-
-// ─── Slide In Right Animation ───────────────────────────────────────────────
-.animate-slide-in-right {
-  opacity: 0;
-  transform: translateX(30px) scale(0.95);
-  animation: slideInRight 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
-}
-
-@keyframes slideInRight {
-  to {
-    opacity: 1;
-    transform: translateX(0) scale(1);
+@media (max-width: 480px) {
+  .liquid-kpi-grid {
+    grid-template-columns: 1fr;
   }
 }
-
-// ─── Floating Animation for Icons ───────────────────────────────────────────
-.action-row-btn:hover .action-btn-icon {
-  animation: floatIcon 2s ease-in-out infinite alternate;
-}
-
-@keyframes floatIcon {
-  0% { transform: translateY(0) scale(1.1) rotate(-5deg); }
-  100% { transform: translateY(-4px) scale(1.15) rotate(0deg); }
-}
-

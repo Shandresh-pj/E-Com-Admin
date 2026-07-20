@@ -678,11 +678,11 @@ export class Product {
         title: 'Review Product Approval',
         text: `Do you want to Approve or Reject "${product.name}"?`,
         icon: 'question',
-        showCancelButton: true,
+        showCancelButton: false,
         showDenyButton: true,
         confirmButtonText: 'Approve',
         denyButtonText: 'Reject',
-        cancelButtonText: 'Close'
+        showCloseButton: true
       }).then((result: any) => {
         if (result.isConfirmed) {
           this.commonService.putApi(`products/${product.id}/approve`, { action: 'APPROVE' }).subscribe({

@@ -11,7 +11,14 @@ export class AlertService {
    */
   fire(options: any) {
     const icon = options.icon || 'info';
+
+    // Strictly default to false unless explicitly overridden
+    const showCancelButton = options.showCancelButton ?? false;
+    const showDenyButton = options.showDenyButton ?? false;
+
     return Swal.fire({
+      showCancelButton,
+      showDenyButton,
       backdrop: true,
       buttonsStyling: false,
       heightAuto: false,
@@ -40,15 +47,16 @@ export class AlertService {
     });
   }
 
-  /** Auto-dismisses in 2.5 s — NO button shown */
+  /** Auto-dismisses in 3 s but also shows a button */
   success(message: string, title = 'Success') {
     this.fire({
       icon: 'success',
       title,
       text: message,
-      timer: 2500,
+      timer: 3000,
       timerProgressBar: true,
       showConfirmButton: false
+      // confirmButtonText: 'Continue'
     });
   }
 
@@ -94,7 +102,7 @@ export class AlertService {
     });
   }
 
-  /** Two buttons — Yes / No */
+  /** Two buttons — Confirm / Cancel */
   confirm(message: string, title = 'Are you sure?') {
     return this.fire({
       icon: 'question',
@@ -103,8 +111,8 @@ export class AlertService {
       showCancelButton: true,
       showDenyButton: false,
       showCloseButton: false,
-      confirmButtonText: 'Yes',
-      cancelButtonText: 'No'
+      confirmButtonText: 'Confirm',
+      cancelButtonText: 'Cancel'
     });
   }
 
@@ -118,8 +126,8 @@ export class AlertService {
       showCancelButton: true,
       showDenyButton: false,
       showCloseButton: false,
-      confirmButtonText: 'Yes',
-      cancelButtonText: 'No',
+      confirmButtonText: 'Submit',
+      cancelButtonText: 'Cancel',
       inputValidator: (value: string) => {
         if (!value) return options.validatorText || 'This field is required!';
         return null;

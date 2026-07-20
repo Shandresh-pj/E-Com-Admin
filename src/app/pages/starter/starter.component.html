@@ -34,6 +34,13 @@
   <!-- 1. ADMIN / SUPER ADMIN DASHBOARD PANEL -->
   <!-- ══════════════════════════════════════════════════════════════════════════ -->
   @if (isAdminDashboard) {
+    <!-- Subscription Widget -->
+    <div class="row m-b-24">
+      <div class="col-12 animate-fade-in-up">
+        <app-subscription-widget></app-subscription-widget>
+      </div>
+    </div>
+
     <!-- KPIs Stats Grid -->
     <div class="row m-b-24">
       <div class="col-lg-3 col-sm-6 animate-fade-in-up delay-1">

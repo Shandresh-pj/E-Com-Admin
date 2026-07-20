@@ -2,6 +2,7 @@ import {
   ApplicationConfig,
   provideZoneChangeDetection,
   importProvidersFrom,
+  ErrorHandler,
 } from '@angular/core';
 import { provideNativeDateAdapter, MAT_DATE_LOCALE } from '@angular/material/core';
 
@@ -36,6 +37,8 @@ import {
 } from '@angular/forms';
 
 import { authInterceptor } from './Securities/Interceptor/auth.interceptor';
+import { errorInterceptor } from './Securities/Interceptor/error.interceptor';
+import { GlobalErrorHandler } from './services/global-error-handler';
 
 export const appConfig: ApplicationConfig = {
 
@@ -61,10 +64,16 @@ export const appConfig: ApplicationConfig = {
       useClass: TemplatePageTitleStrategy
     },
 
+    {
+      provide: ErrorHandler,
+      useClass: GlobalErrorHandler
+    },
+
     provideHttpClient(
 
       withInterceptors([
-        authInterceptor
+        authInterceptor,
+        errorInterceptor
       ]),
 
       withInterceptorsFromDi()

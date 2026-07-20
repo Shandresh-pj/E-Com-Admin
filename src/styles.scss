@@ -141,29 +141,45 @@ app-root {
   overflow: visible !important;
 }
 
-/* mat-sidenav-container: override Angular Material's default
-   overflow:hidden that kills scroll on pages using blank layout */
-mat-sidenav-container.mat-sidenav-container,
-.mat-sidenav-container {
+/* ── BLANK LAYOUT (Login/Auth/Home) scroll fix ─────────────────────────────
+   Angular Material sets mat-sidenav-container to position:absolute +
+   overflow:hidden which clips blank-layout pages. Override ONLY when
+   .blank-wrapper is in the hierarchy — never inside .mainWrapper (dashboard)
+   because mainWrapper controls its own 100vh containment. */
+.blank-wrapper mat-sidenav-container.mat-sidenav-container,
+.blank-wrapper .mat-sidenav-container {
   height: auto !important;
   min-height: 100vh !important;
   overflow: visible !important;
   position: relative !important;
 }
 
-/* mat-sidenav-content: this is the actual scrollable region inside
-   the sidenav container — must be allowed to scroll */
-mat-sidenav-content,
-.mat-sidenav-content,
-.mat-drawer-content {
-  overflow: auto !important;
-  overflow-y: auto !important;
-  overflow-x: hidden !important;
+.blank-wrapper mat-sidenav-content,
+.blank-wrapper .mat-sidenav-content,
+.blank-wrapper .mat-drawer-content {
+  overflow: visible !important;
   min-height: 100vh !important;
-  /* Remove the absolute positioning that Material sets by default */
   position: relative !important;
-  /* Ensure content height grows with children */
   height: auto !important;
+}
+
+/* ── FULL LAYOUT (Dashboard/App pages) ────────────────────────────────────
+   The .mainWrapper clips at 100vh and .contentWrapper in _container.scss
+   is the single scrollable surface. All children must NOT create a
+   second scroll context. */
+.mainWrapper mat-sidenav-container.mat-sidenav-container,
+.mainWrapper .mat-sidenav-container {
+  height: 100% !important;
+  overflow: hidden !important;
+  position: relative !important;
+}
+
+.mainWrapper mat-sidenav-content,
+.mainWrapper .mat-sidenav-content,
+.mainWrapper .mat-drawer-content {
+  height: 100% !important;
+  overflow: hidden !important;
+  position: relative !important;
 }
 
 /* Home, Contact pages route directly (no layout) — ensure their

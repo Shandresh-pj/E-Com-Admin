@@ -1,0 +1,117 @@
+.widget-card {
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  border-radius: 16px;
+  background: white;
+  transition: all 0.3s ease;
+
+  .widget-subtitle {
+    color: rgba(0, 0, 0, 0.6);
+  }
+
+  .plan-name {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 20px;
+    color: #111;
+  }
+
+  .badge-status {
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-weight: 700;
+  }
+
+  &.trial-bg {
+    background: linear-gradient(135deg, #fffdf0 0%, #fff 100%);
+    border-color: rgba(255, 193, 7, 0.3);
+    .widget-subtitle { color: #856404; }
+  }
+
+  &.active-bg {
+    background: linear-gradient(135deg, #f0fdf4 0%, #fff 100%);
+    border-color: rgba(16, 185, 129, 0.3);
+    .widget-subtitle { color: #065f46; }
+  }
+
+  &.expired-bg {
+    background: linear-gradient(135deg, #fef2f2 0%, #fff 100%);
+    border-color: rgba(239, 68, 68, 0.3);
+  }
+
+  .time-boxes {
+    .time-box {
+      background: rgba(255, 255, 255, 0.8);
+      border: 1px solid rgba(0, 0, 0, 0.05);
+      border-radius: 8px;
+      padding: 8px 12px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-width: 60px;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+      
+      span {
+        line-height: 1.2;
+      }
+    }
+  }
+
+  .expired-notice {
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px dashed rgba(239, 68, 68, 0.4);
+  }
+
+  .upgrade-btn {
+    border-radius: 8px;
+    font-weight: 700;
+  }
+  
+  .history-btn {
+    border-radius: 8px;
+    min-width: 48px;
+    padding: 0;
+  }
+
+  .glass-bg-circle {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(40px);
+    z-index: 1;
+    opacity: 0.4;
+
+    &.top-right {
+      top: -30px;
+      right: -30px;
+      width: 120px;
+      height: 120px;
+      background: var(--bs-primary, #6366f1);
+    }
+    &.bottom-left {
+      bottom: -40px;
+      left: -40px;
+      width: 150px;
+      height: 150px;
+      background: var(--bs-info, #0ea5e9);
+    }
+  }
+}
+
+.skeleton-loader {
+  .skeleton-line {
+    height: 16px;
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: skeleton-loading 1.5s infinite;
+    border-radius: 4px;
+  }
+}
+
+@keyframes skeleton-loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}

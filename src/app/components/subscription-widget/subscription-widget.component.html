@@ -1,0 +1,97 @@
+@if (loading) {
+  <mat-card class="cardWithShadow widget-card skeleton-loader h-100">
+    <mat-card-content class="p-24">
+      <div class="skeleton-line w-50 m-b-16"></div>
+      <div class="skeleton-line w-75 m-b-8"></div>
+      <div class="skeleton-line w-100"></div>
+    </mat-card-content>
+  </mat-card>
+} @else if (subscription) {
+  <mat-card class="cardWithShadow widget-card h-100 position-relative overflow-hidden" 
+    [ngClass]="{
+      'trial-bg': subscription.status === 'trialing',
+      'active-bg': subscription.status === 'active',
+      'expired-bg': subscription.status === 'expired' || subscription.status === 'past_due'
+    }">
+    
+    <!-- Decorative SVG background -->
+    <div class="glass-bg-circle top-right"></div>
+    <div class="glass-bg-circle bottom-left"></div>
+
+    <mat-card-content class="p-24 position-relative z-index-2">
+      <div class="d-flex justify-content-between align-items-start m-b-16">
+        <div>
+          <p class="f-s-12 text-uppercase tracking-wider m-b-4 f-w-700 widget-subtitle">
+            Current Plan
+          </p>
+          <h3 class="f-w-800 m-b-0 plan-name">
+            {{ subscription.plan?.name || 'Custom Plan' }} 
+            <span class="badge-status f-s-11" [ngClass]="{
+              'bg-warning text-dark': subscription.status === 'trialing',
+              'bg-success text-white': subscription.status === 'active',
+              'bg-danger text-white': subscription.status === 'expired' || subscription.status === 'past_due'
+            }">
+              {{ subscription.status | uppercase }}
+            </span>
+          </h3>
+        </div>
+        
+        <div class="billing-cycle text-end">
+          <p class="f-s-11 text-muted m-b-0 text-uppercase">Billing</p>
+          <p class="f-s-13 f-w-700 m-b-0">{{ subscription.billing_cycle | titlecase }}</p>
+        </div>
+      </div>
+
+      <div class="countdown-container m-b-24">
+        @if (subscription.status === 'trialing' || subscription.status === 'active') {
+          <p class="f-s-12 m-b-8">
+            <mat-icon class="icon-14 m-r-4 align-middle">timer</mat-icon>
+            {{ subscription.status === 'trialing' ? 'Trial ends in' : 'Renews/Expires in' }}
+          </p>
+          <div class="d-flex gap-12 time-boxes">
+            <div class="time-box">
+              <span class="f-w-800 f-s-20">{{ daysRemaining }}</span>
+              <span class="f-s-10 text-uppercase">Days</span>
+            </div>
+            <div class="time-box">
+              <span class="f-w-800 f-s-20">{{ hoursRemaining }}</span>
+              <span class="f-s-10 text-uppercase">Hrs</span>
+            </div>
+            <div class="time-box">
+              <span class="f-w-800 f-s-20">{{ minutesRemaining }}</span>
+              <span class="f-s-10 text-uppercase">Mins</span>
+            </div>
+          </div>
+          <p class="f-s-11 text-muted m-t-8 m-b-0">
+            Expires on: {{ (subscription.status === 'trialing' ? subscription.trial_end : subscription.end_date) | date:'mediumDate' }}
+          </p>
+        } @else {
+          <div class="expired-notice p-16 rounded">
+            <mat-icon class="text-danger icon-24 m-b-8">warning</mat-icon>
+            <p class="f-s-14 f-w-700 text-danger m-b-0">Subscription Expired</p>
+            <p class="f-s-12 text-muted m-b-0">Please upgrade to restore access.</p>
+          </div>
+        }
+      </div>
+
+      <div class="d-flex gap-12 align-items-center">
+        <button mat-flat-button color="primary" class="w-100 upgrade-btn" routerLink="/subscription-plans">
+          <mat-icon>bolt</mat-icon>
+          Upgrade Plan
+        </button>
+        <button mat-stroked-button color="primary" class="history-btn" routerLink="/billing-history">
+          <mat-icon>receipt_long</mat-icon>
+        </button>
+      </div>
+    </mat-card-content>
+  </mat-card>
+} @else {
+  <mat-card class="cardWithShadow widget-card empty-bg h-100">
+    <mat-card-content class="p-24 text-center d-flex flex-column justify-content-center h-100">
+      <mat-icon class="icon-48 text-muted m-b-16 opacity-50 mx-auto">card_membership</mat-icon>
+      <h4 class="f-w-700 m-b-8">No Active Subscription</h4>
+      <p class="f-s-13 text-muted m-b-16">Unlock full access by selecting a plan.</p>
+      <button mat-flat-button color="primary" routerLink="/subscription-plans">View Plans</button>
+    </mat-card-content>
+  </mat-card>
+}

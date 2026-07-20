@@ -279,25 +279,7 @@ export class Attendance implements OnInit, OnDestroy {
           };
         });
 
-        // Determine if user (or selected manual user) is checked in
-        const currentEmployeeId = this.attendanceForm.value.employee_id;
-        const activeSession = rawLogs.find(
-          (log: any) => log.employee_id === currentEmployeeId && !log.check_out
-        );
-
-        if (activeSession) {
-          this.isCheckedIn = true;
-          this.currentSessionId = activeSession.id;
-          this.checkActiveBreak(activeSession.id);
-        } else {
-          this.isCheckedIn = false;
-          this.currentSessionId = null;
-          this.isOnBreak = false;
-          this.activeBreakLog = null;
-        }
-        
-        this.loading = false;
-        this.cdr.detectChanges();
+        this.loadTodayStatus();
       },
       error: (err) => {
         console.error('Failed to load attendance logs:', err);
@@ -305,6 +287,51 @@ export class Attendance implements OnInit, OnDestroy {
       }
     });
   }
+
+  loadTodayStatus() {
+    const currentEmployeeId = this.attendanceForm.value.employee_id;
+    if (!currentEmployeeId) {
+      this.loading = false;
+      this.cdr.detectChanges();
+      return;
+    }
+
+    this.commonService.getApi(`attendance/today?employee_id=${currentEmployeeId}`).subscribe({
+      next: (res: any) => {
+        const todayData = res?.data;
+        const activeSession = todayData?.attendance;
+        const activeBreak = todayData?.activeBreak;
+
+        if (activeSession && !activeSession.check_out) {
+          this.isCheckedIn = true;
+          this.currentSessionId = activeSession.id;
+          
+          if (activeBreak && !activeBreak.end_time) {
+            this.isOnBreak = true;
+            this.activeBreakLog = activeBreak;
+          } else {
+            this.isOnBreak = false;
+            this.activeBreakLog = null;
+          }
+        } else {
+          this.isCheckedIn = false;
+          this.currentSessionId = null;
+          this.isOnBreak = false;
+          this.activeBreakLog = null;
+        }
+
+        this.loading = false;
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        console.error('Failed to load today status:', err);
+        this.loading = false;
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+
 
   checkActiveBreak(attendanceId: number) {
     this.commonService.getApi(`attendance/breaks/${attendanceId}`).subscribe({

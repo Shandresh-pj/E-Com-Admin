@@ -72,9 +72,12 @@ body {
 }
 
 .mat-drawer-content.contentWrapper {
+  /* Single scroll surface for all dashboard pages.
+     height: 100% fills the parent .mainWrapper (100vh) exactly.
+     overflow-y: auto lets content taller than viewport scroll here only. */
   height: 100%;
-  overflow-y: auto !important;
-  overflow-x: hidden !important;
+  overflow-y: auto;
+  overflow-x: hidden;
   position: relative;
   z-index: 1;
 }
@@ -87,7 +90,9 @@ body {
 
 .pageWrapper {
   padding: 24px;
-  min-height: calc(100vh - 70px);
+  /* Use min-height instead of fixed height so content can grow naturally
+     but never causes the contentWrapper itself to overflow prematurely */
+  min-height: 100%;
   margin: 0 auto;
   position: relative;
   z-index: 2;

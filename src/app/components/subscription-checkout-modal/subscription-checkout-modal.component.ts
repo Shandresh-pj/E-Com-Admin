@@ -1,10 +1,13 @@
 import { Component, Inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, Validators, FormsModule, ReactiveFormsModule, FormControl } from '@angular/forms';
+import {
+  FormBuilder, FormGroup, Validators,
+  FormsModule, ReactiveFormsModule, FormControl
+} from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { MatSnackBar } from '@angular/material/snack-bar';
 import { SubscriptionPlan, SubscriptionService } from 'src/app/services/subscription.service';
 import { RazorpayService } from 'src/app/services/razorpay.service';
+import { AlertService } from 'src/app/Securities/Services/alert.service';
 import { MaterialModule } from 'src/app/material.module';
 import { RouterModule } from '@angular/router';
 
@@ -41,16 +44,16 @@ export class SubscriptionCheckoutModalComponent implements OnInit {
     @Inject(MAT_DIALOG_DATA) public data: SubscriptionModalData,
     private subscriptionService: SubscriptionService,
     private razorpayService: RazorpayService,
-    private snackBar: MatSnackBar
+    private alert: AlertService
   ) {
     this.mode.set(data.initialMode);
 
     this.checkoutForm = this.fb.group({
-      name: ['Shandresh PJ', [Validators.required, Validators.minLength(2)]],
-      email: ['shandresh@svkecom.io', [Validators.required, Validators.email]],
-      phone: ['9876543210', [Validators.required, Validators.pattern(/^[0-9]{10}$/)]],
-      company: ['SVK Enterprise Retail Hub', []],
-      gstin: ['29AAACT1234A1Z1', []]
+      name:    ['', [Validators.required, Validators.minLength(2)]],
+      email:   ['', [Validators.required, Validators.email]],
+      phone:   ['', [Validators.required, Validators.pattern(/^[0-9]{10}$/)]],
+      company: ['', []],
+      gstin:   ['', []]
     });
   }
 
@@ -58,7 +61,7 @@ export class SubscriptionCheckoutModalComponent implements OnInit {
     this.finalAmount.set(this.originalPrice);
   }
 
-  setMode(m: 'trial' | 'pay') {
+  setMode(m: 'trial' | 'pay'): void {
     this.mode.set(m);
   }
 
@@ -81,11 +84,10 @@ export class SubscriptionCheckoutModalComponent implements OnInit {
   }
 
   applyCoupon(): void {
-    const code = this.couponControl.value;
+    const code = this.couponControl.value?.trim();
     if (!code) return;
 
     this.applyingCoupon.set(true);
-    // Assuming subscriptionService has a method to validate coupon
     this.subscriptionService.validateCoupon(code, this.originalPrice).subscribe({
       next: (res: any) => {
         this.applyingCoupon.set(false);
@@ -93,16 +95,23 @@ export class SubscriptionCheckoutModalComponent implements OnInit {
           this.appliedCoupon.set(res.data.coupon);
           this.discountAmount.set(res.data.discount_amount);
           this.finalAmount.set(res.data.final_amount);
-          this.snackBar.open('Coupon Applied Successfully!', 'Close', { duration: 3000 });
+          this.alert.success(`Coupon "${code}" applied! Saved ₹${res.data.discount_amount.toLocaleString('en-IN')}`);
         } else {
-          this.snackBar.open(res.message || 'Invalid coupon.', 'Close', { duration: 3000 });
+          this.alert.warning(res.message || 'Invalid or expired coupon code.');
         }
       },
       error: (err: any) => {
         this.applyingCoupon.set(false);
-        this.snackBar.open(err.error?.message || 'Error applying coupon.', 'Close', { duration: 3000 });
+        this.alert.error(err?.error?.message || 'Could not validate coupon. Please try again.');
       }
     });
+  }
+
+  removeCoupon(): void {
+    this.appliedCoupon.set(null);
+    this.discountAmount.set(0);
+    this.finalAmount.set(this.originalPrice);
+    this.couponControl.setValue('');
   }
 
   onClose(): void {
@@ -112,7 +121,7 @@ export class SubscriptionCheckoutModalComponent implements OnInit {
   async onSubmit(): Promise<void> {
     if (this.checkoutForm.invalid) {
       this.checkoutForm.markAllAsTouched();
-      this.snackBar.open('Please fill in all required fields correctly.', 'OK', { duration: 3000 });
+      this.alert.warning('Please fill in all required fields correctly before proceeding.');
       return;
     }
 
@@ -120,7 +129,7 @@ export class SubscriptionCheckoutModalComponent implements OnInit {
     this.loading.set(true);
 
     if (this.mode() === 'trial') {
-      // Initiate 14-Day Free Trial
+      // ─── Start 14-Day Free Trial ─────────────────────────────
       this.subscriptionService.startFreeTrial({
         planId: this.data.plan.id,
         billingCycle: this.data.billingCycle,
@@ -131,86 +140,90 @@ export class SubscriptionCheckoutModalComponent implements OnInit {
       }).subscribe({
         next: (res) => {
           this.loading.set(false);
+          const expiry = new Date(res.expiryDate).toLocaleDateString('en-IN', {
+            day: 'numeric', month: 'short', year: 'numeric'
+          });
           this.isSuccess.set(true);
-          this.successMessage.set(`🎉 14-Day Free Trial successfully activated for ${val.company || val.name}!`);
+          this.successMessage.set(`🎉 14-Day Free Trial activated for ${val.company || val.name}!`);
           this.receiptData.set({
-            plan: this.data.plan.name,
-            cycle: '14-Day Free Trial (₹0 Charged)',
-            expiry: new Date(res.expiryDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }),
+            plan:          this.data.plan.name,
+            cycle:         '14-Day Free Trial (₹0 Charged)',
+            expiry,
             transactionId: res.trialId || `TRIAL-${Date.now()}`
           });
-          this.snackBar.open(this.successMessage(), 'View Dashboard', { duration: 6000, panelClass: ['success-snackbar'] });
         },
-        error: () => {
+        error: (err: any) => {
           this.loading.set(false);
-          this.snackBar.open('Error activating trial. Please check network.', 'Close', { duration: 4000 });
+          this.alert.error(err?.error?.message || 'Failed to activate trial. Please try again.');
         }
       });
+
     } else {
-      // Initiate Razorpay Order & Payment
+      // ─── Initiate Razorpay Payment ───────────────────────────
       this.subscriptionService.createRazorpayOrder({
-        planId: this.data.plan.id,
-        billingCycle: this.data.billingCycle,
-        amount: this.price,
-        name: val.name,
-        email: val.email,
-        phone: val.phone,
-        company: val.company,
-        coupon_code: this.appliedCoupon()?.code
+        planId:        this.data.plan.id,
+        billingCycle:  this.data.billingCycle,
+        amount:        this.price,
+        name:          val.name,
+        email:         val.email,
+        phone:         val.phone,
+        company:       val.company,
+        coupon_code:   this.appliedCoupon()?.code
       }).subscribe({
         next: async (orderRes) => {
-          // Open Razorpay Checkout overlay
-          await this.razorpayService.openCheckout({
-            key: orderRes.keyId || 'rzp_test_simulated_key',
-            amount: orderRes.amount,
-            currency: orderRes.currency || 'INR',
-            name: 'SVK Cyber E-Com Admin',
-            description: `${this.data.plan.name} (${this.data.billingCycle})`,
-            order_id: orderRes.orderId,
-            prefill: {
-              name: val.name,
-              email: val.email,
-              contact: val.phone
-            },
-            theme: {
-              color: '#6366f1'
-            },
-            handler: (rzpResp) => {
-              // Verify payment on backend
-              this.subscriptionService.verifyPayment({
-                ...rzpResp,
-                planId: this.data.plan.id,
-                email: val.email
-              }).subscribe({
-                next: (verifyRes) => {
+          try {
+            await this.razorpayService.openCheckout({
+              key:         orderRes.keyId || 'rzp_test_simulated_key',
+              amount:      orderRes.amount,
+              currency:    orderRes.currency || 'INR',
+              name:        'SVK Cyber E-Com Admin',
+              description: `${this.data.plan.name} (${this.data.billingCycle})`,
+              order_id:    orderRes.orderId,
+              prefill: {
+                name:    val.name,
+                email:   val.email,
+                contact: val.phone
+              },
+              theme: { color: '#6366f1' },
+              handler: (rzpResp) => {
+                // Verify on backend after Razorpay success
+                this.subscriptionService.verifyPayment({
+                  ...rzpResp,
+                  planId: this.data.plan.id,
+                  email:  val.email
+                }).subscribe({
+                  next: () => {
+                    this.loading.set(false);
+                    this.isSuccess.set(true);
+                    this.successMessage.set(`⚡ Payment Verified! ${this.data.plan.name} Plan activated.`);
+                    this.receiptData.set({
+                      plan:          this.data.plan.name,
+                      cycle:         `${this.data.billingCycle} Subscription`,
+                      amount:        `₹${this.formattedPrice}`,
+                      transactionId: rzpResp.razorpay_payment_id || `PAY-${Date.now()}`
+                    });
+                  },
+                  error: (err: any) => {
+                    this.loading.set(false);
+                    this.alert.error(err?.error?.message || 'Payment verification failed. Contact support with your payment ID.');
+                  }
+                });
+              },
+              modal: {
+                ondismiss: () => {
                   this.loading.set(false);
-                  this.isSuccess.set(true);
-                  this.successMessage.set(`⚡ Razorpay Payment Verified! ${this.data.plan.name} Suite activated.`);
-                  this.receiptData.set({
-                    plan: this.data.plan.name,
-                    cycle: `${this.data.billingCycle} Subscription`,
-                    amount: `₹${this.formattedPrice}`,
-                    transactionId: rzpResp.razorpay_payment_id || `PAY-${Date.now()}`
-                  });
-                  this.snackBar.open(this.successMessage(), 'View Dashboard', { duration: 6000, panelClass: ['success-snackbar'] });
-                },
-                error: () => {
-                  this.loading.set(false);
-                  this.snackBar.open('Payment verification failed.', 'Close', { duration: 4000 });
+                  this.alert.warning('Payment was cancelled. Your order has not been placed.');
                 }
-              });
-            },
-            modal: {
-              ondismiss: () => {
-                this.loading.set(false);
-                this.snackBar.open('Payment cancelled.', 'Close', { duration: 3000 });
               }
-            }
-          });
+            });
+          } catch (err: any) {
+            this.loading.set(false);
+            this.alert.error('Failed to open payment gateway. Please try again.');
+          }
         },
-        error: () => {
+        error: (err: any) => {
           this.loading.set(false);
-          this.snackBar.open('Error initializing payment order.', 'Close', { duration: 4000 });
+          this.alert.error(err?.error?.message || 'Failed to initialize payment order. Please try again.');
         }
       });
     }

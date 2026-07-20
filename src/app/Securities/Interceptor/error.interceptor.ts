@@ -1,86 +1,84 @@
-import {
-  HttpInterceptor,
-  HttpRequest,
-  HttpHandler,
-  HttpEvent,
-  HttpErrorResponse,
-} from '@angular/common/http';
-
-import { Injectable } from '@angular/core';
-import { Observable, throwError } from 'rxjs';
-import { catchError } from 'rxjs/operators';
-
+import { HttpInterceptorFn, HttpErrorResponse } from '@angular/common/http';
+import { inject } from '@angular/core';
 import { Router } from '@angular/router';
+import { throwError } from 'rxjs';
+import { catchError } from 'rxjs/operators';
 import { AlertService } from '../Services/alert.service';
 
-@Injectable()
-export class ErrorInterceptor implements HttpInterceptor {
+/**
+ * Global HTTP functional interceptor for handling server-side and network errors
+ */
+export const errorInterceptor: HttpInterceptorFn = (req, next) => {
+  const alert = inject(AlertService);
+  const router = inject(Router);
 
-  constructor(
-    private alert: AlertService,
-    private router: Router
-  ) {}
+  return next(req).pipe(
+    catchError((error: HttpErrorResponse | any) => {
+      // Don't intercept background/non-critical requests to avoid spamming alerts
+      if (req.url.includes('/auth/me/permissions') || req.url.includes('/notifications')) {
+        return throwError(() => error);
+      }
 
-  intercept(
-    req: HttpRequest<any>,
-    next: HttpHandler
-  ): Observable<HttpEvent<any>> {
-
-    return next.handle(req).pipe(
-      catchError((error: HttpErrorResponse | any) => {
-
+      if (error instanceof HttpErrorResponse) {
         switch (error.status) {
-
           case 400:
-            this.alert.warning(error.error?.message || 'Bad Request');
+            alert.warning(error.error?.message || error.error || 'Bad Request');
             break;
 
-          // 401 is handled by authInterceptor (token refresh + logout).
-          // Do not handle here — pass it through so the retry can work.
+          // 401 Unauthorized is handled exclusively by authInterceptor (token refresh + logout retry)
           case 401:
             break;
 
           case 403:
-            this.alert.error('Access denied');
-            this.router.navigate(['/dashboard']);
+            alert.error(error.error?.message || 'Access denied. You do not have permissions for this resource.');
+            router.navigate(['/dashboard']);
             break;
 
           case 404:
-            this.alert.warning('Resource not found');
+            alert.warning(error.error?.message || 'Resource not found');
             break;
 
           case 422:
-            this.alert.error(
-              this.formatValidationErrors(error.error),
+            alert.error(
+              formatValidationErrors(error.error),
               'Validation Failed'
             );
             break;
 
           case 429:
-            this.alert.warning('Too many requests. Please wait.');
+            alert.warning('Too many requests. Please wait before retrying.');
             break;
 
           case 500:
-            this.alert.error('Internal server error');
+            alert.error(error.error?.message || 'Internal server error. Please try again later.');
             break;
 
           case 0:
-            this.alert.error('Cannot connect to server');
+            alert.error('Cannot connect to server. Please check your internet connection or server status.');
             break;
 
           default:
-            this.alert.error(error.error?.message || 'Something went wrong');
+            alert.error(error.error?.message || error.error || 'An unexpected server error occurred.');
         }
+      } else {
+        alert.error('An unexpected network error occurred.');
+      }
 
-        return throwError(() => error);
-      })
+      return throwError(() => error);
+    })
+  );
+};
 
-    );
-  }
-
-  private formatValidationErrors(body: any): string {
-    const errors = body?.errors;
-    if (!errors) return body?.message || 'Validation Failed';
+/**
+ * Format NestJS/Express validation error payloads cleanly for the end user
+ */
+function formatValidationErrors(body: any): string {
+  const errors = body?.errors;
+  if (!errors) return body?.message || 'Validation Failed';
+  if (typeof errors === 'string') return errors;
+  if (Array.isArray(errors)) return errors.join('\n');
+  if (typeof errors === 'object') {
     return Object.values(errors).flat().join('\n');
   }
+  return 'Validation Failed';
 }

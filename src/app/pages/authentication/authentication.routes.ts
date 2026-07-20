@@ -48,6 +48,12 @@ export const AuthenticationRoutes: Routes = [
   },
 
   {
+    path: 'reset-password/:token',
+    loadComponent: () => import('./reset-password/reset-password.component').then(m => m.ResetPasswordComponent),
+    title: 'Reset Password'
+  },
+
+  {
     path: 'setup-password',
     loadComponent: () => import('./setup-password/setup-password.component').then(m => m.SetupPasswordComponent),
     title: 'Setup Password'

@@ -1,12 +1,12 @@
 <!-- ============================================================== -->
-<!-- Only router without any element -->
+<!-- Blank Layout — Auth / Login / Public pages only              -->
+<!-- Inline styles removed; .blank-wrapper class handles scroll   -->
+<!-- via styles.scss scoped overrides                             -->
 <!-- ============================================================== -->
-<mat-sidenav-container
-  dir="ltr"
-  [class]="'blue_theme ' + currentThemeClass"
-  style="height: auto !important; min-height: 100vh !important; overflow: visible !important; position: relative !important;"
->
-  <mat-sidenav-content style="overflow-y: auto !important; overflow-x: hidden !important; height: auto !important; min-height: 100vh !important; position: relative !important;">
-    <router-outlet></router-outlet>
-  </mat-sidenav-content>
-</mat-sidenav-container>
+<div class="blank-wrapper">
+  <mat-sidenav-container dir="ltr" [class]="'blue_theme ' + currentThemeClass">
+    <mat-sidenav-content>
+      <router-outlet></router-outlet>
+    </mat-sidenav-content>
+  </mat-sidenav-container>
+</div>

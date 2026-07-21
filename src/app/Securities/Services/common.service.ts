@@ -26,12 +26,17 @@ export class CommonService {
     this.cache.clear();
   }
 
+  private cleanEndpoint(endpoint: string): string {
+    return (endpoint || '').replace(/^\/+/, '');
+  }
+
   getApi(endpoint: string, params?: HttpParams | any): Observable<any> {
+    const clean = this.cleanEndpoint(endpoint);
     // Generate a unique cache key based on endpoint and stringified params
-    const cacheKey = `${endpoint}?${params ? JSON.stringify(params) : ''}`;
+    const cacheKey = `${clean}?${params ? JSON.stringify(params) : ''}`;
 
     const network$ = this.http.get(
-      `${this.apiUrl}/${endpoint}`,
+      `${this.apiUrl}/${clean}`,
       { params }
     ).pipe(
       tap(response => {
@@ -73,7 +78,7 @@ export class CommonService {
   postApi(endpoint: string, payload: any): Observable<any> {
     this.clearCache();
     return this.http.post(
-      `${this.apiUrl}/${endpoint}`,
+      `${this.apiUrl}/${this.cleanEndpoint(endpoint)}`,
       payload
     ).pipe(
       catchError(this.handleError)
@@ -83,7 +88,7 @@ export class CommonService {
   putApi(endpoint: string, payload: any): Observable<any> {
     this.clearCache();
     return this.http.put(
-      `${this.apiUrl}/${endpoint}`,
+      `${this.apiUrl}/${this.cleanEndpoint(endpoint)}`,
       payload
     ).pipe(
       catchError(this.handleError)
@@ -93,7 +98,7 @@ export class CommonService {
   deleteApi(endpoint: string): Observable<any> {
     this.clearCache();
     return this.http.delete(
-      `${this.apiUrl}/${endpoint}`
+      `${this.apiUrl}/${this.cleanEndpoint(endpoint)}`
     ).pipe(
       catchError(this.handleError)
     );
@@ -102,7 +107,7 @@ export class CommonService {
   postFormData(endpoint: string, payload: FormData): Observable<any> {
     this.clearCache();
     return this.http.post(
-      `${this.apiUrl}/${endpoint}`,
+      `${this.apiUrl}/${this.cleanEndpoint(endpoint)}`,
       payload
     ).pipe(
       catchError(this.handleError)
@@ -112,7 +117,7 @@ export class CommonService {
   putFormData(endpoint: string, payload: FormData): Observable<any> {
     this.clearCache();
     return this.http.put(
-      `${this.apiUrl}/${endpoint}`,
+      `${this.apiUrl}/${this.cleanEndpoint(endpoint)}`,
       payload
     ).pipe(
       catchError(this.handleError)

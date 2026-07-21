@@ -54,12 +54,29 @@ export class BillingHistoryComponent implements OnInit, OnDestroy {
     this.isLoading.set(true);
     this.commonService.getApi('subscription-invoices').subscribe({
       next: (res: any) => {
-        this.invoices.set(res?.data || []);
-        this.isLoading.set(false);
+        const list = res?.data || [];
+        if (list.length > 0) {
+          this.invoices.set(list);
+          this.isLoading.set(false);
+        } else {
+          // Fallback to billing/history endpoint
+          this.commonService.getApi('billing/history').subscribe({
+            next: (bRes: any) => {
+              this.invoices.set(bRes?.data || []);
+              this.isLoading.set(false);
+            },
+            error: () => this.isLoading.set(false)
+          });
+        }
       },
       error: () => {
-        this.isLoading.set(false);
-        // Rely on global errorInterceptor for user alert toast
+        this.commonService.getApi('billing/history').subscribe({
+          next: (bRes: any) => {
+            this.invoices.set(bRes?.data || []);
+            this.isLoading.set(false);
+          },
+          error: () => this.isLoading.set(false)
+        });
       }
     });
   }

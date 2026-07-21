@@ -1,120 +1,315 @@
-<div class="glass-container">
-  <div class="header">
-    <h2>Subscription Coupons Management</h2>
-    <button (click)="showForm.set(!showForm())">
-      <mat-icon style="vertical-align: middle; margin-right: 4px;">{{ showForm() ? 'close' : 'add' }}</mat-icon>
-      {{ showForm() ? 'Cancel' : 'Create New Coupon' }}
-    </button>
-  </div>
+<div class="liquid-wrapper">
+  <!-- Ambient Liquid Glow Background Orbs -->
+  <div class="liquid-bg-orb liquid-bg-orb-1"></div>
+  <div class="liquid-bg-orb liquid-bg-orb-2"></div>
+  <div class="liquid-bg-orb liquid-bg-orb-3"></div>
 
-  <div class="form-card" *ngIf="showForm()">
-    <h3>Create New Coupon</h3>
-    <form [formGroup]="couponForm" (ngSubmit)="onSubmit()">
-      <div class="form-grid">
-        
-        <mat-form-field appearance="outline">
-          <mat-label>Coupon Code</mat-label>
-          <input matInput formControlName="code" placeholder="e.g. SUMMER50" style="text-transform: uppercase;">
-        </mat-form-field>
+  <!-- Header Banner -->
+  <header class="glass-header">
+    <div class="header-left">
+      <div class="header-badge">
+        <span class="pulse-dot"></span>
+        PROMOTION ENGINE
+      </div>
+      <h1 class="header-title">Subscription Vouchers & Coupons</h1>
+      <p class="header-subtitle">Create, manage, and distribute enterprise discount passcodes and multi-tier trial vouchers.</p>
+    </div>
 
-        <mat-form-field appearance="outline">
-          <mat-label>Discount Type</mat-label>
-          <mat-select formControlName="discount_type">
-            <mat-option *ngFor="let type of discountTypes" [value]="type.value">
-              {{ type.label }}
-            </mat-option>
-          </mat-select>
-        </mat-form-field>
+    <div class="header-actions">
+      <button class="glass-btn primary-glass-btn" (click)="toggleForm()">
+        <mat-icon>{{ showForm() ? 'close' : 'add_circle' }}</mat-icon>
+        <span>{{ showForm() ? 'Close Form' : 'Create New Voucher' }}</span>
+      </button>
+    </div>
+  </header>
 
-        <mat-form-field appearance="outline" *ngIf="['percentage', 'flat', 'extra_days', 'extra_months', 'renewal', 'first_purchase', 'referral'].includes(couponForm.get('discount_type')?.value)">
-          <mat-label>Discount Value</mat-label>
-          <input matInput type="number" formControlName="discount_value">
-        </mat-form-field>
-
-        <mat-form-field appearance="outline" *ngIf="couponForm.get('discount_type')?.value === 'buy_x_get_y'">
-          <mat-label>Buy X Months</mat-label>
-          <input matInput type="number" formControlName="buy_x_months">
-        </mat-form-field>
-
-        <mat-form-field appearance="outline" *ngIf="couponForm.get('discount_type')?.value === 'buy_x_get_y'">
-          <mat-label>Get Y Months</mat-label>
-          <input matInput type="number" formControlName="get_y_months">
-        </mat-form-field>
-
-        <mat-form-field appearance="outline" *ngIf="couponForm.get('discount_type')?.value === 'free_trial_extension'">
-          <mat-label>Free Trial Days</mat-label>
-          <input matInput type="number" formControlName="free_trial_days">
-        </mat-form-field>
-
-        <mat-form-field appearance="outline">
-          <mat-label>Usage Limit (0 for unlimited)</mat-label>
-          <input matInput type="number" formControlName="usage_limit">
-        </mat-form-field>
-
-        <mat-form-field appearance="outline">
-          <mat-label>Min Order Value</mat-label>
-          <input matInput type="number" formControlName="min_order_value">
-        </mat-form-field>
-
-        <mat-form-field appearance="outline">
-          <mat-label>Valid From</mat-label>
-          <input matInput type="date" formControlName="valid_from">
-        </mat-form-field>
-
-        <mat-form-field appearance="outline">
-          <mat-label>Valid Until</mat-label>
-          <input matInput type="date" formControlName="valid_until">
-        </mat-form-field>
+  <!-- Interactive Voucher Creator Drawer / Form -->
+  @if (showForm()) {
+    <div class="glass-card form-drawer">
+      <div class="form-drawer-header">
+        <div class="drawer-title">
+          <mat-icon class="drawer-icon">auto_awesome</mat-icon>
+          <span>Generate Cyber Voucher</span>
+        </div>
+        <p class="drawer-hint">Configure custom rules, discount values, and valid timeframes for subscriptions.</p>
       </div>
 
-      <div class="form-actions">
-        <button type="button" class="btn-cancel" (click)="showForm.set(false)">Cancel</button>
-        <button type="submit" class="btn-submit" [disabled]="couponForm.invalid || isLoading()">
-          Create Coupon
-        </button>
-      </div>
-    </form>
-  </div>
+      <div class="drawer-content-grid">
+        <!-- Form Input Controls -->
+        <form [formGroup]="couponForm" (ngSubmit)="onSubmit()" class="coupon-form">
+          <div class="form-grid">
+            
+            <!-- Code -->
+            <div class="form-group">
+              <label class="form-label">Voucher Passcode</label>
+              <div class="input-wrapper">
+                <mat-icon class="input-icon">confirmation_number</mat-icon>
+                <input 
+                  type="text" 
+                  formControlName="code" 
+                  placeholder="e.g. CYBER50" 
+                  (input)="formatCodeInput($event)"
+                  class="glass-input code-input">
+              </div>
+              @if (couponForm.get('code')?.touched && couponForm.get('code')?.invalid) {
+                <div class="form-error">
+                  Must be uppercase alphanumeric (A-Z, 0-9, -, _)
+                </div>
+              }
+            </div>
 
-  <div class="loading-overlay" *ngIf="isLoading()">
-    <mat-spinner diameter="40"></mat-spinner>
-  </div>
+            <!-- Type -->
+            <div class="form-group">
+              <label class="form-label">Discount Benefit Type</label>
+              <div class="input-wrapper">
+                <mat-icon class="input-icon">tune</mat-icon>
+                <select formControlName="discount_type" class="glass-input glass-select">
+                  @for (t of discountTypes; track t.value) {
+                    <option [value]="t.value">{{ t.label }}</option>
+                  }
+                </select>
+              </div>
+            </div>
 
-  <div class="coupons-grid" *ngIf="!isLoading()">
-    <div class="coupon-card" *ngFor="let coupon of coupons()">
-      <div class="status-badge" [ngClass]="coupon.is_active ? 'active' : 'inactive'">
-        {{ coupon.is_active ? 'Active' : 'Inactive' }}
-      </div>
-      
-      <div class="coupon-code">{{ coupon.code }}</div>
-      <div class="coupon-type">{{ coupon.discount_type | uppercase }}</div>
+            <!-- Dynamic Value depending on type -->
+            @if (['percentage', 'flat', 'extra_days', 'extra_months'].includes(couponForm.get('discount_type')?.value)) {
+              <div class="form-group">
+                <label class="form-label">
+                  {{ couponForm.get('discount_type')?.value === 'percentage' ? 'Percentage Off (%)' : (couponForm.get('discount_type')?.value === 'flat' ? 'Flat Amount (₹)' : 'Bonus Units') }}
+                </label>
+                <div class="input-wrapper">
+                  <mat-icon class="input-icon">analytics</mat-icon>
+                  <input type="number" formControlName="discount_value" placeholder="10" class="glass-input">
+                </div>
+              </div>
+            }
 
-      <div class="coupon-details">
-        <div class="detail-row" *ngIf="coupon.discount_value">
-          <span>Value:</span>
-          <span>{{ coupon.discount_value }}</span>
-        </div>
-        <div class="detail-row" *ngIf="coupon.buy_x_months">
-          <span>Buy X:</span>
-          <span>{{ coupon.buy_x_months }} months</span>
-        </div>
-        <div class="detail-row" *ngIf="coupon.get_y_months">
-          <span>Get Y:</span>
-          <span>{{ coupon.get_y_months }} months</span>
-        </div>
-        <div class="detail-row" *ngIf="coupon.free_trial_days">
-          <span>Extra Trial:</span>
-          <span>{{ coupon.free_trial_days }} days</span>
-        </div>
-        <div class="detail-row">
-          <span>Usage:</span>
-          <span>{{ coupon.used_count }} / {{ coupon.usage_limit > 0 ? coupon.usage_limit : '∞' }}</span>
-        </div>
-        <div class="detail-row" *ngIf="coupon.min_order_value">
-          <span>Min Value:</span>
-          <span>{{ coupon.min_order_value | currency:'INR' }}</span>
+            @if (couponForm.get('discount_type')?.value === 'free_trial_extension') {
+              <div class="form-group">
+                <label class="form-label">Trial Extension (Days)</label>
+                <div class="input-wrapper">
+                  <mat-icon class="input-icon">timelapse</mat-icon>
+                  <input type="number" formControlName="free_trial_days" placeholder="14" class="glass-input">
+                </div>
+              </div>
+            }
+
+            @if (couponForm.get('discount_type')?.value === 'buy_x_get_y') {
+              <div class="form-group">
+                <label class="form-label">Buy Months (X)</label>
+                <div class="input-wrapper">
+                  <mat-icon class="input-icon">shopping_bag</mat-icon>
+                  <input type="number" formControlName="buy_x_months" placeholder="3" class="glass-input">
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Free Months (Y)</label>
+                <div class="input-wrapper">
+                  <mat-icon class="input-icon">card_giftcard</mat-icon>
+                  <input type="number" formControlName="get_y_months" placeholder="1" class="glass-input">
+                </div>
+              </div>
+            }
+
+            <!-- Usage Limit -->
+            <div class="form-group">
+              <label class="form-label">Max Claim Count (0 = Unlimited)</label>
+              <div class="input-wrapper">
+                <mat-icon class="input-icon">people_alt</mat-icon>
+                <input type="number" formControlName="usage_limit" placeholder="100" class="glass-input">
+              </div>
+            </div>
+
+            <!-- Min Order Value -->
+            <div class="form-group">
+              <label class="form-label">Min Cart Value (₹)</label>
+              <div class="input-wrapper">
+                <mat-icon class="input-icon">account_balance_wallet</mat-icon>
+                <input type="number" formControlName="min_order_value" placeholder="0" class="glass-input">
+              </div>
+            </div>
+
+            <!-- Validity Dates -->
+            <div class="form-group">
+              <label class="form-label">Valid From</label>
+              <div class="input-wrapper">
+                <mat-icon class="input-icon">event</mat-icon>
+                <input type="date" formControlName="valid_from" class="glass-input">
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Valid Until</label>
+              <div class="input-wrapper">
+                <mat-icon class="input-icon">event_busy</mat-icon>
+                <input type="date" formControlName="valid_until" class="glass-input">
+              </div>
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <button type="button" class="glass-btn secondary-btn" (click)="toggleForm()">Cancel</button>
+            <button type="submit" class="glass-btn submit-btn" [disabled]="couponForm.invalid || isLoading()">
+              <mat-icon>verified</mat-icon>
+              <span>Publish Voucher Passcode</span>
+            </button>
+          </div>
+        </form>
+
+        <!-- Live Hologram Voucher Ticket Preview -->
+        <div class="voucher-preview-side">
+          <div class="preview-title">Real-Time Ticket Preview</div>
+          <div class="preview-ticket-card">
+            <div class="stub-left">
+              <div class="ticket-brand">SVK CYBER</div>
+              <div class="ticket-badge">{{ getBadgeText(couponForm.value) }}</div>
+            </div>
+            <div class="stub-divider">
+              <div class="cutout top-cut"></div>
+              <div class="dashed-line"></div>
+              <div class="cutout bottom-cut"></div>
+            </div>
+            <div class="stub-right">
+              <div class="preview-code">{{ couponForm.get('code')?.value || 'YOUR-CODE' }}</div>
+              <div class="preview-meta">Claim limit: {{ couponForm.get('usage_limit')?.value || '∞' }} uses</div>
+              <div class="preview-badge">LIVE PREVIEW</div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
+  }
+
+  <!-- Filter & Search Controls Bar -->
+  <div class="glass-controls-bar">
+    <div class="search-box">
+      <mat-icon class="search-icon">search</mat-icon>
+      <input 
+        type="text" 
+        [value]="searchQuery()" 
+        (input)="searchQuery.set($any($event.target).value)" 
+        placeholder="Search vouchers by passcode or discount type..." 
+        class="glass-input search-input">
+    </div>
+
+    <div class="filter-pills">
+      <button class="pill-btn" [class.active]="selectedFilter() === 'all'" (click)="selectedFilter.set('all')">
+        All ({{ coupons().length }})
+      </button>
+      <button class="pill-btn" [class.active]="selectedFilter() === 'active'" (click)="selectedFilter.set('active')">
+        Active
+      </button>
+      <button class="pill-btn" [class.active]="selectedFilter() === 'inactive'" (click)="selectedFilter.set('inactive')">
+        Inactive
+      </button>
+    </div>
   </div>
+
+  <!-- Loading State Loader -->
+  @if (isLoading()) {
+    <div class="loading-state">
+      <mat-spinner diameter="48" class="cyber-spinner"></mat-spinner>
+      <p>Retrieving active voucher keys...</p>
+    </div>
+  }
+
+  <!-- Empty State -->
+  @if (!isLoading() && filteredCoupons().length === 0) {
+    <div class="glass-card empty-card">
+      <div class="empty-icon-wrap">
+        <mat-icon class="empty-icon">confirmation_number</mat-icon>
+      </div>
+      <h3>No Vouchers Found</h3>
+      <p>There are no active voucher codes matching your filter criteria. Click below to create your first promotion passcode.</p>
+      <button class="glass-btn primary-glass-btn" (click)="toggleForm()">
+        <mat-icon>add_circle</mat-icon>
+        <span>Create Coupon Code</span>
+      </button>
+    </div>
+  }
+
+  <!-- Liquid Voucher Ticket Cards Grid -->
+  @if (!isLoading() && filteredCoupons().length > 0) {
+    <div class="vouchers-grid">
+      @for (coupon of filteredCoupons(); track coupon.code || coupon.id) {
+        <div 
+          class="ticket-voucher-card" 
+          [class.coupon-copied]="copiedCode() === coupon.code">
+          
+          <!-- Top Banner Header -->
+          <div class="ticket-header">
+            <span class="status-indicator" [class.active-status]="coupon.is_active" [class.inactive-status]="!coupon.is_active">
+              <span class="status-dot"></span>
+              {{ coupon.is_active ? 'ACTIVE' : 'INACTIVE' }}
+            </span>
+
+            <span class="benefit-chip">
+              {{ getBadgeText(coupon) }}
+            </span>
+          </div>
+
+          <!-- Main Passcode Stub -->
+          <div class="passcode-container">
+            <div class="passcode-display">
+              <span class="code-text">{{ coupon.code }}</span>
+            </div>
+
+            <button 
+              class="copy-btn" 
+              (click)="copyCode(coupon.code)" 
+              [title]="'Copy ' + coupon.code">
+              <mat-icon>{{ copiedCode() === coupon.code ? 'check' : 'content_copy' }}</mat-icon>
+              <span>{{ copiedCode() === coupon.code ? 'Copied' : 'Copy' }}</span>
+            </button>
+          </div>
+
+          <!-- Voucher Ticket Perforation Divider -->
+          <div class="ticket-perforation">
+            <div class="notch notch-left"></div>
+            <div class="dashed-border"></div>
+            <div class="notch notch-right"></div>
+          </div>
+
+          <!-- Voucher Meta Specs -->
+          <div class="ticket-specs">
+            <div class="spec-row">
+              <span class="spec-label">Discount Type</span>
+              <span class="spec-value highlight-text">{{ coupon.discount_type | uppercase }}</span>
+            </div>
+
+            @if (coupon.min_order_value) {
+              <div class="spec-row">
+                <span class="spec-label">Min Order Value</span>
+                <span class="spec-value">₹{{ coupon.min_order_value }}</span>
+              </div>
+            }
+
+            <!-- Usage Progress Meter -->
+            <div class="usage-meter">
+              <div class="meter-labels">
+                <span>Claims Count</span>
+                <span>{{ coupon.used_count }} / {{ coupon.usage_limit > 0 ? coupon.usage_limit : '∞' }}</span>
+              </div>
+              <div class="meter-bar">
+                <div 
+                  class="meter-fill" 
+                  [style.width.%]="coupon.usage_limit > 0 ? (coupon.used_count / coupon.usage_limit) * 100 : 100">
+                </div>
+              </div>
+            </div>
+
+            <!-- Validity Expiration Info -->
+            @if (coupon.valid_until) {
+              <div class="validity-bar">
+                <mat-icon class="clock-icon">schedule</mat-icon>
+                <span>Valid until: {{ coupon.valid_until | date:'longDate' }}</span>
+              </div>
+            }
+          </div>
+
+        </div>
+      }
+    </div>
+  }
+
 </div>

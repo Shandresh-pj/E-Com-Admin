@@ -1,18 +1,211 @@
-<div class="glass-container">
-  <h2>Standard Razorpay Checkout</h2>
-  
-  <div class="input-group">
-    <label>Amount to Pay (INR)</label>
-    <div class="amount-wrapper">
-      <span>₹</span>
-      <input type="number" [(ngModel)]="amountToPay" min="1" step="1">
+<div class="liquid-wrapper">
+  <!-- Ambient Background Orbs -->
+  <div class="liquid-bg-orb orb-1"></div>
+  <div class="liquid-bg-orb orb-2"></div>
+
+  <!-- Header Banner -->
+  <header class="glass-header">
+    <div class="header-left">
+      <div class="security-badge">
+        <mat-icon class="shield-icon">verified_user</mat-icon>
+        256-BIT SSL ENCRYPTED CHECKOUT
+      </div>
+      <h1 class="header-title">Cyber Payment Gateway</h1>
+      <p class="header-subtitle">Instant, secure checkout powered by Razorpay online payments.</p>
+    </div>
+
+    <div class="header-right">
+      <div class="razorpay-trust-card">
+        <span class="trust-label">POWERED BY</span>
+        <span class="trust-brand">Razorpay</span>
+      </div>
+    </div>
+  </header>
+
+  <div class="checkout-layout">
+    <!-- Left Column: Checkout Options & Prefill Form -->
+    <div class="checkout-main">
+      
+      <!-- Amount Selection Section -->
+      <div class="glass-card section-card">
+        <div class="card-title">
+          <mat-icon>payments</mat-icon>
+          <span>Select Payment Amount</span>
+        </div>
+
+        <div class="presets-row">
+          @for (p of presets; track p) {
+            <button 
+              type="button" 
+              class="preset-pill" 
+              [class.active]="amountToPay() === p"
+              (click)="selectPreset(p)">
+              ₹{{ p }}
+            </button>
+          }
+        </div>
+
+        <div class="custom-amount-box">
+          <label class="form-label">Or Enter Custom Amount (INR)</label>
+          <div class="input-wrapper">
+            <span class="currency-prefix">₹</span>
+            <input 
+              type="number" 
+              [ngModel]="amountToPay()" 
+              (ngModelChange)="updateAmount($event)" 
+              min="1" 
+              placeholder="e.g. 500" 
+              class="glass-input custom-input">
+          </div>
+        </div>
+      </div>
+
+      <!-- Customer Details Form -->
+      <div class="glass-card section-card">
+        <div class="card-title">
+          <mat-icon>person</mat-icon>
+          <span>Customer & Receipt Information (Optional)</span>
+        </div>
+
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label">Full Name</label>
+            <div class="input-wrapper">
+              <mat-icon class="input-icon">person_outline</mat-icon>
+              <input type="text" [ngModel]="customerName()" (ngModelChange)="customerName.set($event)" placeholder="John Doe" class="glass-input">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Email Address</label>
+            <div class="input-wrapper">
+              <mat-icon class="input-icon">mail_outline</mat-icon>
+              <input type="email" [ngModel]="customerEmail()" (ngModelChange)="customerEmail.set($event)" placeholder="john@example.com" class="glass-input">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Mobile Number</label>
+            <div class="input-wrapper">
+              <mat-icon class="input-icon">phone</mat-icon>
+              <input type="tel" [ngModel]="customerPhone()" (ngModelChange)="customerPhone.set($event)" placeholder="9876543210" class="glass-input">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Coupon Passcode Section -->
+      <div class="glass-card section-card">
+        <div class="card-title">
+          <mat-icon>confirmation_number</mat-icon>
+          <span>Have a Promotion Coupon?</span>
+        </div>
+
+        <div class="coupon-input-row">
+          <div class="input-wrapper flex-1">
+            <mat-icon class="input-icon">sell</mat-icon>
+            <input 
+              type="text" 
+              [ngModel]="couponCode()" 
+              (ngModelChange)="couponCode.set($event)" 
+              placeholder="Enter Voucher Code (e.g. CYBER10)" 
+              class="glass-input coupon-input" 
+              style="text-transform: uppercase;"
+              [disabled]="appliedCoupon() || isVerifyingCoupon()">
+          </div>
+
+          @if (!appliedCoupon()) {
+            <button 
+              type="button" 
+              class="glass-btn apply-btn" 
+              (click)="applyCoupon()" 
+              [disabled]="isVerifyingCoupon() || !couponCode().trim()">
+              @if (isVerifyingCoupon()) {
+                <mat-spinner diameter="18"></mat-spinner>
+              } @else {
+                <span>Apply</span>
+              }
+            </button>
+          } @else {
+            <button 
+              type="button" 
+              class="glass-btn remove-btn" 
+              (click)="removeCoupon()">
+              Remove
+            </button>
+          }
+        </div>
+
+        @if (appliedCoupon()) {
+          <div class="applied-coupon-badge">
+            <mat-icon class="check-icon">check_circle</mat-icon>
+            <span>Coupon <strong>{{ appliedCoupon()?.code }}</strong> Applied! Discount: ₹{{ discountAmount() }}</span>
+          </div>
+        }
+      </div>
+
+      <!-- Supported Payment Methods Pills -->
+      <div class="methods-bar">
+        <span class="methods-title">SUPPORTED METHODS:</span>
+        <div class="method-pill"><mat-icon>qr_code_2</mat-icon> UPI (GPay/PhonePe/Paytm)</div>
+        <div class="method-pill"><mat-icon>credit_card</mat-icon> Cards (Visa/Mastercard/Rupay)</div>
+        <div class="method-pill"><mat-icon>account_balance</mat-icon> NetBanking</div>
+      </div>
+
+    </div>
+
+    <!-- Right Column: Real-time Order Summary -->
+    <div class="checkout-sidebar">
+      <div class="glass-card summary-card">
+        <div class="summary-header">
+          <div class="summary-title">Order Summary</div>
+          <div class="live-tag">REAL-TIME</div>
+        </div>
+
+        <div class="summary-rows">
+          <div class="summary-row">
+            <span class="row-label">Base Amount</span>
+            <span class="row-val">₹{{ subtotal() }}</span>
+          </div>
+
+          @if (discountAmount() > 0) {
+            <div class="summary-row discount-row">
+              <span class="row-label">Coupon Discount</span>
+              <span class="row-val">-₹{{ discountAmount() }}</span>
+            </div>
+          }
+
+          <div class="summary-row">
+            <span class="row-label">GST Tax (18%)</span>
+            <span class="row-val">+₹{{ gstAmount() }}</span>
+          </div>
+
+          <div class="summary-divider"></div>
+
+          <div class="summary-row total-row">
+            <span class="total-label">Total Payable</span>
+            <span class="total-val">₹{{ totalPayable() }}</span>
+          </div>
+        </div>
+
+        <!-- Pay Button -->
+        <button class="pay-now-btn" (click)="payNow()" [disabled]="isLoading() || totalPayable() < 1">
+          @if (!isLoading()) {
+            <mat-icon>lock</mat-icon>
+            <span>Pay ₹{{ totalPayable() }} Now</span>
+          } @else {
+            <div class="spinner-wrap">
+              <mat-spinner diameter="24" color="accent"></mat-spinner>
+              <span>Processing Gateway...</span>
+            </div>
+          }
+        </button>
+
+        <div class="guarantee-footer">
+          <mat-icon class="lock-icon">security</mat-icon>
+          <span>100% Encrypted & Safe Payment Guarantee</span>
+        </div>
+      </div>
     </div>
   </div>
-
-  <button class="btn-pay" (click)="payNow()" [disabled]="isLoading()">
-    <ng-container *ngIf="!isLoading()">
-      Pay ₹{{ amountToPay() }} Now
-    </ng-container>
-    <mat-spinner *ngIf="isLoading()" diameter="24" color="accent"></mat-spinner>
-  </button>
 </div>

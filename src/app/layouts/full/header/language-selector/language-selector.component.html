@@ -1,0 +1,65 @@
+<div class="lang-selector-container">
+  <!-- Trigger Pill Button -->
+  <button
+    type="button"
+    class="lang-trigger-pill"
+    [matMenuTriggerFor]="langMenu"
+    title="Change Language"
+  >
+    <span class="lang-flag-badge">{{ i18n.activeLanguage().flag_icon }}</span>
+    <span class="lang-code-text">{{ i18n.activeLanguage().code.toUpperCase() }}</span>
+    <i-tabler name="chevron-down" class="icon-12 lang-arrow-icon"></i-tabler>
+  </button>
+
+  <!-- Angular Material Menu Overlay -->
+  <mat-menu #langMenu="matMenu" class="lang-mat-menu-panel" xPosition="before" yPosition="below">
+    <div class="lang-menu-inner" (click)="$event.stopPropagation()">
+      <!-- Header -->
+      <div class="lang-menu-header">
+        <span class="lang-menu-title">Select Language</span>
+        @if (i18n.dir() === 'rtl') {
+          <span class="lang-rtl-pill">RTL Mode</span>
+        }
+      </div>
+
+      <!-- Search Filter -->
+      <div class="lang-search-box">
+        <i-tabler name="search" class="icon-14 lang-search-icon"></i-tabler>
+        <input
+          type="text"
+          class="lang-search-input"
+          [(ngModel)]="searchQuery"
+          placeholder="Search languages…"
+          autocomplete="off"
+        >
+      </div>
+
+      <!-- Language List -->
+      <div class="lang-list">
+        @for (lang of filteredLanguages; track lang.code) {
+          <button
+            type="button"
+            class="lang-item-row"
+            [class.selected]="lang.code === i18n.currentLang()"
+            (click)="selectLanguage(lang)"
+          >
+            <span class="lang-item-flag">{{ lang.flag_icon }}</span>
+            <div class="lang-item-details">
+              <span class="lang-item-name">{{ lang.name }}</span>
+              <span class="lang-item-native">{{ lang.native_name }}</span>
+            </div>
+            @if (lang.direction === 'rtl') {
+              <span class="lang-item-rtl-tag">RTL</span>
+            }
+            @if (lang.code === i18n.currentLang()) {
+              <i-tabler name="check" class="icon-15 lang-check-icon"></i-tabler>
+            }
+          </button>
+        }
+        @if (filteredLanguages.length === 0) {
+          <div class="lang-empty-msg">No matching languages</div>
+        }
+      </div>
+    </div>
+  </mat-menu>
+</div>

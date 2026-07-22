@@ -10,10 +10,12 @@ import { MaterialModule } from 'src/app/material.module';
 import { SubscriptionService } from 'src/app/services/subscription.service';
 import { SocketService } from 'src/app/Securities/Services/socket.service';
 
+import { AppTranslatePipe } from 'src/app/pipes/app-translate.pipe';
+
 @Component({
   selector: 'app-subscription-widget',
   standalone: true,
-  imports: [CommonModule, RouterModule, MaterialModule],
+  imports: [CommonModule, RouterModule, MaterialModule, AppTranslatePipe],
   templateUrl: './subscription-widget.component.html',
   styleUrls: ['./subscription-widget.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,

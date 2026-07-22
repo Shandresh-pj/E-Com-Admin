@@ -5,12 +5,12 @@
         <div class="header-container">
 
             <mat-card-title class="m-b-0">
-                Categories
+                {{ 'category.title' | translate }}
             </mat-card-title>
 
             @if (!Category_Forms && perm.hasRoleAction('canCreate')) {
             <button mat-flat-button class="btn-rounded btn-gradient" (click)="AddNewUser()">
-                <mat-icon>add</mat-icon> Add New Category
+                <mat-icon>add</mat-icon> {{ 'category.add_new' | translate }}
             </button>
             }
 
@@ -34,27 +34,27 @@
         <form [formGroup]="CategoryForm" class="premium-form-grid p-t-24">
             
             <div class="divider">
-                <span>Category Details</span>
+                <span>{{ 'category.details' | translate }}</span>
             </div>
 
             <div class="form-row">
                 <div class="field-container">
-                    <mat-label class="f-w-600 m-b-8 d-block">Category Name <span class="text-danger">*</span></mat-label>
+                    <mat-label class="f-w-600 m-b-8 d-block">{{ 'category.name' | translate }} <span class="text-danger">*</span></mat-label>
                     <mat-form-field appearance="outline" class="w-100">
-                        <input matInput formControlName="name" placeholder="Enter Category Name">
+                        <input matInput formControlName="name" [placeholder]="'category.name' | translate">
                         @if (CategoryForm.get('name')?.hasError('required')) {
-                          <mat-error>Category name is required</mat-error>
+                          <mat-error>{{ 'error.category.name_required' | translate }}</mat-error>
                         } @else if (CategoryForm.get('name')?.hasError('maxlength')) {
-                          <mat-error>Category name cannot exceed 100 characters</mat-error>
+                          <mat-error>{{ 'error.category.name_max' | translate }}</mat-error>
                         }
                     </mat-form-field>
                 </div>
 
                 <div class="field-container">
-                    <mat-label class="f-w-600 m-b-8 d-block">Parent Category</mat-label>
+                    <mat-label class="f-w-600 m-b-8 d-block">{{ 'category.parent' | translate }}</mat-label>
                     <mat-form-field appearance="outline" class="w-100">
-                        <mat-select formControlName="parent_id" placeholder="Select Parent Category (optional)">
-                            <mat-option [value]="null">No Parent</mat-option>
+                        <mat-select formControlName="parent_id" [placeholder]="'category.parent' | translate">
+                            <mat-option [value]="null">{{ 'category.no_parent' | translate }}</mat-option>
                             @for(option of Categories; track option.id) {
                             @if(option.id !== SelectedCategoryId) {
                             <mat-option [value]="option.id">{{option.name}}</mat-option>
@@ -66,14 +66,14 @@
             </div>
 
             <div class="divider">
-                <span>Settings & Media</span>
+                <span>{{ 'category.settings_media' | translate }}</span>
             </div>
 
             <div class="form-row">
                 <div class="field-container">
-                    <mat-label class="f-w-600 m-b-8 d-block">Status <span class="text-danger">*</span></mat-label>
+                    <mat-label class="f-w-600 m-b-8 d-block">{{ 'common.status' | translate }} <span class="text-danger">*</span></mat-label>
                     <mat-form-field appearance="outline" class="w-100">
-                        <mat-select formControlName="StatusId" placeholder="Select Status">
+                        <mat-select formControlName="StatusId" [placeholder]="'common.select_status' | translate">
                             @for(option of Statuses; track option.Id) {
                             <mat-option [value]="option.Id">
                                 <div class="flex items-center gap-8">
@@ -84,13 +84,13 @@
                             }
                         </mat-select>
                         @if (CategoryForm.get('StatusId')?.hasError('required')) {
-                          <mat-error>Status is required</mat-error>
+                          <mat-error>{{ 'error.category.status_required' | translate }}</mat-error>
                         }
                     </mat-form-field>
                 </div>
 
                 <div class="field-container">
-                    <mat-label class="f-w-600 m-b-8 d-block">Category Image</mat-label>
+                    <mat-label class="f-w-600 m-b-8 d-block">{{ 'category.image' | translate }}</mat-label>
                     <input type="file" accept="image/*" (change)="detectFiles($event)" style="padding: 8px 0;">
                     @if (imagePreviewUrl || existingImageUrl) {
                     <div class="m-t-8" style="position: relative; display: inline-block;">
@@ -105,11 +105,11 @@
 
             <div class="form-row single-col">
                 <div class="field-container">
-                    <mat-label class="f-w-600 m-b-8 d-block">Description</mat-label>
+                    <mat-label class="f-w-600 m-b-8 d-block">{{ 'common.description' | translate }}</mat-label>
                     <mat-form-field appearance="outline" class="w-100">
-                        <textarea matInput formControlName="description" placeholder="Enter Description" rows="3"></textarea>
+                        <textarea matInput formControlName="description" [placeholder]="'common.description' | translate" rows="3"></textarea>
                         @if (CategoryForm.get('description')?.hasError('maxlength')) {
-                          <mat-error>Description cannot exceed 500 characters</mat-error>
+                          <mat-error>{{ 'error.description.max' | translate }}</mat-error>
                         }
                     </mat-form-field>
                 </div>
@@ -117,11 +117,11 @@
 
             <div class="flex m-t-12" style="justify-content: flex-end; gap: 16px;">
                 <button mat-stroked-button class="btn-rounded Cancel_Button" type="button" (click)="cancelCategory()">
-                    <mat-icon>close</mat-icon> Cancel
+                    <mat-icon>close</mat-icon> {{ 'common.cancel' | translate }}
                 </button>
                 <button mat-flat-button class="btn-rounded btn-gradient" type="submit" (click)="submit(CategoryForm)">
                     <mat-icon>{{Update_button ? 'save' : 'add'}}</mat-icon>
-                    {{Update_button ? 'Update Category' : 'Save Category'}}
+                    {{ Update_button ? ('category.update' | translate) : ('category.save' | translate) }}
                 </button>
             </div>
         </form>

@@ -7,13 +7,22 @@ import { MatInputModule } from '@angular/material/input';
 import { MatIconModule } from '@angular/material/icon';
 import { AlertService } from 'src/app/Securities/Services/alert.service';
 import { CommonService } from 'src/app/Securities/Services/common.service';
+import { AppTranslatePipe } from 'src/app/pipes/app-translate.pipe';
 
 function passwordMatchValidator(control: AbstractControl): ValidationErrors | null {
   const newPassword = control.get('newPassword')?.value;
-  const confirmPassword = control.get('confirmPassword')?.value;
-  if (newPassword && confirmPassword && newPassword !== confirmPassword) {
-    control.get('confirmPassword')?.setErrors({ passwordMismatch: true });
+  const confirmPassword = control.get('confirmPassword');
+
+  if (!confirmPassword) return null;
+
+  if (newPassword && confirmPassword.value && newPassword !== confirmPassword.value) {
+    confirmPassword.setErrors({ ...confirmPassword.errors, passwordMismatch: true });
     return { passwordMismatch: true };
+  } else if (confirmPassword.errors?.['passwordMismatch']) {
+    delete confirmPassword.errors['passwordMismatch'];
+    if (Object.keys(confirmPassword.errors).length === 0) {
+      confirmPassword.setErrors(null);
+    }
   }
   return null;
 }
@@ -28,7 +37,8 @@ function passwordMatchValidator(control: AbstractControl): ValidationErrors | nu
     MatInputModule,
     MatButtonModule,
     MatCardModule,
-    MatIconModule
+    MatIconModule,
+    AppTranslatePipe
   ],
   templateUrl: './change-password.html',
   styleUrl: './change-password.scss',
@@ -62,7 +72,11 @@ export class ChangePassword {
 
     const payload = {
       currentPassword: form.value.currentPassword,
-      newPassword: form.value.newPassword
+      current_password: form.value.currentPassword,
+      oldPassword: form.value.currentPassword,
+      newPassword: form.value.newPassword,
+      new_password: form.value.newPassword,
+      confirmPassword: form.value.confirmPassword
     };
 
     this.isLoading = true;

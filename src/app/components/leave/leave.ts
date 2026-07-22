@@ -16,6 +16,7 @@ import { AuthService } from 'src/app/Securities/Services/auth.service';
 import { SocketService } from 'src/app/Securities/Services/socket.service';
 import { Subscription } from 'rxjs';
 import { MatTable, TableColumn } from 'src/utils/mat-table/mat-table';
+import { AppTranslatePipe } from 'src/app/pipes/app-translate.pipe';
 
 @Component({
   selector: 'app-leave',
@@ -32,7 +33,8 @@ import { MatTable, TableColumn } from 'src/utils/mat-table/mat-table';
     MatIconModule,
     MatDatepickerModule,
     MatNativeDateModule,
-    MatTable
+    MatTable,
+    AppTranslatePipe
   ],
   templateUrl: './leave.html',
   styleUrl: './leave.scss',

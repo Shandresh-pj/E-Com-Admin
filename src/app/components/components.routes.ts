@@ -29,6 +29,7 @@ import { Notifications } from './notifications/notifications';
 import { Workforce } from './workforce/workforce';
 import { Invoices } from './invoices/invoices';
 import { Approvals } from './approvals/approvals';
+import { EmployeeDocumentsComponent } from './employee-documents/employee-documents';
 import { RoleGuard } from '../Securities/Guard/role.guard';
 import { UserType } from '../Securities/Models/role-access';
 
@@ -354,6 +355,46 @@ export const ComponentsRoutes: Routes = [
       title: 'Workforce Console',
       roles: [SA, A, BM],
       urls: [{ title: 'Workforce Console', url: '/workforce' }]
+    }
+  },
+  {
+    path: 'calendar',
+    loadComponent: () => import('./calendar/calendar').then(m => m.CompanyCalendarComponent),
+    canActivate: [RoleGuard],
+    data: {
+      title: 'Company Calendar',
+      roles: [SA, A, BM, EM],
+      urls: [{ title: 'Company Calendar', url: '/calendar' }]
+    }
+  },
+  {
+    path: 'employee-documents',
+    component: EmployeeDocumentsComponent,
+    canActivate: [RoleGuard],
+    data: {
+      title: 'KYC Document Vault',
+      roles: [SA, A, BM, EM],
+      urls: [{ title: 'KYC Document Vault', url: '/employee-documents' }]
+    }
+  },
+  {
+    path: 'translations',
+    loadComponent: () => import('./translation-management/translation-management').then(m => m.TranslationManagementComponent),
+    canActivate: [RoleGuard],
+    data: {
+      title: 'Translation & Localization Console',
+      roles: [SA, A],
+      urls: [{ title: 'Translation Console', url: '/translations' }]
+    }
+  },
+  {
+    path: 'settings/translations',
+    loadComponent: () => import('./translation-management/translation-management').then(m => m.TranslationManagementComponent),
+    canActivate: [RoleGuard],
+    data: {
+      title: 'Translation & Localization Console',
+      roles: [SA, A],
+      urls: [{ title: 'Settings', url: '/settings' }, { title: 'Translations', url: '/settings/translations' }]
     }
   },
   {

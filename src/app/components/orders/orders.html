@@ -1,10 +1,10 @@
 <mat-card class="cardWithShadow theme-card">
   <mat-card-header>
     <div class="header-container">
-      <mat-card-title class="m-b-0">Orders & Invoicing Management</mat-card-title>
+      <mat-card-title class="m-b-0">{{ 'orders.title' | translate }}</mat-card-title>
       @if (!showCreateForm && !viewDetailsMode && perm.hasRoleAction('canCreate')) {
         <button mat-flat-button color="primary" (click)="toggleCreateForm()">
-          <mat-icon class="icon-16 m-r-4">shopping_cart</mat-icon> Place New Order
+          <mat-icon class="icon-16 m-r-4">shopping_cart</mat-icon> {{ 'orders.place_new' | translate }}
         </button>
       }
     </div>
@@ -18,7 +18,7 @@
         <div class="row">
           <!-- Select Company -->
           <div class="col-lg-6 col-md-6 col-sm-12 m-b-16">
-            <mat-label class="f-w-600 m-b-8 d-block">Company / Shop Branch Owner <span class="text-danger">*</span></mat-label>
+            <mat-label class="f-w-600 m-b-8 d-block">{{ 'orders.company_owner' | translate }} <span class="text-danger">*</span></mat-label>
             <mat-form-field appearance="outline" class="w-100">
               <mat-select formControlName="company_id" placeholder="Select Company">
                 @for(c of companies; track c.id) {
@@ -30,7 +30,7 @@
 
           <!-- Coupon Code Input -->
           <div class="col-lg-6 col-md-6 col-sm-12 m-b-16">
-            <mat-label class="f-w-600 m-b-8 d-block">Promo / Coupon Code</mat-label>
+            <mat-label class="f-w-600 m-b-8 d-block">{{ 'orders.coupon_code' | translate }}</mat-label>
             <mat-form-field appearance="outline" class="w-100">
               <input matInput type="text" formControlName="coupon_code" placeholder="Enter Coupon Code (e.g. WELCOME10)">
             </mat-form-field>
@@ -41,9 +41,9 @@
 
         <!-- Dynamic Items Form Array -->
         <h3 class="f-w-600 m-b-16 d-flex align-items-center justify-content-between">
-          <span>Items Cart</span>
+          <span>{{ 'orders.items_cart' | translate }}</span>
           <button mat-stroked-button color="primary" (click)="addItem()">
-            <mat-icon class="icon-14 m-r-4">add</mat-icon> Add Item
+            <mat-icon class="icon-14 m-r-4">add</mat-icon> {{ 'orders.add_item' | translate }}
           </button>
         </h3>
 
@@ -53,7 +53,7 @@
               
               <!-- Select Product -->
               <div class="col-lg-5 col-md-5 col-sm-12">
-                <mat-label class="f-w-600 m-b-4 d-block">Product <span class="text-danger">*</span></mat-label>
+                <mat-label class="f-w-600 m-b-4 d-block">{{ 'common.product' | translate }} <span class="text-danger">*</span></mat-label>
                 <mat-form-field appearance="outline" class="w-100">
                   <mat-select formControlName="product_id" placeholder="Select Product">
                     @for(p of products; track p.id) {
@@ -65,7 +65,7 @@
 
               <!-- Price (Read-only) -->
               <div class="col-lg-3 col-md-3 col-sm-6">
-                <mat-label class="f-w-600 m-b-4 d-block">Price</mat-label>
+                <mat-label class="f-w-600 m-b-4 d-block">{{ 'common.price' | translate }}</mat-label>
                 <mat-form-field appearance="outline" class="w-100">
                   <input matInput type="number" formControlName="price">
                 </mat-form-field>
@@ -73,7 +73,7 @@
 
               <!-- Quantity -->
               <div class="col-lg-3 col-md-3 col-sm-6">
-                <mat-label class="f-w-600 m-b-4 d-block">Qty <span class="text-danger">*</span></mat-label>
+                <mat-label class="f-w-600 m-b-4 d-block">{{ 'common.qty' | translate }} <span class="text-danger">*</span></mat-label>
                 <mat-form-field appearance="outline" class="w-100">
                   <input matInput type="number" formControlName="quantity">
                 </mat-form-field>
@@ -93,10 +93,10 @@
         <hr class="m-b-24 border-light">
 
         <!-- Payment Details Group -->
-        <h3 class="f-w-600 m-b-16">Payment Information</h3>
+        <h3 class="f-w-600 m-b-16">{{ 'orders.payment_info' | translate }}</h3>
         <div formGroupName="payment" class="row m-b-24">
           <div class="col-lg-3 col-md-6 col-sm-12 m-b-16">
-            <mat-label class="f-w-600 m-b-8 d-block">Payment Method <span class="text-danger">*</span></mat-label>
+            <mat-label class="f-w-600 m-b-8 d-block">{{ 'orders.payment_method' | translate }} <span class="text-danger">*</span></mat-label>
             <mat-form-field appearance="outline" class="w-100">
               <mat-select formControlName="method">
                 <mat-option value="CASH">CASH</mat-option>
@@ -107,7 +107,7 @@
           </div>
 
           <div class="col-lg-3 col-md-6 col-sm-12 m-b-16">
-            <mat-label class="f-w-600 m-b-8 d-block">Payment Status <span class="text-danger">*</span></mat-label>
+            <mat-label class="f-w-600 m-b-8 d-block">{{ 'orders.payment_status' | translate }} <span class="text-danger">*</span></mat-label>
             <mat-form-field appearance="outline" class="w-100">
               <mat-select formControlName="status">
                 <mat-option value="SUCCESS">SUCCESS</mat-option>
@@ -118,14 +118,14 @@
           </div>
 
           <div class="col-lg-3 col-md-6 col-sm-12 m-b-16">
-            <mat-label class="f-w-600 m-b-8 d-block">Transaction ID</mat-label>
+            <mat-label class="f-w-600 m-b-8 d-block">{{ 'orders.transaction_id' | translate }}</mat-label>
             <mat-form-field appearance="outline" class="w-100">
               <input matInput type="text" formControlName="transaction_id" placeholder="Txn ID (if any)">
             </mat-form-field>
           </div>
 
           <div class="col-lg-3 col-md-6 col-sm-12 m-b-16">
-            <mat-label class="f-w-600 m-b-8 d-block">Gateway Provider</mat-label>
+            <mat-label class="f-w-600 m-b-8 d-block">{{ 'orders.gateway' | translate }}</mat-label>
             <mat-form-field appearance="outline" class="w-100">
               <input matInput type="text" formControlName="gateway" placeholder="e.g. Stripe, Razorpay">
             </mat-form-field>
@@ -137,16 +137,16 @@
           <div class="col-lg-4 col-md-6 col-sm-12">
             <div class="summary-box p-16 rounded-8 bg-light-primary">
               <div class="d-flex justify-content-between m-b-8">
-                <span class="text-muted">Subtotal:</span>
+                <span class="text-muted">{{ 'orders.subtotal' | translate }}</span>
                 <span class="f-w-600">${{ calculateSubtotal() | number:'1.2-2' }}</span>
               </div>
               <div class="d-flex justify-content-between m-b-8">
-                <span class="text-muted">Promo Discount:</span>
+                <span class="text-muted">{{ 'orders.promo_discount' | translate }}</span>
                 <span class="f-w-600 text-danger">-${{ calculateDiscountValue() | number:'1.2-2' }}</span>
               </div>
               <hr class="border-light m-y-8">
               <div class="d-flex justify-content-between">
-                <span class="f-w-700 text-primary f-s-16">Grand Total:</span>
+                <span class="f-w-700 text-primary f-s-16">{{ 'orders.grand_total' | translate }}</span>
                 <span class="f-w-800 text-primary f-s-18">${{ calculateTotal() | number:'1.2-2' }}</span>
               </div>
             </div>
@@ -154,9 +154,9 @@
         </div>
 
         <div class="m-t-16">
-          <button mat-stroked-button class="me-3" (click)="toggleCreateForm()" [disabled]="loading">Cancel</button>
+          <button mat-stroked-button class="me-3" (click)="toggleCreateForm()" [disabled]="loading">{{ 'common.cancel' | translate }}</button>
           <button mat-flat-button color="primary" (click)="submitOrder()" [disabled]="loading || orderForm.invalid || items.length === 0">
-            Submit & Process Order
+            {{ 'orders.submit_order' | translate }}
           </button>
         </div>
       </form>
@@ -183,15 +183,15 @@
         <div class="row">
           <!-- Details left -->
           <div class="col-lg-8 col-md-8 col-sm-12">
-            <h4 class="f-w-700 m-b-16 text-dark border-bottom pb-2">Order Items</h4>
+            <h4 class="f-w-700 m-b-16 text-dark border-bottom pb-2">{{ 'orders.order_items' | translate }}</h4>
             <div class="table-responsive m-b-24">
               <table class="w-100 table-items">
                 <thead>
                   <tr class="text-muted border-bottom pb-2">
-                    <th>Product</th>
-                    <th>Price</th>
-                    <th>Qty</th>
-                    <th class="text-end">Total</th>
+                    <th>{{ 'common.product' | translate }}</th>
+                    <th>{{ 'common.price' | translate }}</th>
+                    <th>{{ 'common.qty' | translate }}</th>
+                    <th class="text-end">{{ 'common.total' | translate }}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -209,15 +209,15 @@
             
             <div class="summary-receipt-ledger m-b-24">
               <div class="d-flex justify-content-between m-b-4">
-                <span class="text-muted">Subtotal:</span>
+                <span class="text-muted">{{ 'orders.subtotal' | translate }}</span>
                 <span class="f-w-600">${{ selectedOrder?.subtotal | number:'1.2-2' }}</span>
               </div>
               <div class="d-flex justify-content-between m-b-4">
-                <span class="text-muted">Discount Applied:</span>
+                <span class="text-muted">{{ 'orders.discount_applied' | translate }}</span>
                 <span class="f-w-600 text-danger">-${{ selectedOrder?.discount | number:'1.2-2' }}</span>
               </div>
               <div class="d-flex justify-content-between border-top pt-2">
-                <span class="f-w-700 text-primary f-s-16">Total Amount Paid:</span>
+                <span class="f-w-700 text-primary f-s-16">{{ 'orders.total_paid' | translate }}</span>
                 <span class="f-w-800 text-primary f-s-18">${{ selectedOrder?.total | number:'1.2-2' }}</span>
               </div>
             </div>
@@ -229,20 +229,20 @@
               <div class="qr-box m-b-16 p-12 bg-white rounded-8 shadow-sm">
                 <img [src]="selectedOrder?.qr_code" class="qr-img" alt="Order QR Code Verification">
               </div>
-              <p class="text-muted f-s-12 m-b-24">Scan QR to verify invoice digitally</p>
+              <p class="text-muted f-s-12 m-b-24">{{ 'orders.scan_qr' | translate }}</p>
             }
             
             <button mat-flat-button color="primary" (click)="downloadInvoice(selectedOrder)" class="w-100 m-b-12">
-              <mat-icon class="m-r-4">download</mat-icon> Download PDF Invoice
+              <mat-icon class="m-r-4">download</mat-icon> {{ 'orders.download_pdf' | translate }}
             </button>
           </div>
         </div>
 
         <div class="m-t-24 border-top pt-3">
-          <button mat-stroked-button (click)="closeDetails()" class="me-3">Back to Orders List</button>
+          <button mat-stroked-button (click)="closeDetails()" class="me-3">{{ 'orders.back_to_orders' | translate }}</button>
           @if (perm.hasRoleAction('canDelete')) {
             <button mat-flat-button color="warn" (click)="deleteOrder(selectedOrder)">
-              <mat-icon class="m-r-4">delete</mat-icon> Delete Order
+              <mat-icon class="m-r-4">delete</mat-icon> {{ 'orders.delete_order' | translate }}
             </button>
           }
         </div>

@@ -72,7 +72,9 @@ export class ResetPasswordComponent implements OnInit {
     this.isResetting = true;
     const payload = { 
       token: this.token,
-      password: this.f['password'].value 
+      password: this.f['password'].value,
+      newPassword: this.f['password'].value,
+      new_password: this.f['password'].value
     };
 
     this.commonService.postApi('password/reset-password', payload).subscribe({

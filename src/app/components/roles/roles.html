@@ -5,10 +5,8 @@
         <div class="header-container">
 
             <mat-card-title class="m-b-0">
-                Roles Access
+                {{ 'roles.title' | translate }}
             </mat-card-title>
-
-
 
         </div>
 
@@ -22,13 +20,13 @@
             <div class="row">
 
                 <div class="col-lg-4">
-                    <mat-label class="f-w-600 m-b-8 d-block">Roles Name <span class="text-danger">*</span></mat-label>
+                    <mat-label class="f-w-600 m-b-8 d-block">{{ 'roles.name' | translate }} <span class="text-danger">*</span></mat-label>
                     <mat-form-field appearance="outline" class="w-100">
-                        <input matInput formControlName="name" placeholder="Enter Role Name">
+                        <input matInput formControlName="name" [placeholder]="'roles.placeholder' | translate">
                         @if (RolesForm.get('name')?.hasError('required')) {
-                          <mat-error>Role name is required</mat-error>
+                          <mat-error>{{ 'error.role.name_required' | translate }}</mat-error>
                         } @else if (RolesForm.get('name')?.hasError('maxlength')) {
-                          <mat-error>Role name cannot exceed 100 characters</mat-error>
+                          <mat-error>{{ 'error.role.name_max' | translate }}</mat-error>
                         }
                     </mat-form-field>
                 </div>
@@ -38,15 +36,11 @@
             <div class="m-t-12">
 
                 <button mat-stroked-button class="me-3 Cancel_Button" (click)="cancelRoles()">
-
-                    Cancel
-
+                    {{ 'common.cancel' | translate }}
                 </button>
 
                 <button mat-flat-button color="primary" (click)="onsubmit(RolesForm)">
-
-                     Submit
-
+                    {{ 'common.submit' | translate }}
                 </button>
 
             </div>

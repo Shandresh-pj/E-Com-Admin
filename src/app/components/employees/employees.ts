@@ -10,6 +10,7 @@ import { CommonService } from 'src/app/Securities/Services/common.service';
 import { PermissionService } from 'src/app/Securities/Services/permissions.service';
 import { PHONE_PATTERN } from 'src/utils/app-validators';
 import { MatTable } from 'src/utils/mat-table/mat-table';
+import { AppTranslatePipe } from 'src/app/pipes/app-translate.pipe';
 
 @Component({
   selector: 'app-employees',
@@ -22,7 +23,8 @@ import { MatTable } from 'src/utils/mat-table/mat-table';
     MatButtonModule,
     MatCardModule,
     MatSelectModule,
-    MatTable
+    MatTable,
+    AppTranslatePipe
   ],
   templateUrl: './employees.html',
   styleUrl: './employees.scss',
@@ -182,25 +184,17 @@ export class Employees {
   
   
   onCompanyChange(companyId: number) {
-    const company = this.Companies.find(
-      (x: any) => x.id === companyId
-    );
-  
-    if (company) {
-      // Get unique branches only
-      this.Branch = company.userRoles
-        ?.filter((role: any) => role.branch)
-        .map((role: any) => ({
-          id: role.branch.id,
-          name: role.branch.name
-        }))
-        .filter(
-          (branch: any, index: number, self: any[]) =>
-            index === self.findIndex(
-              (b: any) => b.id === branch.id
-            )
-        ) || [];
+    if (!companyId) {
+      this.Branch = [];
+      return;
     }
+    this.commonService.getApi('branches').subscribe({
+      next: (res: any) => {
+        const allBranches = res?.data || [];
+        this.Branch = allBranches.filter((b: any) => b.company_id === Number(companyId) || b.company?.id === Number(companyId));
+        this.cdr.detectChanges();
+      }
+    });
   
     this.EmployeeForm.patchValue({
       branch_id: ''

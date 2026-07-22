@@ -10,6 +10,7 @@ import {
 } from '@angular/core';
 import { TablerIconsModule } from 'angular-tabler-icons';
 import { MaterialModule } from 'src/app/material.module';
+import { FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import { NgScrollbarModule } from 'ngx-scrollbar';
 import { AlertService } from 'src/app/Securities/Services/alert.service';
@@ -22,6 +23,9 @@ import { NotificationService } from 'src/app/services/notification.service';
 import { environment } from 'src/environment/environment';
 import { Subscription } from 'rxjs';
 
+import { LanguageSelectorComponent } from './language-selector/language-selector.component';
+import { AppTranslatePipe } from 'src/app/pipes/app-translate.pipe';
+
 const FIRST_LOGIN_KEY  = 'svk_first_login_ts';
 const PWD_UPDATED_KEY  = 'svk_pwd_updated';
 const COUNTDOWN_SECS   = 24 * 60 * 60; // 24-hour reminder window
@@ -33,7 +37,10 @@ const COUNTDOWN_SECS   = 24 * 60 * 60; // 24-hour reminder window
     NgScrollbarModule,
     TablerIconsModule,
     MaterialModule,
-    ThemeToggleComponent
+    FormsModule,
+    ThemeToggleComponent,
+    LanguageSelectorComponent,
+    AppTranslatePipe
   ],
   templateUrl: './header.component.html',
   encapsulation: ViewEncapsulation.None,
@@ -56,6 +63,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
 
   // ── Real notifications ────────────────────────────────────────────────
   notifications: any[] = [];
+  notifTab: string = 'all';
   private socketSubscription: Subscription = Subscription.EMPTY;
 
   // ── Password Reminder countdown ─────────────────────────────────────────
@@ -262,6 +270,59 @@ export class HeaderComponent implements OnInit, OnDestroy {
       user.profileImage = null;
       user.avatar = null;
     }
+  }
+
+  // ── Global Search ────────────────────────────────────────────────────
+  globalSearch = '';
+  showSearchDrop = false;
+  searchResults: { name: string; path: string; icon: string }[] = [];
+
+  private readonly allPages = [
+    { name: 'Dashboard', path: '/dashboard', icon: 'layout-grid-add' },
+    { name: 'Profile', path: '/profile', icon: 'user' },
+    { name: 'Attendance', path: '/attendance', icon: 'calendar-stats' },
+    { name: 'Leave Management', path: '/leave', icon: 'calendar-off' },
+    { name: 'Payroll', path: '/payroll', icon: 'cash' },
+    { name: 'Company Calendar', path: '/calendar', icon: 'calendar-event' },
+    { name: 'Document Verification', path: '/employee-documents', icon: 'file-check' },
+    { name: 'Workforce Console', path: '/workforce', icon: 'settings' },
+    { name: 'Workforce Requests', path: '/workforce-requests', icon: 'file-check' },
+    { name: 'Employees', path: '/employees', icon: 'users' },
+    { name: 'Approvals', path: '/approvals', icon: 'checkup-list' },
+    { name: 'Audit Logs', path: '/audit-logs', icon: 'clipboard-list' },
+    { name: 'Roles', path: '/roles', icon: 'shield' },
+    { name: 'Role Access', path: '/role-access', icon: 'shield-check' },
+    { name: 'Change Password', path: '/change-password', icon: 'lock' },
+    { name: 'Notifications', path: '/notifications', icon: 'bell' },
+    { name: 'Products', path: '/product', icon: 'box' },
+    { name: 'Orders', path: '/orders', icon: 'shopping-cart' },
+    { name: 'Invoice Generator', path: '/invoices', icon: 'file-text' },
+    { name: 'Billing History', path: '/billing-history', icon: 'receipt' },
+    { name: 'Profit & Loss', path: '/profit-loss', icon: 'chart-pie' },
+    { name: 'Branch', path: '/branch', icon: 'building' },
+    { name: 'Category', path: '/category', icon: 'folder' },
+    { name: 'Coupons', path: '/coupons', icon: 'ticket' },
+    { name: 'Payments', path: '/payments', icon: 'credit-card' },
+    { name: 'Delivery Tracking', path: '/delivery-tracking', icon: 'truck' },
+    { name: 'Alerts', path: '/alerts', icon: 'alert-circle' },
+  ];
+
+  onGlobalSearch(): void {
+    const q = this.globalSearch.trim().toLowerCase();
+    if (!q) { this.searchResults = []; return; }
+    this.searchResults = this.allPages
+      .filter(p => p.name.toLowerCase().includes(q) || p.path.toLowerCase().includes(q))
+      .slice(0, 8);
+  }
+
+  hideSearchDrop(): void {
+    setTimeout(() => { this.showSearchDrop = false; }, 150);
+  }
+
+  clearSearch(): void {
+    this.globalSearch = '';
+    this.searchResults = [];
+    this.showSearchDrop = false;
   }
 
 }

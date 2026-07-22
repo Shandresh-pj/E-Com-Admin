@@ -12,6 +12,7 @@ import { AlertService } from 'src/app/Securities/Services/alert.service';
 import { PermissionService } from 'src/app/Securities/Services/permissions.service';
 import { environment } from 'src/environment/environment';
 import { MatTable, TableColumn } from 'src/utils/mat-table/mat-table';
+import { AppTranslatePipe } from 'src/app/pipes/app-translate.pipe';
 
 @Component({
   selector: 'app-orders',
@@ -26,7 +27,8 @@ import { MatTable, TableColumn } from 'src/utils/mat-table/mat-table';
     MatInputModule,
     MatSelectModule,
     MatIconModule,
-    MatTable
+    MatTable,
+    AppTranslatePipe
   ],
   templateUrl: './orders.html',
   styleUrl: './orders.scss',

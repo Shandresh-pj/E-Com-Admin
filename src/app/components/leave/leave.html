@@ -1,10 +1,10 @@
 <mat-card class="cardWithShadow theme-card">
   <mat-card-header>
     <div class="header-container">
-      <mat-card-title class="m-b-0">Leave Request Registry</mat-card-title>
+      <mat-card-title class="m-b-0">{{ 'leave.title' | translate }}</mat-card-title>
       @if (!showForm && perm.hasRoleAction('canCreate')) {
         <button mat-flat-button color="primary" (click)="toggleForm()">
-          <mat-icon class="icon-16 m-r-4">add</mat-icon> Apply for Leave
+          <mat-icon class="icon-16 m-r-4">add</mat-icon> {{ 'leave.apply' | translate }}
         </button>
       }
     </div>
@@ -18,9 +18,9 @@
           <!-- Selection Fields (Only shown if NOT auto-mapped) -->
           @if (!detectedEmployee) {
             <div class="col-lg-4 col-md-6 col-sm-12 m-b-16">
-              <mat-label class="f-w-600 m-b-8 d-block">Company <span class="text-danger">*</span></mat-label>
+              <mat-label class="f-w-600 m-b-8 d-block">{{ 'common.company' | translate }} <span class="text-danger">*</span></mat-label>
               <mat-form-field appearance="outline" class="w-100">
-                <mat-select formControlName="company_id" placeholder="Select Company">
+                <mat-select formControlName="company_id" [placeholder]="'common.select_company' | translate">
                   @for(c of companies; track c.id) {
                     <mat-option [value]="c.id">{{ c.name }}</mat-option>
                   }
@@ -29,9 +29,9 @@
             </div>
 
             <div class="col-lg-4 col-md-6 col-sm-12 m-b-16">
-              <mat-label class="f-w-600 m-b-8 d-block">Branch <span class="text-danger">*</span></mat-label>
+              <mat-label class="f-w-600 m-b-8 d-block">{{ 'common.branch' | translate }} <span class="text-danger">*</span></mat-label>
               <mat-form-field appearance="outline" class="w-100">
-                <mat-select formControlName="branch_id" placeholder="Select Branch">
+                <mat-select formControlName="branch_id" [placeholder]="'common.select_branch' | translate">
                   @for(b of branches; track b.id) {
                     <mat-option [value]="b.id">{{ b.name }}</mat-option>
                   }
@@ -40,9 +40,9 @@
             </div>
 
             <div class="col-lg-4 col-md-6 col-sm-12 m-b-16">
-              <mat-label class="f-w-600 m-b-8 d-block">Employee <span class="text-danger">*</span></mat-label>
+              <mat-label class="f-w-600 m-b-8 d-block">{{ 'common.employee' | translate }} <span class="text-danger">*</span></mat-label>
               <mat-form-field appearance="outline" class="w-100">
-                <mat-select formControlName="employee_id" placeholder="Select Employee">
+                <mat-select formControlName="employee_id" [placeholder]="'common.select_employee' | translate">
                   @for(e of employees; track e.id) {
                     <mat-option [value]="e.id">{{ e.name }}</mat-option>
                   }
@@ -53,7 +53,7 @@
 
           <!-- Leave Type Selection -->
           <div class="col-lg-4 col-md-6 col-sm-12 m-b-16">
-            <mat-label class="f-w-600 m-b-8 d-block">Leave Category <span class="text-danger">*</span></mat-label>
+            <mat-label class="f-w-600 m-b-8 d-block">{{ 'leave.category' | translate }} <span class="text-danger">*</span></mat-label>
             <mat-form-field appearance="outline" class="w-100">
               <mat-select formControlName="leave_type">
                 @for(type of leaveTypes; track type) {
@@ -65,7 +65,7 @@
 
           <!-- Date Selectors -->
           <div class="col-lg-4 col-md-6 col-sm-12 m-b-16">
-            <mat-label class="f-w-600 m-b-8 d-block">Start Date <span class="text-danger">*</span></mat-label>
+            <mat-label class="f-w-600 m-b-8 d-block">{{ 'leave.start_date' | translate }} <span class="text-danger">*</span></mat-label>
             <mat-form-field appearance="outline" class="w-100">
               <input matInput [matDatepicker]="fromPicker" formControlName="from_date" placeholder="DD-MM-YYYY" readonly (click)="fromPicker.open()">
               <mat-datepicker-toggle matIconSuffix [for]="fromPicker"></mat-datepicker-toggle>
@@ -74,7 +74,7 @@
           </div>
 
           <div class="col-lg-4 col-md-6 col-sm-12 m-b-16">
-            <mat-label class="f-w-600 m-b-8 d-block">End Date <span class="text-danger">*</span></mat-label>
+            <mat-label class="f-w-600 m-b-8 d-block">{{ 'leave.end_date' | translate }} <span class="text-danger">*</span></mat-label>
             <mat-form-field appearance="outline" class="w-100">
               <input matInput [matDatepicker]="toPicker" formControlName="to_date" placeholder="DD-MM-YYYY" readonly (click)="toPicker.open()">
               <mat-datepicker-toggle matIconSuffix [for]="toPicker"></mat-datepicker-toggle>
@@ -84,7 +84,7 @@
 
           <!-- Display-only Days Calculated -->
           <div class="col-lg-4 col-md-6 col-sm-12 m-b-16">
-            <mat-label class="f-w-600 m-b-8 d-block">Calculated Leave Duration (Days)</mat-label>
+            <mat-label class="f-w-600 m-b-8 d-block">{{ 'leave.duration' | translate }}</mat-label>
             <mat-form-field appearance="outline" class="w-100">
               <input matInput type="number" formControlName="total_days">
             </mat-form-field>
@@ -92,17 +92,17 @@
 
           <!-- Reason Text Box -->
           <div class="col-lg-12 m-b-16">
-            <mat-label class="f-w-600 m-b-8 d-block">Explanation / Reason <span class="text-danger">*</span></mat-label>
+            <mat-label class="f-w-600 m-b-8 d-block">{{ 'leave.reason' | translate }} <span class="text-danger">*</span></mat-label>
             <mat-form-field appearance="outline" class="w-100">
-              <textarea matInput rows="3" formControlName="reason" placeholder="State reason for your leave request"></textarea>
+              <textarea matInput rows="3" formControlName="reason" [placeholder]="'leave.reason_placeholder' | translate"></textarea>
             </mat-form-field>
           </div>
         </div>
 
         <div class="m-t-16">
-          <button mat-stroked-button class="me-3" (click)="toggleForm()" [disabled]="loading">Cancel</button>
+          <button mat-stroked-button class="me-3" (click)="toggleForm()" [disabled]="loading">{{ 'common.cancel' | translate }}</button>
           <button mat-flat-button color="primary" (click)="submitLeaveRequest()" [disabled]="loading || leaveForm.invalid">
-            Submit Leave Request
+            {{ 'leave.submit' | translate }}
           </button>
         </div>
       </form>
@@ -140,10 +140,10 @@
           @if (row.status === 'PENDING' && perm.hasRoleAction('canApprove')) {
             <div class="d-flex gap-8">
               <button mat-flat-button color="primary" class="btn-approve btn-xs" (click)="approveLeave(row)">
-                <mat-icon class="icon-14 m-r-2">check</mat-icon> Approve
+                <mat-icon class="icon-14 m-r-2">check</mat-icon> {{ 'leave.approve' | translate }}
               </button>
               <button mat-flat-button color="warn" class="btn-xs" (click)="rejectLeave(row)">
-                <mat-icon class="icon-14 m-r-2">close</mat-icon> Reject
+                <mat-icon class="icon-14 m-r-2">close</mat-icon> {{ 'leave.reject' | translate }}
               </button>
             </div>
           }

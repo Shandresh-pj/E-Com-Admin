@@ -1,0 +1,483 @@
+<div class="emp-docs-page">
+
+  <!-- ══ PAGE HERO HEADER ═══════════════════════════════════════════════ -->
+  <div class="ed-hero">
+    <div class="ed-hero-bg"></div>
+    <div class="ed-hero-content">
+      <div class="ed-hero-left">
+        <div class="ed-hero-icon-ring">
+          <i-tabler name="file-certificate" class="icon-28 d-flex"></i-tabler>
+        </div>
+        <div>
+          <h1 class="ed-hero-title">KYC Document Vault</h1>
+          <p class="ed-hero-sub">Securely manage, upload, and verify your identity documents</p>
+        </div>
+      </div>
+      <div class="ed-hero-stats">
+        <div class="ed-stat-pill">
+          <span class="ed-stat-dot success"></span>
+          <span class="ed-stat-val">{{ approvedDocs }}</span>
+          <span class="ed-stat-lbl">Verified</span>
+        </div>
+        <div class="ed-stat-pill">
+          <span class="ed-stat-dot warning"></span>
+          <span class="ed-stat-val">{{ pendingDocs }}</span>
+          <span class="ed-stat-lbl">Pending</span>
+        </div>
+        <div class="ed-stat-pill">
+          <span class="ed-stat-dot error"></span>
+          <span class="ed-stat-val">{{ rejectedDocs }}</span>
+          <span class="ed-stat-lbl">Rejected</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ TAB NAV ════════════════════════════════════════════════════════ -->
+  <div class="ed-tab-nav">
+    <button class="ed-tab" [class.active]="activeTab() === 'my-docs'" (click)="setTab('my-docs')">
+      <i-tabler name="files" class="icon-16 d-flex"></i-tabler>
+      My Documents
+    </button>
+    <button class="ed-tab" [class.active]="activeTab() === 'upload'" (click)="setTab('upload')">
+      <i-tabler name="cloud-upload" class="icon-16 d-flex"></i-tabler>
+      Upload Document
+    </button>
+    <button class="ed-tab" [class.active]="activeTab() === 'digilocker'" (click)="setTab('digilocker')">
+      <i-tabler name="shield-lock" class="icon-16 d-flex"></i-tabler>
+      DigiLocker
+      <span class="ed-tab-badge digi">GOV</span>
+    </button>
+    @if (isHR) {
+      <button class="ed-tab" [class.active]="activeTab() === 'hr-queue'" (click)="setTab('hr-queue')">
+        <i-tabler name="shield-check" class="icon-16 d-flex"></i-tabler>
+        HR Verification Queue
+        @if (pendingDocs > 0) {
+          <span class="ed-tab-badge warn">{{ pendingDocs }}</span>
+        }
+      </button>
+    }
+  </div>
+
+  <!-- ══ MY DOCUMENTS TAB ═══════════════════════════════════════════════ -->
+  @if (activeTab() === 'my-docs') {
+    <div class="ed-panel" [@tabSlide]>
+
+      <!-- Filters Row -->
+      <div class="ed-filters">
+        <div class="ed-search-wrap">
+          <i-tabler name="search" class="icon-16 d-flex ed-search-icon"></i-tabler>
+          <input class="ed-search-input" [(ngModel)]="searchQuery" placeholder="Search by document type or number...">
+          @if (searchQuery) {
+            <button class="ed-search-clear" (click)="searchQuery = ''">
+              <i-tabler name="x" class="icon-14 d-flex"></i-tabler>
+            </button>
+          }
+        </div>
+        <div class="ed-filter-chips">
+          <button class="ed-chip" [class.active]="statusFilter === 'ALL'" (click)="statusFilter = 'ALL'">All</button>
+          <button class="ed-chip success" [class.active]="statusFilter === 'APPROVED'" (click)="statusFilter = 'APPROVED'">Approved</button>
+          <button class="ed-chip warning" [class.active]="statusFilter === 'PENDING'" (click)="statusFilter = 'PENDING'">Pending</button>
+          <button class="ed-chip error" [class.active]="statusFilter === 'REJECTED'" (click)="statusFilter = 'REJECTED'">Rejected</button>
+        </div>
+      </div>
+
+      <!-- Loading -->
+      @if (loadingDocs()) {
+        <div class="ed-loading">
+          <div class="ed-spinner"></div>
+          <p>Loading documents...</p>
+        </div>
+      }
+
+      <!-- Document Cards Grid -->
+      @if (!loadingDocs()) {
+        @if (filteredDocs.length === 0) {
+          <div class="ed-empty">
+            <div class="ed-empty-orb">
+              <i-tabler name="folder-open" class="icon-36 d-flex"></i-tabler>
+            </div>
+            <h3>No documents found</h3>
+            <p>Upload your first KYC document or connect DigiLocker to import</p>
+            <button class="ed-btn primary" (click)="setTab('upload')">
+              <i-tabler name="plus" class="icon-16 d-flex"></i-tabler>
+              Upload Document
+            </button>
+          </div>
+        }
+
+        <div class="ed-doc-grid">
+          @for (doc of filteredDocs; track doc.id) {
+            <div class="ed-doc-card" [class]="'status-' + doc.verification_status.toLowerCase()">
+              <div class="ed-doc-card-header">
+                <div class="ed-doc-icon-wrap" [class]="'color-' + getStatusColor(doc.verification_status)">
+                  <i-tabler [name]="getDocTypeIcon(doc.document_type)" class="icon-22 d-flex"></i-tabler>
+                </div>
+                <div class="ed-doc-status-badge" [class]="'badge-' + doc.verification_status.toLowerCase()">
+                  @if (doc.verification_status === 'APPROVED') {
+                    <i-tabler name="circle-check" class="icon-12 d-flex"></i-tabler>
+                  }
+                  @if (doc.verification_status === 'PENDING') {
+                    <i-tabler name="clock" class="icon-12 d-flex"></i-tabler>
+                  }
+                  @if (doc.verification_status === 'REJECTED') {
+                    <i-tabler name="circle-x" class="icon-12 d-flex"></i-tabler>
+                  }
+                  {{ doc.verification_status }}
+                </div>
+              </div>
+              <div class="ed-doc-card-body">
+                <h4 class="ed-doc-type">{{ getDocTypeLabel(doc.document_type) }}</h4>
+                <div class="ed-doc-number">
+                  <i-tabler name="hash" class="icon-13 d-flex"></i-tabler>
+                  <code>{{ doc.document_number || 'Not provided' }}</code>
+                </div>
+                @if (doc.rejection_reason) {
+                  <div class="ed-rejection-note">
+                    <i-tabler name="alert-triangle" class="icon-13 d-flex"></i-tabler>
+                    {{ doc.rejection_reason }}
+                  </div>
+                }
+              </div>
+              <div class="ed-doc-card-footer">
+                <span class="ed-doc-date">{{ doc.created_at | date: 'dd MMM yyyy' }}</span>
+                @if (doc.file_url) {
+                  <a [href]="doc.file_url" target="_blank" class="ed-view-link">
+                    <i-tabler name="external-link" class="icon-13 d-flex"></i-tabler>
+                    View
+                  </a>
+                }
+              </div>
+            </div>
+          }
+        </div>
+      }
+    </div>
+  }
+
+  <!-- ══ UPLOAD TAB ═════════════════════════════════════════════════════ -->
+  @if (activeTab() === 'upload') {
+    <div class="ed-panel ed-upload-panel">
+
+      <!-- Mode Toggle -->
+      <div class="ed-upload-mode-toggle">
+        <button class="ed-mode-btn" [class.active]="uploadMode() === 'manual'" (click)="uploadMode.set('manual')">
+          <i-tabler name="upload" class="icon-16 d-flex"></i-tabler>
+          Manual Upload
+        </button>
+        <button class="ed-mode-btn" [class.active]="uploadMode() === 'digilocker'" (click)="setTab('digilocker')">
+          <i-tabler name="shield-lock" class="icon-16 d-flex"></i-tabler>
+          Via DigiLocker
+        </button>
+      </div>
+
+      <div class="ed-upload-form-grid">
+
+        <!-- Drop Zone -->
+        <div class="ed-dropzone">
+          @if (filePreview) {
+            <div class="ed-file-preview">
+              <img [src]="filePreview" alt="Preview" class="ed-preview-img">
+              <button class="ed-remove-file" (click)="selectedFile = null; filePreview = null">
+                <i-tabler name="x" class="icon-14 d-flex"></i-tabler>
+              </button>
+            </div>
+          } @else {
+            <label for="docFileInput" class="ed-dropzone-inner">
+              <div class="ed-dropzone-icon">
+                <i-tabler name="cloud-upload" class="icon-36 d-flex"></i-tabler>
+              </div>
+              <p class="ed-dropzone-title">Drag & drop your document</p>
+              <p class="ed-dropzone-sub">or <span class="ed-dropzone-link">browse files</span></p>
+              <p class="ed-dropzone-formats">Supported: JPG, PNG, PDF, HEIC · Max 10MB</p>
+              <input id="docFileInput" type="file" hidden accept="image/*,.pdf" (change)="onFileSelected($event)">
+            </label>
+          }
+        </div>
+
+        <!-- Form Fields -->
+        <div class="ed-form-fields">
+          <form [formGroup]="docForm" (ngSubmit)="uploadDocument()">
+
+            <div class="ed-field-group">
+              <label class="ed-field-label">
+                <i-tabler name="file-description" class="icon-14 d-flex"></i-tabler>
+                Document Type
+              </label>
+              <div class="ed-doc-type-grid">
+                @for (dt of docTypes; track dt.value) {
+                  <button type="button" class="ed-type-card"
+                    [class.selected]="docForm.get('document_type')?.value === dt.value"
+                    (click)="docForm.get('document_type')?.setValue(dt.value)">
+                    <i-tabler [name]="dt.icon" class="icon-18 d-flex"></i-tabler>
+                    <span>{{ dt.label }}</span>
+                  </button>
+                }
+              </div>
+            </div>
+
+            <div class="ed-field-group">
+              <label class="ed-field-label">
+                <i-tabler name="hash" class="icon-14 d-flex"></i-tabler>
+                Document Number <span class="required-star">*</span>
+              </label>
+              <input class="ed-text-input" formControlName="document_number"
+                placeholder="e.g. XXXX XXXX XXXX (Aadhaar) / ABCDE1234F (PAN)">
+              @if (docForm.get('document_number')?.touched && docForm.get('document_number')?.invalid) {
+                <span class="ed-error-msg">Document number is required</span>
+              }
+            </div>
+
+            <div class="ed-field-group">
+              <label class="ed-field-label">
+                <i-tabler name="link" class="icon-14 d-flex"></i-tabler>
+                Document URL (Optional if uploading file)
+              </label>
+              <input class="ed-text-input" formControlName="file_url" placeholder="https://...">
+            </div>
+
+            <div class="ed-field-group">
+              <label class="ed-field-label">
+                <i-tabler name="message" class="icon-14 d-flex"></i-tabler>
+                Notes (Optional)
+              </label>
+              <textarea class="ed-textarea" formControlName="notes" rows="2"
+                placeholder="Any additional details..."></textarea>
+            </div>
+
+            <div class="ed-form-actions">
+              <button type="button" class="ed-btn ghost" (click)="setTab('my-docs')">Cancel</button>
+              <button type="submit" class="ed-btn primary" [disabled]="uploading">
+                @if (uploading) {
+                  <div class="ed-btn-spinner"></div>
+                  Submitting...
+                } @else {
+                  <i-tabler name="send" class="icon-16 d-flex"></i-tabler>
+                  Submit for Verification
+                }
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- ══ DIGILOCKER TAB ═════════════════════════════════════════════════ -->
+  @if (activeTab() === 'digilocker') {
+    <div class="ed-panel ed-digi-panel">
+
+      @if (!digilockerConnected()) {
+        <div class="ed-digi-connect">
+          <div class="ed-digi-logo-wrap">
+            <div class="ed-digi-logo">
+              <i-tabler name="shield-lock" class="icon-40 d-flex"></i-tabler>
+            </div>
+          </div>
+          <h2 class="ed-digi-title">Connect DigiLocker</h2>
+          <p class="ed-digi-desc">
+            DigiLocker is a government-issued digital document wallet that lets you access
+            your Aadhaar, PAN, Driving License, and other official documents instantly.
+          </p>
+          <div class="ed-digi-features">
+            <div class="ed-digi-feature">
+              <i-tabler name="shield-check" class="icon-18 d-flex"></i-tabler>
+              <span>Government verified documents</span>
+            </div>
+            <div class="ed-digi-feature">
+              <i-tabler name="lock" class="icon-18 d-flex"></i-tabler>
+              <span>End-to-end encrypted access</span>
+            </div>
+            <div class="ed-digi-feature">
+              <i-tabler name="bolt" class="icon-18 d-flex"></i-tabler>
+              <span>Instant import — no re-typing</span>
+            </div>
+          </div>
+          <button class="ed-btn digi-connect" (click)="connectDigiLocker()" [disabled]="digilockerLoading()">
+            @if (digilockerLoading()) {
+              <div class="ed-btn-spinner"></div>
+              Connecting to DigiLocker...
+            } @else {
+              <i-tabler name="shield-lock" class="icon-18 d-flex"></i-tabler>
+              Connect with DigiLocker
+            }
+          </button>
+          <p class="ed-digi-disclaimer">
+            <i-tabler name="info-circle" class="icon-13 d-flex"></i-tabler>
+            You will be redirected to the official DigiLocker portal for secure authentication
+          </p>
+        </div>
+      }
+
+      @if (digilockerConnected()) {
+        <div class="ed-digi-connected">
+          <div class="ed-digi-connected-header">
+            <div class="ed-digi-status-badge">
+              <i-tabler name="circle-check" class="icon-16 d-flex"></i-tabler>
+              DigiLocker Connected
+            </div>
+            <p>Your DigiLocker documents are available to import</p>
+          </div>
+
+          <div class="ed-digi-doc-list">
+            @for (doc of digilockerDocs(); track doc.type) {
+              <div class="ed-digi-doc-item">
+                <div class="ed-digi-doc-icon">
+                  <i-tabler [name]="doc.icon" class="icon-22 d-flex"></i-tabler>
+                </div>
+                <div class="ed-digi-doc-info">
+                  <h4>{{ doc.name }}</h4>
+                  <div class="ed-digi-doc-meta">
+                    <span>{{ doc.issuer }}</span>
+                    <span class="separator">·</span>
+                    <span>Issued {{ doc.date | date: 'dd MMM yyyy' }}</span>
+                  </div>
+                </div>
+                <span class="ed-digi-valid-badge">
+                  <i-tabler name="check" class="icon-12 d-flex"></i-tabler>
+                  {{ doc.status }}
+                </span>
+                <button class="ed-btn sm primary" (click)="importFromDigiLocker(doc)">
+                  <i-tabler name="download" class="icon-14 d-flex"></i-tabler>
+                  Import
+                </button>
+              </div>
+            }
+          </div>
+        </div>
+      }
+    </div>
+  }
+
+  <!-- ══ HR VERIFICATION QUEUE ══════════════════════════════════════════ -->
+  @if (activeTab() === 'hr-queue' && isHR) {
+    <div class="ed-panel">
+      <div class="ed-hr-header">
+        <h3 class="ed-section-title">
+          <i-tabler name="shield-check" class="icon-20 d-flex"></i-tabler>
+          Company KYC Verification Queue
+        </h3>
+        <p class="ed-section-sub">Review and approve or reject employee document submissions</p>
+      </div>
+
+      <!-- Filters -->
+      <div class="ed-filters">
+        <div class="ed-search-wrap">
+          <i-tabler name="search" class="icon-16 d-flex ed-search-icon"></i-tabler>
+          <input class="ed-search-input" [(ngModel)]="searchQuery" placeholder="Search employee ID or document type...">
+        </div>
+        <div class="ed-filter-chips">
+          <button class="ed-chip" [class.active]="statusFilter === 'ALL'" (click)="statusFilter = 'ALL'">All</button>
+          <button class="ed-chip warning" [class.active]="statusFilter === 'PENDING'" (click)="statusFilter = 'PENDING'">Pending Review</button>
+          <button class="ed-chip success" [class.active]="statusFilter === 'APPROVED'" (click)="statusFilter = 'APPROVED'">Approved</button>
+          <button class="ed-chip error" [class.active]="statusFilter === 'REJECTED'" (click)="statusFilter = 'REJECTED'">Rejected</button>
+        </div>
+      </div>
+
+      @if (loadingDocs()) {
+        <div class="ed-loading">
+          <div class="ed-spinner"></div>
+          <p>Loading verification queue...</p>
+        </div>
+      }
+
+      @if (!loadingDocs()) {
+        <div class="ed-hr-table-wrap">
+          <table class="ed-table">
+            <thead>
+              <tr>
+                <th>Document</th>
+                <th>Employee ID</th>
+                <th>Doc Number</th>
+                <th>Submitted</th>
+                <th>Status</th>
+                <th class="text-end">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (doc of filteredDocs; track doc.id) {
+                <tr class="ed-table-row">
+                  <td>
+                    <div class="ed-table-doc-cell">
+                      <div class="ed-table-doc-icon">
+                        <i-tabler [name]="getDocTypeIcon(doc.document_type)" class="icon-16 d-flex"></i-tabler>
+                      </div>
+                      <span>{{ getDocTypeLabel(doc.document_type) }}</span>
+                    </div>
+                  </td>
+                  <td><span class="ed-emp-id">EMP-{{ doc.employee_id }}</span></td>
+                  <td><code class="ed-code">{{ doc.document_number || 'N/A' }}</code></td>
+                  <td class="ed-date-cell">{{ doc.created_at | date: 'dd MMM yyyy' }}</td>
+                  <td>
+                    <span class="ed-doc-status-badge" [class]="'badge-' + doc.verification_status.toLowerCase()">
+                      {{ doc.verification_status }}
+                    </span>
+                  </td>
+                  <td class="text-end">
+                    <div class="ed-action-btns">
+                      @if (doc.file_url) {
+                        <a [href]="doc.file_url" target="_blank" class="ed-action-link" title="View Document">
+                          <i-tabler name="eye" class="icon-14 d-flex"></i-tabler>
+                        </a>
+                      }
+                      @if (doc.verification_status === 'PENDING') {
+                        <button class="ed-btn sm success" (click)="approveDocument(doc.id)">
+                          <i-tabler name="check" class="icon-13 d-flex"></i-tabler>
+                          Approve
+                        </button>
+                        <button class="ed-btn sm error" (click)="openRejectModal(doc.id)">
+                          <i-tabler name="x" class="icon-13 d-flex"></i-tabler>
+                          Reject
+                        </button>
+                      } @else {
+                        <span class="ed-reviewed-label">Reviewed</span>
+                      }
+                    </div>
+                  </td>
+                </tr>
+              }
+              @if (filteredDocs.length === 0) {
+                <tr>
+                  <td colspan="6" class="ed-table-empty">
+                    <i-tabler name="inbox" class="icon-28 d-flex"></i-tabler>
+                    <p>No documents in this queue</p>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </div>
+  }
+
+</div>
+
+<!-- ══ REJECTION MODAL ═══════════════════════════════════════════════════ -->
+@if (rejectionModal()) {
+  <div class="ed-modal-overlay" (click)="closeRejectModal()">
+    <div class="ed-modal-box" (click)="$event.stopPropagation()">
+      <div class="ed-modal-header">
+        <div class="ed-modal-icon error">
+          <i-tabler name="alert-triangle" class="icon-20 d-flex"></i-tabler>
+        </div>
+        <h3>Reject Document</h3>
+        <button class="ed-modal-close" (click)="closeRejectModal()">
+          <i-tabler name="x" class="icon-16 d-flex"></i-tabler>
+        </button>
+      </div>
+      <div class="ed-modal-body">
+        <label class="ed-field-label">Rejection Reason <span class="required-star">*</span></label>
+        <textarea class="ed-textarea" [(ngModel)]="rejectionReason" rows="3"
+          placeholder="Explain why this document is being rejected..."></textarea>
+      </div>
+      <div class="ed-modal-actions">
+        <button class="ed-btn ghost" (click)="closeRejectModal()">Cancel</button>
+        <button class="ed-btn error" (click)="submitRejection()" [disabled]="!rejectionReason.trim()">
+          <i-tabler name="x" class="icon-16 d-flex"></i-tabler>
+          Confirm Rejection
+        </button>
+      </div>
+    </div>
+  </div>
+}

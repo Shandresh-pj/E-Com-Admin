@@ -12,6 +12,7 @@ import { CommonService } from 'src/app/Securities/Services/common.service';
 import { PermissionService } from 'src/app/Securities/Services/permissions.service';
 import { PHONE_PATTERN } from 'src/utils/app-validators';
 import { MatTable } from 'src/utils/mat-table/mat-table';
+import { AppTranslatePipe } from 'src/app/pipes/app-translate.pipe';
 
 @Component({
   selector: 'app-branch',
@@ -24,7 +25,8 @@ import { MatTable } from 'src/utils/mat-table/mat-table';
     MatButtonModule,
     MatCardModule,
     MatSelectModule,
-    MatTable
+    MatTable,
+    AppTranslatePipe
   ],
   templateUrl: './branch.html',
   styleUrl: './branch.scss',

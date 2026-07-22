@@ -2,23 +2,23 @@
   <div class="col-lg-12">
     <mat-card class="cardWithShadow theme-card">
       <mat-card-header class="p-x-24 p-y-16">
-        <mat-card-title class="m-b-0 f-w-600">Workforce Config Console</mat-card-title>
+        <mat-card-title class="m-b-0 f-w-600">{{ 'workforce.config_console' | translate }}</mat-card-title>
       </mat-card-header>
       <mat-card-content class="p-0 b-t-1">
         <mat-tab-group (selectedTabChange)="onTabChange($event)" class="workforce-tabs">
 
           <!-- ─── TAB 1: SHIFTS & SCHEDULES ─────────────────────────────────── -->
-          <mat-tab label="Shifts & Schedules">
+          <mat-tab [label]="'workforce.shifts_tab' | translate">
             <div class="p-24">
               @if (!showShiftForm) {
                 <div class="row">
                   <!-- Shifts Table -->
                   <div class="col-lg-7">
                     <div class="d-flex justify-content-between align-items-center m-b-16">
-                      <h4 class="f-w-600 m-b-0 text-dark">Shift Calendars</h4>
+                      <h4 class="f-w-600 m-b-0 text-dark">{{ 'workforce.shift_calendars' | translate }}</h4>
                       @if (perm.hasRoleAction('canCreate')) {
                         <button mat-flat-button color="primary" (click)="createShift()">
-                          <mat-icon class="icon-18 m-r-4">add</mat-icon> Add Shift
+                          <mat-icon class="icon-18 m-r-4">add</mat-icon> {{ 'workforce.add_shift' | translate }}
                         </button>
                       }
                     </div>
@@ -42,7 +42,7 @@
                   <div class="col-lg-5">
                     <mat-card class="cardWithShadow border-dashed-primary m-b-0">
                       <mat-card-header class="p-x-20 p-y-16">
-                        <mat-card-title class="m-b-0 f-w-600 f-s-14">Bulk Shift Assignment</mat-card-title>
+                        <mat-card-title class="m-b-0 f-w-600 f-s-14">{{ 'workforce.bulk_assign' | translate }}</mat-card-title>
                       </mat-card-header>
                       <mat-card-content class="p-20 b-t-1">
                         <form [formGroup]="shiftAssignForm" (ngSubmit)="submitShiftAssign()">

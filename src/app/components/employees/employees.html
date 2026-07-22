@@ -2,9 +2,9 @@
 
     <mat-card-header>
         <div class="header-container">
-            <mat-card-title class="m-b-0">Employees</mat-card-title>
+            <mat-card-title class="m-b-0">{{ 'employee.title' | translate }}</mat-card-title>
             @if (!Employee_Forms && !View_Mode && perm.hasRoleAction('canCreate')) {
-                <button mat-flat-button color="primary" (click)="AddNewUser()">Add New Employee</button>
+                <button mat-flat-button color="primary" (click)="AddNewUser()">{{ 'employee.add_new' | translate }}</button>
             }
         </div>
     </mat-card-header>
@@ -32,43 +32,43 @@
         <div class="row p-t-16">
 
             <div class="col-lg-4 m-b-16">
-                <p class="f-w-600 m-b-4 text-muted">Employee Name</p>
+                <p class="f-w-600 m-b-4 text-muted">{{ 'employee.view.name' | translate }}</p>
                 <p class="f-s-16">{{ SelectedEmployee?.name || '-' }}</p>
             </div>
 
             <div class="col-lg-4 m-b-16">
-                <p class="f-w-600 m-b-4 text-muted">Email</p>
+                <p class="f-w-600 m-b-4 text-muted">{{ 'common.email' | translate }}</p>
                 <p class="f-s-16">{{ SelectedEmployee?.email || '-' }}</p>
             </div>
 
             <div class="col-lg-4 m-b-16">
-                <p class="f-w-600 m-b-4 text-muted">Mobile Number</p>
+                <p class="f-w-600 m-b-4 text-muted">{{ 'common.mobile' | translate }}</p>
                 <p class="f-s-16">{{ SelectedEmployee?.mobilenumber || '-' }}</p>
             </div>
 
             <div class="col-lg-4 m-b-16">
-                <p class="f-w-600 m-b-4 text-muted">Employee Type</p>
+                <p class="f-w-600 m-b-4 text-muted">{{ 'employee.type' | translate }}</p>
                 <p class="f-s-16">{{ SelectedEmployee?.userType?.replace('_', ' ') || '-' }}</p>
             </div>
 
             <div class="col-lg-4 m-b-16">
-                <p class="f-w-600 m-b-4 text-muted">Company</p>
+                <p class="f-w-600 m-b-4 text-muted">{{ 'employee.view.company' | translate }}</p>
                 <p class="f-s-16">{{ SelectedEmployee?.userRoles?.[0]?.company?.name || '-' }}</p>
             </div>
 
             <div class="col-lg-4 m-b-16">
-                <p class="f-w-600 m-b-4 text-muted">Branch</p>
+                <p class="f-w-600 m-b-4 text-muted">{{ 'employee.view.branch' | translate }}</p>
                 <p class="f-s-16">{{ SelectedEmployee?.userRoles?.[0]?.branch?.name || '-' }}</p>
             </div>
 
             <div class="col-lg-4 m-b-16">
-                <p class="f-w-600 m-b-4 text-muted">Role</p>
+                <p class="f-w-600 m-b-4 text-muted">{{ 'employee.view.role' | translate }}</p>
                 <p class="f-s-16">{{ SelectedEmployee?.userRoles?.[0]?.role?.name || '-' }}</p>
             </div>
 
         </div>
         <div class="m-t-12">
-            <button mat-stroked-button (click)="closeView()">Back to List</button>
+            <button mat-stroked-button (click)="closeView()">{{ 'common.back_to_list' | translate }}</button>
         </div>
     </mat-card-content>
 
@@ -82,99 +82,99 @@
 
                 <!-- Company -->
                 <div class="col-lg-4">
-                    <mat-label class="f-w-600 m-b-8 d-block">Company <span class="text-danger">*</span></mat-label>
+                    <mat-label class="f-w-600 m-b-8 d-block">{{ 'common.company' | translate }} <span class="text-danger">*</span></mat-label>
                     <mat-form-field appearance="outline" class="w-100">
-                        <mat-select formControlName="company_id" placeholder="Select Company">
+                        <mat-select formControlName="company_id" [placeholder]="'common.select_company' | translate">
                             @for (option of Companies; track option.id) {
                                 <mat-option [value]="option.id">{{ option.name }}</mat-option>
                             }
                         </mat-select>
                         @if (EmployeeForm.get('company_id')?.hasError('required')) {
-                            <mat-error>Company is required</mat-error>
+                            <mat-error>{{ 'error.company.required' | translate }}</mat-error>
                         }
                     </mat-form-field>
                 </div>
 
                 <!-- Branch -->
                 <div class="col-lg-4">
-                    <mat-label class="f-w-600 m-b-8 d-block">Branch <span class="text-danger">*</span></mat-label>
+                    <mat-label class="f-w-600 m-b-8 d-block">{{ 'common.branch' | translate }} <span class="text-danger">*</span></mat-label>
                     <mat-form-field appearance="outline" class="w-100">
-                        <mat-select formControlName="branch_id" placeholder="Select Branch">
+                        <mat-select formControlName="branch_id" [placeholder]="'common.select_branch' | translate">
                             @for (option of Branch; track option.id) {
                                 <mat-option [value]="option.id">{{ option.name }}</mat-option>
                             }
                         </mat-select>
                         @if (EmployeeForm.get('branch_id')?.hasError('required')) {
-                            <mat-error>Branch is required</mat-error>
+                            <mat-error>{{ 'error.branch.required' | translate }}</mat-error>
                         }
                     </mat-form-field>
                 </div>
 
                 <!-- Role -->
                 <div class="col-lg-4">
-                    <mat-label class="f-w-600 m-b-8 d-block">Role <span class="text-danger">*</span></mat-label>
+                    <mat-label class="f-w-600 m-b-8 d-block">{{ 'common.role' | translate }} <span class="text-danger">*</span></mat-label>
                     <mat-form-field appearance="outline" class="w-100">
-                        <mat-select formControlName="role_id" placeholder="Select Role">
+                        <mat-select formControlName="role_id" [placeholder]="'common.select_role' | translate">
                             @for (option of Roles; track option.id) {
                                 <mat-option [value]="option.id">{{ option.name }}</mat-option>
                             }
                         </mat-select>
                         @if (EmployeeForm.get('role_id')?.hasError('required')) {
-                            <mat-error>Role is required</mat-error>
+                            <mat-error>{{ 'error.role.required' | translate }}</mat-error>
                         }
                     </mat-form-field>
                 </div>
 
                 <!-- Employee Name -->
                 <div class="col-lg-4">
-                    <mat-label class="f-w-600 m-b-8 d-block">Employee Name <span class="text-danger">*</span></mat-label>
+                    <mat-label class="f-w-600 m-b-8 d-block">{{ 'employee.name' | translate }} <span class="text-danger">*</span></mat-label>
                     <mat-form-field appearance="outline" class="w-100">
-                        <input matInput formControlName="name" placeholder="Enter Employee Name">
+                        <input matInput formControlName="name" [placeholder]="'employee.name' | translate">
                         @if (EmployeeForm.get('name')?.hasError('required')) {
-                            <mat-error>Employee name is required</mat-error>
+                            <mat-error>{{ 'error.employee.name_required' | translate }}</mat-error>
                         } @else if (EmployeeForm.get('name')?.hasError('maxlength')) {
-                            <mat-error>Employee name cannot exceed 100 characters</mat-error>
+                            <mat-error>{{ 'error.employee.name_max' | translate }}</mat-error>
                         }
                     </mat-form-field>
                 </div>
 
                 <!-- Mobile Number -->
                 <div class="col-lg-4">
-                    <mat-label class="f-w-600 m-b-8 d-block">Mobile Number <span class="text-danger">*</span></mat-label>
+                    <mat-label class="f-w-600 m-b-8 d-block">{{ 'common.mobile' | translate }} <span class="text-danger">*</span></mat-label>
                     <mat-form-field appearance="outline" class="w-100">
-                        <input matInput formControlName="mobilenumber" placeholder="Enter 10-digit Mobile Number">
+                        <input matInput formControlName="mobilenumber" [placeholder]="'common.mobile' | translate">
                         @if (EmployeeForm.get('mobilenumber')?.hasError('required')) {
-                            <mat-error>Mobile number is required</mat-error>
+                            <mat-error>{{ 'error.mobile.required' | translate }}</mat-error>
                         } @else if (EmployeeForm.get('mobilenumber')?.hasError('pattern')) {
-                            <mat-error>Enter a valid 10-digit mobile number</mat-error>
+                            <mat-error>{{ 'error.mobile.pattern' | translate }}</mat-error>
                         }
                     </mat-form-field>
                 </div>
 
                 <!-- Email -->
                 <div class="col-lg-4">
-                    <mat-label class="f-w-600 m-b-8 d-block">Email <span class="text-danger">*</span></mat-label>
+                    <mat-label class="f-w-600 m-b-8 d-block">{{ 'common.email' | translate }} <span class="text-danger">*</span></mat-label>
                     <mat-form-field appearance="outline" class="w-100">
-                        <input matInput formControlName="email" placeholder="Enter Email">
+                        <input matInput formControlName="email" [placeholder]="'common.email' | translate">
                         @if (EmployeeForm.get('email')?.hasError('required')) {
-                            <mat-error>Email is required</mat-error>
+                            <mat-error>{{ 'error.email.required' | translate }}</mat-error>
                         } @else if (EmployeeForm.get('email')?.hasError('email')) {
-                            <mat-error>Enter a valid email address</mat-error>
+                            <mat-error>{{ 'error.email.invalid' | translate }}</mat-error>
                         }
                     </mat-form-field>
                 </div>
 
                 <!-- Employee Type -->
                 <div class="col-lg-4">
-                    <mat-label class="f-w-600 m-b-8 d-block">Employee Type <span class="text-danger">*</span></mat-label>
+                    <mat-label class="f-w-600 m-b-8 d-block">{{ 'employee.type' | translate }} <span class="text-danger">*</span></mat-label>
                     <mat-form-field appearance="outline" class="w-100">
-                        <mat-select formControlName="userType" placeholder="Select Employee Type">
+                        <mat-select formControlName="userType" [placeholder]="'employee.select_type' | translate">
                             @for (type of employeeTypes; track type.value) {
                                 <mat-option [value]="type.value">{{ type.label }}</mat-option>
                             }
                         </mat-select>
                         @if (EmployeeForm.get('userType')?.hasError('required')) {
-                            <mat-error>Employee type is required</mat-error>
+                            <mat-error>{{ 'error.employee.type_required' | translate }}</mat-error>
                         }
                     </mat-form-field>
                 </div>
@@ -182,9 +182,9 @@
             </div>
 
             <div class="m-t-12">
-                <button mat-stroked-button class="me-3 Cancel_Button" (click)="cancelBranch()">Cancel</button>
+                <button mat-stroked-button class="me-3 Cancel_Button" (click)="cancelBranch()">{{ 'common.cancel' | translate }}</button>
                 <button mat-flat-button color="primary" (click)="submit(EmployeeForm)">
-                    {{ UpdateButton ? 'Update' : 'Submit' }}
+                    {{ UpdateButton ? ('common.update' | translate) : ('common.submit' | translate) }}
                 </button>
             </div>
 

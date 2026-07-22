@@ -1,5 +1,5 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
-
+import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormsModule, FormGroup, FormBuilder, Validators } from '@angular/forms';
 import { MaterialModule } from 'src/app/material.module';
 import { TablerIconsModule } from 'angular-tabler-icons';
@@ -7,17 +7,20 @@ import { CommonService } from 'src/app/Securities/Services/common.service';
 import { AlertService } from 'src/app/Securities/Services/alert.service';
 import { PermissionService } from 'src/app/Securities/Services/permissions.service';
 import { MatTable } from 'src/utils/mat-table/mat-table';
+import { AppTranslatePipe } from 'src/app/pipes/app-translate.pipe';
 
 @Component({
   selector: 'app-workforce',
   standalone: true,
   imports: [
+    CommonModule,
     ReactiveFormsModule,
     FormsModule,
     MaterialModule,
     TablerIconsModule,
-    MatTable
-],
+    MatTable,
+    AppTranslatePipe
+  ],
   templateUrl: './workforce.html',
   styleUrl: './workforce.scss'
 })
@@ -83,7 +86,7 @@ export class Workforce implements OnInit {
   // View States
   showShiftForm = false;
   editingShiftId: number | null = null;
-  
+
   showPolicyForm = false;
   editingPolicyId: number | null = null;
 
@@ -103,46 +106,45 @@ export class Workforce implements OnInit {
       type: ['FIXED', Validators.required],
       start_time: ['09:00', Validators.required],
       end_time: ['18:00', Validators.required],
-      grace_period_minutes: [15, [Validators.required, Validators.min(0)]],
-      min_work_minutes: [480, [Validators.required, Validators.min(0)]],
-      overtime_threshold_minutes: [480, [Validators.required, Validators.min(0)]],
-      late_threshold_minutes: [30, [Validators.required, Validators.min(0)]],
-      half_day_threshold_minutes: [240, [Validators.required, Validators.min(0)]],
-      allowed_break_minutes: [60, [Validators.required, Validators.min(0)]],
-      weekend_days: [[0, 6]] // Saturday & Sunday default indices
+      grace_period_minutes: [15, Validators.required],
+      min_work_minutes: [480, Validators.required],
+      overtime_threshold_minutes: [480],
+      late_threshold_minutes: [15],
+      half_day_threshold_minutes: [240],
+      allowed_break_minutes: [60],
+      weekend_days: [[0, 6]]
     });
 
-    // ─── Shift Assign Form Config ───────────────────────────────────────────
+    // ─── Shift Assignment Form ──────────────────────────────────────────────
     this.shiftAssignForm = this.fb.group({
       employee_ids: [[], Validators.required],
       shift_id: ['', Validators.required],
-      effective_from: ['', Validators.required],
+      effective_from: [new Date(), Validators.required],
       effective_to: ['']
     });
 
-    // ─── Break Policy Form Config ───────────────────────────────────────────
+    // ─── Break Policy Form Config ────────────────────────────────────────────
     this.policyForm = this.fb.group({
       name: ['', Validators.required],
       break_type: ['PERSONAL', Validators.required],
-      max_duration_minutes: [60, [Validators.required, Validators.min(1)]],
-      max_frequency: [3, [Validators.required, Validators.min(1)]],
+      max_duration_minutes: [60, Validators.required],
+      max_frequency: [2, Validators.required],
+      warning_threshold: [15],
+      deduction_threshold: [30],
+      half_day_threshold: [60],
+      hr_review_threshold: [120],
       allow_split: [true],
-      is_paid: [false],
-      warning_threshold: [15, Validators.required],
-      deduction_threshold: [30, Validators.required],
-      half_day_threshold: [60, Validators.required],
-      hr_review_threshold: [120, Validators.required]
+      is_paid: [false]
     });
 
-    // ─── Biometric Device Form Config ───────────────────────────────────────
+    // ─── Biometric Device Form Config ────────────────────────────────────────
     this.deviceForm = this.fb.group({
       device_name: ['', Validators.required],
       device_serial: ['', Validators.required],
       device_type: ['FINGERPRINT', Validators.required],
       ip_address: [''],
-      location: [''],
-      firmware_version: ['1.0.0'],
-      min_confidence_score: [0.85, [Validators.required, Validators.min(0), Validators.max(1)]],
+      location: ['Main Entrance'],
+      min_confidence_score: [85, Validators.required],
       is_whitelisted: [true]
     });
   }
@@ -151,35 +153,19 @@ export class Workforce implements OnInit {
     this.loadInitialData();
   }
 
+  onTabChange(event: any) {
+    this.activeTab = event ? event.index : 0;
+  }
+
   loadInitialData() {
     this.loading = true;
-    
-    // Load employee list for bulk shift assign dropdown
-    this.commonService.getApi('employees').subscribe({
-      next: (res: any) => {
-        this.employeesList = res?.data || [];
-        this.cdr.detectChanges();
-      }
-    });
-
     this.loadShifts();
     this.loadPolicies();
     this.loadDevices();
-    this.loadAuthLogs();
+    this.loadLogs();
+    this.loadEmployees();
   }
 
-  // ─── Tab Switch Callback ────────────────────────────────────────────────
-  onTabChange(event: any) {
-    this.activeTab = event.index;
-    if (this.activeTab === 0) this.loadShifts();
-    else if (this.activeTab === 1) this.loadPolicies();
-    else if (this.activeTab === 2) {
-      this.loadDevices();
-      this.loadAuthLogs();
-    }
-  }
-
-  // ─── Shift Operations ───────────────────────────────────────────────────
   loadShifts() {
     this.commonService.getApi('shifts').subscribe({
       next: (res: any) => {
@@ -187,270 +173,275 @@ export class Workforce implements OnInit {
           ...s,
           timings: `${s.start_time} - ${s.end_time}`
         }));
-        this.cdr.detectChanges();
+        this.cdr.markForCheck();
       }
     });
   }
 
-  createShift() {
-    this.showShiftForm = true;
-    this.editingShiftId = null;
-    this.shiftForm.reset({
-      type: 'FIXED',
-      start_time: '09:00',
-      end_time: '18:00',
-      grace_period_minutes: 15,
-      min_work_minutes: 480,
-      overtime_threshold_minutes: 480,
-      late_threshold_minutes: 30,
-      half_day_threshold_minutes: 240,
-      allowed_break_minutes: 60,
-      weekend_days: [0, 6]
-    });
-  }
-
-  editShift(shift: any) {
-    this.showShiftForm = true;
-    this.editingShiftId = shift.id;
-    this.shiftForm.patchValue(shift);
-  }
-
-  deleteShift(shift: any) {
-    this.alert.confirm(`Delete shift pattern "${shift.name}"?`).then((result) => {
-      if (result.isConfirmed) {
-        this.commonService.deleteApi(`shifts/${shift.id}`).subscribe({
-          next: () => {
-            this.alert.success('Shift pattern deleted');
-            this.loadShifts();
-          },
-          error: (err) => this.alert.error(err.error?.message || 'Delete operation failed')
-        });
-      }
-    });
-  }
-
-  submitShift() {
-    if (this.shiftForm.invalid) return;
-    const payload = this.shiftForm.getRawValue();
-
-    if (this.editingShiftId) {
-      this.commonService.putApi(`shifts/${this.editingShiftId}`, payload).subscribe({
-        next: () => {
-          this.alert.success('Shift updated successfully');
-          this.showShiftForm = false;
-          this.loadShifts();
-        }
-      });
-    } else {
-      this.commonService.postApi('shifts', payload).subscribe({
-        next: () => {
-          this.alert.success('Shift pattern created');
-          this.showShiftForm = false;
-          this.loadShifts();
-        }
-      });
-    }
-  }
-
-  formatDateForBackend(dateVal: any): string {
-    if (!dateVal) return '';
-    if (typeof dateVal === 'string') return dateVal.split('T')[0];
-    if (dateVal instanceof Date && !isNaN(dateVal.getTime())) {
-      const year = dateVal.getFullYear();
-      const month = String(dateVal.getMonth() + 1).padStart(2, '0');
-      const day = String(dateVal.getDate()).padStart(2, '0');
-      return `${year}-${month}-${day}`;
-    }
-    return String(dateVal);
-  }
-
-  submitShiftAssign() {
-    if (this.shiftAssignForm.invalid) return;
-    const raw = this.shiftAssignForm.getRawValue();
-    const payload = {
-      ...raw,
-      effective_from: this.formatDateForBackend(raw.effective_from)
-    };
-    
-    this.commonService.postApi('shifts/assign', payload).subscribe({
-      next: () => {
-        this.alert.success('Shifts assigned successfully to selected employees');
-        this.shiftAssignForm.reset();
-      },
-      error: (err) => this.alert.error(err.error?.message || 'Assignment failed')
-    });
-  }
-
-  // ─── Break Policy Operations ────────────────────────────────────────────
   loadPolicies() {
     this.commonService.getApi('break-policies').subscribe({
       next: (res: any) => {
         this.policiesList = res?.data || [];
-        this.cdr.detectChanges();
+        this.cdr.markForCheck();
       }
     });
   }
 
-  createPolicy() {
-    this.showPolicyForm = true;
-    this.editingPolicyId = null;
-    this.policyForm.reset({
-      break_type: 'PERSONAL',
-      max_duration_minutes: 60,
-      max_frequency: 3,
-      allow_split: true,
-      is_paid: false,
-      warning_threshold: 15,
-      deduction_threshold: 30,
-      half_day_threshold: 60,
-      hr_review_threshold: 120
-    });
-  }
-
-  editPolicy(policy: any) {
-    this.showPolicyForm = true;
-    this.editingPolicyId = policy.id;
-    this.policyForm.patchValue({
-      name: policy.name,
-      break_type: policy.break_type,
-      max_duration_minutes: policy.max_duration_minutes,
-      max_frequency: policy.max_frequency,
-      allow_split: policy.allow_split,
-      is_paid: policy.is_paid,
-      warning_threshold: policy.deduction_rules?.warning || 15,
-      deduction_threshold: policy.deduction_rules?.salary_deduction || 30,
-      half_day_threshold: policy.deduction_rules?.half_day || 60,
-      hr_review_threshold: policy.deduction_rules?.hr_review || 120
-    });
-  }
-
-  deletePolicy(policy: any) {
-    this.alert.confirm(`Delete break policy "${policy.name}"?`).then((result) => {
-      if (result.isConfirmed) {
-        this.commonService.deleteApi(`break-policies/${policy.id}`).subscribe({
-          next: () => {
-            this.alert.success('Break policy deleted');
-            this.loadPolicies();
-          },
-          error: (err) => this.alert.error(err.error?.message || 'Delete operation failed')
-        });
-      }
-    });
-  }
-
-  submitPolicy() {
-    if (this.policyForm.invalid) return;
-    const raw = this.policyForm.getRawValue();
-    const payload = {
-      name: raw.name,
-      break_type: raw.break_type,
-      max_duration_minutes: raw.max_duration_minutes,
-      max_frequency: raw.max_frequency,
-      allow_split: raw.allow_split,
-      is_paid: raw.is_paid,
-      deduction_rules: {
-        warning: raw.warning_threshold,
-        salary_deduction: raw.deduction_threshold,
-        half_day: raw.half_day_threshold,
-        hr_review: raw.hr_review_threshold
-      }
-    };
-
-    if (this.editingPolicyId) {
-      this.commonService.putApi(`break-policies/${this.editingPolicyId}`, payload).subscribe({
-        next: () => {
-          this.alert.success('Break policy updated');
-          this.showPolicyForm = false;
-          this.loadPolicies();
-        }
-      });
-    } else {
-      this.commonService.postApi('break-policies', payload).subscribe({
-        next: () => {
-          this.alert.success('Break policy created');
-          this.showPolicyForm = false;
-          this.loadPolicies();
-        }
-      });
-    }
-  }
-
-  // ─── Biometric Devices Operations ───────────────────────────────────────
   loadDevices() {
     this.commonService.getApi('biometric/device').subscribe({
       next: (res: any) => {
         this.devicesList = res?.data || [];
-        this.cdr.detectChanges();
+        this.cdr.markForCheck();
       }
     });
   }
 
-  loadAuthLogs() {
+  loadLogs() {
     this.commonService.getApi('biometric/logs').subscribe({
       next: (res: any) => {
-        this.authLogsList = (res?.data || []).map((l: any) => {
-          const emp = this.employeesList.find(e => e.id === l.employee_id);
-          return {
-            ...l,
-            employee_id: emp ? emp.name : `Employee ID: ${l.employee_id}`
-          };
-        });
-        this.cdr.detectChanges();
+        this.authLogsList = res?.data || [];
+        this.loading = false;
+        this.cdr.markForCheck();
+      },
+      error: () => {
+        this.loading = false;
       }
     });
   }
 
+  loadEmployees() {
+    this.commonService.getApi('employees').subscribe({
+      next: (res: any) => {
+        this.employeesList = res?.data || [];
+        this.cdr.markForCheck();
+      }
+    });
+  }
+
+  // ─── Shift Actions ────────────────────────────────────────────────────────
+  createShift() {
+    this.toggleShiftForm();
+  }
+
+  toggleShiftForm() {
+    this.showShiftForm = !this.showShiftForm;
+    if (!this.showShiftForm) {
+      this.editingShiftId = null;
+      this.shiftForm.reset({
+        type: 'FIXED',
+        start_time: '09:00',
+        end_time: '18:00',
+        grace_period_minutes: 15,
+        min_work_minutes: 480,
+        weekend_days: [0, 6]
+      });
+    }
+  }
+
+  submitShift() {
+    this.saveShift();
+  }
+
+  saveShift() {
+    if (this.shiftForm.invalid) return;
+    this.loading = true;
+    const body = this.shiftForm.value;
+
+    const req$ = this.editingShiftId
+      ? this.commonService.putApi(`shifts/${this.editingShiftId}`, body)
+      : this.commonService.postApi('shifts', body);
+
+    req$.subscribe({
+      next: (res: any) => {
+        this.loading = false;
+        this.alert.success(res?.message || 'Shift saved successfully');
+        this.toggleShiftForm();
+        this.loadShifts();
+      },
+      error: (err: any) => {
+        this.loading = false;
+        this.alert.error(err?.error?.message || 'Failed to save shift');
+      }
+    });
+  }
+
+  editShift(shift: any) {
+    this.editingShiftId = shift.id;
+    this.shiftForm.patchValue(shift);
+    this.showShiftForm = true;
+  }
+
+  deleteShift(shift: any) {
+    if (!confirm(`Are you sure you want to delete shift ${shift.name}?`)) return;
+    this.commonService.deleteApi(`shifts/${shift.id}`).subscribe({
+      next: () => {
+        this.alert.success('Shift deleted successfully');
+        this.loadShifts();
+      }
+    });
+  }
+
+  submitShiftAssign() {
+    this.assignShift();
+  }
+
+  assignShift() {
+    if (this.shiftAssignForm.invalid) return;
+    this.loading = true;
+    const val = this.shiftAssignForm.value;
+    const payload = {
+      ...val,
+      effective_from: val.effective_from instanceof Date ? val.effective_from.toISOString().split('T')[0] : (val.effective_from || new Date().toISOString().split('T')[0]),
+      effective_to: val.effective_to instanceof Date ? val.effective_to.toISOString().split('T')[0] : (val.effective_to || undefined)
+    };
+
+    this.commonService.postApi('shifts/assign', payload).subscribe({
+      next: (res: any) => {
+        this.loading = false;
+        this.alert.success(res?.message || 'Shift assigned to employees successfully');
+        this.shiftAssignForm.reset({ effective_from: new Date() });
+      },
+      error: (err: any) => {
+        this.loading = false;
+        this.alert.error(err?.error?.message || 'Shift assignment failed');
+      }
+    });
+  }
+
+  // ─── Break Policy Actions ─────────────────────────────────────────────────
+  createPolicy() {
+    this.togglePolicyForm();
+  }
+
+  togglePolicyForm() {
+    this.showPolicyForm = !this.showPolicyForm;
+    if (!this.showPolicyForm) {
+      this.editingPolicyId = null;
+      this.policyForm.reset({
+        break_type: 'PERSONAL',
+        max_duration_minutes: 60,
+        max_frequency: 2,
+        warning_threshold: 15,
+        deduction_threshold: 30,
+        half_day_threshold: 60,
+        hr_review_threshold: 120,
+        allow_split: true,
+        is_paid: false
+      });
+    }
+  }
+
+  submitPolicy() {
+    this.savePolicy();
+  }
+
+  savePolicy() {
+    if (this.policyForm.invalid) return;
+    this.loading = true;
+    const body = this.policyForm.value;
+
+    const req$ = this.editingPolicyId
+      ? this.commonService.putApi(`break-policies/${this.editingPolicyId}`, body)
+      : this.commonService.postApi('break-policies', body);
+
+    req$.subscribe({
+      next: (res: any) => {
+        this.loading = false;
+        this.alert.success(res?.message || 'Break policy saved successfully');
+        this.togglePolicyForm();
+        this.loadPolicies();
+      },
+      error: (err: any) => {
+        this.loading = false;
+        this.alert.error(err?.error?.message || 'Failed to save break policy');
+      }
+    });
+  }
+
+  editPolicy(policy: any) {
+    this.editingPolicyId = policy.id;
+    this.policyForm.patchValue(policy);
+    this.showPolicyForm = true;
+  }
+
+  deletePolicy(policy: any) {
+    if (!confirm(`Are you sure you want to delete policy ${policy.name}?`)) return;
+    this.commonService.deleteApi(`break-policies/${policy.id}`).subscribe({
+      next: () => {
+        this.alert.success('Break policy deleted successfully');
+        this.loadPolicies();
+      }
+    });
+  }
+
+  // ─── Biometric Device Actions ──────────────────────────────────────────────
   createDevice() {
-    this.showDeviceForm = true;
-    this.editingDeviceId = null;
-    this.deviceForm.reset({
-      device_type: 'FINGERPRINT',
-      min_confidence_score: 0.85,
-      is_whitelisted: true,
-      firmware_version: '1.0.0'
+    this.toggleDeviceForm();
+  }
+
+  toggleDeviceForm() {
+    this.showDeviceForm = !this.showDeviceForm;
+    if (!this.showDeviceForm) {
+      this.editingDeviceId = null;
+      this.deviceForm.reset({
+        device_type: 'FINGERPRINT',
+        location: 'Main Entrance',
+        min_confidence_score: 85,
+        is_whitelisted: true
+      });
+    }
+  }
+
+  submitDevice() {
+    this.saveDevice();
+  }
+
+  saveDevice() {
+    if (this.deviceForm.invalid) return;
+    this.loading = true;
+    const body = this.deviceForm.value;
+
+    const req$ = this.editingDeviceId
+      ? this.commonService.putApi(`biometric/device/${this.editingDeviceId}`, body)
+      : this.commonService.postApi('biometric/device/register', body);
+
+    req$.subscribe({
+      next: (res: any) => {
+        this.loading = false;
+        this.alert.success(res?.message || 'Device registered successfully');
+        this.toggleDeviceForm();
+        this.loadDevices();
+      },
+      error: (err: any) => {
+        this.loading = false;
+        this.alert.error(err?.error?.message || 'Device registration failed');
+      }
     });
   }
 
   editDevice(device: any) {
-    this.showDeviceForm = true;
     this.editingDeviceId = device.id;
     this.deviceForm.patchValue(device);
+    this.showDeviceForm = true;
   }
 
-  deleteDevice(device: any) {
-    this.alert.confirm(`Remove biometric device "${device.device_name}"?`).then((result) => {
-      if (result.isConfirmed) {
-        this.commonService.deleteApi(`biometric/device/${device.id}`).subscribe({
-          next: () => {
-            this.alert.success('Biometric device removed');
-            this.loadDevices();
-          },
-          error: (err) => this.alert.error(err.error?.message || 'Delete operation failed')
-        });
+  toggleWhitelist(device: any) {
+    const nextStatus = !device.is_whitelisted;
+    this.commonService.putApi(`biometric/device/${device.id}`, { is_whitelisted: nextStatus }).subscribe({
+      next: () => {
+        this.alert.success(`Device ${nextStatus ? 'Whitelisted' : 'Blacklisted'} successfully`);
+        this.loadDevices();
       }
     });
   }
 
-  submitDevice() {
-    if (this.deviceForm.invalid) return;
-    const payload = this.deviceForm.getRawValue();
-
-    if (this.editingDeviceId) {
-      this.commonService.putApi(`biometric/device/${this.editingDeviceId}`, payload).subscribe({
-        next: () => {
-          this.alert.success('Device configurations updated');
-          this.showDeviceForm = false;
-          this.loadDevices();
-        }
-      });
-    } else {
-      this.commonService.postApi('biometric/device/register', payload).subscribe({
-        next: (res: any) => {
-          this.alert.success(`Device registered! Secret Key: ${res?.data?.device_secret || 'Signed JWT'}`);
-          this.showDeviceForm = false;
-          this.loadDevices();
-        }
-      });
-    }
+  deleteDevice(device: any) {
+    if (!confirm(`Are you sure you want to remove device ${device.device_name}?`)) return;
+    this.commonService.deleteApi(`biometric/device/${device.id}`).subscribe({
+      next: () => {
+        this.alert.success('Device removed successfully');
+        this.loadDevices();
+      }
+    });
   }
 }

@@ -13,6 +13,7 @@ import { AlertService } from 'src/app/Securities/Services/alert.service';
 import { PermissionService } from 'src/app/Securities/Services/permissions.service';
 import { AuthService } from 'src/app/Securities/Services/auth.service';
 import { MatTable } from 'src/utils/mat-table/mat-table';
+import { AppTranslatePipe } from 'src/app/pipes/app-translate.pipe';
 
 @Component({
   selector: 'app-attendance',
@@ -28,7 +29,8 @@ import { MatTable } from 'src/utils/mat-table/mat-table';
     MatSelectModule,
     MatIconModule,
     MatProgressBarModule,
-    MatTable
+    MatTable,
+    AppTranslatePipe
   ],
   templateUrl: './attendance.html',
   styleUrl: './attendance.scss',

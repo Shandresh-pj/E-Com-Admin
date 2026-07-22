@@ -207,7 +207,7 @@ export const navItems: NavItem[] = [
     roles: [SA, A, BM, SK],
   },
 
-  { navCap: 'Workforce', roles: [SA, A, BM] },
+  { navCap: 'Workforce', roles: [SA, A, BM, EM] },
   {
     displayName: 'Workforce Console',
     iconName: 'settings',
@@ -227,21 +227,35 @@ export const navItems: NavItem[] = [
     iconName: 'calendar-stats',
     route: '/attendance',
     bgcolor: 'success',
-    roles: [SA, A, BM],
+    roles: [SA, A, BM, EM],
   },
   {
     displayName: 'Leave Management',
     iconName: 'calendar-off',
     route: '/leave',
     bgcolor: 'warning',
-    roles: [SA, A, BM],
+    roles: [SA, A, BM, EM],
+  },
+  {
+    displayName: 'Company Calendar',
+    iconName: 'calendar-event',
+    route: '/calendar',
+    bgcolor: 'info',
+    roles: [SA, A, BM, EM],
+  },
+  {
+    displayName: 'Document Verification',
+    iconName: 'file-check',
+    route: '/employee-documents',
+    bgcolor: 'warning',
+    roles: [SA, A, BM, EM],
   },
   {
     displayName: 'Payroll',
     iconName: 'cash',
     route: '/payroll',
     bgcolor: 'primary',
-    roles: [SA, A, BM],
+    roles: [SA, A, BM, EM],
   },
 
   { navCap: 'Operations & Workflows', roles: [SA, A, BM, SK, EM] },
@@ -271,6 +285,13 @@ export const navItems: NavItem[] = [
     iconName: 'user',
     route: '/profile',
     bgcolor: 'primary',
+  },
+  {
+    displayName: 'Translation Console',
+    iconName: 'language',
+    route: '/translations',
+    bgcolor: 'primary',
+    roles: [SA, A],
   },
   {
     displayName: 'Menu Bar',

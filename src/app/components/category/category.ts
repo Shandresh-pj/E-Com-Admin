@@ -13,6 +13,7 @@ import { CommonService } from 'src/app/Securities/Services/common.service';
 import { MatTable } from 'src/utils/mat-table/mat-table';
 import { toFileUrl } from 'src/utils/file-url';
 import { ViewDetailsDialog } from 'src/utils/view-details-dialog/view-details-dialog';
+import { AppTranslatePipe } from 'src/app/pipes/app-translate.pipe';
 
 @Component({
   selector: 'app-category',
@@ -26,7 +27,8 @@ import { ViewDetailsDialog } from 'src/utils/view-details-dialog/view-details-di
     MatCardModule,
     MatSelectModule,
     MatIconModule,
-    MatTable
+    MatTable,
+    AppTranslatePipe
   ],
   templateUrl: './category.html',
   styleUrl: './category.scss',

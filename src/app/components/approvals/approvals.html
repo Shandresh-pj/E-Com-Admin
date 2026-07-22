@@ -1,28 +1,28 @@
 <mat-card class="cardWithShadow theme-card">
   <mat-card-header class="d-flex justify-content-between align-items-center">
-    <mat-card-title class="m-b-0">Product & Stock Approval Workflow</mat-card-title>
+    <mat-card-title class="m-b-0">{{ 'approvals.title' | translate }}</mat-card-title>
     <div class="d-flex gap-8 flex-wrap">
       <!-- Status Filter -->
       <mat-form-field appearance="outline" class="density-compact filter-field">
-        <mat-label>Status</mat-label>
+        <mat-label>{{ 'approvals.status_filter' | translate }}</mat-label>
         <mat-select [(ngModel)]="statusFilter" (selectionChange)="onFilterChange()">
-          <mat-option value="">All Statuses</mat-option>
-          <mat-option value="Pending">Pending</mat-option>
-          <mat-option value="Approved">Approved</mat-option>
-          <mat-option value="Rejected">Rejected</mat-option>
-          <mat-option value="Cancelled">Cancelled</mat-option>
-          <mat-option value="Changes Requested">Changes Requested</mat-option>
+          <mat-option value="">{{ 'approvals.all_statuses' | translate }}</mat-option>
+          <mat-option value="Pending">{{ 'approvals.pending' | translate }}</mat-option>
+          <mat-option value="Approved">{{ 'approvals.approved' | translate }}</mat-option>
+          <mat-option value="Rejected">{{ 'approvals.rejected' | translate }}</mat-option>
+          <mat-option value="Cancelled">{{ 'approvals.cancelled' | translate }}</mat-option>
+          <mat-option value="Changes Requested">{{ 'approvals.changes_requested' | translate }}</mat-option>
         </mat-select>
       </mat-form-field>
 
       <!-- Action Type Filter -->
       <mat-form-field appearance="outline" class="density-compact filter-field">
-        <mat-label>Workflow Type</mat-label>
+        <mat-label>{{ 'approvals.workflow_type' | translate }}</mat-label>
         <mat-select [(ngModel)]="typeFilter" (selectionChange)="onFilterChange()">
-          <mat-option value="">All Types</mat-option>
-          <mat-option value="CREATE">Product Creation</mat-option>
-          <mat-option value="UPDATE">Product Modification</mat-option>
-          <mat-option value="STOCK_ADJUST">Stock Adjustment</mat-option>
+          <mat-option value="">{{ 'approvals.all_types' | translate }}</mat-option>
+          <mat-option value="CREATE">{{ 'approvals.product_creation' | translate }}</mat-option>
+          <mat-option value="UPDATE">{{ 'approvals.product_modification' | translate }}</mat-option>
+          <mat-option value="STOCK_ADJUST">{{ 'approvals.stock_adjustment' | translate }}</mat-option>
         </mat-select>
       </mat-form-field>
     </div>
@@ -42,7 +42,7 @@
 
         <div class="d-flex align-items-center gap-12 flex-grow-1 max-w-500">
           <mat-form-field appearance="outline" class="w-100 density-compact m-b-0">
-            <mat-label>Bulk Approval Comment</mat-label>
+            <mat-label>{{ 'approvals.bulk_comment' | translate }}</mat-label>
             <input matInput [(ngModel)]="bulkComment" placeholder="Write reason for bulk action...">
           </mat-form-field>
         </div>

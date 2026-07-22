@@ -19,6 +19,7 @@ import { ViewDetailsDialog } from 'src/utils/view-details-dialog/view-details-di
 import { SocketService } from 'src/app/Securities/Services/socket.service';
 import { Subscription } from 'rxjs';
 import { GeminiAiService } from 'src/app/services/gemini-ai.service';
+import { AppTranslatePipe } from 'src/app/pipes/app-translate.pipe';
 
 @Component({
   selector: 'app-product',
@@ -32,7 +33,8 @@ import { GeminiAiService } from 'src/app/services/gemini-ai.service';
     MatCardModule,
     MatSelectModule,
     MatIconModule,
-    MatTable
+    MatTable,
+    AppTranslatePipe
 ],
   templateUrl: './product.html',
   styleUrl: './product.scss',

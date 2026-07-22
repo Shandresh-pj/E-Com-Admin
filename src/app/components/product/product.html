@@ -5,19 +5,19 @@
         <div class="header-container">
 
             <mat-card-title class="m-b-0">
-                Products
+                {{ 'product.title' | translate }}
             </mat-card-title>
 
             @if (!Product_Forms && perm.hasRoleAction('canCreate')) {
             <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
                 <button mat-stroked-button color="primary" class="btn-rounded" (click)="triggerImport()" style="border: 1px solid var(--primary-color);">
-                    <mat-icon>upload</mat-icon> Import
+                    <mat-icon>upload</mat-icon> {{ 'product.import' | translate }}
                 </button>
                 <button mat-stroked-button color="accent" class="btn-rounded" (click)="exportProducts('csv')" style="border: 1px solid var(--accent-color);">
-                    <mat-icon>download</mat-icon> Export CSV
+                    <mat-icon>download</mat-icon> {{ 'product.export_csv' | translate }}
                 </button>
                 <button mat-flat-button class="btn-rounded btn-gradient" (click)="AddNewUser()">
-                    <mat-icon>add</mat-icon> Add New Product
+                    <mat-icon>add</mat-icon> {{ 'product.add_new' | translate }}
                 </button>
             </div>
             }
@@ -30,15 +30,15 @@
     <mat-card-content class="b-t-1">
 
         <div class="filter-bar m-b-16" style="background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border-subtle); border-radius: 12px; padding: 12px 16px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
-            <span class="f-w-600 m-r-16" style="color: var(--text-secondary);">Filter Approval Status:</span>
-            <button mat-stroked-button [color]="selectedStatusFilter === 'all' ? 'primary' : ''" (click)="filterByStatus('all')" [class.active-filter]="selectedStatusFilter === 'all'" style="border-radius: 20px;">All</button>
-            <button mat-stroked-button [color]="selectedStatusFilter === 'Draft' ? 'primary' : ''" (click)="filterByStatus('Draft')" [class.active-filter]="selectedStatusFilter === 'Draft'" style="border-radius: 20px;">Draft</button>
-            <button mat-stroked-button [color]="selectedStatusFilter === 'Pending Approval' ? 'primary' : ''" (click)="filterByStatus('Pending Approval')" [class.active-filter]="selectedStatusFilter === 'Pending Approval'" style="border-radius: 20px;">Pending Approval</button>
-            <button mat-stroked-button [color]="selectedStatusFilter === 'Approved' ? 'primary' : ''" (click)="filterByStatus('Approved')" [class.active-filter]="selectedStatusFilter === 'Approved'" style="border-radius: 20px;">Approved</button>
-            <button mat-stroked-button [color]="selectedStatusFilter === 'Published' ? 'primary' : ''" (click)="filterByStatus('Published')" [class.active-filter]="selectedStatusFilter === 'Published'" style="border-radius: 20px;">Published</button>
-            <button mat-stroked-button [color]="selectedStatusFilter === 'Rejected' ? 'primary' : ''" (click)="filterByStatus('Rejected')" [class.active-filter]="selectedStatusFilter === 'Rejected'" style="border-radius: 20px;">Rejected</button>
+            <span class="f-w-600 m-r-16" style="color: var(--text-secondary);">{{ 'product.filter_status' | translate }}</span>
+            <button mat-stroked-button [color]="selectedStatusFilter === 'all' ? 'primary' : ''" (click)="filterByStatus('all')" [class.active-filter]="selectedStatusFilter === 'all'" style="border-radius: 20px;">{{ 'product.all' | translate }}</button>
+            <button mat-stroked-button [color]="selectedStatusFilter === 'Draft' ? 'primary' : ''" (click)="filterByStatus('Draft')" [class.active-filter]="selectedStatusFilter === 'Draft'" style="border-radius: 20px;">{{ 'product.draft' | translate }}</button>
+            <button mat-stroked-button [color]="selectedStatusFilter === 'Pending Approval' ? 'primary' : ''" (click)="filterByStatus('Pending Approval')" [class.active-filter]="selectedStatusFilter === 'Pending Approval'" style="border-radius: 20px;">{{ 'product.pending' | translate }}</button>
+            <button mat-stroked-button [color]="selectedStatusFilter === 'Approved' ? 'primary' : ''" (click)="filterByStatus('Approved')" [class.active-filter]="selectedStatusFilter === 'Approved'" style="border-radius: 20px;">{{ 'product.approved' | translate }}</button>
+            <button mat-stroked-button [color]="selectedStatusFilter === 'Published' ? 'primary' : ''" (click)="filterByStatus('Published')" [class.active-filter]="selectedStatusFilter === 'Published'" style="border-radius: 20px;">{{ 'product.published' | translate }}</button>
+            <button mat-stroked-button [color]="selectedStatusFilter === 'Rejected' ? 'primary' : ''" (click)="filterByStatus('Rejected')" [class.active-filter]="selectedStatusFilter === 'Rejected'" style="border-radius: 20px;">{{ 'product.rejected' | translate }}</button>
             <button mat-stroked-button [color]="selectedStatusFilter === 'deleted' ? 'warn' : ''" (click)="filterByStatus('deleted')" [class.active-filter]="selectedStatusFilter === 'deleted'" style="border-radius: 20px;">
-                <mat-icon style="font-size: 16px; width: 16px; height: 16px; margin-right: 4px;">delete_outline</mat-icon> Trash
+                <mat-icon style="font-size: 16px; width: 16px; height: 16px; margin-right: 4px;">delete_outline</mat-icon> {{ 'product.trash' | translate }}
             </button>
         </div>
 
@@ -56,7 +56,7 @@
         <form [formGroup]="ProductForm" class="premium-form-grid p-t-24">
             
             <div class="divider">
-                <span>General Information</span>
+                <span>{{ 'product.general_info' | translate }}</span>
             </div>
 
             <div class="form-row">

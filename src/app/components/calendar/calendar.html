@@ -1,0 +1,570 @@
+<div class="cal-page">
+
+  <!-- ══ AMBIENT ORBS ══════════════════════════════════════════════════════ -->
+  <div class="cal-orb cal-orb-1"></div>
+  <div class="cal-orb cal-orb-2"></div>
+
+  <!-- ══ PAGE HERO ═════════════════════════════════════════════════════════ -->
+  <div class="cal-hero">
+    <div class="cal-hero-glow"></div>
+    <div class="cal-hero-inner">
+      <!-- Left: Title -->
+      <div class="cal-hero-left">
+        <div class="cal-hero-icon">
+          <i-tabler name="calendar-event" class="icon-28 d-flex"></i-tabler>
+        </div>
+        <div>
+          <h1 class="cal-hero-title">{{ 'calendar.hero_title' | translate }}</h1>
+          <p class="cal-hero-sub">{{ 'calendar.hero_sub' | translate }}</p>
+        </div>
+      </div>
+
+      <!-- Center: Month Navigator (visible on calendar view) -->
+      @if (activeView() === 'calendar') {
+        <div class="cal-month-nav">
+          <button class="cal-nav-btn" (click)="prevMonth()" title="Previous month">
+            <i-tabler name="chevron-left" class="icon-18 d-flex"></i-tabler>
+          </button>
+          <div class="cal-month-label">
+            <span class="cal-month-name">{{ currentMonthName }}</span>
+            <span class="cal-year">{{ currentYear }}</span>
+          </div>
+          <button class="cal-nav-btn" (click)="nextMonth()" title="Next month">
+            <i-tabler name="chevron-right" class="icon-18 d-flex"></i-tabler>
+          </button>
+          <button class="cal-today-btn" (click)="goToday()">{{ 'calendar.today' | translate }}</button>
+        </div>
+      }
+
+      <!-- Right: View Toggle + Add -->
+      <div class="cal-hero-actions">
+        <div class="cal-view-toggle">
+          <button class="cal-vtoggle-btn" [class.active]="activeView() === 'calendar'" (click)="activeView.set('calendar')">
+            <i-tabler name="calendar-month" class="icon-15 d-flex"></i-tabler>
+            <span>Calendar</span>
+          </button>
+          <button class="cal-vtoggle-btn" [class.active]="activeView() === 'timeline'" (click)="activeView.set('timeline')">
+            <i-tabler name="list-details" class="icon-15 d-flex"></i-tabler>
+            <span>Timeline</span>
+          </button>
+          <button class="cal-vtoggle-btn" [class.active]="activeView() === 'list'" (click)="activeView.set('list')">
+            <i-tabler name="layout-list" class="icon-15 d-flex"></i-tabler>
+            <span>List</span>
+          </button>
+        </div>
+
+        @if (perm.hasRoleAction('canCreate', '/calendar')) {
+          <button class="cal-add-btn" (click)="openForm()">
+            <i-tabler name="plus" class="icon-18 d-flex"></i-tabler>
+            <span>Add Holiday</span>
+          </button>
+        }
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ STAT STRIP ════════════════════════════════════════════════════════ -->
+  <div class="cal-stat-strip">
+    <div class="cal-stat">
+      <div class="cal-stat-icon all">
+        <i-tabler name="calendar" class="icon-18 d-flex"></i-tabler>
+      </div>
+      <div class="cal-stat-body">
+        <span class="cal-stat-num">{{ totalHolidays }}</span>
+        <span class="cal-stat-label">Total Holidays</span>
+      </div>
+    </div>
+    <div class="cal-stat-divider"></div>
+    <div class="cal-stat">
+      <div class="cal-stat-icon mandatory">
+        <i-tabler name="checkup-list" class="icon-18 d-flex"></i-tabler>
+      </div>
+      <div class="cal-stat-body">
+        <span class="cal-stat-num">{{ mandatoryHolidays }}</span>
+        <span class="cal-stat-label">Mandatory</span>
+      </div>
+    </div>
+    <div class="cal-stat-divider"></div>
+    <div class="cal-stat">
+      <div class="cal-stat-icon optional">
+        <i-tabler name="star" class="icon-18 d-flex"></i-tabler>
+      </div>
+      <div class="cal-stat-body">
+        <span class="cal-stat-num">{{ optionalHolidays }}</span>
+        <span class="cal-stat-label">Optional</span>
+      </div>
+    </div>
+    <div class="cal-stat-divider"></div>
+    <div class="cal-stat cal-stat-next">
+      <div class="cal-stat-icon next">
+        <i-tabler name="clock-play" class="icon-18 d-flex"></i-tabler>
+      </div>
+      <div class="cal-stat-body">
+        @if (nextHoliday) {
+          <span class="cal-stat-num cal-next-name">{{ nextHoliday.holiday_name }}</span>
+          <span class="cal-stat-label">
+            {{ nextHoliday.holiday_date | date:'d MMM' }}
+            @if (daysToNextHoliday === 0) { <span class="cal-badge today">Today!</span> }
+            @else if (daysToNextHoliday === 1) { <span class="cal-badge soon">Tomorrow</span> }
+            @else { <span class="cal-badge upcoming">{{ daysToNextHoliday }} days away</span> }
+          </span>
+        } @else {
+          <span class="cal-stat-num">—</span>
+          <span class="cal-stat-label">No upcoming holidays</span>
+        }
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ LOADING ═══════════════════════════════════════════════════════════ -->
+  @if (loading()) {
+    <div class="cal-loading">
+      <div class="cal-spinner"></div>
+      <p>Loading calendar data…</p>
+    </div>
+  }
+
+  <!-- ══ CALENDAR GRID VIEW ════════════════════════════════════════════════ -->
+  @if (!loading() && activeView() === 'calendar') {
+    <div class="cal-grid-section">
+
+      <!-- Calendar Card -->
+      <div class="cal-glass-card cal-main-card">
+        <!-- Day Headers -->
+        <div class="cal-day-headers">
+          @for (d of DAY_LABELS; track d) {
+            <div class="cal-day-header" [class.weekend]="d === 'Sun' || d === 'Sat'">{{ d }}</div>
+          }
+        </div>
+
+        <!-- Weeks -->
+        <div class="cal-weeks-grid">
+          @for (week of calendarDays(); track $index) {
+            @for (day of week; track day.date.getTime()) {
+              <div class="cal-cell"
+                [class.other-month]="!day.isCurrentMonth"
+                [class.today]="day.isToday"
+                [class.weekend]="day.isWeekend"
+                [class.has-holiday]="day.holiday"
+                [class.mandatory]="day.holiday?.type === 'MANDATORY'"
+                [class.optional]="day.holiday?.type === 'OPTIONAL'"
+                [class.selected]="selectedDay()?.date?.getTime() === day.date.getTime()"
+                (click)="selectDay(day)">
+                <span class="cal-cell-num">{{ day.day }}</span>
+                @if (day.holiday) {
+                  <div class="cal-holiday-dot" [class.mandatory]="day.holiday.type === 'MANDATORY'"></div>
+                  <div class="cal-holiday-tag">{{ day.holiday.holiday_name }}</div>
+                }
+              </div>
+            }
+          }
+        </div>
+      </div>
+
+      <!-- Sidebar: Selected Day + Upcoming -->
+      <div class="cal-sidebar-panel">
+
+        <!-- Selected Day Detail -->
+        @if (selectedDay()) {
+          <div class="cal-glass-card cal-day-detail">
+            <div class="cal-day-detail-header">
+              <div class="cal-day-detail-date">
+                <span class="cal-dd-num">{{ selectedDay()!.date | date:'d' }}</span>
+                <div>
+                  <span class="cal-dd-month">{{ selectedDay()!.date | date:'MMMM yyyy' }}</span>
+                  <span class="cal-dd-weekday">{{ selectedDay()!.date | date:'EEEE' }}</span>
+                </div>
+              </div>
+              <button class="cal-dd-close" (click)="selectedDay.set(null)">
+                <i-tabler name="x" class="icon-14 d-flex"></i-tabler>
+              </button>
+            </div>
+
+            @if (selectedDay()!.holiday) {
+              <div class="cal-dd-holiday-badge" [class.mandatory]="selectedDay()!.holiday.type === 'MANDATORY'">
+                <i-tabler [name]="selectedDay()!.holiday.type === 'MANDATORY' ? 'shield-check' : 'star'" class="icon-14 d-flex"></i-tabler>
+                {{ selectedDay()!.holiday.type === 'MANDATORY' ? 'Mandatory Holiday' : 'Optional Leave' }}
+              </div>
+              <h3 class="cal-dd-name">{{ selectedDay()!.holiday.holiday_name }}</h3>
+              @if (selectedDay()!.holiday.description) {
+                <p class="cal-dd-desc">{{ selectedDay()!.holiday.description }}</p>
+              }
+              @if (perm.hasRoleAction('canUpdate', '/calendar')) {
+                <div class="cal-dd-actions">
+                  <button class="cal-dd-edit-btn" (click)="openForm(selectedDay()!.holiday)">
+                    <i-tabler name="edit" class="icon-14 d-flex"></i-tabler> Edit
+                  </button>
+                </div>
+              }
+            } @else if (selectedDay()!.isWeekend) {
+              <div class="cal-dd-weekend">
+                <i-tabler name="sofa" class="icon-28 d-flex"></i-tabler>
+                <p>Weekend — No work scheduled</p>
+              </div>
+            } @else {
+              <div class="cal-dd-working">
+                <i-tabler name="briefcase" class="icon-24 d-flex"></i-tabler>
+                <p>Working Day</p>
+                @if (perm.hasRoleAction('canCreate', '/calendar')) {
+                  <button class="cal-btn sm primary mt-2" (click)="openForm()">
+                    <i-tabler name="plus" class="icon-13 d-flex"></i-tabler> Mark as Holiday
+                  </button>
+                }
+              </div>
+            }
+          </div>
+        }
+
+        <!-- Upcoming Holidays Panel -->
+        <div class="cal-glass-card cal-upcoming-panel">
+          <h4 class="cal-panel-title">
+            <i-tabler name="clock-play" class="icon-16 d-flex"></i-tabler>
+            Upcoming Holidays
+          </h4>
+          <div class="cal-upcoming-list">
+            @for (h of holidaysList; track h.id) {
+              @if (isUpcoming(h.holiday_date)) {
+                <div class="cal-upcoming-item" [class.mandatory]="h.type === 'MANDATORY'">
+                  <div class="cal-upcoming-date-chip">
+                    <span class="cal-chip-day">{{ h.holiday_date | date:'d' }}</span>
+                    <span class="cal-chip-mon">{{ h.holiday_date | date:'MMM' }}</span>
+                  </div>
+                  <div class="cal-upcoming-info">
+                    <span class="cal-upcoming-name">{{ h.holiday_name }}</span>
+                    <span class="cal-upcoming-weekday">{{ getDayOfWeek(h.holiday_date) }}</span>
+                  </div>
+                  <span class="cal-upcoming-badge" [class.mandatory]="h.type === 'MANDATORY'">
+                    {{ h.type === 'MANDATORY' ? 'M' : 'O' }}
+                  </span>
+                </div>
+              }
+            }
+            @if (holidaysList.length === 0) {
+              <div class="cal-upcoming-empty">
+                <i-tabler name="calendar-smile" class="icon-28 d-flex"></i-tabler>
+                <p>No upcoming holidays</p>
+              </div>
+            }
+          </div>
+        </div>
+
+        <!-- Legend -->
+        <div class="cal-glass-card cal-legend">
+          <h4 class="cal-panel-title">
+            <i-tabler name="info-circle" class="icon-16 d-flex"></i-tabler>
+            Legend
+          </h4>
+          <div class="cal-legend-items">
+            <div class="cal-legend-item"><span class="cal-leg-dot mandatory"></span>Mandatory Holiday</div>
+            <div class="cal-legend-item"><span class="cal-leg-dot optional"></span>Optional / Festival</div>
+            <div class="cal-legend-item"><span class="cal-leg-dot today"></span>Today</div>
+            <div class="cal-legend-item"><span class="cal-leg-dot weekend"></span>Weekend</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- ══ TIMELINE VIEW ═════════════════════════════════════════════════════ -->
+  @if (!loading() && activeView() === 'timeline') {
+    <div class="cal-timeline-section">
+
+      <!-- Filter Bar -->
+      <div class="cal-filter-bar">
+        <div class="cal-search-wrap">
+          <i-tabler name="search" class="icon-15 d-flex cal-search-icon"></i-tabler>
+          <input class="cal-search-input" [(ngModel)]="searchQuery"
+            (ngModelChange)="applyFilter()" placeholder="Search holidays…">
+          @if (searchQuery) {
+            <button class="cal-search-clear" (click)="searchQuery=''; applyFilter()">
+              <i-tabler name="x" class="icon-13 d-flex"></i-tabler>
+            </button>
+          }
+        </div>
+        <div class="cal-filter-chips">
+          <button class="cal-chip" [class.active]="filterType==='ALL'"       (click)="filterType='ALL'; applyFilter()">All</button>
+          <button class="cal-chip mandatory" [class.active]="filterType==='MANDATORY'" (click)="filterType='MANDATORY'; applyFilter()">Mandatory</button>
+          <button class="cal-chip optional"  [class.active]="filterType==='OPTIONAL'"  (click)="filterType='OPTIONAL'; applyFilter()">Optional</button>
+        </div>
+      </div>
+
+      <!-- Timeline Groups -->
+      @for (group of timelineMonths; track group.month + group.year) {
+        <div class="cal-tl-group">
+          <div class="cal-tl-month-header">
+            <div class="cal-tl-month-badge">{{ group.month }} {{ group.year }}</div>
+            <div class="cal-tl-month-line"></div>
+          </div>
+          @for (h of group.holidays; track h.id) {
+            <div class="cal-tl-item" [class.past]="isPast(h.holiday_date)" [class.mandatory]="h.type === 'MANDATORY'">
+              <div class="cal-tl-date-block">
+                <span class="cal-tl-day-num">{{ h.holiday_date | date:'d' }}</span>
+                <span class="cal-tl-day-name">{{ h.holiday_date | date:'EEE' }}</span>
+              </div>
+              <div class="cal-tl-connector">
+                <div class="cal-tl-dot" [class.mandatory]="h.type === 'MANDATORY'"></div>
+                <div class="cal-tl-line"></div>
+              </div>
+              <div class="cal-tl-content">
+                <div class="cal-tl-content-header">
+                  <h4 class="cal-tl-name">{{ h.holiday_name }}</h4>
+                  <span class="cal-type-pill" [class.mandatory]="h.type === 'MANDATORY'">
+                    <i-tabler [name]="h.type === 'MANDATORY' ? 'shield-check' : 'star'" class="icon-12 d-flex"></i-tabler>
+                    {{ h.type === 'MANDATORY' ? 'Mandatory' : 'Optional' }}
+                  </span>
+                  @if (isPast(h.holiday_date)) {
+                    <span class="cal-past-badge">Past</span>
+                  }
+                </div>
+                @if (h.description) {
+                  <p class="cal-tl-desc">{{ h.description }}</p>
+                }
+                @if (perm.hasRoleAction('canUpdate', '/calendar') || perm.hasRoleAction('canDelete', '/calendar')) {
+                  <div class="cal-tl-actions">
+                    @if (perm.hasRoleAction('canUpdate', '/calendar')) {
+                      <button class="cal-tl-action-btn edit" (click)="openForm(h)">
+                        <i-tabler name="edit" class="icon-13 d-flex"></i-tabler> Edit
+                      </button>
+                    }
+                    @if (perm.hasRoleAction('canDelete', '/calendar')) {
+                      <button class="cal-tl-action-btn delete" (click)="confirmDelete(h.id)">
+                        <i-tabler name="trash" class="icon-13 d-flex"></i-tabler> Delete
+                      </button>
+                    }
+                  </div>
+                }
+              </div>
+            </div>
+          }
+        </div>
+      }
+
+      @if (filteredHolidays.length === 0) {
+        <div class="cal-empty">
+          <div class="cal-empty-orb">
+            <i-tabler name="calendar-off" class="icon-36 d-flex"></i-tabler>
+          </div>
+          <h3>No holidays found</h3>
+          <p>Try adjusting your search or filter</p>
+        </div>
+      }
+    </div>
+  }
+
+  <!-- ══ LIST VIEW ═════════════════════════════════════════════════════════ -->
+  @if (!loading() && activeView() === 'list') {
+    <div class="cal-list-section">
+
+      <!-- Filter Bar -->
+      <div class="cal-filter-bar">
+        <div class="cal-search-wrap">
+          <i-tabler name="search" class="icon-15 d-flex cal-search-icon"></i-tabler>
+          <input class="cal-search-input" [(ngModel)]="searchQuery"
+            (ngModelChange)="applyFilter()" placeholder="Search holidays…">
+          @if (searchQuery) {
+            <button class="cal-search-clear" (click)="searchQuery=''; applyFilter()">
+              <i-tabler name="x" class="icon-13 d-flex"></i-tabler>
+            </button>
+          }
+        </div>
+        <div class="cal-filter-chips">
+          <button class="cal-chip" [class.active]="filterType==='ALL'"       (click)="filterType='ALL'; applyFilter()">All</button>
+          <button class="cal-chip mandatory" [class.active]="filterType==='MANDATORY'" (click)="filterType='MANDATORY'; applyFilter()">Mandatory</button>
+          <button class="cal-chip optional"  [class.active]="filterType==='OPTIONAL'"  (click)="filterType='OPTIONAL'; applyFilter()">Optional</button>
+        </div>
+        @if (perm.hasRoleAction('canCreate', '/calendar')) {
+          <button class="cal-btn primary sm ms-auto" (click)="openForm()">
+            <i-tabler name="plus" class="icon-14 d-flex"></i-tabler> Add Holiday
+          </button>
+        }
+      </div>
+
+      <!-- Table Card -->
+      <div class="cal-glass-card cal-table-card">
+        <div class="cal-table-wrap">
+          <table class="cal-table">
+            <thead>
+              <tr>
+                <th>Holiday</th>
+                <th>Date</th>
+                <th>Day</th>
+                <th>Category</th>
+                <th>Status</th>
+                <th>Description</th>
+                @if (perm.hasRoleAction('canUpdate', '/calendar') || perm.hasRoleAction('canDelete', '/calendar')) {
+                  <th class="text-end">Actions</th>
+                }
+              </tr>
+            </thead>
+            <tbody>
+              @for (h of filteredHolidays; track h.id) {
+                <tr class="cal-table-row" [class.past-row]="isPast(h.holiday_date)">
+                  <td>
+                    <div class="cal-table-name-cell">
+                      <div class="cal-table-dot" [class.mandatory]="h.type === 'MANDATORY'"></div>
+                      <span class="cal-table-name">{{ h.holiday_name }}</span>
+                    </div>
+                  </td>
+                  <td>
+                    <span class="cal-date-chip">{{ h.holiday_date | date:'d MMM yyyy' }}</span>
+                  </td>
+                  <td class="cal-weekday-cell">{{ h.holiday_date | date:'EEEE' }}</td>
+                  <td>
+                    <span class="cal-type-pill" [class.mandatory]="h.type === 'MANDATORY'">
+                      <i-tabler [name]="h.type === 'MANDATORY' ? 'shield-check' : 'star'" class="icon-12 d-flex"></i-tabler>
+                      {{ h.type === 'MANDATORY' ? 'Mandatory' : 'Optional' }}
+                    </span>
+                  </td>
+                  <td>
+                    @if (isPast(h.holiday_date)) {
+                      <span class="cal-status-badge past">Passed</span>
+                    } @else {
+                      <span class="cal-status-badge upcoming">Upcoming</span>
+                    }
+                  </td>
+                  <td class="cal-desc-cell">{{ h.description || '—' }}</td>
+                  @if (perm.hasRoleAction('canUpdate', '/calendar') || perm.hasRoleAction('canDelete', '/calendar')) {
+                    <td class="text-end">
+                      <div class="cal-table-actions">
+                        @if (perm.hasRoleAction('canUpdate', '/calendar')) {
+                          <button class="cal-icon-btn edit" (click)="openForm(h)" title="Edit">
+                            <i-tabler name="edit" class="icon-15 d-flex"></i-tabler>
+                          </button>
+                        }
+                        @if (perm.hasRoleAction('canDelete', '/calendar')) {
+                          <button class="cal-icon-btn delete" (click)="confirmDelete(h.id)" title="Delete">
+                            <i-tabler name="trash" class="icon-15 d-flex"></i-tabler>
+                          </button>
+                        }
+                      </div>
+                    </td>
+                  }
+                </tr>
+              }
+              @if (filteredHolidays.length === 0) {
+                <tr>
+                  <td colspan="7" class="cal-table-empty">
+                    <i-tabler name="calendar-off" class="icon-36 d-flex"></i-tabler>
+                    <p>No holidays found</p>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  }
+
+</div>
+
+<!-- ══ ADD / EDIT HOLIDAY MODAL ══════════════════════════════════════════ -->
+@if (showForm()) {
+  <div class="cal-modal-overlay" (click)="closeForm()">
+    <div class="cal-modal-box" (click)="$event.stopPropagation()">
+      <!-- Modal Header -->
+      <div class="cal-modal-header">
+        <div class="cal-modal-icon">
+          <i-tabler [name]="editingId ? 'edit' : 'calendar-plus'" class="icon-20 d-flex"></i-tabler>
+        </div>
+        <div>
+          <h3 class="cal-modal-title">{{ editingId ? 'Edit Holiday' : 'Declare New Holiday' }}</h3>
+          <p class="cal-modal-sub">{{ editingId ? 'Update the holiday record' : 'Add a company-wide holiday or festival leave' }}</p>
+        </div>
+        <button class="cal-modal-close" (click)="closeForm()">
+          <i-tabler name="x" class="icon-16 d-flex"></i-tabler>
+        </button>
+      </div>
+
+      <!-- Form Body -->
+      <form [formGroup]="holidayForm" (ngSubmit)="saveHoliday()">
+        <div class="cal-form-grid">
+
+          <div class="cal-field cal-field-full">
+            <label class="cal-field-label">
+              <i-tabler name="calendar-event" class="icon-13 d-flex"></i-tabler>
+              Holiday Name <span class="cal-req">*</span>
+            </label>
+            <input class="cal-input" formControlName="holiday_name" placeholder="e.g. Independence Day, Diwali…">
+            @if (holidayForm.get('holiday_name')?.touched && holidayForm.get('holiday_name')?.invalid) {
+              <span class="cal-error">Holiday name is required</span>
+            }
+          </div>
+
+          <div class="cal-field">
+            <label class="cal-field-label">
+              <i-tabler name="calendar" class="icon-13 d-flex"></i-tabler>
+              Date <span class="cal-req">*</span>
+            </label>
+            <input class="cal-input" type="date" formControlName="holiday_date">
+            @if (holidayForm.get('holiday_date')?.touched && holidayForm.get('holiday_date')?.invalid) {
+              <span class="cal-error">Date is required</span>
+            }
+          </div>
+
+          <div class="cal-field">
+            <label class="cal-field-label">
+              <i-tabler name="tag" class="icon-13 d-flex"></i-tabler>
+              Category <span class="cal-req">*</span>
+            </label>
+            <div class="cal-type-selector">
+              <button type="button" class="cal-type-option"
+                [class.selected]="holidayForm.get('type')?.value === 'MANDATORY'"
+                (click)="holidayForm.get('type')?.setValue('MANDATORY')">
+                <i-tabler name="shield-check" class="icon-16 d-flex"></i-tabler>
+                Mandatory
+              </button>
+              <button type="button" class="cal-type-option optional"
+                [class.selected]="holidayForm.get('type')?.value === 'OPTIONAL'"
+                (click)="holidayForm.get('type')?.setValue('OPTIONAL')">
+                <i-tabler name="star" class="icon-16 d-flex"></i-tabler>
+                Optional
+              </button>
+            </div>
+          </div>
+
+          <div class="cal-field cal-field-full">
+            <label class="cal-field-label">
+              <i-tabler name="message" class="icon-13 d-flex"></i-tabler>
+              Description / Policy Note
+            </label>
+            <textarea class="cal-input cal-textarea" formControlName="description" rows="2"
+              placeholder="Enter statutory directives or notes…"></textarea>
+          </div>
+
+        </div>
+
+        <div class="cal-modal-actions">
+          <button type="button" class="cal-btn ghost" (click)="closeForm()">Cancel</button>
+          <button type="submit" class="cal-btn primary" [disabled]="holidayForm.invalid || saving()">
+            @if (saving()) { <div class="cal-btn-spinner"></div> Saving… }
+            @else {
+              <i-tabler [name]="editingId ? 'check' : 'calendar-plus'" class="icon-15 d-flex"></i-tabler>
+              {{ editingId ? 'Update Holiday' : 'Save Holiday' }}
+            }
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+}
+
+<!-- ══ DELETE CONFIRM MODAL ══════════════════════════════════════════════ -->
+@if (confirmDeleteId() !== null) {
+  <div class="cal-modal-overlay" (click)="cancelDelete()">
+    <div class="cal-modal-box cal-confirm-box" (click)="$event.stopPropagation()">
+      <div class="cal-confirm-icon">
+        <i-tabler name="alert-triangle" class="icon-28 d-flex"></i-tabler>
+      </div>
+      <h3 class="cal-confirm-title">Delete Holiday?</h3>
+      <p class="cal-confirm-sub">This action cannot be undone. The holiday will be permanently removed from the company calendar.</p>
+      <div class="cal-modal-actions">
+        <button class="cal-btn ghost" (click)="cancelDelete()">Cancel</button>
+        <button class="cal-btn danger" (click)="deleteHoliday(confirmDeleteId()!)">
+          <i-tabler name="trash" class="icon-15 d-flex"></i-tabler>
+          Yes, Delete
+        </button>
+      </div>
+    </div>
+  </div>
+}

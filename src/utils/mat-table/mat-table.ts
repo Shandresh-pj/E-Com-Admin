@@ -26,6 +26,7 @@ import { AlertService } from 'src/app/Securities/Services/alert.service';
 import * as XLSX from 'xlsx';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import { AppTranslatePipe } from 'src/app/pipes/app-translate.pipe';
 
 export interface TableColumn {
   columnDef: string;
@@ -48,7 +49,8 @@ export interface TableColumn {
     MatInputModule,
     MatCheckboxModule,
     MatTooltipModule,
-    FormsModule
+    FormsModule,
+    AppTranslatePipe
   ],
   templateUrl: './mat-table.html',
   styleUrls: ['./mat-table.scss']

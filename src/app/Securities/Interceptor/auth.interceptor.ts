@@ -17,7 +17,16 @@ import { RefreshService } from '../Services/refresh.service';
 let isRefreshing = false;
 const refreshSubject = new BehaviorSubject<string | null>(null);
 
-const PUBLIC_URLS = ['/auth/login', '/auth/register', '/auth/refresh', '/auth/logout'];
+const PUBLIC_URLS = [
+  '/auth/login',
+  '/auth/register',
+  '/auth/refresh',
+  '/auth/logout',
+  '/languages',
+  '/translations',
+  '/assets/i18n',
+  '/health'
+];
 
 function isPublicUrl(url: string): boolean {
   return PUBLIC_URLS.some(u => url.includes(u));
@@ -34,9 +43,16 @@ function handle401(
   refreshSvc: RefreshService,
   authService: AuthService
 ) {
-  // Don't trigger a forced logout for background non-critical requests
-  if (req.url.includes('/auth/me/permissions') || req.url.includes('/notifications')) {
-    return throwError(() => new Error('Background request unauthorized'));
+  // Don't trigger a forced logout for public, background or localization requests
+  if (
+    isPublicUrl(req.url) ||
+    req.url.includes('/languages') ||
+    req.url.includes('/translations') ||
+    req.url.includes('/assets/i18n') ||
+    req.url.includes('/auth/me/permissions') ||
+    req.url.includes('/notifications')
+  ) {
+    return throwError(() => new Error('Public/Background request unauthorized'));
   }
 
   const refreshToken = tokenService.getRefreshToken();
@@ -83,11 +99,7 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const authService   = inject(AuthService);
   const refreshSvc    = inject(RefreshService);
 
-  // Don't add auth header to public endpoints
-  if (isPublicUrl(req.url)) {
-    return next(req);
-  }
-
+  // Attach token if present to ensure admin APIs receive Authorization header
   const token = tokenService.getToken();
   const authReq = token ? attachToken(req, token) : req;
 

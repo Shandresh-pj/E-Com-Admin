@@ -1,165 +1,345 @@
-<div class="profile-container">
+<div class="pf-page">
 
-  <!-- ── Left Column: Profile Card ──────────────────────────────────────── -->
-  <div class="profile-sidebar">
-    <div class="profile-card cardWithShadow">
-      
-      <!-- Cover Section -->
-      <div class="profile-cover" [style.background-image]="coverPreview ? 'url(' + coverPreview + ')' : null">
-        <div class="cover-glow"></div>
-        <label class="cover-edit-btn" for="coverInput" title="Update Cover Photo">
-          <i-tabler name="camera" class="icon-14 d-flex"></i-tabler>
-          <span>Edit Cover</span>
-          <input id="coverInput" type="file" accept="image/*" hidden (change)="onCoverChange($event)">
-        </label>
-      </div>
+  <!-- ══ AMBIENT BACKGROUND ORBS ══════════════════════════════════════════ -->
+  <div class="pf-bg-orb pf-orb-1"></div>
+  <div class="pf-bg-orb pf-orb-2"></div>
+  <div class="pf-bg-orb pf-orb-3"></div>
 
-      <!-- Avatar Info -->
-      <div class="avatar-info-wrap">
-        <div class="avatar-glow-ring">
-          <div class="avatar-inner">
-            @if (avatarPreview) {
-              <img [src]="avatarPreview" alt="Profile" class="avatar-img" (error)="onImageError('avatar')">
-            } @else {
-              <span class="avatar-text">{{ initials }}</span>
-            }
-            <label class="avatar-edit-btn" for="avatarInput" title="Update Profile Photo">
-              <i-tabler name="camera" class="icon-16 d-flex"></i-tabler>
-              <input id="avatarInput" type="file" accept="image/*" hidden (change)="onAvatarChange($event)">
-            </label>
-          </div>
-          <span class="online-indicator-dot"></span>
-        </div>
+  <!-- ══ HERO COVER BAND ══════════════════════════════════════════════════ -->
+  <div class="pf-hero-cover" [style.background-image]="coverPreview ? 'url(' + coverPreview + ')' : null">
+    <div class="pf-cover-overlay"></div>
+    <div class="pf-cover-mesh"></div>
 
-        <h2 class="user-display-name">{{ ProfileForm.get('name')?.value || ProfileData?.name || 'User' }}</h2>
-        <span class="role-badge">
-          <i-tabler name="shield-check" class="icon-12 d-flex"></i-tabler>
-          {{ ProfileData?.userType || 'Admin' }}
-        </span>
-      </div>
-
-      <!-- Quick Stats Grid -->
-      <div class="stats-grid">
-        @for (s of stats; track s.label) {
-          <div class="stat-card">
-            <div class="stat-icon">
-              <i-tabler [name]="s.icon" class="icon-16 d-flex"></i-tabler>
-            </div>
-            <div class="stat-meta">
-              <span class="stat-value">{{ s.value }}</span>
-              <span class="stat-title">{{ s.label }}</span>
-            </div>
-          </div>
-        }
-      </div>
-
-    </div>
+    <!-- Cover Edit -->
+    <label class="pf-cover-edit-btn" for="coverFileInput" title="Change cover photo">
+      <i-tabler name="photo-edit" class="icon-15 d-flex"></i-tabler>
+      <span>Edit Cover</span>
+      <input id="coverFileInput" type="file" accept="image/*" hidden (change)="onCoverChange($event)">
+    </label>
   </div>
 
-  <!-- ── Right Column: Info Form ────────────────────────────────────────── -->
-  <div class="profile-form-area">
-    <mat-card class="form-card cardWithShadow">
-      <mat-card-content class="form-card-body">
+  <!-- ══ MAIN GRID ═════════════════════════════════════════════════════════ -->
+  <div class="pf-grid">
 
-        <div class="form-header-row">
-          <div class="form-header-icon">
+    <!-- ── LEFT COLUMN ─────────────────────────────────────────────────── -->
+    <aside class="pf-col-left">
+
+      <!-- Identity Card -->
+      <div class="pf-identity-card">
+        <!-- Avatar -->
+        <div class="pf-avatar-wrap">
+          <div class="pf-avatar-ring">
+            <div class="pf-avatar-inner">
+              <ng-container *ngIf="avatarPreview; else initialsBlock">
+                <img [src]="avatarPreview" alt="Avatar" class="pf-avatar-img" (error)="onImageError('avatar')">
+              </ng-container>
+              <ng-template #initialsBlock>
+                <span class="pf-avatar-initials">{{ initials }}</span>
+              </ng-template>
+              <label class="pf-avatar-hover-overlay" for="avatarFileInput" title="{{ 'profile.change_photo' | translate }}">
+                <i-tabler name="camera" class="icon-18 d-flex"></i-tabler>
+                <span class="pf-avatar-hover-text">{{ 'profile.change' | translate }}</span>
+                <input id="avatarFileInput" type="file" accept="image/*" hidden (change)="onAvatarChange($event)">
+              </label>
+            </div>
+            <span class="pf-avatar-status-dot"></span>
+          </div>
+        </div>
+
+        <!-- Identity Info -->
+        <div class="pf-identity-info">
+          <h2 class="pf-name">{{ ProfileForm.get('name')?.value || ProfileData?.name || 'User' }}</h2>
+          <div class="pf-role-chip">
+            <i-tabler name="shield-check" class="icon-12 d-flex"></i-tabler>
+            {{ ProfileData?.userType || 'Admin' }}
+          </div>
+          <p class="pf-email-hint">{{ ProfileData?.email || '—' }}</p>
+        </div>
+
+        <!-- Divider -->
+        <div class="pf-divider"></div>
+
+        <!-- Quick Stats -->
+        <div class="pf-quick-stats">
+          <div *ngFor="let s of stats" class="pf-stat-item">
+            <div class="pf-stat-icon-wrap">
+              <i-tabler [name]="s.icon" class="icon-16 d-flex"></i-tabler>
+            </div>
+            <div class="pf-stat-text">
+              <span class="pf-stat-val">{{ s.value }}</span>
+              <span class="pf-stat-label">{{ s.label | translate }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Divider -->
+        <div class="pf-divider"></div>
+
+        <!-- Links / Actions -->
+        <nav class="pf-sidebar-nav">
+          <button class="pf-snav-item" [class.active]="activeSection === 'account'" (click)="activeSection = 'account'">
+            <i-tabler name="user-edit" class="icon-16 d-flex"></i-tabler>
+            <span>{{ 'profile.account_details' | translate }}</span>
+            <i-tabler name="chevron-right" class="icon-13 d-flex ms-auto"></i-tabler>
+          </button>
+          <button class="pf-snav-item" [class.active]="activeSection === 'security'" (click)="activeSection = 'security'">
+            <i-tabler name="lock" class="icon-16 d-flex"></i-tabler>
+            <span>{{ 'profile.security' | translate }}</span>
+            <i-tabler name="chevron-right" class="icon-13 d-flex ms-auto"></i-tabler>
+          </button>
+          <button class="pf-snav-item" [class.active]="activeSection === 'activity'" (click)="activeSection = 'activity'">
+            <i-tabler name="activity" class="icon-16 d-flex"></i-tabler>
+            <span>{{ 'profile.activity' | translate }}</span>
+            <i-tabler name="chevron-right" class="icon-13 d-flex ms-auto"></i-tabler>
+          </button>
+          <a class="pf-snav-item" routerLink="/employee-documents">
+            <i-tabler name="file-certificate" class="icon-16 d-flex"></i-tabler>
+            <span>{{ 'profile.my_documents' | translate }}</span>
+            <span class="pf-snav-badge">{{ 'profile.kyc' | translate }}</span>
+          </a>
+        </nav>
+      </div>
+
+    </aside>
+
+    <!-- ── RIGHT COLUMN ─────────────────────────────────────────────────── -->
+    <main class="pf-col-right">
+
+      <!-- ── SECTION: Account Details ──────────────────────────────────── -->
+      <div class="pf-section" *ngIf="activeSection === 'account'">
+
+        <!-- Section Header -->
+        <div class="pf-section-header">
+          <div class="pf-section-icon">
             <i-tabler name="user-edit" class="icon-20 d-flex"></i-tabler>
           </div>
           <div>
-            <h3 class="form-title">Account Information</h3>
-            <p class="form-subtitle">Manage your personal details and system credentials</p>
+            <h2 class="pf-section-title">{{ 'profile.account_details' | translate }}</h2>
+            <p class="pf-section-sub">{{ 'profile.account_sub' | translate }}</p>
+          </div>
+          <div class="pf-section-header-actions">
+            <span class="pf-save-indicator" *ngIf="isSaving">
+              <span class="pf-mini-spinner"></span> {{ 'profile.saving' | translate }}…
+            </span>
           </div>
         </div>
 
+        <!-- Form -->
         <form [formGroup]="ProfileForm" (ngSubmit)="onSubmit()">
-          <div class="form-fields-grid">
+
+          <!-- Avatar Upload Strip -->
+          <div class="pf-avatar-strip">
+            <div class="pf-avatar-strip-preview">
+              <ng-container *ngIf="avatarPreview; else initials2">
+                <img [src]="avatarPreview" alt="Avatar" class="pf-avatar-strip-img">
+              </ng-container>
+              <ng-template #initials2>
+                <span class="pf-avatar-strip-initials">{{ initials }}</span>
+              </ng-template>
+            </div>
+            <div class="pf-avatar-strip-info">
+              <h4>{{ 'profile.profile_photo' | translate }}</h4>
+              <p>{{ 'profile.photo_requirements' | translate }}</p>
+            </div>
+            <label for="avatarFileInput2" class="pf-btn ghost sm">
+              <i-tabler name="upload" class="icon-14 d-flex"></i-tabler>
+              {{ 'profile.upload_photo' | translate }}
+              <input id="avatarFileInput2" type="file" accept="image/*" hidden (change)="onAvatarChange($event)">
+            </label>
+          </div>
+
+          <!-- Fields Grid -->
+          <div class="pf-fields-grid">
 
             <!-- Full Name -->
-            <div class="form-field-item">
-              <label class="custom-field-label">
-                <i-tabler name="user" class="icon-14 d-flex"></i-tabler>
-                Full Name <span class="required-star">*</span>
+            <div class="pf-field">
+              <label class="pf-field-label">
+                <i-tabler name="user" class="icon-13 d-flex"></i-tabler>
+                {{ 'profile.full_name' | translate }} <span class="pf-req">*</span>
               </label>
-              <mat-form-field appearance="outline" class="w-100 custom-input">
-                <input matInput formControlName="name" placeholder="Enter your name">
-                @if (ProfileForm.get('name')?.hasError('required') && ProfileForm.get('name')?.touched) {
-                  <mat-error>Name is required</mat-error>
-                }
-              </mat-form-field>
+              <div class="pf-input-wrap">
+                <input class="pf-input" formControlName="name" placeholder="{{ 'profile.enter_name' | translate }}">
+              </div>
+              <span class="pf-field-error" *ngIf="ProfileForm.get('name')?.touched && ProfileForm.get('name')?.hasError('required')">
+                {{ 'error.name_required' | translate }}
+              </span>
             </div>
 
-            <!-- Email (Read Only) -->
-            <div class="form-field-item">
-              <label class="custom-field-label">
-                <i-tabler name="mail" class="icon-14 d-flex"></i-tabler>
-                Email Address
-                <span class="readonly-badge">Locked</span>
+            <!-- Email (Locked) -->
+            <div class="pf-field">
+              <label class="pf-field-label">
+                <i-tabler name="mail" class="icon-13 d-flex"></i-tabler>
+                {{ 'profile.email_address' | translate }} <span class="pf-lock-badge"><i-tabler name="lock" class="icon-10 d-flex"></i-tabler> {{ 'profile.locked' | translate }}</span>
               </label>
-              <mat-form-field appearance="outline" class="w-100 custom-input disabled-input">
-                <input matInput formControlName="email" placeholder="Email Address">
-              </mat-form-field>
+              <div class="pf-input-wrap locked">
+                <input class="pf-input" formControlName="email" readonly placeholder="{{ 'profile.email_address' | translate }}">
+                <i-tabler name="lock" class="icon-14 d-flex pf-input-suffix-icon"></i-tabler>
+              </div>
             </div>
 
-            <!-- Mobile (Read Only) -->
-            <div class="form-field-item">
-              <label class="custom-field-label">
-                <i-tabler name="phone" class="icon-14 d-flex"></i-tabler>
-                Mobile Number
-                <span class="readonly-badge">Locked</span>
+            <!-- Mobile (Locked) -->
+            <div class="pf-field">
+              <label class="pf-field-label">
+                <i-tabler name="device-mobile" class="icon-13 d-flex"></i-tabler>
+                {{ 'profile.mobile_number' | translate }} <span class="pf-lock-badge"><i-tabler name="lock" class="icon-10 d-flex"></i-tabler> {{ 'profile.locked' | translate }}</span>
               </label>
-              <mat-form-field appearance="outline" class="w-100 custom-input disabled-input">
-                <input matInput formControlName="mobilenumber" placeholder="Mobile Number">
-              </mat-form-field>
+              <div class="pf-input-wrap locked">
+                <input class="pf-input" formControlName="mobilenumber" readonly placeholder="{{ 'profile.mobile_number' | translate }}">
+                <i-tabler name="lock" class="icon-14 d-flex pf-input-suffix-icon"></i-tabler>
+              </div>
             </div>
 
-            <!-- User Type (Read Only) -->
-            <div class="form-field-item">
-              <label class="custom-field-label">
-                <i-tabler name="id-badge" class="icon-14 d-flex"></i-tabler>
-                User Workspace Role
-                <span class="readonly-badge">Locked</span>
+            <!-- Role (Locked) -->
+            <div class="pf-field">
+              <label class="pf-field-label">
+                <i-tabler name="shield" class="icon-13 d-flex"></i-tabler>
+                {{ 'profile.role' | translate }} <span class="pf-lock-badge"><i-tabler name="lock" class="icon-10 d-flex"></i-tabler> {{ 'profile.locked' | translate }}</span>
               </label>
-              <mat-form-field appearance="outline" class="w-100 custom-input disabled-input">
-                <input matInput formControlName="userType" placeholder="Workspace Role">
-              </mat-form-field>
+              <div class="pf-input-wrap locked">
+                <input class="pf-input" formControlName="userType" readonly placeholder="{{ 'profile.role' | translate }}">
+                <i-tabler name="lock" class="icon-14 d-flex pf-input-suffix-icon"></i-tabler>
+              </div>
             </div>
 
-            <!-- Address (Editable) -->
-            <div class="form-field-item field-full-width">
-              <label class="custom-field-label">
-                <i-tabler name="map-pin" class="icon-14 d-flex"></i-tabler>
-                Physical Address <span class="required-star">*</span>
+            <!-- Address (Full Width) -->
+            <div class="pf-field pf-field-full">
+              <label class="pf-field-label">
+                <i-tabler name="map-pin" class="icon-13 d-flex"></i-tabler>
+                {{ 'profile.physical_address' | translate }} <span class="pf-req">*</span>
               </label>
-              <mat-form-field appearance="outline" class="w-100 custom-input">
-                <input matInput formControlName="address" placeholder="Enter your full physical address">
-                @if (ProfileForm.get('address')?.hasError('required') && ProfileForm.get('address')?.touched) {
-                  <mat-error>Address is required</mat-error>
-                }
-              </mat-form-field>
+              <div class="pf-input-wrap">
+                <textarea class="pf-input pf-textarea" formControlName="address" rows="3"
+                  placeholder="{{ 'profile.enter_address' | translate }}"></textarea>
+              </div>
+              <span class="pf-field-error" *ngIf="ProfileForm.get('address')?.touched && ProfileForm.get('address')?.hasError('required')">
+                {{ 'error.address_required' | translate }}
+              </span>
             </div>
 
           </div>
 
-          <!-- Actions -->
-          <div class="form-action-row">
-            <button type="button" class="btn-cancel-glass" (click)="onReset()">
+          <!-- Action Row -->
+          <div class="pf-form-actions">
+            <button type="button" class="pf-btn ghost" (click)="onReset()">
               <i-tabler name="rotate-clockwise" class="icon-14 d-flex"></i-tabler>
-              Reset Details
+              {{ 'profile.reset' | translate }}
             </button>
-            <button type="submit" class="btn-save-glow" [class.btn-loading]="isSaving">
-              @if (isSaving) {
-                <span class="spinner-mini"></span>
-                Processing…
-              } @else {
-                <i-tabler name="device-floppy" class="icon-14 d-flex"></i-tabler>
-                Save Profile
-              }
+            <button type="submit" class="pf-btn primary" [class.loading]="isSaving" [disabled]="isSaving">
+              <span class="pf-mini-spinner" *ngIf="isSaving"></span>
+              <i-tabler name="device-floppy" class="icon-14 d-flex" *ngIf="!isSaving"></i-tabler>
+              {{ isSaving ? ('profile.saving' | translate) : ('profile.save_profile' | translate) }}
             </button>
           </div>
+
         </form>
+      </div>
 
-      </mat-card-content>
-    </mat-card>
+      <!-- ── SECTION: Security ─────────────────────────────────────────── -->
+      <div class="pf-section" *ngIf="activeSection === 'security'">
+        <div class="pf-section-header">
+          <div class="pf-section-icon green">
+            <i-tabler name="lock" class="icon-20 d-flex"></i-tabler>
+          </div>
+          <div>
+            <h2 class="pf-section-title">{{ 'profile.security' | translate }}</h2>
+            <p class="pf-section-sub">{{ 'profile.security_sub' | translate }}</p>
+          </div>
+        </div>
+
+        <div class="pf-security-cards">
+          <div class="pf-security-card">
+            <div class="pf-security-card-icon">
+              <i-tabler name="key" class="icon-22 d-flex"></i-tabler>
+            </div>
+            <div class="pf-security-card-body">
+              <h4>{{ 'profile.change_password' | translate }}</h4>
+              <p>{{ 'profile.change_password_sub' | translate }}</p>
+            </div>
+            <a routerLink="/change-password" class="pf-btn sm primary">
+              <i-tabler name="arrow-right" class="icon-14 d-flex"></i-tabler>
+              {{ 'profile.update' | translate }}
+            </a>
+          </div>
+
+          <div class="pf-security-card">
+            <div class="pf-security-card-icon success">
+              <i-tabler name="shield-check" class="icon-22 d-flex"></i-tabler>
+            </div>
+            <div class="pf-security-card-body">
+              <h4>{{ 'profile.kyc' | translate }}</h4>
+              <p>{{ 'profile.kyc_sub' | translate }}</p>
+            </div>
+            <a routerLink="/employee-documents" class="pf-btn sm success">
+              <i-tabler name="file-certificate" class="icon-14 d-flex"></i-tabler>
+              {{ 'profile.view' | translate }}
+            </a>
+          </div>
+
+          <div class="pf-security-card">
+            <div class="pf-security-card-icon warning">
+              <i-tabler name="device-desktop-analytics" class="icon-22 d-flex"></i-tabler>
+            </div>
+            <div class="pf-security-card-body">
+              <h4>{{ 'profile.active_sessions' | translate }}</h4>
+              <p>{{ 'profile.active_sessions_sub' | translate }}</p>
+            </div>
+            <span class="pf-session-badge">1 {{ 'profile.active' | translate }}</span>
+          </div>
+        </div>
+
+        <!-- Info Cards Row -->
+        <div class="pf-info-grid">
+          <div class="pf-info-card">
+            <i-tabler name="clock" class="icon-16 d-flex"></i-tabler>
+            <div>
+              <span class="pf-info-label">{{ 'profile.last_login' | translate }}</span>
+              <span class="pf-info-value">{{ 'profile.today_at' | translate }} {{ getCurrentTime() }}</span>
+            </div>
+          </div>
+          <div class="pf-info-card">
+            <i-tabler name="device-laptop" class="icon-16 d-flex"></i-tabler>
+            <div>
+              <span class="pf-info-label">{{ 'profile.device' | translate }}</span>
+              <span class="pf-info-value">{{ 'profile.web_browser' | translate }}</span>
+            </div>
+          </div>
+          <div class="pf-info-card">
+            <i-tabler name="map-pin" class="icon-16 d-flex"></i-tabler>
+            <div>
+              <span class="pf-info-label">{{ 'profile.location' | translate }}</span>
+              <span class="pf-info-value">{{ 'profile.india' | translate }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── SECTION: Activity ─────────────────────────────────────────── -->
+      <div class="pf-section" *ngIf="activeSection === 'activity'">
+        <div class="pf-section-header">
+          <div class="pf-section-icon purple">
+            <i-tabler name="activity" class="icon-20 d-flex"></i-tabler>
+          </div>
+          <div>
+            <h2 class="pf-section-title">{{ 'profile.recent_activity' | translate }}</h2>
+            <p class="pf-section-sub">{{ 'profile.recent_activity_sub' | translate }}</p>
+          </div>
+        </div>
+
+        <div class="pf-timeline">
+          <div class="pf-timeline-item" *ngFor="let act of recentActivity">
+            <div class="pf-timeline-dot" [class]="'dot-' + act.color"></div>
+            <div class="pf-timeline-content">
+              <div class="pf-timeline-header">
+                <i-tabler [name]="act.icon" class="icon-14 d-flex"></i-tabler>
+                <span class="pf-timeline-title">{{ act.title }}</span>
+                <span class="pf-timeline-time">{{ act.time }}</span>
+              </div>
+              <p class="pf-timeline-desc">{{ act.desc }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </main>
   </div>
-
 </div>

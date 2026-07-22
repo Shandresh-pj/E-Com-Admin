@@ -10,7 +10,7 @@
       @if (showSearch) {
         <div class="search-box">
           <mat-icon class="search-icon">search</mat-icon>
-          <input type="text" [(ngModel)]="searchQuery" (keyup)="applyFilter($event)" placeholder="Search anything...">
+          <input type="text" [(ngModel)]="searchQuery" (keyup)="applyFilter($event)" [placeholder]="'common.search' | translate">
           @if (searchQuery) {
             <button mat-icon-button class="clear-btn" (click)="searchQuery=''; applyFilter('')">
               <mat-icon>close</mat-icon>
@@ -36,7 +36,7 @@
     @if (isLoading) {
       <div class="loading-overlay">
         <div class="loader"></div>
-        <span>Loading data...</span>
+        <span>{{ 'table.loading' | translate }}</span>
       </div>
     }
 
@@ -64,7 +64,7 @@
       @for (column of columns; track column.columnDef) {
         <ng-container [matColumnDef]="column.columnDef">
           <th mat-header-cell *matHeaderCellDef mat-sort-header>
-            {{column.header}}
+            {{ column.header | translate }}
           </th>
           <td mat-cell *matCellDef="let row">
 
@@ -125,22 +125,22 @@
       @if (showAction) {
         <ng-container matColumnDef="action">
           <th mat-header-cell *matHeaderCellDef class="col-actions">
-            Action
+            {{ 'common.actions' | translate }}
           </th>
           <td mat-cell *matCellDef="let row" class="col-actions">
             <div class="action-buttons">
               @if (showView) {
-                <button mat-icon-button class="btn-action view" (click)="View(row)" matTooltip="View">
+                <button mat-icon-button class="btn-action view" (click)="View(row)" [matTooltip]="'common.view' | translate">
                   <mat-icon>visibility</mat-icon>
                 </button>
               }
               @if (showEdit) {
-                <button mat-icon-button class="btn-action edit" (click)="edit(row)" matTooltip="Edit">
+                <button mat-icon-button class="btn-action edit" (click)="edit(row)" [matTooltip]="'common.edit' | translate">
                   <mat-icon>edit</mat-icon>
                 </button>
               }
               @if (showDelete) {
-                <button mat-icon-button class="btn-action delete" (click)="delete(row)" matTooltip="Delete">
+                <button mat-icon-button class="btn-action delete" (click)="delete(row)" [matTooltip]="'common.delete' | translate">
                   <mat-icon>delete</mat-icon>
                 </button>
               }
@@ -160,7 +160,7 @@
           @if (!isLoading) {
             <div class="empty-state">
               <mat-icon>folder_open</mat-icon>
-              <p>No records found matching your criteria.</p>
+              <p>{{ 'table.no_records' | translate }}</p>
             </div>
           }
         </td>

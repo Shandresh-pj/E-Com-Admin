@@ -10,6 +10,7 @@ import { AuthService } from 'src/app/Securities/Services/auth.service';
 import { PermissionService } from 'src/app/Securities/Services/permissions.service';
 import { CommonService } from 'src/app/Securities/Services/common.service';
 import { MatTable } from 'src/utils/mat-table/mat-table';
+import { AppTranslatePipe } from 'src/app/pipes/app-translate.pipe';
 
 @Component({
   selector: 'app-roles',
@@ -20,7 +21,8 @@ import { MatTable } from 'src/utils/mat-table/mat-table';
     MatButtonModule,
     MatCardModule,
     MatSelectModule,
-    MatTable],
+    MatTable,
+    AppTranslatePipe],
   templateUrl: './roles.html',
   styleUrl: './roles.scss',
 })

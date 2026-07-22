@@ -1,0 +1,345 @@
+<div class="tm-page">
+
+  <!-- Ambient Orbs -->
+  <div class="tm-orb tm-orb-1"></div>
+  <div class="tm-orb tm-orb-2"></div>
+
+  <!-- Hero Header -->
+  <div class="tm-hero">
+    <div class="tm-hero-inner">
+      <div class="tm-hero-left">
+        <div class="tm-hero-icon">
+          <i-tabler name="language" class="icon-28 d-flex"></i-tabler>
+        </div>
+        <div>
+          <h1 class="tm-hero-title">{{ 'Multi-Language & Localization Console' | translate }}</h1>
+          <p class="tm-hero-sub">{{ 'Dynamic i18n management, multi-tenant overrides, RTL support & live publishing' | translate }}</p>
+        </div>
+      </div>
+
+      <!-- Action Group -->
+      <div class="tm-hero-actions">
+        <button class="tm-btn primary" (click)="publishLive()" [disabled]="saving()">
+          <i-tabler name="broadcast" class="icon-16 d-flex"></i-tabler>
+          {{ 'Publish Live' | translate }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Navigation Tabs -->
+  <div class="tm-tabs-bar">
+    <button class="tm-tab-btn" [class.active]="activeTab() === 'matrix'" (click)="activeTab.set('matrix')">
+      <i-tabler name="table" class="icon-16 d-flex"></i-tabler>
+      {{ 'Translation Matrix' | translate }}
+    </button>
+    <button class="tm-tab-btn" [class.active]="activeTab() === 'languages'" (click)="activeTab.set('languages')">
+      <i-tabler name="world" class="icon-16 d-flex"></i-tabler>
+      {{ 'Language Master' | translate }} ({{ languages.length }})
+    </button>
+    <button class="tm-tab-btn" [class.active]="activeTab() === 'import_export'" (click)="activeTab.set('import_export')">
+      <i-tabler name="file-import" class="icon-16 d-flex"></i-tabler>
+      {{ 'Import / Export Packs' | translate }}
+    </button>
+  </div>
+
+  <!-- Loading State -->
+  @if (loading()) {
+    <div class="tm-loading">
+      <div class="tm-spinner"></div>
+      <p>Loading localization dictionary…</p>
+    </div>
+  }
+
+  <!-- TAB 1: TRANSLATION MATRIX -->
+  @if (!loading() && activeTab() === 'matrix') {
+    <div class="tm-section">
+
+      <!-- Filter Controls -->
+      <div class="tm-filter-bar">
+        <!-- Search -->
+        <div class="tm-search-wrap">
+          <i-tabler name="search" class="icon-15 tm-search-icon d-flex"></i-tabler>
+          <input type="text" class="tm-search-input" [(ngModel)]="searchQuery" (ngModelChange)="applyFilter()" [placeholder]="'Search translation keys or text...' | translate">
+        </div>
+
+        <!-- Group Chips -->
+        <div class="tm-group-chips">
+          @for (grp of GROUPS; track grp) {
+            <button class="tm-chip" [class.active]="selectedGroup === grp" (click)="selectedGroup = grp; applyFilter()">
+              {{ grp.toUpperCase() }}
+            </button>
+          }
+        </div>
+
+        <!-- Add Key Button -->
+        <button class="tm-btn ghost sm ms-auto" (click)="showKeyModal.set(true)">
+          <i-tabler name="plus" class="icon-14 d-flex"></i-tabler> {{ 'Add Key' | translate }}
+        </button>
+      </div>
+
+      <!-- Matrix Table Card -->
+      <div class="tm-glass-card tm-table-card">
+        <div class="tm-table-wrap">
+          <table class="tm-table">
+            <thead>
+              <tr>
+                <th>{{ 'Group' | translate }}</th>
+                <th>{{ 'Key Name' | translate }}</th>
+                <th>{{ 'English (Default)' | translate }}</th>
+                @for (lang of languages; track lang.code) {
+                  @if (lang.code !== 'en') {
+                    <th>{{ lang.flag_icon }} {{ lang.name }}</th>
+                  }
+                }
+                <th class="text-end">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (row of filteredMatrix; track row.id) {
+                <tr class="tm-row">
+                  <td>
+                    <span class="tm-group-badge">{{ row.group_name }}</span>
+                  </td>
+                  <td>
+                    <span class="tm-key-name">{{ row.key_name }}</span>
+                  </td>
+                  <td>
+                    <input type="text" class="tm-cell-input" [(ngModel)]="row.default_text">
+                  </td>
+                  @for (lang of languages; track lang.code) {
+                    @if (lang.code !== 'en') {
+                      <td>
+                        <input type="text" class="tm-cell-input" [(ngModel)]="row.translations[lang.code]" [attr.dir]="lang.direction" placeholder="Enter translation…">
+                      </td>
+                    }
+                  }
+                  <td class="text-end">
+                    <button class="tm-icon-btn save" (click)="saveKeyRow(row)" title="Save Row">
+                      <i-tabler name="device-floppy" class="icon-15 d-flex"></i-tabler>
+                    </button>
+                  </td>
+                </tr>
+              }
+              @if (filteredMatrix.length === 0) {
+                <tr>
+                  <td [attr.colspan]="languages.length + 3" class="tm-empty-td">
+                    No translation keys found
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- TAB 2: LANGUAGE MASTER -->
+  @if (!loading() && activeTab() === 'languages') {
+    <div class="tm-section">
+      <div class="tm-filter-bar">
+        <h3>Supported Languages</h3>
+        <button class="tm-btn primary sm ms-auto" (click)="openLangModal()">
+          <i-tabler name="plus" class="icon-14 d-flex"></i-tabler> Add Language
+        </button>
+      </div>
+
+      <div class="tm-languages-grid">
+        @for (lang of languages; track lang.code) {
+          <div class="tm-lang-card" [class.default]="lang.is_default" [class.inactive]="!lang.is_active">
+            <div class="tm-lang-card-header">
+              <span class="tm-lang-flag">{{ lang.flag_icon }}</span>
+              <div class="tm-lang-info">
+                <h4 class="tm-lang-name">{{ lang.name }}</h4>
+                <span class="tm-lang-native">{{ lang.native_name }}</span>
+              </div>
+              <span class="tm-lang-code-pill">{{ lang.code.toUpperCase() }}</span>
+            </div>
+
+            <div class="tm-lang-meta">
+              <span class="tm-meta-badge" [class.rtl]="lang.direction === 'rtl'">
+                Direction: {{ lang.direction.toUpperCase() }}
+              </span>
+              @if (lang.is_default) {
+                <span class="tm-meta-badge default">Default Language</span>
+              }
+            </div>
+
+            <div class="tm-lang-actions">
+              <button class="tm-btn ghost sm" (click)="openLangModal(lang)">Edit</button>
+              @if (!lang.is_default) {
+                <button class="tm-btn ghost sm" (click)="setDefaultLanguage(lang)">Set Default</button>
+                <button class="tm-btn sm" [class.danger]="lang.is_active" [class.success]="!lang.is_active" (click)="toggleLanguageActive(lang)">
+                  {{ lang.is_active ? 'Disable' : 'Enable' }}
+                </button>
+              }
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+  }
+
+  <!-- TAB 3: IMPORT / EXPORT -->
+  @if (!loading() && activeTab() === 'import_export') {
+    <div class="tm-section">
+      <div class="tm-ie-grid">
+
+        <!-- Export Panel -->
+        <div class="tm-glass-card tm-ie-card">
+          <div class="tm-card-title-row">
+            <i-tabler name="file-export" class="icon-20 d-flex text-primary"></i-tabler>
+            <h3>Export Language Pack (JSON)</h3>
+          </div>
+          <p class="tm-card-desc">Download complete dictionary packs to share with translators or offline backup.</p>
+
+          <div class="tm-export-list">
+            @for (lang of languages; track lang.code) {
+              <div class="tm-export-item">
+                <span class="tm-lang-flag">{{ lang.flag_icon }}</span>
+                <span class="tm-export-name">{{ lang.name }} ({{ lang.code }})</span>
+                <button class="tm-btn ghost sm ms-auto" (click)="exportPack(lang.code)">
+                  <i-tabler name="download" class="icon-14 d-flex"></i-tabler> Export JSON
+                </button>
+              </div>
+            }
+          </div>
+        </div>
+
+        <!-- Import Panel -->
+        <div class="tm-glass-card tm-ie-card">
+          <div class="tm-card-title-row">
+            <i-tabler name="file-import" class="icon-20 d-flex text-primary"></i-tabler>
+            <h3>Import Language Pack (JSON)</h3>
+          </div>
+          <p class="tm-card-desc">Paste JSON key-value translation payload to update system strings in bulk.</p>
+
+          <div class="tm-form-grid">
+            <div class="tm-field">
+              <label class="tm-label">Target Language</label>
+              <select class="tm-select" [(ngModel)]="importLang">
+                @for (l of languages; track l.code) {
+                  <option [value]="l.code">{{ l.flag_icon }} {{ l.name }} ({{ l.code }})</option>
+                }
+              </select>
+            </div>
+
+            <div class="tm-field">
+              <label class="tm-label">Key Group</label>
+              <select class="tm-select" [(ngModel)]="importGroup">
+                @for (g of GROUPS; track g) {
+                  @if (g !== 'ALL') {
+                    <option [value]="g">{{ g.toUpperCase() }}</option>
+                  }
+                }
+              </select>
+            </div>
+          </div>
+
+          <div class="tm-field mt-3">
+            <label class="tm-label">JSON Dictionary Payload</label>
+            <textarea class="tm-textarea" rows="8" [(ngModel)]="importJsonText" placeholder='{\n  "menu.dashboard": "முகப்பு",\n  "common.save": "சேமி"\n}'></textarea>
+          </div>
+
+          <div class="mt-3 text-end">
+            <button class="tm-btn primary" (click)="importPack()" [disabled]="saving()">
+              <i-tabler name="cloud-upload" class="icon-16 d-flex"></i-tabler> Import &amp; Merge Dictionary
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  }
+
+</div>
+
+<!-- ADD / EDIT LANGUAGE MODAL -->
+@if (showLangModal()) {
+  <div class="tm-modal-overlay" (click)="showLangModal.set(false)">
+    <div class="tm-modal-box" (click)="$event.stopPropagation()">
+      <div class="tm-modal-header">
+        <h3>{{ editingLangId ? 'Edit Language' : 'Add New Language' }}</h3>
+        <button class="tm-modal-close" (click)="showLangModal.set(false)">
+          <i-tabler name="x" class="icon-16 d-flex"></i-tabler>
+        </button>
+      </div>
+
+      <form [formGroup]="langForm" (ngSubmit)="saveLanguage()">
+        <div class="tm-form-grid">
+          <div class="tm-field">
+            <label class="tm-label">Language Code * (e.g. en, ta, hi)</label>
+            <input class="tm-input" formControlName="code" placeholder="e.g. ta">
+          </div>
+          <div class="tm-field">
+            <label class="tm-label">Language Name * (e.g. Tamil)</label>
+            <input class="tm-input" formControlName="name" placeholder="e.g. Tamil">
+          </div>
+          <div class="tm-field">
+            <label class="tm-label">Native Name * (e.g. தமிழ்)</label>
+            <input class="tm-input" formControlName="native_name" placeholder="e.g. தமிழ்">
+          </div>
+          <div class="tm-field">
+            <label class="tm-label">Flag Emoji (e.g. 🇮🇳, 🇸🇦)</label>
+            <input class="tm-input" formControlName="flag_icon" placeholder="🇮🇳">
+          </div>
+          <div class="tm-field">
+            <label class="tm-label">Text Direction</label>
+            <select class="tm-select" formControlName="direction">
+              <option value="ltr">LTR (Left to Right)</option>
+              <option value="rtl">RTL (Right to Left - Arabic/Hebrew)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="tm-modal-actions">
+          <button type="button" class="tm-btn ghost" (click)="showLangModal.set(false)">Cancel</button>
+          <button type="submit" class="tm-btn primary" [disabled]="langForm.invalid || saving()">Save Language</button>
+        </div>
+      </form>
+    </div>
+  </div>
+}
+
+<!-- ADD KEY MODAL -->
+@if (showKeyModal()) {
+  <div class="tm-modal-overlay" (click)="showKeyModal.set(false)">
+    <div class="tm-modal-box" (click)="$event.stopPropagation()">
+      <div class="tm-modal-header">
+        <h3>Add New Translation Key</h3>
+        <button class="tm-modal-close" (click)="showKeyModal.set(false)">
+          <i-tabler name="x" class="icon-16 d-flex"></i-tabler>
+        </button>
+      </div>
+
+      <form [formGroup]="keyForm" (ngSubmit)="addKey()">
+        <div class="tm-form-grid">
+          <div class="tm-field">
+            <label class="tm-label">Group Name *</label>
+            <select class="tm-select" formControlName="group_name">
+              @for (g of GROUPS; track g) {
+                @if (g !== 'ALL') {
+                  <option [value]="g">{{ g.toUpperCase() }}</option>
+                }
+              }
+            </select>
+          </div>
+          <div class="tm-field">
+            <label class="tm-label">Key Name * (e.g. menu.reports)</label>
+            <input class="tm-input" formControlName="key_name" placeholder="e.g. menu.reports">
+          </div>
+          <div class="tm-field tm-field-full">
+            <label class="tm-label">Default English Text *</label>
+            <input class="tm-input" formControlName="default_text" placeholder="e.g. Reports & Analytics">
+          </div>
+        </div>
+
+        <div class="tm-modal-actions">
+          <button type="button" class="tm-btn ghost" (click)="showKeyModal.set(false)">Cancel</button>
+          <button type="submit" class="tm-btn primary" [disabled]="keyForm.invalid || saving()">Create Key</button>
+        </div>
+      </form>
+    </div>
+  </div>
+}

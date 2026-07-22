@@ -20,9 +20,13 @@ import { TablerIconsModule } from 'angular-tabler-icons';
 import { MaterialModule } from 'src/app/material.module';
 import { CommonModule } from '@angular/common';
 
+import { I18nService } from 'src/app/services/i18n.service';
+import { AppTranslatePipe } from 'src/app/pipes/app-translate.pipe';
+import { effect } from '@angular/core';
+
 @Component({
   selector: 'app-nav-item',
-  imports: [TranslateModule, TablerIconsModule, MaterialModule, CommonModule],
+  imports: [TranslateModule, TablerIconsModule, MaterialModule, CommonModule, AppTranslatePipe],
   templateUrl: './nav-item.component.html',
   styleUrls: [],
 })
@@ -44,13 +48,10 @@ export class AppNavItemComponent implements OnChanges, OnInit, OnDestroy {
     public navService: NavService,
     public router: Router,
     private cdr: ChangeDetectorRef,
+    public i18n: I18nService
   ) {}
 
   ngOnInit() {
-    // Recompute active state on every navigation. These items live inside
-    // Material's OnPush `mat-nav-list`, so mutating a field from an RxJS
-    // callback does NOT refresh the view on its own — the previously active
-    // item stayed highlighted. `markForCheck()` forces the update.
     this.active = this.isMenuActive(this.item);
     this.routerSub = this.router.events
       .pipe(filter((e) => e instanceof NavigationEnd))

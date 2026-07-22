@@ -9,6 +9,7 @@ import { NavigationEnd, Router } from '@angular/router';
 import { NavService } from '../../services/nav.service';
 import { RouterModule } from '@angular/router';
 import { MaterialModule } from 'src/app/material.module';
+import { FormsModule } from '@angular/forms';
 
 import { NgScrollbarModule } from 'ngx-scrollbar';
 import { TablerIconsModule } from 'angular-tabler-icons';
@@ -23,6 +24,7 @@ import { PermissionService } from 'src/app/Securities/Services/permissions.servi
 import { NavItem } from './sidebar/nav-item/nav-item';
 import { SocketService } from 'src/app/Securities/Services/socket.service';
 import { NotificationService } from 'src/app/services/notification.service';
+import { I18nService } from 'src/app/services/i18n.service';
 
 
 const MOBILE_VIEW = 'screen and (max-width: 768px)';
@@ -35,6 +37,7 @@ const TABLET_VIEW = 'screen and (min-width: 769px) and (max-width: 1024px)';
     RouterModule,
     AppNavItemComponent,
     MaterialModule,
+    FormsModule,
     SidebarComponent,
     NgScrollbarModule,
     TablerIconsModule,
@@ -51,6 +54,8 @@ export class FullComponent implements OnInit {
   // inside an effect() isn't guaranteed to be picked up by the same
   // change-detection pass the effect ran in (Angular Signals gotcha).
   navItems = signal<NavItem[]>([]);
+  filteredNavItems = signal<NavItem[]>([]);
+  sidebarSearch = '';
 
   /**
    * Sidebar items come from two sources, merged:
@@ -121,8 +126,10 @@ export class FullComponent implements OnInit {
     private permissionService: PermissionService,
     private socketService: SocketService,
     private notificationService: NotificationService,
+    public i18n: I18nService
   ) {
     this.htmlElement = document.querySelector('html')!;
+
     this.layoutChangesSubscription = this.breakpointObserver
       .observe([MOBILE_VIEW, TABLET_VIEW])
       .subscribe((state) => {
@@ -318,7 +325,10 @@ export class FullComponent implements OnInit {
         { id: 33, name: 'Upgrade Plan', path: '/subscription-plans', icon: 'bi-star-fill', isActive: true },
         { id: 34, name: 'Billing History', path: '/billing-history', icon: 'receipt', isActive: true },
         { id: 35, name: 'Subscription Coupons', path: '/subscription-coupons', icon: 'ticket', isActive: true },
-        { id: 36, name: 'Standard Checkout', path: '/checkout', icon: 'credit-card', isActive: true }
+        { id: 36, name: 'Standard Checkout', path: '/checkout', icon: 'credit-card', isActive: true },
+        { id: 37, name: 'Company Calendar', path: '/calendar', icon: 'calendar-event', isActive: true },
+        { id: 38, name: 'Document Verification', path: '/employee-documents', icon: 'file-check', isActive: true },
+        { id: 39, name: 'Translation Console', path: '/translations', icon: 'language', isActive: true }
 
       ];
     } else {
@@ -367,7 +377,7 @@ export class FullComponent implements OnInit {
       },
       {
         navCap: 'HR & Workforce',
-        paths: ['/employees', '/attendance', '/leave', '/payroll', '/workforce', '/workforce-requests', '/approvals']
+        paths: ['/employees', '/attendance', '/leave', '/payroll', '/workforce', '/workforce-requests', '/approvals', '/calendar', '/employee-documents']
       }
     ];
 
@@ -453,13 +463,15 @@ export class FullComponent implements OnInit {
 
     // Prune duplicates
     const seen = new Set<string>();
-    this.navItems.set(finalItems.filter(it => {
+    const deduped = finalItems.filter(it => {
       if (!it.route) return true;
       const key = norm(it.route) + (it.children ? '_parent' : '');
       if (seen.has(key)) return false;
       seen.add(key);
       return true;
-    }));
+    });
+    this.navItems.set(deduped);
+    this.filteredNavItems.set(deduped);
 
     this.updateNavBadges();
   }
@@ -483,12 +495,46 @@ export class FullComponent implements OnInit {
   };
 
   private mapIcon(icon?: string): string {
-    // Bootstrap Icons classes are always lowercase (e.g. bi-badge); the DB
-    // has inconsistent casing on some Menu records (e.g. "Badge"), which
-    // otherwise produces a class like bi-Badge that matches no real CSS rule.
     const raw = (icon || 'grid-fill').trim().toLowerCase();
     const bare = raw.startsWith('bi-') ? raw.slice(3) : raw.startsWith('bi ') ? raw.slice(3).trim() : raw;
     return `bi-${FullComponent.ICON_ALIASES[bare] ?? bare}`;
+  }
+
+  onSidebarSearch(query: string): void {
+    if (!query.trim()) {
+      this.filteredNavItems.set(this.navItems());
+      return;
+    }
+    const q = query.toLowerCase();
+    const all = this.navItems();
+    const filtered: NavItem[] = [];
+    let currentCap: NavItem | null = null;
+    let capAdded = false;
+
+    for (const item of all) {
+      if (item.navCap) {
+        currentCap = item;
+        capAdded = false;
+        continue;
+      }
+      if (item.displayName && item.displayName.toLowerCase().includes(q)) {
+        if (currentCap && !capAdded) {
+          filtered.push(currentCap);
+          capAdded = true;
+        }
+        filtered.push(item);
+        // Also add matching children
+      } else if (item.children) {
+        const matchingChildren = item.children.filter(
+          (c: NavItem) => c.displayName && c.displayName.toLowerCase().includes(q)
+        );
+        if (matchingChildren.length > 0) {
+          if (currentCap && !capAdded) { filtered.push(currentCap); capAdded = true; }
+          filtered.push({ ...item, children: matchingChildren });
+        }
+      }
+    }
+    this.filteredNavItems.set(filtered);
   }
 
 }

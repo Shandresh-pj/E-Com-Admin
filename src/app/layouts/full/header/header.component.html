@@ -10,13 +10,62 @@
   <!-- Tagline -->
   <div class="topbar-title d-none d-md-flex align-items-center gap-8 ms-4">
     <span class="topbar-brand-dot"></span>
-    <span class="topbar-tagline">Enterprise Command Center</span>
+    <span class="topbar-tagline">{{ 'Enterprise Command Center' | translate }}</span>
+  </div>
+
+  <!-- Global Search -->
+  <div class="topbar-search-wrap">
+    <i-tabler name="search" class="topbar-search-icon icon-15 d-flex"></i-tabler>
+    <input
+      id="topbar-global-search"
+      class="topbar-search-input"
+      [(ngModel)]="globalSearch"
+      (input)="onGlobalSearch()"
+      (focus)="showSearchDrop = true"
+      (blur)="hideSearchDrop()"
+      [placeholder]="'Search pages, actions...' | translate"
+      autocomplete="off"
+    >
+    <div class="topbar-search-kbd">
+      <span class="topbar-search-kbd-key">Ctrl</span>
+      <span class="topbar-search-kbd-key">K</span>
+    </div>
+
+    @if (showSearchDrop && globalSearch.trim()) {
+      <div class="topbar-search-dropdown">
+        @if (searchResults.length > 0) {
+          <p class="text-dark f-w-600 f-s-13 m-b-12 m-t-4">{{ 'header.pages_modules' | translate }}</p>
+          @for (r of searchResults; track r.path) {
+            <a class="topbar-search-result-item" [routerLink]="[r.path]" (mousedown)="$event.preventDefault()" (click)="clearSearch()">
+              <div class="topbar-search-result-icon">
+                <i-tabler [name]="r.icon" class="icon-16 d-flex"></i-tabler>
+              </div>
+              <div class="topbar-search-result-info">
+                <span class="topbar-search-result-name">{{ r.name }}</span>
+                <span class="topbar-search-result-path">{{ r.path }}</span>
+              </div>
+            </a>
+          }
+          <div class="topbar-search-footer">
+            <i-tabler name="corner-down-left" class="icon-12 d-flex"></i-tabler>
+            {{ 'header.press_enter' | translate }}
+          </div>
+        } @else {
+          <p class="m-b-0 f-s-12 text-muted">{{ 'header.no_results' | translate }} "{{ globalSearch }}"</p>
+        }
+      </div>
+    }
   </div>
 
   <span class="flex-1-auto"></span>
 
   <!-- Right Action Group -->
   <div class="topbar-actions d-flex align-items-center gap-8">
+
+    <!-- Language Selector -->
+    <div class="topbar-action-pill me-1">
+      <app-language-selector></app-language-selector>
+    </div>
 
     <!-- Theme Toggle -->
     <div class="topbar-action-pill">
@@ -45,26 +94,26 @@
               <i-tabler name="bell-ringing" class="icon-16 d-flex"></i-tabler>
             </div>
             <div>
-              <h3 class="notif-panel-title">Notifications</h3>
+              <h5 class="text-dark m-b-0 f-w-600">{{ 'header.notifications' | translate }}</h5>
               @if (unreadCount > 0) {
-                <span class="notif-panel-subtitle">{{ unreadCount }} unread</span>
+                <span class="notif-panel-subtitle">{{ unreadCount }} {{ 'header.unread' | translate }}</span>
               } @else {
-                <span class="notif-panel-subtitle">All caught up</span>
+                <span class="notif-panel-subtitle">{{ 'header.all_caught_up' | translate }}</span>
               }
             </div>
           </div>
           @if (notifications.length > 0) {
             <button class="notif-clear-btn" (click)="clearAll()">
               <i-tabler name="trash" class="icon-12 d-flex"></i-tabler>
-              Clear
+              {{ 'header.clear' | translate }}
             </button>
           }
         </div>
 
         <!-- Segment Tabs -->
         <div class="notif-tabs">
-          <button class="notif-tab active">All</button>
-          <button class="notif-tab">Unread
+          <button [class.active]="notifTab==='all'" (click)="notifTab='all'" class="notif-tab">{{ 'header.all_tab' | translate }}</button>
+          <button [class.active]="notifTab==='unread'" (click)="notifTab='unread'" class="notif-tab">{{ 'header.unread_tab' | translate }}
             @if (unreadCount > 0) {
               <span class="notif-tab-badge">{{ unreadCount }}</span>
             }
@@ -86,8 +135,8 @@
                   <i-tabler name="shield-lock" class="icon-18 d-flex"></i-tabler>
                 </div>
                 <div class="pwd-reminder-text">
-                  <p class="pwd-reminder-title">Update Your Password</p>
-                  <p class="pwd-reminder-sub">Secure your account on first login</p>
+                  <h5 class="m-b-4 f-w-600 f-s-14">{{ 'header.update_password' | translate }}</h5>
+                  <p class="m-b-0 f-s-12 text-muted">{{ 'header.secure_account' | translate }}</p>
                 </div>
                 <span class="pwd-reminder-priority-dot"></span>
               </div>
@@ -96,7 +145,7 @@
               <div class="pwd-countdown-wrap" [class.pwd-countdown-urgent]="countdownUrgent">
                 <div class="pwd-countdown-label">
                   <i-tabler name="clock-hour-4" class="icon-12 d-flex me-1"></i-tabler>
-                  <span>{{ countdownUrgent ? 'Act now! Expires in' : 'Time remaining' }}</span>
+                  <span>{{ countdownUrgent ? ('header.act_now' | translate) : ('header.time_remaining' | translate) }}</span>
                 </div>
                 <div class="pwd-countdown-digits">
                   <span class="pwd-digit-block">{{ countdownDisplay.split(':')[0] }}<small>h</small></span>
@@ -119,13 +168,8 @@
 
               <!-- Actions -->
               <div class="pwd-reminder-actions">
-                <button class="pwd-update-btn" (click)="navigateToChangePassword()">
-                  <i-tabler name="key" class="icon-13 d-flex"></i-tabler>
-                  Update Now
-                </button>
-                <button class="pwd-dismiss-btn" (click)="markPasswordUpdated()">
-                  Done
-                </button>
+                <button mat-flat-button color="primary" class="f-s-12" (click)="navigateToChangePassword()">{{ 'header.update_now' | translate }}</button>
+                <button mat-stroked-button class="f-s-12" (click)="markPasswordUpdated()">{{ 'header.done' | translate }}</button>
               </div>
 
             </div>
@@ -137,8 +181,8 @@
               <div class="notif-empty-orb">
                 <i-tabler name="bell-off" class="icon-28 d-flex"></i-tabler>
               </div>
-              <p class="notif-empty-title">All caught up!</p>
-              <p class="notif-empty-sub">No new notifications right now</p>
+              <p class="m-b-0 f-s-13 f-w-600 text-dark">{{ 'header.all_caught_up_panel' | translate }}</p>
+              <p class="m-b-0 f-s-12 text-muted">{{ 'header.no_notifications' | translate }}</p>
             </div>
           }
 
@@ -165,7 +209,7 @@
         <!-- Panel Footer -->
         <div class="notif-panel-footer">
           <a class="notif-view-all-btn" [routerLink]="['/notifications']">
-            <span>View all notifications</span>
+            <span>{{ 'header.view_all' | translate }}</span>
             <i-tabler name="arrow-right" class="icon-14 d-flex"></i-tabler>
           </a>
         </div>
@@ -207,26 +251,26 @@
       <button mat-menu-item (click)="ProfilePage()" class="profile-menu-item">
         <div class="menu-item-content">
           <i-tabler name="user" class="icon-16 d-flex menu-item-icon"></i-tabler>
-          <span>My Profile</span>
+          <span>{{ 'header.my_profile' | translate }}</span>
         </div>
       </button>
       <button mat-menu-item [routerLink]="['/change-password']" class="profile-menu-item">
         <div class="menu-item-content">
           <i-tabler name="lock" class="icon-16 d-flex menu-item-icon"></i-tabler>
-          <span>Change Password</span>
+          <span>{{ 'header.change_password' | translate }}</span>
         </div>
       </button>
       <button mat-menu-item [routerLink]="['/notifications']" class="profile-menu-item">
         <div class="menu-item-content">
           <i-tabler name="bell" class="icon-16 d-flex menu-item-icon"></i-tabler>
-          <span>Notifications</span>
+          <span>{{ 'Notifications' | translate }}</span>
         </div>
       </button>
       <mat-divider></mat-divider>
       <button mat-menu-item (click)="onLogout()" class="profile-menu-item logout-item">
         <div class="menu-item-content">
           <i-tabler name="logout" class="icon-16 d-flex menu-item-icon"></i-tabler>
-          <span>Sign Out</span>
+          <span>{{ 'Sign Out' | translate }}</span>
         </div>
       </button>
     </mat-menu>

@@ -5,15 +5,13 @@
         <div class="header-container">
 
             <mat-card-title class="m-b-0">
-                Branch Access
+                {{ 'branch.title' | translate }}
             </mat-card-title>
 
             @if (!Branch_Forms && !View_Mode && perm.hasRoleAction('canCreate')) {
 
             <button mat-flat-button color="primary" (click)="AddNewUser()">
-
-                Add New Branch
-
+                {{ 'branch.add_new' | translate }}
             </button>
 
             }
@@ -39,43 +37,43 @@
         <div class="row p-t-16">
 
             <div class="col-lg-4 m-b-16">
-                <p class="f-w-600 m-b-4 text-muted">Branch Name</p>
+                <p class="f-w-600 m-b-4 text-muted">{{ 'branch.view.name' | translate }}</p>
                 <p class="f-s-16">{{ SelectedBranch?.userRoles?.[0]?.user?.name || SelectedBranch?.name || '-' }}</p>
             </div>
 
             <div class="col-lg-4 m-b-16">
-                <p class="f-w-600 m-b-4 text-muted">Email</p>
+                <p class="f-w-600 m-b-4 text-muted">{{ 'common.email' | translate }}</p>
                 <p class="f-s-16">{{ SelectedBranch?.email || '-' }}</p>
             </div>
 
             <div class="col-lg-4 m-b-16">
-                <p class="f-w-600 m-b-4 text-muted">Mobile Number</p>
+                <p class="f-w-600 m-b-4 text-muted">{{ 'common.mobile' | translate }}</p>
                 <p class="f-s-16">{{ SelectedBranch?.phone || '-' }}</p>
             </div>
 
             <div class="col-lg-4 m-b-16">
-                <p class="f-w-600 m-b-4 text-muted">Company</p>
+                <p class="f-w-600 m-b-4 text-muted">{{ 'common.company' | translate }}</p>
                 <p class="f-s-16">{{ SelectedBranch?.company?.name || '-' }}</p>
             </div>
 
             <div class="col-lg-4 m-b-16">
-                <p class="f-w-600 m-b-4 text-muted">Location</p>
+                <p class="f-w-600 m-b-4 text-muted">{{ 'branch.view.location' | translate }}</p>
                 <p class="f-s-16">{{ SelectedBranch?.location || '-' }}</p>
             </div>
 
             <div class="col-lg-4 m-b-16">
-                <p class="f-w-600 m-b-4 text-muted">Status</p>
+                <p class="f-w-600 m-b-4 text-muted">{{ 'common.status' | translate }}</p>
                 <p class="f-s-16">{{ SelectedBranch?.status || '-' }}</p>
             </div>
 
             <div class="col-lg-4 m-b-16">
-                <p class="f-w-600 m-b-4 text-muted">Role</p>
+                <p class="f-w-600 m-b-4 text-muted">{{ 'common.role' | translate }}</p>
                 <p class="f-s-16">{{ SelectedBranch?.userRoles?.[0]?.role?.name || '-' }}</p>
             </div>
 
         </div>
         <div class="m-t-12">
-            <button mat-stroked-button (click)="closeView()">Back to List</button>
+            <button mat-stroked-button (click)="closeView()">{{ 'common.back_to_list' | translate }}</button>
         </div>
     </mat-card-content>
 
@@ -87,71 +85,71 @@
 
             <div class="row">
                 <div class="col-lg-4">
-                    <mat-label class="f-w-600 m-b-8 d-block">Company <span class="text-danger">*</span></mat-label>
+                    <mat-label class="f-w-600 m-b-8 d-block">{{ 'common.company' | translate }} <span class="text-danger">*</span></mat-label>
                     <mat-form-field appearance="outline" class="w-100">
-                      <mat-select formControlName="company_id" placeholder="Select Your Company">
+                      <mat-select formControlName="company_id" [placeholder]="'branch.select_company' | translate">
                         @for(option of Companies; track option.id) {
                         <mat-option [value]="option.id">{{option.name}}</mat-option>
                         }
                       </mat-select>
                       @if (BranchForm.get('company_id')?.hasError('required')) {
-                        <mat-error>Company is required</mat-error>
+                        <mat-error>{{ 'error.company.required' | translate }}</mat-error>
                       }
                     </mat-form-field>
                 </div>
 
                 <div class="col-lg-4">
-                    <mat-label class="f-w-600 m-b-8 d-block">Branch Name <span class="text-danger">*</span></mat-label>
+                    <mat-label class="f-w-600 m-b-8 d-block">{{ 'branch.name' | translate }} <span class="text-danger">*</span></mat-label>
                     <mat-form-field appearance="outline" class="w-100">
-                        <input matInput formControlName="name" placeholder="Enter Branch Name">
+                        <input matInput formControlName="name" [placeholder]="'branch.name' | translate">
                         @if (BranchForm.get('name')?.hasError('required')) {
-                          <mat-error>Branch name is required</mat-error>
+                          <mat-error>{{ 'error.branch.name_required' | translate }}</mat-error>
                         } @else if (BranchForm.get('name')?.hasError('maxlength')) {
-                          <mat-error>Branch name cannot exceed 100 characters</mat-error>
+                          <mat-error>{{ 'error.branch.name_max' | translate }}</mat-error>
                         }
                     </mat-form-field>
                 </div>
 
                 <div class="col-lg-4">
-                    <mat-label class="f-w-600 m-b-8 d-block">Mobile Number <span class="text-danger">*</span></mat-label>
+                    <mat-label class="f-w-600 m-b-8 d-block">{{ 'common.mobile' | translate }} <span class="text-danger">*</span></mat-label>
                     <mat-form-field appearance="outline" class="w-100">
-                        <input matInput formControlName="phone" placeholder="Enter 10-digit Mobile Number">
+                        <input matInput formControlName="phone" [placeholder]="'common.mobile' | translate">
                         @if (BranchForm.get('phone')?.hasError('required')) {
-                          <mat-error>Mobile number is required</mat-error>
+                          <mat-error>{{ 'error.mobile.required' | translate }}</mat-error>
                         } @else if (BranchForm.get('phone')?.hasError('pattern')) {
-                          <mat-error>Enter a valid 10-digit mobile number</mat-error>
+                          <mat-error>{{ 'error.mobile.pattern' | translate }}</mat-error>
                         }
                     </mat-form-field>
                 </div>
 
                 <div class="col-lg-4">
-                    <mat-label class="f-w-600 m-b-8 d-block">Email <span class="text-danger">*</span></mat-label>
+                    <mat-label class="f-w-600 m-b-8 d-block">{{ 'common.email' | translate }} <span class="text-danger">*</span></mat-label>
                     <mat-form-field appearance="outline" class="w-100">
-                        <input matInput formControlName="email" placeholder="Enter Email">
+                        <input matInput formControlName="email" [placeholder]="'common.email' | translate">
                         @if (BranchForm.get('email')?.hasError('required')) {
-                          <mat-error>Email is required</mat-error>
+                          <mat-error>{{ 'error.email.required' | translate }}</mat-error>
                         } @else if (BranchForm.get('email')?.hasError('email')) {
-                          <mat-error>Enter a valid email address</mat-error>
+                          <mat-error>{{ 'error.email.invalid' | translate }}</mat-error>
                         }
                     </mat-form-field>
                 </div>
 
                 <div class="col-lg-4">
-                    <mat-label class="f-w-600 m-b-8 d-block">Address</mat-label>
+                    <mat-label class="f-w-600 m-b-8 d-block">{{ 'common.address' | translate }}</mat-label>
                     <mat-form-field appearance="outline" class="w-100">
-                        <input matInput formControlName="location" placeholder="Enter Address">
+                        <input matInput formControlName="location" [placeholder]="'common.address' | translate">
                         @if (BranchForm.get('location')?.hasError('maxlength')) {
-                          <mat-error>Address cannot exceed 200 characters</mat-error>
+                          <mat-error>{{ 'error.address.max' | translate }}</mat-error>
                         }
                     </mat-form-field>
                 </div>
 
                 <div class="col-lg-4">
-                    <mat-label class="f-w-600 m-b-8 d-block">Role</mat-label>
+                    <mat-label class="f-w-600 m-b-8 d-block">{{ 'common.role' | translate }}</mat-label>
                     <mat-form-field appearance="outline" class="w-100">
-                      <mat-select formControlName="role_id" placeholder="Select Your Role" >
+                      <mat-select formControlName="role_id" [placeholder]="'branch.select_role' | translate">
                         @for(option of Roles; track option.id) {
-                        <mat-option [value]="option.id" >{{option.name}}</mat-option>
+                        <mat-option [value]="option.id">{{option.name}}</mat-option>
                         }
                       </mat-select>
                     </mat-form-field>
@@ -162,15 +160,11 @@
             <div class="m-t-12">
 
                 <button mat-stroked-button class="me-3 Cancel_Button" (click)="cancelBranch()">
-
-                    Cancel
-
+                    {{ 'common.cancel' | translate }}
                 </button>
 
                 <button mat-flat-button color="primary" (click)="submit(BranchForm)">
-
-                    {{Update_button ? 'Update' : 'Submit'}}
-
+                    {{ Update_button ? ('common.update' | translate) : ('common.submit' | translate) }}
                 </button>
 
             </div>

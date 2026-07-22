@@ -5,7 +5,7 @@
       <mat-card-content class="p-20">
         <div class="d-flex align-items-center justify-content-between">
           <div>
-            <p class="f-s-12 text-muted m-b-4 text-uppercase f-w-600">Total Worked Time</p>
+            <p class="f-s-12 text-muted m-b-4 text-uppercase f-w-600">{{ 'attendance.total_worked' | translate }}</p>
             <h3 class="f-w-700 m-b-0 text-dark-primary">{{ formatMinutes(totalWorkedMinutes) }}</h3>
           </div>
           <div class="stats-icon bg-light-primary rounded-8 p-12">
@@ -20,7 +20,7 @@
       <mat-card-content class="p-20">
         <div class="d-flex align-items-center justify-content-between">
           <div>
-            <p class="f-s-12 text-muted m-b-4 text-uppercase f-w-600">Total Break duration</p>
+            <p class="f-s-12 text-muted m-b-4 text-uppercase f-w-600">{{ 'attendance.total_break' | translate }}</p>
             <h3 class="f-w-700 m-b-0 text-dark-warning">{{ totalBreakMinutes }} min</h3>
           </div>
           <div class="stats-icon bg-light-warning rounded-8 p-12">
@@ -35,7 +35,7 @@
       <mat-card-content class="p-20">
         <div class="d-flex align-items-center justify-content-between">
           <div>
-            <p class="f-s-12 text-muted m-b-4 text-uppercase f-w-600">Overtime Recorded</p>
+            <p class="f-s-12 text-muted m-b-4 text-uppercase f-w-600">{{ 'attendance.overtime_recorded' | translate }}</p>
             <h3 class="f-w-700 m-b-0 text-dark-success">{{ formatMinutes(totalOvertimeMinutes) }}</h3>
           </div>
           <div class="stats-icon bg-light-success rounded-8 p-12">
@@ -50,7 +50,7 @@
       <mat-card-content class="p-20">
         <div class="d-flex align-items-center justify-content-between">
           <div>
-            <p class="f-s-12 text-muted m-b-4 text-uppercase f-w-600">Active Duty Days</p>
+            <p class="f-s-12 text-muted m-b-4 text-uppercase f-w-600">{{ 'attendance.active_days' | translate }}</p>
             <h3 class="f-w-700 m-b-0 text-dark-info">{{ activeDaysCount }} Days</h3>
           </div>
           <div class="stats-icon bg-light-info rounded-8 p-12">
@@ -68,7 +68,7 @@
     <mat-card class="cardWithShadow theme-card overflow-hidden">
       <mat-card-header class="bg-light-primary p-x-24 p-y-16">
         <div class="w-100 d-flex justify-content-between align-items-center">
-          <mat-card-title class="m-b-0 text-primary f-w-600">Workforce Terminal Session</mat-card-title>
+          <mat-card-title class="m-b-0 text-primary f-w-600">{{ 'attendance.terminal' | translate }}</mat-card-title>
           <span class="badge-geo d-flex align-items-center gap-4 f-s-11">
             <mat-icon class="icon-12">location_on</mat-icon> {{ geoStatus }}
           </span>
@@ -83,12 +83,12 @@
               [ngClass]="isOnBreak ? 'bg-warning' : (isCheckedIn ? 'bg-success' : 'bg-danger')"
             ></span>
             <div>
-              <p class="f-s-12 text-muted m-b-2 text-uppercase">Current Session Status</p>
+              <p class="f-s-12 text-muted m-b-2 text-uppercase">{{ 'attendance.current_status' | translate }}</p>
               <h3 
                 class="f-w-700 m-b-0 font-status" 
                 [ngClass]="isOnBreak ? 'text-warning' : (isCheckedIn ? 'text-success' : 'text-danger')"
               >
-                {{ isOnBreak ? 'ON ACTIVE BREAK' : (isCheckedIn ? 'SIGNED ON DUTY' : 'OUT OF OFFICE') }}
+                {{ isOnBreak ? ('attendance.on_break' | translate) : (isCheckedIn ? ('attendance.signed_on' | translate) : ('attendance.out_of_office' | translate)) }}
               </h3>
             </div>
           </div>
@@ -103,7 +103,7 @@
                 (click)="checkIn()" 
                 [disabled]="loading || ((currentUser?.userType === 'SUPER_ADMIN' || currentUser?.role === 'SUPER_ADMIN') && (attendanceForm.get('employee_id')?.invalid || attendanceForm.get('company_id')?.invalid || attendanceForm.get('branch_id')?.invalid))"
               >
-                <mat-icon class="m-r-4">login</mat-icon> Punch Check-In
+                <mat-icon class="m-r-4">login</mat-icon> {{ 'attendance.punch_in' | translate }}
               </button>
             } @else {
               <!-- Break controls -->
@@ -115,7 +115,7 @@
                   (click)="startBreak()" 
                   [disabled]="loading || breakLoading"
                 >
-                  <mat-icon class="m-r-4">coffee</mat-icon> Enter Break
+                  <mat-icon class="m-r-4">coffee</mat-icon> {{ 'attendance.enter_break' | translate }}
                 </button>
               } @else {
                 <button 
@@ -124,7 +124,7 @@
                   (click)="endBreak()" 
                   [disabled]="loading || breakLoading"
                 >
-                  <mat-icon class="m-r-4">play_arrow</mat-icon> Exit Break
+                  <mat-icon class="m-r-4">play_arrow</mat-icon> {{ 'attendance.exit_break' | translate }}
                 </button>
               }
 
@@ -136,7 +136,7 @@
                 (click)="checkOut()" 
                 [disabled]="loading || isOnBreak"
               >
-                <mat-icon class="m-r-4">logout</mat-icon> Punch Check-Out
+                <mat-icon class="m-r-4">logout</mat-icon> {{ 'attendance.punch_out' | translate }}
               </button>
             }
           </div>
@@ -147,7 +147,7 @@
           <div class="employee-details-bar m-t-20 p-12 rounded-8 d-flex align-items-center justify-content-between">
             <div class="d-flex align-items-center gap-8">
               <mat-icon class="text-primary icon-20">verified_user</mat-icon>
-              <span class="f-w-600 f-s-13">Secured employee profile:</span>
+              <span class="f-w-600 f-s-13">{{ 'attendance.secured_profile' | translate }}</span>
               <span class="f-s-13 text-dark">{{ detectedEmployee.name }} ({{ detectedEmployee.email }})</span>
             </div>
             <div class="d-flex align-items-center gap-8">
@@ -164,7 +164,7 @@
     <mat-card class="cardWithShadow theme-card bg-digital-gradient text-white d-flex align-items-center justify-content-center text-center p-24 h-100 min-h-200">
       <mat-card-content class="w-100 p-0 d-flex flex-column align-items-center justify-content-center">
         <mat-icon class="clock-top-icon m-b-8">alarm</mat-icon>
-        <p class="f-s-11 text-uppercase tracking-wide text-light-white m-b-8">Digital Live Terminal Time</p>
+        <p class="f-s-11 text-uppercase tracking-wide text-light-white m-b-8">{{ 'attendance.digital_clock_label' | translate }}</p>
         <div class="d-flex align-items-baseline justify-content-center">
           <h1 class="clock-time m-b-0 f-w-700">{{ currentTimeString }}</h1>
           <span class="clock-ampm f-s-16 m-l-6 f-w-600">{{ currentAmPm }}</span>
@@ -183,24 +183,24 @@
   <div class="col-lg-6">
     <mat-card class="cardWithShadow theme-card">
       <mat-card-header class="p-x-24 p-y-16">
-        <mat-card-title class="m-b-0 f-w-600 f-s-15">Active Assigned Shift Details</mat-card-title>
+        <mat-card-title class="m-b-0 f-w-600 f-s-15">{{ 'attendance.shift_details' | translate }}</mat-card-title>
       </mat-card-header>
       <mat-card-content class="p-24 b-t-1">
         <div class="d-flex flex-column gap-12">
           <div class="d-flex justify-content-between align-items-center">
-            <span class="text-muted f-s-13">Shift Pattern Name:</span>
+            <span class="text-muted f-s-13">{{ 'attendance.shift_name' | translate }}</span>
             <span class="f-w-600 text-primary">{{ activeShift.name }}</span>
           </div>
           <div class="d-flex justify-content-between align-items-center">
-            <span class="text-muted f-s-13">Timings schedule:</span>
+            <span class="text-muted f-s-13">{{ 'attendance.timings' | translate }}</span>
             <span class="f-w-600 text-dark">{{ activeShift.start_time }} to {{ activeShift.end_time }}</span>
           </div>
           <div class="d-flex justify-content-between align-items-center">
-            <span class="text-muted f-s-13">Late Arrival Grace Period:</span>
+            <span class="text-muted f-s-13">{{ 'attendance.grace_period' | translate }}</span>
             <span class="badge-rules">{{ activeShift.grace_period_minutes }} minutes</span>
           </div>
           <div class="d-flex justify-content-between align-items-center">
-            <span class="text-muted f-s-13">Min shift working time:</span>
+            <span class="text-muted f-s-13">{{ 'attendance.min_work' | translate }}</span>
             <span class="badge-rules bg-light-info text-info">{{ activeShift.min_work_minutes }} minutes ({{ activeShift.min_work_minutes / 60 }} Hrs)</span>
           </div>
         </div>
@@ -214,26 +214,26 @@
   <div class="col-lg-6">
     <mat-card class="cardWithShadow theme-card">
       <mat-card-header class="p-x-24 p-y-16">
-        <mat-card-title class="m-b-0 f-w-600 f-s-15">Active Break Rules Policy</mat-card-title>
+        <mat-card-title class="m-b-0 f-w-600 f-s-15">{{ 'attendance.break_policy' | translate }}</mat-card-title>
       </mat-card-header>
       <mat-card-content class="p-24 b-t-1">
         <div class="d-flex flex-column gap-12">
           <div class="d-flex justify-content-between align-items-center">
-            <span class="text-muted f-s-13">Allowed Break Duration:</span>
+            <span class="text-muted f-s-13">{{ 'attendance.allowed_break' | translate }}</span>
             <span class="f-w-600 text-warning">{{ activeBreakPolicy.max_duration_minutes }} minutes</span>
           </div>
           <div class="d-flex justify-content-between align-items-center">
-            <span class="text-muted f-s-13">Max Allowed Break Sessions:</span>
+            <span class="text-muted f-s-13">{{ 'attendance.max_break_sessions' | translate }}</span>
             <span class="f-w-600 text-dark">{{ activeBreakPolicy.max_frequency }} breaks/day</span>
           </div>
           <div class="d-flex justify-content-between align-items-center">
-            <span class="text-muted f-s-13">Paid Break Status:</span>
+            <span class="text-muted f-s-13">{{ 'attendance.paid_break' | translate }}</span>
             <span class="badge-rules" [ngClass]="activeBreakPolicy.is_paid ? 'bg-light-success text-success' : 'bg-light-danger text-danger'">
               {{ activeBreakPolicy.is_paid ? 'Paid' : 'Unpaid Deduction' }}
             </span>
           </div>
           <div class="d-flex justify-content-between align-items-center">
-            <span class="text-muted f-s-13">Excess penalty warning:</span>
+            <span class="text-muted f-s-13">{{ 'attendance.excess_penalty' | translate }}</span>
             <span class="badge-rules bg-light-warn text-warn">Applied if break > {{ activeBreakPolicy.max_duration_minutes + activeBreakPolicy.deduction_rules.warning }} mins</span>
           </div>
         </div>
@@ -248,14 +248,14 @@
 @if (showForm) {
 <mat-card class="cardWithShadow theme-card m-b-24">
   <mat-card-header class="p-x-24 p-y-16">
-    <mat-card-title class="m-b-0 f-w-600 f-s-15">{{ updateButton ? 'Edit' : 'Create' }} Attendance Record Override</mat-card-title>
+    <mat-card-title class="m-b-0 f-w-600 f-s-15">{{ updateButton ? ('attendance.edit_form' | translate) : ('attendance.create_edit_form' | translate) }}</mat-card-title>
   </mat-card-header>
   <mat-card-content class="p-24 b-t-1">
     <form [formGroup]="attendanceForm">
       <div class="row">
         <!-- Date -->
         <div class="col-lg-4 col-md-6 col-sm-12">
-          <mat-label class="f-w-600 m-b-8 d-block f-s-13">Attendance Date (DD:MM:YYYY) <span class="text-danger">*</span></mat-label>
+          <mat-label class="f-w-600 m-b-8 d-block f-s-13">{{ 'attendance.date' | translate }} <span class="text-danger">*</span></mat-label>
           <mat-form-field appearance="outline" class="w-100">
             <input matInput formControlName="attendance_date" placeholder="e.g. 05:07:2026">
           </mat-form-field>
@@ -263,7 +263,7 @@
 
         <!-- Status -->
         <div class="col-lg-4 col-md-6 col-sm-12">
-          <mat-label class="f-w-600 m-b-8 d-block f-s-13">Status <span class="text-danger">*</span></mat-label>
+          <mat-label class="f-w-600 m-b-8 d-block f-s-13">{{ 'common.status' | translate }} <span class="text-danger">*</span></mat-label>
           <mat-form-field appearance="outline" class="w-100">
             <mat-select formControlName="status">
               <mat-option value="PRESENT">PRESENT</mat-option>
@@ -278,7 +278,7 @@
         @if (currentUser?.userType === 'SUPER_ADMIN' || currentUser?.role === 'SUPER_ADMIN') {
         <!-- Employee selection -->
         <div class="col-lg-4 col-md-6 col-sm-12">
-          <mat-label class="f-w-600 m-b-8 d-block f-s-13">Employee <span class="text-danger">*</span></mat-label>
+          <mat-label class="f-w-600 m-b-8 d-block f-s-13">{{ 'common.employee' | translate }} <span class="text-danger">*</span></mat-label>
           <mat-form-field appearance="outline" class="w-100">
             <mat-select formControlName="employee_id" placeholder="Select Employee">
               @for(e of employees; track $index) {
@@ -290,7 +290,7 @@
 
         <!-- Company selection -->
         <div class="col-lg-4 col-md-6 col-sm-12">
-          <mat-label class="f-w-600 m-b-8 d-block f-s-13">Company <span class="text-danger">*</span></mat-label>
+          <mat-label class="f-w-600 m-b-8 d-block f-s-13">{{ 'common.company' | translate }} <span class="text-danger">*</span></mat-label>
           <mat-form-field appearance="outline" class="w-100">
             <mat-select formControlName="company_id" placeholder="Select Company">
               @for(c of companies; track $index) {
@@ -302,7 +302,7 @@
 
         <!-- Branch selection -->
         <div class="col-lg-4 col-md-6 col-sm-12">
-          <mat-label class="f-w-600 m-b-8 d-block f-s-13">Branch <span class="text-danger">*</span></mat-label>
+          <mat-label class="f-w-600 m-b-8 d-block f-s-13">{{ 'common.branch' | translate }} <span class="text-danger">*</span></mat-label>
           <mat-form-field appearance="outline" class="w-100">
             <mat-select formControlName="branch_id" placeholder="Select Branch">
               @for(b of branches; track $index) {
@@ -315,7 +315,7 @@
 
         <!-- Check-in Time -->
         <div class="col-lg-4 col-md-6 col-sm-12">
-          <mat-label class="f-w-600 m-b-8 d-block f-s-13">Check In Time (HH:mm:ss)</mat-label>
+          <mat-label class="f-w-600 m-b-8 d-block f-s-13">{{ 'attendance.check_in' | translate }}</mat-label>
           <mat-form-field appearance="outline" class="w-100">
             <input matInput formControlName="check_in" placeholder="e.g. 09:00:00">
           </mat-form-field>
@@ -323,7 +323,7 @@
 
         <!-- Check-out Time -->
         <div class="col-lg-4 col-md-6 col-sm-12">
-          <mat-label class="f-w-600 m-b-8 d-block f-s-13">Check Out Time (HH:mm:ss)</mat-label>
+          <mat-label class="f-w-600 m-b-8 d-block f-s-13">{{ 'attendance.check_out' | translate }}</mat-label>
           <mat-form-field appearance="outline" class="w-100">
             <input matInput formControlName="check_out" placeholder="e.g. 17:00:00">
           </mat-form-field>
@@ -331,7 +331,7 @@
 
         <!-- Break minutes -->
         <div class="col-lg-4 col-md-6 col-sm-12">
-          <mat-label class="f-w-600 m-b-8 d-block f-s-13">Break Duration (minutes)</mat-label>
+          <mat-label class="f-w-600 m-b-8 d-block f-s-13">{{ 'attendance.break_duration' | translate }}</mat-label>
           <mat-form-field appearance="outline" class="w-100">
             <input type="number" matInput formControlName="break_minutes" placeholder="e.g. 60">
           </mat-form-field>
@@ -339,9 +339,9 @@
       </div>
 
       <div class="m-t-20 d-flex gap-8">
-        <button mat-stroked-button class="Cancel_Button" (click)="cancelForm()">Cancel</button>
+        <button mat-stroked-button class="Cancel_Button" (click)="cancelForm()">{{ 'common.cancel' | translate }}</button>
         <button mat-flat-button color="primary" [disabled]="loading || attendanceForm.invalid" (click)="submit(attendanceForm)">
-          {{ updateButton ? 'Update Record' : 'Create Record' }}
+          {{ updateButton ? ('attendance.update_record' | translate) : ('attendance.create_record' | translate) }}
         </button>
       </div>
     </form>
@@ -353,14 +353,14 @@
 @if (!detectedEmployee && !showForm && (perm.hasRoleAction('canCreate') || perm.hasRoleAction('canUpdate'))) {
 <mat-card class="cardWithShadow theme-card m-b-24">
   <mat-card-header class="p-x-24 p-y-16">
-    <mat-card-title class="m-b-0 f-w-600 f-s-15">Select Terminal Scope Profile</mat-card-title>
+    <mat-card-title class="m-b-0 f-w-600 f-s-15">{{ 'attendance.scope_profile' | translate }}</mat-card-title>
   </mat-card-header>
   <mat-card-content class="p-24 b-t-1">
     <form [formGroup]="attendanceForm">
       <div class="row">
         <!-- Company selection -->
         <div class="col-lg-4 col-md-6 col-sm-12">
-          <mat-label class="f-w-600 m-b-8 d-block f-s-13">Select Target Company <span class="text-danger">*</span></mat-label>
+          <mat-label class="f-w-600 m-b-8 d-block f-s-13">{{ 'attendance.target_company' | translate }} <span class="text-danger">*</span></mat-label>
           <mat-form-field appearance="outline" class="w-100">
             <mat-select formControlName="company_id" placeholder="Select Company">
               @for(c of companies; track $index) {
@@ -372,7 +372,7 @@
 
         <!-- Branch selection -->
         <div class="col-lg-4 col-md-6 col-sm-12">
-          <mat-label class="f-w-600 m-b-8 d-block f-s-13">Select Target Branch <span class="text-danger">*</span></mat-label>
+          <mat-label class="f-w-600 m-b-8 d-block f-s-13">{{ 'attendance.target_branch' | translate }} <span class="text-danger">*</span></mat-label>
           <mat-form-field appearance="outline" class="w-100">
             <mat-select formControlName="branch_id" placeholder="Select Branch">
               @for(b of branches; track $index) {
@@ -384,7 +384,7 @@
 
         <!-- Employee selection -->
         <div class="col-lg-4 col-md-6 col-sm-12">
-          <mat-label class="f-w-600 m-b-8 d-block f-s-13">Select Target Employee <span class="text-danger">*</span></mat-label>
+          <mat-label class="f-w-600 m-b-8 d-block f-s-13">{{ 'attendance.target_employee' | translate }} <span class="text-danger">*</span></mat-label>
           <mat-form-field appearance="outline" class="w-100">
             <mat-select formControlName="employee_id" placeholder="Select Employee" (selectionChange)="loadAttendanceLogs()">
               @for(e of employees; track $index) {
@@ -404,15 +404,15 @@
 <mat-card class="cardWithShadow theme-card">
   <mat-card-header class="p-x-24 p-y-16">
     <div class="header-container w-100 d-flex justify-content-between align-items-center">
-      <mat-card-title class="m-b-0 f-w-600">Attendance Database Overrides</mat-card-title>
+      <mat-card-title class="m-b-0 f-w-600">{{ 'attendance.db_overrides' | translate }}</mat-card-title>
       <div class="d-flex gap-12">
         @if (perm.hasRoleAction('canCreate')) {
           <button mat-flat-button color="primary" class="d-flex align-items-center gap-4" (click)="AddNewLog()">
-            <mat-icon class="icon-18">add</mat-icon> Create Manual Log
+            <mat-icon class="icon-18">add</mat-icon> {{ 'attendance.create_manual' | translate }}
           </button>
         }
         <button mat-stroked-button class="d-flex align-items-center gap-4" (click)="loadInitialData()">
-          <mat-icon class="icon-16">refresh</mat-icon> Sync Database
+          <mat-icon class="icon-16">refresh</mat-icon> {{ 'attendance.sync_db' | translate }}
         </button>
       </div>
     </div>
@@ -439,20 +439,20 @@
 @if (viewMode && selectedLog) {
 <mat-card class="cardWithShadow theme-card m-b-24">
   <mat-card-header class="p-x-24 p-y-16 bg-light-info text-info">
-    <mat-card-title class="m-b-0 f-w-600 f-s-15">Attendance Details Review</mat-card-title>
+    <mat-card-title class="m-b-0 f-w-600 f-s-15">{{ 'attendance.details_review' | translate }}</mat-card-title>
   </mat-card-header>
   <mat-card-content class="p-24 b-t-1">
     <div class="row">
       <div class="col-lg-4 col-md-6 col-sm-12 m-b-16">
-        <p class="f-w-600 m-b-4 text-muted f-s-12 text-uppercase">Employee Name</p>
+        <p class="f-w-600 m-b-4 text-muted f-s-12 text-uppercase">{{ 'attendance.employee_name' | translate }}</p>
         <p class="f-s-15 f-w-600 text-dark">{{ selectedLog.employee_name }}</p>
       </div>
       <div class="col-lg-4 col-md-6 col-sm-12 m-b-16">
-        <p class="f-w-600 m-b-4 text-muted f-s-12 text-uppercase">Attendance Date</p>
+        <p class="f-w-600 m-b-4 text-muted f-s-12 text-uppercase">{{ 'attendance.date_label' | translate }}</p>
         <p class="f-s-15 f-w-600 text-dark">{{ selectedLog.attendance_date }}</p>
       </div>
       <div class="col-lg-4 col-md-6 col-sm-12 m-b-16">
-        <p class="f-w-600 m-b-4 text-muted f-s-12 text-uppercase">Status Code</p>
+        <p class="f-w-600 m-b-4 text-muted f-s-12 text-uppercase">{{ 'attendance.status_code' | translate }}</p>
         <p class="f-s-15">
           <span class="badge" [ngClass]="{
             'bg-light-success text-success': selectedLog.status === 'PRESENT',
@@ -464,28 +464,28 @@
         </p>
       </div>
       <div class="col-lg-4 col-md-6 col-sm-12 m-b-16">
-        <p class="f-w-600 m-b-4 text-muted f-s-12 text-uppercase">Check In Time</p>
+        <p class="f-w-600 m-b-4 text-muted f-s-12 text-uppercase">{{ 'attendance.check_in_time' | translate }}</p>
         <p class="f-s-15 f-w-600 text-dark">{{ selectedLog.check_in }}</p>
       </div>
       <div class="col-lg-4 col-md-6 col-sm-12 m-b-16">
-        <p class="f-w-600 m-b-4 text-muted f-s-12 text-uppercase">Check Out Time</p>
+        <p class="f-w-600 m-b-4 text-muted f-s-12 text-uppercase">{{ 'attendance.check_out_time' | translate }}</p>
         <p class="f-s-15 f-w-600 text-dark">{{ selectedLog.check_out }}</p>
       </div>
       <div class="col-lg-4 col-md-6 col-sm-12 m-b-16">
-        <p class="f-w-600 m-b-4 text-muted f-s-12 text-uppercase">Break Duration</p>
+        <p class="f-w-600 m-b-4 text-muted f-s-12 text-uppercase">{{ 'attendance.break_label' | translate }}</p>
         <p class="f-s-15 f-w-600 text-dark">{{ selectedLog.break_minutes || 0 }} minutes</p>
       </div>
       <div class="col-lg-4 col-md-6 col-sm-12 m-b-16">
-        <p class="f-w-600 m-b-4 text-muted f-s-12 text-uppercase">Total Working Time</p>
+        <p class="f-w-600 m-b-4 text-muted f-s-12 text-uppercase">{{ 'attendance.total_working' | translate }}</p>
         <p class="f-s-15 f-w-600 text-dark">{{ selectedLog.total_hours }}</p>
       </div>
       <div class="col-lg-4 col-md-6 col-sm-12 m-b-16">
-        <p class="f-w-600 m-b-4 text-muted f-s-12 text-uppercase">Overtime Hours</p>
+        <p class="f-w-600 m-b-4 text-muted f-s-12 text-uppercase">{{ 'attendance.overtime_hours' | translate }}</p>
         <p class="f-s-15 f-w-600 text-dark">{{ selectedLog.overtime_hours }}</p>
       </div>
     </div>
     <div class="m-t-16">
-      <button mat-stroked-button color="primary" (click)="closeView()">Back to Logs</button>
+      <button mat-stroked-button color="primary" (click)="closeView()">{{ 'attendance.back_to_logs' | translate }}</button>
     </div>
   </mat-card-content>
 </mat-card>

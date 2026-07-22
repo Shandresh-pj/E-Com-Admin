@@ -116,9 +116,9 @@
       <div class="sub-widget__empty-icon">
         <mat-icon>card_membership</mat-icon>
       </div>
-      <h4 class="sub-widget__empty-title">No Active Subscription</h4>
+      <h4 class="sub-widget__empty-title">{{ 'dashboard.no_subscription' | translate }}</h4>
       <p class="sub-widget__empty-sub">
-        Choose a plan below to unlock all enterprise features.
+        {{ 'dashboard.choose_plan' | translate }}
       </p>
       <button mat-flat-button class="sub-widget__upgrade-btn" (click)="scrollToPlans()">
         <mat-icon>diamond</mat-icon>

@@ -18,6 +18,7 @@ import { PermissionService } from 'src/app/Securities/Services/permissions.servi
 import { SocketService } from 'src/app/Securities/Services/socket.service';
 import { Subscription } from 'rxjs';
 import { MatTable, TableColumn } from 'src/utils/mat-table/mat-table';
+import { AppTranslatePipe } from 'src/app/pipes/app-translate.pipe';
 
 @Component({
   selector: 'app-approvals',
@@ -35,7 +36,8 @@ import { MatTable, TableColumn } from 'src/utils/mat-table/mat-table';
     MatCheckboxModule,
     MatTooltipModule,
     MatPaginatorModule,
-    MatTable
+    MatTable,
+    AppTranslatePipe
   ],
   templateUrl: './approvals.html',
   styleUrl: './approvals.scss'

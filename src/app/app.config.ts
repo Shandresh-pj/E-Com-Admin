@@ -73,7 +73,7 @@ export const appConfig: ApplicationConfig = {
 
       withInterceptors([
         authInterceptor,
-        errorInterceptor
+        errorInterceptor,
       ]),
 
       withInterceptorsFromDi()

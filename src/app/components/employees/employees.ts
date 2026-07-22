@@ -5,6 +5,7 @@ import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
+import { MatIconModule } from '@angular/material/icon';
 import { AlertService } from 'src/app/Securities/Services/alert.service';
 import { CommonService } from 'src/app/Securities/Services/common.service';
 import { PermissionService } from 'src/app/Securities/Services/permissions.service';
@@ -23,6 +24,7 @@ import { AppTranslatePipe } from 'src/app/pipes/app-translate.pipe';
     MatButtonModule,
     MatCardModule,
     MatSelectModule,
+    MatIconModule,
     MatTable,
     AppTranslatePipe
   ],
@@ -31,26 +33,12 @@ import { AppTranslatePipe } from 'src/app/pipes/app-translate.pipe';
 })
 export class Employees {
   tableColumns = [
-    {
-      columnDef: 'id',
-      header: 'No'
-    },
-    {
-      columnDef: 'name',
-      header: 'Name'
-    },
-    {
-      columnDef: 'email',
-      header: 'Email'
-    },
-    {
-      columnDef: 'mobilenumber',
-      header: 'Mobile Number'
-    },
-    // {
-    //   columnDef: 'userType',
-    //   header: 'Status',
-    // },
+    { columnDef: 'id', header: 'No' },
+    { columnDef: 'name', header: 'Employee Name' },
+    { columnDef: 'email', header: 'Email' },
+    { columnDef: 'department', header: 'Department' },
+    { columnDef: 'designation', header: 'Designation' },
+    { columnDef: 'status', header: 'Status', type: 'badge' }
   ];
 
   employeeTypes = [

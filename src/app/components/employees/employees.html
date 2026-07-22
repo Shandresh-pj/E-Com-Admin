@@ -1,13 +1,18 @@
-<mat-card class="cardWithShadow theme-card">
+<div class="glass-card p-24">
 
-    <mat-card-header>
-        <div class="header-container">
-            <mat-card-title class="m-b-0">{{ 'employee.title' | translate }}</mat-card-title>
-            @if (!Employee_Forms && !View_Mode && perm.hasRoleAction('canCreate')) {
-                <button mat-flat-button color="primary" (click)="AddNewUser()">{{ 'employee.add_new' | translate }}</button>
-            }
+    <div class="d-flex align-items-center justify-content-between m-b-24 flex-wrap gap-16">
+        <div>
+            <h4 class="f-w-800 text-primary m-b-4 d-flex align-items-center gap-8">
+                <mat-icon class="text-primary">people</mat-icon> {{ 'employee.title' | translate }}
+            </h4>
+            <p class="f-s-13 text-muted m-b-0">Manage enterprise employee profiles, role assignments, company departments & designations.</p>
         </div>
-    </mat-card-header>
+        @if (!Employee_Forms && !View_Mode && perm.hasRoleAction('canCreate')) {
+            <button mat-flat-button color="primary" (click)="AddNewUser()">
+                <mat-icon>add</mat-icon> {{ 'employee.add_new' | translate }}
+            </button>
+        }
+    </div>
 
     @if (!Employee_Forms && !View_Mode) {
 
@@ -194,4 +199,4 @@
 
     }
 
-</mat-card>
+</div>

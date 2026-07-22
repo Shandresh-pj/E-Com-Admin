@@ -1,279 +1,203 @@
-<mat-card class="cardWithShadow theme-card">
-  <mat-card-header class="p-x-24 p-y-16">
-    <div class="header-container w-100 d-flex justify-content-between align-items-center">
-      <mat-card-title class="m-b-0 f-w-600">{{ 'payroll.title' | translate }}</mat-card-title>
-      @if (!showForm && !viewDetailsMode && !showPaymentModal && perm.hasRoleAction('canCreate')) {
-        <button mat-flat-button color="primary" (click)="toggleForm()">
-          <mat-icon class="icon-16 m-r-4">add_circle</mat-icon> {{ 'payroll.generate' | translate }}
-        </button>
-      }
+<!-- Payroll Stats Summary Header Row -->
+<div class="row m-b-24">
+  <div class="col-lg-3 col-sm-6 m-b-16">
+    <div class="glass-card border-left-primary p-20">
+      <div class="d-flex align-items-center justify-content-between">
+        <div>
+          <p class="f-s-12 text-muted text-uppercase f-w-700 m-b-4 letter-spacing-1">Monthly Gross Disbursal</p>
+          <h3 class="f-w-800 m-b-0 text-primary">₹{{ formatAmount(totalGrossPayout) }}</h3>
+        </div>
+        <div class="stats-icon bg-light-primary rounded-12 p-12">
+          <mat-icon class="text-primary icon-26">account_balance_wallet</mat-icon>
+        </div>
+      </div>
     </div>
-  </mat-card-header>
+  </div>
+  <div class="col-lg-3 col-sm-6 m-b-16">
+    <div class="glass-card border-left-success p-20">
+      <div class="d-flex align-items-center justify-content-between">
+        <div>
+          <p class="f-s-12 text-muted text-uppercase f-w-700 m-b-4 letter-spacing-1">Net Salary Disbursed</p>
+          <h3 class="f-w-800 m-b-0 text-success">₹{{ formatAmount(totalNetPayout) }}</h3>
+        </div>
+        <div class="stats-icon bg-light-success rounded-12 p-12">
+          <mat-icon class="text-success icon-26">payments</mat-icon>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-3 col-sm-6 m-b-16">
+    <div class="glass-card border-left-warning p-20">
+      <div class="d-flex align-items-center justify-content-between">
+        <div>
+          <p class="f-s-12 text-muted text-uppercase f-w-700 m-b-4 letter-spacing-1">Statutory Deductions (PF/ESI/TDS)</p>
+          <h3 class="f-w-800 m-b-0 text-warning">₹{{ formatAmount(totalDeductionsSum) }}</h3>
+        </div>
+        <div class="stats-icon bg-light-warning rounded-12 p-12">
+          <mat-icon class="text-warning icon-26">receipt_long</mat-icon>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-3 col-sm-6 m-b-16">
+    <div class="glass-card border-left-info p-20">
+      <div class="d-flex align-items-center justify-content-between">
+        <div>
+          <p class="f-s-12 text-muted text-uppercase f-w-700 m-b-4 letter-spacing-1">Payroll Records Processed</p>
+          <h3 class="f-w-800 m-b-0 text-info">{{ totalRecordsCount }} Slips</h3>
+        </div>
+        <div class="stats-icon bg-light-info rounded-12 p-12">
+          <mat-icon class="text-info icon-26">badge</mat-icon>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 
-  <!-- Generate Form Mode -->
-  @if (showForm) {
-    <mat-card-content class="p-24 b-t-1">
-      <form [formGroup]="payrollForm">
-        <div class="row">
-          <!-- Select Employee -->
-          <div class="col-lg-4 col-md-6 col-sm-12 m-b-16">
-            <mat-label class="f-w-600 m-b-8 d-block f-s-13">{{ 'common.employee' | translate }} <span class="text-danger">*</span></mat-label>
-            <mat-form-field appearance="outline" class="w-100">
-              <mat-select formControlName="employee_id" [placeholder]="'common.select_employee' | translate">
-                @for(e of employees; track e.id) {
-                  <mat-option [value]="e.id">{{ e.name }}</mat-option>
-                }
-              </mat-select>
-            </mat-form-field>
-          </div>
-
-          <!-- Select Month -->
-          <div class="col-lg-4 col-md-6 col-sm-12 m-b-16">
-            <mat-label class="f-w-600 m-b-8 d-block f-s-13">{{ 'common.month' | translate }} <span class="text-danger">*</span></mat-label>
-            <mat-form-field appearance="outline" class="w-100">
-              <mat-select formControlName="month" [placeholder]="'payroll.select_month' | translate">
-                @for(m of months; track m.value) {
-                  <mat-option [value]="m.value">{{ m.label }}</mat-option>
-                }
-              </mat-select>
-            </mat-form-field>
-          </div>
-
-          <!-- Year Input -->
-          <div class="col-lg-4 col-md-6 col-sm-12 m-b-16">
-            <mat-label class="f-w-600 m-b-8 d-block f-s-13">{{ 'common.year' | translate }} <span class="text-danger">*</span></mat-label>
-            <mat-form-field appearance="outline" class="w-100">
-              <input matInput type="number" formControlName="year" [placeholder]="'common.year' | translate">
-            </mat-form-field>
-          </div>
+<!-- Main Payroll Console Card -->
+<div class="row">
+  <div class="col-12">
+    <div class="glass-card p-24">
+      <div class="d-flex align-items-center justify-content-between m-b-24 flex-wrap gap-16">
+        <div>
+          <h4 class="f-w-800 text-primary m-b-4 d-flex align-items-center gap-8">
+            <mat-icon class="text-primary">currency_rupee</mat-icon> Enterprise Payroll Engine & Salary Disbursal
+          </h4>
+          <p class="f-s-13 text-muted m-b-0">Automated payroll calculation syncing Attendance worked hours, Overtime rates & Leave LOP deductions.</p>
         </div>
 
-        <div class="m-t-16 d-flex gap-8">
-          <button mat-stroked-button class="Cancel_Button" (click)="toggleForm()" [disabled]="loading">{{ 'common.cancel' | translate }}</button>
-          <button mat-flat-button color="primary" (click)="generatePayroll()" [disabled]="loading || payrollForm.invalid">
-            {{ 'payroll.generate_now' | translate }}
+        <div class="d-flex align-items-center gap-12">
+          <button mat-stroked-button color="primary" (click)="loadPayrolls()" [disabled]="loading">
+            <mat-icon>refresh</mat-icon> Refresh
           </button>
-        </div>
-      </form>
-    </mat-card-content>
-  }
-  
-  <!-- View Details / Payslip Details Mode -->
-  @else if (viewDetailsMode && payslipDetails) {
-    <mat-card-content class="p-24 b-t-1">
-      <div class="payroll-receipt">
-        <div class="receipt-header d-flex justify-content-between align-items-center m-b-24 pb-3 border-bottom">
-          <div>
-            <h3 class="f-w-700 m-b-4">{{ selectedPayroll?.employee_name }}</h3>
-            <p class="text-muted f-s-13 m-b-0">{{ 'payroll.record_id' | translate }} #{{ payslipDetails.id }} | Period: {{ selectedPayroll?.month_year }}</p>
-          </div>
-          <span class="badge-rules font-monospace text-uppercase" [ngClass]="{
-            'bg-light-success text-success': payslipDetails.payment_status === 'PAID',
-            'bg-light-warn text-warn': payslipDetails.payment_status === 'APPROVED',
-            'bg-light-danger text-danger': payslipDetails.payment_status === 'DRAFT'
-          }">
-            {{ payslipDetails.payment_status }}
-          </span>
-        </div>
 
-        <!-- Detailed Breakdown Grid -->
-        <div class="row">
-          <!-- Earnings and Allowances Panel -->
-          <div class="col-md-6 m-b-24">
-            <mat-card class="cardWithShadow border-dashed-primary m-b-0">
-              <mat-card-header class="p-x-20 p-y-12">
-                <mat-card-title class="m-b-0 f-w-600 f-s-14 text-primary">{{ 'payroll.earnings' | translate }}</mat-card-title>
-              </mat-card-header>
-              <mat-card-content class="p-20 b-t-1">
-                <div class="d-flex flex-column gap-12">
-                  <div class="d-flex justify-content-between">
-                    <span class="text-muted">{{ 'payroll.basic_salary' | translate }}</span>
-                    <span class="f-w-600">₹{{ payslipDetails.basic_salary }}</span>
-                  </div>
-                  <div class="d-flex justify-content-between">
-                    <span class="text-muted">{{ 'payroll.hra' | translate }}</span>
-                    <span class="f-w-600 text-success">+ ₹{{ payslipDetails.allowances?.hra || 0 }}</span>
-                  </div>
-                  <div class="d-flex justify-content-between">
-                    <span class="text-muted">{{ 'payroll.transport' | translate }}</span>
-                    <span class="f-w-600 text-success">+ ₹{{ payslipDetails.allowances?.transport || 0 }}</span>
-                  </div>
-                  <div class="d-flex justify-content-between">
-                    <span class="text-muted">{{ 'payroll.medical' | translate }}</span>
-                    <span class="f-w-600 text-success">+ ₹{{ payslipDetails.allowances?.medical || 0 }}</span>
-                  </div>
-                  <div class="d-flex justify-content-between">
-                    <span class="text-muted">{{ 'payroll.overtime_pay' | translate }}</span>
-                    <span class="f-w-600 text-success">+ ₹{{ payslipDetails.allowances?.overtime_pay || 0 }}</span>
-                  </div>
-                  <div class="d-flex justify-content-between border-top p-t-8 f-w-700">
-                    <span>{{ 'payroll.gross' | translate }}</span>
-                    <span>₹{{ payslipDetails.gross_salary }}</span>
-                  </div>
-                </div>
-              </mat-card-content>
-            </mat-card>
-          </div>
-
-          <!-- Deductions Panel -->
-          <div class="col-md-6 m-b-24">
-            <mat-card class="cardWithShadow border-dashed-danger m-b-0">
-              <mat-card-header class="p-x-20 p-y-12">
-                <mat-card-title class="m-b-0 f-w-600 f-s-14 text-danger">{{ 'payroll.deductions' | translate }}</mat-card-title>
-              </mat-card-header>
-              <mat-card-content class="p-20 b-t-1">
-                <div class="d-flex flex-column gap-12">
-                  <div class="d-flex justify-content-between">
-                    <span class="text-muted">{{ 'payroll.absent_deduction' | translate }}</span>
-                    <span class="f-w-600 text-danger">- ₹{{ payslipDetails.deductions?.absent_deduction || 0 }}</span>
-                  </div>
-                  <div class="d-flex justify-content-between">
-                    <span class="text-muted">{{ 'payroll.half_day_deduction' | translate }}</span>
-                    <span class="f-w-600 text-danger">- ₹{{ payslipDetails.deductions?.half_day_deduction || 0 }}</span>
-                  </div>
-                  <div class="d-flex justify-content-between">
-                    <span class="text-muted">{{ 'payroll.late_deduction' | translate }}</span>
-                    <span class="f-w-600 text-danger">- ₹{{ payslipDetails.deductions?.late_deduction || 0 }}</span>
-                  </div>
-                  <div class="d-flex justify-content-between">
-                    <span class="text-muted">{{ 'payroll.break_deduction' | translate }}</span>
-                    <span class="f-w-600 text-danger">- ₹{{ payslipDetails.deductions?.break_deduction || 0 }}</span>
-                  </div>
-                  <div class="d-flex justify-content-between">
-                    <span class="text-muted">{{ 'payroll.tax_deduction' | translate }}</span>
-                    <span class="f-w-600 text-danger">- ₹{{ payslipDetails.deductions?.tax_deduction || 0 }}</span>
-                  </div>
-                  <div class="d-flex justify-content-between border-top p-t-8 f-w-700">
-                    <span>{{ 'payroll.total_deductions' | translate }}</span>
-                    <span>₹{{ payslipDetails.total_deductions }}</span>
-                  </div>
-                </div>
-              </mat-card-content>
-            </mat-card>
-          </div>
+          @if (perm.canManagePayroll()) {
+            <button mat-flat-button color="primary" (click)="openSalaryAssignmentModal()">
+              <mat-icon>settings</mat-icon> Salary Structure Setup
+            </button>
+            
+            <button mat-flat-button color="accent" (click)="toggleGenerateForm()">
+              <mat-icon>play_arrow</mat-icon> Generate Monthly Payroll
+            </button>
+          }
         </div>
+      </div>
 
-        <!-- Attendance Stats Counters Row -->
-        <div class="row m-b-24">
-          <div class="col-lg-3 col-sm-6">
-            <div class="p-12 rounded-8 bg-light-primary text-center">
-              <span class="text-muted f-s-12">{{ 'payroll.present_days' | translate }}</span>
-              <h4 class="m-b-0 f-w-600">{{ payslipDetails.present_days || 0 }} Days</h4>
+      <!-- Generate Payroll Form -->
+      @if (showForm) {
+        <div class="p-24 bg-light-primary rounded-16 m-b-24 b-1 b-primary">
+          <h5 class="f-w-700 text-primary m-b-16">Calculate & Generate Monthly Payroll</h5>
+          <form [formGroup]="payrollForm" (ngSubmit)="generatePayroll()">
+            <div class="row">
+              <div class="col-md-4">
+                <mat-form-field appearance="outline" class="w-100">
+                  <mat-label>Select Employee</mat-label>
+                  <mat-select formControlName="employee_id">
+                    @for (emp of employees; track emp.id) {
+                      <mat-option [value]="emp.id">{{ emp.name }} ({{ emp.email }})</mat-option>
+                    }
+                  </mat-select>
+                </mat-form-field>
+              </div>
+
+              <div class="col-md-4">
+                <mat-form-field appearance="outline" class="w-100">
+                  <mat-label>Select Month</mat-label>
+                  <mat-select formControlName="month">
+                    <mat-option value="January">January</mat-option>
+                    <mat-option value="February">February</mat-option>
+                    <mat-option value="March">March</mat-option>
+                    <mat-option value="April">April</mat-option>
+                    <mat-option value="May">May</mat-option>
+                    <mat-option value="June">June</mat-option>
+                    <mat-option value="July">July</mat-option>
+                    <mat-option value="August">August</mat-option>
+                    <mat-option value="September">September</mat-option>
+                    <mat-option value="October">October</mat-option>
+                    <mat-option value="November">November</mat-option>
+                    <mat-option value="December">December</mat-option>
+                  </mat-select>
+                </mat-form-field>
+              </div>
+
+              <div class="col-md-4">
+                <mat-form-field appearance="outline" class="w-100">
+                  <mat-label>Year</mat-label>
+                  <input matInput type="number" formControlName="year">
+                </mat-form-field>
+              </div>
+            </div>
+
+            <div class="d-flex justify-content-end gap-12">
+              <button type="button" mat-stroked-button (click)="toggleGenerateForm()">Cancel</button>
+              <button type="submit" mat-flat-button color="primary" [disabled]="loading">Execute Calculation Engine</button>
+            </div>
+          </form>
+        </div>
+      }
+
+      <!-- Detailed Payslip Drawer / Modal -->
+      @if (viewDetailsMode && payslipDetails) {
+        <div class="p-24 bg-light-primary rounded-16 m-b-24 b-1 b-primary">
+          <div class="d-flex justify-content-between align-items-center m-b-16">
+            <h5 class="f-w-800 text-primary m-b-0">Detailed Payslip Breakdown - {{ payslipDetails.employee_name }}</h5>
+            <button mat-icon-button (click)="closeDetails()"><mat-icon>close</mat-icon></button>
+          </div>
+
+          <div class="row m-b-16">
+            <div class="col-md-6">
+              <div class="p-16 bg-white rounded-12 shadow-sm">
+                <h6 class="f-w-700 text-success m-b-12">Earnings Breakdown</h6>
+                <div class="d-flex justify-content-between f-s-13 m-b-4"><span>Basic Salary:</span><strong>₹{{ formatAmount(payslipDetails.basic_salary) }}</strong></div>
+                <div class="d-flex justify-content-between f-s-13 m-b-4"><span>HRA:</span><strong>₹{{ formatAmount(payslipDetails.hra) }}</strong></div>
+                <div class="d-flex justify-content-between f-s-13 m-b-4"><span>DA:</span><strong>₹{{ formatAmount(payslipDetails.da) }}</strong></div>
+                <div class="d-flex justify-content-between f-s-13 m-b-4"><span>Allowances:</span><strong>₹{{ formatAmount(payslipDetails.allowances) }}</strong></div>
+                <div class="d-flex justify-content-between f-s-13 m-b-4"><span>Overtime Payout:</span><strong>₹{{ formatAmount(payslipDetails.overtime_amount) }}</strong></div>
+                <hr>
+                <div class="d-flex justify-content-between f-s-14 f-w-800 text-success"><span>GROSS EARNINGS:</span><span>₹{{ formatAmount(payslipDetails.gross_salary) }}</span></div>
+              </div>
+            </div>
+
+            <div class="col-md-6">
+              <div class="p-16 bg-white rounded-12 shadow-sm">
+                <h6 class="f-w-700 text-danger m-b-12">Deductions Breakdown</h6>
+                <div class="d-flex justify-content-between f-s-13 m-b-4"><span>PF (12%):</span><strong>₹{{ formatAmount(payslipDetails.pf_deduction) }}</strong></div>
+                <div class="d-flex justify-content-between f-s-13 m-b-4"><span>ESI (0.75%):</span><strong>₹{{ formatAmount(payslipDetails.esi_deduction) }}</strong></div>
+                <div class="d-flex justify-content-between f-s-13 m-b-4"><span>TDS Tax:</span><strong>₹{{ formatAmount(payslipDetails.tds_deduction) }}</strong></div>
+                <div class="d-flex justify-content-between f-s-13 m-b-4"><span>Professional Tax (PT):</span><strong>₹{{ formatAmount(payslipDetails.pt_deduction) }}</strong></div>
+                <div class="d-flex justify-content-between f-s-13 m-b-4"><span>LOP / Loan Deduction:</span><strong>₹{{ formatAmount((payslipDetails.lop_deduction || 0) + (payslipDetails.loan_deduction || 0)) }}</strong></div>
+                <hr>
+                <div class="d-flex justify-content-between f-s-14 f-w-800 text-danger"><span>TOTAL DEDUCTIONS:</span><span>₹{{ formatAmount(payslipDetails.total_deductions) }}</span></div>
+              </div>
             </div>
           </div>
-          <div class="col-lg-3 col-sm-6">
-            <div class="p-12 rounded-8 bg-light-warn text-center">
-              <span class="text-muted f-s-12">{{ 'payroll.paid_leaves' | translate }}</span>
-              <h4 class="m-b-0 f-w-600">{{ payslipDetails.leave_days || 0 }} Days</h4>
-            </div>
-          </div>
-          <div class="col-lg-3 col-sm-6">
-            <div class="p-12 rounded-8 bg-light-danger text-center">
-              <span class="text-muted f-s-12">{{ 'payroll.absent_days' | translate }}</span>
-              <h4 class="m-b-0 f-w-600">{{ payslipDetails.absent_days || 0 }} Days</h4>
-            </div>
-          </div>
-          <div class="col-lg-3 col-sm-6">
-            <div class="p-12 rounded-8 bg-light-info text-center">
-              <span class="text-muted f-s-12">{{ 'payroll.overtime' | translate }}</span>
-              <h4 class="m-b-0 f-w-600">{{ payslipDetails.overtime_minutes || 0 }} Mins</h4>
-            </div>
-          </div>
-        </div>
 
-        <!-- Final calculated payout banner -->
-        <div class="total-salary-box p-20 rounded-12 bg-light-primary border-left-4 m-b-24">
-          <div class="d-flex flex-wrap justify-content-between align-items-center gap-16">
+          <div class="d-flex justify-content-between align-items-center bg-primary text-white p-16 rounded-12">
             <div>
-              <h3 class="f-w-700 m-b-0 text-primary">{{ 'payroll.net_payout' | translate }}</h3>
-              <p class="text-muted f-s-12 m-b-0 m-t-4">{{ 'payroll.net_sub' | translate }}</p>
+              <span class="f-s-12 text-uppercase text-white-75 letter-spacing-1">FINAL NET PAYABLE AMOUNT</span>
+              <h3 class="f-w-800 text-white m-b-0">₹{{ formatAmount(payslipDetails.net_salary) }}</h3>
             </div>
-            <h2 class="f-s-32 f-w-800 text-primary m-b-0">₹{{ payslipDetails.final_salary | number:'1.2-2' }}</h2>
-          </div>
-        </div>
-
-        <!-- Action tools -->
-        <div class="d-flex gap-8 justify-content-between align-items-center">
-          <button mat-stroked-button (click)="closeDetails()" [disabled]="loading">{{ 'payroll.back_to_ledger' | translate }}</button>
-          
-          <div class="d-flex gap-8">
-            <button mat-stroked-button color="primary" (click)="downloadPayslipPDF(payslipDetails)" [disabled]="loading">
-              <mat-icon class="m-r-4">picture_as_pdf</mat-icon> {{ 'payroll.download_pdf' | translate }}
-            </button>
-            <!-- Approve Draft -->
-            @if (payslipDetails.payment_status === 'DRAFT' && perm.hasRoleAction('canUpdate')) {
-              <button mat-flat-button color="accent" (click)="approvePayroll(payslipDetails.id)" [disabled]="loading">
-                <mat-icon class="m-r-4">verified</mat-icon> {{ 'payroll.approve_payroll' | translate }}
-              </button>
-            }
-            <!-- Mark Paid -->
-            @if (payslipDetails.payment_status === 'APPROVED' && perm.hasRoleAction('canUpdate')) {
-              <button mat-flat-button color="primary" (click)="initiatePayment(payslipDetails)" [disabled]="loading">
-                <mat-icon class="m-r-4">paid</mat-icon> {{ 'payroll.release_payment' | translate }}
-              </button>
-            }
-          </div>
-        </div>
-      </div>
-    </mat-card-content>
-  }
-  
-  <!-- Release Payment Modal Form -->
-  @else if (showPaymentModal && selectedPayroll) {
-    <mat-card-content class="p-24 b-t-1">
-      <div class="payment-modal">
-        <h4 class="f-w-600 m-b-16 text-dark">{{ 'payroll.log_payout' | translate }}</h4>
-        <p class="f-s-13 text-muted m-b-20">
-          Releasing payout of **₹{{ selectedPayroll.final_salary | number:'1.2-2' }}** to **{{ selectedPayroll.employee_name }}**. Provide the payment references below.
-        </p>
-
-        <form [formGroup]="paymentForm" (ngSubmit)="submitPayment()">
-          <div class="row">
-            <div class="col-md-6 m-b-16">
-              <mat-label class="f-w-600 m-b-8 d-block f-s-13">{{ 'payroll.payment_ref' | translate }} <span class="text-danger">*</span></mat-label>
-              <mat-form-field appearance="outline" class="w-100">
-                <input matInput formControlName="payment_reference" placeholder="e.g. TXN-199200234">
-              </mat-form-field>
-            </div>
-            <div class="col-md-6 m-b-16">
-              <mat-label class="f-w-600 m-b-8 d-block f-s-13">{{ 'payroll.payment_method' | translate }} <span class="text-danger">*</span></mat-label>
-              <mat-form-field appearance="outline" class="w-100">
-                <mat-select formControlName="payment_method">
-                  <mat-option value="BANK_TRANSFER">ONLINE BANK TRANSFER</mat-option>
-                  <mat-option value="CASH">CASH SETTLEMENT</mat-option>
-                  <mat-option value="CHEQUE">CHEQUE PAYOUT</mat-option>
-                </mat-select>
-              </mat-form-field>
-            </div>
-          </div>
-
-          <div class="m-t-16 d-flex gap-8">
-            <button mat-stroked-button type="button" class="Cancel_Button" (click)="showPaymentModal = false; viewDetailsMode = true;" [disabled]="loading">{{ 'common.cancel' | translate }}</button>
-            <button mat-flat-button color="primary" type="submit" [disabled]="loading || paymentForm.invalid">
-              {{ 'payroll.confirm_release' | translate }}
+            <button mat-flat-button color="accent" (click)="downloadPayslipPDF(payslipDetails)">
+              <mat-icon>picture_as_pdf</mat-icon> Export Payslip PDF
             </button>
           </div>
-        </form>
-      </div>
-    </mat-card-content>
-  }
+        </div>
+      }
 
-  <!-- List Table Mode -->
-  @else {
-    <mat-card-content class="b-t-1">
-      <div class="table-responsive">
-        <app-mat-table 
-          [columns]="tableColumns" 
-          [tableData]="payrolls" 
-          [showAction]="true" 
-          [showView]="perm.hasRoleAction('canRead')"
-          [Extra_Column]="false"
-          [showEdit]="false"
-          [showDelete]="false"
-          (ViewClick)="viewDetails($event)">
-        </app-mat-table>
-      </div>
-    </mat-card-content>
-  }
+      <!-- Reusable Dynamic MatTable Component -->
+      <app-mat-table 
+        [columns]="tableColumns" 
+        [tableData]="payrolls"
+        [showAction]="true"
+        [showView]="true"
+        [showEdit]="perm.canManagePayroll()"
+        [showDelete]="false"
+        [showSearch]="true"
+        [enableExport]="true"
+        (ViewClick)="viewDetails($event)"
+        (editClick)="handlePayrollAction($event)"
+      ></app-mat-table>
 
-</mat-card>
+    </div>
+  </div>
+</div>

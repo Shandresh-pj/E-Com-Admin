@@ -58,7 +58,7 @@ export class WorkforceRequests implements OnInit {
           id: `REQ-${l.id}`,
           employeeName: l.employee_name || l.employee?.name || `Employee #${l.employee_id}`,
           type: l.leave_type || 'Leave',
-          date: `${l.start_date} - ${l.end_date}`,
+          date: l.date_range || `${l.from_date || l.start_date || ''} ${l.to_date || l.end_date ? 'to ' + (l.to_date || l.end_date) : ''}`.trim(),
           status: l.status || 'Pending',
           rawId: l.id
         }));

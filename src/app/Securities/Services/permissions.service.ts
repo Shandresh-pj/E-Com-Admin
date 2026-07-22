@@ -158,4 +158,44 @@ export class PermissionService {
 
     return menus.some((m: any) => m.path === path || path.startsWith(m.path + '/'));
   }
+
+  // ─── Domain Specific RBAC Helpers ──────────────────────────────────────────
+
+  canApproveLeave(): boolean {
+    this.permissionsUpdated();
+    if (this.auth.isSuperAdmin()) return true;
+    const userType = this.auth.getUserType();
+    const isEmp = userType === UserType.EMPLOYEE || userType === UserType.SHOPKEEPER || userType === UserType.DELIVERY_BOY;
+    if (isEmp) return false;
+    return this.hasRoleAction('canApprove', '/leave');
+  }
+
+  canManagePayroll(): boolean {
+    this.permissionsUpdated();
+    if (this.auth.isSuperAdmin()) return true;
+    const userType = this.auth.getUserType();
+    return userType === UserType.ADMIN || userType === UserType.BRANCH_MANAGER;
+  }
+
+  canManageWorkforce(): boolean {
+    this.permissionsUpdated();
+    if (this.auth.isSuperAdmin()) return true;
+    const userType = this.auth.getUserType();
+    return userType === UserType.ADMIN || userType === UserType.BRANCH_MANAGER;
+  }
+
+  canManageEmployees(): boolean {
+    this.permissionsUpdated();
+    if (this.auth.isSuperAdmin()) return true;
+    const userType = this.auth.getUserType();
+    return userType === UserType.ADMIN || userType === UserType.BRANCH_MANAGER;
+  }
+
+  isEmployeeSelfService(): boolean {
+    this.permissionsUpdated();
+    if (this.auth.isSuperAdmin()) return false;
+    const userType = this.auth.getUserType();
+    return userType === UserType.EMPLOYEE || userType === UserType.SHOPKEEPER || userType === UserType.DELIVERY_BOY;
+  }
 }
+

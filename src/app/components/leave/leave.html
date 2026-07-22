@@ -1,154 +1,163 @@
-<mat-card class="cardWithShadow theme-card">
-  <mat-card-header>
-    <div class="header-container">
-      <mat-card-title class="m-b-0">{{ 'leave.title' | translate }}</mat-card-title>
-      @if (!showForm && perm.hasRoleAction('canCreate')) {
-        <button mat-flat-button color="primary" (click)="toggleForm()">
-          <mat-icon class="icon-16 m-r-4">add</mat-icon> {{ 'leave.apply' | translate }}
-        </button>
-      }
+<!-- Leave Balances Header Cards (Liquid Glass) -->
+<div class="row m-b-24">
+  <div class="col-lg-3 col-sm-6 m-b-16">
+    <div class="glass-card border-left-primary p-20">
+      <div class="d-flex align-items-center justify-content-between">
+        <div>
+          <p class="f-s-12 text-muted text-uppercase f-w-700 m-b-4 letter-spacing-1">Casual Leave</p>
+          <h3 class="f-w-800 m-b-0 text-primary">{{ leaveBalance.CASUAL }} Days</h3>
+        </div>
+        <div class="stats-icon bg-light-primary rounded-12 p-12">
+          <mat-icon class="text-primary icon-26">event_available</mat-icon>
+        </div>
+      </div>
     </div>
-  </mat-card-header>
+  </div>
+  <div class="col-lg-3 col-sm-6 m-b-16">
+    <div class="glass-card border-left-warning p-20">
+      <div class="d-flex align-items-center justify-content-between">
+        <div>
+          <p class="f-s-12 text-muted text-uppercase f-w-700 m-b-4 letter-spacing-1">Sick Leave</p>
+          <h3 class="f-w-800 m-b-0 text-warning">{{ leaveBalance.SICK }} Days</h3>
+        </div>
+        <div class="stats-icon bg-light-warning rounded-12 p-12">
+          <mat-icon class="text-warning icon-26">medical_services</mat-icon>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-3 col-sm-6 m-b-16">
+    <div class="glass-card border-left-success p-20">
+      <div class="d-flex align-items-center justify-content-between">
+        <div>
+          <p class="f-s-12 text-muted text-uppercase f-w-700 m-b-4 letter-spacing-1">Earned Leave</p>
+          <h3 class="f-w-800 m-b-0 text-success">{{ leaveBalance.EARNED }} Days</h3>
+        </div>
+        <div class="stats-icon bg-light-success rounded-12 p-12">
+          <mat-icon class="text-success icon-26">beach_access</mat-icon>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-3 col-sm-6 m-b-16">
+    <div class="glass-card border-left-info p-20">
+      <div class="d-flex align-items-center justify-content-between">
+        <div>
+          <p class="f-s-12 text-muted text-uppercase f-w-700 m-b-4 letter-spacing-1">Emergency Leave</p>
+          <h3 class="f-w-800 m-b-0 text-info">{{ leaveBalance.EMERGENCY }} Days</h3>
+        </div>
+        <div class="stats-icon bg-light-info rounded-12 p-12">
+          <mat-icon class="text-info icon-26">warning</mat-icon>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 
-  <!-- Leave Request Form -->
-  @if (showForm) {
-    <mat-card-content class="p-24 b-t-1">
-      <form [formGroup]="leaveForm">
-        <div class="row">
-          <!-- Selection Fields (Only shown if NOT auto-mapped) -->
-          @if (!detectedEmployee) {
-            <div class="col-lg-4 col-md-6 col-sm-12 m-b-16">
-              <mat-label class="f-w-600 m-b-8 d-block">{{ 'common.company' | translate }} <span class="text-danger">*</span></mat-label>
-              <mat-form-field appearance="outline" class="w-100">
-                <mat-select formControlName="company_id" [placeholder]="'common.select_company' | translate">
-                  @for(c of companies; track c.id) {
-                    <mat-option [value]="c.id">{{ c.name }}</mat-option>
-                  }
-                </mat-select>
-              </mat-form-field>
-            </div>
-
-            <div class="col-lg-4 col-md-6 col-sm-12 m-b-16">
-              <mat-label class="f-w-600 m-b-8 d-block">{{ 'common.branch' | translate }} <span class="text-danger">*</span></mat-label>
-              <mat-form-field appearance="outline" class="w-100">
-                <mat-select formControlName="branch_id" [placeholder]="'common.select_branch' | translate">
-                  @for(b of branches; track b.id) {
-                    <mat-option [value]="b.id">{{ b.name }}</mat-option>
-                  }
-                </mat-select>
-              </mat-form-field>
-            </div>
-
-            <div class="col-lg-4 col-md-6 col-sm-12 m-b-16">
-              <mat-label class="f-w-600 m-b-8 d-block">{{ 'common.employee' | translate }} <span class="text-danger">*</span></mat-label>
-              <mat-form-field appearance="outline" class="w-100">
-                <mat-select formControlName="employee_id" [placeholder]="'common.select_employee' | translate">
-                  @for(e of employees; track e.id) {
-                    <mat-option [value]="e.id">{{ e.name }}</mat-option>
-                  }
-                </mat-select>
-              </mat-form-field>
-            </div>
-          }
-
-          <!-- Leave Type Selection -->
-          <div class="col-lg-4 col-md-6 col-sm-12 m-b-16">
-            <mat-label class="f-w-600 m-b-8 d-block">{{ 'leave.category' | translate }} <span class="text-danger">*</span></mat-label>
-            <mat-form-field appearance="outline" class="w-100">
-              <mat-select formControlName="leave_type">
-                @for(type of leaveTypes; track type) {
-                  <mat-option [value]="type">{{ type }}</mat-option>
-                }
-              </mat-select>
-            </mat-form-field>
-          </div>
-
-          <!-- Date Selectors -->
-          <div class="col-lg-4 col-md-6 col-sm-12 m-b-16">
-            <mat-label class="f-w-600 m-b-8 d-block">{{ 'leave.start_date' | translate }} <span class="text-danger">*</span></mat-label>
-            <mat-form-field appearance="outline" class="w-100">
-              <input matInput [matDatepicker]="fromPicker" formControlName="from_date" placeholder="DD-MM-YYYY" readonly (click)="fromPicker.open()">
-              <mat-datepicker-toggle matIconSuffix [for]="fromPicker"></mat-datepicker-toggle>
-              <mat-datepicker #fromPicker></mat-datepicker>
-            </mat-form-field>
-          </div>
-
-          <div class="col-lg-4 col-md-6 col-sm-12 m-b-16">
-            <mat-label class="f-w-600 m-b-8 d-block">{{ 'leave.end_date' | translate }} <span class="text-danger">*</span></mat-label>
-            <mat-form-field appearance="outline" class="w-100">
-              <input matInput [matDatepicker]="toPicker" formControlName="to_date" placeholder="DD-MM-YYYY" readonly (click)="toPicker.open()">
-              <mat-datepicker-toggle matIconSuffix [for]="toPicker"></mat-datepicker-toggle>
-              <mat-datepicker #toPicker></mat-datepicker>
-            </mat-form-field>
-          </div>
-
-          <!-- Display-only Days Calculated -->
-          <div class="col-lg-4 col-md-6 col-sm-12 m-b-16">
-            <mat-label class="f-w-600 m-b-8 d-block">{{ 'leave.duration' | translate }}</mat-label>
-            <mat-form-field appearance="outline" class="w-100">
-              <input matInput type="number" formControlName="total_days">
-            </mat-form-field>
-          </div>
-
-          <!-- Reason Text Box -->
-          <div class="col-lg-12 m-b-16">
-            <mat-label class="f-w-600 m-b-8 d-block">{{ 'leave.reason' | translate }} <span class="text-danger">*</span></mat-label>
-            <mat-form-field appearance="outline" class="w-100">
-              <textarea matInput rows="3" formControlName="reason" [placeholder]="'leave.reason_placeholder' | translate"></textarea>
-            </mat-form-field>
-          </div>
+<!-- Main Leave Management Table Card -->
+<div class="row">
+  <div class="col-12">
+    <div class="glass-card p-24">
+      <div class="d-flex align-items-center justify-content-between m-b-24 flex-wrap gap-16">
+        <div>
+          <h4 class="f-w-800 text-primary m-b-4 d-flex align-items-center gap-8">
+            <mat-icon class="text-primary">event_note</mat-icon> Leave Application & Approval Console
+          </h4>
+          <p class="f-s-13 text-muted m-b-0">Employees submit leave applications. Admin & Super Admin review, approve, or reject requests.</p>
         </div>
 
-        <div class="m-t-16">
-          <button mat-stroked-button class="me-3" (click)="toggleForm()" [disabled]="loading">{{ 'common.cancel' | translate }}</button>
-          <button mat-flat-button color="primary" (click)="submitLeaveRequest()" [disabled]="loading || leaveForm.invalid">
-            {{ 'leave.submit' | translate }}
+        <div class="d-flex align-items-center gap-12">
+          <button mat-stroked-button color="primary" (click)="loadLeaveRequests()" [disabled]="loading">
+            <mat-icon>refresh</mat-icon> Refresh
+          </button>
+
+          <button mat-flat-button color="primary" (click)="toggleForm()">
+            <mat-icon>add</mat-icon> Apply For Leave
           </button>
         </div>
-      </form>
-    </mat-card-content>
-  }
-  
-  <!-- Leave List Table -->
-  @else {
-    <mat-card-content class="b-t-1">
-      <div class="table-responsive">
-        <app-mat-table
-          [columns]="tableColumns"
-          [tableData]="leaveRequests"
-          [showAction]="false"
-          [showSearch]="true"
-          [isLoading]="loading"
-          [customTemplates]="{ leave_type: leaveTypeTpl, status: statusTpl }">
-        </app-mat-table>
       </div>
 
-      <ng-template #leaveTypeTpl let-row>
-        <span class="type-badge">{{ row.leave_type }}</span>
-      </ng-template>
-
-      <ng-template #statusTpl let-row>
-        <div class="d-flex align-items-center gap-12">
-          <span class="badge" [ngClass]="{
-            'bg-success': row.status === 'APPROVED',
-            'bg-warning': row.status === 'PENDING',
-            'bg-danger': row.status === 'REJECTED'
-          }">
-            {{ row.status }}
-          </span>
+      <!-- Apply Leave Form Panel -->
+      @if (showForm) {
+        <div class="p-24 bg-light-primary rounded-16 m-b-24 b-1 b-primary">
+          <h5 class="f-w-700 text-primary m-b-16">Submit New Leave Application</h5>
           
-          @if (row.status === 'PENDING' && perm.hasRoleAction('canApprove')) {
-            <div class="d-flex gap-8">
-              <button mat-flat-button color="primary" class="btn-approve btn-xs" (click)="approveLeave(row)">
-                <mat-icon class="icon-14 m-r-2">check</mat-icon> {{ 'leave.approve' | translate }}
-              </button>
-              <button mat-flat-button color="warn" class="btn-xs" (click)="rejectLeave(row)">
-                <mat-icon class="icon-14 m-r-2">close</mat-icon> {{ 'leave.reject' | translate }}
-              </button>
+          <form [formGroup]="leaveForm" (ngSubmit)="submitLeaveRequest()">
+            <div class="row">
+              <div class="col-md-4">
+                <mat-form-field appearance="outline" class="w-100">
+                  <mat-label>Select Employee</mat-label>
+                  <mat-select formControlName="employee_id">
+                    @for (emp of employees; track emp.id) {
+                      <mat-option [value]="emp.id">{{ emp.name }} ({{ emp.email }})</mat-option>
+                    }
+                  </mat-select>
+                </mat-form-field>
+              </div>
+
+              <div class="col-md-4">
+                <mat-form-field appearance="outline" class="w-100">
+                  <mat-label>Leave Type</mat-label>
+                  <mat-select formControlName="leave_type">
+                    @for (type of leaveTypes; track type) {
+                      <mat-option [value]="type">{{ type }} LEAVE</mat-option>
+                    }
+                  </mat-select>
+                </mat-form-field>
+              </div>
+
+              <div class="col-md-4">
+                <mat-form-field appearance="outline" class="w-100">
+                  <mat-label>Duration (Days)</mat-label>
+                  <input matInput type="number" formControlName="total_days">
+                </mat-form-field>
+              </div>
+
+              <div class="col-md-6">
+                <mat-form-field appearance="outline" class="w-100">
+                  <mat-label>From Date (YYYY-MM-DD)</mat-label>
+                  <input matInput formControlName="from_date" placeholder="2026-07-25">
+                </mat-form-field>
+              </div>
+
+              <div class="col-md-6">
+                <mat-form-field appearance="outline" class="w-100">
+                  <mat-label>To Date (YYYY-MM-DD)</mat-label>
+                  <input matInput formControlName="to_date" placeholder="2026-07-26">
+                </mat-form-field>
+              </div>
+
+              <div class="col-12">
+                <mat-form-field appearance="outline" class="w-100">
+                  <mat-label>Reason for Leave</mat-label>
+                  <textarea matInput formControlName="reason" rows="3" placeholder="Provide reason..."></textarea>
+                </mat-form-field>
+              </div>
             </div>
-          }
+
+            <div class="d-flex justify-content-end gap-12">
+              <button type="button" mat-stroked-button (click)="toggleForm()">Cancel</button>
+              <button type="submit" mat-flat-button color="primary" [disabled]="loading">Submit Application</button>
+            </div>
+          </form>
         </div>
-      </ng-template>
-    </mat-card-content>
-  }
-</mat-card>
+      }
+
+      <!-- Reusable Dynamic MatTable Component -->
+      <app-mat-table 
+        [columns]="tableColumns" 
+        [tableData]="leaveRequests"
+        [showAction]="true"
+        [showView]="true"
+        [showEdit]="perm.canApproveLeave()"
+        [showDelete]="perm.canApproveLeave()"
+        [showSearch]="true"
+        [enableExport]="true"
+        (ViewClick)="viewLeave($event)"
+        (editClick)="approveLeave($event)"
+        (deleteClick)="rejectLeave($event)"
+      ></app-mat-table>
+
+    </div>
+  </div>
+</div>

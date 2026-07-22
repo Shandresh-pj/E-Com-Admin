@@ -1,99 +1,119 @@
 <!-- Workforce Stats Summary Dashboard Row -->
 <div class="row m-b-24">
-  <div class="col-lg-3 col-sm-6">
-    <mat-card class="cardWithShadow stats-card border-left-primary">
-      <mat-card-content class="p-20">
-        <div class="d-flex align-items-center justify-content-between">
-          <div>
-            <p class="f-s-12 text-muted m-b-4 text-uppercase f-w-600">{{ 'attendance.total_worked' | translate }}</p>
-            <h3 class="f-w-700 m-b-0 text-dark-primary">{{ formatMinutes(totalWorkedMinutes) }}</h3>
-          </div>
-          <div class="stats-icon bg-light-primary rounded-8 p-12">
-            <mat-icon class="text-primary icon-24">schedule</mat-icon>
-          </div>
+  <div class="col-lg-3 col-sm-6 m-b-16">
+    <div class="glass-card stats-card border-left-primary p-20">
+      <div class="d-flex align-items-center justify-content-between">
+        <div>
+          <p class="f-s-12 text-muted m-b-4 text-uppercase f-w-600 letter-spacing-1">{{ 'attendance.total_worked' | translate }}</p>
+          <h3 class="f-w-800 m-b-0 text-primary">{{ formatMinutes(totalWorkedMinutes) }}</h3>
         </div>
-      </mat-card-content>
-    </mat-card>
+        <div class="stats-icon bg-light-primary rounded-12 p-12">
+          <mat-icon class="text-primary icon-24">schedule</mat-icon>
+        </div>
+      </div>
+    </div>
   </div>
-  <div class="col-lg-3 col-sm-6">
-    <mat-card class="cardWithShadow stats-card border-left-warning">
-      <mat-card-content class="p-20">
-        <div class="d-flex align-items-center justify-content-between">
-          <div>
-            <p class="f-s-12 text-muted m-b-4 text-uppercase f-w-600">{{ 'attendance.total_break' | translate }}</p>
-            <h3 class="f-w-700 m-b-0 text-dark-warning">{{ totalBreakMinutes }} min</h3>
-          </div>
-          <div class="stats-icon bg-light-warning rounded-8 p-12">
-            <mat-icon class="text-warning icon-24">coffee</mat-icon>
-          </div>
+  <div class="col-lg-3 col-sm-6 m-b-16">
+    <div class="glass-card stats-card border-left-warning p-20">
+      <div class="d-flex align-items-center justify-content-between">
+        <div>
+          <p class="f-s-12 text-muted m-b-4 text-uppercase f-w-600 letter-spacing-1">{{ 'attendance.total_break' | translate }}</p>
+          <h3 class="f-w-800 m-b-0 text-warning">{{ totalBreakMinutes }} min</h3>
         </div>
-      </mat-card-content>
-    </mat-card>
+        <div class="stats-icon bg-light-warning rounded-12 p-12">
+          <mat-icon class="text-warning icon-24">coffee</mat-icon>
+        </div>
+      </div>
+    </div>
   </div>
-  <div class="col-lg-3 col-sm-6">
-    <mat-card class="cardWithShadow stats-card border-left-success">
-      <mat-card-content class="p-20">
-        <div class="d-flex align-items-center justify-content-between">
-          <div>
-            <p class="f-s-12 text-muted m-b-4 text-uppercase f-w-600">{{ 'attendance.overtime_recorded' | translate }}</p>
-            <h3 class="f-w-700 m-b-0 text-dark-success">{{ formatMinutes(totalOvertimeMinutes) }}</h3>
-          </div>
-          <div class="stats-icon bg-light-success rounded-8 p-12">
-            <mat-icon class="text-success icon-24">electric_bolt</mat-icon>
-          </div>
+  <div class="col-lg-3 col-sm-6 m-b-16">
+    <div class="glass-card stats-card border-left-success p-20">
+      <div class="d-flex align-items-center justify-content-between">
+        <div>
+          <p class="f-s-12 text-muted m-b-4 text-uppercase f-w-600 letter-spacing-1">{{ 'attendance.overtime_recorded' | translate }}</p>
+          <h3 class="f-w-800 m-b-0 text-success">{{ formatMinutes(totalOvertimeMinutes) }}</h3>
         </div>
-      </mat-card-content>
-    </mat-card>
+        <div class="stats-icon bg-light-success rounded-12 p-12">
+          <mat-icon class="text-success icon-24">electric_bolt</mat-icon>
+        </div>
+      </div>
+    </div>
   </div>
-  <div class="col-lg-3 col-sm-6">
-    <mat-card class="cardWithShadow stats-card border-left-info">
-      <mat-card-content class="p-20">
-        <div class="d-flex align-items-center justify-content-between">
-          <div>
-            <p class="f-s-12 text-muted m-b-4 text-uppercase f-w-600">{{ 'attendance.active_days' | translate }}</p>
-            <h3 class="f-w-700 m-b-0 text-dark-info">{{ activeDaysCount }} Days</h3>
-          </div>
-          <div class="stats-icon bg-light-info rounded-8 p-12">
-            <mat-icon class="text-info icon-24">calendar_today</mat-icon>
-          </div>
+  <div class="col-lg-3 col-sm-6 m-b-16">
+    <div class="glass-card stats-card border-left-info p-20">
+      <div class="d-flex align-items-center justify-content-between">
+        <div>
+          <p class="f-s-12 text-muted m-b-4 text-uppercase f-w-600 letter-spacing-1">{{ 'attendance.active_days' | translate }}</p>
+          <h3 class="f-w-800 m-b-0 text-info">{{ activeDaysCount }} Days</h3>
         </div>
-      </mat-card-content>
-    </mat-card>
+        <div class="stats-icon bg-light-info rounded-12 p-12">
+          <mat-icon class="text-info icon-24">calendar_today</mat-icon>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
 
-<!-- Main Check-in Status Card & Digital Clock Row -->
+<!-- Main Terminal Controls & Futuristic Digital Clock Row -->
 <div class="row m-b-24">
-  <div class="col-lg-8">
-    <mat-card class="cardWithShadow theme-card overflow-hidden">
-      <mat-card-header class="bg-light-primary p-x-24 p-y-16">
-        <div class="w-100 d-flex justify-content-between align-items-center">
-          <mat-card-title class="m-b-0 text-primary f-w-600">{{ 'attendance.terminal' | translate }}</mat-card-title>
-          <span class="badge-geo d-flex align-items-center gap-4 f-s-11">
-            <mat-icon class="icon-12">location_on</mat-icon> {{ geoStatus }}
-          </span>
-        </div>
-      </mat-card-header>
-      <mat-card-content class="p-24 b-t-1">
-        <div class="d-flex flex-wrap align-items-center justify-content-between gap-24">
-          <!-- Live session status panel -->
+  <div class="col-lg-8 m-b-16">
+    <div class="glass-card overflow-hidden h-100">
+      <div class="bg-light-primary p-x-24 p-y-16 b-b-1 d-flex justify-content-between align-items-center flex-wrap gap-12">
+        <h4 class="m-b-0 text-primary f-w-700 d-flex align-items-center gap-8">
+          <mat-icon class="icon-24">sensors</mat-icon> Workforce Attendance Terminal
+        </h4>
+        <span 
+          class="badge-geo d-flex align-items-center gap-6 f-s-12 p-x-12 p-y-6 rounded-16 f-w-600"
+          [ngClass]="geofenceVerified ? 'bg-light-success text-success b-1 b-success' : 'bg-light-warning text-warning b-1 b-warning'"
+        >
+          <mat-icon class="icon-16">my_location</mat-icon> {{ geoStatus }}
+        </span>
+      </div>
+
+      <div class="p-24">
+        <div class="d-flex flex-wrap align-items-center justify-content-between gap-24 m-b-20">
+          <!-- Live session status indicator -->
           <div class="d-flex align-items-center gap-16">
             <span 
               class="pulse-indicator" 
               [ngClass]="isOnBreak ? 'bg-warning' : (isCheckedIn ? 'bg-success' : 'bg-danger')"
             ></span>
             <div>
-              <p class="f-s-12 text-muted m-b-2 text-uppercase">{{ 'attendance.current_status' | translate }}</p>
-              <h3 
-                class="f-w-700 m-b-0 font-status" 
+              <p class="f-s-11 text-muted m-b-2 text-uppercase letter-spacing-1 f-w-600">{{ 'attendance.current_status' | translate }}</p>
+              <h2 
+                class="f-w-800 m-b-0 font-status" 
                 [ngClass]="isOnBreak ? 'text-warning' : (isCheckedIn ? 'text-success' : 'text-danger')"
               >
                 {{ isOnBreak ? ('attendance.on_break' | translate) : (isCheckedIn ? ('attendance.signed_on' | translate) : ('attendance.out_of_office' | translate)) }}
-              </h3>
+              </h2>
             </div>
           </div>
 
-          <!-- Quick Action Buttons -->
+          <!-- Auth Sensor Chips Selector -->
+          @if (!isCheckedIn) {
+            <div class="d-flex align-items-center gap-8 flex-wrap">
+              <span class="f-s-12 text-muted f-w-700">Verification Sensor:</span>
+              <mat-chip-listbox [(ngModel)]="selectedAuthMethod">
+                <mat-chip-option value="GPS_LIVE" selected>
+                  <mat-icon class="icon-16">my_location</mat-icon> GPS
+                </mat-chip-option>
+                <mat-chip-option value="FACE_RECOGNITION">
+                  <mat-icon class="icon-16">face</mat-icon> Face AI
+                </mat-chip-option>
+                <mat-chip-option value="FINGERPRINT">
+                  <mat-icon class="icon-16">fingerprint</mat-icon> Bio Touch
+                </mat-chip-option>
+                <mat-chip-option value="QR_CODE">
+                  <mat-icon class="icon-16">qr_code_scanner</mat-icon> QR Code
+                </mat-chip-option>
+                <mat-chip-option value="RFID">
+                  <mat-icon class="icon-16">nfc</mat-icon> RFID Tap
+                </mat-chip-option>
+              </mat-chip-listbox>
+            </div>
+          }
+
+          <!-- Terminal Action Buttons -->
           <div class="action-buttons-box d-flex align-items-center gap-12">
             @if (!isCheckedIn) {
               <button 
@@ -101,9 +121,14 @@
                 color="primary" 
                 class="btn-terminal shadow-primary" 
                 (click)="checkIn()" 
-                [disabled]="loading || ((currentUser?.userType === 'SUPER_ADMIN' || currentUser?.role === 'SUPER_ADMIN') && (attendanceForm.get('employee_id')?.invalid || attendanceForm.get('company_id')?.invalid || attendanceForm.get('branch_id')?.invalid))"
+                [disabled]="loading"
               >
-                <mat-icon class="m-r-4">login</mat-icon> {{ 'attendance.punch_in' | translate }}
+                <ng-container *ngIf="loading">
+                  <mat-icon class="m-r-6 spin-icon">sync</mat-icon> Processing...
+                </ng-container>
+                <ng-container *ngIf="!loading">
+                  <mat-icon class="m-r-6">login</mat-icon> {{ 'attendance.punch_in' | translate }}
+                </ng-container>
               </button>
             } @else {
               <!-- Break controls -->
@@ -115,7 +140,7 @@
                   (click)="startBreak()" 
                   [disabled]="loading || breakLoading"
                 >
-                  <mat-icon class="m-r-4">coffee</mat-icon> {{ 'attendance.enter_break' | translate }}
+                  <mat-icon class="m-r-6">coffee</mat-icon> {{ 'attendance.enter_break' | translate }}
                 </button>
               } @else {
                 <button 
@@ -124,7 +149,7 @@
                   (click)="endBreak()" 
                   [disabled]="loading || breakLoading"
                 >
-                  <mat-icon class="m-r-4">play_arrow</mat-icon> {{ 'attendance.exit_break' | translate }}
+                  <mat-icon class="m-r-6">play_arrow</mat-icon> {{ 'attendance.exit_break' | translate }}
                 </button>
               }
 
@@ -136,357 +161,227 @@
                 (click)="checkOut()" 
                 [disabled]="loading || isOnBreak"
               >
-                <mat-icon class="m-r-4">logout</mat-icon> {{ 'attendance.punch_out' | translate }}
+                <mat-icon class="m-r-6">logout</mat-icon> {{ 'attendance.punch_out' | translate }}
               </button>
             }
           </div>
         </div>
 
-        <!-- Detected Employee information banner -->
+        <!-- Employee Profile Info Bar -->
         @if (detectedEmployee) {
-          <div class="employee-details-bar m-t-20 p-12 rounded-8 d-flex align-items-center justify-content-between">
-            <div class="d-flex align-items-center gap-8">
-              <mat-icon class="text-primary icon-20">verified_user</mat-icon>
-              <span class="f-w-600 f-s-13">{{ 'attendance.secured_profile' | translate }}</span>
-              <span class="f-s-13 text-dark">{{ detectedEmployee.name }} ({{ detectedEmployee.email }})</span>
+          <div class="employee-details-bar p-16 rounded-16 d-flex align-items-center justify-content-between flex-wrap gap-12">
+            <div class="d-flex align-items-center gap-10">
+              <mat-icon class="text-primary icon-22">verified_user</mat-icon>
+              <span class="f-w-700 f-s-13 text-primary">{{ 'attendance.secured_profile' | translate }}:</span>
+              <span class="badge bg-primary text-white font-mono p-x-10 p-y-4 rounded-8 f-s-12">{{ detectedEmployee.name }} ({{ detectedEmployee.email }})</span>
             </div>
-            <div class="d-flex align-items-center gap-8">
-              <span class="badge-role">{{ detectedEmployee.designation || 'Staff Member' }}</span>
+            <div class="d-flex align-items-center gap-16 f-s-12">
+              <span class="text-muted">Assigned Shift: <strong class="text-dark">{{ activeShift?.name || 'General Shift' }}</strong></span>
+              <span class="text-muted">Geofence Bound: <strong class="text-dark">{{ geofenceRadiusMeters }}m</strong></span>
             </div>
           </div>
         }
-      </mat-card-content>
-    </mat-card>
-  </div>
-
-  <!-- Digital Clock Box -->
-  <div class="col-lg-4">
-    <mat-card class="cardWithShadow theme-card bg-digital-gradient text-white d-flex align-items-center justify-content-center text-center p-24 h-100 min-h-200">
-      <mat-card-content class="w-100 p-0 d-flex flex-column align-items-center justify-content-center">
-        <mat-icon class="clock-top-icon m-b-8">alarm</mat-icon>
-        <p class="f-s-11 text-uppercase tracking-wide text-light-white m-b-8">{{ 'attendance.digital_clock_label' | translate }}</p>
-        <div class="d-flex align-items-baseline justify-content-center">
-          <h1 class="clock-time m-b-0 f-w-700">{{ currentTimeString }}</h1>
-          <span class="clock-ampm f-s-16 m-l-6 f-w-600">{{ currentAmPm }}</span>
-        </div>
-        <p class="clock-date m-t-12 m-b-0 f-s-13 text-light-white font-monospace">{{ currentDateString }}</p>
-      </mat-card-content>
-    </mat-card>
-  </div>
-</div>
-
-<!-- Active Shift Assignment & Policies details row -->
-@if (activeShift || activeBreakPolicy) {
-<div class="row m-b-24">
-  <!-- Active Shift details -->
-  @if (activeShift) {
-  <div class="col-lg-6">
-    <mat-card class="cardWithShadow theme-card">
-      <mat-card-header class="p-x-24 p-y-16">
-        <mat-card-title class="m-b-0 f-w-600 f-s-15">{{ 'attendance.shift_details' | translate }}</mat-card-title>
-      </mat-card-header>
-      <mat-card-content class="p-24 b-t-1">
-        <div class="d-flex flex-column gap-12">
-          <div class="d-flex justify-content-between align-items-center">
-            <span class="text-muted f-s-13">{{ 'attendance.shift_name' | translate }}</span>
-            <span class="f-w-600 text-primary">{{ activeShift.name }}</span>
-          </div>
-          <div class="d-flex justify-content-between align-items-center">
-            <span class="text-muted f-s-13">{{ 'attendance.timings' | translate }}</span>
-            <span class="f-w-600 text-dark">{{ activeShift.start_time }} to {{ activeShift.end_time }}</span>
-          </div>
-          <div class="d-flex justify-content-between align-items-center">
-            <span class="text-muted f-s-13">{{ 'attendance.grace_period' | translate }}</span>
-            <span class="badge-rules">{{ activeShift.grace_period_minutes }} minutes</span>
-          </div>
-          <div class="d-flex justify-content-between align-items-center">
-            <span class="text-muted f-s-13">{{ 'attendance.min_work' | translate }}</span>
-            <span class="badge-rules bg-light-info text-info">{{ activeShift.min_work_minutes }} minutes ({{ activeShift.min_work_minutes / 60 }} Hrs)</span>
-          </div>
-        </div>
-      </mat-card-content>
-    </mat-card>
-  </div>
-  }
-
-  <!-- Active Break policy details -->
-  @if (activeBreakPolicy) {
-  <div class="col-lg-6">
-    <mat-card class="cardWithShadow theme-card">
-      <mat-card-header class="p-x-24 p-y-16">
-        <mat-card-title class="m-b-0 f-w-600 f-s-15">{{ 'attendance.break_policy' | translate }}</mat-card-title>
-      </mat-card-header>
-      <mat-card-content class="p-24 b-t-1">
-        <div class="d-flex flex-column gap-12">
-          <div class="d-flex justify-content-between align-items-center">
-            <span class="text-muted f-s-13">{{ 'attendance.allowed_break' | translate }}</span>
-            <span class="f-w-600 text-warning">{{ activeBreakPolicy.max_duration_minutes }} minutes</span>
-          </div>
-          <div class="d-flex justify-content-between align-items-center">
-            <span class="text-muted f-s-13">{{ 'attendance.max_break_sessions' | translate }}</span>
-            <span class="f-w-600 text-dark">{{ activeBreakPolicy.max_frequency }} breaks/day</span>
-          </div>
-          <div class="d-flex justify-content-between align-items-center">
-            <span class="text-muted f-s-13">{{ 'attendance.paid_break' | translate }}</span>
-            <span class="badge-rules" [ngClass]="activeBreakPolicy.is_paid ? 'bg-light-success text-success' : 'bg-light-danger text-danger'">
-              {{ activeBreakPolicy.is_paid ? 'Paid' : 'Unpaid Deduction' }}
-            </span>
-          </div>
-          <div class="d-flex justify-content-between align-items-center">
-            <span class="text-muted f-s-13">{{ 'attendance.excess_penalty' | translate }}</span>
-            <span class="badge-rules bg-light-warn text-warn">Applied if break > {{ activeBreakPolicy.max_duration_minutes + activeBreakPolicy.deduction_rules.warning }} mins</span>
-          </div>
-        </div>
-      </mat-card-content>
-    </mat-card>
-  </div>
-  }
-</div>
-}
-
-<!-- Add/Edit Form for Manual Sessions -->
-@if (showForm) {
-<mat-card class="cardWithShadow theme-card m-b-24">
-  <mat-card-header class="p-x-24 p-y-16">
-    <mat-card-title class="m-b-0 f-w-600 f-s-15">{{ updateButton ? ('attendance.edit_form' | translate) : ('attendance.create_edit_form' | translate) }}</mat-card-title>
-  </mat-card-header>
-  <mat-card-content class="p-24 b-t-1">
-    <form [formGroup]="attendanceForm">
-      <div class="row">
-        <!-- Date -->
-        <div class="col-lg-4 col-md-6 col-sm-12">
-          <mat-label class="f-w-600 m-b-8 d-block f-s-13">{{ 'attendance.date' | translate }} <span class="text-danger">*</span></mat-label>
-          <mat-form-field appearance="outline" class="w-100">
-            <input matInput formControlName="attendance_date" placeholder="e.g. 05:07:2026">
-          </mat-form-field>
-        </div>
-
-        <!-- Status -->
-        <div class="col-lg-4 col-md-6 col-sm-12">
-          <mat-label class="f-w-600 m-b-8 d-block f-s-13">{{ 'common.status' | translate }} <span class="text-danger">*</span></mat-label>
-          <mat-form-field appearance="outline" class="w-100">
-            <mat-select formControlName="status">
-              <mat-option value="PRESENT">PRESENT</mat-option>
-              <mat-option value="LATE">LATE</mat-option>
-              <mat-option value="HALF_DAY">HALF DAY</mat-option>
-              <mat-option value="ABSENT">ABSENT</mat-option>
-              <mat-option value="LEAVE">LEAVE</mat-option>
-            </mat-select>
-          </mat-form-field>
-        </div>
-
-        @if (currentUser?.userType === 'SUPER_ADMIN' || currentUser?.role === 'SUPER_ADMIN') {
-        <!-- Employee selection -->
-        <div class="col-lg-4 col-md-6 col-sm-12">
-          <mat-label class="f-w-600 m-b-8 d-block f-s-13">{{ 'common.employee' | translate }} <span class="text-danger">*</span></mat-label>
-          <mat-form-field appearance="outline" class="w-100">
-            <mat-select formControlName="employee_id" placeholder="Select Employee">
-              @for(e of employees; track $index) {
-                <mat-option [value]="e.id">{{ e.name }}</mat-option>
-              }
-            </mat-select>
-          </mat-form-field>
-        </div>
-
-        <!-- Company selection -->
-        <div class="col-lg-4 col-md-6 col-sm-12">
-          <mat-label class="f-w-600 m-b-8 d-block f-s-13">{{ 'common.company' | translate }} <span class="text-danger">*</span></mat-label>
-          <mat-form-field appearance="outline" class="w-100">
-            <mat-select formControlName="company_id" placeholder="Select Company">
-              @for(c of companies; track $index) {
-                <mat-option [value]="c.id">{{ c.name }}</mat-option>
-              }
-            </mat-select>
-          </mat-form-field>
-        </div>
-
-        <!-- Branch selection -->
-        <div class="col-lg-4 col-md-6 col-sm-12">
-          <mat-label class="f-w-600 m-b-8 d-block f-s-13">{{ 'common.branch' | translate }} <span class="text-danger">*</span></mat-label>
-          <mat-form-field appearance="outline" class="w-100">
-            <mat-select formControlName="branch_id" placeholder="Select Branch">
-              @for(b of branches; track $index) {
-                <mat-option [value]="b.id">{{ b.name }}</mat-option>
-              }
-            </mat-select>
-          </mat-form-field>
-        </div>
-        }
-
-        <!-- Check-in Time -->
-        <div class="col-lg-4 col-md-6 col-sm-12">
-          <mat-label class="f-w-600 m-b-8 d-block f-s-13">{{ 'attendance.check_in' | translate }}</mat-label>
-          <mat-form-field appearance="outline" class="w-100">
-            <input matInput formControlName="check_in" placeholder="e.g. 09:00:00">
-          </mat-form-field>
-        </div>
-
-        <!-- Check-out Time -->
-        <div class="col-lg-4 col-md-6 col-sm-12">
-          <mat-label class="f-w-600 m-b-8 d-block f-s-13">{{ 'attendance.check_out' | translate }}</mat-label>
-          <mat-form-field appearance="outline" class="w-100">
-            <input matInput formControlName="check_out" placeholder="e.g. 17:00:00">
-          </mat-form-field>
-        </div>
-
-        <!-- Break minutes -->
-        <div class="col-lg-4 col-md-6 col-sm-12">
-          <mat-label class="f-w-600 m-b-8 d-block f-s-13">{{ 'attendance.break_duration' | translate }}</mat-label>
-          <mat-form-field appearance="outline" class="w-100">
-            <input type="number" matInput formControlName="break_minutes" placeholder="e.g. 60">
-          </mat-form-field>
-        </div>
-      </div>
-
-      <div class="m-t-20 d-flex gap-8">
-        <button mat-stroked-button class="Cancel_Button" (click)="cancelForm()">{{ 'common.cancel' | translate }}</button>
-        <button mat-flat-button color="primary" [disabled]="loading || attendanceForm.invalid" (click)="submit(attendanceForm)">
-          {{ updateButton ? ('attendance.update_record' | translate) : ('attendance.create_record' | translate) }}
-        </button>
-      </div>
-    </form>
-  </mat-card-content>
-</mat-card>
-}
-
-<!-- Manual Selection Form for Auto Punch (shown when logged out of employee mode and form closed) -->
-@if (!detectedEmployee && !showForm && (perm.hasRoleAction('canCreate') || perm.hasRoleAction('canUpdate'))) {
-<mat-card class="cardWithShadow theme-card m-b-24">
-  <mat-card-header class="p-x-24 p-y-16">
-    <mat-card-title class="m-b-0 f-w-600 f-s-15">{{ 'attendance.scope_profile' | translate }}</mat-card-title>
-  </mat-card-header>
-  <mat-card-content class="p-24 b-t-1">
-    <form [formGroup]="attendanceForm">
-      <div class="row">
-        <!-- Company selection -->
-        <div class="col-lg-4 col-md-6 col-sm-12">
-          <mat-label class="f-w-600 m-b-8 d-block f-s-13">{{ 'attendance.target_company' | translate }} <span class="text-danger">*</span></mat-label>
-          <mat-form-field appearance="outline" class="w-100">
-            <mat-select formControlName="company_id" placeholder="Select Company">
-              @for(c of companies; track $index) {
-                <mat-option [value]="c.id">{{ c.name }}</mat-option>
-              }
-            </mat-select>
-          </mat-form-field>
-        </div>
-
-        <!-- Branch selection -->
-        <div class="col-lg-4 col-md-6 col-sm-12">
-          <mat-label class="f-w-600 m-b-8 d-block f-s-13">{{ 'attendance.target_branch' | translate }} <span class="text-danger">*</span></mat-label>
-          <mat-form-field appearance="outline" class="w-100">
-            <mat-select formControlName="branch_id" placeholder="Select Branch">
-              @for(b of branches; track $index) {
-                <mat-option [value]="b.id">{{ b.name }}</mat-option>
-              }
-            </mat-select>
-          </mat-form-field>
-        </div>
-
-        <!-- Employee selection -->
-        <div class="col-lg-4 col-md-6 col-sm-12">
-          <mat-label class="f-w-600 m-b-8 d-block f-s-13">{{ 'attendance.target_employee' | translate }} <span class="text-danger">*</span></mat-label>
-          <mat-form-field appearance="outline" class="w-100">
-            <mat-select formControlName="employee_id" placeholder="Select Employee" (selectionChange)="loadAttendanceLogs()">
-              @for(e of employees; track $index) {
-                <mat-option [value]="e.id">{{ e.name }}</mat-option>
-              }
-            </mat-select>
-          </mat-form-field>
-        </div>
-      </div>
-    </form>
-  </mat-card-content>
-</mat-card>
-}
-
-<!-- Logs list -->
-@if (!showForm && !viewMode) {
-<mat-card class="cardWithShadow theme-card">
-  <mat-card-header class="p-x-24 p-y-16">
-    <div class="header-container w-100 d-flex justify-content-between align-items-center">
-      <mat-card-title class="m-b-0 f-w-600">{{ 'attendance.db_overrides' | translate }}</mat-card-title>
-      <div class="d-flex gap-12">
-        @if (perm.hasRoleAction('canCreate')) {
-          <button mat-flat-button color="primary" class="d-flex align-items-center gap-4" (click)="AddNewLog()">
-            <mat-icon class="icon-18">add</mat-icon> {{ 'attendance.create_manual' | translate }}
-          </button>
-        }
-        <button mat-stroked-button class="d-flex align-items-center gap-4" (click)="loadInitialData()">
-          <mat-icon class="icon-16">refresh</mat-icon> {{ 'attendance.sync_db' | translate }}
-        </button>
       </div>
     </div>
-  </mat-card-header>
-  <mat-card-content class="b-t-1">
-    <div class="table-responsive">
-      <app-mat-table 
-        [columns]="tableColumns" 
-        [tableData]="attendanceLogs" 
-        [showAction]="perm.hasRoleAction('canUpdate') || perm.hasRoleAction('canDelete') || perm.hasRoleAction('canRead')" 
-        [showView]="perm.hasRoleAction('canRead')"
-        [showEdit]="perm.hasRoleAction('canUpdate')"
-        [showDelete]="perm.hasRoleAction('canDelete')"
-        (editClick)="editLog($event)"
-        (deleteClick)="deleteLog($event)"
-        (ViewClick)="viewLog($event)"
-        [Extra_Column]="false">
-      </app-mat-table>
-    </div>
-  </mat-card-content>
-</mat-card>
-}
+  </div>
 
-@if (viewMode && selectedLog) {
-<mat-card class="cardWithShadow theme-card m-b-24">
-  <mat-card-header class="p-x-24 p-y-16 bg-light-info text-info">
-    <mat-card-title class="m-b-0 f-w-600 f-s-15">{{ 'attendance.details_review' | translate }}</mat-card-title>
-  </mat-card-header>
-  <mat-card-content class="p-24 b-t-1">
-    <div class="row">
-      <div class="col-lg-4 col-md-6 col-sm-12 m-b-16">
-        <p class="f-w-600 m-b-4 text-muted f-s-12 text-uppercase">{{ 'attendance.employee_name' | translate }}</p>
-        <p class="f-s-15 f-w-600 text-dark">{{ selectedLog.employee_name }}</p>
-      </div>
-      <div class="col-lg-4 col-md-6 col-sm-12 m-b-16">
-        <p class="f-w-600 m-b-4 text-muted f-s-12 text-uppercase">{{ 'attendance.date_label' | translate }}</p>
-        <p class="f-s-15 f-w-600 text-dark">{{ selectedLog.attendance_date }}</p>
-      </div>
-      <div class="col-lg-4 col-md-6 col-sm-12 m-b-16">
-        <p class="f-w-600 m-b-4 text-muted f-s-12 text-uppercase">{{ 'attendance.status_code' | translate }}</p>
-        <p class="f-s-15">
-          <span class="badge" [ngClass]="{
-            'bg-light-success text-success': selectedLog.status === 'PRESENT',
-            'bg-light-warning text-warning': selectedLog.status === 'LATE' || selectedLog.status === 'HALF_DAY',
-            'bg-light-danger text-danger': selectedLog.status === 'ABSENT' || selectedLog.status === 'LEAVE'
-          }">
-            {{ selectedLog.status }}
-          </span>
+  <!-- Unique Cyber Liquid Glass Terminal Clock Card -->
+  <div class="col-lg-4 m-b-16">
+    <div class="glass-card cyber-clock-card text-white p-24 text-center h-100 d-flex flex-column justify-content-between">
+      <div>
+        <p class="f-s-12 text-uppercase text-white-50 letter-spacing-2 m-b-12 f-w-700">{{ 'attendance.digital_time' | translate }}</p>
+        
+        <div class="d-flex align-items-center justify-content-center gap-10 m-b-8">
+          <div class="digital-time-display">
+            {{ currentTimeString }}
+          </div>
+          <span class="ampm-badge">{{ currentAmPm }}</span>
+        </div>
+        
+        <p class="f-s-14 f-w-600 text-info m-b-20 d-flex align-items-center justify-content-center gap-6">
+          <mat-icon class="icon-16">today</mat-icon> {{ currentDateString }}
         </p>
       </div>
-      <div class="col-lg-4 col-md-6 col-sm-12 m-b-16">
-        <p class="f-w-600 m-b-4 text-muted f-s-12 text-uppercase">{{ 'attendance.check_in_time' | translate }}</p>
-        <p class="f-s-15 f-w-600 text-dark">{{ selectedLog.check_in }}</p>
-      </div>
-      <div class="col-lg-4 col-md-6 col-sm-12 m-b-16">
-        <p class="f-w-600 m-b-4 text-muted f-s-12 text-uppercase">{{ 'attendance.check_out_time' | translate }}</p>
-        <p class="f-s-15 f-w-600 text-dark">{{ selectedLog.check_out }}</p>
-      </div>
-      <div class="col-lg-4 col-md-6 col-sm-12 m-b-16">
-        <p class="f-w-600 m-b-4 text-muted f-s-12 text-uppercase">{{ 'attendance.break_label' | translate }}</p>
-        <p class="f-s-15 f-w-600 text-dark">{{ selectedLog.break_minutes || 0 }} minutes</p>
-      </div>
-      <div class="col-lg-4 col-md-6 col-sm-12 m-b-16">
-        <p class="f-w-600 m-b-4 text-muted f-s-12 text-uppercase">{{ 'attendance.total_working' | translate }}</p>
-        <p class="f-s-15 f-w-600 text-dark">{{ selectedLog.total_hours }}</p>
-      </div>
-      <div class="col-lg-4 col-md-6 col-sm-12 m-b-16">
-        <p class="f-w-600 m-b-4 text-muted f-s-12 text-uppercase">{{ 'attendance.overtime_hours' | translate }}</p>
-        <p class="f-s-15 f-w-600 text-dark">{{ selectedLog.overtime_hours }}</p>
+
+      <!-- Shift Details Sub-Panel -->
+      <div class="bg-white-10 p-16 rounded-16 text-start b-1 b-white-10">
+        <p class="f-s-12 f-w-700 text-uppercase text-warning m-b-12 d-flex align-items-center gap-6">
+          <mat-icon class="icon-18">schedule</mat-icon> {{ 'attendance.shift_details' | translate }}
+        </p>
+        <div class="d-flex justify-content-between f-s-12 m-b-6">
+          <span class="text-white-75">{{ 'attendance.shift_name' | translate }}</span>
+          <span class="f-w-700 text-white">{{ activeShift?.name || 'Standard General' }}</span>
+        </div>
+        <div class="d-flex justify-content-between f-s-12 m-b-6">
+          <span class="text-white-75">{{ 'attendance.timings' | translate }}</span>
+          <span class="f-w-700 text-cyan">{{ activeShift?.timings || (activeShift?.start_time + ' - ' + activeShift?.end_time) || '09:00 - 18:00' }}</span>
+        </div>
+        <div class="d-flex justify-content-between f-s-12 m-b-6">
+          <span class="text-white-75">{{ 'attendance.grace_period' | translate }}</span>
+          <span class="f-w-700 text-success">{{ activeShift?.grace_period_minutes || 15 }} mins</span>
+        </div>
+        <div class="d-flex justify-content-between f-s-12">
+          <span class="text-white-75">{{ 'attendance.min_work' | translate }}</span>
+          <span class="f-w-700 text-white">{{ (activeShift?.min_work_minutes ? (activeShift.min_work_minutes / 60) : 8) }} Hours</span>
+        </div>
       </div>
     </div>
-    <div class="m-t-16">
-      <button mat-stroked-button color="primary" (click)="closeView()">{{ 'attendance.back_to_logs' | translate }}</button>
+  </div>
+</div>
+
+<!-- Biometric Laser Scanner Modal Simulation -->
+@if (showBiometricModal) {
+  <div class="modal-backdrop-custom">
+    <div class="modal-content-custom p-32 text-center">
+      <h3 class="f-w-800 m-b-16 text-cyan d-flex align-items-center justify-content-center gap-10">
+        <mat-icon class="icon-28">fingerprint</mat-icon> {{ selectedAuthMethod.replace('_', ' ') }} Verification
+      </h3>
+
+      @if (biometricScanning) {
+        <div class="p-y-32">
+          <div class="scanner-ring m-auto m-b-20">
+            <mat-icon class="icon-48 text-cyan">center_focus_strong</mat-icon>
+          </div>
+          <p class="f-s-14 text-white-75 m-b-0">Scanning & verifying biometric payload with AI Whitelist Node...</p>
+          <mat-progress-bar mode="indeterminate" class="m-t-20"></mat-progress-bar>
+        </div>
+      } @else if (biometricSuccess) {
+        <div class="p-y-16">
+          <mat-icon class="icon-64 text-success m-b-16">check_circle</mat-icon>
+          <h4 class="f-w-800 text-success m-b-4">Biometric Verification Succeeded</h4>
+          <p class="f-s-14 text-white-75 m-b-24">Confidence Score: <strong class="text-success">{{ biometricConfidence }}% Match</strong></p>
+          <div class="d-flex justify-content-center gap-16">
+            <button mat-stroked-button color="basic" (click)="cancelBiometricModal()">Cancel</button>
+            <button mat-flat-button color="primary" class="btn-terminal shadow-primary" (click)="confirmBiometricCheckIn()">Complete Punch Check-In</button>
+          </div>
+        </div>
+      }
     </div>
-  </mat-card-content>
-</mat-card>
+  </div>
 }
+
+<!-- Logs Table & Admin Controls Header -->
+<div class="row">
+  <div class="col-12">
+    <div class="glass-card p-24">
+      <div class="d-flex align-items-center justify-content-between m-b-24 flex-wrap gap-16">
+        <div>
+          <h4 class="f-w-800 m-b-4 text-primary d-flex align-items-center gap-8">
+            <mat-icon class="text-primary">history</mat-icon> Attendance Terminal Logs & Overrides
+          </h4>
+          <p class="f-s-13 text-muted m-b-0">Real-time terminal logs synchronized with leave balances & payroll calculations</p>
+        </div>
+
+        <div class="d-flex align-items-center gap-12">
+          <button mat-stroked-button color="primary" (click)="loadAttendanceLogs()" [disabled]="loading">
+            <mat-icon>refresh</mat-icon> {{ 'attendance.sync_db' | translate }}
+          </button>
+
+          @if (perm.hasRoleAction('canCreate')) {
+            <button mat-flat-button color="primary" (click)="AddNewLog()">
+              <mat-icon>add</mat-icon> {{ 'attendance.create_manual' | translate }}
+            </button>
+          }
+        </div>
+      </div>
+
+      <!-- Admin Override Form -->
+      @if (showForm) {
+        <div class="p-24 bg-light-primary rounded-16 m-b-24 b-1 b-primary">
+          <h5 class="f-w-700 text-primary m-b-16">
+            {{ updateButton ? ('attendance.edit_form' | translate) : ('attendance.create_edit_form' | translate) }}
+          </h5>
+          
+          <form [formGroup]="attendanceForm" (ngSubmit)="submit(attendanceForm)">
+            <div class="row">
+              <div class="col-md-4">
+                <mat-form-field appearance="outline" class="w-100">
+                  <mat-label>Select Employee</mat-label>
+                  <mat-select formControlName="employee_id">
+                    @for (emp of employees; track emp.id) {
+                      <mat-option [value]="emp.id">{{ emp.name }} ({{ emp.email }})</mat-option>
+                    }
+                  </mat-select>
+                </mat-form-field>
+              </div>
+
+              <div class="col-md-4">
+                <mat-form-field appearance="outline" class="w-100">
+                  <mat-label>Select Company</mat-label>
+                  <mat-select formControlName="company_id">
+                    @for (comp of companies; track comp.id) {
+                      <mat-option [value]="comp.id">{{ comp.name }}</mat-option>
+                    }
+                  </mat-select>
+                </mat-form-field>
+              </div>
+
+              <div class="col-md-4">
+                <mat-form-field appearance="outline" class="w-100">
+                  <mat-label>Select Branch</mat-label>
+                  <mat-select formControlName="branch_id">
+                    @for (b of branches; track b.id) {
+                      <mat-option [value]="b.id">{{ b.name }}</mat-option>
+                    }
+                  </mat-select>
+                </mat-form-field>
+              </div>
+
+              <div class="col-md-3">
+                <mat-form-field appearance="outline" class="w-100">
+                  <mat-label>Attendance Date (YYYY-MM-DD)</mat-label>
+                  <input matInput formControlName="attendance_date" placeholder="YYYY-MM-DD">
+                </mat-form-field>
+              </div>
+
+              <div class="col-md-3">
+                <mat-form-field appearance="outline" class="w-100">
+                  <mat-label>Check-In Time (HH:mm:ss)</mat-label>
+                  <input matInput formControlName="check_in" placeholder="09:00:00">
+                </mat-form-field>
+              </div>
+
+              <div class="col-md-3">
+                <mat-form-field appearance="outline" class="w-100">
+                  <mat-label>Check-Out Time (HH:mm:ss)</mat-label>
+                  <input matInput formControlName="check_out" placeholder="18:00:00">
+                </mat-form-field>
+              </div>
+
+              <div class="col-md-3">
+                <mat-form-field appearance="outline" class="w-100">
+                  <mat-label>Status</mat-label>
+                  <mat-select formControlName="status">
+                    <mat-option value="PRESENT">PRESENT</mat-option>
+                    <mat-option value="LATE">LATE</mat-option>
+                    <mat-option value="HALF_DAY">HALF_DAY</mat-option>
+                    <mat-option value="ON_LEAVE">ON_LEAVE</mat-option>
+                    <mat-option value="ABSENT">ABSENT</mat-option>
+                  </mat-select>
+                </mat-form-field>
+              </div>
+            </div>
+
+            <div class="d-flex justify-content-end gap-12">
+              <button type="button" mat-stroked-button (click)="cancelForm()">Cancel</button>
+              <button type="submit" mat-flat-button color="primary" [disabled]="loading">
+                {{ updateButton ? ('attendance.update_record' | translate) : ('attendance.create_record' | translate) }}
+              </button>
+            </div>
+          </form>
+        </div>
+      }
+
+      <!-- Attendance Data Table -->
+      <app-mat-table 
+        [columns]="tableColumns" 
+        [tableData]="attendanceLogs"
+        [showAction]="true"
+        [showView]="true"
+        (editClick)="editLog($event)"
+        (ViewClick)="viewLog($event)"
+        (deleteClick)="deleteLog($event)"
+      ></app-mat-table>
+    </div>
+  </div>
+</div>

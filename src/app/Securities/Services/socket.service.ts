@@ -21,6 +21,7 @@ export class SocketService {
   sessionRefresh$: Observable<any> = this.sessionRefreshSubject.asObservable();
 
   private reconnectAttempts = 0;
+  private reconnectTimer: ReturnType<typeof setTimeout> | null = null;
 
   constructor(private ngZone: NgZone) {}
 
@@ -93,12 +94,28 @@ export class SocketService {
     if (!this.currentToken || this.reconnectAttempts >= 15) {
       return;
     }
+    // Cancel any pending reconnect before scheduling a new one
+    // to prevent duplicate WebSocket instances from being created
+    if (this.reconnectTimer) {
+      clearTimeout(this.reconnectTimer);
+      this.reconnectTimer = null;
+    }
     this.reconnectAttempts++;
     const delay = Math.min(3000 * Math.pow(1.5, Math.min(this.reconnectAttempts - 1, 5)), 30000);
-    setTimeout(() => this.connect(), delay);
+    this.reconnectTimer = setTimeout(() => {
+      this.reconnectTimer = null;
+      this.connect();
+    }, delay);
   }
 
   public disconnect(): void {
+    // Cancel any pending reconnect timer so we don't attempt
+    // to reconnect after an intentional logout
+    if (this.reconnectTimer) {
+      clearTimeout(this.reconnectTimer);
+      this.reconnectTimer = null;
+    }
+    this.reconnectAttempts = 0;
     this.cleanup();
     this.currentToken = null;
   }

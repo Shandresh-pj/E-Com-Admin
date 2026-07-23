@@ -11,12 +11,15 @@ import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatNativeDateModule } from '@angular/material/core';
 import { CommonService } from 'src/app/Securities/Services/common.service';
 import { AlertService } from 'src/app/Securities/Services/alert.service';
 import { PermissionService } from 'src/app/Securities/Services/permissions.service';
 import { AuthService } from 'src/app/Securities/Services/auth.service';
 import { MatTable } from 'src/utils/mat-table/mat-table';
 import { AppTranslatePipe } from 'src/app/pipes/app-translate.pipe';
+import { NotificationSoundService } from 'src/app/Securities/Services/notification-sound.service';
 
 @Component({
   selector: 'app-attendance',
@@ -35,6 +38,8 @@ import { AppTranslatePipe } from 'src/app/pipes/app-translate.pipe';
     MatChipsModule,
     MatDialogModule,
     MatTooltipModule,
+    MatDatepickerModule,
+    MatNativeDateModule,
     MatTable,
     AppTranslatePipe
   ],
@@ -70,10 +75,16 @@ export class Attendance implements OnInit, OnDestroy {
   activeShift: any = null;
   activeBreakPolicy: any = null;
 
-  // Break state variables
+  // Break state & Real-time Timer variables
   isOnBreak = false;
   activeBreakLog: any = null;
   breakLoading = false;
+  private breakTimerInterval: any = null;
+  breakElapsedSeconds = 0;
+  breakRemainingSeconds = 0;
+  breakExceededAlerted = false;
+  formattedBreakElapsed = '00:00';
+  formattedBreakRemaining = '30:00';
 
   // Admin CRUD form toggle
   showForm = false;
@@ -111,12 +122,34 @@ export class Attendance implements OnInit, OnDestroy {
   biometricSuccess = false;
   biometricConfidence = 96;
 
+  // SuperAdmin / Multi-Tenant Filters
+  selectedCompanyFilter: string | number = 'ALL';
+  selectedBranchFilter: string | number = 'ALL';
+  selectedEmployeeFilter: string | number = 'ALL';
+  selectedDateFilter: string = '';
+  filteredBranches: any[] = [];
+
+  get isAdminUser(): boolean {
+    if (!this.currentUser) return false;
+    const type = String(this.currentUser.userType || this.currentUser.user_type || '').toLowerCase();
+    const role = String(this.currentUser.role || '').toLowerCase();
+    return !!(
+      this.currentUser.isSuperAdmin ||
+      type === 'super_admin' ||
+      type === 'admin' ||
+      role === 'super_admin' ||
+      role === 'admin' ||
+      role === 'super admin'
+    );
+  }
+
   constructor(
     private fb: FormBuilder,
     private commonService: CommonService,
     private alert: AlertService,
     public perm: PermissionService,
     private auth: AuthService,
+    public soundService: NotificationSoundService,
     private cdr: ChangeDetectorRef
   ) {
     this.attendanceForm = this.fb.group({
@@ -143,6 +176,7 @@ export class Attendance implements OnInit, OnDestroy {
     if (this.clockInterval) {
       clearInterval(this.clockInterval);
     }
+    this.stopBreakTimer();
   }
 
   startDigitalClock() {
@@ -165,27 +199,99 @@ export class Attendance implements OnInit, OnDestroy {
     }, 1000);
   }
 
-  requestGeolocation() {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          this.latitude = position.coords.latitude;
-          this.longitude = position.coords.longitude;
-          this.validateGeofence(this.latitude, this.longitude);
-        },
-        (error) => {
-          console.warn('Geolocation fallback activated:', error);
-          // Default to branch office coordinates for seamless execution
-          this.latitude = 12.9716;
-          this.longitude = 77.5946;
-          this.validateGeofence(this.latitude, this.longitude);
-        }
-      );
-    } else {
-      this.latitude = 12.9716;
-      this.longitude = 77.5946;
-      this.validateGeofence(this.latitude, this.longitude);
+  requestGeolocation(): Promise<{ lat: number; lng: number }> {
+    return new Promise((resolve) => {
+      if (navigator.geolocation) {
+        this.geoStatus = 'Refreshing GPS Location...';
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            this.latitude = position.coords.latitude;
+            this.longitude = position.coords.longitude;
+            this.validateGeofence(this.latitude, this.longitude);
+            resolve({ lat: this.latitude, lng: this.longitude });
+          },
+          (error) => {
+            console.warn('Geolocation fallback activated:', error);
+            this.latitude = this.latitude || 12.9716;
+            this.longitude = this.longitude || 77.5946;
+            this.validateGeofence(this.latitude, this.longitude);
+            resolve({ lat: this.latitude, lng: this.longitude });
+          },
+          { enableHighAccuracy: true, timeout: 8000 }
+        );
+      } else {
+        this.latitude = this.latitude || 12.9716;
+        this.longitude = this.longitude || 77.5946;
+        this.validateGeofence(this.latitude, this.longitude);
+        resolve({ lat: this.latitude, lng: this.longitude });
+      }
+    });
+  }
+
+  parseStartTimeMs(startTimeStr?: any): number {
+    if (!startTimeStr) return Date.now();
+    if (typeof startTimeStr === 'number') return startTimeStr;
+
+    let str = String(startTimeStr).trim();
+    if (str === 'undefined' || str === 'null' || !str) return Date.now();
+
+    if (/^\d{1,2}:\d{2}(:\d{2})?$/.test(str)) {
+      const todayStr = new Date().toISOString().split('T')[0];
+      str = `${todayStr}T${str}`;
+    } else if (str.includes(' ') && !str.includes('T')) {
+      str = str.replace(' ', 'T');
     }
+
+    const parsed = new Date(str).getTime();
+    return isNaN(parsed) ? Date.now() : parsed;
+  }
+
+  startBreakTimer(startTimeStr?: string) {
+    this.stopBreakTimer();
+    this.breakExceededAlerted = false;
+    const startTimeMs = this.parseStartTimeMs(startTimeStr);
+
+    const tick = () => {
+      const nowMs = Date.now();
+      this.breakElapsedSeconds = Math.max(0, Math.floor((nowMs - startTimeMs) / 1000));
+
+      const limitMinutes = Number(this.activeBreakPolicy?.max_duration_minutes) || 30;
+      const limitSeconds = limitMinutes * 60;
+      this.breakRemainingSeconds = Math.max(0, limitSeconds - this.breakElapsedSeconds);
+
+      this.formattedBreakElapsed = this.formatSecondsToMMSS(this.breakElapsedSeconds);
+      this.formattedBreakRemaining = this.formatSecondsToMMSS(this.breakRemainingSeconds);
+
+      // Warning when 5 minutes remaining
+      if (this.breakRemainingSeconds === 300) {
+        this.soundService.playBreakReminder();
+        this.alert.warning("Your break limit expires in 5 minutes!", "Break Reminder");
+      }
+      // Overtime alert
+      if (this.breakElapsedSeconds > limitSeconds && !this.breakExceededAlerted) {
+        this.breakExceededAlerted = true;
+        this.soundService.playBreakExceeded();
+        this.alert.error("Maximum break duration exceeded! Please end your break.", "Break Exceeded");
+      }
+      this.cdr.detectChanges();
+    };
+
+    tick();
+    this.breakTimerInterval = setInterval(tick, 1000);
+  }
+
+  stopBreakTimer() {
+    if (this.breakTimerInterval) {
+      clearInterval(this.breakTimerInterval);
+      this.breakTimerInterval = null;
+    }
+  }
+
+  formatSecondsToMMSS(totalSecs: number): string {
+    if (isNaN(totalSecs) || totalSecs < 0) return '00:00';
+    const mins = Math.floor(totalSecs / 60);
+    const secs = totalSecs % 60;
+    return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
   }
 
   validateGeofence(lat: number, lng: number) {
@@ -227,6 +333,7 @@ export class Attendance implements OnInit, OnDestroy {
     this.commonService.getApi('branches').subscribe({
       next: (res: any) => {
         this.branches = res?.data || [];
+        this.filteredBranches = this.branches;
         if (this.branches.length > 0 && this.branches[0].latitude) {
           this.branchLatitude = Number(this.branches[0].latitude);
           this.branchLongitude = Number(this.branches[0].longitude);
@@ -246,6 +353,66 @@ export class Attendance implements OnInit, OnDestroy {
       },
       error: () => { this.loading = false; }
     });
+  }
+
+  onCompanyFilterChange(companyId: any) {
+    this.selectedCompanyFilter = companyId;
+    if (companyId === 'ALL') {
+      this.filteredBranches = this.branches;
+    } else {
+      this.filteredBranches = this.branches.filter(b => Number(b.company_id || b.company?.id) === Number(companyId));
+    }
+    this.selectedBranchFilter = 'ALL';
+    this.loadAttendanceLogs();
+  }
+
+  onBranchFilterChange(branchId: any) {
+    this.selectedBranchFilter = branchId;
+    this.loadAttendanceLogs();
+  }
+
+  onEmployeeFilterChange(empId: any) {
+    this.selectedEmployeeFilter = empId;
+    this.loadAttendanceLogs();
+  }
+
+  onDateFilterChange(val: any) {
+    if (!val) {
+      this.selectedDateFilter = '';
+    } else if (val instanceof Date) {
+      const yyyy = val.getFullYear();
+      const mm = String(val.getMonth() + 1).padStart(2, '0');
+      const dd = String(val.getDate()).padStart(2, '0');
+      this.selectedDateFilter = `${yyyy}-${mm}-${dd}`;
+    } else if (typeof val === 'string') {
+      this.selectedDateFilter = val;
+    } else if (val && typeof val === 'object' && val.format) {
+      this.selectedDateFilter = val.format('YYYY-MM-DD');
+    }
+    this.loadAttendanceLogs();
+  }
+
+  resetFilters() {
+    this.selectedCompanyFilter = 'ALL';
+    this.selectedBranchFilter = 'ALL';
+    this.selectedEmployeeFilter = 'ALL';
+    this.selectedDateFilter = '';
+    this.filteredBranches = this.branches;
+    this.loadAttendanceLogs();
+  }
+
+  onActingEmployeeChange(empId: any) {
+    const targetEmp = this.employees.find(e => Number(e.id) === Number(empId));
+    if (targetEmp) {
+      this.detectedEmployee = targetEmp;
+      this.attendanceForm.patchValue({
+        employee_id: Number(targetEmp.id),
+        company_id: Number(targetEmp.company_id || targetEmp.companyId || 1),
+        branch_id: Number(targetEmp.branch_id || targetEmp.branchId || 1)
+      });
+      this.loadEmployeeShiftAndPolicy(Number(targetEmp.id));
+      this.loadTodayStatus();
+    }
   }
 
   detectEmployeeMapping() {
@@ -292,7 +459,24 @@ export class Attendance implements OnInit, OnDestroy {
   }
 
   loadAttendanceLogs() {
-    this.commonService.getApi('attendance').subscribe({
+    this.loading = true;
+    let queryParts: string[] = [];
+    if (this.selectedCompanyFilter && this.selectedCompanyFilter !== 'ALL') {
+      queryParts.push(`company_id=${this.selectedCompanyFilter}`);
+    }
+    if (this.selectedBranchFilter && this.selectedBranchFilter !== 'ALL') {
+      queryParts.push(`branch_id=${this.selectedBranchFilter}`);
+    }
+    if (this.selectedEmployeeFilter && this.selectedEmployeeFilter !== 'ALL') {
+      queryParts.push(`employee_id=${this.selectedEmployeeFilter}`);
+    }
+    if (this.selectedDateFilter) {
+      queryParts.push(`date=${this.selectedDateFilter}`);
+    }
+
+    const queryStr = queryParts.length > 0 ? `attendance?${queryParts.join('&')}` : 'attendance';
+
+    this.commonService.getApi(queryStr).subscribe({
       next: (res: any) => {
         const rawLogs = res?.data || [];
         
@@ -306,15 +490,13 @@ export class Attendance implements OnInit, OnDestroy {
 
         this.attendanceLogs = rawLogs.map((log: any) => {
           const empId = Number(log.employee_id ?? log.employeeId);
-          const emp = this.employees.find(e => e.id === empId);
+          const emp = this.employees.find(e => Number(e.id) === empId);
           
-          if (empId === currentEmpId) {
-            this.totalWorkedMinutes += log.net_worked_minutes || log.total_minutes || 0;
-            this.totalBreakMinutes += log.break_minutes || 0;
-            this.totalOvertimeMinutes += log.overtime_minutes || 0;
-            if (log.status === 'PRESENT' || log.status === 'LATE' || log.status === 'HALF_DAY') {
-              this.activeDaysCount++;
-            }
+          this.totalWorkedMinutes += log.net_worked_minutes || log.total_minutes || 0;
+          this.totalBreakMinutes += log.break_minutes || 0;
+          this.totalOvertimeMinutes += log.overtime_minutes || 0;
+          if (log.status === 'PRESENT' || log.status === 'LATE' || log.status === 'HALF_DAY') {
+            this.activeDaysCount++;
           }
 
           return {
@@ -336,7 +518,7 @@ export class Attendance implements OnInit, OnDestroy {
 
         this.loadTodayStatus();
       },
-      error: (err) => {
+      error: (err: any) => {
         console.error('Failed to load attendance logs:', err);
         this.loading = false;
       }
@@ -359,21 +541,24 @@ export class Attendance implements OnInit, OnDestroy {
           if (activeBreak && !activeBreak.end_time) {
             this.isOnBreak = true;
             this.activeBreakLog = activeBreak;
+            this.startBreakTimer(activeBreak.start_time || activeBreak.created_at);
           } else {
             this.isOnBreak = false;
             this.activeBreakLog = null;
+            this.stopBreakTimer();
           }
         } else {
           this.isCheckedIn = false;
           this.currentSessionId = null;
           this.isOnBreak = false;
           this.activeBreakLog = null;
+          this.stopBreakTimer();
         }
 
         this.loading = false;
         this.cdr.detectChanges();
       },
-      error: (err) => {
+      error: (err: any) => {
         console.error('Failed to load today status:', err);
         this.loading = false;
         this.cdr.detectChanges();
@@ -425,9 +610,10 @@ export class Attendance implements OnInit, OnDestroy {
     this.biometricSuccess = false;
   }
 
-  checkIn() {
+  async checkIn() {
     // Fix Punch Check-In: guarantee employee mapping & fallback form values
     this.detectEmployeeMapping();
+    await this.requestGeolocation();
 
     const empId = Number(this.attendanceForm.value.employee_id) || 1;
     const compId = Number(this.attendanceForm.value.company_id) || 1;
@@ -446,8 +632,10 @@ export class Attendance implements OnInit, OnDestroy {
     }
   }
 
-  executeCheckIn(authMethod: string) {
+  async executeCheckIn(authMethod: string) {
     this.loading = true;
+    await this.requestGeolocation();
+
     const payload: any = {
       employee_id: Number(this.attendanceForm.value.employee_id) || 1,
       company_id: Number(this.attendanceForm.value.company_id) || 1,
@@ -460,12 +648,13 @@ export class Attendance implements OnInit, OnDestroy {
 
     this.commonService.postApi('attendance/check-in', payload).subscribe({
       next: (res: any) => {
+        this.soundService.playCheckInSuccess();
         this.alert.success(`Checked in successfully via ${authMethod.replace('_', ' ')}!`);
         this.isCheckedIn = true;
         this.currentSessionId = res?.data?.id;
         this.loadAttendanceLogs();
       },
-      error: (err) => {
+      error: (err: any) => {
         console.error('Check-in failed:', err);
         this.alert.error("Check-in failed: " + (err.error?.message || "Internal Error"));
         this.loading = false;
@@ -473,7 +662,7 @@ export class Attendance implements OnInit, OnDestroy {
     });
   }
 
-  checkOut() {
+  async checkOut() {
     const sessionId = this.currentSessionId;
     if (!sessionId) {
       this.alert.warning("No active terminal session found to punch out");
@@ -481,6 +670,8 @@ export class Attendance implements OnInit, OnDestroy {
     }
 
     this.loading = true;
+    await this.requestGeolocation();
+
     const payload: any = {
       gps_lat: this.latitude,
       gps_lng: this.longitude
@@ -488,14 +679,16 @@ export class Attendance implements OnInit, OnDestroy {
 
     this.commonService.postApi(`attendance/check-out/${sessionId}`, payload).subscribe({
       next: () => {
+        this.soundService.playCheckOutSuccess();
         this.alert.success("Checked out successfully");
         this.isCheckedIn = false;
         this.currentSessionId = null;
         this.isOnBreak = false;
         this.activeBreakLog = null;
+        this.stopBreakTimer();
         this.loadAttendanceLogs();
       },
-      error: (err) => {
+      error: (err: any) => {
         console.error('Check-out failed:', err);
         this.alert.error("Check-out failed: " + (err.error?.message || "Internal Error"));
         this.loading = false;
@@ -503,22 +696,28 @@ export class Attendance implements OnInit, OnDestroy {
     });
   }
 
-  startBreak() {
+  async startBreak() {
     if (!this.currentSessionId) return;
 
     this.breakLoading = true;
+    await this.requestGeolocation();
+
     this.commonService.postApi('attendance/break-in', {
       attendance_id: this.currentSessionId,
-      break_type: 'PERSONAL'
+      break_type: 'PERSONAL',
+      gps_lat: this.latitude,
+      gps_lng: this.longitude
     }).subscribe({
       next: (res: any) => {
-        this.alert.success("Break started");
+        this.soundService.playBreakStart();
+        this.alert.success("Break started! Timer is actively running.");
         this.isOnBreak = true;
         this.activeBreakLog = res?.data;
         this.breakLoading = false;
+        this.startBreakTimer(res?.data?.start_time || new Date().toISOString());
         this.loadAttendanceLogs();
       },
-      error: (err) => {
+      error: (err: any) => {
         console.error('Failed to start break:', err);
         this.alert.error("Failed to start break: " + (err.error?.message || "Verify your active session"));
         this.breakLoading = false;
@@ -526,19 +725,26 @@ export class Attendance implements OnInit, OnDestroy {
     });
   }
 
-  endBreak() {
+  async endBreak() {
     if (!this.activeBreakLog) return;
 
     this.breakLoading = true;
-    this.commonService.postApi(`attendance/break-out/${this.activeBreakLog.id}`, {}).subscribe({
+    await this.requestGeolocation();
+
+    this.commonService.postApi(`attendance/break-out/${this.activeBreakLog.id}`, {
+      gps_lat: this.latitude,
+      gps_lng: this.longitude
+    }).subscribe({
       next: () => {
-        this.alert.success("Break ended successfully");
+        this.soundService.playCheckInSuccess();
+        this.alert.success("Break ended successfully! Welcome back.");
         this.isOnBreak = false;
         this.activeBreakLog = null;
+        this.stopBreakTimer();
         this.breakLoading = false;
         this.loadAttendanceLogs();
       },
-      error: (err) => {
+      error: (err: any) => {
         console.error('Failed to end break:', err);
         this.alert.error("Failed to end break");
         this.breakLoading = false;
@@ -610,14 +816,14 @@ export class Attendance implements OnInit, OnDestroy {
   }
 
   deleteLog(log: any) {
-    this.alert.confirm("Are you sure you want to delete this log?").then((result) => {
+    this.alert.confirm("Are you sure you want to delete this log?").then((result: any) => {
       if (result.isConfirmed) {
         this.commonService.deleteApi(`attendance/${log.id}`).subscribe({
           next: () => {
             this.alert.success("Log deleted successfully");
             this.loadInitialData();
           },
-          error: (err) => {
+          error: (err: any) => {
             this.alert.error("Failed to delete log: " + (err.error?.message || "Internal Error"));
           }
         });
@@ -651,7 +857,7 @@ export class Attendance implements OnInit, OnDestroy {
           this.showForm = false;
           this.loadInitialData();
         },
-        error: (err) => {
+        error: (err: any) => {
           console.error(err);
           this.alert.error("Failed to create log: " + (err.error?.message || "Internal Error"));
           this.loading = false;
@@ -664,7 +870,7 @@ export class Attendance implements OnInit, OnDestroy {
           this.showForm = false;
           this.loadInitialData();
         },
-        error: (err) => {
+        error: (err: any) => {
           console.error(err);
           this.alert.error("Failed to update log: " + (err.error?.message || "Internal Error"));
           this.loading = false;
@@ -682,7 +888,17 @@ export class Attendance implements OnInit, OnDestroy {
   formatDateDDMMYYYY(dateStr: any): string {
     if (!dateStr) return '-';
     try {
-      const date = new Date(dateStr);
+      let str = String(dateStr).trim();
+      if (str.includes(':') && str.length === 10) {
+        // e.g. "23:07:2026" or "2026:07:23"
+        const parts = str.split(':');
+        if (parts[0].length === 4) {
+          return `${parts[2].padStart(2, '0')}-${parts[1].padStart(2, '0')}-${parts[0]}`;
+        } else {
+          return `${parts[0].padStart(2, '0')}-${parts[1].padStart(2, '0')}-${parts[2]}`;
+        }
+      }
+      const date = new Date(str);
       if (!isNaN(date.getTime())) {
         const day = String(date.getDate()).padStart(2, '0');
         const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -690,7 +906,7 @@ export class Attendance implements OnInit, OnDestroy {
         return `${day}-${month}-${year}`;
       }
     } catch (e) {}
-    return dateStr;
+    return String(dateStr);
   }
 
   formatTime12h(timeStr: any): string {

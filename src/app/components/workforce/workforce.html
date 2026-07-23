@@ -1,457 +1,419 @@
-<!-- Executive Workforce Console & Company Policy Settings -->
-<div class="container-fluid p-0">
-  
-  <!-- ── 1. EXECUTIVE COMMAND HUB HEADER ───────────────────────────────────── -->
-  <div class="workforce-command-hub p-32 m-b-24">
-    <div class="d-flex align-items-center justify-content-between flex-wrap gap-20">
-      <div class="d-flex align-items-center gap-16">
-        <div class="hub-icon-avatar">
-          <mat-icon>admin_panel_settings</mat-icon>
-        </div>
-        <div>
-          <h2 class="hub-title mb-1">
-            Workforce Console & Policy Control
-          </h2>
-          <p class="hub-subtitle mb-0">
-            Configure Multi-Company Shift Patterns, Working Hours, Automated Break Penalties, Biometric Terminals & GPS Geofencing.
-          </p>
-        </div>
-      </div>
+﻿<!-- ╔══════════════════════════════════════════════════════════════════════════╗ -->
+<!-- ║  WORKFORCE INTELLIGENCE CONSOLE  ·  Enterprise Liquid Glass Design      ║ -->
+<!-- ╚══════════════════════════════════════════════════════════════════════════╝ -->
+<div class="wf-shell" [class.sidenav-collapsed]="!sidenavOpen">
 
-      <!-- Clean Executive Organization Pill Selector -->
-      <div class="org-selector-pill">
-        <div class="pill-icon">
-          <mat-icon>business</mat-icon>
-        </div>
-        <div class="pill-content">
-          <span class="pill-label">ORGANIZATION PROFILE</span>
-          <mat-select [formControl]="companySelectControl" class="pill-select">
-            @for (comp of companies; track comp.id) {
-              <mat-option [value]="comp.id">{{ comp.name }}{{ comp.code ? ' (' + comp.code + ')' : '' }}</mat-option>
-            }
-          </mat-select>
-        </div>
+  <!-- ═══ SIDE NAVIGATION ═══ -->
+  <aside class="wf-sidenav">
+    <div class="wf-sidenav-header">
+      <div class="wf-brand-icon">
+        <mat-icon class="wf-brand-mat-icon">manage_accounts</mat-icon>
+        <span class="wf-brand-ring"></span>
+      </div>
+      <div class="wf-brand-text">
+        <span class="wf-brand-title">Workforce</span>
+        <span class="wf-brand-sub">Intelligence Suite</span>
+      </div>
+      <button class="wf-sidenav-toggle" (click)="toggleSidenav()">
+        <mat-icon>{{ sidenavOpen ? 'menu_open' : 'menu' }}</mat-icon>
+      </button>
+    </div>
+    <div class="wf-org-pill">
+      <mat-icon class="wf-org-pill-icon">corporate_fare</mat-icon>
+      <div class="wf-org-pill-body">
+        <span class="wf-org-pill-label">Organization</span>
+        <mat-select [formControl]="companySelectControl" class="wf-org-select" panelClass="wf-org-panel">
+          @for (c of companies; track c.id) {
+            <mat-option [value]="c.id">{{ c.name }}{{ c.code ? ' - ' + c.code : '' }}</mat-option>
+          }
+        </mat-select>
       </div>
     </div>
-
-    <!-- Executive Dynamic KPI Metric Chips Grid -->
-    <div class="kpi-metrics-grid">
-      <div class="kpi-card">
-        <div class="kpi-icon-avatar indigo">
-          <mat-icon>schedule</mat-icon>
-        </div>
-        <div>
-          <div class="kpi-value">{{ shiftsList.length }}</div>
-          <div class="kpi-label">Configured Shifts</div>
-        </div>
-      </div>
-
-      <div class="kpi-card">
-        <div class="kpi-icon-avatar purple">
-          <mat-icon>free_breakfast</mat-icon>
-        </div>
-        <div>
-          <div class="kpi-value">{{ policiesList.length }}</div>
-          <div class="kpi-label">Break Rules</div>
-        </div>
-      </div>
-
-      <div class="kpi-card">
-        <div class="kpi-icon-avatar emerald">
-          <mat-icon>fingerprint</mat-icon>
-        </div>
-        <div>
-          <div class="kpi-value">{{ devicesList.length }}</div>
-          <div class="kpi-label">Biometric Terminals</div>
-        </div>
-      </div>
-
-      <div class="kpi-card">
-        <div class="kpi-icon-avatar amber">
-          <mat-icon>location_on</mat-icon>
-        </div>
-        <div>
-          <div class="kpi-value">{{ branchesList.length }}</div>
-          <div class="kpi-label">Active Geofences</div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ── 2. TABBED CONSOLE CONTAINER ──────────────────────────────────────── -->
-  <div class="console-card">
-    <mat-tab-group class="console-tab-group" animationDuration="300ms" [(selectedIndex)]="activeTab">
-      
-      <!-- ── TAB 1: SHIFTS & SCHEDULES ────────────────────────────────────── -->
-      <mat-tab>
-        <ng-template mat-tab-label>
-          <mat-icon>schedule</mat-icon> Shifts & Schedules
-        </ng-template>
-
-        <div class="p-24">
-          <div class="section-header">
-            <div>
-              <div class="section-title">
-                <mat-icon class="text-primary">query_builder</mat-icon>
-                Shift Patterns & Working Hour Thresholds
-              </div>
-              <p class="text-muted f-s-13 m-b-0">Define fixed, rotational, flexible and night shifts with grace periods and half-day triggers.</p>
-            </div>
-            <button mat-flat-button color="primary" class="rounded-12" (click)="toggleShiftForm()">
-              <mat-icon>{{ showShiftForm ? 'close' : 'add' }}</mat-icon>
-              {{ showShiftForm ? 'Close Form' : 'Create Shift Pattern' }}
-            </button>
+    <nav class="wf-nav">
+      @for (item of navItems; track item.index) {
+        <button class="wf-nav-item" [class.active]="activeTab === item.index" (click)="setTab(item.index)">
+          <div class="wf-nav-icon-wrap">
+            <mat-icon class="wf-nav-icon">{{ item.icon }}</mat-icon>
+            <span class="wf-nav-active-bar"></span>
           </div>
+          <div class="wf-nav-text">
+            <span class="wf-nav-label">{{ item.label }}</span>
+            <span class="wf-nav-sub">{{ item.sub }}</span>
+          </div>
+        </button>
+      }
+    </nav>
+    <div class="wf-sidenav-footer">
+      <div class="wf-system-status">
+        <span class="wf-status-dot"></span>
+        <span class="wf-status-text">All Systems Operational</span>
+      </div>
+    </div>
+  </aside>
 
-          <!-- Shift Form Drawer -->
+  <!-- ═══ MAIN CONTENT ═══ -->
+  <main class="wf-main">
+    <div class="wf-topbar">
+      <div class="wf-topbar-left">
+        <button class="wf-topbar-menu-btn" (click)="toggleSidenav()"><mat-icon>menu</mat-icon></button>
+        <div class="wf-breadcrumb">
+          <mat-icon class="wf-bc-home">home</mat-icon>
+          <mat-icon class="wf-bc-sep">chevron_right</mat-icon>
+          <span>Workforce Console</span>
+          <mat-icon class="wf-bc-sep">chevron_right</mat-icon>
+          <span class="wf-bc-active">{{ navItems[activeTab]?.label }}</span>
+        </div>
+      </div>
+      <div class="wf-topbar-right">
+        <div class="wf-live-chip"><span class="wf-live-dot"></span><span>LIVE</span></div>
+      </div>
+    </div>
+
+    <mat-tab-group class="wf-content-tabs" animationDuration="280ms" [(selectedIndex)]="activeTab">
+
+      <!-- TAB 0: OVERVIEW DASHBOARD -->
+      <mat-tab>
+        <div class="wf-page-body">
+          <div class="wf-page-hero wf-hero-violet">
+            <div class="wf-hero-orbs"><span class="wf-orb o1"></span><span class="wf-orb o2"></span><span class="wf-orb o3"></span></div>
+            <div class="wf-hero-content">
+              <div class="wf-hero-left">
+                <div class="wf-hero-avatar wf-ha-violet"><mat-icon>dashboard</mat-icon></div>
+                <div>
+                  <h1 class="wf-hero-title">Workforce Overview</h1>
+                  <p class="wf-hero-desc">Real-time intelligence across all workforce dimensions</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="wf-kpi-grid">
+            <div class="wf-kpi-card kpi-violet" (click)="setTab(1)">
+              <div class="wf-kpi-glow"></div>
+              <div class="wf-kpi-top">
+                <div class="wf-kpi-icon kpi-icon-violet"><mat-icon>schedule</mat-icon></div>
+                <span class="wf-kpi-tag tag-violet">SHIFTS</span>
+              </div>
+              <div class="wf-kpi-num">{{ shiftsList.length }}</div>
+              <div class="wf-kpi-lbl">Active Shift Patterns</div>
+              <div class="wf-kpi-bar"><div class="wf-kpi-fill fill-violet" style="width:100%"></div></div>
+              <div class="wf-kpi-foot"><mat-icon>arrow_forward</mat-icon><span>Manage Shifts</span></div>
+            </div>
+            <div class="wf-kpi-card kpi-rose" (click)="setTab(2)">
+              <div class="wf-kpi-glow"></div>
+              <div class="wf-kpi-top">
+                <div class="wf-kpi-icon kpi-icon-rose"><mat-icon>coffee</mat-icon></div>
+                <span class="wf-kpi-tag tag-rose">BREAKS</span>
+              </div>
+              <div class="wf-kpi-num">{{ policiesList.length }}</div>
+              <div class="wf-kpi-lbl">Break Deduction Rules</div>
+              <div class="wf-kpi-bar"><div class="wf-kpi-fill fill-rose" style="width:100%"></div></div>
+              <div class="wf-kpi-foot"><mat-icon>arrow_forward</mat-icon><span>Manage Policies</span></div>
+            </div>
+            <div class="wf-kpi-card kpi-teal" (click)="setTab(3)">
+              <div class="wf-kpi-glow"></div>
+              <div class="wf-kpi-top">
+                <div class="wf-kpi-icon kpi-icon-teal"><mat-icon>fingerprint</mat-icon></div>
+                <span class="wf-kpi-tag tag-teal"><span class="wf-mini-dot"></span>ONLINE</span>
+              </div>
+              <div class="wf-kpi-num">{{ onlineDevicesCount }}<span class="wf-kpi-of"> / {{ devicesList.length }}</span></div>
+              <div class="wf-kpi-lbl">Terminals Online</div>
+              <div class="wf-kpi-bar"><div class="wf-kpi-fill fill-teal" [style.width.%]="terminalHealthPercentage"></div></div>
+              <div class="wf-kpi-foot"><mat-icon>arrow_forward</mat-icon><span>{{ terminalHealthPercentage }}% Health</span></div>
+            </div>
+            <div class="wf-kpi-card kpi-amber" (click)="setTab(4)">
+              <div class="wf-kpi-glow"></div>
+              <div class="wf-kpi-top">
+                <div class="wf-kpi-icon kpi-icon-amber"><mat-icon>satellite_alt</mat-icon></div>
+                <span class="wf-kpi-tag tag-amber"><span class="wf-mini-dot"></span>RADAR</span>
+              </div>
+              <div class="wf-kpi-num">{{ branchesList.length }}</div>
+              <div class="wf-kpi-lbl">GPS Geofences Active</div>
+              <div class="wf-kpi-bar"><div class="wf-kpi-fill fill-amber" style="width:100%"></div></div>
+              <div class="wf-kpi-foot"><mat-icon>arrow_forward</mat-icon><span>Manage Geofences</span></div>
+            </div>
+          </div>
+          <div class="wf-section-heading"><mat-icon>apps</mat-icon><span>Quick Access Modules</span></div>
+          <div class="wf-module-grid">
+            <div class="wf-module-card" (click)="setTab(1)">
+              <div class="wf-mc-icon mc-violet"><mat-icon>schedule</mat-icon></div>
+              <div class="wf-mc-body"><div class="wf-mc-title">Shifts &amp; Schedules</div><div class="wf-mc-desc">Define work hours, rotations &amp; grace periods</div></div>
+              <mat-icon class="wf-mc-arrow">chevron_right</mat-icon>
+            </div>
+            <div class="wf-module-card" (click)="setTab(2)">
+              <div class="wf-mc-icon mc-rose"><mat-icon>coffee</mat-icon></div>
+              <div class="wf-mc-body"><div class="wf-mc-title">Break Deduction Rules</div><div class="wf-mc-desc">Auto-deduction triggers &amp; frequency limits</div></div>
+              <mat-icon class="wf-mc-arrow">chevron_right</mat-icon>
+            </div>
+            <div class="wf-module-card" (click)="setTab(3)">
+              <div class="wf-mc-icon mc-teal"><mat-icon>fingerprint</mat-icon></div>
+              <div class="wf-mc-body"><div class="wf-mc-title">Biometric Terminals</div><div class="wf-mc-desc">AI Face · Fingerprint · RFID · QR check-in</div></div>
+              <mat-icon class="wf-mc-arrow">chevron_right</mat-icon>
+            </div>
+            <div class="wf-module-card" (click)="setTab(4)">
+              <div class="wf-mc-icon mc-amber"><mat-icon>satellite_alt</mat-icon></div>
+              <div class="wf-mc-body"><div class="wf-mc-title">GPS Geofencing</div><div class="wf-mc-desc">Perimeter boundaries &amp; mobile check-in radii</div></div>
+              <mat-icon class="wf-mc-arrow">chevron_right</mat-icon>
+            </div>
+          </div>
+        </div>
+      </mat-tab>
+
+      <!-- TAB 1: SHIFTS -->
+      <mat-tab>
+        <div class="wf-page-body">
+          <div class="wf-page-hero wf-hero-violet">
+            <div class="wf-hero-orbs"><span class="wf-orb o1"></span><span class="wf-orb o2"></span></div>
+            <div class="wf-hero-content">
+              <div class="wf-hero-left">
+                <div class="wf-hero-avatar wf-ha-violet"><mat-icon>schedule</mat-icon></div>
+                <div><h1 class="wf-hero-title">Shifts &amp; Schedules</h1><p class="wf-hero-desc">Define shift hours, grace periods &amp; minimum work thresholds</p></div>
+              </div>
+              @if (perm.hasRoleAction('canCreate', 'Shifts & Schedules') || perm.hasRoleAction('canCreate', '/workforce')) {
+                <button class="wf-hero-action-btn btn-violet" (click)="toggleShiftForm()">
+                  <mat-icon>{{ showShiftForm ? 'close' : 'add_circle_outline' }}</mat-icon>
+                  <span>{{ showShiftForm ? 'Close Form' : 'New Shift Pattern' }}</span>
+                </button>
+              }
+            </div>
+          </div>
           @if (showShiftForm) {
-            <div class="form-drawer-card">
-              <div class="drawer-title">
-                <mat-icon class="text-primary">{{ editingShiftId ? 'edit' : 'post_add' }}</mat-icon>
-                {{ editingShiftId ? 'Edit Shift Pattern #' + editingShiftId : 'Create New Shift Pattern' }}
+            <div class="wf-form-card wf-fc-violet">
+              <div class="wf-fc-header">
+                <div class="wf-fc-h-icon fch-violet"><mat-icon>{{ editingShiftId ? 'edit_note' : 'add_circle' }}</mat-icon></div>
+                <div><div class="wf-fc-h-title">{{ editingShiftId ? 'Edit Shift Pattern #' + editingShiftId : 'Create New Shift Pattern' }}</div><div class="wf-fc-h-sub">Configure shift hours, grace tolerance &amp; working thresholds</div></div>
               </div>
-              <form [formGroup]="shiftForm" (ngSubmit)="submitShift()">
-                <div class="row">
-                  <div class="col-md-4 col-sm-6">
-                    <mat-form-field appearance="outline" class="w-100">
-                      <mat-label>Shift Pattern Name</mat-label>
-                      <input matInput formControlName="name" placeholder="e.g. General Morning Shift">
-                    </mat-form-field>
-                  </div>
-                  <div class="col-md-4 col-sm-6">
-                    <mat-form-field appearance="outline" class="w-100">
-                      <mat-label>Shift Type</mat-label>
-                      <mat-select formControlName="type">
-                        <mat-option value="FIXED">FIXED (Standard Hours)</mat-option>
-                        <mat-option value="ROTATIONAL">ROTATIONAL (Shift Rotations)</mat-option>
-                        <mat-option value="NIGHT">NIGHT (Overnight Shift)</mat-option>
-                        <mat-option value="FLEXIBLE">FLEXIBLE (Bandwidth Hours)</mat-option>
-                      </mat-select>
-                    </mat-form-field>
-                  </div>
-                  <div class="col-md-4 col-sm-6">
-                    <mat-form-field appearance="outline" class="w-100">
-                      <mat-label>Start Time (HH:mm)</mat-label>
-                      <input matInput formControlName="start_time" placeholder="09:00">
-                    </mat-form-field>
-                  </div>
-                  <div class="col-md-4 col-sm-6">
-                    <mat-form-field appearance="outline" class="w-100">
-                      <mat-label>End Time (HH:mm)</mat-label>
-                      <input matInput formControlName="end_time" placeholder="18:00">
-                    </mat-form-field>
-                  </div>
-                  <div class="col-md-4 col-sm-6">
-                    <mat-form-field appearance="outline" class="w-100">
-                      <mat-label>Grace Period (Minutes)</mat-label>
-                      <input matInput type="number" formControlName="grace_period_minutes">
-                    </mat-form-field>
-                  </div>
-                  <div class="col-md-4 col-sm-6">
-                    <mat-form-field appearance="outline" class="w-100">
-                      <mat-label>Min Shift Work Minutes</mat-label>
-                      <input matInput type="number" formControlName="min_work_minutes">
-                    </mat-form-field>
-                  </div>
-                </div>
-                <div class="d-flex justify-content-end gap-12 mt-2">
-                  <button type="button" mat-stroked-button (click)="toggleShiftForm()">Cancel</button>
-                  <button type="submit" mat-flat-button color="primary" [disabled]="loadingShifts">
-                    <mat-icon>save</mat-icon> {{ editingShiftId ? 'Update Shift' : 'Save Shift Pattern' }}
-                  </button>
+              <form [formGroup]="shiftForm" (ngSubmit)="submitShift()" class="wf-form-grid g3">
+                <mat-form-field appearance="outline" class="wf-ff"><mat-label>Pattern Name</mat-label><mat-icon matPrefix class="wf-ff-prefix">label</mat-icon><input matInput formControlName="name" placeholder="Morning Shift A"></mat-form-field>
+                <mat-form-field appearance="outline" class="wf-ff"><mat-label>Shift Type</mat-label><mat-icon matPrefix class="wf-ff-prefix">swap_horiz</mat-icon><mat-select formControlName="type"><mat-option value="FIXED">Fixed Hours</mat-option><mat-option value="FLEXIBLE">Flexible Hours</mat-option><mat-option value="ROTATIONAL">Rotational</mat-option><mat-option value="NIGHT">Night Shift</mat-option></mat-select></mat-form-field>
+                <mat-form-field appearance="outline" class="wf-ff"><mat-label>Start Time</mat-label><mat-icon matPrefix class="wf-ff-prefix">play_circle</mat-icon><input matInput formControlName="start_time" placeholder="09:00"></mat-form-field>
+                <mat-form-field appearance="outline" class="wf-ff"><mat-label>End Time</mat-label><mat-icon matPrefix class="wf-ff-prefix">stop_circle</mat-icon><input matInput formControlName="end_time" placeholder="18:00"></mat-form-field>
+                <mat-form-field appearance="outline" class="wf-ff"><mat-label>Grace Period (min)</mat-label><mat-icon matPrefix class="wf-ff-prefix">timer</mat-icon><input matInput type="number" formControlName="grace_period_minutes"></mat-form-field>
+                <mat-form-field appearance="outline" class="wf-ff"><mat-label>Min Work Required (min)</mat-label><mat-icon matPrefix class="wf-ff-prefix">work_history</mat-icon><input matInput type="number" formControlName="min_work_minutes"></mat-form-field>
+                <div class="wf-form-actions">
+                  <button type="button" class="wf-ghost-btn" (click)="toggleShiftForm()"><mat-icon>close</mat-icon>Cancel</button>
+                  <button type="submit" class="wf-solid-btn btn-violet" [disabled]="loadingShifts"><mat-icon>save</mat-icon><span>{{ editingShiftId ? 'Update Shift' : 'Save Pattern' }}</span></button>
                 </div>
               </form>
             </div>
           }
-
-          <!-- Dynamic Shifts Data Table -->
-          <div class="table-responsive">
-            <app-mat-table 
-              [columns]="shiftColumns" 
-              [tableData]="shiftsList" 
-              [showSearch]="true" 
-              [enableExport]="true" 
-              [showAction]="true" 
-              [showEdit]="true" 
-              [showDelete]="true" 
-              [isLoading]="loadingShifts" 
-              [title]="'Shift Patterns'"
-              (editClick)="editShift($event)" 
-              (deleteClick)="deleteShift($event)">
+          <div class="wf-table-card">
+            <app-mat-table [columns]="shiftColumns" [tableData]="shiftsList" [showSearch]="true" [enableExport]="true" [showAction]="true"
+              [showEdit]="perm.hasRoleAction('canUpdate','Shifts & Schedules')||perm.hasRoleAction('canUpdate','/workforce')"
+              [showDelete]="perm.hasRoleAction('canDelete','Shifts & Schedules')||perm.hasRoleAction('canDelete','/workforce')"
+              [isLoading]="loadingShifts" [title]="'Configured Shift Patterns'"
+              (editClick)="editShift($event)" (deleteClick)="deleteShift($event)">
             </app-mat-table>
           </div>
         </div>
       </mat-tab>
 
-      <!-- ── TAB 2: BREAK DEDUCTION RULES ─────────────────────────────────── -->
+      <!-- TAB 2: BREAK POLICIES -->
       <mat-tab>
-        <ng-template mat-tab-label>
-          <mat-icon>free_breakfast</mat-icon> Break Deduction Rules
-        </ng-template>
-
-        <div class="p-24">
-          <div class="section-header">
-            <div>
-              <div class="section-title">
-                <mat-icon class="text-primary">timer</mat-icon>
-                Break Allowances & Overbreak Penalty Policies
+        <div class="wf-page-body">
+          <div class="wf-page-hero wf-hero-rose">
+            <div class="wf-hero-orbs"><span class="wf-orb o1"></span><span class="wf-orb o2"></span></div>
+            <div class="wf-hero-content">
+              <div class="wf-hero-left">
+                <div class="wf-hero-avatar wf-ha-rose"><mat-icon>coffee</mat-icon></div>
+                <div><h1 class="wf-hero-title">Break Deduction Rules</h1><p class="wf-hero-desc">Set max break durations, frequency limits &amp; salary deduction triggers</p></div>
               </div>
-              <p class="text-muted f-s-13 m-b-0">Set maximum duration limits, warning thresholds, and automatic pay deductions for overbreak infractions.</p>
+              @if (perm.hasRoleAction('canCreate', 'Break Deduction Rules') || perm.hasRoleAction('canCreate', '/workforce')) {
+                <button class="wf-hero-action-btn btn-rose" (click)="togglePolicyForm()">
+                  <mat-icon>{{ showPolicyForm ? 'close' : 'add_circle_outline' }}</mat-icon>
+                  <span>{{ showPolicyForm ? 'Close Form' : 'New Break Policy' }}</span>
+                </button>
+              }
             </div>
-            <button mat-flat-button color="primary" class="rounded-12" (click)="togglePolicyForm()">
-              <mat-icon>{{ showPolicyForm ? 'close' : 'add' }}</mat-icon>
-              {{ showPolicyForm ? 'Close Form' : 'Create Break Policy' }}
-            </button>
           </div>
-
-          <!-- Policy Form Drawer -->
           @if (showPolicyForm) {
-            <div class="form-drawer-card">
-              <div class="drawer-title">
-                <mat-icon class="text-primary">{{ editingPolicyId ? 'edit' : 'add_alert' }}</mat-icon>
-                {{ editingPolicyId ? 'Edit Break Policy #' + editingPolicyId : 'Define New Break Policy' }}
+            <div class="wf-form-card wf-fc-rose">
+              <div class="wf-fc-header">
+                <div class="wf-fc-h-icon fch-rose"><mat-icon>{{ editingPolicyId ? 'edit_note' : 'playlist_add' }}</mat-icon></div>
+                <div><div class="wf-fc-h-title">{{ editingPolicyId ? 'Edit Break Policy #' + editingPolicyId : 'Create New Break Policy' }}</div><div class="wf-fc-h-sub">Configure break limits, frequency &amp; auto-deduction triggers</div></div>
               </div>
-              <form [formGroup]="policyForm" (ngSubmit)="submitPolicy()">
-                <div class="row">
-                  <div class="col-md-4 col-sm-6">
-                    <mat-form-field appearance="outline" class="w-100">
-                      <mat-label>Policy Name</mat-label>
-                      <input matInput formControlName="name" placeholder="e.g. Lunch Break Policy">
-                    </mat-form-field>
-                  </div>
-                  <div class="col-md-4 col-sm-6">
-                    <mat-form-field appearance="outline" class="w-100">
-                      <mat-label>Break Category</mat-label>
-                      <mat-select formControlName="break_type">
-                        <mat-option value="MEAL">Meal / Lunch</mat-option>
-                        <mat-option value="TEA">Tea / Refreshment</mat-option>
-                        <mat-option value="CASUAL">Personal / Casual</mat-option>
-                        <mat-option value="PRAYER">Prayer / Rest</mat-option>
-                      </mat-select>
-                    </mat-form-field>
-                  </div>
-                  <div class="col-md-4 col-sm-6">
-                    <mat-form-field appearance="outline" class="w-100">
-                      <mat-label>Max Duration (Minutes)</mat-label>
-                      <input matInput type="number" formControlName="max_duration_minutes">
-                    </mat-form-field>
-                  </div>
-                  <div class="col-md-4 col-sm-6">
-                    <mat-form-field appearance="outline" class="w-100">
-                      <mat-label>Max Daily Frequency</mat-label>
-                      <input matInput type="number" formControlName="max_frequency">
-                    </mat-form-field>
-                  </div>
-                  <div class="col-md-4 col-sm-6">
-                    <mat-form-field appearance="outline" class="w-100">
-                      <mat-label>Deduction Threshold (Mins)</mat-label>
-                      <input matInput type="number" formControlName="deduction_threshold">
-                    </mat-form-field>
-                  </div>
-                </div>
-                <div class="d-flex justify-content-end gap-12 mt-2">
-                  <button type="button" mat-stroked-button (click)="togglePolicyForm()">Cancel</button>
-                  <button type="submit" mat-flat-button color="primary" [disabled]="loadingPolicies">
-                    <mat-icon>save</mat-icon> {{ editingPolicyId ? 'Update Policy' : 'Save Policy Rule' }}
-                  </button>
+              <form [formGroup]="policyForm" (ngSubmit)="submitPolicy()" class="wf-form-grid g3">
+                <mat-form-field appearance="outline" class="wf-ff"><mat-label>Policy Name</mat-label><mat-icon matPrefix class="wf-ff-prefix">label</mat-icon><input matInput formControlName="name" placeholder="Standard Lunch Break"></mat-form-field>
+                <mat-form-field appearance="outline" class="wf-ff"><mat-label>Break Category</mat-label><mat-icon matPrefix class="wf-ff-prefix">category</mat-icon><mat-select formControlName="break_type"><mat-option value="MEAL">Meal / Lunch</mat-option><mat-option value="TEA">Tea / Coffee</mat-option><mat-option value="PERSONAL">Personal</mat-option><mat-option value="PRAYER">Prayer / Health</mat-option></mat-select></mat-form-field>
+                <mat-form-field appearance="outline" class="wf-ff"><mat-label>Max Duration (min)</mat-label><mat-icon matPrefix class="wf-ff-prefix">hourglass_bottom</mat-icon><input matInput type="number" formControlName="max_duration_minutes"></mat-form-field>
+                <mat-form-field appearance="outline" class="wf-ff"><mat-label>Max Frequency / Shift</mat-label><mat-icon matPrefix class="wf-ff-prefix">repeat</mat-icon><input matInput type="number" formControlName="max_frequency"></mat-form-field>
+                <mat-form-field appearance="outline" class="wf-ff"><mat-label>Deduction Threshold (min)</mat-label><mat-icon matPrefix class="wf-ff-prefix">money_off</mat-icon><input matInput type="number" formControlName="deduction_threshold"></mat-form-field>
+                <div class="wf-form-actions">
+                  <button type="button" class="wf-ghost-btn" (click)="togglePolicyForm()"><mat-icon>close</mat-icon>Cancel</button>
+                  <button type="submit" class="wf-solid-btn btn-rose" [disabled]="loadingPolicies"><mat-icon>save</mat-icon><span>{{ editingPolicyId ? 'Update Policy' : 'Save Policy' }}</span></button>
                 </div>
               </form>
             </div>
           }
-
-          <!-- Dynamic Break Policies Table -->
-          <div class="table-responsive">
-            <app-mat-table 
-              [columns]="policyColumns" 
-              [tableData]="policiesList" 
-              [showSearch]="true" 
-              [enableExport]="true" 
-              [showAction]="true" 
-              [showEdit]="true" 
-              [showDelete]="true" 
-              [isLoading]="loadingPolicies" 
-              [title]="'Break Policies'"
-              (editClick)="editPolicy($event)" 
-              (deleteClick)="deletePolicy($event)">
+          <div class="wf-table-card">
+            <app-mat-table [columns]="policyColumns" [tableData]="policiesList" [showSearch]="true" [enableExport]="true" [showAction]="true"
+              [showEdit]="perm.hasRoleAction('canUpdate','Break Deduction Rules')||perm.hasRoleAction('canUpdate','/workforce')"
+              [showDelete]="perm.hasRoleAction('canDelete','Break Deduction Rules')||perm.hasRoleAction('canDelete','/workforce')"
+              [isLoading]="loadingPolicies" [title]="'Configured Break Policies'"
+              (editClick)="editPolicy($event)" (deleteClick)="deletePolicy($event)">
             </app-mat-table>
           </div>
         </div>
       </mat-tab>
 
-      <!-- ── TAB 3: BIOMETRIC SENSORS & WHITELIST ─────────────────────────── -->
+      <!-- TAB 3: BIOMETRIC DEVICES -->
       <mat-tab>
-        <ng-template mat-tab-label>
-          <mat-icon>fingerprint</mat-icon> Biometric Sensors & Terminals
-        </ng-template>
-
-        <div class="p-24">
-          <div class="section-header">
-            <div>
-              <div class="section-title">
-                <mat-icon class="text-primary">verified_user</mat-icon>
-                Whitelisted Biometric Hardware & AI Sensors
+        <div class="wf-page-body">
+          <div class="wf-page-hero wf-hero-teal">
+            <div class="wf-hero-orbs"><span class="wf-orb o1"></span><span class="wf-orb o2"></span></div>
+            <div class="wf-hero-content">
+              <div class="wf-hero-left">
+                <div class="wf-hero-avatar wf-ha-teal"><mat-icon>fingerprint</mat-icon></div>
+                <div><h1 class="wf-hero-title">Biometric Sensors &amp; Terminals</h1><p class="wf-hero-desc">Register AI face recognizers, fingerprint scanners, RFID cards &amp; dynamic QR check-ins</p></div>
               </div>
-              <p class="text-muted f-s-13 m-b-0">Register hardware terminals, facial recognition devices, optical fingerprint scanners and dynamic QR check-ins.</p>
+              @if (perm.hasRoleAction('canCreate', 'Biometric Sensors & Terminals') || perm.hasRoleAction('canCreate', '/workforce')) {
+                <button class="wf-hero-action-btn btn-teal" (click)="toggleDeviceForm()">
+                  <mat-icon>{{ showDeviceForm ? 'close' : 'add_circle_outline' }}</mat-icon>
+                  <span>{{ showDeviceForm ? 'Close Form' : 'Register Terminal' }}</span>
+                </button>
+              }
             </div>
-            <button mat-flat-button color="primary" class="rounded-12" (click)="toggleDeviceForm()">
-              <mat-icon>{{ showDeviceForm ? 'close' : 'add' }}</mat-icon>
-              {{ showDeviceForm ? 'Close Form' : 'Register Sensor Device' }}
-            </button>
           </div>
-
-          <!-- Device Form Drawer -->
           @if (showDeviceForm) {
-            <div class="form-drawer-card">
-              <div class="drawer-title">
-                <mat-icon class="text-primary">{{ editingDeviceId ? 'edit' : 'developer_board' }}</mat-icon>
-                {{ editingDeviceId ? 'Edit Sensor Device #' + editingDeviceId : 'Register New Sensor Device' }}
+            <div class="wf-form-card wf-fc-teal">
+              <div class="wf-fc-header">
+                <div class="wf-fc-h-icon fch-teal"><mat-icon>{{ editingDeviceId ? 'edit_note' : 'developer_board' }}</mat-icon></div>
+                <div><div class="wf-fc-h-title">{{ editingDeviceId ? 'Edit Terminal #' + editingDeviceId : 'Register New Biometric Terminal' }}</div><div class="wf-fc-h-sub">Set up device identity, authentication type &amp; confidence threshold</div></div>
               </div>
-              <form [formGroup]="deviceForm" (ngSubmit)="submitDevice()">
-                <div class="row">
-                  <div class="col-md-4 col-sm-6">
-                    <mat-form-field appearance="outline" class="w-100">
-                      <mat-label>Device Name</mat-label>
-                      <input matInput formControlName="device_name" placeholder="Front Gate Terminal">
-                    </mat-form-field>
-                  </div>
-                  <div class="col-md-4 col-sm-6">
-                    <mat-form-field appearance="outline" class="w-100">
-                      <mat-label>Serial Number</mat-label>
-                      <input matInput formControlName="device_serial" placeholder="SN-8849-XYZ">
-                    </mat-form-field>
-                  </div>
-                  <div class="col-md-4 col-sm-6">
-                    <mat-form-field appearance="outline" class="w-100">
-                      <mat-label>Sensor Auth Type</mat-label>
-                      <mat-select formControlName="device_type">
-                        <mat-option value="FACE_RECOGNITION">AI Face Recognition</mat-option>
-                        <mat-option value="FINGERPRINT">Optical Fingerprint Scanner</mat-option>
-                        <mat-option value="RFID">RFID Smart Card Terminal</mat-option>
-                        <mat-option value="QR_CODE">Dynamic QR Check-in Terminal</mat-option>
-                      </mat-select>
-                    </mat-form-field>
-                  </div>
-                  <div class="col-md-4 col-sm-6">
-                    <mat-form-field appearance="outline" class="w-100">
-                      <mat-label>Device Location</mat-label>
-                      <input matInput formControlName="location" placeholder="Main Lobby Entrance">
-                    </mat-form-field>
-                  </div>
-                  <div class="col-md-4 col-sm-6">
-                    <mat-form-field appearance="outline" class="w-100">
-                      <mat-label>Min Confidence Score (%)</mat-label>
-                      <input matInput type="number" formControlName="min_confidence_score">
-                    </mat-form-field>
-                  </div>
-                </div>
-                <div class="d-flex justify-content-end gap-12 mt-2">
-                  <button type="button" mat-stroked-button (click)="toggleDeviceForm()">Cancel</button>
-                  <button type="submit" mat-flat-button color="primary" [disabled]="loadingDevices">
-                    <mat-icon>save</mat-icon> {{ editingDeviceId ? 'Update Terminal' : 'Register Terminal' }}
-                  </button>
+              <form [formGroup]="deviceForm" (ngSubmit)="submitDevice()" class="wf-form-grid g3">
+                <mat-form-field appearance="outline" class="wf-ff"><mat-label>Device Name</mat-label><mat-icon matPrefix class="wf-ff-prefix">devices</mat-icon><input matInput formControlName="device_name" placeholder="Front Gate Terminal"></mat-form-field>
+                <mat-form-field appearance="outline" class="wf-ff"><mat-label>Serial Number</mat-label><mat-icon matPrefix class="wf-ff-prefix">qr_code_2</mat-icon><input matInput formControlName="device_serial" placeholder="SN-8849-XYZ"></mat-form-field>
+                <mat-form-field appearance="outline" class="wf-ff"><mat-label>Auth Technology</mat-label><mat-icon matPrefix class="wf-ff-prefix">security</mat-icon><mat-select formControlName="device_type"><mat-option value="FACE_RECOGNITION">AI Face Recognition</mat-option><mat-option value="FINGERPRINT">Optical Fingerprint</mat-option><mat-option value="RFID">RFID Smart Card</mat-option><mat-option value="QR_CODE">Dynamic QR Check-in</mat-option></mat-select></mat-form-field>
+                <mat-form-field appearance="outline" class="wf-ff"><mat-label>Location</mat-label><mat-icon matPrefix class="wf-ff-prefix">place</mat-icon><input matInput formControlName="location" placeholder="Main Lobby Entrance"></mat-form-field>
+                <mat-form-field appearance="outline" class="wf-ff"><mat-label>Min Confidence Score (%)</mat-label><mat-icon matPrefix class="wf-ff-prefix">insights</mat-icon><input matInput type="number" formControlName="min_confidence_score"></mat-form-field>
+                <div class="wf-form-actions">
+                  <button type="button" class="wf-ghost-btn" (click)="toggleDeviceForm()"><mat-icon>close</mat-icon>Cancel</button>
+                  <button type="submit" class="wf-solid-btn btn-teal" [disabled]="loadingDevices"><mat-icon>save</mat-icon><span>{{ editingDeviceId ? 'Update Terminal' : 'Register Terminal' }}</span></button>
                 </div>
               </form>
             </div>
           }
-
-          <!-- Dynamic Sensor Cards (Rendered Only When API Data Exists) -->
           @if (devicesList && devicesList.length > 0) {
-            <div class="sensor-grid">
+            <div class="wf-device-grid">
               @for (dev of devicesList; track dev.id) {
-                <div class="sensor-card">
-                  <span class="sensor-badge" [ngClass]="dev.status === 'ONLINE' ? 'status-online' : 'status-offline'">
-                    {{ dev.status }}
-                  </span>
-                  <div class="sensor-icon">
-                    <mat-icon>sensors</mat-icon>
+                <div class="wf-device-card" [class.wf-dc-online]="dev.status==='ONLINE'" [class.wf-dc-offline]="dev.status!=='ONLINE'">
+                  <div class="wf-dc-shimmer"></div>
+                  <div class="wf-dc-top">
+                    <div class="wf-dc-avatar">
+                      <mat-icon>{{ dev.device_type === 'FACE_RECOGNITION' ? 'face_retouching_natural' : dev.device_type === 'FINGERPRINT' ? 'fingerprint' : dev.device_type === 'RFID' ? 'contactless' : 'qr_code_scanner' }}</mat-icon>
+                    </div>
+                    <div class="wf-dc-status-pill" [class.pill-online]="dev.status==='ONLINE'" [class.pill-offline]="dev.status!=='ONLINE'">
+                      <span class="wf-dc-status-dot"></span>{{ dev.status }}
+                    </div>
                   </div>
-                  <div class="sensor-name">{{ dev.device_name }}</div>
-                  <div class="sensor-serial">S/N: {{ dev.device_serial }}</div>
-                  <div class="sensor-meta">
-                    <span><mat-icon class="icon-16 align-middle">place</mat-icon> {{ dev.location || 'Branch Office' }}</span>
-                    <span><strong>Score Limit:</strong> {{ dev.min_confidence_score || 90 }}%</span>
+                  <div class="wf-dc-type-label">{{ dev.device_type === 'FACE_RECOGNITION' ? 'AI Face Recognition' : dev.device_type === 'FINGERPRINT' ? 'Optical Fingerprint' : dev.device_type === 'RFID' ? 'RFID Smart Card' : 'QR Check-in' }}</div>
+                  <div class="wf-dc-name">{{ dev.device_name }}</div>
+                  <div class="wf-dc-serial"><mat-icon>qr_code_2</mat-icon>{{ dev.device_serial }}</div>
+                  <div class="wf-dc-divider"></div>
+                  <div class="wf-dc-meta">
+                    <div class="wf-dc-meta-item"><mat-icon>place</mat-icon><span>{{ dev.location || 'Branch' }}</span></div>
+                    <div class="wf-dc-meta-item"><mat-icon>verified</mat-icon><span>{{ dev.min_confidence_score || 90 }}% min</span></div>
                   </div>
                 </div>
               }
             </div>
           }
-
-          <!-- Dynamic Devices Table -->
-          <div class="table-responsive">
-            <app-mat-table 
-              [columns]="deviceColumns" 
-              [tableData]="devicesList" 
-              [showSearch]="true" 
-              [enableExport]="true" 
-              [showAction]="true" 
-              [showEdit]="true" 
-              [showDelete]="true" 
-              [isLoading]="loadingDevices" 
-              [title]="'Biometric Devices'"
-              (editClick)="editDevice($event)" 
-              (deleteClick)="deleteDevice($event)">
+          <div class="wf-table-card">
+            <app-mat-table [columns]="deviceColumns" [tableData]="devicesList" [showSearch]="true" [enableExport]="true" [showAction]="true"
+              [showEdit]="perm.hasRoleAction('canUpdate','Biometric Sensors & Terminals')||perm.hasRoleAction('canUpdate','/workforce')"
+              [showDelete]="perm.hasRoleAction('canDelete','Biometric Sensors & Terminals')||perm.hasRoleAction('canDelete','/workforce')"
+              [isLoading]="loadingDevices" [title]="'Registered Biometric Terminals'"
+              (editClick)="editDevice($event)" (deleteClick)="deleteDevice($event)">
             </app-mat-table>
           </div>
         </div>
       </mat-tab>
 
-      <!-- ── TAB 4: GPS GEOFENCING BOUNDARIES ─────────────────────────────── -->
+      <!-- TAB 4: GPS GEOFENCING -->
       <mat-tab>
-        <ng-template mat-tab-label>
-          <mat-icon>location_on</mat-icon> GPS Geofencing Boundaries
-        </ng-template>
-
-        <div class="p-24">
-          <div class="section-header">
-            <div>
-              <div class="section-title">
-                <mat-icon class="text-primary">my_location</mat-icon>
-                Branch Office Geofencing & Perimeter Boundaries
+        <div class="wf-page-body">
+          <div class="wf-page-hero wf-hero-amber">
+            <div class="wf-hero-orbs"><span class="wf-orb o1"></span><span class="wf-orb o2"></span></div>
+            <div class="wf-hero-content">
+              <div class="wf-hero-left">
+                <div class="wf-hero-avatar wf-ha-amber"><mat-icon>satellite_alt</mat-icon></div>
+                <div><h1 class="wf-hero-title">GPS Geofencing Boundaries</h1><p class="wf-hero-desc">Manage perimeter boundary radii &amp; GPS coordinates for mobile attendance verification</p></div>
               </div>
-              <p class="text-muted f-s-13 m-b-0">Real-time GPS coordinates and allowable radius meters fetched dynamically from branch office locations.</p>
+              @if (perm.hasRoleAction('canCreate', 'GPS Geofencing Boundaries') || perm.hasRoleAction('canCreate', '/workforce')) {
+                <button class="wf-hero-action-btn btn-amber" (click)="toggleBranchForm()">
+                  <mat-icon>{{ showBranchForm ? 'close' : 'add_location_alt' }}</mat-icon>
+                  <span>{{ showBranchForm ? 'Close Form' : 'Add Geofence' }}</span>
+                </button>
+              }
             </div>
-            <button mat-flat-button color="primary" class="rounded-12" (click)="saveGpsSettings()">
-              <mat-icon>published_with_changes</mat-icon> Sync Geofence Rules
-            </button>
           </div>
-
-          <!-- Dynamic Geofence Cards Grid (Fetched directly from API) -->
+          @if (showBranchForm) {
+            <div class="wf-form-card wf-fc-amber">
+              <div class="wf-fc-header">
+                <div class="wf-fc-h-icon fch-amber"><mat-icon>{{ editingBranchId ? 'edit_location' : 'pin_drop' }}</mat-icon></div>
+                <div><div class="wf-fc-h-title">{{ editingBranchId ? 'Edit Geofence #' + editingBranchId : 'Register New GPS Geofence' }}</div><div class="wf-fc-h-sub">Set GPS coordinates, branch code &amp; allowed perimeter radius</div></div>
+              </div>
+              <form [formGroup]="branchForm" (ngSubmit)="submitBranch()" class="wf-form-grid g3">
+                <mat-form-field appearance="outline" class="wf-ff"><mat-label>Branch Name</mat-label><mat-icon matPrefix class="wf-ff-prefix">business</mat-icon><input matInput formControlName="name" placeholder="Headquarters Office"></mat-form-field>
+                <mat-form-field appearance="outline" class="wf-ff"><mat-label>Branch Code</mat-label><mat-icon matPrefix class="wf-ff-prefix">tag</mat-icon><input matInput formControlName="code" placeholder="HQ-01"></mat-form-field>
+                <mat-form-field appearance="outline" class="wf-ff"><mat-label>Latitude (N)</mat-label><mat-icon matPrefix class="wf-ff-prefix">location_searching</mat-icon><input matInput type="number" step="0.0001" formControlName="latitude" placeholder="12.9716"></mat-form-field>
+                <mat-form-field appearance="outline" class="wf-ff"><mat-label>Longitude (E)</mat-label><mat-icon matPrefix class="wf-ff-prefix">public</mat-icon><input matInput type="number" step="0.0001" formControlName="longitude" placeholder="77.5946"></mat-form-field>
+                <mat-form-field appearance="outline" class="wf-ff"><mat-label>Perimeter Radius (meters)</mat-label><mat-icon matPrefix class="wf-ff-prefix">radar</mat-icon><input matInput type="number" formControlName="radius_meters" placeholder="500"></mat-form-field>
+                <div class="wf-form-actions">
+                  <button type="button" class="wf-ghost-btn" (click)="toggleBranchForm()"><mat-icon>close</mat-icon>Cancel</button>
+                  <button type="submit" class="wf-solid-btn btn-amber" [disabled]="loadingBranches"><mat-icon>save</mat-icon><span>{{ editingBranchId ? 'Update Boundary' : 'Save Geofence' }}</span></button>
+                </div>
+              </form>
+            </div>
+          }
           @if (branchesList && branchesList.length > 0) {
-            <div class="geofence-grid">
+            <div class="wf-geo-grid">
               @for (b of branchesList; track b.id) {
-                <div class="geofence-card">
-                  <div class="branch-header">
-                    <div class="branch-name">{{ b.name }}</div>
-                    <div class="branch-code">{{ b.code || ('BR-' + b.id) }}</div>
+                <div class="wf-geo-card">
+                  <div class="wf-geo-radar-bg" aria-hidden="true">
+                    <svg viewBox="0 0 160 160" xmlns="http://www.w3.org/2000/svg">
+                      <circle cx="80" cy="80" r="70" fill="none" stroke="rgba(245,158,11,0.08)" stroke-width="1.5"/>
+                      <circle cx="80" cy="80" r="50" fill="none" stroke="rgba(245,158,11,0.12)" stroke-width="1.5"/>
+                      <circle cx="80" cy="80" r="30" fill="none" stroke="rgba(245,158,11,0.18)" stroke-width="1.5"/>
+                      <circle cx="80" cy="80" r="8"  fill="rgba(245,158,11,0.50)"/>
+                      <line x1="80" y1="80" x2="80" y2="10" stroke="rgba(245,158,11,0.60)" stroke-width="2" class="wf-radar-spin"/>
+                      <line x1="80" y1="80" x2="150" y2="80" stroke="rgba(245,158,11,0.12)" stroke-width="1" stroke-dasharray="4,6"/>
+                      <line x1="80" y1="80" x2="80" y2="150" stroke="rgba(245,158,11,0.12)" stroke-width="1" stroke-dasharray="4,6"/>
+                    </svg>
                   </div>
-                  <div class="coord-chip">
-                    <span><strong>Latitude:</strong> {{ b.latitude || '12.9716° N' }}</span>
-                    <mat-icon class="icon-18 text-muted">map</mat-icon>
+                  <div class="wf-geo-top">
+                    <div class="wf-geo-icon"><mat-icon>satellite_alt</mat-icon></div>
+                    <div class="wf-geo-code">{{ b.code || ('BR-' + b.id) }}</div>
                   </div>
-                  <div class="coord-chip">
-                    <span><strong>Longitude:</strong> {{ b.longitude || '77.5946° E' }}</span>
-                    <mat-icon class="icon-18 text-muted">pin_drop</mat-icon>
+                  <div class="wf-geo-name">{{ b.name }}</div>
+                  <div class="wf-geo-coords">
+                    <div class="wf-geo-coord">
+                      <div class="wf-gc-lbl"><mat-icon>location_searching</mat-icon><span>Latitude</span></div>
+                      <span class="wf-gc-val">{{ b.latitude || '12.9716' }}&deg; N</span>
+                    </div>
+                    <div class="wf-geo-coord">
+                      <div class="wf-gc-lbl"><mat-icon>public</mat-icon><span>Longitude</span></div>
+                      <span class="wf-gc-val">{{ b.longitude || '77.5946' }}&deg; E</span>
+                    </div>
                   </div>
-                  <div class="d-flex align-items-center justify-content-between mt-3">
-                    <span class="radius-badge">
-                      <mat-icon class="icon-16">radar</mat-icon> {{ b.radius_meters || 500 }}m Perimeter Radius
-                    </span>
-                    <span class="badge bg-success-light text-success font-semibold px-2 py-1 rounded-6">GEOFENCE ACTIVE</span>
+                  <div class="wf-geo-footer">
+                    <div class="wf-geo-radius"><mat-icon>radar</mat-icon><span>{{ b.radius_meters || 500 }}m radius</span></div>
+                    <div class="wf-geo-active"><span class="wf-geo-active-dot"></span>ACTIVE</div>
                   </div>
                 </div>
               }
             </div>
-          } @else {
-            <div class="text-center p-48 bg-light rounded-16 border text-muted">
-              <mat-icon class="icon-48 text-muted mb-2">location_off</mat-icon>
-              <h5>No Branch Geofences Found</h5>
-              <p class="f-s-13 mb-0">Branch locations will automatically populate here when branch offices are created.</p>
-            </div>
           }
+          <div class="wf-table-card">
+            <app-mat-table [columns]="branchColumns" [tableData]="branchesList" [showSearch]="true" [enableExport]="true" [showAction]="true"
+              [showEdit]="perm.hasRoleAction('canUpdate','GPS Geofencing Boundaries')||perm.hasRoleAction('canUpdate','/workforce')"
+              [showDelete]="perm.hasRoleAction('canDelete','GPS Geofencing Boundaries')||perm.hasRoleAction('canDelete','/workforce')"
+              [isLoading]="loadingBranches" [title]="'Registered GPS Geofences'"
+              (editClick)="editBranch($event)" (deleteClick)="deleteBranch($event)">
+            </app-mat-table>
+          </div>
         </div>
       </mat-tab>
 
     </mat-tab-group>
-  </div>
-
+  </main>
 </div>

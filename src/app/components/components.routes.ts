@@ -42,13 +42,14 @@ const DB = UserType.DELIVERY_BOY;
 
 export const ComponentsRoutes: Routes = [
   {
-    path: '',
-    children: [
-      {
-        path: 'profit-loss',
-        loadComponent: () => import('./profit-loss/profit-loss').then(m => m.ProfitLossComponent)
-      }
-    ]
+    path: 'profit-loss',
+    loadComponent: () => import('./profit-loss/profit-loss').then(m => m.ProfitLossComponent),
+    canActivate: [RoleGuard],
+    data: {
+      title: 'Profit & Loss',
+      roles: [SA, A, BM],
+      urls: [{ title: 'Profit & Loss', url: '/profit-loss' }]
+    }
   },
   {
     path: 'admin',
@@ -355,6 +356,46 @@ export const ComponentsRoutes: Routes = [
       title: 'Workforce Console',
       roles: [SA, A, BM],
       urls: [{ title: 'Workforce Console', url: '/workforce' }]
+    }
+  },
+  {
+    path: 'shifts',
+    component: Workforce,
+    canActivate: [RoleGuard],
+    data: {
+      title: 'Shifts & Schedules',
+      roles: [SA, A, BM],
+      urls: [{ title: 'Shifts & Schedules', url: '/shifts' }]
+    }
+  },
+  {
+    path: 'break-policies',
+    component: Workforce,
+    canActivate: [RoleGuard],
+    data: {
+      title: 'Break Deduction Rules',
+      roles: [SA, A, BM],
+      urls: [{ title: 'Break Deduction Rules', url: '/break-policies' }]
+    }
+  },
+  {
+    path: 'biometric',
+    component: Workforce,
+    canActivate: [RoleGuard],
+    data: {
+      title: 'Biometric Sensors & Terminals',
+      roles: [SA, A, BM],
+      urls: [{ title: 'Biometric Sensors', url: '/biometric' }]
+    }
+  },
+  {
+    path: 'geofencing',
+    component: Workforce,
+    canActivate: [RoleGuard],
+    data: {
+      title: 'GPS Geofencing Boundaries',
+      roles: [SA, A, BM],
+      urls: [{ title: 'GPS Geofencing', url: '/geofencing' }]
     }
   },
   {

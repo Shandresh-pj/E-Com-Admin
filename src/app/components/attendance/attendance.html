@@ -135,37 +135,73 @@
               @if (!isOnBreak) {
                 <button 
                   mat-flat-button 
-                  color="accent" 
-                  class="btn-terminal shadow-accent" 
+                  class="btn-terminal shadow-accent-glow d-flex align-items-center gap-8" 
                   (click)="startBreak()" 
                   [disabled]="loading || breakLoading"
                 >
-                  <mat-icon class="m-r-6">coffee</mat-icon> {{ 'attendance.enter_break' | translate }}
+                  <mat-icon class="icon-20">coffee</mat-icon> {{ 'attendance.enter_break' | translate }}
                 </button>
               } @else {
                 <button 
                   mat-flat-button 
-                  class="btn-terminal btn-success-override" 
+                  class="btn-terminal btn-success-glow d-flex align-items-center gap-8" 
                   (click)="endBreak()" 
                   [disabled]="loading || breakLoading"
                 >
-                  <mat-icon class="m-r-6">play_arrow</mat-icon> {{ 'attendance.exit_break' | translate }}
+                  <mat-icon class="icon-20 spin-icon-fast">play_arrow</mat-icon> {{ 'attendance.exit_break' | translate }}
                 </button>
               }
 
               <!-- Punch out control -->
               <button 
                 mat-flat-button 
-                color="warn" 
-                class="btn-terminal shadow-warn" 
+                class="btn-terminal shadow-warn-glow d-flex align-items-center gap-8" 
                 (click)="checkOut()" 
                 [disabled]="loading || isOnBreak"
               >
-                <mat-icon class="m-r-6">logout</mat-icon> {{ 'attendance.punch_out' | translate }}
+                <mat-icon class="icon-20">logout</mat-icon> {{ 'attendance.punch_out' | translate }}
               </button>
             }
           </div>
         </div>
+
+        <!-- Ultra-Premium Liquid Glass Break Timer Banner -->
+        @if (isOnBreak) {
+          <div class="liquid-glass-break-card p-24 rounded-24 m-b-24 position-relative overflow-hidden animate-pulse-border">
+            <div class="d-flex align-items-center justify-content-between flex-wrap gap-20 position-relative z-index-2">
+              <div class="d-flex align-items-center gap-16">
+                <div class="break-icon-wrap-glass shadow-amber-glow-soft d-flex align-items-center justify-content-center">
+                  <mat-icon class="icon-32 text-amber-dark glow-icon-static">local_cafe</mat-icon>
+                </div>
+                <div>
+                  <h4 class="f-w-800 text-amber-deep m-b-4 d-flex align-items-center gap-8 flex-wrap">
+                    Break In Progress — Timer Active
+                    <span class="live-pulse-badge-light d-flex align-items-center gap-6 f-s-11 font-bold p-x-10 p-y-3 rounded-16">
+                      <span class="live-dot-amber"></span> LIVE TIMER
+                    </span>
+                  </h4>
+                  <p class="f-s-13 text-amber-muted m-b-0">Auto-deduction policy active • Max Limit: {{ activeBreakPolicy?.max_duration_minutes || 30 }} Minutes</p>
+                </div>
+              </div>
+
+              <div class="d-flex align-items-center gap-16 flex-wrap">
+                <div class="glass-timer-box text-center p-x-20 p-y-12 rounded-16">
+                  <p class="f-s-11 text-amber-muted-cap text-uppercase f-w-700 m-b-4 letter-spacing-1">Elapsed Time</p>
+                  <h2 class="f-w-900 font-mono m-b-0 text-amber-num">{{ formattedBreakElapsed }}</h2>
+                </div>
+                <div class="glass-timer-box text-center p-x-20 p-y-12 rounded-16" [ngClass]="breakRemainingSeconds < 300 ? 'border-danger-glow-light' : ''">
+                  <p class="f-s-11 text-amber-muted-cap text-uppercase f-w-700 m-b-4 letter-spacing-1">Time Remaining</p>
+                  <h2 class="f-w-900 font-mono m-b-0" [ngClass]="breakRemainingSeconds < 300 ? 'text-danger animate-bounce' : 'text-cyan-deep'">{{ formattedBreakRemaining }}</h2>
+                </div>
+              </div>
+            </div>
+
+            <!-- Glowing progress bar -->
+            <div class="m-t-20 position-relative z-index-2">
+              <mat-progress-bar mode="indeterminate" class="liquid-progress-bar rounded-8"></mat-progress-bar>
+            </div>
+          </div>
+        }
 
         <!-- Employee Profile Info Bar -->
         @if (detectedEmployee) {
@@ -178,6 +214,9 @@
             <div class="d-flex align-items-center gap-16 f-s-12">
               <span class="text-muted">Assigned Shift: <strong class="text-dark">{{ activeShift?.name || 'General Shift' }}</strong></span>
               <span class="text-muted">Geofence Bound: <strong class="text-dark">{{ geofenceRadiusMeters }}m</strong></span>
+              <button mat-icon-button color="primary" matTooltip="Refresh Location GPS" (click)="requestGeolocation()">
+                <mat-icon class="icon-18">refresh</mat-icon>
+              </button>
             </div>
           </div>
         }
@@ -272,18 +311,84 @@
           <p class="f-s-13 text-muted m-b-0">Real-time terminal logs synchronized with leave balances & payroll calculations</p>
         </div>
 
-        <div class="d-flex align-items-center gap-12">
-          <button mat-stroked-button color="primary" (click)="loadAttendanceLogs()" [disabled]="loading">
-            <mat-icon>refresh</mat-icon> {{ 'attendance.sync_db' | translate }}
+        <div class="d-flex align-items-center gap-12 flex-wrap">
+          @if (isAdminUser) {
+            <mat-form-field appearance="outline" class="density-compact m-b-0" style="min-width: 220px;">
+              <mat-label>Acting Employee Terminal</mat-label>
+              <mat-select [value]="attendanceForm.value.employee_id" (selectionChange)="onActingEmployeeChange($event.value)">
+                @for (emp of employees; track emp.id) {
+                  <mat-option [value]="emp.id">{{ emp.name }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+          }
+
+          <button mat-stroked-button color="primary" class="white-space-nowrap btn-terminal-sm d-inline-flex align-items-center" (click)="loadAttendanceLogs()" [disabled]="loading">
+            <mat-icon class="m-r-4 icon-18">refresh</mat-icon> {{ 'attendance.sync_db' | translate }}
           </button>
 
           @if (perm.hasRoleAction('canCreate')) {
-            <button mat-flat-button color="primary" (click)="AddNewLog()">
-              <mat-icon>add</mat-icon> {{ 'attendance.create_manual' | translate }}
+            <button mat-flat-button color="primary" class="white-space-nowrap btn-terminal-sm shadow-primary d-inline-flex align-items-center" (click)="AddNewLog()">
+              <mat-icon class="m-r-4 icon-18">add</mat-icon> {{ 'attendance.create_manual' | translate }}
             </button>
           }
         </div>
       </div>
+
+      <!-- Super Admin & Admin Enterprise Filter Bar -->
+      @if (isAdminUser) {
+        <div class="p-16 bg-light-primary rounded-12 m-b-24 b-1 b-primary d-flex align-items-center flex-wrap gap-12">
+          <span class="f-s-13 f-w-700 text-primary d-flex align-items-center gap-6">
+            <mat-icon class="icon-18 text-primary">filter_list</mat-icon> Enterprise Filters:
+          </span>
+
+        <!-- Company Filter -->
+        <mat-form-field appearance="outline" class="w-100-mobile" style="min-width: 170px;">
+          <mat-label>Company</mat-label>
+          <mat-select [value]="selectedCompanyFilter" (selectionChange)="onCompanyFilterChange($event.value)">
+            <mat-option value="ALL">All Companies</mat-option>
+            @for (comp of companies; track comp.id) {
+              <mat-option [value]="comp.id">{{ comp.name }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+
+        <!-- Branch Filter -->
+        <mat-form-field appearance="outline" class="w-100-mobile" style="min-width: 170px;">
+          <mat-label>Branch</mat-label>
+          <mat-select [value]="selectedBranchFilter" (selectionChange)="onBranchFilterChange($event.value)">
+            <mat-option value="ALL">All Branches</mat-option>
+            @for (b of filteredBranches; track b.id) {
+              <mat-option [value]="b.id">{{ b.name }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+
+        <!-- Employee Filter -->
+        <mat-form-field appearance="outline" class="w-100-mobile" style="min-width: 170px;">
+          <mat-label>Employee</mat-label>
+          <mat-select [value]="selectedEmployeeFilter" (selectionChange)="onEmployeeFilterChange($event.value)">
+            <mat-option value="ALL">All Staff</mat-option>
+            @for (emp of employees; track emp.id) {
+              <mat-option [value]="emp.id">{{ emp.name }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+
+        <!-- Date Filter -->
+        <mat-form-field appearance="outline" class="w-100-mobile" style="min-width: 170px;">
+          <mat-label>Date</mat-label>
+          <input matInput [matDatepicker]="filterPicker" [value]="selectedDateFilter" (dateChange)="onDateFilterChange($event.value)" placeholder="Choose Date">
+          <mat-datepicker-toggle matIconSuffix [for]="filterPicker"></mat-datepicker-toggle>
+          <mat-datepicker #filterPicker></mat-datepicker>
+        </mat-form-field>
+
+        <!-- Reset Button -->
+        <button mat-stroked-button color="warn" (click)="resetFilters()">
+          <mat-icon class="icon-16">clear_all</mat-icon> Reset
+        </button>
+      </div>
+      }
 
       <!-- Admin Override Form -->
       @if (showForm) {
@@ -329,8 +434,10 @@
 
               <div class="col-md-3">
                 <mat-form-field appearance="outline" class="w-100">
-                  <mat-label>Attendance Date (YYYY-MM-DD)</mat-label>
-                  <input matInput formControlName="attendance_date" placeholder="YYYY-MM-DD">
+                  <mat-label>Attendance Date</mat-label>
+                  <input matInput [matDatepicker]="formPicker" formControlName="attendance_date" placeholder="Choose Date">
+                  <mat-datepicker-toggle matIconSuffix [for]="formPicker"></mat-datepicker-toggle>
+                  <mat-datepicker #formPicker></mat-datepicker>
                 </mat-form-field>
               </div>
 

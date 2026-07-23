@@ -37,14 +37,9 @@ export class PermissionService {
 
   /**
    * Fine-grained check: does the user hold the given action on the given menu?
-   * Supports both flat (menu_id) and nested (menu.id) permission shapes from the API.
-   * Also handles the string 'FULL_ACCESS' for super-admin tokens.
+   * ONLY Super Admin possesses full system access.
    */
   hasPermission(menuId: number, action: string): boolean {
-    // Unconditional signal read: registers any template calling this method
-    // as a reactive consumer of permissionsUpdated, so a socket-driven
-    // permission change repaints it automatically — same mechanism that
-    // makes the sidebar's navItems signal update live.
     this.permissionsUpdated();
 
     if (this.auth.isSuperAdmin()) return true;
@@ -52,7 +47,6 @@ export class PermissionService {
     const permissions = this.session.getPermissions();
 
     if (!Array.isArray(permissions)) return false;
-    if (permissions.includes('FULL_ACCESS')) return true;
 
     return permissions.some(
       (p: any) => (p.menu_id ?? p.menu?.id) === menuId && p.action === action
@@ -63,12 +57,9 @@ export class PermissionService {
    * Coarse-grained UI guard (hide/show buttons like Add, Edit, Delete, Approve).
    *
    * Priority:
-   *  1. SuperAdmin → always true.
-   *  2. If the user has DB permissions, derive the answer from those entries
-   *     (READ → canRead, WRITE → canCreate, UPDATE → canUpdate, DELETE → canDelete,
-   *      APPROVE action OR canApprove flag → canApprove — each independent).
-   *  3. Fall back to the static ROLE_PERMISSIONS matrix when no DB permissions
-   *     exist (e.g. first-run or legacy tokens).
+   *  1. SuperAdmin ONLY → always true.
+   *  2. If the user has DB permissions, derive the answer from those entries.
+   *  3. Fall back to static ROLE_PERMISSIONS matrix when no DB permissions exist.
    */
   hasRoleAction(
     action: 'canCreate' | 'canRead' | 'canUpdate' | 'canDelete' | 'canApprove',
@@ -79,14 +70,10 @@ export class PermissionService {
     if (this.auth.isSuperAdmin()) return true;
 
     const permissions = this.session.getPermissions();
-    if (!Array.isArray(permissions) || permissions.length === 0) return false;
-    if (permissions.includes('FULL_ACCESS')) return true;
 
-    // Get current path or specified path
     const target = menuNameOrPath || this.router.url.split('?')[0];
     const targetNormalized = target.toLowerCase().replace(/\/+$/, '');
 
-    // Default universal paths fallback to role permissions matrix
     const defaultPaths = [
       '/dashboard',
       '/change-password',
@@ -101,41 +88,32 @@ export class PermissionService {
       return ROLE_PERMISSIONS[userType]?.[action] ?? false;
     }
 
-    // Match database permissions based on name or path
-    const hasMatch = permissions.some((p: any) => {
-      const menuName = (p.menu?.name || '').toLowerCase();
-      const menuPath = (p.menu?.path || '').toLowerCase().replace(/\/+$/, '');
-      const isMatch = targetNormalized === menuName || targetNormalized === menuPath || targetNormalized.startsWith(menuPath + '/');
-      if (isMatch) {
-        if (action === 'canApprove') {
-          return p.canApprove === true || p.action === 'APPROVE';
+    if (Array.isArray(permissions) && permissions.length > 0) {
+      const hasMatch = permissions.some((p: any) => {
+        const menuName = (p.menu?.name || '').toLowerCase();
+        const menuPath = (p.menu?.path || '').toLowerCase().replace(/\/+$/, '');
+        const isMatch = targetNormalized === menuName || targetNormalized === menuPath || targetNormalized.startsWith(menuPath + '/');
+        if (isMatch) {
+          if (action === 'canApprove') {
+            return p.canApprove === true || p.action === 'APPROVE';
+          }
+          const uiActions = DB_ACTION_MAP[p.action] ?? [];
+          return uiActions.includes(action);
         }
-        const uiActions = DB_ACTION_MAP[p.action] ?? [];
-        return uiActions.includes(action);
-      }
-      return false;
-    });
+        return false;
+      });
 
-    if (hasMatch) return true;
-
-    // Fallback to static role permissions matrix only if the menu doesn't exist in the database configuration
-    const menus = this.session.getMenus();
-    const hasMenuInDb = Array.isArray(menus) && menus.some(
-      (m: any) => {
-        const name = (m.name || '').toLowerCase();
-        const p = (m.path || '').toLowerCase().replace(/\/+$/, '');
-        return targetNormalized === name || targetNormalized === p || targetNormalized.startsWith(p + '/');
-      }
-    );
-
-    if (!hasMenuInDb) {
-      const userType = this.auth.getUserType() as UserType;
-      return ROLE_PERMISSIONS[userType]?.[action] ?? false;
+      if (hasMatch) return true;
     }
 
-    return false;
+    const userType = this.auth.getUserType() as UserType;
+    return ROLE_PERMISSIONS[userType]?.[action] ?? false;
   }
 
+  /**
+   * Evaluates page-level route access for guards & sidebar filtering.
+   * ONLY Super Admin gets unrestricted access to all pages.
+   */
   hasPagePermission(path: string): boolean {
     this.permissionsUpdated();
 
@@ -153,10 +131,23 @@ export class PermissionService {
 
     const menus = this.session.getMenus();
 
-    if (!Array.isArray(menus) || !menus.length) return false;
-    if (menus.includes('ALL')) return true;
+    if (!Array.isArray(menus) || !menus.length) {
+      const userType = this.auth.getUserType() as UserType;
+      const perms = ROLE_PERMISSIONS[userType];
+      return perms?.canRead ?? false;
+    }
 
-    return menus.some((m: any) => m.path === path || path.startsWith(m.path + '/'));
+    const targetNormalized = path.toLowerCase().replace(/\/+$/, '');
+
+    return menus.some((m: any) => {
+      if (typeof m === 'string') {
+        if (m === 'ALL') return false; // ONLY Super Admin has full access to ALL
+        const strNormalized = m.toLowerCase().replace(/\/+$/, '');
+        return targetNormalized === strNormalized || targetNormalized.startsWith(strNormalized + '/');
+      }
+      const menuPath = (m.path || m.route || m.name || '').toLowerCase().replace(/\/+$/, '');
+      return targetNormalized === menuPath || targetNormalized.startsWith(menuPath + '/');
+    });
   }
 
   // ─── Domain Specific RBAC Helpers ──────────────────────────────────────────
@@ -198,4 +189,3 @@ export class PermissionService {
     return userType === UserType.EMPLOYEE || userType === UserType.SHOPKEEPER || userType === UserType.DELIVERY_BOY;
   }
 }
-

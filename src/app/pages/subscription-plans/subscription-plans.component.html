@@ -49,8 +49,8 @@
 
   <!-- Loading State -->
   @if (loading) {
-    <div class="plans-grid">
-      @for (_ of [1,2,3,4]; track $index) {
+    <div class="plans-section__grid">
+      @for (_ of [1,2,3]; track $index) {
         <div class="plan-card plan-card--skeleton">
           <div class="sk-line w-30 h-16 mb-8"></div>
           <div class="sk-line w-50 h-28 mb-4"></div>
@@ -69,10 +69,10 @@
     @if (plans.length === 0) {
       <div class="plans-section__empty">
         <mat-icon>inventory</mat-icon>
-        <p>No subscription plans available. <a routerLink="/subscription-management">Configure plans</a> in admin settings.</p>
+        <p>No subscription plans available. <a routerLink="/manage-subscription-plans">Configure plans</a> in admin settings.</p>
       </div>
     } @else {
-      <div class="plans-grid">
+      <div class="plans-section__grid">
         @for (plan of plans; track plan.id; let i = $index) {
           <div
             class="plan-card"

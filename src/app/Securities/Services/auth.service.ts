@@ -119,7 +119,10 @@ export class AuthService {
 
   isSuperAdmin(): boolean {
     const user = this.sessionService.getUser();
-    return user?.isSuperAdmin === true || user?.userType === UserType.SUPER_ADMIN;
+    if (!user) return false;
+    const type = String(user.userType || user.user_type || '').toLowerCase();
+    const role = String(user.role || '').toLowerCase();
+    return user.isSuperAdmin === true || type === 'super_admin' || role === 'super_admin' || role === 'super admin';
   }
 
   getUserType(): string {

@@ -47,21 +47,31 @@ export class SubscriptionService {
       map(res => {
         const plansList = (res && res.data !== undefined) ? res.data : res;
         if (Array.isArray(plansList)) {
-          // Map backend entity to frontend interface
-          return plansList.map((plan: any) => ({
-            id: plan.id.toString(),
-            name: plan.name,
-            badge: plan.badge || '',
-            monthlyPrice: Number(plan.monthly_price),
-            yearlyPrice: Number(plan.yearly_price),
-            description: plan.description,
-            features: typeof plan.features === 'string' ? JSON.parse(plan.features) : (plan.features || []),
-            hasFreeTrial: plan.trial_days > 0,
-            freeTrialDays: plan.trial_days,
-            recommended: plan.badge === 'Recommended' || plan.badge === 'RECOMMENDED MULTI-BRANCH ERP',
-            razorpayPlanIdMonthly: '',
-            razorpayPlanIdYearly: ''
-          }));
+          return plansList.map((plan: any) => {
+            let featuresList: any[] = [];
+            if (typeof plan.features === 'string') {
+              try { featuresList = JSON.parse(plan.features); } catch (e) { featuresList = [plan.features]; }
+            } else if (Array.isArray(plan.features)) {
+              featuresList = plan.features;
+            } else if (plan.features) {
+              featuresList = [plan.features];
+            }
+
+            return {
+              id: plan.id.toString(),
+              name: plan.name,
+              badge: plan.badge || '',
+              monthlyPrice: Number(plan.monthly_price) || 0,
+              yearlyPrice: Number(plan.yearly_price) || 0,
+              description: plan.description || '',
+              features: featuresList.map(f => (typeof f === 'string' ? { text: f, highlight: false } : f)),
+              hasFreeTrial: Number(plan.trial_days) > 0,
+              freeTrialDays: Number(plan.trial_days) || 0,
+              recommended: plan.badge?.toUpperCase().includes('RECOMMENDED') || plan.badge?.toUpperCase().includes('POPULAR') || false,
+              razorpayPlanIdMonthly: '',
+              razorpayPlanIdYearly: ''
+            };
+          });
         }
         return [];
       }),

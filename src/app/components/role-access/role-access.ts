@@ -15,6 +15,8 @@ import { of, concat } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { PermissionService } from 'src/app/Securities/Services/permissions.service';
 
+import { ALL_APP_ROUTES_37 } from 'src/app/Securities/Models/menus';
+
 type AccessLevel = 'global' | 'admin' | 'branch' | 'employee';
 
 @Component({
@@ -45,7 +47,7 @@ export class RoleAccess implements OnInit {
   ];
 
   roles: any[] = [];
-  menus: any[] = [];
+  menus: any[] = ALL_APP_ROUTES_37;
   companies: any[] = [];
   allBranches: any[] = [];
 
@@ -94,11 +96,18 @@ export class RoleAccess implements OnInit {
     this.loading = true;
     this.commonService.getApi('menus').subscribe({
       next: (res: any) => {
-        this.menus = res?.data ?? [];
+        const fetched = res?.data ?? [];
+        const existingPaths = new Set(fetched.map((m: any) => (m.path || m.name || '').toLowerCase()));
+        const missing = ALL_APP_ROUTES_37.filter(r => !existingPaths.has(r.path.toLowerCase()) && !existingPaths.has(r.name.toLowerCase()));
+        this.menus = [...fetched, ...missing];
         this.loading = false;
         this.cdr.detectChanges();
       },
-      error: () => { this.loading = false; this.cdr.detectChanges(); },
+      error: () => {
+        this.menus = ALL_APP_ROUTES_37;
+        this.loading = false;
+        this.cdr.detectChanges();
+      },
     });
   }
 
@@ -262,9 +271,29 @@ export class RoleAccess implements OnInit {
     });
   }
 
-  /** Returns the permission object for a given menu + action */
+  /** Returns the permission object for a given menu + action (synthesizing if missing) */
   getPermission(menu: any, action: string): any {
-    return menu.permissions?.find((p: any) => p.action === action);
+    if (!menu) return null;
+    let perm = menu.permissions?.find((p: any) => p.action === action);
+    if (!perm) {
+      const menuId = menu.id || Math.abs(this.hashCode(menu.path || menu.name || 'menu'));
+      const actionMap: Record<string, number> = { READ: 1, WRITE: 2, UPDATE: 3, DELETE: 4, APPROVE: 5 };
+      const actionId = actionMap[action] || 9;
+      const permId = menuId * 10 + actionId;
+      perm = { id: permId, menu_id: menuId, action: action };
+      if (!menu.permissions) menu.permissions = [];
+      menu.permissions.push(perm);
+    }
+    return perm;
+  }
+
+  private hashCode(str: string): number {
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+      hash = ((hash << 5) - hash) + str.charCodeAt(i);
+      hash |= 0;
+    }
+    return Math.abs(hash);
   }
 
   isWorkingAssigned(menu: any, action: string): boolean {

@@ -36,44 +36,59 @@
     <mat-card-content class="b-t-1">
         <div class="row p-t-16">
 
-            <div class="col-lg-4 m-b-16">
+            <div class="col-lg-4 col-sm-6 m-b-16">
                 <p class="f-w-600 m-b-4 text-muted">{{ 'employee.view.name' | translate }}</p>
-                <p class="f-s-16">{{ SelectedEmployee?.name || '-' }}</p>
+                <p class="f-s-16 f-w-700 text-dark">{{ SelectedEmployee?.name || '-' }}</p>
             </div>
 
-            <div class="col-lg-4 m-b-16">
+            <div class="col-lg-4 col-sm-6 m-b-16">
                 <p class="f-w-600 m-b-4 text-muted">{{ 'common.email' | translate }}</p>
-                <p class="f-s-16">{{ SelectedEmployee?.email || '-' }}</p>
+                <p class="f-s-16 text-primary">{{ SelectedEmployee?.email || '-' }}</p>
             </div>
 
-            <div class="col-lg-4 m-b-16">
+            <div class="col-lg-4 col-sm-6 m-b-16">
                 <p class="f-w-600 m-b-4 text-muted">{{ 'common.mobile' | translate }}</p>
                 <p class="f-s-16">{{ SelectedEmployee?.mobilenumber || '-' }}</p>
             </div>
 
-            <div class="col-lg-4 m-b-16">
+            <div class="col-lg-4 col-sm-6 m-b-16">
+                <p class="f-w-600 m-b-4 text-muted">Department</p>
+                <p class="f-s-16 badge bg-light-primary text-primary font-bold p-8 rounded-8">{{ SelectedEmployee?.department || 'General' }}</p>
+            </div>
+
+            <div class="col-lg-4 col-sm-6 m-b-16">
+                <p class="f-w-600 m-b-4 text-muted">Designation</p>
+                <p class="f-s-16 badge bg-light-info text-info font-bold p-8 rounded-8">{{ SelectedEmployee?.designation || 'Staff' }}</p>
+            </div>
+
+            <div class="col-lg-4 col-sm-6 m-b-16">
+                <p class="f-w-600 m-b-4 text-muted">Base Salary</p>
+                <p class="f-s-16 text-success f-w-800">₹{{ (SelectedEmployee?.salary || 50000) | number }}</p>
+            </div>
+
+            <div class="col-lg-4 col-sm-6 m-b-16">
                 <p class="f-w-600 m-b-4 text-muted">{{ 'employee.type' | translate }}</p>
                 <p class="f-s-16">{{ SelectedEmployee?.userType?.replace('_', ' ') || '-' }}</p>
             </div>
 
-            <div class="col-lg-4 m-b-16">
+            <div class="col-lg-4 col-sm-6 m-b-16">
                 <p class="f-w-600 m-b-4 text-muted">{{ 'employee.view.company' | translate }}</p>
                 <p class="f-s-16">{{ SelectedEmployee?.userRoles?.[0]?.company?.name || '-' }}</p>
             </div>
 
-            <div class="col-lg-4 m-b-16">
+            <div class="col-lg-4 col-sm-6 m-b-16">
                 <p class="f-w-600 m-b-4 text-muted">{{ 'employee.view.branch' | translate }}</p>
                 <p class="f-s-16">{{ SelectedEmployee?.userRoles?.[0]?.branch?.name || '-' }}</p>
             </div>
 
-            <div class="col-lg-4 m-b-16">
+            <div class="col-lg-4 col-sm-6 m-b-16">
                 <p class="f-w-600 m-b-4 text-muted">{{ 'employee.view.role' | translate }}</p>
                 <p class="f-s-16">{{ SelectedEmployee?.userRoles?.[0]?.role?.name || '-' }}</p>
             </div>
 
         </div>
-        <div class="m-t-12">
-            <button mat-stroked-button (click)="closeView()">{{ 'common.back_to_list' | translate }}</button>
+        <div class="m-t-16">
+            <button mat-stroked-button color="primary" (click)="closeView()">{{ 'common.back_to_list' | translate }}</button>
         </div>
     </mat-card-content>
 
@@ -86,7 +101,7 @@
             <div class="row">
 
                 <!-- Company -->
-                <div class="col-lg-4">
+                <div class="col-lg-4 col-md-6">
                     <mat-label class="f-w-600 m-b-8 d-block">{{ 'common.company' | translate }} <span class="text-danger">*</span></mat-label>
                     <mat-form-field appearance="outline" class="w-100">
                         <mat-select formControlName="company_id" [placeholder]="'common.select_company' | translate">
@@ -101,7 +116,7 @@
                 </div>
 
                 <!-- Branch -->
-                <div class="col-lg-4">
+                <div class="col-lg-4 col-md-6">
                     <mat-label class="f-w-600 m-b-8 d-block">{{ 'common.branch' | translate }} <span class="text-danger">*</span></mat-label>
                     <mat-form-field appearance="outline" class="w-100">
                         <mat-select formControlName="branch_id" [placeholder]="'common.select_branch' | translate">
@@ -116,7 +131,7 @@
                 </div>
 
                 <!-- Role -->
-                <div class="col-lg-4">
+                <div class="col-lg-4 col-md-6">
                     <mat-label class="f-w-600 m-b-8 d-block">{{ 'common.role' | translate }} <span class="text-danger">*</span></mat-label>
                     <mat-form-field appearance="outline" class="w-100">
                         <mat-select formControlName="role_id" [placeholder]="'common.select_role' | translate">
@@ -131,7 +146,7 @@
                 </div>
 
                 <!-- Employee Name -->
-                <div class="col-lg-4">
+                <div class="col-lg-4 col-md-6">
                     <mat-label class="f-w-600 m-b-8 d-block">{{ 'employee.name' | translate }} <span class="text-danger">*</span></mat-label>
                     <mat-form-field appearance="outline" class="w-100">
                         <input matInput formControlName="name" [placeholder]="'employee.name' | translate">
@@ -144,7 +159,7 @@
                 </div>
 
                 <!-- Mobile Number -->
-                <div class="col-lg-4">
+                <div class="col-lg-4 col-md-6">
                     <mat-label class="f-w-600 m-b-8 d-block">{{ 'common.mobile' | translate }} <span class="text-danger">*</span></mat-label>
                     <mat-form-field appearance="outline" class="w-100">
                         <input matInput formControlName="mobilenumber" [placeholder]="'common.mobile' | translate">
@@ -157,7 +172,7 @@
                 </div>
 
                 <!-- Email -->
-                <div class="col-lg-4">
+                <div class="col-lg-4 col-md-6">
                     <mat-label class="f-w-600 m-b-8 d-block">{{ 'common.email' | translate }} <span class="text-danger">*</span></mat-label>
                     <mat-form-field appearance="outline" class="w-100">
                         <input matInput formControlName="email" [placeholder]="'common.email' | translate">
@@ -170,7 +185,7 @@
                 </div>
 
                 <!-- Employee Type -->
-                <div class="col-lg-4">
+                <div class="col-lg-4 col-md-6">
                     <mat-label class="f-w-600 m-b-8 d-block">{{ 'employee.type' | translate }} <span class="text-danger">*</span></mat-label>
                     <mat-form-field appearance="outline" class="w-100">
                         <mat-select formControlName="userType" [placeholder]="'employee.select_type' | translate">
@@ -184,11 +199,35 @@
                     </mat-form-field>
                 </div>
 
+                <!-- Department -->
+                <div class="col-lg-4 col-md-6">
+                    <mat-label class="f-w-600 m-b-8 d-block">Department</mat-label>
+                    <mat-form-field appearance="outline" class="w-100">
+                        <input matInput formControlName="department" placeholder="e.g. Sales, HR, Engineering">
+                    </mat-form-field>
+                </div>
+
+                <!-- Designation -->
+                <div class="col-lg-4 col-md-6">
+                    <mat-label class="f-w-600 m-b-8 d-block">Designation</mat-label>
+                    <mat-form-field appearance="outline" class="w-100">
+                        <input matInput formControlName="designation" placeholder="e.g. Senior Executive, Manager">
+                    </mat-form-field>
+                </div>
+
+                <!-- Monthly Base Salary -->
+                <div class="col-lg-4 col-md-6">
+                    <mat-label class="f-w-600 m-b-8 d-block">Base Salary (INR)</mat-label>
+                    <mat-form-field appearance="outline" class="w-100">
+                        <input matInput type="number" formControlName="salary" placeholder="50000">
+                    </mat-form-field>
+                </div>
+
             </div>
 
-            <div class="m-t-12">
-                <button mat-stroked-button class="me-3 Cancel_Button" (click)="cancelBranch()">{{ 'common.cancel' | translate }}</button>
-                <button mat-flat-button color="primary" (click)="submit(EmployeeForm)">
+            <div class="m-t-16 d-flex align-items-center gap-12">
+                <button mat-stroked-button type="button" class="Cancel_Button" (click)="cancelBranch()">{{ 'common.cancel' | translate }}</button>
+                <button mat-flat-button color="primary" [disabled]="loading" (click)="submit(EmployeeForm)">
                     {{ UpdateButton ? ('common.update' | translate) : ('common.submit' | translate) }}
                 </button>
             </div>

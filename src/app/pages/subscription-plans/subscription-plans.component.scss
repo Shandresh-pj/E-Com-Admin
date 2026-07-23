@@ -187,10 +187,22 @@
   }
 
   // ── Grid & Cards ────────────────────────────────────────────────────────
-  &__grid {
+  &__grid,
+  .plans-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 24px;
+    gap: 28px;
+    width: 100%;
+    margin-bottom: 32px;
+
+    @media (min-width: 1200px) {
+      grid-template-columns: repeat(3, 1fr);
+    }
+
+    @media (max-width: 992px) {
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 20px;
+    }
 
     @media (max-width: 768px) {
       grid-template-columns: 1fr;

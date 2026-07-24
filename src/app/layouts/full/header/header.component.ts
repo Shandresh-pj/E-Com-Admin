@@ -297,6 +297,8 @@ export class HeaderComponent implements OnInit, OnDestroy {
     { name: 'Products', path: '/product', icon: 'box' },
     { name: 'Orders', path: '/orders', icon: 'shopping-cart' },
     { name: 'Invoice Generator', path: '/invoices', icon: 'file-text' },
+    { name: 'POS Billing Machine', path: '/pos-billing', icon: 'receipt-2' },
+    { name: 'Hardware & Devices', path: '/devices', icon: 'devices' },
     { name: 'Billing History', path: '/billing-history', icon: 'receipt' },
     { name: 'Profit & Loss', path: '/profit-loss', icon: 'chart-pie' },
     { name: 'Branch', path: '/branch', icon: 'building' },

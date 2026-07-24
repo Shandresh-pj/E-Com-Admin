@@ -9,6 +9,8 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDialog } from '@angular/material/dialog';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatNativeDateModule } from '@angular/material/core';
 import { AlertService } from 'src/app/Securities/Services/alert.service';
 import { AuthService } from 'src/app/Securities/Services/auth.service';
 import { CommonService } from 'src/app/Securities/Services/common.service';
@@ -33,6 +35,8 @@ import { AppTranslatePipe } from 'src/app/pipes/app-translate.pipe';
     MatCardModule,
     MatSelectModule,
     MatIconModule,
+    MatDatepickerModule,
+    MatNativeDateModule,
     MatTable,
     AppTranslatePipe
 ],
@@ -46,6 +50,8 @@ export class Product {
     { columnDef: 'price', header: 'Price' },
     { columnDef: 'stock_in_hand', header: 'Stock' },
     { columnDef: 'product_type', header: 'Type' },
+    { columnDef: 'manufacture_date', header: 'Mfg. Date' },
+    { columnDef: 'expiry_date', header: 'Expiry Date' },
     { columnDef: 'approval_status', header: 'Approval State', type: 'badge' },
     { columnDef: 'status', header: 'Status', type: 'badge' },
   ];
@@ -104,7 +110,9 @@ export class Product {
       variants: this.fb.array([]),
       attributeValues: this.fb.array([]),
       low_stock_threshold: [5, [Validators.required, Validators.min(0)]],
-      critical_stock_threshold: [2, [Validators.required, Validators.min(0)]]
+      critical_stock_threshold: [2, [Validators.required, Validators.min(0)]],
+      manufacture_date: ['', Validators.required],
+      expiry_date: ['', Validators.required]
     });
   }
 
@@ -168,6 +176,92 @@ export class Product {
     return user?.id;
   }
 
+  // ── Expiry Date Utilities ─────────────────────────────────────────────────
+
+  /** Returns days until expiry (negative if already expired).
+   *  Accepts both Date objects (from Material datepicker) and ISO strings (from API). */
+  daysUntilExpiry(expiryDate: Date | string | null | undefined): number | null {
+    if (!expiryDate) return null;
+    const expiry = expiryDate instanceof Date ? new Date(expiryDate) : new Date(expiryDate);
+    if (isNaN(expiry.getTime())) return null;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    expiry.setHours(0, 0, 0, 0);
+    return Math.floor((expiry.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+  }
+
+  /** Convert a Date object or ISO string to YYYY-MM-DD format for API */
+  toISODateString(date: Date | string | null | undefined): string {
+    if (!date) return '';
+    if (date instanceof Date) {
+      if (isNaN(date.getTime())) return '';
+      return date.toISOString().split('T')[0];
+    }
+    return String(date).split('T')[0];
+  }
+
+  /** Returns 'expired', 'warning' (≤2 days), or 'ok' */
+  getExpiryStatus(product: any): 'expired' | 'warning' | 'ok' | 'none' {
+    const days = this.daysUntilExpiry(product?.expiry_date);
+    if (days === null) return 'none';
+    if (days < 0) return 'expired';
+    if (days <= 2) return 'warning';
+    return 'ok';
+  }
+
+  /** Check all products and fire Swal popup + browser push notification for expired/near-expired */
+  checkAndShowExpiryNotifications(products: any[]) {
+    if (!products?.length) return;
+
+    const expired: any[] = [];
+    const nearExpiry: any[] = [];
+
+    products.forEach(p => {
+      const days = this.daysUntilExpiry(p?.expiry_date);
+      if (days === null) return;
+      if (days < 0) expired.push({ ...p, days });
+      else if (days <= 2) nearExpiry.push({ ...p, days });
+    });
+
+    // Request browser notification permission on first use
+    if ('Notification' in window && Notification.permission === 'default') {
+      Notification.requestPermission();
+    }
+
+    const sendPush = (title: string, body: string) => {
+      if ('Notification' in window && Notification.permission === 'granted') {
+        new Notification(title, { body });
+      }
+    };
+
+    if (expired.length > 0) {
+      const htmlList = expired.map(p => `❌ <b>${p.name}</b> — expired ${Math.abs(p.days)} day(s) ago`).join('<br>');
+      this.alert.fire({
+        icon: 'error',
+        title: `🚨 ${expired.length} Expired Product${expired.length > 1 ? 's' : ''} Detected!`,
+        html: `<div style="text-align:left;font-size:14px;"><b>Remove from sale immediately:</b><br><br>${htmlList}</div>`,
+        confirmButtonText: 'Review Products',
+        confirmButtonColor: '#ef4444'
+      });
+      expired.forEach(p => sendPush('🚨 EXPIRED Product Alert', `${p.name} expired ${Math.abs(p.days)} day(s) ago. Remove from sale immediately!`));
+    }
+
+    if (nearExpiry.length > 0) {
+      const delayMs = expired.length > 0 ? 600 : 0;
+      setTimeout(() => {
+        const htmlList = nearExpiry.map(p => `⚠️ <b>${p.name}</b> — expires ${p.days === 0 ? 'TODAY' : 'in ' + p.days + ' day(s)'}`).join('<br>');
+        this.alert.fire({
+          icon: 'warning',
+          title: `⚠️ ${nearExpiry.length} Product${nearExpiry.length > 1 ? 's' : ''} Expiring Soon!`,
+          html: `<div style="text-align:left;font-size:14px;"><b>These products expire within 2 days:</b><br><br>${htmlList}</div>`,
+          confirmButtonText: "OK, I'll handle it",
+          confirmButtonColor: '#f59e0b'
+        });
+        nearExpiry.forEach(p => sendPush('⚠️ Expiry Warning', `${p.name} expires ${p.days === 0 ? 'TODAY' : 'in ' + p.days + ' day(s)'}. Take action now.`));
+      }, delayMs);
+    }
+  }
+
   getProducts(onLoaded?: () => void) {
     const params: any = {};
     if (this.selectedStatusFilter === 'deleted') {
@@ -182,6 +276,7 @@ export class Product {
       next: (res: any) => {
         this.Products = res?.data || [];
         onLoaded?.();
+        this.checkAndShowExpiryNotifications(this.Products);
         this.cdr.detectChanges();
       }
     });
@@ -545,7 +640,9 @@ export class Product {
       product_type: product?.product_type,
       status: product?.status,
       low_stock_threshold: product?.low_stock_threshold || 5,
-      critical_stock_threshold: product?.critical_stock_threshold || 2
+      critical_stock_threshold: product?.critical_stock_threshold || 2,
+      manufacture_date: product?.manufacture_date ? new Date(product.manufacture_date) : null,
+      expiry_date: product?.expiry_date ? new Date(product.expiry_date) : null
     });
 
     if (product?.product_type === 'variant' && product?.variants?.length) {
@@ -870,6 +967,8 @@ export class Product {
     formData.append('status', value.status);
     formData.append('low_stock_threshold', value.low_stock_threshold || '5');
     formData.append('critical_stock_threshold', value.critical_stock_threshold || '2');
+    formData.append('manufacture_date', this.toISODateString(value.manufacture_date));
+    formData.append('expiry_date', this.toISODateString(value.expiry_date));
     formData.append('registration_id', this.getRegistrationId() || '');
 
     formData.append('variants', JSON.stringify(value.product_type === 'variant' ? value.variants : []));

@@ -39,6 +39,11 @@
   "topbar.notifications": "सूचनाएं",
   "topbar.language": "भाषा",
 
+  "header.my_profile": "मेरी प्रोफ़ाइल",
+  "header.change_password": "पासवर्ड बदलें",
+  "header.unread": "अपठित",
+  "header.no_results": "कोई परिणाम नहीं मिला",
+
   "common.save": "सहेजें",
   "common.cancel": "रद्द करें",
   "common.delete": "हटाएं",

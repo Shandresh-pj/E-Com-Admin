@@ -81,7 +81,10 @@ export class PermissionService {
       '/billing-history',
       '/subscription-plans',
       '/subscription-coupons',
-      '/checkout'
+      '/checkout',
+      '/pos-billing',
+      '/devices',
+      '/profit-loss'
     ];
     if (defaultPaths.some(p => targetNormalized === p || targetNormalized.startsWith(p + '/'))) {
       const userType = this.auth.getUserType() as UserType;

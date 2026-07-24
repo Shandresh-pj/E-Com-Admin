@@ -39,6 +39,11 @@
   "topbar.notifications": "الإشعارات",
   "topbar.language": "اللغة",
 
+  "header.my_profile": "ملفي الشخصي",
+  "header.change_password": "تغيير كلمة المرور",
+  "header.unread": "غير مقروء",
+  "header.no_results": "لم يتم العثور على نتائج",
+
   "common.save": "حفظ",
   "common.cancel": "إلغاء",
   "common.delete": "حذف",

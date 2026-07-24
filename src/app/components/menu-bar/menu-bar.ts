@@ -95,8 +95,9 @@ export class MenuBar implements OnInit {
     { name: 'Standard Checkout', path: '/checkout', icon: 'credit-card', isActive: true },
     { name: 'Company Calendar', path: '/calendar', icon: 'calendar-event', isActive: true },
     { name: 'Document Verification', path: '/employee-documents', icon: 'file-check', isActive: true },
-    { name: 'Translation Console', path: '/translations', icon: 'language', isActive: true }
-
+    { name: 'Translation Console', path: '/translations', icon: 'language', isActive: true },
+    { name: 'POS Billing Machine', path: '/pos-billing', icon: 'receipt-2', isActive: true },
+    { name: 'Hardware & Devices', path: '/devices', icon: 'devices', isActive: true }
   ];
 
   constructor(

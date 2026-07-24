@@ -1,0 +1,241 @@
+<div class="devices-page liquid-glass-container">
+
+  <!-- Ambient Glowing Background Orbs -->
+  <div class="ambient-glow orb-1"></div>
+  <div class="ambient-glow orb-2"></div>
+  <div class="ambient-glow orb-3"></div>
+
+  <!-- Executive Header Banner -->
+  <div class="glass-header-card">
+    <div class="header-main-info">
+      <div class="icon-orb">
+        <mat-icon>settings_input_component</mat-icon>
+      </div>
+      <div>
+        <h1 class="header-title">{{ 'Hardware & Devices Auto-Detection Console' | translate }}</h1>
+        <p class="header-subtitle">
+          Intelligent multi-protocol hardware scanner for POS Billing Machines, Barcode Scanners, Electronic Scales &amp; Payment Terminals
+        </p>
+      </div>
+    </div>
+
+    <div class="header-actions">
+      <div class="status-summary-pill">
+        <span class="pulse-dot"></span>
+        <span><strong>{{ deviceService.connectedCount() }} / {{ deviceService.allDevices().length }}</strong> Devices Online</span>
+      </div>
+
+      <button mat-stroked-button class="glass-btn glass-btn-secondary" (click)="openAddModal()">
+        <mat-icon>add_link</mat-icon>
+        <span>Manual Connect</span>
+      </button>
+
+      <button mat-flat-button class="glass-btn glass-btn-primary" (click)="runAutoDiscovery()" [disabled]="deviceService.scanning()">
+        <mat-icon [class.spin]="deviceService.scanning()">sync</mat-icon>
+        <span>{{ deviceService.scanning() ? 'Scanning Hardware...' : 'Auto-Detect Devices' }}</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Telemetry Cards Grid -->
+  <div class="telemetry-grid">
+    <div class="telemetry-card">
+      <div class="t-icon text-primary"><mat-icon>wifi_tethering</mat-icon></div>
+      <div class="t-info">
+        <span class="t-label">WebSerial &amp; WebUSB Status</span>
+        <span class="t-value text-success">Active &amp; Listening</span>
+      </div>
+    </div>
+
+    <div class="telemetry-card">
+      <div class="t-icon text-warning"><mat-icon>speed</mat-icon></div>
+      <div class="t-info">
+        <span class="t-label">Avg Bus Latency</span>
+        <span class="t-value">4.2 ms</span>
+      </div>
+    </div>
+
+    <div class="telemetry-card">
+      <div class="t-icon text-info"><mat-icon>data_object</mat-icon></div>
+      <div class="t-info">
+        <span class="t-label">Packets Processed</span>
+        <span class="t-value">17,440 pks</span>
+      </div>
+    </div>
+
+    <div class="telemetry-card">
+      <div class="t-icon text-secondary"><mat-icon>autorenew</mat-icon></div>
+      <div class="t-info">
+        <span class="t-label">Auto-Reconnect Protocol</span>
+        <span class="t-value text-primary">Enabled (1000ms)</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Connected Hardware Fleet Section Heading -->
+  <div class="section-heading">
+    <h2><mat-icon>devices</mat-icon> Connected POS Hardware Fleet</h2>
+    <span class="badge-count">{{ deviceService.allDevices().length }} Devices Registered</span>
+  </div>
+
+  <!-- Devices Cards Grid -->
+  @if (deviceService.allDevices().length === 0 && !deviceService.scanning()) {
+    <div class="empty-glass-card">
+      <div class="empty-icon-orb"><mat-icon>devices_other</mat-icon></div>
+      <h3>No Hardware Devices Connected</h3>
+      <p>Click "Auto-Detect Devices" to automatically scan WebUSB, WebSerial, WiFi IP &amp; Bluetooth ports or manually add your billing hardware.</p>
+      <div class="empty-actions">
+        <button mat-flat-button class="glass-btn glass-btn-primary" (click)="runAutoDiscovery()">
+          <mat-icon>sync</mat-icon> Auto-Detect Devices
+        </button>
+        <button mat-stroked-button class="glass-btn glass-btn-secondary" (click)="openAddModal()">
+          <mat-icon>add_link</mat-icon> Manual Connect
+        </button>
+      </div>
+    </div>
+  } @else {
+    <div class="devices-grid">
+      @for (device of deviceService.allDevices(); track device.id) {
+      <div class="device-card liquid-glass-card" [class.disconnected]="device.status !== 'CONNECTED'">
+        
+        <div class="card-top-accent" [ngClass]="getProtocolBadge(device.protocol).class"></div>
+
+        <div class="device-card-header">
+          <div class="dev-type-badge">
+            <mat-icon>{{ getDeviceIcon(device.type) }}</mat-icon>
+            <span>{{ formatDeviceType(device.type) }}</span>
+          </div>
+
+          <div class="protocol-badge" [ngClass]="getProtocolBadge(device.protocol).class">
+            {{ getProtocolBadge(device.protocol).label }}
+          </div>
+        </div>
+
+        <div class="device-card-body">
+          <h3 class="device-name">{{ device.name }}</h3>
+          <p class="device-port">
+            <mat-icon>settings_ethernet</mat-icon>
+            <span>{{ device.portOrAddress }}</span>
+          </p>
+
+          <!-- Metadata Chips -->
+          <div class="metadata-chips">
+            @if (device.wifiSsid) {
+              <span class="meta-chip"><mat-icon>wifi</mat-icon> {{ device.wifiSsid }}</span>
+            }
+            @if (device.firmwareVersion) {
+              <span class="meta-chip"><mat-icon>memory</mat-icon> FW: {{ device.firmwareVersion }}</span>
+            }
+            @if (device.baudRate) {
+              <span class="meta-chip"><mat-icon>swap_vert</mat-icon> {{ device.baudRate }} Baud</span>
+            }
+            @if (device.metadata && device.metadata['paperWidth']) {
+              <span class="meta-chip"><mat-icon>receipt</mat-icon> Paper: {{ device.metadata['paperWidth'] }}</span>
+            }
+            @if (device.metadata && device.metadata['unit']) {
+              <span class="meta-chip"><mat-icon>scale</mat-icon> Tare: {{ device.metadata['tare'] || 0 }} {{ device.metadata['unit'] }}</span>
+            }
+          </div>
+
+          <!-- Latency & Signal Strength Telemetry Meter -->
+          <div class="telemetry-meter">
+            <div class="meter-labels">
+              <span class="latency-badge">
+                <mat-icon>bolt</mat-icon>
+                <span>Latency: <strong>{{ device.latencyMs }} ms</strong></span>
+              </span>
+              <span class="signal-badge" [class.high]="device.signalStrength >= 90" [class.med]="device.signalStrength >= 70 && device.signalStrength < 90">
+                <mat-icon>signal_cellular_alt</mat-icon>
+                <span>Signal: <strong>{{ device.signalStrength }}%</strong></span>
+              </span>
+            </div>
+            <div class="progress-bar-container">
+              <div class="progress-fill" [style.width.%]="device.signalStrength" [class.high]="device.signalStrength >= 90" [class.med]="device.signalStrength >= 70 && device.signalStrength < 90"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="device-card-footer">
+          <div class="footer-left">
+            <button mat-icon-button class="action-icon-btn" [matTooltip]="device.autoReconnect ? 'Auto-Reconnect Enabled' : 'Auto-Reconnect Disabled'" (click)="toggleReconnect(device)">
+              <mat-icon [style.color]="device.autoReconnect ? '#10b981' : '#94a3b8'">autorenew</mat-icon>
+            </button>
+            <span class="packets-text">{{ device.packetsReceived | number }} pks</span>
+          </div>
+
+          <div class="footer-right">
+            <button mat-button class="glass-btn-sm" (click)="testDevice(device)">
+              <mat-icon>play_arrow</mat-icon> Test Device
+            </button>
+            <button mat-icon-button class="action-icon-btn text-danger" matTooltip="Disconnect" (click)="removeDevice(device)">
+              <mat-icon>power_settings_new</mat-icon>
+            </button>
+          </div>
+        </div>
+
+      </div>
+    }
+  </div>
+  }
+
+  <!-- Manual Device Connection Modal -->
+  @if (showAddModal) {
+    <div class="modal-overlay-glass" (click)="closeAddModal()">
+      <div class="modal-glass-card" (click)="$event.stopPropagation()">
+        
+        <div class="modal-header">
+          <h2><mat-icon>add_link</mat-icon> Register Hardware Device</h2>
+          <button mat-icon-button (click)="closeAddModal()"><mat-icon>close</mat-icon></button>
+        </div>
+
+        <div class="modal-form">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Hardware Name</mat-label>
+            <input matInput [(ngModel)]="newDevice.name" placeholder="e.g. Star Micronics Thermal Printer">
+          </mat-form-field>
+
+          <div class="form-row-2">
+            <mat-form-field appearance="outline">
+              <mat-label>Device Type</mat-label>
+              <mat-select [(ngModel)]="newDevice.type">
+                <mat-option value="THERMAL_PRINTER">Thermal Printer</mat-option>
+                <mat-option value="BARCODE_SCANNER">Barcode Scanner</mat-option>
+                <mat-option value="WEIGH_SCALE">Weighing Scale</mat-option>
+                <mat-option value="CARD_READER">Card Payment POS</mat-option>
+                <mat-option value="CUSTOMER_DISPLAY">Customer VFD Display</mat-option>
+                <mat-option value="BIOMETRIC_READER">Biometric Scanner</mat-option>
+                <mat-option value="CASH_DRAWER">Cash Drawer</mat-option>
+              </mat-select>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Connection Protocol</mat-label>
+              <mat-select [(ngModel)]="newDevice.protocol">
+                <mat-option value="WEB_USB">WebUSB Direct</mat-option>
+                <mat-option value="WEB_SERIAL">WebSerial COM</mat-option>
+                <mat-option value="WIFI_IP">WiFi IP Wireless</mat-option>
+                <mat-option value="ETHERNET_LAN">Ethernet LAN</mat-option>
+                <mat-option value="BLUETOOTH">Bluetooth LE</mat-option>
+                <mat-option value="WEBSOCKET_LAN">LAN WebSocket</mat-option>
+                <mat-option value="MQTT_CLOUD">MQTT Cloud IoT</mat-option>
+                <mat-option value="HID_KEYBOARD">USB HID Emulation</mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>IP Address / COM Port</mat-label>
+            <input matInput [(ngModel)]="newDevice.portOrAddress" placeholder="192.168.1.105:9100 or COM3">
+          </mat-form-field>
+        </div>
+
+        <div class="modal-footer">
+          <button mat-button (click)="closeAddModal()">Cancel</button>
+          <button mat-flat-button class="glass-btn-primary" (click)="submitAddDevice()">Connect Device</button>
+        </div>
+
+      </div>
+    </div>
+  }
+
+</div>

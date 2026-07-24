@@ -42,6 +42,26 @@ const DB = UserType.DELIVERY_BOY;
 
 export const ComponentsRoutes: Routes = [
   {
+    path: 'pos-billing',
+    loadComponent: () => import('./pos-billing/pos-billing').then(m => m.PosBillingComponent),
+    canActivate: [RoleGuard],
+    data: {
+      title: 'POS Billing Terminal',
+      roles: [SA, A, BM, SK],
+      urls: [{ title: 'POS Billing', url: '/pos-billing' }]
+    }
+  },
+  {
+    path: 'devices',
+    loadComponent: () => import('./devices/devices').then(m => m.DevicesComponent),
+    canActivate: [RoleGuard],
+    data: {
+      title: 'Hardware & Devices Auto-Detect',
+      roles: [SA, A, BM],
+      urls: [{ title: 'Hardware & Devices', url: '/devices' }]
+    }
+  },
+  {
     path: 'profit-loss',
     loadComponent: () => import('./profit-loss/profit-loss').then(m => m.ProfitLossComponent),
     canActivate: [RoleGuard],

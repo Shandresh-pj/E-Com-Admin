@@ -145,6 +145,47 @@
 
             <div class="form-row">
                 <div class="field-container">
+                    <mat-label class="f-w-600 m-b-8 d-block">
+                        Manufacture Date <span class="text-danger">*</span>
+                    </mat-label>
+                    <mat-form-field appearance="outline" class="w-100">
+                        <mat-icon matPrefix style="margin-right: 8px; color: var(--brand-primary);">event_available</mat-icon>
+                        <input matInput [matDatepicker]="mfgPicker" formControlName="manufacture_date"
+                            placeholder="Select manufacture date">
+                        <mat-datepicker-toggle matIconSuffix [for]="mfgPicker"></mat-datepicker-toggle>
+                        <mat-datepicker #mfgPicker></mat-datepicker>
+                        @if (ProductForm.get('manufacture_date')?.invalid && ProductForm.get('manufacture_date')?.touched) {
+                            <mat-error>Manufacture date is required</mat-error>
+                        }
+                    </mat-form-field>
+                </div>
+
+                <div class="field-container">
+                    <mat-label class="f-w-600 m-b-8 d-block">
+                        Expiry Date <span class="text-danger">*</span>
+                        @if (ProductForm.get('expiry_date')?.value) {
+                            @if (daysUntilExpiry(ProductForm.get('expiry_date')?.value) !== null && daysUntilExpiry(ProductForm.get('expiry_date')?.value)! < 0) {
+                                <span style="background:#ef4444;color:#fff;border-radius:8px;padding:2px 8px;font-size:11px;margin-left:8px;">EXPIRED</span>
+                            } @else if (daysUntilExpiry(ProductForm.get('expiry_date')?.value) !== null && daysUntilExpiry(ProductForm.get('expiry_date')?.value)! <= 2) {
+                                <span style="background:#f59e0b;color:#fff;border-radius:8px;padding:2px 8px;font-size:11px;margin-left:8px;">EXPIRING SOON</span>
+                            }
+                        }
+                    </mat-label>
+                    <mat-form-field appearance="outline" class="w-100">
+                        <mat-icon matPrefix style="margin-right: 8px; color: #ef4444;">event_busy</mat-icon>
+                        <input matInput [matDatepicker]="expiryPicker" formControlName="expiry_date"
+                            placeholder="Select expiry date">
+                        <mat-datepicker-toggle matIconSuffix [for]="expiryPicker"></mat-datepicker-toggle>
+                        <mat-datepicker #expiryPicker></mat-datepicker>
+                        @if (ProductForm.get('expiry_date')?.invalid && ProductForm.get('expiry_date')?.touched) {
+                            <mat-error>Expiry date is required</mat-error>
+                        }
+                    </mat-form-field>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="field-container">
                     <mat-label class="f-w-600 m-b-8 d-block">Low Stock Threshold <span class="text-danger">*</span></mat-label>
                     <mat-form-field appearance="outline" class="w-100">
                         <input matInput type="number" formControlName="low_stock_threshold" placeholder="Enter Low Stock level">

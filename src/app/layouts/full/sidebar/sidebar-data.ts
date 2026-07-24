@@ -110,6 +110,13 @@ export const navItems: NavItem[] = [
 
   { navCap: 'Sales', roles: [SA, A, BM, SK] },
   {
+    displayName: 'POS Billing Machine',
+    iconName: 'receipt-2',
+    route: '/pos-billing',
+    bgcolor: 'success',
+    roles: [SA, A, BM, SK],
+  },
+  {
     displayName: 'Orders',
     iconName: 'shopping-cart',
     route: '/orders',
@@ -192,6 +199,20 @@ export const navItems: NavItem[] = [
   },
 
   { navCap: 'Logistics & Finance', roles: [SA, A, BM, SK] },
+  {
+    displayName: 'Hardware & Devices',
+    iconName: 'devices',
+    route: '/devices',
+    bgcolor: 'warning',
+    roles: [SA, A, BM],
+  },
+  {
+    displayName: 'Profit & Loss',
+    iconName: 'chart-pie',
+    route: '/profit-loss',
+    bgcolor: 'secondary',
+    roles: [SA, A, BM],
+  },
   {
     displayName: 'Delivery Tracking',
     iconName: 'truck-delivery',

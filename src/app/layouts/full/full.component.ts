@@ -328,8 +328,9 @@ export class FullComponent implements OnInit {
         { id: 36, name: 'Standard Checkout', path: '/checkout', icon: 'credit-card', isActive: true },
         { id: 37, name: 'Company Calendar', path: '/calendar', icon: 'calendar-event', isActive: true },
         { id: 38, name: 'Document Verification', path: '/employee-documents', icon: 'file-check', isActive: true },
-        { id: 39, name: 'Translation Console', path: '/translations', icon: 'language', isActive: true }
-
+        { id: 39, name: 'Translation Console', path: '/translations', icon: 'language', isActive: true },
+        { id: 40, name: 'POS Billing Machine', path: '/pos-billing', icon: 'bi-receipt-cutoff', isActive: true },
+        { id: 41, name: 'Hardware & Devices', path: '/devices', icon: 'bi-cpu-fill', isActive: true }
       ];
     } else {
       allowedMenus = apiMenus.filter((m: any) => {
@@ -356,28 +357,34 @@ export class FullComponent implements OnInit {
       }
     ];
 
-    // Instead of hardcoding 'Inventory' and dumping the rest in 'Other Modules',
-    // let's group dynamically based on path to provide a clean Liquid Glass UI sidebar.
     const groupings = [
       {
-        navCap: 'Admin & Core',
-        paths: ['/admin', '/roles', '/role-access', '/branch', '/menubar', '/audit-logs', '/status', '/profile']
+        navCap: 'Administration & Roles',
+        paths: ['/admin', '/crm-contacts', '/branch', '/employees', '/role-access', '/roles', '/audit-logs']
       },
       {
-        navCap: 'Catalog',
-        paths: ['/category', '/product-attribute', '/attribute-value', '/product', '/coupons']
+        navCap: 'Catalog & Products',
+        paths: ['/category', '/product', '/product-attribute', '/attribute-value', '/coupons']
       },
       {
-        navCap: 'Inventory & Operations',
-        paths: ['/stocks', '/branch-stocks', '/alerts', '/delivery-tracking']
+        navCap: 'POS Billing & Hardware',
+        paths: ['/pos-billing', '/devices', '/biometric']
       },
       {
-        navCap: 'Sales & Finance',
-        paths: ['/orders', '/payments', '/invoices', '/profit-loss', '/crm-contacts', '/subscription-plans', '/manage-subscription-plans']
+        navCap: 'Inventory & Logistics',
+        paths: ['/stocks', '/branch-stocks', '/delivery-tracking', '/alerts']
       },
       {
-        navCap: 'HR & Workforce',
-        paths: ['/employees', '/attendance', '/leave', '/payroll', '/workforce', '/workforce-requests', '/approvals', '/calendar', '/employee-documents']
+        navCap: 'Sales, Finance & Subscriptions',
+        paths: ['/orders', '/invoices', '/payments', '/profit-loss', '/billing-history', '/subscription-plans', '/manage-subscription-plans', '/subscription-coupons', '/checkout']
+      },
+      {
+        navCap: 'HR & Workforce Console',
+        paths: ['/workforce', '/shifts', '/break-policies', '/geofencing', '/workforce-requests', '/attendance', '/leave', '/calendar', '/employee-documents', '/payroll']
+      },
+      {
+        navCap: 'Operations & Settings',
+        paths: ['/approvals', '/notifications', '/profile', '/translations', '/menubar', '/status', '/change-password']
       }
     ];
 
@@ -492,6 +499,9 @@ export class FullComponent implements OnInit {
     'shopping-cart': 'cart-fill',
     'clipboard-list': 'clock-history',
     'list-details': 'list-ul',
+    'receipt-2': 'receipt-cutoff',
+    devices: 'cpu-fill',
+    'chart-pie': 'pie-chart-fill'
   };
 
   private mapIcon(icon?: string): string {
@@ -505,7 +515,7 @@ export class FullComponent implements OnInit {
       this.filteredNavItems.set(this.navItems());
       return;
     }
-    const q = query.toLowerCase();
+    const q = query.toLowerCase().trim();
     const all = this.navItems();
     const filtered: NavItem[] = [];
     let currentCap: NavItem | null = null;
@@ -515,18 +525,26 @@ export class FullComponent implements OnInit {
       if (item.navCap) {
         currentCap = item;
         capAdded = false;
+        if (item.navCap.toLowerCase().includes(q)) {
+          filtered.push(item);
+          capAdded = true;
+        }
         continue;
       }
-      if (item.displayName && item.displayName.toLowerCase().includes(q)) {
+      
+      const matchesName = !!item.displayName && item.displayName.toLowerCase().includes(q);
+      const matchesRoute = !!item.route && item.route.toLowerCase().includes(q);
+      const capMatches = !!currentCap && !!currentCap.navCap && currentCap.navCap.toLowerCase().includes(q);
+
+      if (matchesName || matchesRoute || capMatches) {
         if (currentCap && !capAdded) {
           filtered.push(currentCap);
           capAdded = true;
         }
         filtered.push(item);
-        // Also add matching children
       } else if (item.children) {
         const matchingChildren = item.children.filter(
-          (c: NavItem) => c.displayName && c.displayName.toLowerCase().includes(q)
+          (c: NavItem) => (c.displayName && c.displayName.toLowerCase().includes(q)) || (c.route && c.route.toLowerCase().includes(q))
         );
         if (matchingChildren.length > 0) {
           if (currentCap && !capAdded) { filtered.push(currentCap); capAdded = true; }

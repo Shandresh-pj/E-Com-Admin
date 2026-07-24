@@ -126,7 +126,8 @@ export class AuthService {
   }
 
   getUserType(): string {
-    return this.sessionService.getUser()?.userType ?? '';
+    const user = this.sessionService.getUser();
+    return user?.userType || user?.user_type || '';
   }
 
   // ─── Accessors ────────────────────────────────────────────────────────────

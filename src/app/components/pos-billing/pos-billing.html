@@ -10,20 +10,21 @@
     <div class="top-bar-left">
       <div class="pos-badge">
         <mat-icon>business</mat-icon>
-        <span>{{ companyName() | uppercase }} • ADMIN: {{ adminName() }} • BRANCH: {{ selectedBranch().name || 'Main Store' }}</span>
+        <span>{{ companyName() | uppercase }} • ADMIN: {{ adminName() }} • BRANCH: {{ selectedBranch().name || 'Main
+          Store' }}</span>
       </div>
-      <h1 class="pos-title">{{ 'Liquid Glass POS Billing Machine' | translate }}</h1>
+      <h1 class="pos-title">{{ 'POS Billing Machine' | translate }}</h1>
     </div>
 
     <!-- Branch Selector & Live Hardware Status Indicators -->
     <div class="hardware-indicators">
-      
+
       <!-- Company Branch Selector Dropdown -->
       <div class="branch-selector-pill">
         <mat-icon>store</mat-icon>
         <select [ngModel]="selectedBranch().id" (ngModelChange)="onBranchChange($event)" class="branch-select-input">
           @for (b of branches(); track b.id) {
-            <option [value]="b.id">{{ b.name }} ({{ b.code }})</option>
+          <option [value]="b.id">{{ b.name }} ({{ b.code }})</option>
           }
         </select>
       </div>
@@ -40,13 +41,15 @@
         <span>SCANNER: READY</span>
       </div>
 
-      <div class="hw-chip active-scale" matTooltip="CAS ER-Plus Scale Live Weight (Click to sample)" (click)="fetchScaleWeight()">
+      <div class="hw-chip active-scale" matTooltip="CAS ER-Plus Scale Live Weight (Click to sample)"
+        (click)="fetchScaleWeight()">
         <span class="led-dot blue"></span>
         <mat-icon>scale</mat-icon>
         <span>SCALE: {{ scaleWeightKg() }} kg</span>
       </div>
 
-      <button mat-stroked-button class="glass-btn-drawer" (click)="triggerDrawerPulse()" matTooltip="Open Cash Drawer (RJ11 24V Signal)">
+      <button mat-stroked-button class="glass-btn-drawer" (click)="triggerDrawerPulse()"
+        matTooltip="Open Cash Drawer (RJ11 24V Signal)">
         <mat-icon>point_of_sale</mat-icon>
         <span>Open Drawer</span>
       </button>
@@ -66,7 +69,8 @@
         <form (submit)="onBarcodeScanSubmit(); $event.preventDefault()" class="barcode-input-wrap">
           <div class="scanner-glow-ring"></div>
           <mat-icon class="barcode-icon">qr_code_scanner</mat-icon>
-          <input type="text" [(ngModel)]="barcodeInput" name="barcode" placeholder="Scan Barcode or enter SKU (e.g. 8901030101)..." class="glass-input">
+          <input type="text" [(ngModel)]="barcodeInput" name="barcode"
+            placeholder="Scan Barcode or enter SKU (e.g. 8901030101)..." class="glass-input">
           <button type="submit" mat-flat-button class="scan-btn">
             <mat-icon>bolt</mat-icon>
             <span>Scan</span>
@@ -77,15 +81,17 @@
         <div class="search-and-cat">
           <div class="search-wrap">
             <mat-icon>search</mat-icon>
-            <input type="text" [ngModel]="searchQuery()" (ngModelChange)="searchQuery.set($event)" placeholder="Search products by name or code..." class="glass-input">
+            <input type="text" [ngModel]="searchQuery()" (ngModelChange)="searchQuery.set($event)"
+              placeholder="Search products by name or code..." class="glass-input">
           </div>
 
           <!-- Category Pills -->
           <div class="category-pills-scroll">
             @for (cat of categories; track cat) {
-              <button type="button" class="cat-pill" [class.active]="selectedCategory() === cat" (click)="selectedCategory.set(cat)">
-                {{ cat }}
-              </button>
+            <button type="button" class="cat-pill" [class.active]="selectedCategory() === cat"
+              (click)="selectedCategory.set(cat)">
+              {{ cat }}
+            </button>
             }
           </div>
         </div>
@@ -94,44 +100,43 @@
 
       <!-- Products Grid -->
       @if (isLoadingProducts()) {
-        <div class="loading-products-state">
-          <mat-spinner diameter="40"></mat-spinner>
-          <p>Syncing products from inventory API...</p>
-        </div>
+      <div class="loading-products-state">
+        <mat-spinner diameter="40"></mat-spinner>
+        <p>Syncing products from inventory API...</p>
+      </div>
       } @else {
-        <div class="products-grid">
-          @for (prod of filteredProducts(); track prod.id) {
-            <div class="product-card liquid-glass-card" [class.out-of-stock]="prod.stock <= 0" (click)="addToCart(prod)">
+      <div class="products-grid">
+        @for (prod of filteredProducts(); track prod.id) {
+        <div class="product-card liquid-glass-card" [class.out-of-stock]="prod.stock <= 0" (click)="addToCart(prod)">
 
-              <div class="product-header">
-                <span class="product-category">{{ prod.category }}</span>
-                @if (prod.stock <= 0) {
-                  <span class="weigh-badge out-stock-badge">OUT OF STOCK</span>
-                } @else if (prod.stock <= 10) {
-                  <span class="weigh-badge low-stock-badge">Stock: {{ prod.stock }} {{ prod.unit }}</span>
+          <div class="product-header">
+            <span class="product-category">{{ prod.category }}</span>
+            @if (prod.stock <= 0) { <span class="weigh-badge out-stock-badge">OUT OF STOCK</span>
+              } @else if (prod.stock <= 10) { <span class="weigh-badge low-stock-badge">Stock: {{ prod.stock }} {{
+                prod.unit }}</span>
                 } @else if (prod.isWeighable) {
-                  <span class="weigh-badge"><mat-icon>scale</mat-icon> Weighable</span>
+                <span class="weigh-badge"><mat-icon>scale</mat-icon> Weighable</span>
                 }
-              </div>
+          </div>
 
-              <h3 class="product-title">{{ prod.name }}</h3>
-              <span class="sku-code">SKU: {{ prod.code }}</span>
+          <h3 class="product-title">{{ prod.name }}</h3>
+          <span class="sku-code">SKU: {{ prod.code }}</span>
 
-              <div class="product-footer">
-                <div class="price-wrap">
-                  <span class="currency">₹</span>
-                  <span class="amount">{{ prod.price | number:'1.2-2' }}</span>
-                  <span class="unit">/ {{ prod.unit }}</span>
-                </div>
-
-                <button mat-icon-button class="add-cart-btn" [disabled]="prod.stock <= 0" matTooltip="Add to cart">
-                  <mat-icon>add_shopping_cart</mat-icon>
-                </button>
-              </div>
-
+          <div class="product-footer">
+            <div class="price-wrap">
+              <span class="currency">₹</span>
+              <span class="amount">{{ prod.price | number:'1.2-2' }}</span>
+              <span class="unit">/ {{ prod.unit }}</span>
             </div>
-          }
+
+            <button mat-icon-button class="add-cart-btn" [disabled]="prod.stock <= 0" matTooltip="Add to cart">
+              <mat-icon>add_shopping_cart</mat-icon>
+            </button>
+          </div>
+
         </div>
+        }
+      </div>
       }
 
     </div>
@@ -156,52 +161,58 @@
       <!-- Cart Items List -->
       <div class="cart-items-scroll">
         @if (cartItems().length === 0) {
-          <div class="empty-cart-state">
-            <div class="empty-icon"><mat-icon>shopping_cart_checkout</mat-icon></div>
-            <p class="empty-text">Billing Cart Empty</p>
-            <span class="empty-sub">Scan a barcode or click a product tile to start billing</span>
-          </div>
+        <div class="empty-cart-state">
+          <div class="empty-icon"><mat-icon>shopping_cart_checkout</mat-icon></div>
+          <p class="empty-text">Billing Cart Empty</p>
+          <span class="empty-sub">Scan a barcode or click a product tile to start billing</span>
+        </div>
         } @else {
-          @for (item of cartItems(); track item.product.id) {
-            <div class="cart-item-row">
+        @for (item of cartItems(); track item.product.id) {
+        <div class="cart-item-row">
 
-              <div class="item-main-info">
-                <h4 class="item-name">{{ item.product.name }}</h4>
-                <div class="item-meta">
-                  <span>₹{{ item.unitPrice }} × {{ item.quantity }} {{ item.product.unit }}</span>
-                  @if (item.discountPct > 0) {
-                    <span class="disc-tag">{{ item.discountPct }}% OFF</span>
-                  }
-                </div>
-              </div>
-
-              <!-- Quantity Controls -->
-              <div class="qty-controls">
-                <button mat-icon-button class="qty-btn" (click)="updateQuantity(item, -1)"><mat-icon>remove</mat-icon></button>
-                <span class="qty-val">{{ item.quantity }}</span>
-                <button mat-icon-button class="qty-btn" (click)="updateQuantity(item, 1)"><mat-icon>add</mat-icon></button>
-              </div>
-
-              <!-- Item Total & Remove -->
-              <div class="item-total-wrap">
-                <span class="item-total-price">₹{{ item.totalPrice | number:'1.2-2' }}</span>
-                <button mat-icon-button class="remove-item-btn" (click)="removeFromCart(item)"><mat-icon>close</mat-icon></button>
-              </div>
-
+          <div class="item-main-info">
+            <h4 class="item-name">{{ item.product.name }}</h4>
+            <div class="item-meta">
+              <span>₹{{ item.unitPrice }} × {{ item.quantity }} {{ item.product.unit }}</span>
+              @if (item.discountPct > 0) {
+              <span class="disc-tag">{{ item.discountPct }}% OFF</span>
+              }
             </div>
-          }
+          </div>
+
+          <!-- Quantity Controls -->
+          <div class="qty-controls">
+            <button mat-icon-button class="qty-btn"
+              (click)="updateQuantity(item, -1)"><mat-icon>remove</mat-icon></button>
+            <span class="qty-val">{{ item.quantity }}</span>
+            <button mat-icon-button class="qty-btn" (click)="updateQuantity(item, 1)"><mat-icon>add</mat-icon></button>
+          </div>
+
+          <!-- Item Total & Remove -->
+          <div class="item-total-wrap">
+            <span class="item-total-price">₹{{ item.totalPrice | number:'1.2-2' }}</span>
+            <button mat-icon-button class="remove-item-btn"
+              (click)="removeFromCart(item)"><mat-icon>close</mat-icon></button>
+          </div>
+
+        </div>
+        }
         }
       </div>
 
       <!-- Discount Presets Bar -->
       @if (cartItems().length > 0) {
-        <div class="discount-presets-bar">
-          <span class="disc-lbl">Bill Discount:</span>
-          <button type="button" class="disc-pill" [class.active]="globalDiscountPct() === 0" (click)="setGlobalDiscount(0)">0%</button>
-          <button type="button" class="disc-pill" [class.active]="globalDiscountPct() === 5" (click)="setGlobalDiscount(5)">5%</button>
-          <button type="button" class="disc-pill" [class.active]="globalDiscountPct() === 10" (click)="setGlobalDiscount(10)">10%</button>
-          <button type="button" class="disc-pill" [class.active]="globalDiscountPct() === 15" (click)="setGlobalDiscount(15)">15%</button>
-        </div>
+      <div class="discount-presets-bar">
+        <span class="disc-lbl">Bill Discount:</span>
+        <button type="button" class="disc-pill" [class.active]="globalDiscountPct() === 0"
+          (click)="setGlobalDiscount(0)">0%</button>
+        <button type="button" class="disc-pill" [class.active]="globalDiscountPct() === 5"
+          (click)="setGlobalDiscount(5)">5%</button>
+        <button type="button" class="disc-pill" [class.active]="globalDiscountPct() === 10"
+          (click)="setGlobalDiscount(10)">10%</button>
+        <button type="button" class="disc-pill" [class.active]="globalDiscountPct() === 15"
+          (click)="setGlobalDiscount(15)">15%</button>
+      </div>
       }
 
       <!-- Customer Details Input -->
@@ -218,10 +229,10 @@
         </div>
 
         @if (globalDiscountPct() > 0) {
-          <div class="total-row discount-row text-success">
-            <span>Special Discount ({{ globalDiscountPct() }}%)</span>
-            <span>-{{ (subtotal() * globalDiscountPct() / 100) | currency:'INR' }}</span>
-          </div>
+        <div class="total-row discount-row text-success">
+          <span>Special Discount ({{ globalDiscountPct() }}%)</span>
+          <span>-{{ (subtotal() * globalDiscountPct() / 100) | currency:'INR' }}</span>
+        </div>
         }
 
         <div class="total-row">
@@ -236,7 +247,8 @@
 
       <!-- Action Buttons -->
       <div class="cart-actions">
-        <button mat-flat-button class="checkout-btn glass-btn-primary" (click)="openCheckout()" [disabled]="cartItems().length === 0">
+        <button mat-flat-button class="checkout-btn glass-btn-primary" (click)="openCheckout()"
+          [disabled]="cartItems().length === 0">
           <mat-icon>payments</mat-icon>
           <span>FAST CHECKOUT • ₹{{ grandTotal() | number:'1.2-2' }}</span>
         </button>
@@ -248,152 +260,157 @@
 
   <!-- CHECKOUT MODAL -->
   @if (showCheckoutModal) {
-    <div class="glass-modal-backdrop" (click)="closeCheckout()">
-      <div class="glass-modal-card checkout-modal" (click)="$event.stopPropagation()">
+  <div class="glass-modal-backdrop" (click)="closeCheckout()">
+    <div class="glass-modal-card checkout-modal" (click)="$event.stopPropagation()">
 
-        <div class="modal-header">
-          <h3><mat-icon>payments</mat-icon> Complete POS Payment</h3>
-          <button mat-icon-button (click)="closeCheckout()"><mat-icon>close</mat-icon></button>
+      <div class="modal-header">
+        <h3><mat-icon>payments</mat-icon> Complete POS Payment</h3>
+        <button mat-icon-button (click)="closeCheckout()"><mat-icon>close</mat-icon></button>
+      </div>
+
+      <div class="checkout-modal-body">
+
+        <div class="total-display-banner">
+          <span class="lbl">TOTAL AMOUNT DUE</span>
+          <h1 class="amount">₹{{ grandTotal() | number:'1.2-2' }}</h1>
         </div>
 
-        <div class="checkout-modal-body">
+        <!-- Select Payment Method -->
+        <div class="payment-method-selector">
+          <button type="button" class="pm-tile" [class.selected]="selectedPaymentMethod === 'UPI'"
+            (click)="selectedPaymentMethod = 'UPI'">
+            <mat-icon>qr_code_2</mat-icon>
+            <span>UPI / QR</span>
+          </button>
 
-          <div class="total-display-banner">
-            <span class="lbl">TOTAL AMOUNT DUE</span>
-            <h1 class="amount">₹{{ grandTotal() | number:'1.2-2' }}</h1>
-          </div>
+          <button type="button" class="pm-tile" [class.selected]="selectedPaymentMethod === 'CASH'"
+            (click)="selectedPaymentMethod = 'CASH'">
+            <mat-icon>payments</mat-icon>
+            <span>CASH</span>
+          </button>
 
-          <!-- Select Payment Method -->
-          <div class="payment-method-selector">
-            <button type="button" class="pm-tile" [class.selected]="selectedPaymentMethod === 'UPI'" (click)="selectedPaymentMethod = 'UPI'">
-              <mat-icon>qr_code_2</mat-icon>
-              <span>UPI / QR</span>
-            </button>
+          <button type="button" class="pm-tile" [class.selected]="selectedPaymentMethod === 'CARD'"
+            (click)="selectedPaymentMethod = 'CARD'">
+            <mat-icon>credit_card</mat-icon>
+            <span>CARD</span>
+          </button>
 
-            <button type="button" class="pm-tile" [class.selected]="selectedPaymentMethod === 'CASH'" (click)="selectedPaymentMethod = 'CASH'">
-              <mat-icon>payments</mat-icon>
-              <span>CASH</span>
-            </button>
-
-            <button type="button" class="pm-tile" [class.selected]="selectedPaymentMethod === 'CARD'" (click)="selectedPaymentMethod = 'CARD'">
-              <mat-icon>credit_card</mat-icon>
-              <span>CARD</span>
-            </button>
-
-            <button type="button" class="pm-tile" [class.selected]="selectedPaymentMethod === 'SPLIT'" (click)="selectedPaymentMethod = 'SPLIT'">
-              <mat-icon>call_split</mat-icon>
-              <span>SPLIT</span>
-            </button>
-          </div>
-
-          <!-- Dynamic Mode Details -->
-          @if (selectedPaymentMethod === 'UPI') {
-            <div class="upi-qr-box">
-              <div class="qr-placeholder">
-                <mat-icon>qr_code_2</mat-icon>
-              </div>
-              <p>Scan QR code using Google Pay, PhonePe, Paytm, or BHIM UPI</p>
-            </div>
-          }
-
-          @if (selectedPaymentMethod === 'CASH') {
-            <div class="cash-box">
-              <label>Cash Amount Received from Customer</label>
-              
-              <!-- Quick Cash Presets -->
-              <div class="quick-cash-presets">
-                @for (amt of quickCashPresets; track amt) {
-                  <button type="button" class="preset-btn" (click)="setQuickCash(amt)">₹{{ amt }}</button>
-                }
-                <button type="button" class="preset-btn exact-btn" (click)="setExactCash()">EXACT</button>
-              </div>
-
-              <mat-form-field appearance="outline" class="w-100 m-t-8">
-                <span matPrefix>₹&nbsp;</span>
-                <input matInput type="number" [(ngModel)]="cashTendered" placeholder="0.00">
-              </mat-form-field>
-
-              @if (cashTendered && cashTendered >= grandTotal()) {
-                <div class="change-due-box">
-                  <span>CHANGE TO RETURN:</span>
-                  <strong>₹{{ (cashTendered - grandTotal()) | number:'1.2-2' }}</strong>
-                </div>
-              }
-            </div>
-          }
-
-        </div>
-
-        <div class="modal-footer">
-          <button mat-stroked-button class="glass-btn" (click)="closeCheckout()">Cancel</button>
-          <button mat-flat-button class="glass-btn glass-btn-primary" (click)="processPayment()">
-            <mat-icon>print</mat-icon> Pay &amp; Print ESC/POS Receipt
+          <button type="button" class="pm-tile" [class.selected]="selectedPaymentMethod === 'SPLIT'"
+            (click)="selectedPaymentMethod = 'SPLIT'">
+            <mat-icon>call_split</mat-icon>
+            <span>SPLIT</span>
           </button>
         </div>
 
+        <!-- Dynamic Mode Details -->
+        @if (selectedPaymentMethod === 'UPI') {
+        <div class="upi-qr-box">
+          <div class="qr-placeholder">
+            <mat-icon>qr_code_2</mat-icon>
+          </div>
+          <p>Scan QR code using Google Pay, PhonePe, Paytm, or BHIM UPI</p>
+        </div>
+        }
+
+        @if (selectedPaymentMethod === 'CASH') {
+        <div class="cash-box">
+          <label>Cash Amount Received from Customer</label>
+
+          <!-- Quick Cash Presets -->
+          <div class="quick-cash-presets">
+            @for (amt of quickCashPresets; track amt) {
+            <button type="button" class="preset-btn" (click)="setQuickCash(amt)">₹{{ amt }}</button>
+            }
+            <button type="button" class="preset-btn exact-btn" (click)="setExactCash()">EXACT</button>
+          </div>
+
+          <mat-form-field appearance="outline" class="w-100 m-t-8">
+            <span matPrefix>₹&nbsp;</span>
+            <input matInput type="number" [(ngModel)]="cashTendered" placeholder="0.00">
+          </mat-form-field>
+
+          @if (cashTendered && cashTendered >= grandTotal()) {
+          <div class="change-due-box">
+            <span>CHANGE TO RETURN:</span>
+            <strong>₹{{ (cashTendered - grandTotal()) | number:'1.2-2' }}</strong>
+          </div>
+          }
+        </div>
+        }
+
       </div>
+
+      <div class="modal-footer">
+        <button mat-stroked-button class="glass-btn" (click)="closeCheckout()">Cancel</button>
+        <button mat-flat-button class="glass-btn glass-btn-primary" (click)="processPayment()">
+          <mat-icon>print</mat-icon> Pay &amp; Print ESC/POS Receipt
+        </button>
+      </div>
+
     </div>
+  </div>
   }
 
   <!-- RECEIPT PREVIEW MODAL -->
   @if (showReceiptModal && lastInvoice) {
-    <div class="glass-modal-backdrop" (click)="closeReceiptModal()">
-      <div class="receipt-modal-card" (click)="$event.stopPropagation()">
+  <div class="glass-modal-backdrop" (click)="closeReceiptModal()">
+    <div class="receipt-modal-card" (click)="$event.stopPropagation()">
 
-        <div class="modal-header">
-          <h3><mat-icon>receipt</mat-icon> ESC/POS Thermal Receipt</h3>
-          <button mat-icon-button (click)="closeReceiptModal()"><mat-icon>close</mat-icon></button>
-        </div>
-
-        <!-- ESC/POS Receipt Simulation Ticket -->
-        <div class="thermal-ticket">
-          <div class="ticket-header">
-            <h2>{{ lastInvoice.companyName | uppercase }}</h2>
-            <p>Branch: {{ lastInvoice.branchName }}</p>
-            <p>GSTIN: 29AAACT1234A1Z1</p>
-            <div class="ticket-divider">--------------------------------</div>
-          </div>
-
-          <div class="ticket-meta">
-            <p>Inv: {{ lastInvoice.invoiceNo }}</p>
-            <p>Date: {{ lastInvoice.date | date:'dd MMM yyyy, hh:mm a' }}</p>
-            <p>Customer: {{ lastInvoice.customerName }}</p>
-            <div class="ticket-divider">--------------------------------</div>
-          </div>
-
-          <div class="ticket-items">
-            @for (it of lastInvoice.items; track it.product.id) {
-              <div class="ticket-row">
-                <span>{{ it.product.name }} (x{{ it.quantity }})</span>
-                <span>₹{{ it.totalPrice }}</span>
-              </div>
-            }
-            <div class="ticket-divider">--------------------------------</div>
-          </div>
-
-          <div class="ticket-totals">
-            <div class="ticket-row"><span>Subtotal:</span><span>₹{{ lastInvoice.subtotal | number:'1.2-2' }}</span></div>
-            <div class="ticket-row"><span>GST Tax (18%):</span><span>₹{{ lastInvoice.tax | number:'1.2-2' }}</span></div>
-            <div class="ticket-row bold"><span>GRAND TOTAL:</span><span>₹{{ lastInvoice.grandTotal | number:'1.2-2' }}</span></div>
-            <div class="ticket-row"><span>Payment Mode:</span><span>{{ lastInvoice.paymentMethod }}</span></div>
-            <div class="ticket-divider">================================</div>
-          </div>
-
-          <div class="ticket-footer">
-            <p>Thank you for shopping with us!</p>
-            <p>*** Powered by Liquid Glass POS ***</p>
-          </div>
-        </div>
-
-        <div class="modal-footer">
-          <button mat-stroked-button class="glass-btn" (click)="closeReceiptModal()">Close</button>
-          <button mat-flat-button class="glass-btn glass-btn-primary" (click)="printThermalReceipt()">
-            <mat-icon>print</mat-icon> Print Thermal Ticket
-          </button>
-        </div>
-
+      <div class="modal-header">
+        <h3><mat-icon>receipt</mat-icon> ESC/POS Thermal Receipt</h3>
+        <button mat-icon-button (click)="closeReceiptModal()"><mat-icon>close</mat-icon></button>
       </div>
+
+      <!-- ESC/POS Receipt Simulation Ticket -->
+      <div class="thermal-ticket">
+        <div class="ticket-header">
+          <h2>{{ lastInvoice.companyName | uppercase }}</h2>
+          <p>Branch: {{ lastInvoice.branchName }}</p>
+          <p>GSTIN: 29AAACT1234A1Z1</p>
+          <div class="ticket-divider">--------------------------------</div>
+        </div>
+
+        <div class="ticket-meta">
+          <p>Inv: {{ lastInvoice.invoiceNo }}</p>
+          <p>Date: {{ lastInvoice.date | date:'dd MMM yyyy, hh:mm a' }}</p>
+          <p>Customer: {{ lastInvoice.customerName }}</p>
+          <div class="ticket-divider">--------------------------------</div>
+        </div>
+
+        <div class="ticket-items">
+          @for (it of lastInvoice.items; track it.product.id) {
+          <div class="ticket-row">
+            <span>{{ it.product.name }} (x{{ it.quantity }})</span>
+            <span>₹{{ it.totalPrice }}</span>
+          </div>
+          }
+          <div class="ticket-divider">--------------------------------</div>
+        </div>
+
+        <div class="ticket-totals">
+          <div class="ticket-row"><span>Subtotal:</span><span>₹{{ lastInvoice.subtotal | number:'1.2-2' }}</span></div>
+          <div class="ticket-row"><span>GST Tax (18%):</span><span>₹{{ lastInvoice.tax | number:'1.2-2' }}</span></div>
+          <div class="ticket-row bold"><span>GRAND TOTAL:</span><span>₹{{ lastInvoice.grandTotal | number:'1.2-2'
+              }}</span></div>
+          <div class="ticket-row"><span>Payment Mode:</span><span>{{ lastInvoice.paymentMethod }}</span></div>
+          <div class="ticket-divider">================================</div>
+        </div>
+
+        <div class="ticket-footer">
+          <p>Thank you for shopping with us!</p>
+          <p>*** Powered by Liquid Glass POS ***</p>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button mat-stroked-button class="glass-btn" (click)="closeReceiptModal()">Close</button>
+        <button mat-flat-button class="glass-btn glass-btn-primary" (click)="printThermalReceipt()">
+          <mat-icon>print</mat-icon> Print Thermal Ticket
+        </button>
+      </div>
+
     </div>
+  </div>
   }
 
 </div>

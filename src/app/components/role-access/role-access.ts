@@ -31,7 +31,7 @@ type AccessLevel = 'global' | 'admin' | 'branch' | 'employee';
     MatCardModule,
     MatProgressSpinnerModule,
     MatTooltipModule
-],
+  ],
   templateUrl: './role-access.html',
   styleUrl: './role-access.scss',
 })
@@ -84,6 +84,10 @@ export class RoleAccess implements OnInit {
     this.loadBranches();
   }
 
+  seedingMenus = false;
+
+
+
   // ────────────────────────────── lookups ──────────────────────────────
 
   loadRoles(): void {
@@ -96,15 +100,45 @@ export class RoleAccess implements OnInit {
     this.loading = true;
     this.commonService.getApi('menus').subscribe({
       next: (res: any) => {
-        const fetched = res?.data ?? [];
+        const fetched: any[] = res?.data ?? [];
         const existingPaths = new Set(fetched.map((m: any) => (m.path || m.name || '').toLowerCase()));
         const missing = ALL_APP_ROUTES_37.filter(r => !existingPaths.has(r.path.toLowerCase()) && !existingPaths.has(r.name.toLowerCase()));
-        this.menus = [...fetched, ...missing];
+
+        const combined = [...fetched, ...missing];
+        const usedMenuIds = new Set<number>();
+
+        // Guarantee 100% unique menu IDs and non-shared permissions array references
+        this.menus = combined.map((m, idx) => {
+          let uniqueMenuId = m.id;
+          if (!uniqueMenuId || usedMenuIds.has(uniqueMenuId)) {
+            uniqueMenuId = (idx + 1) * 100 + Math.abs(this.hashCode(m.path || m.name || `menu_${idx}`));
+            while (usedMenuIds.has(uniqueMenuId)) {
+              uniqueMenuId++;
+            }
+          }
+          usedMenuIds.add(uniqueMenuId);
+
+          const rawPerms = Array.isArray(m.permissions) ? m.permissions.map((p: any) => ({ ...p })) : [];
+          return {
+            ...m,
+            id: uniqueMenuId,
+            permissions: rawPerms
+          };
+        });
+
         this.loading = false;
         this.cdr.detectChanges();
       },
       error: () => {
-        this.menus = ALL_APP_ROUTES_37;
+        const usedMenuIds = new Set<number>();
+        this.menus = ALL_APP_ROUTES_37.map((m, idx) => {
+          let uniqueMenuId = m.id || (idx + 1);
+          if (usedMenuIds.has(uniqueMenuId)) {
+            uniqueMenuId = (idx + 1) * 100;
+          }
+          usedMenuIds.add(uniqueMenuId);
+          return { ...m, id: uniqueMenuId, permissions: [] };
+        });
         this.loading = false;
         this.cdr.detectChanges();
       },
@@ -258,7 +292,37 @@ export class RoleAccess implements OnInit {
       next: (res: any) => {
         const assignments: any[] = res?.data ?? [];
         this.assignedMap.clear();
-        assignments.forEach(a => this.assignedMap.set(a.permission_id, a.id));
+
+        assignments.forEach(a => {
+          const dbPermId = a.permission_id;
+          const recordId = a.id;
+
+          // 1. Direct DB permission_id mapping
+          if (dbPermId) {
+            this.assignedMap.set(dbPermId, recordId);
+          }
+
+          // 2. Cross-match menu & action to local synthesized menu permissions
+          if (a.permission) {
+            const menuRef = a.permission.menu;
+            const action = a.permission.action;
+            if (action && menuRef) {
+              const matchedMenu = this.menus.find(m =>
+                (menuRef.id && m.id === menuRef.id) ||
+                (menuRef.path && m.path?.toLowerCase() === menuRef.path.toLowerCase()) ||
+                (menuRef.name && m.name?.toLowerCase() === menuRef.name.toLowerCase())
+              );
+
+              if (matchedMenu) {
+                const localPerm = this.getPermission(matchedMenu, action);
+                if (localPerm) {
+                  this.assignedMap.set(localPerm.id, recordId);
+                }
+              }
+            }
+          }
+        });
+
         this.workingAssignments = new Set(this.assignedMap.keys());
         this.matrixLoading = false;
         this.cdr.detectChanges();
@@ -271,17 +335,20 @@ export class RoleAccess implements OnInit {
     });
   }
 
-  /** Returns the permission object for a given menu + action (synthesizing if missing) */
+  /** Returns the permission object for a given menu + action (isolated per menu module) */
   getPermission(menu: any, action: string): any {
-    if (!menu) return null;
-    let perm = menu.permissions?.find((p: any) => p.action === action);
+    if (!menu || !menu.id) return null;
+    if (!menu.permissions) {
+      menu.permissions = [];
+    }
+
+    let perm = menu.permissions.find((p: any) => p.action === action);
     if (!perm) {
-      const menuId = menu.id || Math.abs(this.hashCode(menu.path || menu.name || 'menu'));
       const actionMap: Record<string, number> = { READ: 1, WRITE: 2, UPDATE: 3, DELETE: 4, APPROVE: 5 };
       const actionId = actionMap[action] || 9;
-      const permId = menuId * 10 + actionId;
-      perm = { id: permId, menu_id: menuId, action: action };
-      if (!menu.permissions) menu.permissions = [];
+      // Synthesize unique permission ID strictly namespaced to menu.id
+      const permId = Number(`${menu.id}${actionId}`);
+      perm = { id: permId, menu_id: menu.id, action: action, synthesized: true };
       menu.permissions.push(perm);
     }
     return perm;
@@ -348,11 +415,10 @@ export class RoleAccess implements OnInit {
 
   private findPermissionDetails(permId: number): { menu: any; action: string } | null {
     for (const menu of this.menus) {
-      if (menu.permissions) {
-        for (const action of this.actions) {
-          const p = menu.permissions.find((x: any) => x.action === action);
+      if (menu.permissions && Array.isArray(menu.permissions)) {
+        for (const p of menu.permissions) {
           if (p && p.id === permId) {
-            return { menu, action };
+            return { menu, action: p.action };
           }
         }
       }
@@ -374,6 +440,10 @@ export class RoleAccess implements OnInit {
 
       grants.push({
         permission_id: permId,
+        menu_id: details.menu.id,
+        menu_name: details.menu.name,
+        menu_path: details.menu.path,
+        action: details.action,
         canApprove: details.action === 'APPROVE',
       });
     }

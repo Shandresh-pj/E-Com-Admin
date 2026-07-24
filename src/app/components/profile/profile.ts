@@ -80,7 +80,7 @@ export class Profile implements OnInit {
     });
 
     const user = this.authService.getUser();
-    this.ProfileId = user?.id;
+    this.ProfileId = user?.id || user?.userId || user?.user_id;
   }
 
   ngOnInit(): void {

@@ -5,12 +5,12 @@
 
 .pos-billing-page {
   position: relative;
-  min-height: calc(100vh - 90px);
-  padding: 16px;
+  min-height: auto;
+  padding: 4px 0;
   display: flex;
   flex-direction: column;
   gap: 16px;
-  overflow-x: hidden;
+  overflow: visible;
   box-sizing: border-box;
   width: 100%;
 
@@ -645,13 +645,30 @@
   }
 
   .cart-items-scroll {
-    min-height: 180px;
-    max-height: 340px;
+    min-height: 140px;
+    max-height: 320px;
     overflow-y: auto;
-    padding: 12px 0;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(79, 70, 229, 0.3) transparent;
+    padding: 12px 4px;
     display: flex;
     flex-direction: column;
     gap: 8px;
+
+    &::-webkit-scrollbar {
+      width: 5px;
+    }
+    &::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    &::-webkit-scrollbar-thumb {
+      background: rgba(79, 70, 229, 0.25);
+      border-radius: 4px;
+
+      &:hover {
+        background: rgba(79, 70, 229, 0.45);
+      }
+    }
 
     .empty-cart-state {
       display: flex;

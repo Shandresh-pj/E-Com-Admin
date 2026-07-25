@@ -10,6 +10,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { CommonService } from 'src/app/Securities/Services/common.service';
 import { AlertService } from 'src/app/Securities/Services/alert.service';
 import { PermissionService } from 'src/app/Securities/Services/permissions.service';
+import { AuthService } from 'src/app/Securities/Services/auth.service';
 import { environment } from 'src/environment/environment';
 import { MatTable, TableColumn } from 'src/utils/mat-table/mat-table';
 import { AppTranslatePipe } from 'src/app/pipes/app-translate.pipe';
@@ -59,6 +60,7 @@ export class Orders implements OnInit {
     private fb: FormBuilder,
     private commonService: CommonService,
     private alert: AlertService,
+    private authService: AuthService,
     public perm: PermissionService,
     private cdr: ChangeDetectorRef
   ) {
@@ -196,9 +198,12 @@ export class Orders implements OnInit {
     this.loading = true;
     const formValue = this.orderForm.getRawValue();
     
+    const user = this.authService.getUser();
+    const companyId = formValue.company_id || user?.company_id || user?.companyId || 1;
+
     // Clean and validate items payload
     const payload = {
-      company_id: formValue.company_id,
+      company_id: companyId,
       coupon_code: formValue.coupon_code || undefined,
       payment: formValue.payment,
       items: formValue.items.map((item: any) => ({

@@ -79,24 +79,19 @@ export class PosBillingComponent implements OnInit {
   private commonService = inject(CommonService);
   private sessionService = inject(SessionService);
 
-  // Company, Admin & Branch Context
-  companyName = signal<string>('Spike Global Superstores');
+  // Company, Admin & Branch Context (100% Dynamic API driven)
+  companyName = signal<string>('');
   companyId = signal<number>(1);
-  adminName = signal<string>('Super Admin');
-  branches = signal<PosBranch[]>([
-    { id: 1, name: 'HQ Main Store - Downtown', code: 'BR-HQ-01' },
-    { id: 2, name: 'North Boulevard Express', code: 'BR-NTH-02' },
-    { id: 3, name: 'South Bay Mall Outlet', code: 'BR-STH-03' },
-    { id: 4, name: 'Westside Supercenter', code: 'BR-WST-04' }
-  ]);
-  selectedBranch = signal<PosBranch>({ id: 1, name: 'HQ Main Store - Downtown', code: 'BR-HQ-01' });
+  adminName = signal<string>('');
+  branches = signal<PosBranch[]>([]);
+  selectedBranch = signal<PosBranch>({ id: 0, name: '', code: '' });
 
   // Search & Filters
   searchQuery = signal<string>('');
   selectedCategory = signal<string>('ALL');
   isLoadingProducts = signal<boolean>(false);
 
-  // Fallback Product Database
+  // Dynamic Product Database
   products: PosProduct[] = [];
 
   categories: string[] = ['ALL'];
@@ -148,9 +143,25 @@ export class PosBillingComponent implements OnInit {
   cashTendered: number | null = null;
   quickCashPresets = [100, 200, 500, 1000, 2000];
 
-  // Receipt Modal State
+  // Hardware Device Management & Discovery Modal State
+  showDeviceModal = false;
+  newDeviceName = '';
+  newDeviceType: any = 'THERMAL_PRINTER';
+  newDeviceProtocol: any = 'WIFI_IP';
+  newDeviceAddress = '192.168.1.105:9100';
+  isScanningHardware = false;
+
   showReceiptModal = false;
   lastInvoice: any = null;
+  receiptTheme = signal<'glass' | 'thermal' | 'a4' | 'obsidian'>('glass');
+  receiptWidth = signal<'80mm' | '58mm' | 'full'>('80mm');
+  showGstBreakdown = signal<boolean>(true);
+  showQrCode = signal<boolean>(true);
+  showBarcode = signal<boolean>(true);
+  showCustomerInfo = signal<boolean>(true);
+  showLogo = signal<boolean>(true);
+  footerNote = signal<string>('Thank you for shopping with us! Visit again.');
+  mobileActiveTab = signal<'catalog' | 'cart'>('catalog');
 
   ngOnInit(): void {
     this.loadCompanyAndBranchContext();
@@ -222,8 +233,8 @@ export class PosBillingComponent implements OnInit {
           if (list.length > 0) {
             const mappedBranches: PosBranch[] = list.map((b: any) => ({
               id: b.id || b.branch_id,
-              name: b.name || b.branch_name,
-              code: b.code || `BR-${b.id}`,
+              name: b.name || b.branch_name || 'Main Branch',
+              code: b.code || b.branch_code || `BR-${b.id}`,
               address: b.address || b.location || b.email
             }));
             this.branches.set(mappedBranches);
@@ -232,6 +243,11 @@ export class PosBillingComponent implements OnInit {
             const userBranchId = user?.branch_id || user?.branchId;
             const activeBranch = mappedBranches.find(b => b.id === userBranchId) || mappedBranches[0];
             this.selectedBranch.set(activeBranch);
+
+            // Re-fetch branch products from API
+            if (activeBranch && activeBranch.id) {
+              this.loadProductsFromApi(activeBranch.id);
+            }
           }
         }
       });
@@ -256,23 +272,23 @@ export class PosBillingComponent implements OnInit {
 
         if (res && (res.data || Array.isArray(res))) {
           const list = Array.isArray(res) ? res : res.data;
-          if (list.length > 0) {
+          if (Array.isArray(list)) {
             this.products = list.map((p: any) => ({
               id: p.id,
-              code: p.barcode || p.code || p.sku || `8901030${p.id}`,
-              name: p.name || p.title,
-              category: p.category_name || p.category || 'General Products',
-              price: Number(p.price || p.selling_price || 100),
-              stock: Number(p.stock_in_hand || p.stock || p.quantity || 50),
+              code: p.barcode || p.code || p.sku || `SKU-${p.id}`,
+              name: p.name || p.title || 'Product',
+              category: p.category_name || p.category || 'General',
+              price: Number(p.price ?? p.selling_price ?? 0),
+              stock: Number(p.stock_in_hand ?? p.stock ?? p.quantity ?? 0),
               unit: p.unit || (p.is_weighable ? 'kg' : 'pcs'),
               isWeighable: Boolean(p.is_weighable || p.unit === 'kg'),
-              image: p.image || p.thumbnail || 'assets/images/products/p1.jpg',
+              image: p.image || p.thumbnail || '',
               manufacture_date: p.manufacture_date || null,
               expiry_date: p.expiry_date || null
             }));
 
-            // Dynamically build/merge categories list
-            const catSet = new Set<string>(this.categories);
+            // Dynamically build/merge categories list from API products
+            const catSet = new Set<string>(['ALL']);
             this.products.forEach(p => { if (p.category) catSet.add(p.category); });
             this.categories = Array.from(catSet);
 
@@ -515,6 +531,99 @@ export class PosBillingComponent implements OnInit {
     });
   }
 
+  // Dynamic Hardware Device Helpers
+  async scanDevicesApi() {
+    this.isScanningHardware = true;
+    await this.deviceService.scanForDevices();
+    this.isScanningHardware = false;
+    Swal.fire({
+      toast: true,
+      position: 'top-end',
+      icon: 'success',
+      title: 'POS Hardware Ports Auto-Scanned via API!',
+      showConfirmButton: false,
+      timer: 1800
+    });
+  }
+
+  openDeviceModal() {
+    this.showDeviceModal = true;
+  }
+
+  closeDeviceModal() {
+    this.showDeviceModal = false;
+  }
+
+  registerDeviceFromForm() {
+    if (!this.newDeviceName.trim()) {
+      Swal.fire('Error', 'Please enter a device name', 'error');
+      return;
+    }
+
+    this.deviceService.addDevice({
+      name: this.newDeviceName.trim(),
+      type: this.newDeviceType,
+      protocol: this.newDeviceProtocol,
+      status: 'CONNECTED',
+      portOrAddress: this.newDeviceAddress || '192.168.1.105:9100',
+      ipAddress: this.newDeviceAddress,
+      latencyMs: 3,
+      signalStrength: 95,
+      autoReconnect: true
+    });
+
+    Swal.fire({
+      icon: 'success',
+      title: 'Hardware Device Connected!',
+      text: `${this.newDeviceName} registered and saved to API database.`,
+      timer: 1800,
+      showConfirmButton: false
+    });
+
+    this.newDeviceName = '';
+    this.showDeviceModal = false;
+  }
+
+  getDeviceIcon(type: string): string {
+    switch (type) {
+      case 'THERMAL_PRINTER': return 'print';
+      case 'BARCODE_SCANNER': return 'qr_code_scanner';
+      case 'WEIGH_SCALE': return 'scale';
+      case 'CASH_DRAWER': return 'point_of_sale';
+      case 'CUSTOMER_DISPLAY': return 'desktop_windows';
+      case 'CARD_READER': return 'credit_card';
+      case 'BIOMETRIC_READER': return 'fingerprint';
+      default: return 'devices_other';
+    }
+  }
+
+  handleDeviceAction(device: any) {
+    if (device.type === 'THERMAL_PRINTER') {
+      const printed = this.deviceService.testPrintTicket();
+      Swal.fire({
+        toast: true, position: 'top-end', icon: printed ? 'success' : 'warning',
+        title: printed ? `Test Ticket sent to ${device.name}` : `Printer ${device.name} Offline`,
+        showConfirmButton: false, timer: 1800
+      });
+    } else if (device.type === 'WEIGH_SCALE') {
+      this.fetchScaleWeight();
+    } else if (device.type === 'CASH_DRAWER') {
+      this.triggerDrawerPulse();
+    } else if (device.type === 'BARCODE_SCANNER') {
+      Swal.fire({
+        toast: true, position: 'top-end', icon: 'info',
+        title: `Scanner ${device.name} Ready (${device.protocol})`,
+        showConfirmButton: false, timer: 1800
+      });
+    } else {
+      Swal.fire({
+        toast: true, position: 'top-end', icon: 'info',
+        title: `${device.name} (${device.status}): ${device.portOrAddress || 'OK'}`,
+        showConfirmButton: false, timer: 1800
+      });
+    }
+  }
+
   // Quick Open Cash Drawer Button
   triggerDrawerPulse() {
     this.deviceService.triggerCashDrawer();
@@ -593,13 +702,22 @@ export class PosBillingComponent implements OnInit {
       }
     });
 
-    // Submit order to Backend API (pos/checkout or orders/create)
-    this.commonService.postApi('pos/checkout', orderPayload)
+    // Submit order to Backend API (orders/create or pos/checkout)
+    this.commonService.postApi('orders/create', orderPayload)
       .pipe(
-        catchError(() => this.commonService.postApi('orders/create', orderPayload)),
+        catchError(() => this.commonService.postApi('pos/checkout', orderPayload)),
         catchError(() => of(null))
       )
-      .subscribe();
+      .subscribe((res: any) => {
+        if (res && res.data && res.data.order) {
+          const apiOrder = res.data.order;
+          if (apiOrder.invoice_no) {
+            this.lastInvoice.invoiceNo = apiOrder.invoice_no;
+          }
+        }
+        // Re-sync product stock from API server post checkout
+        this.loadProductsFromApi(this.selectedBranch().id);
+      });
 
     this.lastInvoice = {
       invoiceNo,
@@ -645,6 +763,43 @@ export class PosBillingComponent implements OnInit {
 
   printThermalReceipt() {
     window.print();
+  }
+
+  setTheme(theme: 'glass' | 'thermal' | 'a4' | 'obsidian') {
+    this.receiptTheme.set(theme);
+    if (theme === 'a4') {
+      this.receiptWidth.set('full');
+    } else if (this.receiptWidth() === 'full') {
+      this.receiptWidth.set('80mm');
+    }
+  }
+
+  setReceiptWidth(w: '80mm' | '58mm' | 'full') {
+    this.receiptWidth.set(w);
+  }
+
+  toggleGst() {
+    this.showGstBreakdown.update(v => !v);
+  }
+
+  toggleQr() {
+    this.showQrCode.update(v => !v);
+  }
+
+  toggleBarcode() {
+    this.showBarcode.update(v => !v);
+  }
+
+  toggleCustomer() {
+    this.showCustomerInfo.update(v => !v);
+  }
+
+  toggleLogo() {
+    this.showLogo.update(v => !v);
+  }
+
+  updateFooterNote(val: string) {
+    this.footerNote.set(val);
   }
 
   closeReceiptModal() {

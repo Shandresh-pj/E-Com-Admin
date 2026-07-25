@@ -44,6 +44,7 @@ import { AppTranslatePipe } from 'src/app/pipes/app-translate.pipe';
   styleUrl: './product.scss',
 })
 export class Product {
+  isSubmitting = false;
   tableColumns = [
     { columnDef: 'id', header: 'No' },
     { columnDef: 'name', header: 'Name' },
@@ -934,6 +935,8 @@ export class Product {
   }
 
   submit(form: FormGroup) {
+    if (this.isSubmitting) return;
+
     if (form.invalid) {
       form.markAllAsTouched();
       return;
@@ -954,6 +957,8 @@ export class Product {
         }
       }
     }
+
+    this.isSubmitting = true;
 
     const formData = new FormData();
     formData.append('name', value.name);
@@ -999,20 +1004,24 @@ export class Product {
     if (!this.Update_button) {
       this.commonService.postApi(`products/add`, formData).subscribe({
         next: (res: any) => {
+          this.isSubmitting = false;
           this.alert.success("Product Created Successfully");
           this.getProducts(() => this.cancelProduct());
         },
         error: (err: any) => {
+          this.isSubmitting = false;
           this.alert.error(err?.error?.message || "Failed to create product");
         }
       });
     } else {
       this.commonService.putApi(`products/${this.SelectedProductId}`, formData).subscribe({
         next: (res: any) => {
+          this.isSubmitting = false;
           this.alert.success("Product Updated Successfully");
           this.getProducts(() => this.cancelProduct());
         },
         error: (err: any) => {
+          this.isSubmitting = false;
           this.alert.error(err?.error?.message || "Failed to update product");
         }
       });

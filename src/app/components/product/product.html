@@ -583,7 +583,7 @@
                 <button mat-stroked-button class="btn-rounded Cancel_Button" type="button" (click)="cancelProduct()">
                     <mat-icon>close</mat-icon> Cancel
                 </button>
-                <button mat-flat-button class="btn-rounded btn-gradient" type="submit" (click)="submit(ProductForm)">
+                <button mat-flat-button class="btn-rounded btn-gradient" type="submit" [disabled]="isSubmitting" (click)="submit(ProductForm)">
                     <mat-icon>{{Update_button ? 'save' : 'add'}}</mat-icon>
                     {{Update_button ? 'Update Product' : 'Save Product'}}
                 </button>

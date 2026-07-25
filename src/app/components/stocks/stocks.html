@@ -79,18 +79,19 @@
         </app-mat-table>
 
         <ng-template #stockTpl let-element>
-          <span [class.text-error]="element.stock <= (element.critical_stock_threshold || 2)"
-                [class.text-warning]="element.stock > (element.critical_stock_threshold || 2) && element.stock <= (element.low_stock_threshold || 5)"
+          @let currentStock = (element.stock !== undefined && element.stock !== null) ? element.stock : (element.stock_in_hand ?? 0);
+          <span [class.text-error]="currentStock <= (element.critical_stock_threshold || 2)"
+                [class.text-warning]="currentStock > (element.critical_stock_threshold || 2) && currentStock <= (element.low_stock_threshold || 5)"
                 class="f-w-600">
-            {{ element.stock }}
+            {{ currentStock }}
           </span>
-          @if (element.stock <= 0) {
+          @if (currentStock <= 0) {
             <span class="badge bg-light-error text-error m-l-8 font-weight-bold">Out of Stock</span>
           }
-          @if (element.stock > 0 && element.stock <= (element.critical_stock_threshold || 2)) {
+          @if (currentStock > 0 && currentStock <= (element.critical_stock_threshold || 2)) {
             <span class="badge bg-light-error text-error m-l-8">Critical Stock</span>
           }
-          @if (element.stock > (element.critical_stock_threshold || 2) && element.stock <= (element.low_stock_threshold || 5)) {
+          @if (currentStock > (element.critical_stock_threshold || 2) && currentStock <= (element.low_stock_threshold || 5)) {
             <span class="badge bg-light-warning text-warning m-l-8">Low Stock</span>
           }
         </ng-template>

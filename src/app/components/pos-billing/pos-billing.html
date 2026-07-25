@@ -10,13 +10,12 @@
     <div class="top-bar-left">
       <div class="pos-badge">
         <mat-icon>business</mat-icon>
-        <span>{{ companyName() | uppercase }} • ADMIN: {{ adminName() }} • BRANCH: {{ selectedBranch().name || 'Main
-          Store' }}</span>
+        <span>{{ companyName() ? (companyName() | uppercase) : 'ONLINE STORE' }} • ADMIN: {{ adminName() || 'USER' }} • BRANCH: {{ selectedBranch().name || 'MAIN BRANCH' }}</span>
       </div>
       <h1 class="pos-title">{{ 'POS Billing Machine' | translate }}</h1>
     </div>
 
-    <!-- Branch Selector & Live Hardware Status Indicators -->
+    <!-- Dynamic Hardware Status Indicators (Fetched from API) -->
     <div class="hardware-indicators">
 
       <!-- Company Branch Selector Dropdown -->
@@ -29,38 +28,53 @@
         </select>
       </div>
 
-      <div class="hw-chip connected" matTooltip="Star Micronics WiFi Printer (192.168.1.105:9100)">
-        <span class="led-dot green"></span>
-        <mat-icon>print</mat-icon>
-        <span>PRINTER: OK (WiFi)</span>
+      <!-- DYNAMIC HARDWARE DEVICE CHIPS FROM API -->
+      @for (dev of deviceService.allDevices(); track dev.id) {
+      <div class="hw-chip" [class.connected]="dev.status === 'CONNECTED'" [class.disconnected]="dev.status === 'DISCONNECTED'" (click)="handleDeviceAction(dev)" [matTooltip]="dev.name + ' (' + dev.protocol + ') • ' + (dev.portOrAddress || dev.ipAddress || 'Connected')">
+        <span class="led-dot" [class.green]="dev.status === 'CONNECTED'" [class.red]="dev.status === 'DISCONNECTED'" [class.blue]="dev.type === 'WEIGH_SCALE'"></span>
+        <mat-icon>{{ getDeviceIcon(dev.type) }}</mat-icon>
+        <span>
+          @if (dev.type === 'WEIGH_SCALE') {
+            SCALE: {{ scaleWeightKg() }} kg
+          } @else {
+            {{ dev.name | uppercase }}
+          }
+        </span>
       </div>
+      }
 
-      <div class="hw-chip connected" matTooltip="Honeywell WiFi 2D Scanner Ready">
-        <span class="led-dot green"></span>
-        <mat-icon>qr_code_scanner</mat-icon>
-        <span>SCANNER: READY</span>
-      </div>
+      <button mat-stroked-button class="glass-btn-drawer" (click)="openDeviceModal()" matTooltip="Scan or Connect Hardware Devices">
+        <mat-icon>settings_remote</mat-icon>
+        <span>Devices</span>
+      </button>
 
-      <div class="hw-chip active-scale" matTooltip="CAS ER-Plus Scale Live Weight (Click to sample)"
-        (click)="fetchScaleWeight()">
-        <span class="led-dot blue"></span>
-        <mat-icon>scale</mat-icon>
-        <span>SCALE: {{ scaleWeightKg() }} kg</span>
-      </div>
-
-      <button mat-stroked-button class="glass-btn-drawer" (click)="triggerDrawerPulse()"
-        matTooltip="Open Cash Drawer (RJ11 24V Signal)">
+      <button mat-stroked-button class="glass-btn-drawer" (click)="triggerDrawerPulse()" matTooltip="Open Cash Drawer (RJ11 24V Signal)">
         <mat-icon>point_of_sale</mat-icon>
         <span>Open Drawer</span>
       </button>
     </div>
   </div>
 
+  <!-- Mobile Tab Switcher Bar (visible on <= 768px screens) -->
+  <div class="pos-mobile-tabs">
+    <button type="button" class="mobile-tab-btn" [class.active]="mobileActiveTab() === 'catalog'" (click)="mobileActiveTab.set('catalog')">
+      <mat-icon>grid_view</mat-icon>
+      <span>Catalogue ({{ filteredProducts().length }})</span>
+    </button>
+    <button type="button" class="mobile-tab-btn" [class.active]="mobileActiveTab() === 'cart'" (click)="mobileActiveTab.set('cart')">
+      <mat-icon>shopping_bag</mat-icon>
+      <span>Cart ({{ cartCount() }})</span>
+      @if (cartCount() > 0) {
+        <span class="mobile-cart-badge">₹{{ grandTotal() | number:'1.0-0' }}</span>
+      }
+    </button>
+  </div>
+
   <!-- Main POS Grid Layout (Product Catalogue + Live Cart) -->
   <div class="pos-main-layout">
 
     <!-- LEFT COLUMN: Product Catalog & Quick Controls -->
-    <div class="catalog-section">
+    <div class="catalog-section" [class.active-mobile-view]="mobileActiveTab() === 'catalog'">
 
       <!-- Barcode Search & Category Filter Bar -->
       <div class="catalog-filter-bar glass-card">
@@ -142,7 +156,7 @@
     </div>
 
     <!-- RIGHT COLUMN: Billing Cart & Fast Checkout -->
-    <div class="cart-section glass-card">
+    <div class="cart-section glass-card" [class.active-mobile-view]="mobileActiveTab() === 'cart'">
 
       <div class="cart-header">
         <div class="cart-title-wrap">
@@ -351,64 +365,461 @@
   </div>
   }
 
-  <!-- RECEIPT PREVIEW MODAL -->
+  <!-- ULTRA-PREMIUM & CUSTOMIZABLE RECEIPT PREVIEW MODAL -->
   @if (showReceiptModal && lastInvoice) {
-  <div class="glass-modal-backdrop" (click)="closeReceiptModal()">
-    <div class="receipt-modal-card" (click)="$event.stopPropagation()">
+  <div class="glass-modal-backdrop no-print-backdrop" (click)="closeReceiptModal()">
+    <div class="receipt-modal-card-customizable" (click)="$event.stopPropagation()">
 
-      <div class="modal-header">
-        <h3><mat-icon>receipt</mat-icon> ESC/POS Thermal Receipt</h3>
-        <button mat-icon-button (click)="closeReceiptModal()"><mat-icon>close</mat-icon></button>
+      <!-- Customizer Toolbar Header -->
+      <div class="customizer-toolbar no-print">
+        <div class="toolbar-top">
+          <div class="toolbar-title">
+            <div class="icon-orb"><mat-icon>palette</mat-icon></div>
+            <div>
+              <h3>Bill &amp; Receipt Customizer</h3>
+              <span class="subtitle">Customize design, theme, sections &amp; paper width before printing</span>
+            </div>
+          </div>
+          <button mat-icon-button (click)="closeReceiptModal()"><mat-icon>close</mat-icon></button>
+        </div>
+
+        <!-- Customization Controls Grid -->
+        <div class="customizer-controls">
+          <!-- Theme Picker -->
+          <div class="control-group">
+            <label><mat-icon>style</mat-icon> Design Style:</label>
+            <div class="theme-pills">
+              <button type="button" class="theme-btn" [class.active]="receiptTheme() === 'glass'" (click)="setTheme('glass')">
+                <span class="icon">💎</span> Liquid Glass
+              </button>
+              <button type="button" class="theme-btn" [class.active]="receiptTheme() === 'thermal'" (click)="setTheme('thermal')">
+                <span class="icon">🧾</span> Thermal ESC/POS
+              </button>
+              <button type="button" class="theme-btn" [class.active]="receiptTheme() === 'a4'" (click)="setTheme('a4')">
+                <span class="icon">📄</span> A4 Tax Invoice
+              </button>
+              <button type="button" class="theme-btn" [class.active]="receiptTheme() === 'obsidian'" (click)="setTheme('obsidian')">
+                <span class="icon">🖤</span> Obsidian Gold
+              </button>
+            </div>
+          </div>
+
+          <!-- Paper Format / Width -->
+          <div class="control-group">
+            <label><mat-icon>aspect_ratio</mat-icon> Paper Width:</label>
+            <div class="width-pills">
+              <button type="button" class="w-btn" [class.active]="receiptWidth() === '80mm'" (click)="setReceiptWidth('80mm')">
+                80mm Roll
+              </button>
+              <button type="button" class="w-btn" [class.active]="receiptWidth() === '58mm'" (click)="setReceiptWidth('58mm')">
+                58mm Roll
+              </button>
+              <button type="button" class="w-btn" [class.active]="receiptWidth() === 'full'" (click)="setReceiptWidth('full')">
+                Full Width
+              </button>
+            </div>
+          </div>
+
+          <!-- Section Visibility Toggles -->
+          <div class="control-group">
+            <label><mat-icon>tune</mat-icon> Toggle Sections:</label>
+            <div class="toggle-chips">
+              <button type="button" class="chip" [class.active]="showLogo()" (click)="toggleLogo()">
+                <mat-icon>{{ showLogo() ? 'check_box' : 'check_box_outline_blank' }}</mat-icon> Store Badge
+              </button>
+              <button type="button" class="chip" [class.active]="showCustomerInfo()" (click)="toggleCustomer()">
+                <mat-icon>{{ showCustomerInfo() ? 'check_box' : 'check_box_outline_blank' }}</mat-icon> Customer Info
+              </button>
+              <button type="button" class="chip" [class.active]="showGstBreakdown()" (click)="toggleGst()">
+                <mat-icon>{{ showGstBreakdown() ? 'check_box' : 'check_box_outline_blank' }}</mat-icon> GST Breakdown
+              </button>
+              <button type="button" class="chip" [class.active]="showQrCode()" (click)="toggleQr()">
+                <mat-icon>{{ showQrCode() ? 'check_box' : 'check_box_outline_blank' }}</mat-icon> QR Code
+              </button>
+              <button type="button" class="chip" [class.active]="showBarcode()" (click)="toggleBarcode()">
+                <mat-icon>{{ showBarcode() ? 'check_box' : 'check_box_outline_blank' }}</mat-icon> Barcode
+              </button>
+            </div>
+          </div>
+
+          <!-- Editable Greeting / Footer Note -->
+          <div class="control-group full-width-group">
+            <label><mat-icon>edit_note</mat-icon> Custom Footer Message:</label>
+            <input type="text" [ngModel]="footerNote()" (ngModelChange)="updateFooterNote($event)" placeholder="Enter custom greeting or return policy..." class="custom-note-input">
+          </div>
+        </div>
       </div>
 
-      <!-- ESC/POS Receipt Simulation Ticket -->
-      <div class="thermal-ticket">
-        <div class="ticket-header">
-          <h2>{{ lastInvoice.companyName | uppercase }}</h2>
-          <p>Branch: {{ lastInvoice.branchName }}</p>
-          <p>GSTIN: 29AAACT1234A1Z1</p>
-          <div class="ticket-divider">--------------------------------</div>
-        </div>
+      <!-- LIVE RECEIPT RENDER STAGE (Targets window.print()) -->
+      <div class="receipt-stage-container" [attr.data-theme]="receiptTheme()" [attr.data-width]="receiptWidth()">
+        
+        <!-- THEME 1: LIQUID GLASS DESIGN -->
+        @if (receiptTheme() === 'glass') {
+        <div class="printable-receipt glass-receipt-theme">
+          <div class="glass-receipt-hero">
+            @if (showLogo()) {
+            <div class="brand-badge"><mat-icon>local_mall</mat-icon></div>
+            }
+            <h2 class="store-name">{{ lastInvoice.companyName | uppercase }}</h2>
+            <p class="store-sub">Branch: {{ lastInvoice.branchName }} • GSTIN: 29AAACT1234A1Z1</p>
+          </div>
 
-        <div class="ticket-meta">
-          <p>Inv: {{ lastInvoice.invoiceNo }}</p>
-          <p>Date: {{ lastInvoice.date | date:'dd MMM yyyy, hh:mm a' }}</p>
-          <p>Customer: {{ lastInvoice.customerName }}</p>
-          <div class="ticket-divider">--------------------------------</div>
-        </div>
+          <div class="receipt-meta-grid">
+            <div class="meta-item">
+              <span class="label">INVOICE NO</span>
+              <span class="val highlight">{{ lastInvoice.invoiceNo }}</span>
+            </div>
+            <div class="meta-item">
+              <span class="label">DATE &amp; TIME</span>
+              <span class="val">{{ lastInvoice.date | date:'dd MMM yyyy, hh:mm a' }}</span>
+            </div>
+            <div class="meta-item">
+              <span class="label">PAYMENT MODE</span>
+              <span class="val badge-pay">{{ lastInvoice.paymentMethod }}</span>
+            </div>
+          </div>
 
-        <div class="ticket-items">
-          @for (it of lastInvoice.items; track it.product.id) {
-          <div class="ticket-row">
-            <span>{{ it.product.name }} (x{{ it.quantity }})</span>
-            <span>₹{{ it.totalPrice }}</span>
+          @if (showCustomerInfo()) {
+          <div class="customer-strip">
+            <mat-icon>person</mat-icon>
+            <span><strong>Customer:</strong> {{ lastInvoice.customerName }} ({{ lastInvoice.customerPhone }})</span>
           </div>
           }
-          <div class="ticket-divider">--------------------------------</div>
+
+          <div class="items-table-wrap">
+            <table class="glass-items-table">
+              <thead>
+                <tr>
+                  <th>ITEM</th>
+                  <th class="text-center">QTY</th>
+                  <th class="text-right">PRICE</th>
+                  <th class="text-right">TOTAL</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (it of lastInvoice.items; track it.product.id) {
+                <tr>
+                  <td class="item-name">{{ it.product.name }}</td>
+                  <td class="text-center">{{ it.quantity }}</td>
+                  <td class="text-right">₹{{ it.unitPrice | number:'1.2-2' }}</td>
+                  <td class="text-right fw-bold">₹{{ it.totalPrice | number:'1.2-2' }}</td>
+                </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+
+          <div class="totals-breakdown-card">
+            <div class="total-row"><span>Subtotal</span><span>₹{{ lastInvoice.subtotal | number:'1.2-2' }}</span></div>
+            
+            @if (showGstBreakdown()) {
+            <div class="total-row"><span>CGST (9%)</span><span>₹{{ (lastInvoice.tax / 2) | number:'1.2-2' }}</span></div>
+            <div class="total-row"><span>SGST (9%)</span><span>₹{{ (lastInvoice.tax / 2) | number:'1.2-2' }}</span></div>
+            }
+
+            @if (lastInvoice.cashTendered && lastInvoice.cashTendered > 0) {
+            <div class="total-row"><span>Cash Received</span><span>₹{{ lastInvoice.cashTendered | number:'1.2-2' }}</span></div>
+            <div class="total-row text-success"><span>Change Return</span><span>₹{{ lastInvoice.changeDue | number:'1.2-2' }}</span></div>
+            }
+
+            <div class="total-row grand-total-row">
+              <span>GRAND TOTAL</span>
+              <span class="grand-val">₹{{ lastInvoice.grandTotal | number:'1.2-2' }}</span>
+            </div>
+          </div>
+
+          <div class="receipt-bottom-widgets">
+            @if (showQrCode()) {
+            <div class="qr-verify-box">
+              <mat-icon>qr_code_2</mat-icon>
+              <span>Scan to verify digital tax receipt</span>
+            </div>
+            }
+            @if (showBarcode()) {
+            <div class="barcode-strip">
+              <div class="barcode-lines"></div>
+              <span class="barcode-text">*{{ lastInvoice.invoiceNo }}*</span>
+            </div>
+            }
+          </div>
+
+          <div class="receipt-footer-text">
+            <p class="greeting">{{ footerNote() }}</p>
+            <span class="powered">*** Powered by Spike Liquid Glass POS ***</span>
+          </div>
+        </div>
+        }
+
+        <!-- THEME 2: THERMAL ESC/POS SLIP -->
+        @if (receiptTheme() === 'thermal') {
+        <div class="printable-receipt thermal-receipt-theme">
+          <div class="thermal-header">
+            @if (showLogo()) {
+            <div class="thermal-logo"><mat-icon>storefront</mat-icon></div>
+            }
+            <h2 class="t-name">{{ lastInvoice.companyName | uppercase }}</h2>
+            <p>Branch: {{ lastInvoice.branchName }}</p>
+            <p>GSTIN: 29AAACT1234A1Z1</p>
+            <div class="t-line">================================</div>
+          </div>
+
+          <div class="thermal-meta">
+            <p><strong>Inv:</strong> {{ lastInvoice.invoiceNo }}</p>
+            <p><strong>Date:</strong> {{ lastInvoice.date | date:'dd/MM/yyyy hh:mm a' }}</p>
+            @if (showCustomerInfo()) {
+            <p><strong>Cust:</strong> {{ lastInvoice.customerName }}</p>
+            }
+            <p><strong>Mode:</strong> {{ lastInvoice.paymentMethod }}</p>
+            <div class="t-line">--------------------------------</div>
+          </div>
+
+          <div class="thermal-items">
+            @for (it of lastInvoice.items; track it.product.id) {
+            <div class="t-item-row">
+              <span class="t-item-desc">{{ it.product.name }}</span>
+              <span class="t-item-calc">{{ it.quantity }} x {{ it.unitPrice }}</span>
+              <span class="t-item-amt">₹{{ it.totalPrice }}</span>
+            </div>
+            }
+            <div class="t-line">--------------------------------</div>
+          </div>
+
+          <div class="thermal-totals">
+            <div class="t-row"><span>Subtotal:</span><span>₹{{ lastInvoice.subtotal | number:'1.2-2' }}</span></div>
+            @if (showGstBreakdown()) {
+            <div class="t-row"><span>GST Tax (18%):</span><span>₹{{ lastInvoice.tax | number:'1.2-2' }}</span></div>
+            }
+            <div class="t-row t-grand"><span>TOTAL:</span><span>₹{{ lastInvoice.grandTotal | number:'1.2-2' }}</span></div>
+            @if (lastInvoice.cashTendered) {
+            <div class="t-row"><span>Tendered:</span><span>₹{{ lastInvoice.cashTendered }}</span></div>
+            <div class="t-row"><span>Change:</span><span>₹{{ lastInvoice.changeDue | number:'1.2-2' }}</span></div>
+            }
+            <div class="t-line">================================</div>
+          </div>
+
+          @if (showQrCode()) {
+          <div class="thermal-qr">
+            <mat-icon>qr_code_2</mat-icon>
+            <span>Scan to Verify</span>
+          </div>
+          }
+
+          <div class="thermal-footer">
+            <p>{{ footerNote() }}</p>
+            <p>*** THANK YOU ***</p>
+          </div>
+        </div>
+        }
+
+        <!-- THEME 3: FORMAL A4 TAX INVOICE -->
+        @if (receiptTheme() === 'a4') {
+        <div class="printable-receipt a4-invoice-theme">
+          <div class="a4-header">
+            <div class="a4-company">
+              @if (showLogo()) {
+              <div class="a4-logo"><mat-icon>corporate_fare</mat-icon></div>
+              }
+              <div>
+                <h2>{{ lastInvoice.companyName }}</h2>
+                <p>HQ Store Address, High Street, Commercial Zone</p>
+                <p><strong>GSTIN:</strong> 29AAACT1234A1Z1 • <strong>Phone:</strong> +91 98765 43210</p>
+              </div>
+            </div>
+            <div class="a4-badge">
+              <span class="a4-type">TAX INVOICE</span>
+              <span class="a4-no">{{ lastInvoice.invoiceNo }}</span>
+              <span class="a4-status">PAID</span>
+            </div>
+          </div>
+
+          <div class="a4-parties-grid">
+            <div class="party-card">
+              <h4>BILLED FROM:</h4>
+              <p class="name">{{ lastInvoice.companyName }}</p>
+              <p>Branch: {{ lastInvoice.branchName }}</p>
+              <p>POS Machine ID: POS-TERMINAL-01</p>
+            </div>
+            @if (showCustomerInfo()) {
+            <div class="party-card">
+              <h4>BILLED TO (CUSTOMER):</h4>
+              <p class="name">{{ lastInvoice.customerName }}</p>
+              <p>Contact: {{ lastInvoice.customerPhone }}</p>
+              <p>Payment Mode: {{ lastInvoice.paymentMethod }}</p>
+            </div>
+            }
+          </div>
+
+          <table class="a4-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>DESCRIPTION</th>
+                <th>HSN/SAC</th>
+                <th class="text-center">QTY</th>
+                <th class="text-right">UNIT PRICE</th>
+                <th class="text-right">TAX (18%)</th>
+                <th class="text-right">TOTAL</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (it of lastInvoice.items; track it.product.id; let idx = $index) {
+              <tr>
+                <td>{{ idx + 1 }}</td>
+                <td><strong>{{ it.product.name }}</strong></td>
+                <td>998314</td>
+                <td class="text-center">{{ it.quantity }}</td>
+                <td class="text-right">₹{{ it.unitPrice | number:'1.2-2' }}</td>
+                <td class="text-right">₹{{ (it.totalPrice * 0.18) | number:'1.2-2' }}</td>
+                <td class="text-right fw-bold">₹{{ it.totalPrice | number:'1.2-2' }}</td>
+              </tr>
+              }
+            </tbody>
+          </table>
+
+          <div class="a4-footer-grid">
+            <div class="a4-notes-col">
+              <h5>Terms &amp; Conditions:</h5>
+              <p>1. Goods once sold will not be taken back without original bill.</p>
+              <p>2. Subject to local jurisdiction only.</p>
+              <p class="m-t-8"><strong>Customer Note:</strong> {{ footerNote() }}</p>
+            </div>
+            <div class="a4-totals-col">
+              <div class="a4-row"><span>Subtotal:</span><span>₹{{ lastInvoice.subtotal | number:'1.2-2' }}</span></div>
+              <div class="a4-row"><span>GST Tax (18%):</span><span>₹{{ lastInvoice.tax | number:'1.2-2' }}</span></div>
+              <div class="a4-row grand"><span>GRAND TOTAL:</span><span>₹{{ lastInvoice.grandTotal | number:'1.2-2' }}</span></div>
+              <div class="sign-block">
+                <span>Authorized Signatory</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        }
+
+        <!-- THEME 4: OBSIDIAN GOLD BOUTIQUE -->
+        @if (receiptTheme() === 'obsidian') {
+        <div class="printable-receipt obsidian-receipt-theme">
+          <div class="obsidian-header">
+            @if (showLogo()) {
+            <div class="gold-emblem"><mat-icon>star</mat-icon></div>
+            }
+            <h2>{{ lastInvoice.companyName | uppercase }}</h2>
+            <p>BOUTIQUE RECEIPT • {{ lastInvoice.branchName }}</p>
+          </div>
+
+          <div class="obsidian-meta">
+            <span>INV: {{ lastInvoice.invoiceNo }}</span>
+            <span>{{ lastInvoice.date | date:'dd.MM.yyyy' }}</span>
+          </div>
+
+          <div class="obsidian-items">
+            @for (it of lastInvoice.items; track it.product.id) {
+            <div class="obsidian-row">
+              <span class="name">{{ it.product.name }} (×{{ it.quantity }})</span>
+              <span class="dots"></span>
+              <span class="amt">₹{{ it.totalPrice | number:'1.2-2' }}</span>
+            </div>
+            }
+          </div>
+
+          <div class="obsidian-totals">
+            <div class="obs-row"><span>SUBTOTAL</span><span>₹{{ lastInvoice.subtotal | number:'1.2-2' }}</span></div>
+            <div class="obs-row"><span>TAX</span><span>₹{{ lastInvoice.tax | number:'1.2-2' }}</span></div>
+            <div class="obs-row total-gold"><span>TOTAL DUE</span><span>₹{{ lastInvoice.grandTotal | number:'1.2-2' }}</span></div>
+          </div>
+
+          @if (showQrCode()) {
+          <div class="obsidian-qr">
+            <mat-icon>qr_code_2</mat-icon>
+            <span>VERIFIED DIGITAL PASS</span>
+          </div>
+          }
+
+          <div class="obsidian-footer">
+            <p>{{ footerNote() }}</p>
+          </div>
+        </div>
+        }
+
+      </div>
+
+      <!-- Action Footer Buttons (no-print) -->
+      <div class="modal-footer no-print">
+        <button mat-stroked-button class="glass-btn" (click)="closeReceiptModal()">Close</button>
+        <button mat-flat-button class="glass-btn glass-btn-primary" (click)="printThermalReceipt()">
+          <mat-icon>print</mat-icon> Print Custom Bill / Invoice
+        </button>
+      </div>
+
+    </div>
+  </div>
+  }
+
+  <!-- DYNAMIC POS HARDWARE DEVICE MANAGEMENT MODAL -->
+  @if (showDeviceModal) {
+  <div class="glass-modal-backdrop" (click)="closeDeviceModal()">
+    <div class="glass-modal-card checkout-modal" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3><mat-icon>settings_remote</mat-icon> Connected POS Devices (API)</h3>
+        <button mat-icon-button (click)="closeDeviceModal()"><mat-icon>close</mat-icon></button>
+      </div>
+
+      <div class="checkout-modal-body">
+        <div class="flex m-b-12" style="justify-content: space-between; align-items: center;">
+          <span class="f-w-600">Registered API Hardware Devices:</span>
+          <button mat-flat-button color="accent" (click)="scanDevicesApi()" [disabled]="isScanningHardware">
+            <mat-icon>sync</mat-icon> {{ isScanningHardware ? 'Scanning Ports...' : 'Auto-Scan Ports' }}
+          </button>
         </div>
 
-        <div class="ticket-totals">
-          <div class="ticket-row"><span>Subtotal:</span><span>₹{{ lastInvoice.subtotal | number:'1.2-2' }}</span></div>
-          <div class="ticket-row"><span>GST Tax (18%):</span><span>₹{{ lastInvoice.tax | number:'1.2-2' }}</span></div>
-          <div class="ticket-row bold"><span>GRAND TOTAL:</span><span>₹{{ lastInvoice.grandTotal | number:'1.2-2'
-              }}</span></div>
-          <div class="ticket-row"><span>Payment Mode:</span><span>{{ lastInvoice.paymentMethod }}</span></div>
-          <div class="ticket-divider">================================</div>
+        <div class="device-list-container m-b-16" style="max-height: 180px; overflow-y: auto;">
+          @if (deviceService.allDevices().length === 0) {
+            <p class="text-muted p-12 text-center">No hardware devices registered yet on API backend.</p>
+          } @else {
+            @for (d of deviceService.allDevices(); track d.id) {
+            <div class="device-item-row flex p-8 m-b-8 border-rounded" style="justify-content: space-between; align-items: center; background: rgba(248, 250, 252, 0.8);">
+              <div class="dev-info flex" style="align-items: center; gap: 10px;">
+                <span class="led-dot" [class.green]="d.status === 'CONNECTED'" [class.red]="d.status === 'DISCONNECTED'"></span>
+                <div>
+                  <strong>{{ d.name }}</strong>
+                  <div class="sub-text text-muted" style="font-size: 0.75rem;">{{ d.type }} • {{ d.protocol }} ({{ d.portOrAddress || 'API' }})</div>
+                </div>
+              </div>
+              <button mat-icon-button color="warn" (click)="deviceService.removeDevice(d.id)" matTooltip="Remove device"><mat-icon>delete</mat-icon></button>
+            </div>
+            }
+          }
         </div>
 
-        <div class="ticket-footer">
-          <p>Thank you for shopping with us!</p>
-          <p>*** Powered by Liquid Glass POS ***</p>
+        <div class="add-device-box p-16 border-rounded" style="background: rgba(241, 245, 249, 0.6); border: 1px solid #cbd5e1;">
+          <h4 class="m-b-12 f-w-600">Connect New Hardware Device:</h4>
+          <div class="flex gap-8 m-b-8" style="gap: 8px;">
+            <input type="text" [(ngModel)]="newDeviceName" placeholder="Device Name (e.g. Star WiFi Printer)" class="glass-input-sm" style="flex: 1;">
+            <select [(ngModel)]="newDeviceType" class="glass-input-sm" style="flex: 1;">
+              <option value="THERMAL_PRINTER">Thermal Printer</option>
+              <option value="BARCODE_SCANNER">Barcode Scanner</option>
+              <option value="WEIGH_SCALE">Digital Weighing Scale</option>
+              <option value="CASH_DRAWER">Cash Drawer (RJ11)</option>
+              <option value="CUSTOMER_DISPLAY">VFD Customer Display</option>
+            </select>
+          </div>
+          <div class="flex gap-8 m-b-12" style="gap: 8px;">
+            <select [(ngModel)]="newDeviceProtocol" class="glass-input-sm" style="flex: 1;">
+              <option value="WIFI_IP">WiFi / IP Socket</option>
+              <option value="WEB_USB">WebUSB / USB</option>
+              <option value="WEB_SERIAL">WebSerial / COM Port</option>
+              <option value="BLUETOOTH">Bluetooth LE</option>
+            </select>
+            <input type="text" [(ngModel)]="newDeviceAddress" placeholder="IP / Address (e.g. 192.168.1.105:9100)" class="glass-input-sm" style="flex: 1;">
+          </div>
+          <button mat-flat-button class="glass-btn-primary w-100" (click)="registerDeviceFromForm()" style="width: 100%;">
+            <mat-icon>add_link</mat-icon> Save &amp; Connect Device to API
+          </button>
         </div>
       </div>
 
       <div class="modal-footer">
-        <button mat-stroked-button class="glass-btn" (click)="closeReceiptModal()">Close</button>
-        <button mat-flat-button class="glass-btn glass-btn-primary" (click)="printThermalReceipt()">
-          <mat-icon>print</mat-icon> Print Thermal Ticket
-        </button>
+        <button mat-stroked-button class="glass-btn" (click)="closeDeviceModal()">Close</button>
       </div>
-
     </div>
   </div>
   }

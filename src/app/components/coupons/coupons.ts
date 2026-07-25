@@ -99,20 +99,33 @@ export class Coupons implements OnInit {
     }
 
     const payload = { ...this.couponForm.value };
+    if (!payload.id) {
+      delete payload.id;
+    }
     // Ensure numeric value for non-monetary types
     if (payload.type === 'bogo' || payload.type === 'free_shipping') {
       payload.value = 0;
     }
 
-    if (payload.id) {
-      this.couponService.updateCoupon(payload.id, payload).subscribe(() => {
-        this.closeForm();
-        this.loadCoupons();
+    if (this.editingCoupon?.id) {
+      this.couponService.updateCoupon(this.editingCoupon.id, payload).subscribe({
+        next: () => {
+          this.closeForm();
+          this.loadCoupons();
+        },
+        error: (err: any) => {
+          console.error('Failed to update coupon', err);
+        }
       });
     } else {
-      this.couponService.createCoupon(payload).subscribe(() => {
-        this.closeForm();
-        this.loadCoupons();
+      this.couponService.createCoupon(payload).subscribe({
+        next: () => {
+          this.closeForm();
+          this.loadCoupons();
+        },
+        error: (err: any) => {
+          console.error('Failed to create coupon', err);
+        }
       });
     }
   }

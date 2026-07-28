@@ -62,6 +62,19 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
   isScrolled = signal(false);
   // Mobile menu state
   mobileMenuOpen = signal(false);
+  // Dark Theme state
+  isDarkTheme = signal(true);
+
+  toggleTheme() {
+    const next = !this.isDarkTheme();
+    this.isDarkTheme.set(next);
+    if (isPlatformBrowser(this.platformId)) {
+      document.documentElement.classList.toggle('dark', next);
+      document.body.classList.toggle('dark-theme', next);
+      document.body.classList.toggle('light-theme', !next);
+      localStorage.setItem('svk_theme', next ? 'dark' : 'light');
+    }
+  }
 
   // Animated counters
   usersCount = signal(0);
@@ -75,6 +88,23 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
 
   // Billing Cycle (Monthly vs Yearly)
   billingCycle = signal<'Monthly' | 'Yearly'>('Monthly');
+
+  // Interactive ROI Savings Calculator Signals
+  branchesCount = signal<number>(4);
+  ordersCount = signal<number>(1500);
+  estimatedSavings = computed(() => {
+    const branchSavings = this.branchesCount() * 24000;
+    const orderSavings = this.ordersCount() * 15;
+    return branchSavings + orderSavings;
+  });
+
+  updateBranches(event: any) {
+    this.branchesCount.set(Number(event.target.value));
+  }
+
+  updateOrders(event: any) {
+    this.ordersCount.set(Number(event.target.value));
+  }
 
   toggleBilling() {
     this.billingCycle.set(this.billingCycle() === 'Monthly' ? 'Yearly' : 'Monthly');
@@ -162,6 +192,15 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
     this.liveNotification.set('🤖 AI Autonomous Stock & Fraud Audit Complete — 0 Anomalies Found across 6 Branches.');
     setTimeout(() => this.liveNotification.set(null), 4000);
   }
+
+  techSpecs = [
+    { category: 'Frontend Architecture', icon: '⚡', tech: 'Angular 18 Standalone, TypeScript, RxJS', detail: 'Sub-50ms render latency with OnPush Change Detection & lazy routes' },
+    { category: 'Backend Engine', icon: '⚙️', tech: 'Node.js, Express REST API, Prisma ORM', detail: 'High-concurrency event loop supporting 10,000+ req/sec' },
+    { category: 'Database & Storage', icon: '🗄️', tech: 'Neon Serverless PostgreSQL, Redis Cache', detail: 'Multi-region failover & automated daily point-in-time backups' },
+    { category: 'Real-Time Telemetry', icon: '📡', tech: 'Socket.IO WebSockets Engine', detail: 'Instant stock velocity updates, order state, & role-access sync' },
+    { category: 'Artificial Intelligence', icon: '🤖', tech: 'Google Gemini AI & GPT-4o NLP', detail: 'Semantic vector search, catalog auto-enrichment, & demand forecasting' },
+    { category: 'Security & Compliance', icon: '🛡️', tech: '256-Bit SSL, Granular RBAC, SOC2 & GDPR', detail: 'Zero-trust auth, immutable audit logs, and encrypted payloads' },
+  ];
 
   // Typing headline
   typedText = signal('');
@@ -316,6 +355,14 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
     });
 
     if (!isPlatformBrowser(this.platformId)) return;
+
+    // Initialize Theme
+    const savedTheme = localStorage.getItem('svk_theme');
+    const isDark = savedTheme ? savedTheme === 'dark' : true;
+    this.isDarkTheme.set(isDark);
+    document.documentElement.classList.toggle('dark', isDark);
+    document.body.classList.toggle('dark-theme', isDark);
+    document.body.classList.toggle('light-theme', !isDark);
 
     // Scroll listener for nav
     this.scrollListener = () => {

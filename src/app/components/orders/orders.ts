@@ -13,6 +13,8 @@ import { PermissionService } from 'src/app/Securities/Services/permissions.servi
 import { AuthService } from 'src/app/Securities/Services/auth.service';
 import { environment } from 'src/environment/environment';
 import { MatTable, TableColumn } from 'src/utils/mat-table/mat-table';
+import { SocketService } from 'src/app/Securities/Services/socket.service';
+import { Subscription } from 'rxjs';
 import { AppTranslatePipe } from 'src/app/pipes/app-translate.pipe';
 
 @Component({
@@ -43,7 +45,7 @@ export class Orders implements OnInit {
   tableColumns: TableColumn[] = [
     { columnDef: 'invoice_no', header: 'Invoice' },
     { columnDef: 'company_name', header: 'Company' },
-    { columnDef: 'total', header: 'Total', type: 'currency', format: 'USD' },
+    { columnDef: 'total', header: 'Total', type: 'currency', format: 'INR' },
     { columnDef: 'payment_status', header: 'Pay Status', type: 'badge' },
     { columnDef: 'delivery_status', header: 'Delivery', type: 'badge' },
     { columnDef: 'created_at', header: 'Date', type: 'custom' }
@@ -55,6 +57,7 @@ export class Orders implements OnInit {
   selectedOrder: any = null;
   loading = false;
   apiUrl = environment.apiUrl;
+  private socketSub = new Subscription();
 
   constructor(
     private fb: FormBuilder,
@@ -62,7 +65,8 @@ export class Orders implements OnInit {
     private alert: AlertService,
     private authService: AuthService,
     public perm: PermissionService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private socketService: SocketService
   ) {
     this.orderForm = this.fb.group({
       company_id: ['', Validators.required],
@@ -80,6 +84,15 @@ export class Orders implements OnInit {
   ngOnInit() {
     this.loadOrders();
     this.loadLookups();
+
+    this.socketService.connect();
+    this.socketSub.add(this.socketService.on('order-created').subscribe(() => this.loadOrders()));
+    this.socketSub.add(this.socketService.on('order-updated').subscribe(() => this.loadOrders()));
+    this.socketSub.add(this.socketService.on('order-status-update').subscribe(() => this.loadOrders()));
+  }
+
+  ngOnDestroy() {
+    this.socketSub.unsubscribe();
   }
 
   get items(): FormArray {

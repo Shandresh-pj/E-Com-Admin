@@ -110,8 +110,8 @@ export class RoleAccess implements OnInit {
         // Guarantee 100% unique menu IDs and non-shared permissions array references
         this.menus = combined.map((m, idx) => {
           let uniqueMenuId = m.id;
-          if (!uniqueMenuId || usedMenuIds.has(uniqueMenuId)) {
-            uniqueMenuId = (idx + 1) * 100 + Math.abs(this.hashCode(m.path || m.name || `menu_${idx}`));
+          if (!uniqueMenuId || uniqueMenuId > 90000 || usedMenuIds.has(uniqueMenuId)) {
+            uniqueMenuId = 100 + idx;
             while (usedMenuIds.has(uniqueMenuId)) {
               uniqueMenuId++;
             }

@@ -18,6 +18,8 @@ import Swal from 'sweetalert2';
 import { DeviceAutoDetectService } from 'src/app/services/device-auto-detect.service';
 import { CommonService } from 'src/app/Securities/Services/common.service';
 import { SessionService } from 'src/app/Securities/Services/session.service';
+import { SocketService } from 'src/app/Securities/Services/socket.service';
+import { ChangeDetectorRef } from '@angular/core';
 
 export interface PosProduct {
   id: number;
@@ -78,6 +80,8 @@ export class PosBillingComponent implements OnInit {
   deviceService = inject(DeviceAutoDetectService);
   private commonService = inject(CommonService);
   private sessionService = inject(SessionService);
+  private socketService = inject(SocketService);
+  private cdr = inject(ChangeDetectorRef);
 
   // Company, Admin & Branch Context (100% Dynamic API driven)
   companyName = signal<string>('');
@@ -168,6 +172,18 @@ export class PosBillingComponent implements OnInit {
     this.loadCategoriesFromApi();
     this.loadProductsFromApi();
     this.deviceService.updateCustomerDisplay('SMART POS SYSTEM', 'READY FOR SCAN');
+
+    // Subscribe to Socket.IO real-time stock updates
+    this.socketService.connect();
+    this.socketService.on('stock-update').subscribe((data: any) => {
+      if (data && data.product_id != null && data.new_stock != null) {
+        const prod = this.products.find(p => p.id === Number(data.product_id));
+        if (prod) {
+          prod.stock = Number(data.new_stock);
+          this.cdr.detectChanges();
+        }
+      }
+    });
   }
 
   /**
@@ -719,6 +735,9 @@ export class PosBillingComponent implements OnInit {
         this.loadProductsFromApi(this.selectedBranch().id);
       });
 
+    const qrContent = encodeURIComponent(`https://svkdthworld.shop/orders/verify?inv=${invoiceNo}&total=${this.grandTotal()}`);
+    const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${qrContent}`;
+
     this.lastInvoice = {
       invoiceNo,
       date: invoiceDate,
@@ -732,7 +751,8 @@ export class PosBillingComponent implements OnInit {
       grandTotal: this.grandTotal(),
       paymentMethod: this.selectedPaymentMethod,
       cashTendered: this.cashTendered,
-      changeDue: (this.cashTendered && this.cashTendered > this.grandTotal()) ? (this.cashTendered - this.grandTotal()) : 0
+      changeDue: (this.cashTendered && this.cashTendered > this.grandTotal()) ? (this.cashTendered - this.grandTotal()) : 0,
+      qrCodeUrl
     };
 
     // Auto-trigger cash drawer if CASH payment

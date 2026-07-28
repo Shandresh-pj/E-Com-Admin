@@ -74,23 +74,6 @@ export class PermissionService {
     const target = menuNameOrPath || this.router.url.split('?')[0];
     const targetNormalized = target.toLowerCase().replace(/\/+$/, '');
 
-    const defaultPaths = [
-      '/dashboard',
-      '/change-password',
-      '/profile',
-      '/billing-history',
-      '/subscription-plans',
-      '/subscription-coupons',
-      '/checkout',
-      '/pos-billing',
-      '/devices',
-      '/profit-loss'
-    ];
-    if (defaultPaths.some(p => targetNormalized === p || targetNormalized.startsWith(p + '/'))) {
-      const userType = this.auth.getUserType() as UserType;
-      return ROLE_PERMISSIONS[userType]?.[action] ?? false;
-    }
-
     if (Array.isArray(permissions) && permissions.length > 0) {
       const hasMatch = permissions.some((p: any) => {
         const menuName = (p.menu?.name || '').toLowerCase();
@@ -107,6 +90,23 @@ export class PermissionService {
       });
 
       if (hasMatch) return true;
+    }
+
+    const defaultPaths = [
+      '/dashboard',
+      '/change-password',
+      '/profile',
+      '/billing-history',
+      '/subscription-plans',
+      '/subscription-coupons',
+      '/checkout',
+      '/pos-billing',
+      '/devices',
+      '/profit-loss'
+    ];
+    if (defaultPaths.some(p => targetNormalized === p || targetNormalized.startsWith(p + '/'))) {
+      const userType = this.auth.getUserType() as UserType;
+      return ROLE_PERMISSIONS[userType]?.[action] ?? false;
     }
 
     const userType = this.auth.getUserType() as UserType;

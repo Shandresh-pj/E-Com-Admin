@@ -669,27 +669,184 @@ html.dark, html .dark-theme {
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   MOBILE RESPONSIVE EXTRAS
+   MOBILE RESPONSIVE EXTRAS (100% Mobile-First Responsive Fixes)
    ═══════════════════════════════════════════════════════════════════════════ */
+@media (max-width: 1024px) {
+  .pf-grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+    padding: 0 16px;
+  }
+
+  .pf-identity-card {
+    position: static;
+  }
+}
+
 @media (max-width: 768px) {
-  .pf-hero-cover { border-radius: 0 0 20px 20px; }
-  .pf-avatar-wrap { padding-top: 0; margin-top: -50px; }
-  .pf-identity-card { border-radius: 20px; }
+  .pf-page {
+    padding-bottom: 32px;
+  }
 
+  .pf-hero-cover {
+    height: 180px;
+    border-radius: 0 0 24px 24px;
+    margin-bottom: -50px;
+  }
+
+  .pf-avatar-wrap {
+    padding-top: 20px;
+    margin-bottom: 12px;
+  }
+
+  .pf-avatar-inner {
+    width: 90px;
+    height: 90px;
+  }
+
+  .pf-identity-info {
+    padding: 0 16px 16px;
+  }
+
+  .pf-name {
+    font-size: 1.15rem;
+  }
+
+  .pf-email-hint {
+    white-space: normal;
+    word-break: break-all;
+  }
+
+  /* Horizontal Scrollable Touch Tab Bar on Mobile */
   .pf-sidebar-nav {
-    display: flex; flex-direction: row; flex-wrap: wrap; gap: 6px; padding: 10px;
-  }
-  .pf-snav-item {
-    flex: 1; min-width: 140px; padding: 10px 12px;
-    justify-content: center;
-    span:not(.pf-snav-badge) { display: none; }
-    i-tabler:last-child { display: none; }
+    display: flex;
+    flex-direction: row;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    gap: 8px;
+    padding: 12px;
+    -webkit-overflow-scrolling: touch;
+    border-top: 1px solid var(--glass-border-subtle);
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
   }
 
-  .pf-col-right { padding-top: 0; }
+  .pf-snav-item {
+    flex: 0 0 auto;
+    scroll-snap-align: start;
+    width: auto;
+    padding: 10px 16px;
+    border-radius: 100px;
+    background: rgba(255,255,255,0.4);
+    border: 1px solid var(--glass-border-subtle);
+
+    span:not(.pf-snav-badge) {
+      display: inline-block !important;
+      font-size: 13px;
+      white-space: nowrap;
+    }
+
+    i-tabler:last-child {
+      display: none;
+    }
+
+    &.active {
+      background: linear-gradient(135deg, #4f46e5, #7c3aed);
+      color: #ffffff;
+      border-color: transparent;
+      box-shadow: 0 4px 16px rgba(79,70,229,0.3);
+
+      i-tabler {
+        color: #ffffff !important;
+      }
+    }
+  }
+
+  .pf-col-right {
+    padding-top: 0;
+  }
+
+  .pf-section {
+    padding: 20px 16px;
+    border-radius: 20px;
+  }
+
+  .pf-fields-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
 }
 
 @media (max-width: 480px) {
-  .pf-info-grid { grid-template-columns: 1fr 1fr; }
-  .pf-section-header { flex-wrap: wrap; }
+  .pf-grid {
+    padding: 0 10px;
+  }
+
+  .pf-hero-cover {
+    height: 150px;
+    margin-bottom: -40px;
+  }
+
+  .pf-avatar-inner {
+    width: 80px;
+    height: 80px;
+  }
+
+  .pf-cover-edit-btn {
+    top: 12px;
+    right: 12px;
+    padding: 5px 10px;
+    font-size: 11px;
+  }
+
+  .pf-section-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .pf-section-icon {
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+  }
+
+  .pf-field-label {
+    flex-wrap: wrap;
+  }
+
+  .pf-input {
+    padding: 10px 36px 10px 12px;
+    font-size: 13px;
+    border-radius: 12px;
+  }
+
+  .pf-form-actions {
+    flex-direction: column;
+    gap: 10px;
+
+    .pf-btn {
+      width: 100%;
+      justify-content: center;
+      padding: 12px 20px;
+    }
+  }
+
+  .pf-info-grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .pf-security-card {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+
+    .pf-btn {
+      width: 100%;
+      justify-content: center;
+    }
+  }
 }

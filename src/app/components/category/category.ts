@@ -14,6 +14,8 @@ import { MatTable } from 'src/utils/mat-table/mat-table';
 import { toFileUrl } from 'src/utils/file-url';
 import { ViewDetailsDialog } from 'src/utils/view-details-dialog/view-details-dialog';
 import { AppTranslatePipe } from 'src/app/pipes/app-translate.pipe';
+import { SocketService } from 'src/app/Securities/Services/socket.service';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-category',
@@ -52,13 +54,16 @@ export class Category {
   imagePreviewUrl: string | null = null;
   existingImageUrl: string | null = null;
 
+  private socketSub = new Subscription();
+
   constructor(
     private fb: FormBuilder,
     private commonService: CommonService,
     private alert: AlertService,
     private cdr: ChangeDetectorRef,
     private dialog: MatDialog,
-    public perm: PermissionService
+    public perm: PermissionService,
+    private socketService: SocketService
   ) {
     this.CategoryForm = fb.group({
       name: ['', [Validators.required, Validators.maxLength(100)]],
@@ -71,6 +76,14 @@ export class Category {
   ngOnInit() {
     this.getStatuses();
     this.getCategories();
+    this.socketService.connect();
+    this.socketSub.add(
+      this.socketService.on('category-update').subscribe(() => this.getCategories())
+    );
+  }
+
+  ngOnDestroy() {
+    this.socketSub.unsubscribe();
   }
 
   getCategories(onLoaded?: () => void) {

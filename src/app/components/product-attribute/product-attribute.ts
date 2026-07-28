@@ -13,6 +13,8 @@ import { PermissionService } from 'src/app/Securities/Services/permissions.servi
 import { CommonService } from 'src/app/Securities/Services/common.service';
 import { MatTable } from 'src/utils/mat-table/mat-table';
 import { ViewDetailsDialog } from 'src/utils/view-details-dialog/view-details-dialog';
+import { SocketService } from 'src/app/Securities/Services/socket.service';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-product-attribute',
@@ -44,6 +46,8 @@ export class ProductAttribute {
   ProductAttributes: any;
   SelectedProductAttributeId: any;
 
+  private socketSub = new Subscription();
+
   constructor(
     private fb: FormBuilder,
     private authService: AuthService,
@@ -51,7 +55,8 @@ export class ProductAttribute {
     private alert: AlertService,
     private cdr: ChangeDetectorRef,
     private dialog: MatDialog,
-    public perm: PermissionService
+    public perm: PermissionService,
+    private socketService: SocketService
   ) {
     this.ProductAttributeForm = fb.group({
       AttributeNameCode: ['', [Validators.required, Validators.maxLength(50)]],
@@ -61,6 +66,14 @@ export class ProductAttribute {
 
   ngOnInit() {
     this.getProductAttributes();
+    this.socketService.connect();
+    this.socketSub.add(
+      this.socketService.on('attribute-update').subscribe(() => this.getProductAttributes())
+    );
+  }
+
+  ngOnDestroy() {
+    this.socketSub.unsubscribe();
   }
 
   getCompanyId() {

@@ -1,73 +1,78 @@
-﻿<!-- ╔══════════════════════════════════════════════════════════════════════════╗ -->
-<!-- ║  WORKFORCE INTELLIGENCE CONSOLE  ·  Enterprise Liquid Glass Design      ║ -->
+<!-- ╔══════════════════════════════════════════════════════════════════════════╗ -->
+<!-- ║  WORKFORCE INTELLIGENCE CONSOLE  ·  Next-Gen Liquid Glass Architecture   ║ -->
 <!-- ╚══════════════════════════════════════════════════════════════════════════╝ -->
-<div class="wf-shell" [class.sidenav-collapsed]="!sidenavOpen">
+<div class="wf-shell">
 
-  <!-- ═══ SIDE NAVIGATION ═══ -->
-  <aside class="wf-sidenav">
-    <div class="wf-sidenav-header">
-      <div class="wf-brand-icon">
-        <mat-icon class="wf-brand-mat-icon">manage_accounts</mat-icon>
-        <span class="wf-brand-ring"></span>
+  <!-- ═══ AMBIENT LIQUID BACKGROUND ORBS ═══ -->
+  <div class="wf-liquid-canvas">
+    <div class="wf-liquid-orb orb-violet"></div>
+    <div class="wf-liquid-orb orb-teal"></div>
+    <div class="wf-liquid-orb orb-rose"></div>
+    <div class="wf-liquid-orb orb-amber"></div>
+  </div>
+
+  <!-- ═══ ULTRA LIQUID GLASS HEADER ═══ -->
+  <header class="wf-glass-header">
+    <div class="wf-gh-top">
+      <div class="wf-gh-brand">
+        <div class="wf-gh-icon-box">
+          <div class="wf-icon-inner">
+            <mat-icon class="wf-brand-mat-icon">manage_accounts</mat-icon>
+          </div>
+          <div class="wf-pulse-ring r1"></div>
+          <div class="wf-pulse-ring r2"></div>
+        </div>
+        <div>
+          <div class="wf-brand-badge">ENTERPRISE SUITE</div>
+          <h1 class="wf-gh-title">Workforce Intelligence</h1>
+        </div>
       </div>
-      <div class="wf-brand-text">
-        <span class="wf-brand-title">Workforce</span>
-        <span class="wf-brand-sub">Intelligence Suite</span>
+
+      <div class="wf-gh-controls">
+        <div class="wf-org-select-card">
+          <div class="wf-org-icon-wrap">
+            <mat-icon>corporate_fare</mat-icon>
+          </div>
+          <div class="wf-org-info">
+            <span class="wf-org-label">ORGANIZATION</span>
+            <mat-select [formControl]="companySelectControl" class="wf-org-select" panelClass="wf-org-panel">
+              @for (c of companies; track c.id) {
+                <mat-option [value]="c.id">{{ c.name }}{{ c.code ? ' - ' + c.code : '' }}</mat-option>
+              }
+            </mat-select>
+          </div>
+        </div>
+
+        <div class="wf-live-status-pill">
+          <span class="wf-status-beacon">
+            <span class="beacon-core"></span>
+            <span class="beacon-wave"></span>
+          </span>
+          <span class="wf-status-txt">ALL SYSTEMS OPERATIONAL</span>
+        </div>
       </div>
-      <button class="wf-sidenav-toggle" (click)="toggleSidenav()">
-        <mat-icon>{{ sidenavOpen ? 'menu_open' : 'menu' }}</mat-icon>
-      </button>
     </div>
-    <div class="wf-org-pill">
-      <mat-icon class="wf-org-pill-icon">corporate_fare</mat-icon>
-      <div class="wf-org-pill-body">
-        <span class="wf-org-pill-label">Organization</span>
-        <mat-select [formControl]="companySelectControl" class="wf-org-select" panelClass="wf-org-panel">
-          @for (c of companies; track c.id) {
-            <mat-option [value]="c.id">{{ c.name }}{{ c.code ? ' - ' + c.code : '' }}</mat-option>
-          }
-        </mat-select>
-      </div>
-    </div>
-    <nav class="wf-nav">
+
+    <!-- ═══ HORIZONTAL LIQUID SEGMENTED TABS ═══ -->
+    <nav class="wf-segmented-nav">
       @for (item of navItems; track item.index) {
-        <button class="wf-nav-item" [class.active]="activeTab === item.index" (click)="setTab(item.index)">
-          <div class="wf-nav-icon-wrap">
-            <mat-icon class="wf-nav-icon">{{ item.icon }}</mat-icon>
-            <span class="wf-nav-active-bar"></span>
+        <button class="wf-nav-pill" [class.active]="activeTab === item.index" (click)="setTab(item.index)">
+          <div class="wf-pill-shimmer"></div>
+          <div class="wf-pill-icon-wrap" [class]="'icon-' + item.index">
+            <mat-icon>{{ item.icon }}</mat-icon>
           </div>
-          <div class="wf-nav-text">
-            <span class="wf-nav-label">{{ item.label }}</span>
-            <span class="wf-nav-sub">{{ item.sub }}</span>
+          <div class="wf-pill-content">
+            <span class="wf-pill-title">{{ item.label }}</span>
+            <span class="wf-pill-sub">{{ item.sub }}</span>
           </div>
+          <div class="wf-active-glow-bar"></div>
         </button>
       }
     </nav>
-    <div class="wf-sidenav-footer">
-      <div class="wf-system-status">
-        <span class="wf-status-dot"></span>
-        <span class="wf-status-text">All Systems Operational</span>
-      </div>
-    </div>
-  </aside>
+  </header>
 
-  <!-- ═══ MAIN CONTENT ═══ -->
+  <!-- ═══ MAIN CONTENT BODY ═══ -->
   <main class="wf-main">
-    <div class="wf-topbar">
-      <div class="wf-topbar-left">
-        <button class="wf-topbar-menu-btn" (click)="toggleSidenav()"><mat-icon>menu</mat-icon></button>
-        <div class="wf-breadcrumb">
-          <mat-icon class="wf-bc-home">home</mat-icon>
-          <mat-icon class="wf-bc-sep">chevron_right</mat-icon>
-          <span>Workforce Console</span>
-          <mat-icon class="wf-bc-sep">chevron_right</mat-icon>
-          <span class="wf-bc-active">{{ navItems[activeTab]?.label }}</span>
-        </div>
-      </div>
-      <div class="wf-topbar-right">
-        <div class="wf-live-chip"><span class="wf-live-dot"></span><span>LIVE</span></div>
-      </div>
-    </div>
 
     <mat-tab-group class="wf-content-tabs" animationDuration="280ms" [(selectedIndex)]="activeTab">
 
@@ -78,7 +83,10 @@
             <div class="wf-hero-orbs"><span class="wf-orb o1"></span><span class="wf-orb o2"></span><span class="wf-orb o3"></span></div>
             <div class="wf-hero-content">
               <div class="wf-hero-left">
-                <div class="wf-hero-avatar wf-ha-violet"><mat-icon>dashboard</mat-icon></div>
+                <div class="wf-hero-avatar wf-ha-violet">
+                  <mat-icon>dashboard</mat-icon>
+                  <span class="avatar-ring"></span>
+                </div>
                 <div>
                   <h1 class="wf-hero-title">Workforce Overview</h1>
                   <p class="wf-hero-desc">Real-time intelligence across all workforce dimensions</p>
@@ -86,8 +94,12 @@
               </div>
             </div>
           </div>
+
+          <!-- 4 LIQUID KPI CARDS -->
           <div class="wf-kpi-grid">
+            <!-- Shift Card -->
             <div class="wf-kpi-card kpi-violet" (click)="setTab(1)">
+              <div class="wf-card-shimmer"></div>
               <div class="wf-kpi-glow"></div>
               <div class="wf-kpi-top">
                 <div class="wf-kpi-icon kpi-icon-violet"><mat-icon>schedule</mat-icon></div>
@@ -98,7 +110,10 @@
               <div class="wf-kpi-bar"><div class="wf-kpi-fill fill-violet" style="width:100%"></div></div>
               <div class="wf-kpi-foot"><mat-icon>arrow_forward</mat-icon><span>Manage Shifts</span></div>
             </div>
+
+            <!-- Break Card -->
             <div class="wf-kpi-card kpi-rose" (click)="setTab(2)">
+              <div class="wf-card-shimmer"></div>
               <div class="wf-kpi-glow"></div>
               <div class="wf-kpi-top">
                 <div class="wf-kpi-icon kpi-icon-rose"><mat-icon>coffee</mat-icon></div>
@@ -109,7 +124,10 @@
               <div class="wf-kpi-bar"><div class="wf-kpi-fill fill-rose" style="width:100%"></div></div>
               <div class="wf-kpi-foot"><mat-icon>arrow_forward</mat-icon><span>Manage Policies</span></div>
             </div>
+
+            <!-- Biometric Card -->
             <div class="wf-kpi-card kpi-teal" (click)="setTab(3)">
+              <div class="wf-card-shimmer"></div>
               <div class="wf-kpi-glow"></div>
               <div class="wf-kpi-top">
                 <div class="wf-kpi-icon kpi-icon-teal"><mat-icon>fingerprint</mat-icon></div>
@@ -120,7 +138,10 @@
               <div class="wf-kpi-bar"><div class="wf-kpi-fill fill-teal" [style.width.%]="terminalHealthPercentage"></div></div>
               <div class="wf-kpi-foot"><mat-icon>arrow_forward</mat-icon><span>{{ terminalHealthPercentage }}% Health</span></div>
             </div>
+
+            <!-- GPS Geofence Card -->
             <div class="wf-kpi-card kpi-amber" (click)="setTab(4)">
+              <div class="wf-card-shimmer"></div>
               <div class="wf-kpi-glow"></div>
               <div class="wf-kpi-top">
                 <div class="wf-kpi-icon kpi-icon-amber"><mat-icon>satellite_alt</mat-icon></div>
@@ -132,27 +153,47 @@
               <div class="wf-kpi-foot"><mat-icon>arrow_forward</mat-icon><span>Manage Geofences</span></div>
             </div>
           </div>
-          <div class="wf-section-heading"><mat-icon>apps</mat-icon><span>Quick Access Modules</span></div>
+
+          <!-- QUICK ACCESS MODULES -->
+          <div class="wf-section-heading">
+            <mat-icon>apps</mat-icon>
+            <span>Quick Access Modules</span>
+          </div>
           <div class="wf-module-grid">
             <div class="wf-module-card" (click)="setTab(1)">
               <div class="wf-mc-icon mc-violet"><mat-icon>schedule</mat-icon></div>
-              <div class="wf-mc-body"><div class="wf-mc-title">Shifts &amp; Schedules</div><div class="wf-mc-desc">Define work hours, rotations &amp; grace periods</div></div>
-              <mat-icon class="wf-mc-arrow">chevron_right</mat-icon>
+              <div class="wf-mc-body">
+                <div class="wf-mc-title">Shifts &amp; Schedules</div>
+                <div class="wf-mc-desc">Define work hours, rotations &amp; grace periods</div>
+              </div>
+              <div class="wf-mc-arrow-box"><mat-icon>chevron_right</mat-icon></div>
             </div>
+
             <div class="wf-module-card" (click)="setTab(2)">
               <div class="wf-mc-icon mc-rose"><mat-icon>coffee</mat-icon></div>
-              <div class="wf-mc-body"><div class="wf-mc-title">Break Deduction Rules</div><div class="wf-mc-desc">Auto-deduction triggers &amp; frequency limits</div></div>
-              <mat-icon class="wf-mc-arrow">chevron_right</mat-icon>
+              <div class="wf-mc-body">
+                <div class="wf-mc-title">Break Deduction Rules</div>
+                <div class="wf-mc-desc">Auto-deduction triggers &amp; frequency limits</div>
+              </div>
+              <div class="wf-mc-arrow-box"><mat-icon>chevron_right</mat-icon></div>
             </div>
+
             <div class="wf-module-card" (click)="setTab(3)">
               <div class="wf-mc-icon mc-teal"><mat-icon>fingerprint</mat-icon></div>
-              <div class="wf-mc-body"><div class="wf-mc-title">Biometric Terminals</div><div class="wf-mc-desc">AI Face · Fingerprint · RFID · QR check-in</div></div>
-              <mat-icon class="wf-mc-arrow">chevron_right</mat-icon>
+              <div class="wf-mc-body">
+                <div class="wf-mc-title">Biometric Terminals</div>
+                <div class="wf-mc-desc">AI Face · Fingerprint · RFID · QR check-in</div>
+              </div>
+              <div class="wf-mc-arrow-box"><mat-icon>chevron_right</mat-icon></div>
             </div>
+
             <div class="wf-module-card" (click)="setTab(4)">
               <div class="wf-mc-icon mc-amber"><mat-icon>satellite_alt</mat-icon></div>
-              <div class="wf-mc-body"><div class="wf-mc-title">GPS Geofencing</div><div class="wf-mc-desc">Perimeter boundaries &amp; mobile check-in radii</div></div>
-              <mat-icon class="wf-mc-arrow">chevron_right</mat-icon>
+              <div class="wf-mc-body">
+                <div class="wf-mc-title">GPS Geofencing</div>
+                <div class="wf-mc-desc">Perimeter boundaries &amp; mobile check-in radii</div>
+              </div>
+              <div class="wf-mc-arrow-box"><mat-icon>chevron_right</mat-icon></div>
             </div>
           </div>
         </div>
@@ -168,7 +209,7 @@
                 <div class="wf-hero-avatar wf-ha-violet"><mat-icon>schedule</mat-icon></div>
                 <div><h1 class="wf-hero-title">Shifts &amp; Schedules</h1><p class="wf-hero-desc">Define shift hours, grace periods &amp; minimum work thresholds</p></div>
               </div>
-              @if (perm.hasRoleAction('canCreate', 'Shifts & Schedules') || perm.hasRoleAction('canCreate', '/workforce')) {
+              @if (canCreate('Shifts & Schedules')) {
                 <button class="wf-hero-action-btn btn-violet" (click)="toggleShiftForm()">
                   <mat-icon>{{ showShiftForm ? 'close' : 'add_circle_outline' }}</mat-icon>
                   <span>{{ showShiftForm ? 'Close Form' : 'New Shift Pattern' }}</span>
@@ -198,8 +239,8 @@
           }
           <div class="wf-table-card">
             <app-mat-table [columns]="shiftColumns" [tableData]="shiftsList" [showSearch]="true" [enableExport]="true" [showAction]="true"
-              [showEdit]="perm.hasRoleAction('canUpdate','Shifts & Schedules')||perm.hasRoleAction('canUpdate','/workforce')"
-              [showDelete]="perm.hasRoleAction('canDelete','Shifts & Schedules')||perm.hasRoleAction('canDelete','/workforce')"
+              [showEdit]="canUpdate('Shifts & Schedules')"
+              [showDelete]="canDelete('Shifts & Schedules')"
               [isLoading]="loadingShifts" [title]="'Configured Shift Patterns'"
               (editClick)="editShift($event)" (deleteClick)="deleteShift($event)">
             </app-mat-table>
@@ -217,7 +258,7 @@
                 <div class="wf-hero-avatar wf-ha-rose"><mat-icon>coffee</mat-icon></div>
                 <div><h1 class="wf-hero-title">Break Deduction Rules</h1><p class="wf-hero-desc">Set max break durations, frequency limits &amp; salary deduction triggers</p></div>
               </div>
-              @if (perm.hasRoleAction('canCreate', 'Break Deduction Rules') || perm.hasRoleAction('canCreate', '/workforce')) {
+              @if (canCreate('Break Deduction Rules')) {
                 <button class="wf-hero-action-btn btn-rose" (click)="togglePolicyForm()">
                   <mat-icon>{{ showPolicyForm ? 'close' : 'add_circle_outline' }}</mat-icon>
                   <span>{{ showPolicyForm ? 'Close Form' : 'New Break Policy' }}</span>
@@ -246,8 +287,8 @@
           }
           <div class="wf-table-card">
             <app-mat-table [columns]="policyColumns" [tableData]="policiesList" [showSearch]="true" [enableExport]="true" [showAction]="true"
-              [showEdit]="perm.hasRoleAction('canUpdate','Break Deduction Rules')||perm.hasRoleAction('canUpdate','/workforce')"
-              [showDelete]="perm.hasRoleAction('canDelete','Break Deduction Rules')||perm.hasRoleAction('canDelete','/workforce')"
+              [showEdit]="canUpdate('Break Deduction Rules')"
+              [showDelete]="canDelete('Break Deduction Rules')"
               [isLoading]="loadingPolicies" [title]="'Configured Break Policies'"
               (editClick)="editPolicy($event)" (deleteClick)="deletePolicy($event)">
             </app-mat-table>
@@ -265,7 +306,7 @@
                 <div class="wf-hero-avatar wf-ha-teal"><mat-icon>fingerprint</mat-icon></div>
                 <div><h1 class="wf-hero-title">Biometric Sensors &amp; Terminals</h1><p class="wf-hero-desc">Register AI face recognizers, fingerprint scanners, RFID cards &amp; dynamic QR check-ins</p></div>
               </div>
-              @if (perm.hasRoleAction('canCreate', 'Biometric Sensors & Terminals') || perm.hasRoleAction('canCreate', '/workforce')) {
+              @if (canCreate('Biometric Sensors & Terminals')) {
                 <button class="wf-hero-action-btn btn-teal" (click)="toggleDeviceForm()">
                   <mat-icon>{{ showDeviceForm ? 'close' : 'add_circle_outline' }}</mat-icon>
                   <span>{{ showDeviceForm ? 'Close Form' : 'Register Terminal' }}</span>
@@ -319,8 +360,8 @@
           }
           <div class="wf-table-card">
             <app-mat-table [columns]="deviceColumns" [tableData]="devicesList" [showSearch]="true" [enableExport]="true" [showAction]="true"
-              [showEdit]="perm.hasRoleAction('canUpdate','Biometric Sensors & Terminals')||perm.hasRoleAction('canUpdate','/workforce')"
-              [showDelete]="perm.hasRoleAction('canDelete','Biometric Sensors & Terminals')||perm.hasRoleAction('canDelete','/workforce')"
+              [showEdit]="canUpdate('Biometric Sensors & Terminals')"
+              [showDelete]="canDelete('Biometric Sensors & Terminals')"
               [isLoading]="loadingDevices" [title]="'Registered Biometric Terminals'"
               (editClick)="editDevice($event)" (deleteClick)="deleteDevice($event)">
             </app-mat-table>
@@ -338,7 +379,7 @@
                 <div class="wf-hero-avatar wf-ha-amber"><mat-icon>satellite_alt</mat-icon></div>
                 <div><h1 class="wf-hero-title">GPS Geofencing Boundaries</h1><p class="wf-hero-desc">Manage perimeter boundary radii &amp; GPS coordinates for mobile attendance verification</p></div>
               </div>
-              @if (perm.hasRoleAction('canCreate', 'GPS Geofencing Boundaries') || perm.hasRoleAction('canCreate', '/workforce')) {
+              @if (canCreate('GPS Geofencing Boundaries')) {
                 <button class="wf-hero-action-btn btn-amber" (click)="toggleBranchForm()">
                   <mat-icon>{{ showBranchForm ? 'close' : 'add_location_alt' }}</mat-icon>
                   <span>{{ showBranchForm ? 'Close Form' : 'Add Geofence' }}</span>
@@ -405,8 +446,8 @@
           }
           <div class="wf-table-card">
             <app-mat-table [columns]="branchColumns" [tableData]="branchesList" [showSearch]="true" [enableExport]="true" [showAction]="true"
-              [showEdit]="perm.hasRoleAction('canUpdate','GPS Geofencing Boundaries')||perm.hasRoleAction('canUpdate','/workforce')"
-              [showDelete]="perm.hasRoleAction('canDelete','GPS Geofencing Boundaries')||perm.hasRoleAction('canDelete','/workforce')"
+              [showEdit]="canUpdate('GPS Geofencing Boundaries')"
+              [showDelete]="canDelete('GPS Geofencing Boundaries')"
               [isLoading]="loadingBranches" [title]="'Registered GPS Geofences'"
               (editClick)="editBranch($event)" (deleteClick)="deleteBranch($event)">
             </app-mat-table>

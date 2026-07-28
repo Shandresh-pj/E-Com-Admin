@@ -1,4 +1,4 @@
-﻿import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormsModule, FormGroup, FormBuilder, Validators, FormControl } from '@angular/forms';
 import { MaterialModule } from 'src/app/material.module';
@@ -195,6 +195,28 @@ export class Workforce implements OnInit {
       longitude:     [77.5946, [Validators.required, Validators.min(-180), Validators.max(180)]],
       radius_meters: [500,     [Validators.required, Validators.min(10)]]
     });
+  }
+
+  // ─── Robust Role Access Permission Helpers ─────────────────────────────────
+  canCreate(featureName?: string): boolean {
+    return this.perm.hasRoleAction('canCreate', '/workforce') ||
+           this.perm.hasRoleAction('canCreate', 'Workforce Console') ||
+           this.perm.hasRoleAction('canCreate', 'Workforce') ||
+           (!!featureName && this.perm.hasRoleAction('canCreate', featureName));
+  }
+
+  canUpdate(featureName?: string): boolean {
+    return this.perm.hasRoleAction('canUpdate', '/workforce') ||
+           this.perm.hasRoleAction('canUpdate', 'Workforce Console') ||
+           this.perm.hasRoleAction('canUpdate', 'Workforce') ||
+           (!!featureName && this.perm.hasRoleAction('canUpdate', featureName));
+  }
+
+  canDelete(featureName?: string): boolean {
+    return this.perm.hasRoleAction('canDelete', '/workforce') ||
+           this.perm.hasRoleAction('canDelete', 'Workforce Console') ||
+           this.perm.hasRoleAction('canDelete', 'Workforce') ||
+           (!!featureName && this.perm.hasRoleAction('canDelete', featureName));
   }
 
   ngOnInit() {

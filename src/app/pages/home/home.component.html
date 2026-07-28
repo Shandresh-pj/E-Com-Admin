@@ -61,6 +61,9 @@
 
       <!-- Action Cluster -->
       <div class="island-actions">
+        <button type="button" class="theme-toggle-btn" (click)="toggleTheme()" [attr.aria-label]="isDarkTheme() ? 'Switch to Light Mode' : 'Switch to Dark Mode'" [title]="isDarkTheme() ? 'Light Mode' : 'Dark Mode'">
+          <span class="theme-icon">{{ isDarkTheme() ? '☀️' : '🌙' }}</span>
+        </button>
         <a routerLink="/authentication/login" class="island-btn-login">
           <span>Sign In</span>
         </a>
@@ -672,6 +675,36 @@
     </div>
   </section>
 
+  <!-- Quantum Technical Specifications & System Architecture Matrix -->
+  <section class="tech-specs-section liquid-glass-section" aria-label="Technical Specifications">
+    <div class="section-wrap">
+      <div class="section-header" data-reveal="specs-hdr">
+        <div class="s-badge liquid-badge">
+          <svg viewBox="0 0 24 24" fill="none" class="badge-svg">
+            <path d="M16 18L22 12L16 6M8 6L2 12L8 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <span>ENTERPRISE SPECIFICATIONS</span>
+        </div>
+        <h2 class="s-title">System Architecture & <span class="gradient-text">Specifications</span></h2>
+        <p class="s-sub">Architected for high throughput, sub-50ms query response times, and multi-branch scale.</p>
+      </div>
+
+      <div class="specs-grid">
+        @for (spec of techSpecs; track spec.category; let i = $index) {
+          <div class="spec-card liquid-glass-card p-20 p-md-24">
+            <div class="d-flex align-items-center gap-12 mb-3">
+              <div class="spec-icon-box">{{ spec.icon }}</div>
+              <div>
+                <span class="spec-cat-lbl">{{ spec.category }}</span>
+                <h4 class="spec-tech-title m-b-0">{{ spec.tech }}</h4>
+              </div>
+            </div>
+            <p class="spec-detail-text m-b-0">{{ spec.detail }}</p>
+          </div>
+        }
+      </div>
+    </div>
+  </section>
 
   <section class="quantum-telemetry-section" aria-label="Enterprise telemetry live counters">
     <div class="section-wrap">
@@ -898,6 +931,67 @@
           </div>
         </div>
         }
+      </div>
+    </div>
+  </section>
+
+  <!-- Quantum Liquid Glass Interactive ROI Savings Calculator -->
+  <section class="roi-calculator-section liquid-glass-section" aria-label="Interactive ROI Calculator">
+    <div class="section-wrap">
+      <div class="section-header" data-reveal="roi-hdr">
+        <div class="s-badge liquid-badge">
+          <svg viewBox="0 0 24 24" fill="none" class="badge-svg">
+            <path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <span>INTERACTIVE ROI ESTIMATOR</span>
+        </div>
+        <h2 class="s-title">Calculate Your Enterprise <span class="gradient-text">Cost Savings</span></h2>
+        <p class="s-sub">See how much time & money SVK E-Com saves your multi-branch operations each year.</p>
+      </div>
+
+      <div class="roi-card-wrap liquid-glass-card p-24 p-md-36">
+        <div class="row align-items-center g-4">
+
+          <!-- Left Sliders Control -->
+          <div class="col-12 col-lg-7">
+            <div class="roi-control-group mb-4">
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <label class="f-w-700 f-s-14 text-dark m-b-0">Number of Branches / Warehouses</label>
+                <span class="roi-chip-badge">{{ branchesCount() }} Locations</span>
+              </div>
+              <input type="range" class="form-range roi-slider" min="1" max="25" [value]="branchesCount()" (input)="updateBranches($event)">
+              <div class="d-flex justify-content-between f-s-11 text-muted mt-1">
+                <span>1 Branch</span>
+                <span>25 Branches</span>
+              </div>
+            </div>
+
+            <div class="roi-control-group mb-2">
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <label class="f-w-700 f-s-14 text-dark m-b-0">Monthly Orders Processed</label>
+                <span class="roi-chip-badge">{{ ordersCount().toLocaleString() }} Orders/Mo</span>
+              </div>
+              <input type="range" class="form-range roi-slider" min="200" max="10000" step="100" [value]="ordersCount()" (input)="updateOrders($event)">
+              <div class="d-flex justify-content-between f-s-11 text-muted mt-1">
+                <span>200 Orders</span>
+                <span>10,000+ Orders</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right Savings Display Card -->
+          <div class="col-12 col-lg-5">
+            <div class="roi-result-card text-center p-24 rounded-20">
+              <span class="roi-result-label">ESTIMATED ANNUAL SAVINGS</span>
+              <div class="roi-big-savings text-gradient">₹{{ estimatedSavings().toLocaleString('en-IN') }}</div>
+              <p class="f-s-12 text-muted mb-3">Based on 35% reduction in manual data entry, zero stockouts, and AI auto-invoicing velocity.</p>
+              <a routerLink="/contact" class="btn-primary w-100 py-12 text-center rounded-14">
+                Claim Your Enterprise Savings →
+              </a>
+            </div>
+          </div>
+
+        </div>
       </div>
     </div>
   </section>

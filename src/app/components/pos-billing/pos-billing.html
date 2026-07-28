@@ -530,15 +530,11 @@
 
           <div class="receipt-bottom-widgets">
             @if (showQrCode()) {
-            <div class="qr-verify-box">
-              <mat-icon>qr_code_2</mat-icon>
-              <span>Scan to verify digital tax receipt</span>
-            </div>
-            }
-            @if (showBarcode()) {
-            <div class="barcode-strip">
-              <div class="barcode-lines"></div>
-              <span class="barcode-text">*{{ lastInvoice.invoiceNo }}*</span>
+            <div class="qr-verify-card text-center p-3 my-2 rounded bg-white border" style="display: flex; flex-direction: column; align-items: center;">
+              <img [src]="lastInvoice?.qrCodeUrl || ('https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=' + (lastInvoice?.invoiceNo || 'INV'))"
+                   alt="Digital Tax Receipt QR Code" style="width: 140px; height: 140px; border-radius: 8px; padding: 4px; background: white; border: 1px solid #e2e8f0; display: block;">
+              <span class="f-s-12 f-w-600 text-dark m-t-8">Scan to verify digital tax receipt</span>
+              <span class="f-s-11 text-muted">{{ lastInvoice?.invoiceNo }}</span>
             </div>
             }
           </div>

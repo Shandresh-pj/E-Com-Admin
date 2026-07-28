@@ -77,8 +77,11 @@ export class FullComponent implements OnInit {
     const visible = navItems.filter((item: NavItem) => {
       if (!item.route) return true; // captions are pruned below
       if (grantedPaths.has(item.route.toLowerCase().replace(/\/+$/, ''))) return true;
-      if (!item.roles || !item.roles.length) return true; // universal items
-      return item.roles.includes(this.authService.getUserType());
+      if (this.permissionService.hasPagePermission(item.route)) return true;
+      if (item.roles && item.roles.length) {
+        return item.roles.includes(this.authService.getUserType());
+      }
+      return false;
     });
 
     return visible.filter((item: NavItem, i: number) => {

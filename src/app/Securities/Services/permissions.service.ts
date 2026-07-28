@@ -151,46 +151,58 @@ export class PermissionService {
 
   /**
    * Evaluates page-level route access for guards & sidebar filtering.
-   * ONLY Super Admin gets unrestricted access to all pages.
+   * Super Admin has full access to ALL pages.
+   * Other roles default to accessing ONLY Dashboard, Profile, Change Password, and Notifications.
+   * All other modules require explicit DB Role Access grants.
    */
   hasPagePermission(path: string): boolean {
     this.permissionsUpdated();
 
     if (this.auth.isSuperAdmin()) return true;
 
-    const defaultPaths = [
+    // Default accessible routes for ALL roles
+    const universalPaths = [
       '/dashboard',
-      '/change-password',
       '/profile',
-      '/unauthorized',
-      '/attendance',
-      '/leave',
-      '/workforce',
-      '/employees'
+      '/change-password',
+      '/notifications',
+      '/unauthorized'
     ];
-    if (defaultPaths.some(p => path === p || path.startsWith(p + '/'))) {
+    const targetNormalized = (path || '').toLowerCase().replace(/\/+$/, '');
+    if (universalPaths.some(p => targetNormalized === p || targetNormalized.startsWith(p + '/'))) {
       return true;
     }
 
-    const menus = this.session.getMenus();
-
-    if (!Array.isArray(menus) || !menus.length) {
-      const userType = this.auth.getUserType() as UserType;
-      const perms = ROLE_PERMISSIONS[userType];
-      return perms?.canRead ?? false;
+    // Check DB granted permissions (Role Access Matrix)
+    const permissions = this.session.getPermissions();
+    if (Array.isArray(permissions) && permissions.length > 0) {
+      const match = permissions.find((p: any) => {
+        const menuPath = (p.menu?.path || '').toLowerCase().replace(/\/+$/, '');
+        const menuName = (p.menu?.name || '').toLowerCase();
+        return targetNormalized === menuPath || targetNormalized === menuName || targetNormalized.startsWith(menuPath + '/');
+      });
+      if (match) {
+        return match.canRead === true || match.can_read === true || match.action === 'ALL' || match.action === 'READ';
+      }
     }
 
-    const targetNormalized = path.toLowerCase().replace(/\/+$/, '');
+    // Check DB granted menus
+    const menus = this.session.getMenus();
+    if (Array.isArray(menus) && menus.length > 0) {
+      const hasMenu = menus.some((m: any) => {
+        if (typeof m === 'string') {
+          if (m === 'ALL') return true;
+          const strNormalized = m.toLowerCase().replace(/\/+$/, '');
+          return targetNormalized === strNormalized || targetNormalized.startsWith(strNormalized + '/');
+        }
+        const menuPath = (m.path || m.route || m.name || '').toLowerCase().replace(/\/+$/, '');
+        return targetNormalized === menuPath || targetNormalized.startsWith(menuPath + '/');
+      });
+      if (hasMenu) return true;
+    }
 
-    return menus.some((m: any) => {
-      if (typeof m === 'string') {
-        if (m === 'ALL') return false; // ONLY Super Admin has full access to ALL
-        const strNormalized = m.toLowerCase().replace(/\/+$/, '');
-        return targetNormalized === strNormalized || targetNormalized.startsWith(strNormalized + '/');
-      }
-      const menuPath = (m.path || m.route || m.name || '').toLowerCase().replace(/\/+$/, '');
-      return targetNormalized === menuPath || targetNormalized.startsWith(menuPath + '/');
-    });
+    // All other management modules: NO ACCESS for other roles unless explicitly granted above!
+    return false;
   }
 
   // ─── Domain Specific RBAC Helpers ──────────────────────────────────────────

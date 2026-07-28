@@ -7,6 +7,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatIconModule } from '@angular/material/icon';
 import { AlertService } from 'src/app/Securities/Services/alert.service';
 import { CommonService } from 'src/app/Securities/Services/common.service';
+import { SessionService } from 'src/app/Securities/Services/session.service';
 import { AppTranslatePipe } from 'src/app/pipes/app-translate.pipe';
 
 function passwordMatchValidator(control: AbstractControl): ValidationErrors | null {
@@ -53,6 +54,7 @@ export class ChangePassword {
   constructor(
     private fb: FormBuilder,
     private commonService: CommonService,
+    private sessionService: SessionService,
     private alert: AlertService
   ) {
     this.ChangePasswordForm = fb.group({
@@ -70,7 +72,12 @@ export class ChangePassword {
       return;
     }
 
+    const user = this.sessionService.getUser();
+    const userId = user?.id || user?.userId;
+
     const payload = {
+      user_id: userId,
+      userId: userId,
       currentPassword: form.value.currentPassword,
       current_password: form.value.currentPassword,
       oldPassword: form.value.currentPassword,

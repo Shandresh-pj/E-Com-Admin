@@ -134,7 +134,8 @@ export class StarterComponent implements OnInit {
       next: (res: any) => {
         this.activeBranchesCount = res?.data?.length || 0;
         this.cdr.detectChanges();
-      }
+      },
+      error: () => {}
     });
 
     // Load employees count
@@ -142,7 +143,8 @@ export class StarterComponent implements OnInit {
       next: (res: any) => {
         this.totalEmployees = res?.data?.length || 0;
         this.cdr.detectChanges();
-      }
+      },
+      error: () => {}
     });
 
     // Load daily attendance report for today
@@ -150,7 +152,8 @@ export class StarterComponent implements OnInit {
       next: (res: any) => {
         this.presentTodayCount = res?.data?.present_count || 0;
         this.cdr.detectChanges();
-      }
+      },
+      error: () => {}
     });
 
     // Load active shifts template count
@@ -158,7 +161,8 @@ export class StarterComponent implements OnInit {
       next: (res: any) => {
         this.activeShiftsCount = res?.data?.length || 0;
         this.cdr.detectChanges();
-      }
+      },
+      error: () => {}
     });
 
     // Load pending approvals from product controller
@@ -166,7 +170,8 @@ export class StarterComponent implements OnInit {
       next: (res: any) => {
         this.pendingApprovalsCount = res?.total || 0;
         this.cdr.detectChanges();
-      }
+      },
+      error: () => {}
     });
 
     // Load low stock alerts count
@@ -174,7 +179,8 @@ export class StarterComponent implements OnInit {
       next: (res: any) => {
         this.lowStockAlertsCount = res?.data?.length || 0;
         this.cdr.detectChanges();
-      }
+      },
+      error: () => {}
     });
 
     // Load recent Audit log logs
@@ -182,7 +188,8 @@ export class StarterComponent implements OnInit {
       next: (res: any) => {
         this.recentAuditLogs = (res?.data || []).slice(0, 5);
         this.cdr.detectChanges();
-      }
+      },
+      error: () => {}
     });
   }
 
@@ -196,7 +203,8 @@ export class StarterComponent implements OnInit {
         next: (res: any) => {
           this.branchName = res?.data?.name || `Branch #${branchId}`;
           this.cdr.detectChanges();
-        }
+        },
+        error: () => {}
       });
     }
 
@@ -205,7 +213,8 @@ export class StarterComponent implements OnInit {
       next: (res: any) => {
         this.presentTodayCount = res?.data?.present || 0;
         this.cdr.detectChanges();
-      }
+      },
+      error: () => {}
     });
 
     // Get branch employees
@@ -215,7 +224,8 @@ export class StarterComponent implements OnInit {
         this.branchEmployees = branchId ? list.filter((e: any) => e.branch_id === branchId) : list;
         this.totalEmployees = this.branchEmployees.length;
         this.cdr.detectChanges();
-      }
+      },
+      error: () => {}
     });
 
     // Get leave requests
@@ -224,7 +234,8 @@ export class StarterComponent implements OnInit {
         const leaves = res?.data || [];
         this.pendingLeaves = leaves.filter((l: any) => l.status === 'PENDING').slice(0, 5);
         this.cdr.detectChanges();
-      }
+      },
+      error: () => {}
     });
   }
 
@@ -238,7 +249,8 @@ export class StarterComponent implements OnInit {
       next: (res: any) => {
         this.employeeShift = res?.data?.shift || null;
         this.cdr.detectChanges();
-      }
+      },
+      error: () => {}
     });
 
     // Get personal attendance for today
@@ -250,7 +262,8 @@ export class StarterComponent implements OnInit {
         }
         this.attendanceToday = att;
         this.cdr.detectChanges();
-      }
+      },
+      error: () => {}
     });
 
     // Get employee history log list
@@ -264,7 +277,8 @@ export class StarterComponent implements OnInit {
           total_hours: log.total_minutes ? `${Math.floor(log.total_minutes / 60)}h ${log.total_minutes % 60}m` : '-'
         })).slice(0, 5);
         this.cdr.detectChanges();
-      }
+      },
+      error: () => {}
     });
   }
 
@@ -275,7 +289,8 @@ export class StarterComponent implements OnInit {
       next: (res: any) => {
         this.customerOrders = (res?.data || []).slice(0, 5);
         this.cdr.detectChanges();
-      }
+      },
+      error: () => {}
     });
   }
 

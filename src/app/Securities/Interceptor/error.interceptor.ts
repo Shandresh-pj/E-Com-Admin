@@ -14,8 +14,14 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
 
   return next(req).pipe(
     catchError((error: HttpErrorResponse | any) => {
-      // Don't intercept background/non-critical requests to avoid spamming alerts
-      if (req.url.includes('/auth/me/permissions') || req.url.includes('/notifications') || req.url.includes('/devices') || req.url.includes('/pos')) {
+      // Don't intercept background/dashboard requests to avoid spamming alerts
+      if (
+        req.url.includes('/auth/me/permissions') ||
+        req.url.includes('/notifications') ||
+        req.url.includes('/devices') ||
+        req.url.includes('/pos') ||
+        router.url.includes('/dashboard')
+      ) {
         return throwError(() => error);
       }
 

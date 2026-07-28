@@ -1,0 +1,78 @@
+<div class="clock-dialog-container">
+
+  <!-- Header Title -->
+  <div class="text-center m-b-20">
+    <h3 class="dialog-title">{{ title }}</h3>
+  </div>
+
+  <!-- Time Range Header Display -->
+  <div class="time-header-cards d-flex justify-content-between align-items-center m-b-24">
+    
+    <div class="time-box cursor-pointer" [class.active]="activeMode === 'start'" (click)="setMode('start')">
+      <span class="time-label">Start Time</span>
+      <h4 class="time-value">{{ formattedStartTime12 }}</h4>
+    </div>
+
+    @if (isRange) {
+      <div class="time-box cursor-pointer" [class.active]="activeMode === 'end'" (click)="setMode('end')">
+        <span class="time-label">End Time</span>
+        <h4 class="time-value">{{ formattedEndTime12 }}</h4>
+      </div>
+    }
+
+  </div>
+
+  <!-- Circular Dial Clock Interface -->
+  <div class="clock-dial-wrapper">
+    <div class="clock-circle">
+
+      <!-- SVG Ring for Radial Arc Highlight -->
+      <svg class="clock-svg" width="260" height="260" viewBox="0 0 260 260">
+        <!-- Outer Track Ring -->
+        <circle cx="130" cy="130" r="100" class="track-ring"></circle>
+        
+        <!-- Animated Active Arc -->
+        @if (isRange) {
+          <path [attr.d]="ArcPath" class="arc-ring"></path>
+        }
+      </svg>
+
+      <!-- Center AM / PM Toggle Pill -->
+      <div class="center-badge" (click)="toggleAmPm()">
+        <span class="ampm-text" [class.active]="currentAmPm === 'AM'" (click)="$event.stopPropagation(); toggleAmPm('AM')">AM</span>
+        <span class="ampm-divider">/</span>
+        <span class="ampm-text" [class.active]="currentAmPm === 'PM'" (click)="$event.stopPropagation(); toggleAmPm('PM')">PM</span>
+      </div>
+
+      <!-- Clock Hour Markers (12, 1, 2, 3, ..., 11) -->
+      @for (h of hoursList; track h) {
+        <div 
+          class="hour-node" 
+          [ngStyle]="getHourStyle(h)"
+          [class.selected]="h === currentHour"
+          [class.start-node]="isRange && h === startHour"
+          [class.end-node]="isRange && h === endHour"
+          (click)="selectHour(h)"
+        >
+          <span class="node-num">{{ h }}</span>
+        </div>
+      }
+
+    </div>
+  </div>
+
+  <!-- Duration Badge Footer -->
+  @if (isRange) {
+    <div class="text-center m-t-20 m-b-24">
+      <h2 class="duration-value m-b-2">{{ durationText }}</h2>
+      <p class="duration-label text-muted m-b-0">Calculated Shift Duration</p>
+    </div>
+  }
+
+  <!-- Modal Action Buttons -->
+  <div class="dialog-actions d-flex justify-content-between gap-16 m-t-16">
+    <button mat-flat-button class="btn-cancel w-100" (click)="close()">Cancel</button>
+    <button mat-flat-button class="btn-done w-100" (click)="confirm()">Done</button>
+  </div>
+
+</div>

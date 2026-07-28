@@ -57,10 +57,6 @@ export class AuthService {
         this.sessionService.setSession(response);
         // Connect Socket
         this.socketService.connect(response.token);
-        // Defer refreshPermissions so login navigation completes immediately
-        setTimeout(() => {
-          this.refreshPermissions().subscribe({ error: () => {} });
-        }, 100);
       })
     );
   }

@@ -42,12 +42,16 @@ import { MatPaginatorModule } from '@angular/material/paginator';
 import { MatSortModule } from '@angular/material/sort';
 import { MatTableModule } from '@angular/material/table';
 
+import { MatNativeDateModule, provideNativeDateAdapter } from '@angular/material/core';
+
 @NgModule({
   declarations: [],
+  providers: [provideNativeDateAdapter()],
   exports: [
     MatAutocompleteModule,
     MatCheckboxModule,
     MatDatepickerModule,
+    MatNativeDateModule,
     MatFormFieldModule,
     MatInputModule,
     MatRadioModule,

@@ -227,66 +227,87 @@
           <mat-card-content class="p-16">
             <div class="smart-nav-grid">
 
-              @if (perm.hasRoleAction('canRead', '/workforce')) {
+              @if (perm.hasPagePermission('/workforce')) {
                 <a routerLink="/workforce" class="smart-nav-pill animate-zoom-in delay-1">
                   <div class="pill-icon q-violet"><mat-icon>manage_accounts</mat-icon></div>
                   <span class="pill-text">Workforce</span>
                 </a>
               }
 
-              @if (perm.hasRoleAction('canRead', '/attendance')) {
+              @if (perm.hasPagePermission('/attendance')) {
                 <a routerLink="/attendance" class="smart-nav-pill animate-zoom-in delay-2">
                   <div class="pill-icon q-indigo"><mat-icon>history</mat-icon></div>
                   <span class="pill-text">Attendance</span>
                 </a>
               }
 
-              @if (perm.hasRoleAction('canRead', '/employees')) {
+              @if (perm.hasPagePermission('/employees')) {
                 <a routerLink="/employees" class="smart-nav-pill animate-zoom-in delay-3">
                   <div class="pill-icon q-emerald"><mat-icon>badge</mat-icon></div>
                   <span class="pill-text">Employees</span>
                 </a>
               }
 
-              @if (perm.hasRoleAction('canRead', '/payroll')) {
+              @if (perm.hasPagePermission('/payroll')) {
                 <a routerLink="/payroll" class="smart-nav-pill animate-zoom-in delay-4">
                   <div class="pill-icon q-amber"><mat-icon>payments</mat-icon></div>
                   <span class="pill-text">Payrolls</span>
                 </a>
               }
 
-              @if (perm.hasRoleAction('canRead', '/pos-billing')) {
+              @if (perm.hasPagePermission('/pos-billing')) {
                 <a routerLink="/pos-billing" class="smart-nav-pill animate-zoom-in delay-5">
                   <div class="pill-icon q-cyan"><mat-icon>point_of_sale</mat-icon></div>
                   <span class="pill-text">POS Billing</span>
                 </a>
               }
 
-              @if (perm.hasRoleAction('canRead', '/product')) {
+              @if (perm.hasPagePermission('/product')) {
                 <a routerLink="/product" class="smart-nav-pill animate-zoom-in delay-6">
                   <div class="pill-icon q-purple"><mat-icon>inventory_2</mat-icon></div>
                   <span class="pill-text">Products</span>
                 </a>
               }
 
-              @if (perm.hasRoleAction('canRead', '/orders')) {
+              @if (perm.hasPagePermission('/orders')) {
                 <a routerLink="/orders" class="smart-nav-pill animate-zoom-in delay-7">
                   <div class="pill-icon q-rose"><mat-icon>shopping_cart</mat-icon></div>
                   <span class="pill-text">Orders</span>
                 </a>
               }
 
-              @if (perm.hasRoleAction('canRead', '/branch')) {
+              @if (perm.hasPagePermission('/branch')) {
                 <a routerLink="/branch" class="smart-nav-pill animate-zoom-in delay-8">
                   <div class="pill-icon q-sky"><mat-icon>storefront</mat-icon></div>
                   <span class="pill-text">Branches</span>
                 </a>
               }
 
-              @if (perm.hasRoleAction('canRead', '/subscription-plans')) {
+              @if (perm.hasPagePermission('/subscription-plans')) {
                 <a routerLink="/subscription-plans" class="smart-nav-pill animate-zoom-in delay-8">
                   <div class="pill-icon q-gold"><mat-icon>diamond</mat-icon></div>
                   <span class="pill-text">Plans</span>
+                </a>
+              }
+
+              @if (perm.hasPagePermission('/devices')) {
+                <a routerLink="/devices" class="smart-nav-pill animate-zoom-in delay-8">
+                  <div class="pill-icon q-indigo"><mat-icon>cpu</mat-icon></div>
+                  <span class="pill-text">Devices</span>
+                </a>
+              }
+
+              @if (perm.hasPagePermission('/profile')) {
+                <a routerLink="/profile" class="smart-nav-pill animate-zoom-in delay-8">
+                  <div class="pill-icon q-emerald"><mat-icon>person</mat-icon></div>
+                  <span class="pill-text">Profile</span>
+                </a>
+              }
+
+              @if (perm.hasPagePermission('/change-password')) {
+                <a routerLink="/change-password" class="smart-nav-pill animate-zoom-in delay-8">
+                  <div class="pill-icon q-rose"><mat-icon>lock</mat-icon></div>
+                  <span class="pill-text">Security</span>
                 </a>
               }
 

@@ -260,6 +260,21 @@ export class Leave implements OnInit {
     });
   }
 
+  calculateLeaveDays() {
+    const fromVal = this.leaveForm.get('from_date')?.value;
+    const toVal = this.leaveForm.get('to_date')?.value;
+
+    if (fromVal && toVal) {
+      const fromDate = new Date(fromVal);
+      const toDate = new Date(toVal);
+      if (!isNaN(fromDate.getTime()) && !isNaN(toDate.getTime())) {
+        const diffTime = Math.abs(toDate.getTime() - fromDate.getTime());
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
+        this.leaveForm.patchValue({ total_days: diffDays });
+      }
+    }
+  }
+
   viewLeave(row: any) {
     this.alert.info(`Leave Application Details:\nEmployee: ${row.employee_name}\nType: ${row.leave_type}\nDates: ${row.date_range} (${row.total_days} Days)\nReason: ${row.reason}\nStatus: ${row.status}`);
   }

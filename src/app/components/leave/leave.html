@@ -115,15 +115,19 @@
 
               <div class="col-md-6">
                 <mat-form-field appearance="outline" class="w-100">
-                  <mat-label>From Date (YYYY-MM-DD)</mat-label>
-                  <input matInput formControlName="from_date" placeholder="2026-07-25">
+                  <mat-label>From Date</mat-label>
+                  <input matInput [matDatepicker]="fromPicker" formControlName="from_date" placeholder="Choose From Date" (focus)="fromPicker.open()" (dateChange)="calculateLeaveDays()">
+                  <mat-datepicker-toggle matIconSuffix [for]="fromPicker"></mat-datepicker-toggle>
+                  <mat-datepicker #fromPicker></mat-datepicker>
                 </mat-form-field>
               </div>
 
               <div class="col-md-6">
                 <mat-form-field appearance="outline" class="w-100">
-                  <mat-label>To Date (YYYY-MM-DD)</mat-label>
-                  <input matInput formControlName="to_date" placeholder="2026-07-26">
+                  <mat-label>To Date</mat-label>
+                  <input matInput [matDatepicker]="toPicker" formControlName="to_date" placeholder="Choose To Date" (focus)="toPicker.open()" (dateChange)="calculateLeaveDays()">
+                  <mat-datepicker-toggle matIconSuffix [for]="toPicker"></mat-datepicker-toggle>
+                  <mat-datepicker #toPicker></mat-datepicker>
                 </mat-form-field>
               </div>
 

@@ -8,6 +8,9 @@ import { AlertService } from 'src/app/Securities/Services/alert.service';
 import { PermissionService } from 'src/app/Securities/Services/permissions.service';
 import { MatTable as CustomMatTableComponent } from 'src/utils/mat-table/mat-table';
 
+import { MatDialog } from '@angular/material/dialog';
+import { ClockTimepickerComponent } from 'src/app/components/clock-timepicker/clock-timepicker';
+
 @Component({
   selector: 'app-workforce',
   standalone: true,
@@ -17,7 +20,8 @@ import { MatTable as CustomMatTableComponent } from 'src/utils/mat-table/mat-tab
     FormsModule,
     MaterialModule,
     TablerIconsModule,
-    CustomMatTableComponent
+    CustomMatTableComponent,
+    ClockTimepickerComponent
   ],
   templateUrl: './workforce.html',
   styleUrl: './workforce.scss'
@@ -153,6 +157,7 @@ export class Workforce implements OnInit {
     private commonService: CommonService,
     private alert: AlertService,
     public perm: PermissionService,
+    private dialog: MatDialog,
     private cdr: ChangeDetectorRef
   ) {
     this.shiftForm = this.fb.group({
@@ -194,6 +199,35 @@ export class Workforce implements OnInit {
       latitude:      [12.9716, [Validators.required, Validators.min(-90),  Validators.max(90)]],
       longitude:     [77.5946, [Validators.required, Validators.min(-180), Validators.max(180)]],
       radius_meters: [500,     [Validators.required, Validators.min(10)]]
+    });
+  }
+
+  openClockPicker(field: 'start' | 'end') {
+    const isStart = field === 'start';
+    const initialTime = isStart 
+      ? (this.shiftForm.get('start_time')?.value || '09:00 AM')
+      : (this.shiftForm.get('end_time')?.value || '06:00 PM');
+
+    const dialogRef = this.dialog.open(ClockTimepickerComponent, {
+      width: '380px',
+      panelClass: 'clock-picker-dialog-panel',
+      data: {
+        title: isStart ? 'Select Start Time' : 'Select End Time',
+        startTime: initialTime,
+        isRange: false
+      }
+    });
+
+    dialogRef.afterClosed().subscribe((res: any) => {
+      if (res) {
+        const timeVal = res.startTime24 || res.startTime12;
+        if (isStart) {
+          this.shiftForm.patchValue({ start_time: timeVal });
+        } else {
+          this.shiftForm.patchValue({ end_time: timeVal });
+        }
+        this.cdr.detectChanges();
+      }
     });
   }
 

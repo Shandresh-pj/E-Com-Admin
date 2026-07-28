@@ -9,15 +9,15 @@ import { ROLE_PERMISSIONS, UserType } from '../Models/role-access';
  * Supports READ, WRITE, CREATE, UPDATE, DELETE, APPROVE, ALL, *, and FULL.
  */
 const DB_ACTION_MAP: Record<string, Array<'canCreate' | 'canRead' | 'canUpdate' | 'canDelete' | 'canApprove'>> = {
-  READ:    ['canRead'],
-  WRITE:   ['canCreate'],
-  CREATE:  ['canCreate'],
-  UPDATE:  ['canUpdate'],
-  DELETE:  ['canDelete'],
+  READ: ['canRead'],
+  WRITE: ['canCreate'],
+  CREATE: ['canCreate'],
+  UPDATE: ['canUpdate'],
+  DELETE: ['canDelete'],
   APPROVE: ['canApprove'],
-  ALL:     ['canRead', 'canCreate', 'canUpdate', 'canDelete', 'canApprove'],
-  '*':     ['canRead', 'canCreate', 'canUpdate', 'canDelete', 'canApprove'],
-  FULL:    ['canRead', 'canCreate', 'canUpdate', 'canDelete', 'canApprove'],
+  ALL: ['canRead', 'canCreate', 'canUpdate', 'canDelete', 'canApprove'],
+  '*': ['canRead', 'canCreate', 'canUpdate', 'canDelete', 'canApprove'],
+  FULL: ['canRead', 'canCreate', 'canUpdate', 'canDelete', 'canApprove'],
 };
 
 @Injectable({
@@ -166,6 +166,7 @@ export class PermissionService {
       '/profile',
       '/change-password',
       '/notifications',
+      '/subscription-plans',
       '/unauthorized'
     ];
     const targetNormalized = (path || '').toLowerCase().replace(/\/+$/, '');

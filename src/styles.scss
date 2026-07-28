@@ -3,6 +3,22 @@
    Global Styles · Design Tokens · Component Overrides · Animations
    ═══════════════════════════════════════════════════════════════════════════ */
 
+/* Clock Timepicker Dialog Overlay Override */
+.clock-picker-dialog-panel {
+  .mat-mdc-dialog-container {
+    --mdc-dialog-container-shape: 28px;
+    background: transparent !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    overflow: visible !important;
+    .mdc-dialog__surface {
+      background: transparent !important;
+      box-shadow: none !important;
+      overflow: visible !important;
+    }
+  }
+}
+
 /* ── CSS Custom Properties (Design Tokens) ─────────────────────────────── */
 :root {
   /* Typography */

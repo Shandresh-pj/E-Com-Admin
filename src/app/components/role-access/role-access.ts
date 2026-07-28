@@ -63,7 +63,52 @@ export class RoleAccess implements OnInit {
   /** Local working set of assigned permission_ids (used for batch changes) */
   workingAssignments = new Set<number>();
 
-  /** permission_ids currently being toggled (debounce + optimistic UI) */
+  searchQuery: string = '';
+
+  get filteredMenus(): any[] {
+    const q = (this.searchQuery || '').trim().toLowerCase();
+    if (!q) return this.menus;
+    return this.menus.filter(m =>
+      (m.name || '').toLowerCase().includes(q) ||
+      (m.path || '').toLowerCase().includes(q)
+    );
+  }
+
+  get totalPermissionsCount(): number {
+    let count = 0;
+    this.menus.forEach(m => {
+      this.actions.forEach(a => {
+        if (this.getPermission(m, a)) count++;
+      });
+    });
+    return count;
+  }
+
+  get grantedPermissionsCount(): number {
+    return this.workingAssignments.size;
+  }
+
+  get grantedPercentage(): number {
+    const total = this.totalPermissionsCount;
+    if (total === 0) return 0;
+    return Math.round((this.grantedPermissionsCount / total) * 100);
+  }
+
+  grantAllSystemPermissions(): void {
+    this.menus.forEach(menu => {
+      this.actions.forEach(action => {
+        const perm = this.getPermission(menu, action);
+        if (perm) {
+          this.workingAssignments.add(perm.id);
+        }
+      });
+    });
+  }
+
+  revokeAllSystemPermissions(): void {
+    this.workingAssignments.clear();
+  }
+
   pending = new Set<number>();
 
   loading = false;

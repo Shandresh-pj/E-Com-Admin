@@ -1,16 +1,38 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, Subject } from 'rxjs';
-import { filter, map, take } from 'rxjs/operators';
+import { filter, take } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root'
 })
 export class SessionService {
-  private userSubject = new BehaviorSubject<any>(null);
-  private rolesSubject = new BehaviorSubject<any[]>([]);
-  private permissionsSubject = new BehaviorSubject<any[]>([]);
-  private menusSubject = new BehaviorSubject<any[]>([]);
-  private loadedSubject = new BehaviorSubject<boolean>(false);
+
+  private getStoredItem<T>(key: string, defaultValue: T): T {
+    try {
+      const item = localStorage.getItem(key);
+      return item ? JSON.parse(item) : defaultValue;
+    } catch {
+      return defaultValue;
+    }
+  }
+
+  private setStoredItem(key: string, value: any): void {
+    try {
+      if (value === null || value === undefined) {
+        localStorage.removeItem(key);
+      } else {
+        localStorage.setItem(key, JSON.stringify(value));
+      }
+    } catch (e) {
+      console.warn('Failed to save session item:', key, e);
+    }
+  }
+
+  private userSubject = new BehaviorSubject<any>(this.getStoredItem('session_user', null));
+  private rolesSubject = new BehaviorSubject<any[]>(this.getStoredItem('session_roles', []));
+  private permissionsSubject = new BehaviorSubject<any[]>(this.getStoredItem('session_permissions', []));
+  private menusSubject = new BehaviorSubject<any[]>(this.getStoredItem('session_menus', []));
+  private loadedSubject = new BehaviorSubject<boolean>(!!this.getStoredItem('session_user', null));
   private permissionsChangedSubject = new Subject<void>();
 
   user$: Observable<any> = this.userSubject.asObservable();
@@ -22,17 +44,45 @@ export class SessionService {
 
   setSession(data: any): void {
     if (data.user !== undefined) {
-      this.userSubject.next(data.user ?? {});
+      const normalizedUser = {
+        ...(data.user ?? {}),
+        id: data.user?.id ?? data.user?.userId ?? data.userId,
+        userId: data.user?.userId ?? data.user?.id ?? data.userId,
+        email: data.user?.email ?? data.email,
+        name: data.user?.name ?? data.name,
+        userType: data.user?.userType ?? data.user?.user_type ?? data.userType,
+        user_type: data.user?.userType ?? data.user?.user_type ?? data.userType,
+        companyId: data.user?.companyId ?? data.user?.company_id ?? data.companyId,
+        company_id: data.user?.companyId ?? data.user?.company_id ?? data.companyId,
+        branchId: data.user?.branchId ?? data.user?.branch_id ?? data.branchId,
+        branch_id: data.user?.branchId ?? data.user?.branch_id ?? data.branchId,
+        isSuperAdmin: data.user?.isSuperAdmin === true ||
+                      data.user?.userType === 'Super_Admin' ||
+                      data.user?.userType === 'super_admin' ||
+                      data.user?.role === 'super_admin'
+      };
+      this.userSubject.next(normalizedUser);
+      this.setStoredItem('session_user', normalizedUser);
     }
+
     if (data.roles !== undefined) {
-      this.rolesSubject.next(data.roles ?? []);
+      const roles = data.roles ?? [];
+      this.rolesSubject.next(roles);
+      this.setStoredItem('session_roles', roles);
     }
+
     if (data.permissions !== undefined) {
-      this.permissionsSubject.next(data.permissions ?? []);
+      const permissions = data.permissions ?? [];
+      this.permissionsSubject.next(permissions);
+      this.setStoredItem('session_permissions', permissions);
     }
+
     if (data.menus !== undefined) {
-      this.menusSubject.next(data.menus ?? []);
+      const menus = data.menus ?? [];
+      this.menusSubject.next(menus);
+      this.setStoredItem('session_menus', menus);
     }
+
     this.loadedSubject.next(true);
     this.permissionsChangedSubject.next();
   }
@@ -42,15 +92,15 @@ export class SessionService {
   }
 
   getRoles(): any[] {
-    return this.rolesSubject.value;
+    return this.rolesSubject.value ?? [];
   }
 
   getPermissions(): any[] {
-    return this.permissionsSubject.value;
+    return this.permissionsSubject.value ?? [];
   }
 
   getMenus(): any[] {
-    return this.menusSubject.value;
+    return this.menusSubject.value ?? [];
   }
 
   clearSession(): void {
@@ -59,6 +109,11 @@ export class SessionService {
     this.permissionsSubject.next([]);
     this.menusSubject.next([]);
     this.loadedSubject.next(false);
+
+    localStorage.removeItem('session_user');
+    localStorage.removeItem('session_roles');
+    localStorage.removeItem('session_permissions');
+    localStorage.removeItem('session_menus');
   }
 
   isLoaded(): boolean {
@@ -76,11 +131,20 @@ export class SessionService {
       this.setSession({
         token,
         user: {
-          id: data.userId,
+          id: data.userId || data.id,
+          userId: data.userId || data.id,
           name: data.name || data.email,
           email: data.email,
-          userType: data.userType,
-          isSuperAdmin: data.isSuperAdmin
+          userType: data.userType || data.user_type,
+          user_type: data.userType || data.user_type,
+          companyId: data.companyId || data.company_id,
+          company_id: data.companyId || data.company_id,
+          branchId: data.branchId || data.branch_id,
+          branch_id: data.branchId || data.branch_id,
+          isSuperAdmin: data.isSuperAdmin === true ||
+                        data.userType === 'Super_Admin' ||
+                        data.userType === 'super_admin' ||
+                        data.role === 'super_admin'
         },
         roles: data.roles || [],
         permissions: data.permissions || [],

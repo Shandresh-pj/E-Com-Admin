@@ -68,14 +68,14 @@ export const navItems: NavItem[] = [
     iconName: 'lock-access',
     route: '/role-access',
     bgcolor: 'warning',
-    roles: [SA],
+    roles: [SA, A, BM],
   },
   {
     displayName: 'App Roles',
     iconName: 'key',
     route: '/roles',
     bgcolor: 'success',
-    roles: [SA],
+    roles: [SA, A],
   },
 
   { navCap: 'Catalog', roles: [SA, A, BM, SK] },
@@ -228,7 +228,7 @@ export const navItems: NavItem[] = [
     roles: [SA, A, BM, SK],
   },
 
-  { navCap: 'Workforce', roles: [SA, A, BM, EM] },
+  { navCap: 'Workforce', roles: [SA, A, BM, SK, DB, EM] },
   {
     displayName: 'Workforce Console',
     iconName: 'settings',
@@ -276,14 +276,14 @@ export const navItems: NavItem[] = [
     iconName: 'calendar-stats',
     route: '/attendance',
     bgcolor: 'success',
-    roles: [SA, A, BM, EM],
+    roles: [SA, A, BM, SK, DB, EM],
   },
   {
     displayName: 'Leave Management',
     iconName: 'calendar-off',
     route: '/leave',
     bgcolor: 'warning',
-    roles: [SA, A, BM, EM],
+    roles: [SA, A, BM, SK, DB, EM],
   },
   {
     displayName: 'Company Calendar',

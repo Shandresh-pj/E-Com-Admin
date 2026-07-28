@@ -20,7 +20,7 @@ export const ROLE_PERMISSIONS: Record<UserType, {
   [UserType.ADMIN]:          { canCreate: true,  canRead: true,  canUpdate: true,  canDelete: true,  canApprove: true  },
   [UserType.BRANCH]:         { canCreate: true,  canRead: true,  canUpdate: true,  canDelete: true,  canApprove: false },
   [UserType.EMPLOYEE]:       { canCreate: true,  canRead: true,  canUpdate: true,  canDelete: false, canApprove: false },
-  [UserType.BRANCH_MANAGER]: { canCreate: true,  canRead: true,  canUpdate: true,  canDelete: true,  canApprove: false },
+  [UserType.BRANCH_MANAGER]: { canCreate: true,  canRead: true,  canUpdate: true,  canDelete: true,  canApprove: true  },
   [UserType.SHOPKEEPER]:     { canCreate: true,  canRead: true,  canUpdate: true,  canDelete: false, canApprove: false },
   [UserType.DELIVERY_BOY]:   { canCreate: false, canRead: true,  canUpdate: true,  canDelete: false, canApprove: false },
   [UserType.CUSTOMER]:       { canCreate: true,  canRead: true,  canUpdate: true,  canDelete: true,  canApprove: false },

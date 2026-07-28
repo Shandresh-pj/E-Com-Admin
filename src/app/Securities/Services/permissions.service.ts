@@ -6,16 +6,18 @@ import { ROLE_PERMISSIONS, UserType } from '../Models/role-access';
 
 /**
  * Maps DB permission action strings to UI action keys.
- * Each DB action maps to exactly one UI action — WRITE (create) and UPDATE
- * are distinct, independently-grantable permissions and must never imply
- * each other.
+ * Supports READ, WRITE, CREATE, UPDATE, DELETE, APPROVE, ALL, *, and FULL.
  */
 const DB_ACTION_MAP: Record<string, Array<'canCreate' | 'canRead' | 'canUpdate' | 'canDelete' | 'canApprove'>> = {
   READ:    ['canRead'],
   WRITE:   ['canCreate'],
+  CREATE:  ['canCreate'],
   UPDATE:  ['canUpdate'],
   DELETE:  ['canDelete'],
   APPROVE: ['canApprove'],
+  ALL:     ['canRead', 'canCreate', 'canUpdate', 'canDelete', 'canApprove'],
+  '*':     ['canRead', 'canCreate', 'canUpdate', 'canDelete', 'canApprove'],
+  FULL:    ['canRead', 'canCreate', 'canUpdate', 'canDelete', 'canApprove'],
 };
 
 @Injectable({
@@ -37,7 +39,7 @@ export class PermissionService {
 
   /**
    * Fine-grained check: does the user hold the given action on the given menu?
-   * ONLY Super Admin possesses full system access.
+   * Supports READ, WRITE, CREATE, UPDATE, DELETE, APPROVE, ALL, *, FULL.
    */
   hasPermission(menuId: number, action: string): boolean {
     this.permissionsUpdated();
@@ -46,20 +48,44 @@ export class PermissionService {
 
     const permissions = this.session.getPermissions();
 
-    if (!Array.isArray(permissions)) return false;
+    if (!Array.isArray(permissions) || permissions.length === 0) {
+      const userType = this.auth.getUserType() as UserType;
+      const rolePerms = ROLE_PERMISSIONS[userType];
+      if (!rolePerms) return false;
+      const actUpper = (action || '').toUpperCase();
+      if (actUpper === 'READ') return rolePerms.canRead;
+      if (actUpper === 'WRITE' || actUpper === 'CREATE') return rolePerms.canCreate;
+      if (actUpper === 'UPDATE') return rolePerms.canUpdate;
+      if (actUpper === 'DELETE') return rolePerms.canDelete;
+      if (actUpper === 'APPROVE') return rolePerms.canApprove;
+      if (actUpper === 'ALL' || actUpper === '*' || actUpper === 'FULL') return rolePerms.canRead;
+      return false;
+    }
 
-    return permissions.some(
-      (p: any) => (p.menu_id ?? p.menu?.id) === menuId && p.action === action
-    );
+    const reqActionUpper = (action || '').toUpperCase();
+
+    return permissions.some((p: any) => {
+      const pMenuId = p.menu_id ?? p.menu?.id;
+      if (pMenuId !== menuId) return false;
+
+      const actUpper = (p.action || '').toUpperCase();
+      if (actUpper === 'ALL' || actUpper === '*' || actUpper === 'FULL') return true;
+      if (actUpper === reqActionUpper) return true;
+      if ((reqActionUpper === 'WRITE' || reqActionUpper === 'CREATE') && (actUpper === 'WRITE' || actUpper === 'CREATE')) return true;
+
+      if (reqActionUpper === 'READ' && (p.canRead === true || p.can_read === true)) return true;
+      if ((reqActionUpper === 'WRITE' || reqActionUpper === 'CREATE') && (p.canCreate === true || p.can_create === true)) return true;
+      if (reqActionUpper === 'UPDATE' && (p.canUpdate === true || p.can_update === true)) return true;
+      if (reqActionUpper === 'DELETE' && (p.canDelete === true || p.can_delete === true)) return true;
+      if (reqActionUpper === 'APPROVE' && (p.canApprove === true || p.can_approve === true)) return true;
+
+      return false;
+    });
   }
 
   /**
    * Coarse-grained UI guard (hide/show buttons like Add, Edit, Delete, Approve).
-   *
-   * Priority:
-   *  1. SuperAdmin ONLY → always true.
-   *  2. If the user has DB permissions, derive the answer from those entries.
-   *  3. Fall back to static ROLE_PERMISSIONS matrix when no DB permissions exist.
+   * Supports READ, WRITE, CREATE, UPDATE, DELETE, APPROVE, ALL.
    */
   hasRoleAction(
     action: 'canCreate' | 'canRead' | 'canUpdate' | 'canDelete' | 'canApprove',
@@ -75,21 +101,27 @@ export class PermissionService {
     const targetNormalized = target.toLowerCase().replace(/\/+$/, '');
 
     if (Array.isArray(permissions) && permissions.length > 0) {
-      const hasMatch = permissions.some((p: any) => {
+      const matches = permissions.filter((p: any) => {
         const menuName = (p.menu?.name || '').toLowerCase();
         const menuPath = (p.menu?.path || '').toLowerCase().replace(/\/+$/, '');
-        const isMatch = targetNormalized === menuName || targetNormalized === menuPath || targetNormalized.startsWith(menuPath + '/');
-        if (isMatch) {
-          if (action === 'canApprove') {
-            return p.canApprove === true || p.action === 'APPROVE';
-          }
-          const uiActions = DB_ACTION_MAP[p.action] ?? [];
-          return uiActions.includes(action);
-        }
-        return false;
+        return targetNormalized === menuName || targetNormalized === menuPath || targetNormalized.startsWith(menuPath + '/');
       });
 
-      if (hasMatch) return true;
+      if (matches.length > 0) {
+        return matches.some((p: any) => {
+          if (action === 'canRead' && (p.canRead === true || p.can_read === true)) return true;
+          if (action === 'canCreate' && (p.canCreate === true || p.can_create === true)) return true;
+          if (action === 'canUpdate' && (p.canUpdate === true || p.can_update === true)) return true;
+          if (action === 'canDelete' && (p.canDelete === true || p.can_delete === true)) return true;
+          if (action === 'canApprove' && (p.canApprove === true || p.can_approve === true || p.action === 'APPROVE')) return true;
+
+          const actUpper = (p.action || '').toUpperCase();
+          if (actUpper === 'ALL' || actUpper === '*' || actUpper === 'FULL') return true;
+
+          const uiActions = DB_ACTION_MAP[actUpper] ?? [];
+          return uiActions.includes(action);
+        });
+      }
     }
 
     const defaultPaths = [
@@ -102,11 +134,15 @@ export class PermissionService {
       '/checkout',
       '/pos-billing',
       '/devices',
-      '/profit-loss'
+      '/profit-loss',
+      '/attendance',
+      '/leave',
+      '/workforce',
+      '/employees'
     ];
     if (defaultPaths.some(p => targetNormalized === p || targetNormalized.startsWith(p + '/'))) {
       const userType = this.auth.getUserType() as UserType;
-      return ROLE_PERMISSIONS[userType]?.[action] ?? false;
+      return ROLE_PERMISSIONS[userType]?.[action] ?? true;
     }
 
     const userType = this.auth.getUserType() as UserType;
@@ -126,7 +162,11 @@ export class PermissionService {
       '/dashboard',
       '/change-password',
       '/profile',
-      '/unauthorized'
+      '/unauthorized',
+      '/attendance',
+      '/leave',
+      '/workforce',
+      '/employees'
     ];
     if (defaultPaths.some(p => path === p || path.startsWith(p + '/'))) {
       return true;

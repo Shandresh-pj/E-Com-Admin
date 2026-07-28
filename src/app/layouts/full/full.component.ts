@@ -287,60 +287,64 @@ export class FullComponent implements OnInit {
     const isSuperAdmin = this.authService.isSuperAdmin() || apiMenus.includes('ALL');
 
     let allowedMenus: any[] = [];
+    const allStandardMenus = [
+      { id: 1, name: 'App Admin', path: '/admin', icon: 'bi-shield-lock-fill', isActive: true },
+      { id: 2, name: 'Branch', path: '/branch', icon: 'bi-shop', isActive: true },
+      { id: 3, name: 'Employee', path: '/employees', icon: 'bi-people-fill', isActive: true },
+      { id: 4, name: 'Roles', path: '/roles', icon: 'bi-key-fill', isActive: true },
+      { id: 5, name: 'Role Access', path: '/role-access', icon: 'bi-shield-check', isActive: true },
+      { id: 6, name: 'Profile', path: '/profile', icon: 'bi-person-badge-fill', isActive: true },
+      { id: 7, name: 'Menu Bar', path: '/menubar', icon: 'bi-list-ul', isActive: true },
+      { id: 8, name: 'Status', path: '/status', icon: 'bi-check2-square', isActive: true },
+      { id: 9, name: 'Product Attribute', path: '/product-attribute', icon: 'bi-tag-fill', isActive: true },
+      { id: 10, name: 'Attribute Value', path: '/attribute-value', icon: 'bi-tags-fill', isActive: true },
+      { id: 11, name: 'Category', path: '/category', icon: 'bi-folder-fill', isActive: true },
+      { id: 12, name: 'Product', path: '/product', icon: 'bi-box-seam-fill', isActive: true },
+      { id: 13, name: 'Orders', path: '/orders', icon: 'bi-cart-fill', isActive: true },
+      { id: 99, name: 'Coupons', path: '/coupons', icon: 'bi-ticket-detailed-fill', isActive: true },
+      { id: 14, name: 'Change Password', path: '/change-password', icon: 'bi-lock-fill', isActive: true },
+      { id: 15, name: 'Audit Logs', path: '/audit-logs', icon: 'bi-clock-history', isActive: true },
+      { id: 16, name: 'Alerts', path: '/alerts', icon: 'bi-exclamation-triangle-fill', isActive: true },
+      { id: 17, name: 'Attendance', path: '/attendance', icon: 'bi-calendar-check-fill', isActive: true },
+      { id: 18, name: 'Branch Stocks', path: '/branch-stocks', icon: 'bi-house-gear-fill', isActive: true },
+      { id: 19, name: 'Stocks', path: '/stocks', icon: 'bi-box2-fill', isActive: true },
+      { id: 20, name: 'Payroll', path: '/payroll', icon: 'bi-cash-coin', isActive: true },
+      { id: 21, name: 'Leave', path: '/leave', icon: 'bi-airplane-fill', isActive: true },
+      { id: 22, name: 'Delivery Tracking', path: '/delivery-tracking', icon: 'bi-truck', isActive: true },
+      { id: 23, name: 'Payments', path: '/payments', icon: 'bi-credit-card-2-front-fill', isActive: true },
+      { id: 24, name: 'Notifications', path: '/notifications', icon: 'bi-bell-fill', isActive: true },
+      { id: 25, name: 'Workforce Console', path: '/workforce', icon: 'bi-gear-wide-connected', isActive: true },
+      { id: 26, name: 'Invoice Generator', path: '/invoices', icon: 'bi-file-text', isActive: true },
+      { id: 27, name: 'Approvals', path: '/approvals', icon: 'bi-check-square', isActive: true },
+      { id: 28, name: 'Workforce Requests', path: '/workforce-requests', icon: 'bi-briefcase-fill', isActive: true },
+      { id: 29, name: 'Leave Management', path: '/leave', icon: 'bi-calendar-x-fill', isActive: true },
+      { id: 30, name: 'CRM Contacts', path: '/crm-contacts', icon: 'bi-people-fill', isActive: true },
+      { id: 31, name: 'Profit & Loss', path: '/profit-loss', icon: 'bi-pie-chart-fill', isActive: true },
+      { id: 32, name: 'Manage Plans', path: '/manage-subscription-plans', icon: 'bi-gem', isActive: true },
+      { id: 33, name: 'Upgrade Plan', path: '/subscription-plans', icon: 'bi-star-fill', isActive: true },
+      { id: 34, name: 'Billing History', path: '/billing-history', icon: 'receipt', isActive: true },
+      { id: 35, name: 'Subscription Coupons', path: '/subscription-coupons', icon: 'ticket', isActive: true },
+      { id: 36, name: 'Standard Checkout', path: '/checkout', icon: 'credit-card', isActive: true },
+      { id: 37, name: 'Company Calendar', path: '/calendar', icon: 'calendar-event', isActive: true },
+      { id: 38, name: 'Document Verification', path: '/employee-documents', icon: 'file-check', isActive: true },
+      { id: 39, name: 'Translation Console', path: '/translations', icon: 'language', isActive: true },
+      { id: 40, name: 'POS Billing Machine', path: '/pos-billing', icon: 'bi-receipt-cutoff', isActive: true },
+      { id: 41, name: 'Hardware & Devices', path: '/devices', icon: 'bi-cpu-fill', isActive: true }
+    ];
+
     if (isSuperAdmin) {
-      allowedMenus = [
-        { id: 1, name: 'App Admin', path: '/admin', icon: 'bi-shield-lock-fill', isActive: true },
-        { id: 2, name: 'Branch', path: '/branch', icon: 'bi-shop', isActive: true },
-        { id: 3, name: 'Employee', path: '/employees', icon: 'bi-people-fill', isActive: true },
-        { id: 4, name: 'Roles', path: '/roles', icon: 'bi-key-fill', isActive: true },
-        { id: 5, name: 'Role Access', path: '/role-access', icon: 'bi-shield-check', isActive: true },
-        { id: 6, name: 'Profile', path: '/profile', icon: 'bi-person-badge-fill', isActive: true },
-        { id: 7, name: 'Menu Bar', path: '/menubar', icon: 'bi-list-ul', isActive: true },
-        { id: 8, name: 'Status', path: '/status', icon: 'bi-check2-square', isActive: true },
-        { id: 9, name: 'Product Attribute', path: '/product-attribute', icon: 'bi-tag-fill', isActive: true },
-        { id: 10, name: 'Attribute Value', path: '/attribute-value', icon: 'bi-tags-fill', isActive: true },
-        { id: 11, name: 'Category', path: '/category', icon: 'bi-folder-fill', isActive: true },
-        { id: 12, name: 'Product', path: '/product', icon: 'bi-box-seam-fill', isActive: true },
-        { id: 13, name: 'Orders', path: '/orders', icon: 'bi-cart-fill', isActive: true },
-        { id: 99, name: 'Coupons', path: '/coupons', icon: 'bi-ticket-detailed-fill', isActive: true },
-        { id: 14, name: 'Change Password', path: '/change-password', icon: 'bi-lock-fill', isActive: true },
-        { id: 15, name: 'Audit Logs', path: '/audit-logs', icon: 'bi-clock-history', isActive: true },
-        { id: 16, name: 'Alerts', path: '/alerts', icon: 'bi-exclamation-triangle-fill', isActive: true },
-        { id: 17, name: 'Attendance', path: '/attendance', icon: 'bi-calendar-check-fill', isActive: true },
-        { id: 18, name: 'Branch Stocks', path: '/branch-stocks', icon: 'bi-house-gear-fill', isActive: true },
-        { id: 19, name: 'Stocks', path: '/stocks', icon: 'bi-box2-fill', isActive: true },
-        { id: 20, name: 'Payroll', path: '/payroll', icon: 'bi-cash-coin', isActive: true },
-        { id: 21, name: 'Leave', path: '/leave', icon: 'bi-airplane-fill', isActive: true },
-        { id: 22, name: 'Delivery Tracking', path: '/delivery-tracking', icon: 'bi-truck', isActive: true },
-        { id: 23, name: 'Payments', path: '/payments', icon: 'bi-credit-card-2-front-fill', isActive: true },
-        { id: 24, name: 'Notifications', path: '/notifications', icon: 'bi-bell-fill', isActive: true },
-        { id: 25, name: 'Workforce Console', path: '/workforce', icon: 'bi-gear-wide-connected', isActive: true },
-        { id: 26, name: 'Invoice Generator', path: '/invoices', icon: 'bi-file-text', isActive: true },
-        { id: 27, name: 'Approvals', path: '/approvals', icon: 'bi-check-square', isActive: true },
-        { id: 28, name: 'Workforce Requests', path: '/workforce-requests', icon: 'bi-briefcase-fill', isActive: true },
-        { id: 29, name: 'Leave Management', path: '/leave', icon: 'bi-calendar-x-fill', isActive: true },
-        { id: 30, name: 'CRM Contacts', path: '/crm-contacts', icon: 'bi-people-fill', isActive: true },
-        { id: 31, name: 'Profit & Loss', path: '/profit-loss', icon: 'bi-pie-chart-fill', isActive: true },
-        { id: 32, name: 'Manage Plans', path: '/manage-subscription-plans', icon: 'bi-gem', isActive: true },
-        { id: 33, name: 'Upgrade Plan', path: '/subscription-plans', icon: 'bi-star-fill', isActive: true },
-        { id: 34, name: 'Billing History', path: '/billing-history', icon: 'receipt', isActive: true },
-        { id: 35, name: 'Subscription Coupons', path: '/subscription-coupons', icon: 'ticket', isActive: true },
-        { id: 36, name: 'Standard Checkout', path: '/checkout', icon: 'credit-card', isActive: true },
-        { id: 37, name: 'Company Calendar', path: '/calendar', icon: 'calendar-event', isActive: true },
-        { id: 38, name: 'Document Verification', path: '/employee-documents', icon: 'file-check', isActive: true },
-        { id: 39, name: 'Translation Console', path: '/translations', icon: 'language', isActive: true },
-        { id: 40, name: 'POS Billing Machine', path: '/pos-billing', icon: 'bi-receipt-cutoff', isActive: true },
-        { id: 41, name: 'Hardware & Devices', path: '/devices', icon: 'bi-cpu-fill', isActive: true }
-      ];
-    } else {
+      allowedMenus = allStandardMenus;
+    } else if (Array.isArray(apiMenus) && apiMenus.length > 0 && typeof apiMenus[0] === 'object') {
       allowedMenus = apiMenus.filter((m: any) => {
-        if (!m || typeof m !== 'object') return false;
-        if (m.isActive === false) return false;
-        return this.permissionService.hasPermission(m.id, 'READ');
+        if (!m || typeof m !== 'object' || m.isActive === false) return false;
+        return this.permissionService.hasPermission(m.id, 'READ') ||
+               this.permissionService.hasPagePermission(m.path || m.route);
       });
-      // if (this.authService.getUserType() === 'Admin' && !allowedMenus.some(m => m.path === '/crm-contacts')) {
-      //   allowedMenus.push({ id: 30, name: 'CRM Contacts', path: '/crm-contacts', icon: 'bi-people-fill', isActive: true });
-      // }
+      if (allowedMenus.length === 0) {
+        allowedMenus = allStandardMenus.filter(m => this.permissionService.hasPagePermission(m.path));
+      }
+    } else {
+      allowedMenus = allStandardMenus.filter(m => this.permissionService.hasPagePermission(m.path));
     }
 
     const norm = (r?: string) => (r || '').toLowerCase().replace(/\/+$/, '');

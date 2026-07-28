@@ -82,48 +82,44 @@ export class StarterComponent implements OnInit {
 
   // Formats raw role strings for display (e.g. 'test' -> 'Test', 'Super_Admin' -> 'Super Admin')
   get displayRole(): string {
-    if (!this.userRole) return 'Unknown';
+    if (!this.userRole) return 'Enterprise User';
     return this.userRole.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
   }
 
+  get normalizedRole(): string {
+    return (this.userRole || '').toLowerCase().replace(/[\s_]+/g, '');
+  }
+
+  get isSuperAdmin(): boolean {
+    return this.auth.isSuperAdmin() || this.normalizedRole === 'superadmin';
+  }
+
   get isBranchDashboard(): boolean {
-    return this.userRole === UserType.BRANCH_MANAGER || this.userRole === UserType.SHOPKEEPER || this.userRole === 'Branch';
+    return ['branchmanager', 'branch', 'shopkeeper'].includes(this.normalizedRole);
   }
 
   get isEmployeeDashboard(): boolean {
-    return this.userRole === UserType.EMPLOYEE || this.userRole === UserType.DELIVERY_BOY;
+    return ['employee', 'deliveryboy'].includes(this.normalizedRole);
   }
 
   get isCustomerDashboard(): boolean {
-    return this.userRole === UserType.CUSTOMER;
+    return this.normalizedRole === 'customer';
   }
 
   get isAdminDashboard(): boolean {
-    // If not matching any other specific dashboard, fallback to Admin to prevent a blank screen
     return !this.isBranchDashboard && !this.isEmployeeDashboard && !this.isCustomerDashboard;
   }
 
   loadDashboardData() {
     this.loading = true;
 
-    // Load admin metrics
-    if (this.userRole === UserType.SUPER_ADMIN || this.userRole === UserType.ADMIN) {
-      this.loadAdminMetrics();
-    }
-    // Load branch metrics
-    else if (this.userRole === UserType.BRANCH_MANAGER || this.userRole === UserType.SHOPKEEPER || this.userRole === 'Branch') {
+    if (this.isBranchDashboard) {
       this.loadBranchMetrics();
-    }
-    // Load employee/delivery boy metrics
-    else if (this.userRole === UserType.EMPLOYEE || this.userRole === UserType.DELIVERY_BOY) {
+    } else if (this.isEmployeeDashboard) {
       this.loadEmployeeMetrics();
-    }
-    // Load customer metrics
-    else if (this.userRole === UserType.CUSTOMER) {
+    } else if (this.isCustomerDashboard) {
       this.loadCustomerMetrics();
-    }
-    // Fallback for unknown/test roles so dashboard is not empty
-    else {
+    } else {
       this.loadAdminMetrics();
     }
 

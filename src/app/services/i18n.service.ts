@@ -178,7 +178,27 @@ export class I18nService {
   translate(key: string, params?: Record<string, any>): string {
     if (!key) return '';
     const dict = this.dictionary();
-    let text = dict[key] || key;
+    let text = dict[key];
+
+    if (!text && key.includes('.')) {
+      const parts = key.split('.');
+      let obj: any = dict;
+      for (const p of parts) {
+        if (obj && typeof obj === 'object' && p in obj) {
+          obj = obj[p];
+        } else {
+          obj = null;
+          break;
+        }
+      }
+      if (typeof obj === 'string') {
+        text = obj;
+      }
+    }
+
+    if (!text) {
+      text = key;
+    }
 
     if (params && typeof params === 'object') {
       Object.keys(params).forEach(p => {

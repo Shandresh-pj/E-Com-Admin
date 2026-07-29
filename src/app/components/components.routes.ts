@@ -35,6 +35,7 @@ import { UserType } from '../Securities/Models/role-access';
 
 const SA = UserType.SUPER_ADMIN;
 const A = UserType.ADMIN;
+const BR = UserType.BRANCH;
 const BM = UserType.BRANCH_MANAGER;
 const SK = UserType.SHOPKEEPER;
 const EM = UserType.EMPLOYEE;
@@ -47,7 +48,6 @@ export const ComponentsRoutes: Routes = [
     canActivate: [RoleGuard],
     data: {
       title: 'POS Billing Terminal',
-      roles: [SA, A, BM, SK],
       urls: [{ title: 'POS Billing', url: '/pos-billing' }]
     }
   },
@@ -57,7 +57,6 @@ export const ComponentsRoutes: Routes = [
     canActivate: [RoleGuard],
     data: {
       title: 'Hardware & Devices Auto-Detect',
-      roles: [SA, A, BM],
       urls: [{ title: 'Hardware & Devices', url: '/devices' }]
     }
   },
@@ -67,7 +66,6 @@ export const ComponentsRoutes: Routes = [
     canActivate: [RoleGuard],
     data: {
       title: 'Profit & Loss',
-      roles: [SA, A, BM],
       urls: [{ title: 'Profit & Loss', url: '/profit-loss' }]
     }
   },
@@ -77,7 +75,6 @@ export const ComponentsRoutes: Routes = [
     canActivate: [RoleGuard],
     data: {
       title: 'App Admin',
-      roles: [SA, A],
       urls: [
         { title: 'App Admin', url: '/admin' }
       ]
@@ -90,7 +87,6 @@ export const ComponentsRoutes: Routes = [
     canActivate: [RoleGuard],
     data: {
       title: 'Branch',
-      roles: [SA, A],
       urls: [
         { title: 'Branch', url: '/branch' }
       ]
@@ -103,7 +99,6 @@ export const ComponentsRoutes: Routes = [
     canActivate: [RoleGuard],
     data: {
       title: 'Employees',
-      roles: [SA, A, BM],
       urls: [
         { title: 'Employees', url: '/employees' }
       ]
@@ -116,7 +111,6 @@ export const ComponentsRoutes: Routes = [
     canActivate: [RoleGuard],
     data: {
       title: 'Roles',
-      roles: [SA],
       urls: [
         { title: 'Roles', url: '/roles' }
       ]
@@ -129,7 +123,6 @@ export const ComponentsRoutes: Routes = [
     canActivate: [RoleGuard],
     data: {
       title: 'Role Access',
-      roles: [SA],
       urls: [
         { title: 'Role Access', url: '/role-access' }
       ]
@@ -153,7 +146,6 @@ export const ComponentsRoutes: Routes = [
     canActivate: [RoleGuard],
     data: {
       title: 'Menu Bar',
-      roles: [SA],
       urls: [
         { title: 'Menu Bar', url: '/menubar' }
       ]
@@ -166,7 +158,6 @@ export const ComponentsRoutes: Routes = [
     canActivate: [RoleGuard],
     data: {
       title: 'Status',
-      roles: [SA, A],
       urls: [
         { title: 'Status', url: '/status' }
       ]
@@ -179,7 +170,6 @@ export const ComponentsRoutes: Routes = [
     canActivate: [RoleGuard],
     data: {
       title: 'Product Attribute',
-      roles: [SA, A, BM],
       urls: [
         {
           title: 'Product Attribute',
@@ -195,7 +185,6 @@ export const ComponentsRoutes: Routes = [
     canActivate: [RoleGuard],
     data: {
       title: 'Attribute Value',
-      roles: [SA, A, BM],
       urls: [
         {
           title: 'Attribute Value',
@@ -211,7 +200,6 @@ export const ComponentsRoutes: Routes = [
     canActivate: [RoleGuard],
     data: {
       title: 'Category',
-      roles: [SA, A, BM],
       urls: [
         {
           title: 'Category',
@@ -227,7 +215,6 @@ export const ComponentsRoutes: Routes = [
     canActivate: [RoleGuard],
     data: {
       title: 'Product',
-      roles: [SA, A, BM, SK],
       urls: [
         {
           title: 'Product',
@@ -243,7 +230,6 @@ export const ComponentsRoutes: Routes = [
     canActivate: [RoleGuard],
     data: {
       title: 'Orders',
-      roles: [SA, A, BM, SK],
       urls: [
         {
           title: 'Orders',
@@ -273,19 +259,18 @@ export const ComponentsRoutes: Routes = [
     canActivate: [RoleGuard],
     data: {
       title: 'Audit Logs',
-      roles: [SA, A],
       urls: [
         { title: 'Audit Logs', url: '/audit-logs' }
       ]
     }
   },
+
   {
     path: 'alerts',
     component: Alerts,
     canActivate: [RoleGuard],
     data: {
       title: 'Alerts',
-      roles: [SA, A, BM],
       urls: [{ title: 'Alerts', url: '/alerts' }]
     }
   },
@@ -295,7 +280,6 @@ export const ComponentsRoutes: Routes = [
     canActivate: [RoleGuard],
     data: {
       title: 'Attendance',
-      roles: [SA, A, BM, SK, EM],
       urls: [{ title: 'Attendance', url: '/attendance' }]
     }
   },
@@ -305,7 +289,6 @@ export const ComponentsRoutes: Routes = [
     canActivate: [RoleGuard],
     data: {
       title: 'Branch Stocks',
-      roles: [SA, A, BM, SK],
       urls: [{ title: 'Branch Stocks', url: '/branch-stocks' }]
     }
   },
@@ -315,7 +298,6 @@ export const ComponentsRoutes: Routes = [
     canActivate: [RoleGuard],
     data: {
       title: 'Stocks',
-      roles: [SA, A, BM, SK],
       urls: [{ title: 'Stocks', url: '/stocks' }]
     }
   },
@@ -325,7 +307,6 @@ export const ComponentsRoutes: Routes = [
     canActivate: [RoleGuard],
     data: {
       title: 'Payroll',
-      roles: [SA, A, BM],
       urls: [{ title: 'Payroll', url: '/payroll' }]
     }
   },
@@ -335,7 +316,6 @@ export const ComponentsRoutes: Routes = [
     canActivate: [RoleGuard],
     data: {
       title: 'Leave',
-      roles: [SA, A, BM, SK, EM],
       urls: [{ title: 'Leave', url: '/leave' }]
     }
   },
@@ -345,7 +325,6 @@ export const ComponentsRoutes: Routes = [
     canActivate: [RoleGuard],
     data: {
       title: 'Delivery Tracking',
-      roles: [SA, A, BM, DB],
       urls: [{ title: 'Delivery Tracking', url: '/delivery-tracking' }]
     }
   },
@@ -355,14 +334,12 @@ export const ComponentsRoutes: Routes = [
     canActivate: [RoleGuard],
     data: {
       title: 'Payments',
-      roles: [SA, A, BM, SK],
       urls: [{ title: 'Payments', url: '/payments' }]
     }
   },
   {
     path: 'notifications',
     component: Notifications,
-    canActivate: [RoleGuard],
     data: {
       title: 'Notifications',
       urls: [{ title: 'Notifications', url: '/notifications' }]
@@ -374,7 +351,6 @@ export const ComponentsRoutes: Routes = [
     canActivate: [RoleGuard],
     data: {
       title: 'Workforce Console',
-      roles: [SA, A, BM],
       urls: [{ title: 'Workforce Console', url: '/workforce' }]
     }
   },
@@ -384,7 +360,6 @@ export const ComponentsRoutes: Routes = [
     canActivate: [RoleGuard],
     data: {
       title: 'Shifts & Schedules',
-      roles: [SA, A, BM],
       urls: [{ title: 'Shifts & Schedules', url: '/shifts' }]
     }
   },
@@ -394,7 +369,6 @@ export const ComponentsRoutes: Routes = [
     canActivate: [RoleGuard],
     data: {
       title: 'Break Deduction Rules',
-      roles: [SA, A, BM],
       urls: [{ title: 'Break Deduction Rules', url: '/break-policies' }]
     }
   },
@@ -404,7 +378,6 @@ export const ComponentsRoutes: Routes = [
     canActivate: [RoleGuard],
     data: {
       title: 'Biometric Sensors & Terminals',
-      roles: [SA, A, BM],
       urls: [{ title: 'Biometric Sensors', url: '/biometric' }]
     }
   },
@@ -414,7 +387,6 @@ export const ComponentsRoutes: Routes = [
     canActivate: [RoleGuard],
     data: {
       title: 'GPS Geofencing Boundaries',
-      roles: [SA, A, BM],
       urls: [{ title: 'GPS Geofencing', url: '/geofencing' }]
     }
   },
@@ -424,7 +396,6 @@ export const ComponentsRoutes: Routes = [
     canActivate: [RoleGuard],
     data: {
       title: 'Company Calendar',
-      roles: [SA, A, BM, EM],
       urls: [{ title: 'Company Calendar', url: '/calendar' }]
     }
   },
@@ -434,7 +405,6 @@ export const ComponentsRoutes: Routes = [
     canActivate: [RoleGuard],
     data: {
       title: 'KYC Document Vault',
-      roles: [SA, A, BM, EM],
       urls: [{ title: 'KYC Document Vault', url: '/employee-documents' }]
     }
   },
@@ -444,7 +414,6 @@ export const ComponentsRoutes: Routes = [
     canActivate: [RoleGuard],
     data: {
       title: 'Translation & Localization Console',
-      roles: [SA, A],
       urls: [{ title: 'Translation Console', url: '/translations' }]
     }
   },
@@ -454,7 +423,6 @@ export const ComponentsRoutes: Routes = [
     canActivate: [RoleGuard],
     data: {
       title: 'Translation & Localization Console',
-      roles: [SA, A],
       urls: [{ title: 'Settings', url: '/settings' }, { title: 'Translations', url: '/settings/translations' }]
     }
   },
@@ -464,7 +432,6 @@ export const ComponentsRoutes: Routes = [
     canActivate: [RoleGuard],
     data: {
       title: 'Workforce Requests',
-      roles: [SA, A, BM],
       urls: [{ title: 'Workforce Requests', url: '/workforce-requests' }]
     }
   },
@@ -474,7 +441,6 @@ export const ComponentsRoutes: Routes = [
     canActivate: [RoleGuard],
     data: {
       title: 'Invoice Generator',
-      roles: [SA, A, BM, SK],
       urls: [{ title: 'Invoice Generator', url: '/invoices' }]
     }
   },
@@ -484,7 +450,6 @@ export const ComponentsRoutes: Routes = [
     canActivate: [RoleGuard],
     data: {
       title: 'Workflow Approvals',
-      roles: [SA, A, BM, SK, EM],
       urls: [{ title: 'Workflow Approvals', url: '/approvals' }]
     }
   },
@@ -494,7 +459,6 @@ export const ComponentsRoutes: Routes = [
     canActivate: [RoleGuard],
     data: {
       title: 'CRM Contacts',
-      roles: [SA, A],
       urls: [{ title: 'CRM Contacts', url: '/crm-contacts' }]
     }
   },
@@ -504,7 +468,6 @@ export const ComponentsRoutes: Routes = [
     canActivate: [RoleGuard],
     data: {
       title: 'Coupons Management',
-      roles: [SA, A, BM, SK],
       urls: [{ title: 'Coupons', url: '/coupons' }]
     }
   },
@@ -514,7 +477,6 @@ export const ComponentsRoutes: Routes = [
     canActivate: [RoleGuard],
     data: {
       title: 'Subscription Plans Management',
-      roles: [SA, A],
       urls: [{ title: 'Manage Plans', url: '/manage-subscription-plans' }]
     }
   },
@@ -524,7 +486,6 @@ export const ComponentsRoutes: Routes = [
     canActivate: [RoleGuard],
     data: {
       title: 'Billing & Invoice History',
-      roles: [SA, A, BM, SK, EM, DB],
       urls: [{ title: 'Billing & Invoices', url: '/billing-history' }]
     }
   },
@@ -534,7 +495,6 @@ export const ComponentsRoutes: Routes = [
     canActivate: [RoleGuard],
     data: {
       title: 'Subscription Coupons',
-      roles: [SA, A],
       urls: [{ title: 'Coupons', url: '/subscription-coupons' }]
     }
   },
@@ -544,7 +504,6 @@ export const ComponentsRoutes: Routes = [
     canActivate: [RoleGuard],
     data: {
       title: 'Standard Payment Checkout',
-      roles: [SA, A, BM, SK, EM, DB],
       urls: [{ title: 'Checkout', url: '/checkout' }]
     }
   }

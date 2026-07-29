@@ -20,30 +20,43 @@ export const RoleGuard: CanActivateFn = (route, state) => {
     return false;
   }
 
-  // Wait for session data to be fetched from the socket
+  // Wait for session data to be loaded
   return session.waitForLoad().pipe(
     map(() => {
       const user = session.getUser();
+      const userType = user?.userType || user?.user_type || '';
 
-      if (user?.isSuperAdmin || user?.userType === UserType.SUPER_ADMIN) {
+      // Super Admin always gets access
+      if (user?.isSuperAdmin || userType === UserType.SUPER_ADMIN || userType === 'Super_Admin' || userType === 'super_admin') {
         return true;
       }
 
-      // 1. Dynamic permission check — if the DB grants this page, allow it
-      //    regardless of the static roles array (permission overrides role matrix)
       const url = state.url.split('?')[0];
+
+      // 1. Dynamic DB permission check — if the DB grants this page for the user's role/branch/company, allow it
       if (permissionService.hasPagePermission(url)) {
         return true;
       }
 
-      // 2. Static UserType fallback — for pages not covered by dynamic permissions
+      // 2. Static role check from route data
       const expectedRoles: string[] = route.data['roles'] ?? [];
-      if (expectedRoles.length && !expectedRoles.includes(user?.userType)) {
-        router.navigate(['/unauthorized']);
-        return false;
+      if (expectedRoles.length > 0) {
+        const normalizedUserType = String(userType).toLowerCase();
+        const matchesRole = expectedRoles.some(r => String(r).toLowerCase() === normalizedUserType);
+        if (matchesRole) {
+          return true;
+        }
       }
 
-      return true;
+      // 3. Fallback: If no explicit expectedRoles defined, allow navigation if authenticated
+      if (!expectedRoles.length) {
+        return true;
+      }
+
+      // Deny & redirect to unauthorized
+      console.warn(`[RoleGuard] Access denied for userType: ${userType} to URL: ${url}`);
+      router.navigate(['/unauthorized']);
+      return false;
     })
   );
 };

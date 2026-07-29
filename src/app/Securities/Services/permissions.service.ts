@@ -102,8 +102,8 @@ export class PermissionService {
 
     if (Array.isArray(permissions) && permissions.length > 0) {
       const matches = permissions.filter((p: any) => {
-        const menuName = (p.menu?.name || '').toLowerCase();
-        const menuPath = (p.menu?.path || '').toLowerCase().replace(/\/+$/, '');
+        const menuName = (p.menu?.name || p.menu_name || p.name || '').toLowerCase();
+        const menuPath = (p.menu?.path || p.menu_path || p.path || '').toLowerCase().replace(/\/+$/, '');
         return targetNormalized === menuName || targetNormalized === menuPath || targetNormalized.startsWith(menuPath + '/');
       });
 
@@ -138,7 +138,10 @@ export class PermissionService {
       '/attendance',
       '/leave',
       '/workforce',
-      '/employees'
+      '/employees',
+      '/branch',
+      '/product',
+      '/orders'
     ];
     if (defaultPaths.some(p => targetNormalized === p || targetNormalized.startsWith(p + '/'))) {
       const userType = this.auth.getUserType() as UserType;
@@ -152,15 +155,14 @@ export class PermissionService {
   /**
    * Evaluates page-level route access for guards & sidebar filtering.
    * Super Admin has full access to ALL pages.
-   * Other roles default to accessing ONLY Dashboard, Profile, Change Password, and Notifications.
-   * All other modules require explicit DB Role Access grants.
+   * Other roles access DB Granted Role Access Matrix, DB Menus, or Role Defaults.
    */
   hasPagePermission(path: string): boolean {
     this.permissionsUpdated();
 
     if (this.auth.isSuperAdmin()) return true;
 
-    // Default accessible routes for ALL roles
+    // Universal accessible paths for ALL roles
     const universalPaths = [
       '/dashboard',
       '/profile',
@@ -178,12 +180,14 @@ export class PermissionService {
     const permissions = this.session.getPermissions();
     if (Array.isArray(permissions) && permissions.length > 0) {
       const match = permissions.find((p: any) => {
-        const menuPath = (p.menu?.path || '').toLowerCase().replace(/\/+$/, '');
-        const menuName = (p.menu?.name || '').toLowerCase();
-        return targetNormalized === menuPath || targetNormalized === menuName || targetNormalized.startsWith(menuPath + '/');
+        const menuPath = (p.menu?.path || p.menu_path || p.path || '').toLowerCase().replace(/\/+$/, '');
+        const menuName = (p.menu?.name || p.menu_name || p.name || '').toLowerCase();
+        if (menuPath && (targetNormalized === menuPath || targetNormalized.startsWith(menuPath + '/'))) return true;
+        if (menuName && (targetNormalized === menuName || targetNormalized.startsWith(menuName + '/'))) return true;
+        return false;
       });
       if (match) {
-        return match.canRead === true || match.can_read === true || match.action === 'ALL' || match.action === 'READ';
+        return match.canRead === true || match.can_read === true || match.canCreate === true || match.can_create === true || match.action === 'ALL' || match.action === 'READ' || match.action === '*';
       }
     }
 
@@ -196,13 +200,19 @@ export class PermissionService {
           const strNormalized = m.toLowerCase().replace(/\/+$/, '');
           return targetNormalized === strNormalized || targetNormalized.startsWith(strNormalized + '/');
         }
-        const menuPath = (m.path || m.route || m.name || '').toLowerCase().replace(/\/+$/, '');
+        const menuPath = (m.path || m.route || m.menu_path || m.name || '').toLowerCase().replace(/\/+$/, '');
         return targetNormalized === menuPath || targetNormalized.startsWith(menuPath + '/');
       });
       if (hasMenu) return true;
     }
 
-    // All other management modules: NO ACCESS for other roles unless explicitly granted above!
+    // Default Role permissions fallback (Branch, Admin, Branch_Manager, etc.)
+    const userType = this.auth.getUserType();
+    const rolePerms = ROLE_PERMISSIONS[userType as UserType];
+    if (rolePerms && rolePerms.canRead) {
+      return true;
+    }
+
     return false;
   }
 
@@ -221,21 +231,21 @@ export class PermissionService {
     this.permissionsUpdated();
     if (this.auth.isSuperAdmin()) return true;
     const userType = this.auth.getUserType();
-    return userType === UserType.ADMIN || userType === UserType.BRANCH_MANAGER;
+    return userType === UserType.ADMIN || userType === UserType.BRANCH_MANAGER || userType === UserType.BRANCH;
   }
 
   canManageWorkforce(): boolean {
     this.permissionsUpdated();
     if (this.auth.isSuperAdmin()) return true;
     const userType = this.auth.getUserType();
-    return userType === UserType.ADMIN || userType === UserType.BRANCH_MANAGER;
+    return userType === UserType.ADMIN || userType === UserType.BRANCH_MANAGER || userType === UserType.BRANCH;
   }
 
   canManageEmployees(): boolean {
     this.permissionsUpdated();
     if (this.auth.isSuperAdmin()) return true;
     const userType = this.auth.getUserType();
-    return userType === UserType.ADMIN || userType === UserType.BRANCH_MANAGER;
+    return userType === UserType.ADMIN || userType === UserType.BRANCH_MANAGER || userType === UserType.BRANCH;
   }
 
   isEmployeeSelfService(): boolean {

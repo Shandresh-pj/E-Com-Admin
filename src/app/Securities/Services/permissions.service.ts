@@ -301,4 +301,43 @@ export class PermissionService {
     const userType = this.normalizeUserType(this.auth.getUserType());
     return userType === UserType.EMPLOYEE || userType === UserType.SHOPKEEPER || userType === UserType.DELIVERY_BOY;
   }
+
+  /**
+   * Returns true only for Super Admin and Admin roles.
+   * Used to gate purchase-cost / margin fields in product forms and reports.
+   */
+  canViewPurchaseCost(): boolean {
+    this.permissionsUpdated();
+    if (this.auth.isSuperAdmin()) return true;
+    const userType = this.normalizeUserType(this.auth.getUserType());
+    return userType === UserType.ADMIN;
+  }
+
+  /**
+   * Returns true for Branch, BranchManager, Employee, Shopkeeper, Delivery_Boy.
+   * Used to determine whether a product submission is routed to "Pending Approval".
+   */
+  isBranchOrBelow(): boolean {
+    this.permissionsUpdated();
+    if (this.auth.isSuperAdmin()) return false;
+    const userType = this.normalizeUserType(this.auth.getUserType());
+    return (
+      userType === UserType.BRANCH ||
+      userType === UserType.BRANCH_MANAGER ||
+      userType === UserType.EMPLOYEE ||
+      userType === UserType.SHOPKEEPER ||
+      userType === UserType.DELIVERY_BOY
+    );
+  }
+
+  /**
+   * Returns true only if the user can manage (approve / reject) products.
+   * Super Admin and Admin can approve; Branch users submit for approval.
+   */
+  canApproveProducts(): boolean {
+    this.permissionsUpdated();
+    if (this.auth.isSuperAdmin()) return true;
+    const userType = this.normalizeUserType(this.auth.getUserType());
+    return userType === UserType.ADMIN || userType === UserType.BRANCH_MANAGER;
+  }
 }

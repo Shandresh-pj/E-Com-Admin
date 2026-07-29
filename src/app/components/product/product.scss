@@ -788,3 +788,31 @@ mat-form-field.expired-date-field {
     border-color: #ef4444 !important;
   }
 }
+
+/* ─── Admin-only Purchase Cost Banner ─────────────────────────────── */
+.purchase-cost-banner {
+  display: flex;
+  align-items: center;
+  padding: 8px 14px;
+  border-radius: 8px;
+  background: rgba(245, 158, 11, 0.08);
+  border: 1px solid rgba(245, 158, 11, 0.25);
+  margin-top: -8px;
+
+  mat-icon { flex-shrink: 0; }
+}
+
+/* ─── Branch Approval Notice ───────────────────────────────────────── */
+.branch-approval-notice {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: rgba(99, 102, 241, 0.06);
+  border: 1px solid rgba(99, 102, 241, 0.25);
+  height: 100%;
+  box-sizing: border-box;
+
+  mat-icon { flex-shrink: 0; margin-top: 2px; }
+}

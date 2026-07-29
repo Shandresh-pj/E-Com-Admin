@@ -103,11 +103,18 @@ export class Product {
       name: ['', [Validators.required, Validators.maxLength(200)]],
       description: ['', Validators.maxLength(1000)],
       category: [''],
+      // Base selling price (required for all roles)
       price: ['', [Validators.required, Validators.min(0)]],
+      // Purchase / cost price — visible only to Super_Admin and Admin
+      purchase_cost: [''],
+      // Tiered pricing fields
+      retail_price: [''],
+      wholesale_price: [''],
+      dealer_price: [''],
       stock_in_hand: ['', [Validators.required, Validators.min(0)]],
       barcode: ['', Validators.pattern(/^\d{8,14}$/)],
       product_type: ['single', Validators.required],
-      status: ['', Validators.required],
+      status: ['Draft', Validators.required],
       variants: this.fb.array([]),
       attributeValues: this.fb.array([]),
       low_stock_threshold: [5, [Validators.required, Validators.min(0)]],
@@ -636,10 +643,17 @@ export class Product {
       description: product?.description,
       category: product?.category,
       price: product?.price,
+      // Pricing tiers — only patched if user can view purchase cost
+      ...(this.perm.canViewPurchaseCost() ? {
+        purchase_cost:   product?.purchase_cost   ?? '',
+        retail_price:    product?.retail_price    ?? '',
+        wholesale_price: product?.wholesale_price ?? '',
+        dealer_price:    product?.dealer_price    ?? ''
+      } : {}),
       stock_in_hand: product?.stock_in_hand,
       barcode: product?.barcode,
       product_type: product?.product_type,
-      status: product?.status,
+      status: product?.status || 'Draft',
       low_stock_threshold: product?.low_stock_threshold || 5,
       critical_stock_threshold: product?.critical_stock_threshold || 2,
       manufacture_date: product?.manufacture_date ? new Date(product.manufacture_date) : null,
@@ -970,12 +984,30 @@ export class Product {
     formData.append('stock_in_hand', value.stock_in_hand);
     formData.append('barcode', value.barcode || '');
     formData.append('product_type', value.product_type);
-    formData.append('status', value.status);
+    // Branch/below users always submit as Draft and require admin approval
+    const effectiveStatus = this.perm.isBranchOrBelow() ? 'Draft' : value.status;
+    formData.append('status', effectiveStatus);
     formData.append('low_stock_threshold', value.low_stock_threshold || '5');
     formData.append('critical_stock_threshold', value.critical_stock_threshold || '2');
     formData.append('manufacture_date', this.toISODateString(value.manufacture_date));
     formData.append('expiry_date', this.toISODateString(value.expiry_date));
     formData.append('registration_id', this.getRegistrationId() || '');
+
+    // Tiered pricing — only admins can set purchase cost / dealer pricing
+    if (this.perm.canViewPurchaseCost()) {
+      if (value.purchase_cost !== null && value.purchase_cost !== '') {
+        formData.append('purchase_cost', value.purchase_cost);
+      }
+      if (value.retail_price !== null && value.retail_price !== '') {
+        formData.append('retail_price', value.retail_price);
+      }
+      if (value.wholesale_price !== null && value.wholesale_price !== '') {
+        formData.append('wholesale_price', value.wholesale_price);
+      }
+      if (value.dealer_price !== null && value.dealer_price !== '') {
+        formData.append('dealer_price', value.dealer_price);
+      }
+    }
 
     if (user?.company_id || user?.companyId) {
       formData.append('company_id', String(user.company_id || user.companyId));
@@ -1016,12 +1048,21 @@ export class Product {
       this.commonService.postApi(`products/add`, formData).subscribe({
         next: (res: any) => {
           this.isSubmitting = false;
-          this.alert.success("Product Created Successfully");
+          if (this.perm.isBranchOrBelow()) {
+            this.alert.fire({
+              icon: 'success',
+              title: 'Product Submitted!',
+              text: 'Your product has been submitted and is awaiting admin approval.',
+              confirmButtonText: 'OK'
+            });
+          } else {
+            this.alert.success('Product Created Successfully');
+          }
           this.getProducts(() => this.cancelProduct());
         },
         error: (err: any) => {
           this.isSubmitting = false;
-          this.alert.error(err?.error?.message || "Failed to create product");
+          this.alert.error(err?.error?.message || 'Failed to create product');
         }
       });
     } else {

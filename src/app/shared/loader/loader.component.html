@@ -1,64 +1,111 @@
-<div class="ldr" [class.out]="!isVisible">
+<div class="ldr" [class.out]="!isVisible" role="progressbar" [attr.aria-valuenow]="pct" aria-valuemin="0" aria-valuemax="100" aria-label="Loading application">
 
-  <!-- Semi-Transparent Glass Blur Backdrop Overlay -->
-  <div class="backdrop-blur-overlay" aria-hidden="true"></div>
-
-  <!-- Ambient Glow Effects -->
-  <div class="ambient-glows" aria-hidden="true">
-    <div class="glow-orb g1"></div>
-    <div class="glow-orb g2"></div>
+  <!-- ── Floating Particle Field ─────────────────────────────────────────── -->
+  <div class="particle-field" aria-hidden="true">
+    @for (p of particles; track $index) {
+      <span class="particle"
+        [style.left.%]="p.x"
+        [style.top.%]="p.y"
+        [style.width.px]="p.size"
+        [style.height.px]="p.size"
+        [style.background]="p.color"
+        [style.box-shadow]="'0 0 ' + (p.size * 3) + 'px ' + p.color"
+        [style.animation-duration.s]="p.dur"
+        [style.animation-delay.s]="p.delay">
+      </span>
+    }
   </div>
 
-  <!-- Ultra-Premium Glass Loader Card -->
-  <div class="loader-glass-card">
+  <!-- ── Ambient Background Orbs ────────────────────────────────────────── -->
+  <div class="ambient" aria-hidden="true">
+    <div class="orb o1"></div>
+    <div class="orb o2"></div>
+    <div class="orb o3"></div>
+  </div>
 
-    <!-- Mini Brand Header Badge -->
-    <div class="brand-header">
-      <div class="brand-chip">
-        <span class="pulse-beacon"></span>
-        <span class="brand-name">SVK ENTERPRISES</span>
-        <span class="live-tag">LIVE</span>
-      </div>
+  <!-- ── Scanning Grid Overlay ──────────────────────────────────────────── -->
+  <div class="scan-grid" aria-hidden="true">
+    <div class="scan-beam"></div>
+  </div>
+
+  <!-- ── Loader Card ───────────────────────────────────────────────────── -->
+  <div class="loader-card">
+
+    <!-- Brand Row -->
+    <div class="brand-row">
+      <div class="brand-dot"></div>
+      <span class="brand-name">SVK ENTERPRISES</span>
+      <span class="live-chip">LIVE</span>
     </div>
 
-    <!-- Vector Ring Progress Visualizer -->
-    <div class="ring-visualizer-wrap">
-      <svg class="ring-svg" viewBox="0 0 100 100">
-        <defs>
-          <linearGradient id="loaderGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stop-color="#6366f1" />
-            <stop offset="50%" stop-color="#06b6d4" />
-            <stop offset="100%" stop-color="#ec4899" />
-          </linearGradient>
-        </defs>
+    <!-- Dual SVG Ring System -->
+    <div class="rings-wrap" aria-hidden="true">
 
-        <!-- Outer Track Ring -->
-        <circle class="ring-track" cx="50" cy="50" r="45" />
-
-        <!-- Animated Progress Gradient Stroke Arc -->
-        <circle class="ring-progress" cx="50" cy="50" r="45"
-                [style.strokeDashoffset]="strokeDashoffset" />
+      <!-- Rotating outer decoration ring -->
+      <svg class="deco-ring" viewBox="0 0 120 120">
+        <circle class="deco-track" cx="60" cy="60" r="56"/>
+        <circle class="deco-dash"  cx="60" cy="60" r="56"/>
       </svg>
 
-      <!-- Centered Percentage Display -->
-      <div class="pct-badge-center">
-        <span class="pct-number">{{ pct }}</span>
-        <span class="pct-unit">%</span>
+      <!-- Main progress ring (outer) -->
+      <svg class="prog-ring" viewBox="0 0 120 120">
+        <defs>
+          <linearGradient id="g1" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%"   stop-color="#6366f1"/>
+            <stop offset="50%"  stop-color="#06b6d4"/>
+            <stop offset="100%" stop-color="#ec4899"/>
+          </linearGradient>
+          <linearGradient id="g2" x1="100%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%"   stop-color="#ec4899"/>
+            <stop offset="100%" stop-color="#818cf8"/>
+          </linearGradient>
+          <filter id="glow">
+            <feGaussianBlur stdDeviation="2.5" result="blur"/>
+            <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+          </filter>
+        </defs>
+        <!-- Outer track -->
+        <circle class="outer-track" cx="60" cy="60" r="42"/>
+        <!-- Outer progress arc -->
+        <circle class="outer-arc" cx="60" cy="60" r="42"
+          [style.stroke-dashoffset]="strokeDashoffset" filter="url(#glow)"/>
+        <!-- Inner track -->
+        <circle class="inner-track" cx="60" cy="60" r="34"/>
+        <!-- Inner counter arc (fills in reverse) -->
+        <circle class="inner-arc" cx="60" cy="60" r="34"
+          [style.stroke-dashoffset]="innerOffset"/>
+      </svg>
+
+      <!-- Centre percentage -->
+      <div class="pct-center">
+        <span class="pct-val">{{ pct }}</span>
+        <span class="pct-sym">%</span>
       </div>
     </div>
 
-    <!-- Live Status Footer & Progress Track -->
-    <div class="status-footer">
-      <div class="status-row">
-        <span class="status-dot"></span>
-        <span class="status-label">{{ statusText }}</span>
-      </div>
+    <!-- Equalizer Bars -->
+    <div class="equalizer" aria-hidden="true">
+      @for (b of bars; track $index) {
+        <div class="bar"
+          [style.--bh]="b.height + 'px'"
+          [style.animation-duration.s]="b.dur"
+          [style.animation-delay.s]="b.delay">
+        </div>
+      }
+    </div>
 
-      <div class="linear-track">
-        <div class="linear-fill" [style.width.%]="pct"></div>
+    <!-- Status & Progress Track -->
+    <div class="status-area">
+      <div class="status-line">
+        <span class="blink-dot"></span>
+        <span class="status-txt">{{ statusText }}</span>
+      </div>
+      <div class="prog-track">
+        <div class="prog-fill" [style.width.%]="pct">
+          <span class="shimmer"></span>
+        </div>
       </div>
     </div>
 
   </div>
-
 </div>

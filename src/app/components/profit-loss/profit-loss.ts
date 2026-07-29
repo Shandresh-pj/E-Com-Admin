@@ -12,7 +12,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatSelectModule } from '@angular/material/select';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
-import { HttpClientModule, HttpClient } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import Swal from 'sweetalert2';
 
 import { catchError } from 'rxjs/operators';
@@ -21,6 +21,9 @@ import { of } from 'rxjs';
 import { environment } from 'src/environment/environment';
 import { MatTable, TableColumn } from 'src/utils/mat-table/mat-table';
 import { AppTranslatePipe } from 'src/app/pipes/app-translate.pipe';
+import { AuthService } from 'src/app/Securities/Services/auth.service';
+import { CommonService } from 'src/app/Securities/Services/common.service';
+import { PermissionService } from 'src/app/Securities/Services/permissions.service';
 
 export interface Branch {
   id: number;
@@ -72,7 +75,6 @@ export interface BranchPLSummary {
     MatTooltipModule,
     MatSelectModule,
     MatProgressBarModule,
-    HttpClientModule,
     MatTable,
     AppTranslatePipe
   ],
@@ -103,7 +105,9 @@ export class ProfitLossComponent implements OnInit {
   dataSource: ProfitLossRecord[] = [];
 
   isLoading = false;
-  companyId = 1;
+  companyId = 1;          // will be overridden from session in ngOnInit
+  isBranchUser = false;   // true when user should see only their branch
+  userBranchId: number | null = null;
 
   // Inline Form State
   PL_Form = false;
@@ -162,9 +166,30 @@ export class ProfitLossComponent implements OnInit {
     return summaries.sort((a, b) => b.netProfit - a.netProfit).map((s, index) => ({ ...s, performanceRank: index + 1 }));
   });
 
-  constructor(private http: HttpClient) {}
+  constructor(
+    private http: HttpClient,
+    private authService: AuthService,
+    private commonService: CommonService,
+    public perm: PermissionService
+  ) {}
 
   ngOnInit() {
+    // Read company and branch from session
+    const user = this.authService.getUser();
+    this.companyId = user?.company_id || user?.companyId || 1;
+    this.isBranchUser = this.perm.isBranchOrBelow();
+    this.userBranchId = user?.branch_id || user?.branchId || null;
+
+    // Lock branch selector for non-admin users
+    if (this.isBranchUser && this.userBranchId) {
+      this.selectedBranchId.set(this.userBranchId);
+    }
+
+    // Set default branch in manual form for branch users
+    if (this.userBranchId) {
+      this.manualForm.branch_id = this.userBranchId;
+    }
+
     this.fetchBranches();
     this.fetchRecords();
   }
@@ -208,8 +233,10 @@ export class ProfitLossComponent implements OnInit {
 
   fetchRecords() {
     this.isLoading = true;
+    // Branch users fetch only their own branch records
+    const branchParam = (this.isBranchUser && this.userBranchId) ? `&branch_id=${this.userBranchId}` : '';
     this.http.get<{ success: boolean; data: ProfitLossRecord[] }>(
-      `${environment.apiUrl}/profit-loss?company_id=${this.companyId}`
+      `${environment.apiUrl}/profit-loss?company_id=${this.companyId}${branchParam}`
     ).pipe(catchError(() => of(null)))
     .subscribe({
       next: (res: any) => {
@@ -343,13 +370,24 @@ export class ProfitLossComponent implements OnInit {
   }
 
   exportReport(format: 'PDF' | 'EXCEL') {
+    const branchId = this.selectedBranchId();
+    const branchName = this.branches.find(b => b.id === branchId)?.name || 'All Branches';
+    const params = [
+      `company_id=${this.companyId}`,
+      `format=${format}`,
+      branchId !== 0 ? `branch_id=${branchId}` : ''
+    ].filter(Boolean).join('&');
+
     Swal.fire({
       icon: 'info',
       title: `Exporting P&L Statement (${format})`,
-      text: `Generating financial report for ${this.branches.find(b => b.id === this.selectedBranchId())?.name}`,
-      timer: 2000,
+      text: `Generating report for ${branchName}...`,
+      timer: 1500,
       showConfirmButton: false
     });
+
+    // Open download in new tab
+    window.open(`${environment.apiUrl}/profit-loss/export?${params}`, '_blank');
   }
 
   resetForms() {

@@ -4,7 +4,8 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
-export interface Star { x: number; y: number; w: number; o: number; d: number; dur: number; }
+export interface Particle { x: number; y: number; size: number; dur: number; delay: number; color: string; }
+export interface Bar { height: number; dur: number; delay: number; }
 
 @Component({
   selector: 'app-loader',
@@ -18,27 +19,26 @@ export class LoaderComponent implements OnInit, OnDestroy {
 
   isVisible = true;
   pct = 0;
-  statusText = 'Connecting to secure gateway…';
-  stars: Star[] = [];
+  statusText = 'Initializing…';
+  particles: Particle[] = [];
+  bars: Bar[] = [];
 
-  /** Conic-gradient ring style bound via [style] */
-  get ringStyle(): string {
-    const deg = this.pct * 3.6; // 0–360
-    return `--p:${deg}deg`;
+  /** SVG stroke offset for main progress arc (r=42, circumference=263.9) */
+  get strokeDashoffset(): number {
+    return 263.9 - (this.pct / 100) * 263.9;
   }
 
-  /** SVG stroke dashoffset calculation for smooth 2D ring loader */
-  get strokeDashoffset(): number {
-    const circumference = 282.74; // 2 * PI * 45 radius
-    return circumference - (this.pct / 100) * circumference;
+  /** Inner pulse ring offset (r=34, circumference=213.6) */
+  get innerOffset(): number {
+    return 213.6 - (this.pct / 100) * 213.6;
   }
 
   private readonly steps: [number, string, number][] = [
-    [18,  'Connecting to secure gateway…',    300],
-    [38,  'Loading application engine…',     340],
-    [64,  'Optimizing visual renderer…',     320],
-    [86,  'Applying security policies…',     300],
-    [100, 'Workspace ready!',                0  ],
+    [15,  'Establishing secure connection…', 280],
+    [34,  'Loading application modules…',    320],
+    [58,  'Syncing live data streams…',      300],
+    [80,  'Applying security policies…',     260],
+    [100, 'Ready!',                           0 ],
   ];
 
   private timers: ReturnType<typeof setTimeout>[] = [];
@@ -46,23 +46,35 @@ export class LoaderComponent implements OnInit, OnDestroy {
   constructor(private cdr: ChangeDetectorRef) {}
 
   ngOnInit(): void {
-    this.buildStars();
-    this.timers.push(setTimeout(() => this.run(0), 150));
+    this._buildParticles();
+    this._buildBars();
+    this.timers.push(setTimeout(() => this.run(0), 180));
   }
 
   ngOnDestroy(): void {
     this.timers.forEach(clearTimeout);
   }
 
-  private buildStars(): void {
-    for (let i = 0; i < 65; i++) {
-      this.stars.push({
-        x: Math.random() * 100,
-        y: Math.random() * 100,
-        w: Math.random() * 2.5 + 1,
-        o: Math.random() * 0.7 + 0.2,
-        d: -(Math.random() * 6),
-        dur: Math.random() * 4 + 3,
+  private _buildParticles(): void {
+    const colors = ['#6366f1', '#06b6d4', '#ec4899', '#818cf8', '#34d399'];
+    for (let i = 0; i < 28; i++) {
+      this.particles.push({
+        x:     Math.random() * 100,
+        y:     Math.random() * 100,
+        size:  Math.random() * 3 + 1.5,
+        dur:   Math.random() * 6 + 4,
+        delay: -(Math.random() * 8),
+        color: colors[Math.floor(Math.random() * colors.length)]
+      });
+    }
+  }
+
+  private _buildBars(): void {
+    for (let i = 0; i < 9; i++) {
+      this.bars.push({
+        height: Math.random() * 55 + 20,
+        dur:    Math.random() * 0.6 + 0.5,
+        delay:  i * 0.08
       });
     }
   }
@@ -78,7 +90,7 @@ export class LoaderComponent implements OnInit, OnDestroy {
         this.timers.push(setTimeout(() => {
           this.isVisible = false;
           this.cdr.markForCheck();
-        }, 480));
+        }, 520));
       } else {
         this.timers.push(setTimeout(() => this.run(i + 1), pause));
       }
@@ -90,7 +102,7 @@ export class LoaderComponent implements OnInit, OnDestroy {
       if (this.pct >= target) { done(); return; }
       this.pct = Math.min(this.pct + 1, target);
       this.cdr.markForCheck();
-      this.timers.push(setTimeout(tick, 14));
+      this.timers.push(setTimeout(tick, 12));
     };
     tick();
   }

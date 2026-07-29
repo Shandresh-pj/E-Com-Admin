@@ -105,9 +105,10 @@
                 </div>
 
                 <div class="field-container">
-                    <mat-label class="f-w-600 m-b-8 d-block">Price <span class="text-danger">*</span></mat-label>
+                    <mat-label class="f-w-600 m-b-8 d-block">Selling Price <span class="text-danger">*</span></mat-label>
                     <mat-form-field appearance="outline" class="w-100">
-                        <input matInput type="number" formControlName="price" placeholder="Enter Price" min="0">
+                        <mat-icon matPrefix style="color:var(--brand-primary);margin-right:6px">currency_rupee</mat-icon>
+                        <input matInput type="number" formControlName="price" placeholder="Enter Selling Price" min="0">
                         @if (ProductForm.get('price')?.hasError('required')) {
                             <mat-error>Price is required</mat-error>
                         }
@@ -117,6 +118,52 @@
                     </mat-form-field>
                 </div>
             </div>
+
+            <!-- ── Admin-only: Purchase Cost & Tiered Pricing ─────────────── -->
+            @if (perm.canViewPurchaseCost()) {
+            <div class="purchase-cost-banner m-b-12">
+                <mat-icon style="color:#f59e0b;font-size:16px;vertical-align:middle;margin-right:6px">admin_panel_settings</mat-icon>
+                <span style="font-size:12px;color:var(--text-secondary);">Admin-only pricing fields — hidden from Branch / Employee roles</span>
+            </div>
+            <div class="form-row">
+                <div class="field-container">
+                    <mat-label class="f-w-600 m-b-8 d-block" style="color:#f59e0b">
+                        <mat-icon style="font-size:15px;vertical-align:middle;margin-right:4px">lock</mat-icon>
+                        Purchase / Cost Price
+                    </mat-label>
+                    <mat-form-field appearance="outline" class="w-100">
+                        <mat-icon matPrefix style="color:#f59e0b;margin-right:6px">currency_rupee</mat-icon>
+                        <input matInput type="number" formControlName="purchase_cost" placeholder="Enter Purchase / Cost Price" min="0">
+                    </mat-form-field>
+                </div>
+
+                <div class="field-container">
+                    <mat-label class="f-w-600 m-b-8 d-block">Retail Price</mat-label>
+                    <mat-form-field appearance="outline" class="w-100">
+                        <mat-icon matPrefix style="color:var(--brand-primary);margin-right:6px">currency_rupee</mat-icon>
+                        <input matInput type="number" formControlName="retail_price" placeholder="Retail Price" min="0">
+                    </mat-form-field>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="field-container">
+                    <mat-label class="f-w-600 m-b-8 d-block">Wholesale Price</mat-label>
+                    <mat-form-field appearance="outline" class="w-100">
+                        <mat-icon matPrefix style="color:var(--brand-primary);margin-right:6px">currency_rupee</mat-icon>
+                        <input matInput type="number" formControlName="wholesale_price" placeholder="Wholesale Price" min="0">
+                    </mat-form-field>
+                </div>
+
+                <div class="field-container">
+                    <mat-label class="f-w-600 m-b-8 d-block">Dealer Price</mat-label>
+                    <mat-form-field appearance="outline" class="w-100">
+                        <mat-icon matPrefix style="color:var(--brand-primary);margin-right:6px">currency_rupee</mat-icon>
+                        <input matInput type="number" formControlName="dealer_price" placeholder="Dealer Price" min="0">
+                    </mat-form-field>
+                </div>
+            </div>
+            } <!-- end canViewPurchaseCost -->
 
             <div class="form-row">
                 <div class="field-container">
@@ -221,22 +268,46 @@
                     <mat-label class="f-w-600 m-b-8 d-block">Status <span class="text-danger">*</span></mat-label>
                     <mat-form-field appearance="outline" class="w-100">
                         <mat-select formControlName="status" placeholder="Select Status">
+                            <!-- Branch/below users start at Draft automatically -->
+                            <mat-option value="Draft">
+                                <span style="display:flex;align-items:center;gap:8px">
+                                    <span style="width:8px;height:8px;border-radius:50%;background:#94a3b8;display:inline-block"></span>
+                                    Draft
+                                </span>
+                            </mat-option>
+                            @if (!perm.isBranchOrBelow()) {
                             <mat-option value="active">
-                                <div class="flex items-center gap-8">
-                                    <span class="status-dot bg-success"></span> Active
-                                </div>
+                                <span style="display:flex;align-items:center;gap:8px">
+                                    <span style="width:8px;height:8px;border-radius:50%;background:#22c55e;display:inline-block"></span>
+                                    Active
+                                </span>
                             </mat-option>
                             <mat-option value="inactive">
-                                <div class="flex items-center gap-8">
-                                    <span class="status-dot bg-warn"></span> Inactive
-                                </div>
+                                <span style="display:flex;align-items:center;gap:8px">
+                                    <span style="width:8px;height:8px;border-radius:50%;background:#ef4444;display:inline-block"></span>
+                                    Inactive
+                                </span>
                             </mat-option>
+                            }
                         </mat-select>
                         @if (ProductForm.get('status')?.hasError('required')) {
                             <mat-error>Status is required</mat-error>
                         }
                     </mat-form-field>
                 </div>
+                @if (perm.isBranchOrBelow()) {
+                <div class="field-container">
+                    <div class="branch-approval-notice">
+                        <mat-icon style="color:#6366f1;font-size:18px">info</mat-icon>
+                        <div>
+                            <div class="f-w-600 f-s-13" style="color:#6366f1">Pending Approval Workflow</div>
+                            <div class="f-s-12" style="color:var(--text-secondary);margin-top:4px">
+                                Your product will be submitted as <b>Draft</b> and requires Admin approval before going live.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                }
             </div>
 
             <div class="form-row single-col">

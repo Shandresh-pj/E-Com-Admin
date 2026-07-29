@@ -1,241 +1,453 @@
-// ── Ultra-Premium Flat Glass Loader SCSS ─────────────────────────────────────
-$indigo : #6366f1;
-$violet : #818cf8;
-$cyan   : #06b6d4;
-$pink   : #ec4899;
+// ══════════════════════════════════════════════════════════════════════════════
+//  LOADER — ULTRA-PREMIUM MULTI-ANIMATION SYSTEM
+//  Particles · Dual-Ring SVG · Equalizer · Scan-Grid · Shimmer · Ambient Orbs
+// ══════════════════════════════════════════════════════════════════════════════
 
+$c-indigo  : #6366f1;
+$c-violet  : #818cf8;
+$c-cyan    : #06b6d4;
+$c-pink    : #ec4899;
+$c-mint    : #34d399;
+
+// ── Host ────────────────────────────────────────────────────────────────────
 :host { display: block; }
 
+// ── Root Overlay ────────────────────────────────────────────────────────────
 .ldr {
-  position: fixed;
-  inset: 0;
-  z-index: 999999;
-  display: flex;
+  position:  fixed;
+  inset:     0;
+  z-index:   999999;
+  display:   flex;
   align-items: center;
   justify-content: center;
-  background: rgba(10, 14, 26, 0.65);
-  backdrop-filter: blur(24px) saturate(180%);
-  -webkit-backdrop-filter: blur(24px) saturate(180%);
-  transition: opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1), transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  background: rgba(6, 9, 20, 0.72);
+  backdrop-filter: blur(28px) saturate(180%);
+  -webkit-backdrop-filter: blur(28px) saturate(180%);
   overflow: hidden;
+  transition: opacity 0.55s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.55s cubic-bezier(0.16, 1, 0.3, 1);
 
   &.out {
     opacity: 0;
-    transform: scale(1.04);
+    transform: scale(1.05);
     pointer-events: none;
   }
 }
 
-.backdrop-blur-overlay {
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(circle at 50% 50%, rgba(99, 102, 241, 0.1) 0%, rgba(6, 182, 212, 0.04) 60%, transparent 85%);
-  pointer-events: none;
-}
-
-// Ambient Background Glows
-.ambient-glows {
+// ── Ambient Orbs ────────────────────────────────────────────────────────────
+.ambient {
   position: absolute;
   inset: 0;
   pointer-events: none;
 
-  .glow-orb {
+  .orb {
     position: absolute;
     border-radius: 50%;
-    filter: blur(80px);
-    opacity: 0.45;
+    filter: blur(90px);
+    opacity: 0.5;
   }
-  .g1 {
-    width: 300px; height: 300px;
-    background: radial-gradient(circle, rgba(99, 102, 241, 0.3), transparent 70%);
-    top: 25%; left: 32%;
-    animation: driftGlow1 14s ease-in-out infinite alternate;
+
+  .o1 {
+    width: clamp(200px, 40vw, 360px);
+    height: clamp(200px, 40vw, 360px);
+    background: radial-gradient(circle, rgba(99,102,241,0.35), transparent 70%);
+    top: 10%; left: 15%;
+    animation: orbitOrb 18s ease-in-out infinite alternate;
   }
-  .g2 {
-    width: 260px; height: 260px;
-    background: radial-gradient(circle, rgba(6, 182, 212, 0.25), transparent 70%);
-    bottom: 25%; right: 32%;
-    animation: driftGlow2 12s ease-in-out infinite alternate-reverse;
+  .o2 {
+    width: clamp(160px, 32vw, 280px);
+    height: clamp(160px, 32vw, 280px);
+    background: radial-gradient(circle, rgba(6,182,212,0.28), transparent 70%);
+    bottom: 10%; right: 12%;
+    animation: orbitOrb 14s ease-in-out infinite alternate-reverse;
+  }
+  .o3 {
+    width: clamp(100px, 20vw, 180px);
+    height: clamp(100px, 20vw, 180px);
+    background: radial-gradient(circle, rgba(236,72,153,0.2), transparent 70%);
+    top: 50%; left: 60%;
+    animation: orbitOrb 10s ease-in-out infinite alternate;
   }
 }
+@keyframes orbitOrb {
+  from { transform: translate(0, 0) scale(1); }
+  to   { transform: translate(22px, -16px) scale(1.12); }
+}
 
-@keyframes driftGlow1 { 0% { transform: translate(0, 0) scale(1); } 100% { transform: translate(25px, -18px) scale(1.1); } }
-@keyframes driftGlow2 { 0% { transform: translate(0, 0) scale(1); } 100% { transform: translate(-20px, 15px) scale(1.08); } }
+// ── Floating Particle Field ──────────────────────────────────────────────────
+.particle-field {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
 
-// Compact Glass Card
-.loader-glass-card {
+.particle {
+  position: absolute;
+  border-radius: 50%;
+  animation: floatParticle linear infinite;
+  will-change: transform, opacity;
+}
+
+@keyframes floatParticle {
+  0%   { transform: translateY(0)   scale(1);    opacity: 0; }
+  10%  { opacity: 1; }
+  90%  { opacity: 1; }
+  100% { transform: translateY(-100vh) scale(0.4); opacity: 0; }
+}
+
+// ── Scan Grid Overlay ────────────────────────────────────────────────────────
+.scan-grid {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(rgba(99,102,241,0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(99,102,241,0.04) 1px, transparent 1px);
+  background-size: clamp(30px, 5vw, 48px) clamp(30px, 5vw, 48px);
+  overflow: hidden;
+
+  .scan-beam {
+    position: absolute;
+    left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent 0%, rgba(99,102,241,0.5) 30%, rgba(6,182,212,0.7) 50%, rgba(99,102,241,0.5) 70%, transparent 100%);
+    filter: blur(1px);
+    animation: scanBeam 3.2s ease-in-out infinite;
+    box-shadow: 0 0 12px rgba(99,102,241,0.4);
+  }
+}
+@keyframes scanBeam {
+  0%   { top: -2px; opacity: 0; }
+  5%   { opacity: 1; }
+  95%  { opacity: 1; }
+  100% { top: 100%; opacity: 0; }
+}
+
+// ── Loader Card ──────────────────────────────────────────────────────────────
+.loader-card {
   position: relative;
   z-index: 10;
-  width: min(290px, 86vw);
-  padding: 24px 22px;
-  border-radius: 24px;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.07) 0%, rgba(255, 255, 255, 0.02) 100%);
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  width: clamp(240px, 80vw, 300px);
+  padding: clamp(20px, 4vw, 28px) clamp(18px, 3.5vw, 24px);
+  border-radius: 28px;
+  background: linear-gradient(145deg,
+    rgba(255,255,255,0.09) 0%,
+    rgba(255,255,255,0.03) 60%,
+    rgba(99,102,241,0.04) 100%);
+  border: 1px solid rgba(255,255,255,0.14);
   box-shadow:
-    0 20px 45px -10px rgba(0, 0, 0, 0.5),
-    0 0 30px rgba(99, 102, 241, 0.2),
-    inset 0 1px 0 rgba(255, 255, 255, 0.2);
-  backdrop-filter: blur(20px);
+    0 30px 60px -12px rgba(0,0,0,0.55),
+    0 0 0 1px rgba(99,102,241,0.08),
+    0 0 40px rgba(99,102,241,0.15),
+    inset 0 1px 0 rgba(255,255,255,0.18),
+    inset 0 -1px 0 rgba(0,0,0,0.1);
+  backdrop-filter: blur(24px);
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 20px;
-  animation: cardFadeUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+  gap: clamp(14px, 3vw, 20px);
+  animation: cardUp 0.65s cubic-bezier(0.16, 1, 0.3, 1) both;
+  will-change: transform;
 }
 
-@keyframes cardFadeUp {
-  from { opacity: 0; transform: translateY(16px) scale(0.95); }
-  to { opacity: 1; transform: translateY(0) scale(1); }
+@keyframes cardUp {
+  from { opacity: 0; transform: translateY(20px) scale(0.94); }
+  to   { opacity: 1; transform: translateY(0)    scale(1);    }
 }
 
-// Brand Header Badge
-.brand-header {
-  .brand-chip {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 6px 14px;
-    border-radius: 99px;
-    background: rgba(15, 23, 42, 0.75);
-    border: 1px solid rgba(99, 102, 241, 0.3);
-    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+// ── Brand Row ────────────────────────────────────────────────────────────────
+.brand-row {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 5px 12px;
+  border-radius: 99px;
+  background: rgba(10,14,30,0.7);
+  border: 1px solid rgba(99,102,241,0.28);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.3);
 
-    .pulse-beacon {
-      width: 7px; height: 7px;
-      border-radius: 50%;
-      background: $cyan;
-      box-shadow: 0 0 8px $cyan;
-      animation: beaconPulse 1.4s ease-in-out infinite;
-    }
+  .brand-dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: $c-cyan;
+    box-shadow: 0 0 10px $c-cyan;
+    animation: dotPulse 1.5s ease-in-out infinite;
+    flex-shrink: 0;
+  }
 
-    .brand-name {
-      font-family: 'Outfit', 'Inter', system-ui, sans-serif;
-      font-size: 11px;
-      font-weight: 800;
-      letter-spacing: 1.2px;
-      color: #f8fafc;
-    }
+  .brand-name {
+    font-family: 'Outfit', 'Inter', system-ui, sans-serif;
+    font-size: clamp(9px, 2vw, 11px);
+    font-weight: 800;
+    letter-spacing: 1.3px;
+    color: #f1f5f9;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
 
-    .live-tag {
-      font-size: 8.5px;
-      font-weight: 800;
-      letter-spacing: 1px;
-      color: $cyan;
-      background: rgba(6, 182, 212, 0.15);
-      border: 1px solid rgba(6, 182, 212, 0.35);
-      padding: 1px 6px;
-      border-radius: 4px;
-    }
+  .live-chip {
+    font-size: clamp(7px, 1.5vw, 8.5px);
+    font-weight: 800;
+    letter-spacing: 1px;
+    color: $c-cyan;
+    background: rgba(6,182,212,0.12);
+    border: 1px solid rgba(6,182,212,0.3);
+    padding: 1px 5px;
+    border-radius: 4px;
   }
 }
 
-@keyframes beaconPulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.35; transform: scale(0.7); } }
+@keyframes dotPulse {
+  0%, 100% { opacity: 1; box-shadow: 0 0 10px $c-cyan; }
+  50%       { opacity: 0.3; box-shadow: 0 0 4px $c-cyan; }
+}
 
-// Vector Ring Progress Visualizer
-.ring-visualizer-wrap {
+// ── Dual Ring System ─────────────────────────────────────────────────────────
+.rings-wrap {
   position: relative;
-  width: 110px;
-  height: 110px;
+  width: clamp(96px, 28vw, 120px);
+  height: clamp(96px, 28vw, 120px);
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
 
-  .ring-svg {
+  // Decorative rotating dashed ring
+  .deco-ring {
+    position: absolute;
+    inset: -8px;
+    width: calc(100% + 16px);
+    height: calc(100% + 16px);
+    animation: spinSlow 14s linear infinite;
+    overflow: visible;
+
+    .deco-track {
+      fill: none;
+      stroke: rgba(99,102,241,0.08);
+      stroke-width: 1;
+    }
+
+    .deco-dash {
+      fill: none;
+      stroke: rgba(99,102,241,0.3);
+      stroke-width: 1;
+      stroke-dasharray: 4 10;
+      animation: dashFlow 3s linear infinite;
+    }
+  }
+
+  // Main progress ring
+  .prog-ring {
     width: 100%;
     height: 100%;
     transform: rotate(-90deg);
     overflow: visible;
 
-    .ring-track {
+    .outer-track {
       fill: none;
-      stroke: rgba(255, 255, 255, 0.08);
-      stroke-width: 6;
+      stroke: rgba(255,255,255,0.06);
+      stroke-width: 7;
+    }
+    .outer-arc {
+      fill: none;
+      stroke: url(#g1);
+      stroke-width: 7;
+      stroke-linecap: round;
+      stroke-dasharray: 263.9;
+      transition: stroke-dashoffset 0.3s cubic-bezier(0.34, 1.2, 0.64, 1);
+      filter: drop-shadow(0 0 6px rgba(99,102,241,0.7));
     }
 
-    .ring-progress {
+    .inner-track {
       fill: none;
-      stroke: url(#loaderGrad);
-      stroke-width: 6;
+      stroke: rgba(255,255,255,0.04);
+      stroke-width: 4;
+    }
+    .inner-arc {
+      fill: none;
+      stroke: url(#g2);
+      stroke-width: 4;
       stroke-linecap: round;
-      stroke-dasharray: 282.74;
-      transition: stroke-dashoffset 0.35s cubic-bezier(0.34, 1.2, 0.64, 1);
-      filter: drop-shadow(0 0 8px rgba(99, 102, 241, 0.6));
+      stroke-dasharray: 213.6;
+      transition: stroke-dashoffset 0.3s cubic-bezier(0.34, 1.2, 0.64, 1);
+      filter: drop-shadow(0 0 5px rgba(236,72,153,0.6));
+      animation: innerSpin 2s linear infinite;
     }
   }
 
-  // Centered Percentage Display inside SVG
-  .pct-badge-center {
+  // Centre percentage
+  .pct-center {
     position: absolute;
     display: flex;
     align-items: baseline;
-    justify-content: center;
+    gap: 1px;
     line-height: 1;
 
-    .pct-number {
+    .pct-val {
       font-family: 'Outfit', 'Inter', system-ui, sans-serif;
-      font-size: 32px;
+      font-size: clamp(24px, 7vw, 32px);
       font-weight: 900;
-      color: #ffffff;
+      color: #fff;
       letter-spacing: -1px;
-      text-shadow: 0 0 16px rgba(99, 102, 241, 0.8), 0 0 30px rgba(6, 182, 212, 0.4);
+      text-shadow: 0 0 18px rgba(99,102,241,0.9), 0 0 32px rgba(6,182,212,0.4);
       font-variant-numeric: tabular-nums;
+      animation: numPop 0.12s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
 
-    .pct-unit {
+    .pct-sym {
       font-family: 'Outfit', 'Inter', system-ui, sans-serif;
-      font-size: 14px;
+      font-size: clamp(10px, 3vw, 13px);
       font-weight: 800;
-      color: $cyan;
-      margin-left: 2px;
-      text-shadow: 0 0 8px $cyan;
+      color: $c-cyan;
+      text-shadow: 0 0 8px $c-cyan;
+      margin-bottom: 2px;
     }
   }
 }
 
-// Live Status Footer & Progress Bar
-.status-footer {
+@keyframes spinSlow { to { transform: rotate(360deg); } }
+@keyframes dashFlow { to { stroke-dashoffset: -28; } }
+@keyframes innerSpin {
+  0%   { opacity: 0.7; }
+  50%  { opacity: 1; }
+  100% { opacity: 0.7; }
+}
+@keyframes numPop {
+  from { transform: scale(0.85); }
+  to   { transform: scale(1); }
+}
+
+// ── Equalizer Bars ───────────────────────────────────────────────────────────
+.equalizer {
+  display: flex;
+  align-items: flex-end;
+  gap: clamp(3px, 1vw, 5px);
+  height: clamp(28px, 6vw, 36px);
+
+  .bar {
+    width: clamp(4px, 1.2vw, 6px);
+    height: var(--bh, 50%);
+    max-height: 100%;
+    border-radius: 3px 3px 1px 1px;
+    background: linear-gradient(180deg, $c-indigo 0%, $c-cyan 60%, $c-pink 100%);
+    box-shadow: 0 0 6px rgba(99,102,241,0.5);
+    animation: barPump ease-in-out infinite alternate;
+    transform-origin: bottom;
+  }
+}
+
+@keyframes barPump {
+  from { transform: scaleY(0.2); opacity: 0.4; }
+  to   { transform: scaleY(1);   opacity: 1;   }
+}
+
+// ── Status Area ──────────────────────────────────────────────────────────────
+.status-area {
   width: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
 
-  .status-row {
+  .status-line {
     display: flex;
     align-items: center;
-    gap: 7px;
+    gap: 6px;
 
-    .status-dot {
-      width: 6px; height: 6px;
+    .blink-dot {
+      width: 5px; height: 5px;
       border-radius: 50%;
-      background: $cyan;
-      box-shadow: 0 0 8px $cyan;
-      animation: dotBlink 1.2s ease-in-out infinite;
+      background: $c-cyan;
+      box-shadow: 0 0 8px $c-cyan;
+      animation: blinkDot 1.1s ease-in-out infinite;
+      flex-shrink: 0;
     }
 
-    .status-label {
-      font-size: 11.5px;
+    .status-txt {
+      font-family: 'Outfit', 'Inter', system-ui, sans-serif;
+      font-size: clamp(9.5px, 2.5vw, 11.5px);
       font-weight: 500;
-      color: rgba(226, 232, 240, 0.9);
+      color: rgba(226,232,240,0.85);
       letter-spacing: 0.1px;
+      text-align: center;
+      line-height: 1.4;
     }
   }
 
-  .linear-track {
+  // Progress track with shimmer
+  .prog-track {
     width: 100%;
-    height: 3.5px;
+    height: 4px;
     border-radius: 99px;
-    background: rgba(255, 255, 255, 0.08);
+    background: rgba(255,255,255,0.07);
     overflow: hidden;
 
-    .linear-fill {
+    .prog-fill {
+      position: relative;
       height: 100%;
       border-radius: 99px;
-      background: linear-gradient(90deg, $indigo, $cyan 50%, $pink);
-      box-shadow: 0 0 12px rgba(99, 102, 241, 0.8);
-      transition: width 0.35s ease;
+      background: linear-gradient(90deg, $c-indigo 0%, $c-cyan 55%, $c-pink 100%);
+      box-shadow: 0 0 14px rgba(99,102,241,0.8);
+      transition: width 0.3s cubic-bezier(0.34, 1.2, 0.64, 1);
+      overflow: hidden;
+
+      .shimmer {
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(90deg,
+          transparent 0%,
+          rgba(255,255,255,0.35) 45%,
+          rgba(255,255,255,0.6) 50%,
+          rgba(255,255,255,0.35) 55%,
+          transparent 100%);
+        animation: shimmerSlide 1.4s ease-in-out infinite;
+        background-size: 200% 100%;
+      }
     }
   }
 }
 
-@keyframes dotBlink { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.3; transform: scale(0.7); } }
+@keyframes blinkDot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%       { opacity: 0.25; transform: scale(0.65); }
+}
+@keyframes shimmerSlide {
+  0%   { transform: translateX(-100%); }
+  100% { transform: translateX(200%); }
+}
+
+// ── Corner Accent Lines ──────────────────────────────────────────────────────
+.loader-card::before,
+.loader-card::after {
+  content: '';
+  position: absolute;
+  border-radius: 2px;
+}
+.loader-card::before {
+  top: 12px; left: 12px;
+  width: 20px; height: 20px;
+  border-top: 2px solid rgba(99,102,241,0.5);
+  border-left: 2px solid rgba(99,102,241,0.5);
+}
+.loader-card::after {
+  bottom: 12px; right: 12px;
+  width: 20px; height: 20px;
+  border-bottom: 2px solid rgba(6,182,212,0.5);
+  border-right: 2px solid rgba(6,182,212,0.5);
+}
+
+// ── Full Responsive ──────────────────────────────────────────────────────────
+@media (max-width: 380px) {
+  .loader-card {
+    width: 90vw;
+    padding: 18px 16px;
+    gap: 14px;
+    border-radius: 22px;
+  }
+  .equalizer { height: 24px; }
+}
+
+@media (min-height: 900px) {
+  .loader-card { gap: 22px; }
+}

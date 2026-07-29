@@ -6,10 +6,11 @@ import { TokenService } from './Securities/Services/token.service';
 import { SocketService } from './Securities/Services/socket.service';
 import { SessionService } from './Securities/Services/session.service';
 import { AuthService } from './Securities/Services/auth.service';
+import { LoaderComponent } from './shared/loader/loader.component';
 
 @Component({
     selector: 'app-root',
-    imports: [RouterOutlet],
+    imports: [RouterOutlet, LoaderComponent],
     templateUrl: './app.component.html'
 })
 export class AppComponent implements OnInit {

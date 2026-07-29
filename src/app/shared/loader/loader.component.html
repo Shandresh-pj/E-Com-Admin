@@ -1,0 +1,127 @@
+<div class="svk-loader-backdrop" [class.hidden]="!isVisible">
+  <!-- ── Liquid morphing SVG background ──────────────────────── -->
+  <div class="liquid-bg">
+    <svg class="liquid-svg" viewBox="0 0 800 600" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <filter id="goo">
+          <feGaussianBlur in="SourceGraphic" stdDeviation="18" result="blur"/>
+          <feColorMatrix in="blur" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 28 -10" result="goo"/>
+          <feBlend in="SourceGraphic" in2="goo"/>
+        </filter>
+        <radialGradient id="g1" cx="50%" cy="50%">
+          <stop offset="0%" stop-color="#6366f1"/>
+          <stop offset="100%" stop-color="#4338ca" stop-opacity="0"/>
+        </radialGradient>
+        <radialGradient id="g2" cx="50%" cy="50%">
+          <stop offset="0%" stop-color="#06b6d4"/>
+          <stop offset="100%" stop-color="#0e7490" stop-opacity="0"/>
+        </radialGradient>
+        <radialGradient id="g3" cx="50%" cy="50%">
+          <stop offset="0%" stop-color="#8b5cf6"/>
+          <stop offset="100%" stop-color="#6d28d9" stop-opacity="0"/>
+        </radialGradient>
+        <radialGradient id="g4" cx="50%" cy="50%">
+          <stop offset="0%" stop-color="#ec4899"/>
+          <stop offset="100%" stop-color="#be185d" stop-opacity="0"/>
+        </radialGradient>
+      </defs>
+      <g filter="url(#goo)">
+        <circle class="blob b1" cx="200" cy="200" r="180" fill="url(#g1)" opacity="0.7"/>
+        <circle class="blob b2" cx="600" cy="400" r="160" fill="url(#g2)" opacity="0.7"/>
+        <circle class="blob b3" cx="400" cy="500" r="140" fill="url(#g3)" opacity="0.6"/>
+        <circle class="blob b4" cx="700" cy="100" r="120" fill="url(#g4)" opacity="0.55"/>
+        <circle class="blob b5" cx="100" cy="500" r="100" fill="url(#g2)" opacity="0.5"/>
+      </g>
+    </svg>
+  </div>
+
+  <!-- ── Animated particle field ──────────────────────────────── -->
+  <canvas class="particle-canvas" #particleCanvas></canvas>
+
+  <!-- ── Glass card ───────────────────────────────────────────── -->
+  <div class="glass-card">
+
+    <!-- Holographic shimmer border -->
+    <div class="holo-border"></div>
+
+    <!-- Inner card content -->
+    <div class="card-inner">
+
+      <!-- Orbital spinner system -->
+      <div class="orbital-system">
+        <!-- Orbit tracks -->
+        <div class="orbit orbit-1"></div>
+        <div class="orbit orbit-2"></div>
+        <div class="orbit orbit-3"></div>
+
+        <!-- Orbiting nodes -->
+        <div class="orbital-node node-1"></div>
+        <div class="orbital-node node-2"></div>
+        <div class="orbital-node node-3"></div>
+        <div class="orbital-node node-4"></div>
+
+        <!-- Center logo -->
+        <div class="logo-center">
+          <div class="logo-hex">
+            <svg viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M30 4L54 17.5V44.5L30 58L6 44.5V17.5L30 4Z"
+                fill="url(#hexGrad)" stroke="rgba(255,255,255,0.15)" stroke-width="1"/>
+              <defs>
+                <linearGradient id="hexGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stop-color="#6366f1"/>
+                  <stop offset="50%" stop-color="#8b5cf6"/>
+                  <stop offset="100%" stop-color="#06b6d4"/>
+                </linearGradient>
+              </defs>
+            </svg>
+            <span class="hex-letter">S</span>
+          </div>
+          <!-- Pulse rings -->
+          <div class="pulse-ring pulse-1"></div>
+          <div class="pulse-ring pulse-2"></div>
+          <div class="pulse-ring pulse-3"></div>
+        </div>
+      </div>
+
+      <!-- Brand section -->
+      <div class="brand-section">
+        <h1 class="brand-title">
+          <span class="t-svk">SVK</span>
+          <span class="t-enterprise">Enterprise</span>
+        </h1>
+        <p class="brand-tagline">
+          <span class="tagline-dot"></span>
+          <span class="tagline-text">{{ loadingText }}</span>
+          <span class="tagline-cursor">|</span>
+        </p>
+      </div>
+
+      <!-- Liquid progress bar -->
+      <div class="liquid-progress">
+        <div class="progress-rail">
+          <div class="progress-liquid" [style.width.%]="progress"></div>
+          <div class="progress-glow" [style.left.%]="progress"></div>
+        </div>
+        <div class="progress-meta">
+          <span class="progress-label">Initializing workspace</span>
+          <span class="progress-num">{{ progress }}%</span>
+        </div>
+      </div>
+
+      <!-- Module status bars -->
+      <div class="module-grid">
+        <div class="module-item" *ngFor="let m of modules">
+          <div class="module-dot" [class.active]="m.done" [style.background]="m.color"></div>
+          <span class="module-name">{{ m.name }}</span>
+          <div class="module-bar">
+            <div class="module-fill" [class.done]="m.done" [style.background]="m.color"></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── Scanline overlay ──────────────────────────────────────── -->
+  <div class="scanlines"></div>
+</div>

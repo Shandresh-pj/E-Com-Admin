@@ -43,24 +43,46 @@ export class SessionService {
   permissionsChanged$: Observable<void> = this.permissionsChangedSubject.asObservable();
 
   setSession(data: any): void {
-    if (data.user !== undefined) {
+    if (!data) return;
+
+    // Detect user object either under data.user or flat at data root
+    const rawUserObj = data.user !== undefined ? data.user : (data.id !== undefined || data.userId !== undefined || data.userType !== undefined || data.user_type !== undefined ? data : null);
+
+    if (rawUserObj) {
+      const existingUser = this.getUser() || {};
+      const mergedUser = { ...existingUser, ...rawUserObj };
+
+      const userTypeVal = mergedUser.userType ?? mergedUser.user_type ?? data.userType ?? data.user_type ?? '';
+      const roleVal     = mergedUser.role ?? data.role ?? '';
+
+      const normUserType = String(userTypeVal).toLowerCase().trim();
+      const normRole     = String(roleVal).toLowerCase().trim();
+
+      const isSA = mergedUser.isSuperAdmin === true ||
+                   data.isSuperAdmin === true ||
+                   normUserType === 'super_admin' ||
+                   normUserType === 'superadmin' ||
+                   normUserType === 'super admin' ||
+                   normRole === 'super_admin' ||
+                   normRole === 'superadmin' ||
+                   normRole === 'super admin';
+
       const normalizedUser = {
-        ...(data.user ?? {}),
-        id: data.user?.id ?? data.user?.userId ?? data.userId,
-        userId: data.user?.userId ?? data.user?.id ?? data.userId,
-        email: data.user?.email ?? data.email,
-        name: data.user?.name ?? data.name,
-        userType: data.user?.userType ?? data.user?.user_type ?? data.userType,
-        user_type: data.user?.userType ?? data.user?.user_type ?? data.userType,
-        companyId: data.user?.companyId ?? data.user?.company_id ?? data.companyId,
-        company_id: data.user?.companyId ?? data.user?.company_id ?? data.companyId,
-        branchId: data.user?.branchId ?? data.user?.branch_id ?? data.branchId,
-        branch_id: data.user?.branchId ?? data.user?.branch_id ?? data.branchId,
-        isSuperAdmin: data.user?.isSuperAdmin === true ||
-                      data.user?.userType === 'Super_Admin' ||
-                      data.user?.userType === 'super_admin' ||
-                      data.user?.role === 'super_admin'
+        ...mergedUser,
+        id: mergedUser.id ?? mergedUser.userId ?? data.id ?? data.userId,
+        userId: mergedUser.userId ?? mergedUser.id ?? data.userId ?? data.id,
+        email: mergedUser.email ?? data.email,
+        name: mergedUser.name ?? data.name,
+        userType: userTypeVal || (isSA ? 'Super_Admin' : 'Employee'),
+        user_type: userTypeVal || (isSA ? 'Super_Admin' : 'Employee'),
+        role: roleVal || (isSA ? 'Super_Admin' : 'Employee'),
+        companyId: mergedUser.companyId ?? mergedUser.company_id ?? data.companyId ?? data.company_id,
+        company_id: mergedUser.companyId ?? mergedUser.company_id ?? data.companyId ?? data.company_id,
+        branchId: mergedUser.branchId ?? mergedUser.branch_id ?? data.branchId ?? data.branch_id,
+        branch_id: mergedUser.branchId ?? mergedUser.branch_id ?? data.branchId ?? data.branch_id,
+        isSuperAdmin: isSA
       };
+
       this.userSubject.next(normalizedUser);
       this.setStoredItem('session_user', normalizedUser);
     }
@@ -137,6 +159,7 @@ export class SessionService {
           email: data.email,
           userType: data.userType || data.user_type,
           user_type: data.userType || data.user_type,
+          role: data.role,
           companyId: data.companyId || data.company_id,
           company_id: data.companyId || data.company_id,
           branchId: data.branchId || data.branch_id,

@@ -37,6 +37,19 @@ export class PermissionService {
     });
   }
 
+  private normalizeUserType(rawType: string): UserType {
+    if (!rawType) return UserType.EMPLOYEE;
+    const lower = String(rawType).toLowerCase().trim();
+    if (lower === 'super_admin' || lower === 'superadmin' || lower === 'super admin') return UserType.SUPER_ADMIN;
+    if (lower === 'admin') return UserType.ADMIN;
+    if (lower === 'branch') return UserType.BRANCH;
+    if (lower === 'branch_manager' || lower === 'branchmanager' || lower === 'branch manager') return UserType.BRANCH_MANAGER;
+    if (lower === 'shopkeeper') return UserType.SHOPKEEPER;
+    if (lower === 'delivery_boy' || lower === 'deliveryboy' || lower === 'delivery boy') return UserType.DELIVERY_BOY;
+    if (lower === 'customer') return UserType.CUSTOMER;
+    return UserType.EMPLOYEE;
+  }
+
   /**
    * Fine-grained check: does the user hold the given action on the given menu?
    * Supports READ, WRITE, CREATE, UPDATE, DELETE, APPROVE, ALL, *, FULL.
@@ -49,7 +62,7 @@ export class PermissionService {
     const permissions = this.session.getPermissions();
 
     if (!Array.isArray(permissions) || permissions.length === 0) {
-      const userType = this.auth.getUserType() as UserType;
+      const userType = this.normalizeUserType(this.auth.getUserType());
       const rolePerms = ROLE_PERMISSIONS[userType];
       if (!rolePerms) return false;
       const actUpper = (action || '').toUpperCase();
@@ -96,7 +109,6 @@ export class PermissionService {
     if (this.auth.isSuperAdmin()) return true;
 
     const permissions = this.session.getPermissions();
-
     const target = menuNameOrPath || this.router.url.split('?')[0];
     const targetNormalized = target.toLowerCase().replace(/\/+$/, '');
 
@@ -141,14 +153,38 @@ export class PermissionService {
       '/employees',
       '/branch',
       '/product',
-      '/orders'
+      '/orders',
+      '/crm-contacts',
+      '/role-access',
+      '/roles',
+      '/product-attribute',
+      '/attribute-value',
+      '/category',
+      '/coupons',
+      '/invoices',
+      '/audit-logs',
+      '/stocks',
+      '/branch-stocks',
+      '/delivery-tracking',
+      '/payments',
+      '/shifts',
+      '/break-policies',
+      '/biometric',
+      '/geofencing',
+      '/workforce-requests',
+      '/calendar',
+      '/employee-documents',
+      '/payroll',
+      '/approvals',
+      '/alerts',
+      '/notifications'
     ];
     if (defaultPaths.some(p => targetNormalized === p || targetNormalized.startsWith(p + '/'))) {
-      const userType = this.auth.getUserType() as UserType;
+      const userType = this.normalizeUserType(this.auth.getUserType());
       return ROLE_PERMISSIONS[userType]?.[action] ?? true;
     }
 
-    const userType = this.auth.getUserType() as UserType;
+    const userType = this.normalizeUserType(this.auth.getUserType());
     return ROLE_PERMISSIONS[userType]?.[action] ?? false;
   }
 
@@ -179,15 +215,26 @@ export class PermissionService {
     // Check DB granted permissions (Role Access Matrix)
     const permissions = this.session.getPermissions();
     if (Array.isArray(permissions) && permissions.length > 0) {
-      const match = permissions.find((p: any) => {
+      const hasGrantedPermission = permissions.some((p: any) => {
         const menuPath = (p.menu?.path || p.menu_path || p.path || '').toLowerCase().replace(/\/+$/, '');
         const menuName = (p.menu?.name || p.menu_name || p.name || '').toLowerCase();
-        if (menuPath && (targetNormalized === menuPath || targetNormalized.startsWith(menuPath + '/'))) return true;
-        if (menuName && (targetNormalized === menuName || targetNormalized.startsWith(menuName + '/'))) return true;
-        return false;
+        
+        const pathMatches = menuPath && (targetNormalized === menuPath || targetNormalized.startsWith(menuPath + '/'));
+        const nameMatches = menuName && (targetNormalized === menuName || targetNormalized.startsWith(menuName + '/'));
+
+        if (!pathMatches && !nameMatches) return false;
+
+        if (p.is_denied === true || p.denied === true) return false;
+
+        const actUpper = (p.action || '').toUpperCase();
+        if (['READ', 'WRITE', 'CREATE', 'UPDATE', 'DELETE', 'APPROVE', 'ALL', '*', 'FULL'].includes(actUpper)) return true;
+        if (p.canRead === true || p.can_read === true || p.canCreate === true || p.can_create === true || p.canUpdate === true || p.can_update === true || p.canDelete === true || p.can_delete === true || p.canApprove === true || p.can_approve === true) return true;
+
+        return true;
       });
-      if (match) {
-        return match.canRead === true || match.can_read === true || match.canCreate === true || match.can_create === true || match.action === 'ALL' || match.action === 'READ' || match.action === '*';
+
+      if (hasGrantedPermission) {
+        return true;
       }
     }
 
@@ -207,8 +254,8 @@ export class PermissionService {
     }
 
     // Default Role permissions fallback (Branch, Admin, Branch_Manager, etc.)
-    const userType = this.auth.getUserType();
-    const rolePerms = ROLE_PERMISSIONS[userType as UserType];
+    const userType = this.normalizeUserType(this.auth.getUserType());
+    const rolePerms = ROLE_PERMISSIONS[userType];
     if (rolePerms && rolePerms.canRead) {
       return true;
     }
@@ -221,7 +268,7 @@ export class PermissionService {
   canApproveLeave(): boolean {
     this.permissionsUpdated();
     if (this.auth.isSuperAdmin()) return true;
-    const userType = this.auth.getUserType();
+    const userType = this.normalizeUserType(this.auth.getUserType());
     const isEmp = userType === UserType.EMPLOYEE || userType === UserType.SHOPKEEPER || userType === UserType.DELIVERY_BOY;
     if (isEmp) return false;
     return this.hasRoleAction('canApprove', '/leave');
@@ -230,28 +277,28 @@ export class PermissionService {
   canManagePayroll(): boolean {
     this.permissionsUpdated();
     if (this.auth.isSuperAdmin()) return true;
-    const userType = this.auth.getUserType();
+    const userType = this.normalizeUserType(this.auth.getUserType());
     return userType === UserType.ADMIN || userType === UserType.BRANCH_MANAGER || userType === UserType.BRANCH;
   }
 
   canManageWorkforce(): boolean {
     this.permissionsUpdated();
     if (this.auth.isSuperAdmin()) return true;
-    const userType = this.auth.getUserType();
+    const userType = this.normalizeUserType(this.auth.getUserType());
     return userType === UserType.ADMIN || userType === UserType.BRANCH_MANAGER || userType === UserType.BRANCH;
   }
 
   canManageEmployees(): boolean {
     this.permissionsUpdated();
     if (this.auth.isSuperAdmin()) return true;
-    const userType = this.auth.getUserType();
+    const userType = this.normalizeUserType(this.auth.getUserType());
     return userType === UserType.ADMIN || userType === UserType.BRANCH_MANAGER || userType === UserType.BRANCH;
   }
 
   isEmployeeSelfService(): boolean {
     this.permissionsUpdated();
     if (this.auth.isSuperAdmin()) return false;
-    const userType = this.auth.getUserType();
+    const userType = this.normalizeUserType(this.auth.getUserType());
     return userType === UserType.EMPLOYEE || userType === UserType.SHOPKEEPER || userType === UserType.DELIVERY_BOY;
   }
 }

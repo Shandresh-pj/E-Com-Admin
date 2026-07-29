@@ -20,8 +20,7 @@ import { ClockTimepickerComponent } from 'src/app/components/clock-timepicker/cl
     FormsModule,
     MaterialModule,
     TablerIconsModule,
-    CustomMatTableComponent,
-    ClockTimepickerComponent
+    CustomMatTableComponent
   ],
   templateUrl: './workforce.html',
   styleUrl: './workforce.scss'

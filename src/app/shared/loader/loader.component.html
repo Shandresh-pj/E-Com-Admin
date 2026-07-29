@@ -1,100 +1,64 @@
 <div class="ldr" [class.out]="!isVisible">
 
-  <!-- ═══ Background layers ════════════════════════════════════════ -->
-  <div class="aurora">
-    <div class="a1"></div>
-    <div class="a2"></div>
-    <div class="a3"></div>
-  </div>
-  <div class="star-field" aria-hidden="true">
-    <i *ngFor="let s of stars" class="star"
-      [style.top.%]="s.y"
-      [style.left.%]="s.x"
-      [style.width.px]="s.w"
-      [style.height.px]="s.w"
-      [style.opacity]="s.o"
-      [style.animationDelay]="s.d + 's'"
-      [style.animationDuration]="s.dur + 's'">
-    </i>
+  <!-- Semi-Transparent Glass Blur Backdrop Overlay -->
+  <div class="backdrop-blur-overlay" aria-hidden="true"></div>
+
+  <!-- Ambient Glow Effects -->
+  <div class="ambient-glows" aria-hidden="true">
+    <div class="glow-orb g1"></div>
+    <div class="glow-orb g2"></div>
   </div>
 
-  <!-- Floating ambient orbs -->
-  <div class="float-orbs" aria-hidden="true">
-    <div class="fo fo1"></div>
-    <div class="fo fo2"></div>
-    <div class="fo fo3"></div>
-  </div>
+  <!-- Ultra-Premium Glass Loader Card -->
+  <div class="loader-glass-card">
 
-  <!-- ═══ Centre stage ══════════════════════════════════════════════ -->
-  <div class="stage">
-
-    <!-- Logo pill -->
-    <div class="logo-pill" aria-label="SVK Enterprise logo">
-      <div class="logo-glyph">
-        <span class="lg-inner">S</span>
-        <div class="lg-spin"></div>
-      </div>
-      <div class="logo-name">SVK Enterprises</div>
-      <div class="logo-badge">LIVE</div>
-    </div>
-
-    <!-- ──── Conic ring + giant percentage ──── -->
-    <div class="ring-outer-wrap">
-      <!-- Decorative dashed rings -->
-      <div class="dec-ring dr1"></div>
-      <div class="dec-ring dr2"></div>
-      <div class="dec-ring dr3"></div>
-      <!-- Orbit dot on outermost ring -->
-      <div class="orbit-dot"></div>
-
-      <div class="ring-shell" [style]="ringStyle">
-        <div class="ring-face">
-          <div class="ring-halo"></div>
-          <!-- Sweep scanline -->
-          <div class="ring-sweep"></div>
-          <!-- Giant % -->
-          <div class="pct-block">
-            <span class="pct-n">{{ pct }}</span><span class="pct-s">%</span>
-          </div>
-          <span class="pct-sub">Loaded</span>
-        </div>
+    <!-- Mini Brand Header Badge -->
+    <div class="brand-header">
+      <div class="brand-chip">
+        <span class="pulse-beacon"></span>
+        <span class="brand-name">SVK ENTERPRISES</span>
+        <span class="live-tag">LIVE</span>
       </div>
     </div>
 
-    <!-- ──── Typing status ──── -->
-    <div class="status">
-      <span class="pip"></span>
-      <span class="stext">{{ statusText }}</span>
-      <span class="cursor">|</span>
-    </div>
+    <!-- Vector Ring Progress Visualizer -->
+    <div class="ring-visualizer-wrap">
+      <svg class="ring-svg" viewBox="0 0 100 100">
+        <defs>
+          <linearGradient id="loaderGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#6366f1" />
+            <stop offset="50%" stop-color="#06b6d4" />
+            <stop offset="100%" stop-color="#ec4899" />
+          </linearGradient>
+        </defs>
 
-    <!-- ──── Module checklist ──── -->
-    <div class="modules">
-      <div class="mod" *ngFor="let m of modules" [class.done]="m.done">
-        <svg class="mod-icon" viewBox="0 0 16 16" fill="none">
-          <circle cx="8" cy="8" r="7" [attr.stroke]="m.color" stroke-width="1.2" opacity=".4"/>
-          <path *ngIf="m.done" d="M4.5 8l2.5 2.5 4-4.5" [attr.stroke]="m.color" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-          <circle *ngIf="!m.done" cx="8" cy="8" r="2" [attr.fill]="m.color" opacity=".5" class="mod-dot"/>
-        </svg>
-        <span class="mod-label">{{ m.name }}</span>
+        <!-- Outer Track Ring -->
+        <circle class="ring-track" cx="50" cy="50" r="45" />
+
+        <!-- Animated Progress Gradient Stroke Arc -->
+        <circle class="ring-progress" cx="50" cy="50" r="45"
+                [style.strokeDashoffset]="strokeDashoffset" />
+      </svg>
+
+      <!-- Centered Percentage Display -->
+      <div class="pct-badge-center">
+        <span class="pct-number">{{ pct }}</span>
+        <span class="pct-unit">%</span>
       </div>
     </div>
 
-    <!-- ──── Linear progress bar ──── -->
-    <div class="bar-wrap">
-      <div class="bar-track">
-        <div class="bar-fill" [style.width.%]="pct">
-          <div class="bar-sheen"></div>
-        </div>
+    <!-- Live Status Footer & Progress Track -->
+    <div class="status-footer">
+      <div class="status-row">
+        <span class="status-dot"></span>
+        <span class="status-label">{{ statusText }}</span>
       </div>
-      <div class="bar-row">
-        <span class="bar-txt">Initializing workspace…</span>
-        <span class="bar-pct">{{ pct }}%</span>
+
+      <div class="linear-track">
+        <div class="linear-fill" [style.width.%]="pct"></div>
       </div>
     </div>
 
   </div>
 
-  <!-- Bottom glow line -->
-  <div class="foot-line"></div>
 </div>

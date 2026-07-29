@@ -4,32 +4,22 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
-export interface Star  { x:number; y:number; w:number; o:number; d:number; dur:number; }
-export interface Mod   { name:string; color:string; done:boolean; }
+export interface Star { x: number; y: number; w: number; o: number; d: number; dur: number; }
 
 @Component({
-  selector   : 'app-loader',
-  standalone : true,
-  imports    : [CommonModule],
+  selector: 'app-loader',
+  standalone: true,
+  imports: [CommonModule],
   templateUrl: './loader.component.html',
-  styleUrl   : './loader.component.scss',
+  styleUrl: './loader.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class LoaderComponent implements OnInit, OnDestroy {
 
-  isVisible  = true;
-  pct        = 0;
-  statusText = 'Connecting to servers…';
-
+  isVisible = true;
+  pct = 0;
+  statusText = 'Connecting to secure gateway…';
   stars: Star[] = [];
-  modules: Mod[] = [
-    { name: 'Auth Engine',   color: '#6366f1', done: false },
-    { name: 'Data Layer',    color: '#06b6d4', done: false },
-    { name: 'UI Renderer',   color: '#8b5cf6', done: false },
-    { name: 'Permissions',   color: '#ec4899', done: false },
-    { name: 'Analytics',     color: '#f59e0b', done: false },
-    { name: 'Socket Layer',  color: '#10b981', done: false },
-  ];
 
   /** Conic-gradient ring style bound via [style] */
   get ringStyle(): string {
@@ -37,15 +27,18 @@ export class LoaderComponent implements OnInit, OnDestroy {
     return `--p:${deg}deg`;
   }
 
-  private readonly steps: [number, string, number, number][] = [
-    // [target%, text, modIdx, pauseMs]
-    [16,  'Connecting to servers…',      0, 340],
-    [33,  'Loading core modules…',       1, 380],
-    [52,  'Rendering UI components…',    2, 360],
-    [68,  'Applying role permissions…',  3, 340],
-    [83,  'Initialising analytics…',     4, 310],
-    [96,  'Connecting socket layer…',    5, 0  ],
-    [100, 'Workspace ready!',           -1, 0  ],
+  /** SVG stroke dashoffset calculation for smooth 2D ring loader */
+  get strokeDashoffset(): number {
+    const circumference = 282.74; // 2 * PI * 45 radius
+    return circumference - (this.pct / 100) * circumference;
+  }
+
+  private readonly steps: [number, string, number][] = [
+    [18,  'Connecting to secure gateway…',    300],
+    [38,  'Loading application engine…',     340],
+    [64,  'Optimizing visual renderer…',     320],
+    [86,  'Applying security policies…',     300],
+    [100, 'Workspace ready!',                0  ],
   ];
 
   private timers: ReturnType<typeof setTimeout>[] = [];
@@ -54,19 +47,21 @@ export class LoaderComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.buildStars();
-    this.timers.push(setTimeout(() => this.run(0), 180));
+    this.timers.push(setTimeout(() => this.run(0), 150));
   }
 
-  ngOnDestroy(): void { this.timers.forEach(clearTimeout); }
+  ngOnDestroy(): void {
+    this.timers.forEach(clearTimeout);
+  }
 
   private buildStars(): void {
-    for (let i = 0; i < 55; i++) {
+    for (let i = 0; i < 65; i++) {
       this.stars.push({
-        x  : Math.random() * 100,
-        y  : Math.random() * 100,
-        w  : Math.random() * 2 + 1,
-        o  : Math.random() * 0.6 + 0.15,
-        d  : -(Math.random() * 6),
+        x: Math.random() * 100,
+        y: Math.random() * 100,
+        w: Math.random() * 2.5 + 1,
+        o: Math.random() * 0.7 + 0.2,
+        d: -(Math.random() * 6),
         dur: Math.random() * 4 + 3,
       });
     }
@@ -74,20 +69,16 @@ export class LoaderComponent implements OnInit, OnDestroy {
 
   private run(i: number): void {
     if (i >= this.steps.length) return;
-    const [target, text, modIdx, pause] = this.steps[i];
+    const [target, text, pause] = this.steps[i];
     this.statusText = text;
     this.cdr.markForCheck();
 
     this.animateTo(target, () => {
-      if (modIdx >= 0) {
-        this.modules[modIdx].done = true;
-        this.cdr.markForCheck();
-      }
       if (target === 100) {
         this.timers.push(setTimeout(() => {
           this.isVisible = false;
           this.cdr.markForCheck();
-        }, 520));
+        }, 480));
       } else {
         this.timers.push(setTimeout(() => this.run(i + 1), pause));
       }
@@ -99,7 +90,7 @@ export class LoaderComponent implements OnInit, OnDestroy {
       if (this.pct >= target) { done(); return; }
       this.pct = Math.min(this.pct + 1, target);
       this.cdr.markForCheck();
-      this.timers.push(setTimeout(tick, 16));
+      this.timers.push(setTimeout(tick, 14));
     };
     tick();
   }

@@ -14,9 +14,6 @@ import { SubscriptionWidgetComponent } from 'src/app/components/subscription-wid
 import { AuthService } from 'src/app/Securities/Services/auth.service';
 import { CommonService } from 'src/app/Securities/Services/common.service';
 import { PermissionService } from 'src/app/Securities/Services/permissions.service';
-import { UserType } from 'src/app/Securities/Models/role-access';
-import { AppTranslatePipe } from 'src/app/pipes/app-translate.pipe';
-
 @Component({
   selector: 'app-starter',
   standalone: true,
@@ -29,8 +26,7 @@ import { AppTranslatePipe } from 'src/app/pipes/app-translate.pipe';
     AppTrafficDistributionComponent,
     AppProductSalesComponent,
     SubscriptionPlansComponent,
-    SubscriptionWidgetComponent,
-    AppTranslatePipe
+    SubscriptionWidgetComponent
   ],
   templateUrl: './starter.component.html',
   styleUrl: './starter.component.scss',

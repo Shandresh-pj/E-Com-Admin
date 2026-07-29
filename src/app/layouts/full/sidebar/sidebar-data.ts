@@ -2,7 +2,7 @@ import { NavItem } from './nav-item/nav-item';
 import { UserType } from 'src/app/Securities/Models/role-access';
 
 const SA = UserType.SUPER_ADMIN;
-const A = UserType.ADMIN;
+const A  = UserType.ADMIN;
 const BR = UserType.BRANCH;
 const BM = UserType.BRANCH_MANAGER;
 const SK = UserType.SHOPKEEPER;
@@ -21,299 +21,299 @@ export const navItems: NavItem[] = [
   },
   {
     navCap: 'Admin',
-    roles: [SA, A],
+    roles: [SA, A, BR],
   },
   {
     displayName: 'App Admin',
     iconName: 'shield',
     route: '/admin',
     bgcolor: 'primary',
-    roles: [SA, A],
+    roles: [SA, A, BR],
   },
   {
     displayName: 'CRM Contacts',
     iconName: 'users',
     route: '/crm-contacts',
     bgcolor: 'primary',
-    roles: [SA, A],
+    roles: [SA, A, BR],
   },
   {
     navCap: 'Branch',
-    roles: [SA, A],
+    roles: [SA, A, BR, BM],
   },
   {
     displayName: 'App Branch',
     iconName: 'building-store',
     route: '/branch',
     bgcolor: 'warning',
-    roles: [SA, A],
+    roles: [SA, A, BR, BM],
   },
   {
     navCap: 'Employees',
-    roles: [SA, A, BM],
+    roles: [SA, A, BR, BM],
   },
   {
     displayName: 'App Employee',
     iconName: 'user-check',
     route: '/employees',
     bgcolor: 'success',
-    roles: [SA, A, BM],
+    roles: [SA, A, BR, BM],
   },
   {
     navCap: 'Roles',
-    roles: [SA],
+    roles: [SA, A, BR],
   },
   {
     displayName: 'App Role Access',
     iconName: 'lock-access',
     route: '/role-access',
     bgcolor: 'warning',
-    roles: [SA, A, BM],
+    roles: [SA, A, BR, BM],
   },
   {
     displayName: 'App Roles',
     iconName: 'key',
     route: '/roles',
     bgcolor: 'success',
-    roles: [SA, A],
+    roles: [SA, A, BR],
   },
 
-  { navCap: 'Catalog', roles: [SA, A, BM, SK] },
+  { navCap: 'Catalog', roles: [SA, A, BR, BM, SK] },
   {
     displayName: 'Product Attribute',
     iconName: 'tag',
     route: '/product-attribute',
     bgcolor: 'primary',
-    roles: [SA, A, BM],
+    roles: [SA, A, BR, BM, SK],
   },
   {
     displayName: 'Attribute Value',
     iconName: 'list-details',
     route: '/attribute-value',
     bgcolor: 'warning',
-    roles: [SA, A, BM],
+    roles: [SA, A, BR, BM, SK],
   },
   {
     displayName: 'Category',
     iconName: 'category',
     route: '/category',
     bgcolor: 'success',
-    roles: [SA, A, BM],
+    roles: [SA, A, BR, BM, SK],
   },
   {
     displayName: 'Product',
     iconName: 'box',
     route: '/product',
     bgcolor: 'error',
-    roles: [SA, A, BM, SK],
+    roles: [SA, A, BR, BM, SK, EM],
   },
 
-  { navCap: 'Sales', roles: [SA, A, BM, SK] },
+  { navCap: 'Sales', roles: [SA, A, BR, BM, SK] },
   {
     displayName: 'POS Billing Machine',
     iconName: 'receipt-2',
     route: '/pos-billing',
     bgcolor: 'success',
-    roles: [SA, A, BM, SK],
+    roles: [SA, A, BR, BM, SK],
   },
   {
     displayName: 'Orders',
     iconName: 'shopping-cart',
     route: '/orders',
     bgcolor: 'primary',
-    roles: [SA, A, BM, SK],
+    roles: [SA, A, BR, BM, SK, EM, DB],
   },
   {
     displayName: 'Coupons',
     iconName: 'ticket',
     route: '/coupons',
     bgcolor: 'error',
-    roles: [SA, A, BM, SK],
+    roles: [SA, A, BR, BM, SK],
   },
   {
     displayName: 'Invoice Generator',
     iconName: 'file-text',
     route: '/invoices',
     bgcolor: 'warning',
-    roles: [SA, A, BM, SK]
+    roles: [SA, A, BR, BM, SK]
   },
   {
     displayName: 'Manage Plans',
     iconName: 'diamond',
     route: '/manage-subscription-plans',
     bgcolor: 'secondary',
-    roles: [SA, A]
+    roles: [SA, A, BR]
   },
   {
     displayName: 'Upgrade Plan',
     iconName: 'premium-rights',
     route: '/subscription-plans',
     bgcolor: 'primary',
-    roles: [SA, A, BM]
+    roles: [SA, A, BR, BM]
   },
   {
     displayName: 'Billing & Invoices',
     iconName: 'receipt',
     route: '/billing-history',
     bgcolor: 'success',
-    roles: [SA, A, BM, SK]
+    roles: [SA, A, BR, BM, SK]
   },
   {
     displayName: 'Subscription Coupons',
     iconName: 'ticket',
     route: '/subscription-coupons',
     bgcolor: 'warning',
-    roles: [SA, A]
+    roles: [SA, A, BR]
   },
   {
     displayName: 'Payment Checkout',
     iconName: 'credit-card',
     route: '/checkout',
     bgcolor: 'info',
-    roles: [SA, A, BM, SK]
+    roles: [SA, A, BR, BM, SK, EM, DB]
   },
 
-  { navCap: 'Audit', roles: [SA, A] },
+  { navCap: 'Audit', roles: [SA, A, BR, BM] },
   {
     displayName: 'Audit Logs',
     iconName: 'clipboard-list',
     route: '/audit-logs',
     bgcolor: 'error',
-    roles: [SA, A],
+    roles: [SA, A, BR, BM],
   },
 
-  { navCap: 'Inventory & Stocks', roles: [SA, A, BM, SK] },
+  { navCap: 'Inventory & Stocks', roles: [SA, A, BR, BM, SK] },
   {
     displayName: 'Stocks',
     iconName: 'box-seam',
     route: '/stocks',
     bgcolor: 'primary',
-    roles: [SA, A, BM, SK],
+    roles: [SA, A, BR, BM, SK],
   },
   {
     displayName: 'Branch Stocks',
     iconName: 'building-warehouse',
     route: '/branch-stocks',
     bgcolor: 'warning',
-    roles: [SA, A, BM],
+    roles: [SA, A, BR, BM],
   },
 
-  { navCap: 'Logistics & Finance', roles: [SA, A, BM, SK] },
+  { navCap: 'Logistics & Finance', roles: [SA, A, BR, BM, SK] },
   {
     displayName: 'Hardware & Devices',
     iconName: 'devices',
     route: '/devices',
     bgcolor: 'warning',
-    roles: [SA, A, BM],
+    roles: [SA, A, BR, BM],
   },
   {
     displayName: 'Profit & Loss',
     iconName: 'chart-pie',
     route: '/profit-loss',
     bgcolor: 'secondary',
-    roles: [SA, A, BM],
+    roles: [SA, A, BR, BM],
   },
   {
     displayName: 'Delivery Tracking',
     iconName: 'truck-delivery',
     route: '/delivery-tracking',
     bgcolor: 'primary',
-    roles: [SA, A, BM, DB],
+    roles: [SA, A, BR, BM, DB],
   },
   {
     displayName: 'Payments',
     iconName: 'credit-card',
     route: '/payments',
     bgcolor: 'success',
-    roles: [SA, A, BM, SK],
+    roles: [SA, A, BR, BM, SK],
   },
 
-  { navCap: 'Workforce', roles: [SA, A, BM, SK, DB, EM] },
+  { navCap: 'Workforce', roles: [SA, A, BR, BM, SK, DB, EM] },
   {
     displayName: 'Workforce Console',
     iconName: 'settings',
     route: '/workforce',
     bgcolor: 'primary',
-    roles: [SA, A, BM],
+    roles: [SA, A, BR, BM],
   },
   {
     displayName: 'Shifts & Schedules',
     iconName: 'clock',
     route: '/shifts',
     bgcolor: 'info',
-    roles: [SA, A, BM],
+    roles: [SA, A, BR, BM],
   },
   {
     displayName: 'Break Deduction Rules',
     iconName: 'cup',
     route: '/break-policies',
     bgcolor: 'warning',
-    roles: [SA, A, BM],
+    roles: [SA, A, BR, BM],
   },
   {
     displayName: 'Biometric Sensors',
     iconName: 'fingerprint',
     route: '/biometric',
     bgcolor: 'success',
-    roles: [SA, A, BM],
+    roles: [SA, A, BR, BM],
   },
   {
     displayName: 'GPS Geofencing',
     iconName: 'map-pin',
     route: '/geofencing',
     bgcolor: 'error',
-    roles: [SA, A, BM],
+    roles: [SA, A, BR, BM],
   },
   {
     displayName: 'Workforce Requests',
     iconName: 'file-check',
     route: '/workforce-requests',
     bgcolor: 'warning',
-    roles: [SA, A, BM],
+    roles: [SA, A, BR, BM],
   },
   {
     displayName: 'Attendance',
     iconName: 'calendar-stats',
     route: '/attendance',
     bgcolor: 'success',
-    roles: [SA, A, BM, SK, DB, EM],
+    roles: [SA, A, BR, BM, SK, DB, EM],
   },
   {
     displayName: 'Leave Management',
     iconName: 'calendar-off',
     route: '/leave',
     bgcolor: 'warning',
-    roles: [SA, A, BM, SK, DB, EM],
+    roles: [SA, A, BR, BM, SK, DB, EM],
   },
   {
     displayName: 'Company Calendar',
     iconName: 'calendar-event',
     route: '/calendar',
     bgcolor: 'info',
-    roles: [SA, A, BM, EM],
+    roles: [SA, A, BR, BM, EM],
   },
   {
     displayName: 'Document Verification',
     iconName: 'file-check',
     route: '/employee-documents',
     bgcolor: 'warning',
-    roles: [SA, A, BM, EM],
+    roles: [SA, A, BR, BM, EM],
   },
   {
     displayName: 'Payroll',
     iconName: 'cash',
     route: '/payroll',
     bgcolor: 'primary',
-    roles: [SA, A, BM, EM],
+    roles: [SA, A, BR, BM, EM],
   },
 
-  { navCap: 'Operations & Workflows', roles: [SA, A, BM, SK, EM] },
+  { navCap: 'Operations & Workflows', roles: [SA, A, BR, BM, SK, EM] },
   {
     displayName: 'Workflow Approvals',
     iconName: 'checkup-list',
     route: '/approvals',
     bgcolor: 'primary',
-    roles: [SA, A, BM, SK, EM],
+    roles: [SA, A, BR, BM, SK, EM],
   },
   {
     displayName: 'Alerts',
@@ -340,21 +340,21 @@ export const navItems: NavItem[] = [
     iconName: 'language',
     route: '/translations',
     bgcolor: 'primary',
-    roles: [SA, A],
+    roles: [SA, A, BR],
   },
   {
     displayName: 'Menu Bar',
     iconName: 'layout-navbar',
     route: '/menu-bar',
     bgcolor: 'warning',
-    roles: [SA, A],
+    roles: [SA, A, BR],
   },
   {
     displayName: 'Status',
     iconName: 'list-check',
     route: '/status',
     bgcolor: 'warning',
-    roles: [SA, A],
+    roles: [SA, A, BR],
   },
   {
     displayName: 'Change Password',

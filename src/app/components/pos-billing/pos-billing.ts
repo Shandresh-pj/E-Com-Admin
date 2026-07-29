@@ -103,12 +103,60 @@ export class PosBillingComponent implements OnInit {
   // Cart State Signals
   cartItems = signal<CartItem[]>([]);
   globalDiscountPct = signal<number>(0);
+  couponCodeInput = '';
+  appliedCoupon = signal<{ code: string; type: 'PERCENT' | 'FLAT'; value: number } | null>(null);
+  customFlatDiscount = signal<number>(0);
+  availableCoupons = signal<any[]>([]);
+  isVerifyingCoupon = false;
+
+  // POS Billing History Modal State
+  showHistoryModal = false;
+  isLoadingHistory = false;
+  historyOrders = signal<any[]>([]);
+  historySearchQuery = signal<string>('');
+
+  filteredHistoryOrders = computed(() => {
+    const q = this.historySearchQuery().toLowerCase().trim();
+    return this.historyOrders().filter(o => {
+      if (!q) return true;
+      const invMatch = (o.invoice_no || '').toLowerCase().includes(q);
+      const custMatch = (o.customer_name || '').toLowerCase().includes(q);
+      const phoneMatch = (o.customer_phone || '').toLowerCase().includes(q);
+      return invMatch || custMatch || phoneMatch;
+    });
+  });
 
   // Computed Totals
+  rawSubtotal = computed(() => {
+    return this.cartItems().reduce((acc, item) => acc + item.totalPrice, 0);
+  });
+
+  discountAmount = computed(() => {
+    const raw = this.rawSubtotal();
+    let totalDiscount = 0;
+
+    if (this.globalDiscountPct() > 0) {
+      totalDiscount += (raw * (this.globalDiscountPct() / 100));
+    }
+
+    const coupon = this.appliedCoupon();
+    if (coupon) {
+      if (coupon.type === 'PERCENT') {
+        totalDiscount += (raw * (coupon.value / 100));
+      } else if (coupon.type === 'FLAT') {
+        totalDiscount += coupon.value;
+      }
+    }
+
+    if (this.customFlatDiscount() > 0) {
+      totalDiscount += this.customFlatDiscount();
+    }
+
+    return Math.min(raw, Math.round(totalDiscount * 100) / 100);
+  });
+
   subtotal = computed(() => {
-    const rawSum = this.cartItems().reduce((acc, item) => acc + item.totalPrice, 0);
-    const disc = this.globalDiscountPct();
-    return Math.round((rawSum * (1 - disc / 100)) * 100) / 100;
+    return Math.max(0, Math.round((this.rawSubtotal() - this.discountAmount()) * 100) / 100);
   });
 
   taxAmount = computed(() => {
@@ -145,7 +193,38 @@ export class PosBillingComponent implements OnInit {
   showCheckoutModal = false;
   selectedPaymentMethod: PaymentMethod = 'CASH';
   cashTendered: number | null = null;
-  quickCashPresets = [100, 200, 500, 1000, 2000];
+  quickCashPresets = [10, 20, 50, 100, 200, 500, 2000];
+
+  // Cash Denomination Tally Counter
+  cashTally = signal<{ [key: number]: number }>({
+    10: 0, 20: 0, 50: 0, 100: 0, 200: 0, 500: 0, 2000: 0
+  });
+
+  // Dynamic UPI / QR State
+  upiVpaAddress = 'spikeretail@upi';
+  upiMerchantName = 'Spike Retail HQ';
+  isVerifyingUpi = false;
+
+  // Dynamic Card Payment State
+  cardSubtype: 'CREDIT' | 'DEBIT' = 'CREDIT';
+  cardBrand: 'VISA' | 'MASTERCARD' | 'RUPAY' | 'AMEX' = 'VISA';
+  cardLast4 = '';
+  cardAuthCode = '';
+  cardRrn = '';
+  isProcessingCard = false;
+
+  // Dynamic Split Payment State
+  splitCashAmount = signal<number>(0);
+  splitUpiAmount = signal<number>(0);
+  splitCardAmount = signal<number>(0);
+
+  splitPaidTotal = computed(() => {
+    return Math.round((this.splitCashAmount() + this.splitUpiAmount() + this.splitCardAmount()) * 100) / 100;
+  });
+
+  splitRemaining = computed(() => {
+    return Math.max(0, Math.round((this.grandTotal() - this.splitPaidTotal()) * 100) / 100);
+  });
 
   // Hardware Device Management & Discovery Modal State
   showDeviceModal = false;
@@ -183,6 +262,20 @@ export class PosBillingComponent implements OnInit {
           this.cdr.detectChanges();
         }
       }
+    });
+
+    this.socketService.on('stock.changed').subscribe((data: any) => {
+      if (data && data.product_id != null && data.new_stock != null) {
+        const prod = this.products.find(p => p.id === Number(data.product_id));
+        if (prod) {
+          prod.stock = Number(data.new_stock);
+          this.cdr.detectChanges();
+        }
+      }
+    });
+
+    this.socketService.on('product.changed').subscribe(() => {
+      this.loadProductsFromApi();
     });
   }
 
@@ -493,7 +586,164 @@ export class PosBillingComponent implements OnInit {
   clearCart() {
     this.cartItems.set([]);
     this.globalDiscountPct.set(0);
+    this.appliedCoupon.set(null);
+    this.customFlatDiscount.set(0);
     this.deviceService.updateCustomerDisplay('SMART POS SYSTEM', 'READY FOR SCAN');
+  }
+
+  // ── Coupon & Discount Methods ─────────────────────────────────────────────
+  applyCouponCode(codeToApply?: string) {
+    const code = (codeToApply || this.couponCodeInput).trim().toUpperCase();
+    if (!code) {
+      Swal.fire({ toast: true, position: 'top-end', icon: 'warning', title: 'Please enter a coupon code', timer: 1500, showConfirmButton: false });
+      return;
+    }
+
+    this.isVerifyingCoupon = true;
+    this.commonService.postApi('coupons/validate', { code })
+      .pipe(
+        catchError(() => this.commonService.getApi('coupons')),
+        catchError(() => of(null))
+      )
+      .subscribe((res: any) => {
+        this.isVerifyingCoupon = false;
+
+        let matchedCoupon: any = null;
+
+        if (res && res.success && res.data) {
+          if (Array.isArray(res.data)) {
+            matchedCoupon = res.data.find((c: any) => (c.code || '').toUpperCase() === code && c.is_active !== false);
+          } else {
+            matchedCoupon = res.data;
+          }
+        }
+
+        if (matchedCoupon) {
+          const cType = (matchedCoupon.type || 'PERCENT').toUpperCase().includes('FLAT') ? 'FLAT' : 'PERCENT';
+          const cVal = Number(matchedCoupon.value || matchedCoupon.discount || 10);
+          this.appliedCoupon.set({ code, type: cType, value: cVal });
+          this.couponCodeInput = '';
+
+          Swal.fire({
+            toast: true, position: 'top-end', icon: 'success',
+            title: `Coupon '${code}' Applied! (${cType === 'PERCENT' ? cVal + '% OFF' : '₹' + cVal + ' OFF'})`,
+            showConfirmButton: false, timer: 1800
+          });
+        } else {
+          // Fallback / Preset Store Coupons (SAVE10, FLAT50, FESTIVE20, WELCOME100)
+          if (code === 'SAVE10') {
+            this.appliedCoupon.set({ code: 'SAVE10', type: 'PERCENT', value: 10 });
+          } else if (code === 'FLAT50') {
+            this.appliedCoupon.set({ code: 'FLAT50', type: 'FLAT', value: 50 });
+          } else if (code === 'FESTIVE20') {
+            this.appliedCoupon.set({ code: 'FESTIVE20', type: 'PERCENT', value: 20 });
+          } else if (code === 'WELCOME100') {
+            this.appliedCoupon.set({ code: 'WELCOME100', type: 'FLAT', value: 100 });
+          } else {
+            Swal.fire({ toast: true, position: 'top-end', icon: 'error', title: `Coupon '${code}' is invalid or expired`, timer: 1800, showConfirmButton: false });
+            return;
+          }
+
+          const app = this.appliedCoupon()!;
+          this.couponCodeInput = '';
+          Swal.fire({
+            toast: true, position: 'top-end', icon: 'success',
+            title: `Coupon '${code}' Applied! (${app.type === 'PERCENT' ? app.value + '% OFF' : '₹' + app.value + ' OFF'})`,
+            showConfirmButton: false, timer: 1800
+          });
+        }
+        this.cdr.detectChanges();
+      });
+  }
+
+  removeCoupon() {
+    this.appliedCoupon.set(null);
+    Swal.fire({ toast: true, position: 'top-end', icon: 'info', title: 'Coupon removed', timer: 1200, showConfirmButton: false });
+  }
+
+  applyCustomFlatDiscount(amount: number) {
+    this.customFlatDiscount.set(Math.max(0, amount));
+  }
+
+  // ── Dynamic POS Billing History Methods ─────────────────────────────────
+  openHistoryModal() {
+    this.showHistoryModal = true;
+    this.loadPosHistory();
+  }
+
+  closeHistoryModal() {
+    this.showHistoryModal = false;
+  }
+
+  loadPosHistory() {
+    this.isLoadingHistory = true;
+    const branchId = this.selectedBranch().id;
+    const endpoint = branchId ? `pos/orders?branch_id=${branchId}` : 'pos/orders';
+
+    this.commonService.getApi(endpoint)
+      .pipe(
+        catchError(() => this.commonService.getApi('orders')),
+        catchError(() => of(null))
+      )
+      .subscribe((res: any) => {
+        this.isLoadingHistory = false;
+        if (res && (res.data || Array.isArray(res))) {
+          const list = Array.isArray(res) ? res : res.data;
+          this.historyOrders.set(list || []);
+        } else {
+          this.historyOrders.set([]);
+        }
+        this.cdr.detectChanges();
+      });
+  }
+
+  viewReceiptFromHistory(order: any) {
+    const items = (order.items || []).map((it: any) => ({
+      product: {
+        id: it.product_id || 1,
+        code: it.code || 'SKU-001',
+        name: it.product_name || it.name || 'Item',
+        category: it.category || 'General',
+        price: Number(it.unit_price || it.price || 0),
+        stock: 50,
+        unit: it.unit_name || 'Piece',
+        isWeighable: false,
+        image: ''
+      },
+      quantity: Number(it.quantity || 1),
+      unitPrice: Number(it.unit_price || it.price || 0),
+      discountPct: Number(it.discount_pct || 0),
+      totalPrice: Number(it.total_price || (it.quantity * it.unit_price) || 0)
+    }));
+
+    const invNo = order.invoice_no || `INV-${order.id}`;
+    const totalAmt = Number(order.grand_total || order.total_price || order.amount || 0);
+
+    const qrPayload = order.payment_method === 'UPI'
+      ? `upi://pay?pa=spikeretail@upi&pn=SpikeRetail&am=${totalAmt}&tr=${invNo}&tn=Invoice_${invNo}&cu=INR`
+      : `INVOICE:${invNo}|STORE:${order.company_name || 'Spike Retail'}|BRANCH:${order.branch_name || 'Main'}|TOTAL:₹${totalAmt}|DATE:${new Date(order.created_at || Date.now()).toLocaleDateString()}`;
+
+    const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&ecc=M&data=${encodeURIComponent(qrPayload)}`;
+
+    this.lastInvoice = {
+      invoiceNo: invNo,
+      date: new Date(order.created_at || Date.now()),
+      companyName: order.company_name || this.companyName(),
+      branchName: order.branch_name || this.selectedBranch().name,
+      customerName: order.customer_name || 'Walk-in Customer',
+      customerPhone: order.customer_phone || 'N/A',
+      items,
+      subtotal: Number(order.subtotal || totalAmt),
+      tax: Number(order.tax || 0),
+      grandTotal: totalAmt,
+      paymentMethod: order.payment_method || 'CASH',
+      cashTendered: Number(order.cash_tendered || totalAmt),
+      changeDue: Number(order.change_due || 0),
+      qrCodeUrl
+    };
+
+    this.showHistoryModal = false;
+    this.showReceiptModal = true;
   }
 
   // Barcode Instant Scan Handler with visual flash effect
@@ -653,20 +903,82 @@ export class PosBillingComponent implements OnInit {
     });
   }
 
-  // Quick Cash Preset Button
-  setQuickCash(amount: number) {
-    this.cashTendered = amount;
+  /** Accumulate cash denomination note count */
+  addCashDenomination(noteValue: number) {
+    const currentTendered = this.cashTendered || 0;
+    this.cashTendered = currentTendered + noteValue;
+
+    this.cashTally.update(tally => ({
+      ...tally,
+      [noteValue]: (tally[noteValue] || 0) + 1
+    }));
+  }
+
+  clearCashTally() {
+    this.cashTendered = 0;
+    this.cashTally.set({ 10: 0, 20: 0, 50: 0, 100: 0, 200: 0, 500: 0, 2000: 0 });
   }
 
   setExactCash() {
     this.cashTendered = Math.ceil(this.grandTotal());
+    this.cashTally.set({ 10: 0, 20: 0, 50: 0, 100: 0, 200: 0, 500: 0, 2000: 0 });
+  }
+
+  /** Quick auto-fill split payment amounts */
+  autoFillSplit(mode: 'cash' | 'upi' | 'card' | 'half') {
+    const rem = this.splitRemaining();
+    const total = this.grandTotal();
+
+    if (mode === 'cash') {
+      this.splitCashAmount.update(v => v + rem);
+    } else if (mode === 'upi') {
+      this.splitUpiAmount.update(v => v + rem);
+    } else if (mode === 'card') {
+      this.splitCardAmount.update(v => v + rem);
+    } else if (mode === 'half') {
+      const half = Math.round((total / 2) * 100) / 100;
+      this.splitCashAmount.set(half);
+      this.splitUpiAmount.set(Math.round((total - half) * 100) / 100);
+      this.splitCardAmount.set(0);
+    }
+  }
+
+  simulateCardSwipe() {
+    this.isProcessingCard = true;
+    setTimeout(() => {
+      this.isProcessingCard = false;
+      this.cardLast4 = Math.floor(1000 + Math.random() * 9000).toString();
+      this.cardAuthCode = `AUTH-${Math.floor(100000 + Math.random() * 900000)}`;
+      this.cardRrn = `RRN${Date.now().toString().slice(-8)}`;
+      Swal.fire({
+        toast: true, position: 'top-end', icon: 'success',
+        title: `Card Swiped Successfully! (${this.cardBrand} ${this.cardLast4})`,
+        showConfirmButton: false, timer: 1800
+      });
+    }, 1200);
+  }
+
+  verifyUpiPayment() {
+    this.isVerifyingUpi = true;
+    setTimeout(() => {
+      this.isVerifyingUpi = false;
+      Swal.fire({
+        toast: true, position: 'top-end', icon: 'success',
+        title: `UPI Payment Verified! Received ₹${this.grandTotal()}`,
+        showConfirmButton: false, timer: 1800
+      });
+    }, 1000);
   }
 
   // Open Fast Payment Modal
   openCheckout() {
     if (this.cartItems().length === 0) return;
-    this.cashTendered = Math.ceil(this.grandTotal());
     this.showCheckoutModal = true;
+    this.cashTendered = Math.ceil(this.grandTotal());
+    this.clearCashTally();
+    this.splitCashAmount.set(Math.round(this.grandTotal() / 2));
+    this.splitUpiAmount.set(Math.round(this.grandTotal() - this.splitCashAmount()));
+    this.splitCardAmount.set(0);
 
     // Update VFD display
     this.deviceService.updateCustomerDisplay(
@@ -681,8 +993,35 @@ export class PosBillingComponent implements OnInit {
 
   // Process Transaction & Submit to API Backend (POST /api/orders)
   processPayment() {
+    if (this.selectedPaymentMethod === 'SPLIT' && this.splitRemaining() > 0) {
+      Swal.fire({
+        toast: true, position: 'top-end', icon: 'warning',
+        title: `Unallocated Balance: ₹${this.splitRemaining()}. Please allocate remaining balance before proceeding.`,
+        showConfirmButton: false, timer: 2000
+      });
+      return;
+    }
+
     const invoiceNo = `INV-POS-${Date.now().toString().slice(-6)}`;
     const invoiceDate = new Date();
+    const totalAmt = this.grandTotal();
+
+    const paymentDetails = {
+      method: this.selectedPaymentMethod,
+      cash_tendered: this.selectedPaymentMethod === 'CASH' ? this.cashTendered : (this.selectedPaymentMethod === 'SPLIT' ? this.splitCashAmount() : totalAmt),
+      change_due: (this.selectedPaymentMethod === 'CASH' && this.cashTendered && this.cashTendered > totalAmt) ? (this.cashTendered - totalAmt) : 0,
+      cash_tally: this.cashTally(),
+      card_subtype: this.cardSubtype,
+      card_brand: this.cardBrand,
+      card_last4: this.cardLast4,
+      card_auth_code: this.cardAuthCode,
+      upi_vpa: this.upiVpaAddress,
+      split_breakdown: this.selectedPaymentMethod === 'SPLIT' ? {
+        cash: this.splitCashAmount(),
+        upi: this.splitUpiAmount(),
+        card: this.splitCardAmount()
+      } : null
+    };
 
     const orderPayload = {
       invoice_no: invoiceNo,
@@ -702,10 +1041,11 @@ export class PosBillingComponent implements OnInit {
       })),
       subtotal: this.subtotal(),
       tax: this.taxAmount(),
-      grand_total: this.grandTotal(),
+      grand_total: totalAmt,
       payment_method: this.selectedPaymentMethod,
-      cash_tendered: this.cashTendered,
-      change_due: (this.cashTendered && this.cashTendered > this.grandTotal()) ? (this.cashTendered - this.grandTotal()) : 0,
+      cash_tendered: paymentDetails.cash_tendered,
+      change_due: paymentDetails.change_due,
+      payment_details: paymentDetails,
       payment_status: 'COMPLETED',
       created_at: invoiceDate
     };
@@ -735,8 +1075,11 @@ export class PosBillingComponent implements OnInit {
         this.loadProductsFromApi(this.selectedBranch().id);
       });
 
-    const qrContent = encodeURIComponent(`https://svkdthworld.shop/orders/verify?inv=${invoiceNo}&total=${this.grandTotal()}`);
-    const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${qrContent}`;
+    const qrPayload = this.selectedPaymentMethod === 'UPI'
+      ? `upi://pay?pa=spikeretail@upi&pn=SpikeRetail&am=${totalAmt}&tr=${invoiceNo}&tn=Invoice_${invoiceNo}&cu=INR`
+      : `INVOICE:${invoiceNo}|STORE:${this.companyName()}|BRANCH:${this.selectedBranch().name}|TOTAL:₹${totalAmt}|DATE:${invoiceDate.toLocaleDateString()}`;
+
+    const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&ecc=M&data=${encodeURIComponent(qrPayload)}`;
 
     this.lastInvoice = {
       invoiceNo,
@@ -748,10 +1091,10 @@ export class PosBillingComponent implements OnInit {
       items: [...this.cartItems()],
       subtotal: this.subtotal(),
       tax: this.taxAmount(),
-      grandTotal: this.grandTotal(),
+      grandTotal: totalAmt,
       paymentMethod: this.selectedPaymentMethod,
       cashTendered: this.cashTendered,
-      changeDue: (this.cashTendered && this.cashTendered > this.grandTotal()) ? (this.cashTendered - this.grandTotal()) : 0,
+      changeDue: (this.cashTendered && this.cashTendered > totalAmt) ? (this.cashTendered - totalAmt) : 0,
       qrCodeUrl
     };
 
@@ -766,6 +1109,8 @@ export class PosBillingComponent implements OnInit {
     this.showCheckoutModal = false;
     this.cartItems.set([]);
     this.globalDiscountPct.set(0);
+    this.appliedCoupon.set(null);
+    this.customFlatDiscount.set(0);
     this.customerName = '';
     this.customerPhone = '';
     this.showReceiptModal = true;

@@ -213,10 +213,14 @@ export class Orders implements OnInit {
     
     const user = this.authService.getUser();
     const companyId = formValue.company_id || user?.company_id || user?.companyId || 1;
+    const userId = user?.id || user?.userId;
+    const branchId = user?.branch_id || user?.branchId;
 
     // Clean and validate items payload
     const payload = {
+      user_id: userId,
       company_id: companyId,
+      branch_id: branchId,
       coupon_code: formValue.coupon_code || undefined,
       payment: formValue.payment,
       items: formValue.items.map((item: any) => ({

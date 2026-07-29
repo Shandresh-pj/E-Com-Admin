@@ -54,7 +54,7 @@
 
 .branch-select-field {
   width: 320px;
-  margin-bottom: -1.25em;
+  max-width: 100%;
 
   ::ng-deep .mat-mdc-form-field-flex {
     border-radius: 12px;

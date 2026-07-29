@@ -68,18 +68,26 @@ export class FullComponent implements OnInit {
   private buildNavItems() {
     if (this.authService.isSuperAdmin()) return navItems;
 
+    const currentUserType = this.authService.getUserType();
+    const normUserType = String(currentUserType).toLowerCase().trim();
+
     const grantedPaths = new Set(
       this.authService.getMenus()
-        .filter((m: any) => m && typeof m === 'object' && m.path)
-        .map((m: any) => String(m.path).toLowerCase().replace(/\/+$/, ''))
+        .filter((m: any) => m && (typeof m === 'object' ? m.path || m.route : m))
+        .map((m: any) => {
+          const str = typeof m === 'object' ? (m.path || m.route || '') : String(m);
+          return str.toLowerCase().replace(/\/+$/, '');
+        })
     );
 
     const visible = navItems.filter((item: NavItem) => {
       if (!item.route) return true; // captions are pruned below
-      if (grantedPaths.has(item.route.toLowerCase().replace(/\/+$/, ''))) return true;
+      const itemRouteNorm = item.route.toLowerCase().replace(/\/+$/, '');
+
+      if (grantedPaths.has(itemRouteNorm) || grantedPaths.has('all') || grantedPaths.has('*')) return true;
       if (this.permissionService.hasPagePermission(item.route)) return true;
       if (item.roles && item.roles.length) {
-        return item.roles.includes(this.authService.getUserType());
+        return item.roles.some(r => String(r).toLowerCase().trim() === normUserType);
       }
       return false;
     });

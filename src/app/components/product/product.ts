@@ -960,6 +960,7 @@ export class Product {
 
     this.isSubmitting = true;
 
+    const user = this.authService.getUser();
     const formData = new FormData();
     formData.append('name', value.name);
     formData.append('description', value.description || '');
@@ -975,6 +976,16 @@ export class Product {
     formData.append('manufacture_date', this.toISODateString(value.manufacture_date));
     formData.append('expiry_date', this.toISODateString(value.expiry_date));
     formData.append('registration_id', this.getRegistrationId() || '');
+
+    if (user?.company_id || user?.companyId) {
+      formData.append('company_id', String(user.company_id || user.companyId));
+    }
+    if (user?.branch_id || user?.branchId) {
+      formData.append('branch_id', String(user.branch_id || user.branchId));
+    }
+    if (user?.id || user?.userId) {
+      formData.append('user_id', String(user.id || user.userId));
+    }
 
     formData.append('variants', JSON.stringify(value.product_type === 'variant' ? value.variants : []));
 

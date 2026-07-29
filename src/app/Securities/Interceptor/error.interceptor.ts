@@ -14,12 +14,15 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
 
   return next(req).pipe(
     catchError((error: HttpErrorResponse | any) => {
-      // Don't intercept background/dashboard requests to avoid spamming alerts
+      // Don't intercept background/dashboard/lookup requests to avoid spamming alerts
       if (
         req.url.includes('/auth/me/permissions') ||
         req.url.includes('/notifications') ||
         req.url.includes('/devices') ||
         req.url.includes('/pos') ||
+        req.url.includes('/roles') ||
+        req.url.includes('/companies') ||
+        req.url.includes('/branches') ||
         router.url.includes('/dashboard')
       ) {
         return throwError(() => error);
@@ -36,8 +39,7 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
             break;
 
           case 403:
-            alert.error(error.error?.message || 'Access denied. You do not have permissions for this resource.');
-            router.navigate(['/dashboard']);
+            alert.error(error.error?.message || 'Access denied: insufficient role privileges.');
             break;
 
           case 404:
@@ -59,15 +61,12 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
             alert.error(error.error?.message || 'Internal server error. Please try again later.');
             break;
 
-          case 0:
-            alert.error('Cannot connect to server. Please check your internet connection or server status.');
-            break;
-
           default:
-            alert.error(error.error?.message || error.error || 'An unexpected server error occurred.');
+            if (error.status >= 500) {
+              alert.error('An unexpected server error occurred.');
+            }
+            break;
         }
-      } else {
-        alert.error('An unexpected network error occurred.');
       }
 
       return throwError(() => error);
@@ -75,16 +74,27 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
   );
 };
 
-/**
- * Format NestJS/Express validation error payloads cleanly for the end user
- */
-function formatValidationErrors(body: any): string {
-  const errors = body?.errors;
-  if (!errors) return body?.message || 'Validation Failed';
-  if (typeof errors === 'string') return errors;
-  if (Array.isArray(errors)) return errors.join('\n');
-  if (typeof errors === 'object') {
-    return Object.values(errors).flat().join('\n');
+function formatValidationErrors(errorData: any): string {
+  if (!errorData) return 'Invalid input data';
+  if (typeof errorData === 'string') return errorData;
+  if (errorData.message && typeof errorData.message === 'string') return errorData.message;
+
+  if (errorData.errors && Array.isArray(errorData.errors)) {
+    return errorData.errors.map((e: any) => e.msg || e.message || e).join(', ');
   }
-  return 'Validation Failed';
+
+  if (typeof errorData === 'object') {
+    const messages: string[] = [];
+    Object.keys(errorData).forEach(key => {
+      const val = errorData[key];
+      if (Array.isArray(val)) {
+        messages.push(`${key}: ${val.join(', ')}`);
+      } else if (typeof val === 'string') {
+        messages.push(`${key}: ${val}`);
+      }
+    });
+    if (messages.length > 0) return messages.join('; ');
+  }
+
+  return 'Validation failed';
 }

@@ -48,6 +48,11 @@
         <span>Devices</span>
       </button>
 
+      <button mat-stroked-button class="glass-btn-drawer" (click)="openHistoryModal()" matTooltip="View Historical POS Sales & Receipts">
+        <mat-icon>history</mat-icon>
+        <span>Billing History</span>
+      </button>
+
       <button mat-stroked-button class="glass-btn-drawer" (click)="triggerDrawerPulse()" matTooltip="Open Cash Drawer (RJ11 24V Signal)">
         <mat-icon>point_of_sale</mat-icon>
         <span>Open Drawer</span>
@@ -229,6 +234,35 @@
       </div>
       }
 
+      <!-- Coupon Code & Custom Discount Panel -->
+      <div class="coupon-section-box">
+        <div class="coupon-input-group">
+          <mat-icon class="coupon-icon">local_offer</mat-icon>
+          <input type="text" [(ngModel)]="couponCodeInput" (keyup.enter)="applyCouponCode()" placeholder="Enter Coupon (e.g. SAVE10)..." class="glass-input-sm coupon-input">
+          <button type="button" class="apply-coupon-btn" (click)="applyCouponCode()" [disabled]="isVerifyingCoupon">
+            {{ isVerifyingCoupon ? '...' : 'Apply' }}
+          </button>
+        </div>
+
+        <!-- Applied Coupon Badge -->
+        @if (appliedCoupon()) {
+        <div class="applied-coupon-chip">
+          <span class="c-badge">🎉 COUPON: {{ appliedCoupon()?.code }} ({{ appliedCoupon()?.type === 'PERCENT' ? appliedCoupon()?.value + '% OFF' : '₹' + appliedCoupon()?.value + ' OFF' }})</span>
+          <button type="button" class="remove-c-btn" (click)="removeCoupon()"><mat-icon>close</mat-icon></button>
+        </div>
+        }
+
+        <!-- Custom Quick Discount Preset Pills -->
+        <div class="custom-discount-pills">
+          <span class="disc-label">Quick Discount:</span>
+          <button type="button" class="disc-pill" [class.active]="globalDiscountPct() === 5" (click)="setGlobalDiscount(5)">5%</button>
+          <button type="button" class="disc-pill" [class.active]="globalDiscountPct() === 10" (click)="setGlobalDiscount(10)">10%</button>
+          <button type="button" class="disc-pill" [class.active]="globalDiscountPct() === 15" (click)="setGlobalDiscount(15)">15%</button>
+          <button type="button" class="disc-pill" [class.active]="customFlatDiscount() === 50" (click)="applyCustomFlatDiscount(50)">₹50</button>
+          <button type="button" class="disc-pill" [class.active]="customFlatDiscount() === 100" (click)="applyCustomFlatDiscount(100)">₹100</button>
+        </div>
+      </div>
+
       <!-- Customer Details Input -->
       <div class="customer-inputs-grid">
         <input type="text" [(ngModel)]="customerName" placeholder="Customer Name (Walk-in)" class="glass-input-sm">
@@ -238,16 +272,21 @@
       <!-- Billing Totals Breakdown -->
       <div class="cart-totals-card">
         <div class="total-row">
-          <span>Subtotal</span>
-          <span>₹{{ subtotal() | number:'1.2-2' }}</span>
+          <span>Item Subtotal</span>
+          <span>₹{{ rawSubtotal() | number:'1.2-2' }}</span>
         </div>
 
-        @if (globalDiscountPct() > 0) {
+        @if (discountAmount() > 0) {
         <div class="total-row discount-row text-success">
-          <span>Special Discount ({{ globalDiscountPct() }}%)</span>
-          <span>-{{ (subtotal() * globalDiscountPct() / 100) | currency:'INR' }}</span>
+          <span>Discount Applied</span>
+          <span>-₹{{ discountAmount() | number:'1.2-2' }}</span>
         </div>
         }
+
+        <div class="total-row">
+          <span>Taxable Subtotal</span>
+          <span>₹{{ subtotal() | number:'1.2-2' }}</span>
+        </div>
 
         <div class="total-row">
           <span>GST / Tax (18%)</span>
@@ -318,37 +357,135 @@
 
         <!-- Dynamic Mode Details -->
         @if (selectedPaymentMethod === 'UPI') {
-        <div class="upi-qr-box">
-          <div class="qr-placeholder">
-            <mat-icon>qr_code_2</mat-icon>
+        <div class="upi-qr-box text-center p-16">
+          <div class="qr-code-img-wrap m-b-12">
+            <img [src]="'https://api.qrserver.com/v1/create-qr-code/?size=220x220&ecc=M&data=upi%3A%2F%2Fpay%3Fpa%3D' + upiVpaAddress + '%26pn%3DSpikeRetail%26am%3D' + grandTotal() + '%26cu%3DINR'"
+                 alt="Dynamic UPI QR Code" style="width: 200px; height: 200px; padding: 8px; background: white; border-radius: 12px; border: 2px solid #3b82f6; box-shadow: 0 10px 25px rgba(59, 130, 246, 0.15); display: inline-block;">
           </div>
-          <p>Scan QR code using Google Pay, PhonePe, Paytm, or BHIM UPI</p>
+          <div class="upi-details-pill m-b-12">
+            <span class="vpa-badge"><mat-icon>qr_code_2</mat-icon> VPA: {{ upiVpaAddress }} • {{ upiMerchantName }}</span>
+            <div class="fw-bold text-primary m-t-4" style="font-size: 1.1rem;">AMOUNT: ₹{{ grandTotal() | number:'1.2-2' }}</div>
+          </div>
+          <p class="text-muted f-s-13">Scan QR code using Google Pay, PhonePe, Paytm, BHIM, or WhatsApp Pay</p>
+          <button mat-stroked-button color="primary" (click)="verifyUpiPayment()" [disabled]="isVerifyingUpi" class="m-t-8">
+            <mat-icon>verified</mat-icon> {{ isVerifyingUpi ? 'Verifying Payment...' : 'Check Payment Confirmation' }}
+          </button>
         </div>
         }
 
         @if (selectedPaymentMethod === 'CASH') {
-        <div class="cash-box">
-          <label>Cash Amount Received from Customer</label>
+        <div class="cash-box p-12">
+          <label class="fw-bold text-dark m-b-8 display-block">Cash Amount Received from Customer:</label>
 
-          <!-- Quick Cash Presets -->
-          <div class="quick-cash-presets">
+          <!-- Denomination Accumulator Buttons -->
+          <div class="quick-cash-presets flex flex-wrap gap-8 m-b-12" style="display: flex; flex-wrap: wrap; gap: 8px;">
             @for (amt of quickCashPresets; track amt) {
-            <button type="button" class="preset-btn" (click)="setQuickCash(amt)">₹{{ amt }}</button>
+            <button type="button" class="preset-btn" (click)="addCashDenomination(amt)" matTooltip="Add +₹{{ amt }} note count">
+              +₹{{ amt }}
+            </button>
             }
-            <button type="button" class="preset-btn exact-btn" (click)="setExactCash()">EXACT</button>
+            <button type="button" class="preset-btn exact-btn" (click)="setExactCash()" matTooltip="Exact Amount ₹{{ grandTotal() }}">EXACT</button>
+            <button type="button" class="preset-btn text-danger border-danger" (click)="clearCashTally()" matTooltip="Reset Cash Count">CLEAR</button>
           </div>
 
-          <mat-form-field appearance="outline" class="w-100 m-t-8">
+          <!-- Note Tally Breakdown Banner -->
+          <div class="note-tally-banner p-8 rounded m-b-12" style="background: rgba(241, 245, 249, 0.9); border: 1px solid #cbd5e1; border-radius: 8px; padding: 8px;">
+            <div class="f-s-12 text-muted f-w-600">Note Denomination Accumulator:</div>
+            <div class="f-s-13 text-dark f-w-600 m-t-4">
+              Received: ₹{{ (cashTendered || 0) | number:'1.2-2' }}
+              @if (cashTally()[2000] > 0) { <span class="badge bg-secondary m-l-4">₹2000×{{ cashTally()[2000] }}</span> }
+              @if (cashTally()[500] > 0) { <span class="badge bg-secondary m-l-4">₹500×{{ cashTally()[500] }}</span> }
+              @if (cashTally()[200] > 0) { <span class="badge bg-secondary m-l-4">₹200×{{ cashTally()[200] }}</span> }
+              @if (cashTally()[100] > 0) { <span class="badge bg-secondary m-l-4">₹100×{{ cashTally()[100] }}</span> }
+              @if (cashTally()[50] > 0) { <span class="badge bg-secondary m-l-4">₹50×{{ cashTally()[50] }}</span> }
+              @if (cashTally()[20] > 0) { <span class="badge bg-secondary m-l-4">₹20×{{ cashTally()[20] }}</span> }
+              @if (cashTally()[10] > 0) { <span class="badge bg-secondary m-l-4">₹10×{{ cashTally()[10] }}</span> }
+            </div>
+          </div>
+
+          <mat-form-field appearance="outline" class="w-100 m-t-4">
             <span matPrefix>₹&nbsp;</span>
             <input matInput type="number" [(ngModel)]="cashTendered" placeholder="0.00">
           </mat-form-field>
 
           @if (cashTendered && cashTendered >= grandTotal()) {
-          <div class="change-due-box">
-            <span>CHANGE TO RETURN:</span>
-            <strong>₹{{ (cashTendered - grandTotal()) | number:'1.2-2' }}</strong>
+          <div class="change-due-box p-12 rounded bg-success-subtle text-success border border-success" style="padding: 10px; border-radius: 8px; background: rgba(220, 252, 231, 0.8); border: 1px solid #86efac;">
+            <span class="fw-bold">CHANGE TO RETURN:</span>
+            <strong class="f-s-18 m-l-8">₹{{ (cashTendered - grandTotal()) | number:'1.2-2' }}</strong>
           </div>
           }
+        </div>
+        }
+
+        @if (selectedPaymentMethod === 'CARD') {
+        <div class="card-box p-12">
+          <div class="card-type-selector flex gap-8 m-b-12" style="display: flex; gap: 8px; margin-bottom: 12px;">
+            <button type="button" class="preset-btn" [class.active]="cardSubtype === 'CREDIT'" (click)="cardSubtype = 'CREDIT'">
+              <mat-icon style="font-size: 16px; vertical-align: middle;">credit_card</mat-icon> Credit Card
+            </button>
+            <button type="button" class="preset-btn" [class.active]="cardSubtype === 'DEBIT'" (click)="cardSubtype = 'DEBIT'">
+              <mat-icon style="font-size: 16px; vertical-align: middle;">payment</mat-icon> Debit Card
+            </button>
+          </div>
+
+          <div class="card-brands flex gap-8 m-b-16" style="display: flex; gap: 8px; margin-bottom: 12px;">
+            <button type="button" class="disc-pill" [class.active]="cardBrand === 'VISA'" (click)="cardBrand = 'VISA'">VISA</button>
+            <button type="button" class="disc-pill" [class.active]="cardBrand === 'MASTERCARD'" (click)="cardBrand = 'MASTERCARD'">Mastercard</button>
+            <button type="button" class="disc-pill" [class.active]="cardBrand === 'RUPAY'" (click)="cardBrand = 'RUPAY'">RuPay</button>
+            <button type="button" class="disc-pill" [class.active]="cardBrand === 'AMEX'" (click)="cardBrand = 'AMEX'">Amex</button>
+          </div>
+
+          <div class="card-inputs-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+            <div>
+              <label class="f-s-12 text-muted">Card Last 4 Digits</label>
+              <input type="text" [(ngModel)]="cardLast4" placeholder="e.g. 4321" maxlength="4" class="glass-input-sm w-100 m-t-4" style="width: 100%;">
+            </div>
+            <div>
+              <label class="f-s-12 text-muted">EDC Auth Code</label>
+              <input type="text" [(ngModel)]="cardAuthCode" placeholder="e.g. AUTH-98210" class="glass-input-sm w-100 m-t-4" style="width: 100%;">
+            </div>
+          </div>
+
+          <button type="button" mat-stroked-button color="primary" (click)="simulateCardSwipe()" [disabled]="isProcessingCard" class="w-100 m-t-12" style="width: 100%; margin-top: 12px;">
+            <mat-icon>contactless</mat-icon> {{ isProcessingCard ? 'Swiping EDC Terminal...' : 'Simulate Card Terminal Swipe' }}
+          </button>
+        </div>
+        }
+
+        @if (selectedPaymentMethod === 'SPLIT') {
+        <div class="split-box p-12">
+          <div class="split-status-bar p-12 rounded m-b-12" style="background: rgba(238, 242, 255, 0.9); border: 1px solid #c7d2fe; padding: 10px; border-radius: 8px; margin-bottom: 12px;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <span>Allocated: <strong>₹{{ splitPaidTotal() | number:'1.2-2' }}</strong></span>
+              <span [class.text-success]="splitRemaining() === 0" [class.text-danger]="splitRemaining() > 0">
+                Remaining: <strong>₹{{ splitRemaining() | number:'1.2-2' }}</strong>
+              </span>
+            </div>
+          </div>
+
+          <div class="split-inputs flex flex-column gap-8" style="display: flex; flex-direction: column; gap: 8px;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span style="width: 80px; font-weight: 600;"><mat-icon style="font-size:16px; vertical-align:middle;">payments</mat-icon> Cash:</span>
+              <input type="number" [ngModel]="splitCashAmount()" (ngModelChange)="splitCashAmount.set($event)" placeholder="Cash portion" class="glass-input-sm" style="flex: 1;">
+              <button type="button" class="preset-btn" (click)="autoFillSplit('cash')">Fill Rem</button>
+            </div>
+
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span style="width: 80px; font-weight: 600;"><mat-icon style="font-size:16px; vertical-align:middle;">qr_code_2</mat-icon> UPI:</span>
+              <input type="number" [ngModel]="splitUpiAmount()" (ngModelChange)="splitUpiAmount.set($event)" placeholder="UPI portion" class="glass-input-sm" style="flex: 1;">
+              <button type="button" class="preset-btn" (click)="autoFillSplit('upi')">Fill Rem</button>
+            </div>
+
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span style="width: 80px; font-weight: 600;"><mat-icon style="font-size:16px; vertical-align:middle;">credit_card</mat-icon> Card:</span>
+              <input type="number" [ngModel]="splitCardAmount()" (ngModelChange)="splitCardAmount.set($event)" placeholder="Card portion" class="glass-input-sm" style="flex: 1;">
+              <button type="button" class="preset-btn" (click)="autoFillSplit('card')">Fill Rem</button>
+            </div>
+          </div>
+
+          <div class="quick-split-presets flex gap-8 m-t-12" style="margin-top: 12px;">
+            <button type="button" class="preset-btn" (click)="autoFillSplit('half')" style="width: 100%;">50% Cash / 50% UPI Split</button>
+          </div>
         </div>
         }
 
@@ -815,6 +952,91 @@
 
       <div class="modal-footer">
         <button mat-stroked-button class="glass-btn" (click)="closeDeviceModal()">Close</button>
+      </div>
+    </div>
+  </div>
+  }
+
+  <!-- DYNAMIC POS BILLING HISTORY MODAL -->
+  @if (showHistoryModal) {
+  <div class="glass-modal-backdrop" (click)="closeHistoryModal()">
+    <div class="glass-modal-card history-modal" (click)="$event.stopPropagation()" style="max-width: 900px; width: 90vw;">
+
+      <div class="modal-header">
+        <h3><mat-icon>history</mat-icon> POS Billing Sales History</h3>
+        <button mat-icon-button (click)="closeHistoryModal()"><mat-icon>close</mat-icon></button>
+      </div>
+
+      <div class="checkout-modal-body p-16">
+        <div class="flex gap-12 m-b-16" style="gap: 12px; align-items: center;">
+          <div class="search-wrap" style="flex: 1;">
+            <mat-icon>search</mat-icon>
+            <input type="text" [ngModel]="historySearchQuery()" (ngModelChange)="historySearchQuery.set($event)"
+              placeholder="Search history by Invoice No, Customer Name or Phone..." class="glass-input-sm">
+          </div>
+          <button mat-stroked-button color="primary" (click)="loadPosHistory()" [disabled]="isLoadingHistory">
+            <mat-icon>refresh</mat-icon> {{ isLoadingHistory ? 'Loading...' : 'Refresh API' }}
+          </button>
+        </div>
+
+        @if (isLoadingHistory) {
+        <div class="text-center p-32">
+          <mat-spinner diameter="40" style="margin: 0 auto;"></mat-spinner>
+          <p class="m-t-12 text-muted">Fetching POS billing history from server API...</p>
+        </div>
+        } @else if (filteredHistoryOrders().length === 0) {
+        <div class="text-center p-32 border-rounded" style="background: rgba(248, 250, 252, 0.8);">
+          <mat-icon style="font-size: 48px; width: 48px; height: 48px; color: #94a3b8;">receipt_long</mat-icon>
+          <h4 class="m-t-8 text-dark">No POS Invoices Found</h4>
+          <p class="text-muted f-s-13">Completed checkout orders will appear here automatically.</p>
+        </div>
+        } @else {
+        <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+          <table class="table align-middle text-nowrap w-100" style="font-size: 0.875rem;">
+            <thead>
+              <tr style="border-bottom: 2px solid #e2e8f0; background: #f8fafc;">
+                <th class="p-12">Invoice No</th>
+                <th class="p-12">Date &amp; Time</th>
+                <th class="p-12">Customer</th>
+                <th class="p-12 text-center">Payment</th>
+                <th class="p-12 text-end">Total Amount</th>
+                <th class="p-12 text-center">Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (ord of filteredHistoryOrders(); track ord.id || ord.invoice_no) {
+              <tr style="border-bottom: 1px solid #f1f5f9;">
+                <td class="p-12">
+                  <strong class="text-primary">{{ ord.invoice_no }}</strong>
+                </td>
+                <td class="p-12 text-muted">
+                  {{ ord.created_at | date:'dd/MM/yyyy hh:mm a' }}
+                </td>
+                <td class="p-12">
+                  <div><strong>{{ ord.customer_name || 'Walk-in' }}</strong></div>
+                  <div class="f-s-11 text-muted">{{ ord.customer_phone || '' }}</div>
+                </td>
+                <td class="p-12 text-center">
+                  <span class="badge bg-light-primary text-primary px-2 py-1 rounded">{{ ord.payment_method || 'CASH' }}</span>
+                </td>
+                <td class="p-12 text-end">
+                  <strong class="text-dark">₹{{ (ord.grand_total || ord.total_price || 0) | number:'1.2-2' }}</strong>
+                </td>
+                <td class="p-12 text-center">
+                  <button mat-flat-button class="glass-btn-primary" (click)="viewReceiptFromHistory(ord)" style="font-size: 0.75rem; padding: 0 12px; height: 32px;">
+                    <mat-icon style="font-size: 16px; width: 16px; height: 16px;">receipt</mat-icon> View Receipt
+                  </button>
+                </td>
+              </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+        }
+      </div>
+
+      <div class="modal-footer">
+        <button mat-stroked-button class="glass-btn" (click)="closeHistoryModal()">Close</button>
       </div>
     </div>
   </div>

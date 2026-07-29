@@ -1,15 +1,15 @@
 import { Injectable, NgZone } from '@angular/core';
 import { Subject, Observable } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
+import { io, Socket } from 'socket.io-client';
 import { environment } from 'src/environment/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class SocketService {
-  private ws: WebSocket | null = null;
+  private socket: Socket | null = null;
   private eventSubject = new Subject<{ event: string; data: any }>();
-  private isConnected = false;
   private currentToken: string | null = null;
 
   private sessionSubject = new Subject<any>();
@@ -20,169 +20,74 @@ export class SocketService {
   sessionExpired$: Observable<void> = this.sessionExpiredSubject.asObservable();
   sessionRefresh$: Observable<any> = this.sessionRefreshSubject.asObservable();
 
-  private reconnectAttempts = 0;
-  private reconnectTimer: ReturnType<typeof setTimeout> | null = null;
-
   constructor(private ngZone: NgZone) {}
 
   public connect(token?: string): void {
     if (token) {
       this.currentToken = token;
     }
-    if (this.ws || this.isConnected) return;
     if (!this.currentToken) return;
 
-    const socketBase = (environment as any).socketUrl || environment.apiUrl.replace(/\/api$/, '');
+    if (this.socket && this.socket.connected) return;
 
-    // Convert http:// → ws:// and https:// → wss://
-    // The path must NOT have a trailing slash before the query string.
-    // Wrong: /ws/?EIO=4&transport=websocket (causes 404 on Render)
-    // Right: /ws?EIO=4&transport=websocket
-    const wsBase = socketBase.replace(/^https?/, (p: string) => p === 'https' ? 'wss' : 'ws');
-    const wsUrl = `${wsBase}/ws?EIO=4&transport=websocket&token=${encodeURIComponent(this.currentToken)}`;
+    const socketUrl = (environment as any).socketUrl || environment.apiUrl.replace(/\/api$/, '');
 
     try {
-      this.ws = new WebSocket(wsUrl);
+      this.socket = io(socketUrl, {
+        path: '/ws',
+        auth: { token: this.currentToken },
+        query: { token: this.currentToken },
+        transports: ['websocket', 'polling'],
+        autoConnect: true,
+        reconnection: true,
+        reconnectionAttempts: 15,
+        reconnectionDelay: 2000
+      });
 
-
-      // The native WebSocket isn't reliably zone-patched, so its callbacks can
-      // run outside Angular's zone — state updates happen but nothing tells
-      // Angular to re-render until an unrelated zone-patched event (like a
-      // route change) forces a change-detection pass. Force it explicitly.
-      this.ws.onopen = () => {
+      this.socket.on('connect', () => {
         this.ngZone.run(() => {
-          console.log('[WebSocket] Connected');
-          this.isConnected = true;
-          this.reconnectAttempts = 0;
+          console.log('[Socket.IO] Connected successfully with ID:', this.socket?.id);
         });
-      };
+      });
 
-      this.ws.onmessage = (event) => {
+      this.socket.onAny((event: string, data: any) => {
         this.ngZone.run(() => {
-          console.log('[WebSocket] Message received:', event.data);
-          this.handleMessage(event.data);
-        });
-      };
+          console.log(`[Socket.IO] Real-time event '${event}':`, data);
+          this.eventSubject.next({ event, data });
 
-      this.ws.onerror = (err) => {
-        this.ngZone.run(() => {
-          if (this.reconnectAttempts === 0) {
-            console.log('[WebSocket] Backend offline or unreachable (retrying silently in background...)');
+          if (event === 'permissions-updated') {
+            console.log('Received updated permissions via socket', data);
+            this.sessionRefreshSubject.next({ permissions: data });
+          } else if (event === 'logout') {
+            console.log('Force logout event received via socket', data);
+            this.sessionExpiredSubject.next();
           }
         });
-      };
+      });
 
-      this.ws.onclose = () => {
+      this.socket.on('disconnect', (reason) => {
         this.ngZone.run(() => {
-          if (this.isConnected) {
-            console.log('[WebSocket] Disconnected from server');
-          }
-          this.cleanup();
-          this.scheduleReconnect();
+          console.log('[Socket.IO] Disconnected from server:', reason);
         });
-      };
+      });
+
+      this.socket.on('connect_error', (err) => {
+        this.ngZone.run(() => {
+          console.warn('[Socket.IO] Connection error (retrying in background...):', err?.message || err);
+        });
+      });
 
     } catch (e) {
-      if (this.reconnectAttempts === 0) {
-        console.log('[WebSocket] Connection attempt failed, scheduling silent retries...');
-      }
-      this.scheduleReconnect();
+      console.error('[Socket.IO] Initialization failed:', e);
     }
-  }
-
-  private scheduleReconnect(): void {
-    if (!this.currentToken || this.reconnectAttempts >= 15) {
-      return;
-    }
-    // Cancel any pending reconnect before scheduling a new one
-    // to prevent duplicate WebSocket instances from being created
-    if (this.reconnectTimer) {
-      clearTimeout(this.reconnectTimer);
-      this.reconnectTimer = null;
-    }
-    this.reconnectAttempts++;
-    const delay = Math.min(3000 * Math.pow(1.5, Math.min(this.reconnectAttempts - 1, 5)), 30000);
-    this.reconnectTimer = setTimeout(() => {
-      this.reconnectTimer = null;
-      this.connect();
-    }, delay);
   }
 
   public disconnect(): void {
-    // Cancel any pending reconnect timer so we don't attempt
-    // to reconnect after an intentional logout
-    if (this.reconnectTimer) {
-      clearTimeout(this.reconnectTimer);
-      this.reconnectTimer = null;
+    if (this.socket) {
+      this.socket.disconnect();
+      this.socket = null;
     }
-    this.reconnectAttempts = 0;
-    this.cleanup();
     this.currentToken = null;
-  }
-
-  private cleanup(): void {
-    this.isConnected = false;
-    if (this.ws) {
-      try { this.ws.close(); } catch (e) {}
-      this.ws = null;
-    }
-  }
-
-  private handleMessage(data: string): void {
-    if (!data) return;
-
-    const eioType = data.charAt(0);
-    const payload = data.substring(1);
-
-    if (eioType === '0') {
-      try {
-        // Handshake ack only — the server drives the ping/pong heartbeat
-        // from here (Engine.IO v4: server pings, client only pongs below).
-        JSON.parse(payload);
-
-        const connectPayload = `40${JSON.stringify({ token: this.currentToken })}`;
-        this.sendRaw(connectPayload);
-
-      } catch (err) {
-        console.error('[WebSocket] Failed to parse EIO open packet:', err);
-      }
-    } else if (eioType === '2') {
-      // Server ping — reply with pong. Never send '2' (ping) ourselves;
-      // under EIO v4 only the server initiates pings, and a client-sent
-      // ping is a protocol violation that gets the connection dropped.
-      this.sendRaw('3');
-    } else if (eioType === '4') {
-      const sioType = payload.charAt(0);
-      const sioPayload = payload.substring(1);
-
-      if (sioType === '2') {
-        try {
-          const parsed = JSON.parse(sioPayload);
-          if (Array.isArray(parsed) && parsed.length >= 2) {
-            const event = parsed[0];
-            const eventData = parsed[1];
-            this.eventSubject.next({ event, data: eventData });
-
-            if (event === 'permissions-updated') {
-              console.log('Received updated permissions via socket', eventData);
-              this.sessionRefreshSubject.next({ permissions: eventData });
-            } else if (event === 'logout') {
-              console.log('Force logout event received via socket', eventData);
-              this.sessionExpiredSubject.next();
-            }
-          }
-        } catch (err) {
-          console.error('[WebSocket] Failed to parse SIO message:', err);
-        }
-      }
-    }
-  }
-
-  private sendRaw(message: string): void {
-    if (this.ws && this.ws.readyState === WebSocket.OPEN) {
-      console.log('[WebSocket] Message sent:', message);
-      this.ws.send(message);
-    }
   }
 
   public on<T = any>(eventName: string): Observable<T> {
@@ -192,8 +97,13 @@ export class SocketService {
     );
   }
 
-  public emit(eventName: string, data: any): void {
-    const payload = `42${JSON.stringify([eventName, data])}`;
-    this.sendRaw(payload);
+  public emit(eventName: string, data: any, ack?: (response: any) => void): void {
+    if (this.socket && this.socket.connected) {
+      if (ack) {
+        this.socket.emit(eventName, data, ack);
+      } else {
+        this.socket.emit(eventName, data);
+      }
+    }
   }
 }

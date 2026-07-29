@@ -87,6 +87,23 @@ export class Product {
   aiLoading: boolean = false;
   private socketSub = new Subscription();
 
+  unitOptions = [
+    { name: 'Piece', symbol: 'pc', category: 'COUNT' },
+    { name: 'Kg', symbol: 'kg', category: 'WEIGHT' },
+    { name: 'Gram', symbol: 'g', category: 'WEIGHT' },
+    { name: 'Ton', symbol: 't', category: 'WEIGHT' },
+    { name: 'Liter', symbol: 'l', category: 'VOLUME' },
+    { name: 'ml', symbol: 'ml', category: 'VOLUME' },
+    { name: 'Box', symbol: 'box', category: 'COUNT' },
+    { name: 'Packet', symbol: 'pkt', category: 'COUNT' },
+    { name: 'Carton', symbol: 'ctn', category: 'COUNT' },
+    { name: 'Dozen', symbol: 'doz', category: 'COUNT' },
+    { name: 'Bundle', symbol: 'bdl', category: 'COUNT' },
+    { name: 'Roll', symbol: 'roll', category: 'COUNT' },
+    { name: 'Meter', symbol: 'm', category: 'LENGTH' },
+    { name: 'Feet', symbol: 'ft', category: 'LENGTH' }
+  ];
+
   constructor(
     private fb: FormBuilder,
     private authService: AuthService,
@@ -103,6 +120,7 @@ export class Product {
       name: ['', [Validators.required, Validators.maxLength(200)]],
       description: ['', Validators.maxLength(1000)],
       category: [''],
+      base_unit: ['Piece', Validators.required],
       // Base selling price (required for all roles)
       price: ['', [Validators.required, Validators.min(0)]],
       // Purchase / cost price — visible only to Super_Admin and Admin
@@ -117,6 +135,7 @@ export class Product {
       status: ['Draft', Validators.required],
       variants: this.fb.array([]),
       attributeValues: this.fb.array([]),
+      unitConversions: this.fb.array([]),
       low_stock_threshold: [5, [Validators.required, Validators.min(0)]],
       critical_stock_threshold: [2, [Validators.required, Validators.min(0)]],
       manufacture_date: ['', Validators.required],
@@ -172,6 +191,26 @@ export class Product {
 
   get attributeValues(): FormArray {
     return this.ProductForm.get('attributeValues') as FormArray;
+  }
+
+  get unitConversions(): FormArray {
+    return this.ProductForm.get('unitConversions') as FormArray;
+  }
+
+  addUnitConversionRow() {
+    this.unitConversions.push(this.fb.group({
+      unit_name: ['', Validators.required],
+      unit_symbol: [''],
+      conversion_to_base: [1.0, [Validators.required, Validators.min(0.000001)]],
+      is_sale_unit: [true],
+      is_purchase_unit: [true]
+    }));
+    this.cdr.detectChanges();
+  }
+
+  removeUnitConversionRow(index: number) {
+    this.unitConversions.removeAt(index);
+    this.cdr.detectChanges();
   }
 
 
@@ -642,6 +681,7 @@ export class Product {
       name: product?.name,
       description: product?.description,
       category: product?.category,
+      base_unit: product?.base_unit || 'Piece',
       price: product?.price,
       // Pricing tiers — only patched if user can view purchase cost
       ...(this.perm.canViewPurchaseCost() ? {
@@ -659,6 +699,19 @@ export class Product {
       manufacture_date: product?.manufacture_date ? new Date(product.manufacture_date) : null,
       expiry_date: product?.expiry_date ? new Date(product.expiry_date) : null
     });
+
+    this.unitConversions.clear();
+    if (product?.unitConversions?.length) {
+      product.unitConversions.forEach((uc: any) => {
+        this.unitConversions.push(this.fb.group({
+          unit_name: [uc.unit_name, Validators.required],
+          unit_symbol: [uc.unit_symbol || uc.unit_name],
+          conversion_to_base: [uc.conversion_to_base, [Validators.required, Validators.min(0.000001)]],
+          is_sale_unit: [uc.is_sale_unit !== false],
+          is_purchase_unit: [uc.is_purchase_unit !== false]
+        }));
+      });
+    }
 
     if (product?.product_type === 'variant' && product?.variants?.length) {
       // Rebuild SelectedAttrValues and SavedVariantDataMap from existing variants
@@ -932,6 +985,7 @@ export class Product {
     this.showAdditionalAttributes = false;
     this.variants.clear();
     this.attributeValues.clear();
+    this.unitConversions.clear();
     this.SelectedAttrValues = {};
     this.SavedVariantDataMap = {};
     this.SelectedVariantAttributeIds = [];
@@ -945,7 +999,7 @@ export class Product {
     this.VideoFile = null;
     this.videoPreviewUrl = null;
     this.existingVideoUrl = null;
-    this.ProductForm.reset({ product_type: 'single' });
+    this.ProductForm.reset({ product_type: 'single', base_unit: 'Piece' });
   }
 
   submit(form: FormGroup) {
@@ -979,6 +1033,7 @@ export class Product {
     formData.append('name', value.name);
     formData.append('description', value.description || '');
     formData.append('category', value.category || '');
+    formData.append('base_unit', value.base_unit || 'Piece');
     formData.append('price', value.price);
     formData.append('stock', value.stock_in_hand);
     formData.append('stock_in_hand', value.stock_in_hand);
@@ -992,6 +1047,15 @@ export class Product {
     formData.append('manufacture_date', this.toISODateString(value.manufacture_date));
     formData.append('expiry_date', this.toISODateString(value.expiry_date));
     formData.append('registration_id', this.getRegistrationId() || '');
+
+    const uConversions = (value.unitConversions || []).map((uc: any) => ({
+      unit_name: uc.unit_name,
+      unit_symbol: uc.unit_symbol || uc.unit_name,
+      conversion_to_base: Number(uc.conversion_to_base) || 1.0,
+      is_sale_unit: uc.is_sale_unit !== false,
+      is_purchase_unit: uc.is_purchase_unit !== false
+    }));
+    formData.append('unit_conversions', JSON.stringify(uConversions));
 
     // Tiered pricing — only admins can set purchase cost / dealer pricing
     if (this.perm.canViewPurchaseCost()) {

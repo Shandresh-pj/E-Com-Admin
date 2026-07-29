@@ -24,6 +24,10 @@ export class SocketService {
 
   public connect(token?: string): void {
     if (token) {
+      if (this.socket && this.currentToken !== token) {
+        this.socket.disconnect();
+        this.socket = null;
+      }
       this.currentToken = token;
     }
     if (!this.currentToken) return;

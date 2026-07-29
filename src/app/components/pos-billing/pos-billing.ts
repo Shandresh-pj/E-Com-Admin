@@ -109,6 +109,11 @@ export class PosBillingComponent implements OnInit {
   availableCoupons = signal<any[]>([]);
   isVerifyingCoupon = false;
 
+  // GST / Tax Toggle
+  isTaxEnabled = signal<boolean>(true);
+  taxRate = signal<number>(18); // editable tax rate %
+
+
   // POS Billing History Modal State
   showHistoryModal = false;
   isLoadingHistory = false;
@@ -160,7 +165,8 @@ export class PosBillingComponent implements OnInit {
   });
 
   taxAmount = computed(() => {
-    return Math.round(this.subtotal() * 0.18 * 100) / 100; // GST 18%
+    if (!this.isTaxEnabled()) return 0;
+    return Math.round(this.subtotal() * (this.taxRate() / 100) * 100) / 100;
   });
 
   grandTotal = computed(() => {
@@ -192,13 +198,19 @@ export class PosBillingComponent implements OnInit {
   // Payment Modal State
   showCheckoutModal = false;
   selectedPaymentMethod: PaymentMethod = 'CASH';
-  cashTendered: number | null = null;
   quickCashPresets = [10, 20, 50, 100, 200, 500, 2000];
 
-  // Cash Denomination Tally Counter
+  // Cash Denomination Tally Counter — stores NOTE COUNT per denomination
   cashTally = signal<{ [key: number]: number }>({
     10: 0, 20: 0, 50: 0, 100: 0, 200: 0, 500: 0, 2000: 0
   });
+
+  // Computed total cash from note counts × denomination values
+  cashTendered = computed(() => {
+    const tally = this.cashTally();
+    return Object.entries(tally).reduce((sum, [denom, count]) => sum + Number(denom) * count, 0);
+  });
+
 
   // Dynamic UPI / QR State
   upiVpaAddress = 'spikeretail@upi';
@@ -903,25 +915,33 @@ export class PosBillingComponent implements OnInit {
     });
   }
 
-  /** Accumulate cash denomination note count */
-  addCashDenomination(noteValue: number) {
-    const currentTendered = this.cashTendered || 0;
-    this.cashTendered = currentTendered + noteValue;
+  /** Set count for a specific denomination */
+  updateDenominationCount(denom: number, count: number) {
+    const safeCount = Math.max(0, Math.floor(count) || 0);
+    this.cashTally.update(tally => ({ ...tally, [denom]: safeCount }));
+  }
 
-    this.cashTally.update(tally => ({
-      ...tally,
-      [noteValue]: (tally[noteValue] || 0) + 1
-    }));
+  /** Legacy: Add one note of a denomination */
+  addCashDenomination(noteValue: number) {
+    this.cashTally.update(tally => ({ ...tally, [noteValue]: (tally[noteValue] || 0) + 1 }));
   }
 
   clearCashTally() {
-    this.cashTendered = 0;
     this.cashTally.set({ 10: 0, 20: 0, 50: 0, 100: 0, 200: 0, 500: 0, 2000: 0 });
   }
 
   setExactCash() {
-    this.cashTendered = Math.ceil(this.grandTotal());
+    const total = Math.ceil(this.grandTotal());
     this.cashTally.set({ 10: 0, 20: 0, 50: 0, 100: 0, 200: 0, 500: 0, 2000: 0 });
+    // Find best note split (prefer 500s and 100s)
+    let rem = total;
+    const result: { [k: number]: number } = { 10: 0, 20: 0, 50: 0, 100: 0, 200: 0, 500: 0, 2000: 0 };
+    for (const d of [2000, 500, 200, 100, 50, 20, 10]) {
+      if (rem <= 0) break;
+      result[d] = Math.floor(rem / d);
+      rem = rem % d;
+    }
+    this.cashTally.set(result);
   }
 
   /** Quick auto-fill split payment amounts */
@@ -974,8 +994,7 @@ export class PosBillingComponent implements OnInit {
   openCheckout() {
     if (this.cartItems().length === 0) return;
     this.showCheckoutModal = true;
-    this.cashTendered = Math.ceil(this.grandTotal());
-    this.clearCashTally();
+    this.setExactCash();  // Pre-fill denomination counts for exact amount
     this.splitCashAmount.set(Math.round(this.grandTotal() / 2));
     this.splitUpiAmount.set(Math.round(this.grandTotal() - this.splitCashAmount()));
     this.splitCardAmount.set(0);
@@ -1008,8 +1027,8 @@ export class PosBillingComponent implements OnInit {
 
     const paymentDetails = {
       method: this.selectedPaymentMethod,
-      cash_tendered: this.selectedPaymentMethod === 'CASH' ? this.cashTendered : (this.selectedPaymentMethod === 'SPLIT' ? this.splitCashAmount() : totalAmt),
-      change_due: (this.selectedPaymentMethod === 'CASH' && this.cashTendered && this.cashTendered > totalAmt) ? (this.cashTendered - totalAmt) : 0,
+      cash_tendered: this.selectedPaymentMethod === 'CASH' ? this.cashTendered() : (this.selectedPaymentMethod === 'SPLIT' ? this.splitCashAmount() : totalAmt),
+      change_due: (this.selectedPaymentMethod === 'CASH' && this.cashTendered() > totalAmt) ? (this.cashTendered() - totalAmt) : 0,
       cash_tally: this.cashTally(),
       card_subtype: this.cardSubtype,
       card_brand: this.cardBrand,
@@ -1093,8 +1112,8 @@ export class PosBillingComponent implements OnInit {
       tax: this.taxAmount(),
       grandTotal: totalAmt,
       paymentMethod: this.selectedPaymentMethod,
-      cashTendered: this.cashTendered,
-      changeDue: (this.cashTendered && this.cashTendered > totalAmt) ? (this.cashTendered - totalAmt) : 0,
+      cashTendered: this.cashTendered(),
+      changeDue: (this.cashTendered() > totalAmt) ? (this.cashTendered() - totalAmt) : 0,
       qrCodeUrl
     };
 

@@ -253,13 +253,7 @@ export class PermissionService {
       if (hasMenu) return true;
     }
 
-    // Default Role permissions fallback (Branch, Admin, Branch_Manager, etc.)
-    const userType = this.normalizeUserType(this.auth.getUserType());
-    const rolePerms = ROLE_PERMISSIONS[userType];
-    if (rolePerms && rolePerms.canRead) {
-      return true;
-    }
-
+    // If explicit DB permissions or menus exist but target is not in them, return false for non-super-admin
     return false;
   }
 

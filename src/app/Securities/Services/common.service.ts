@@ -45,51 +45,32 @@ export class CommonService {
     return true;
   }
 
+  private serializeParams(params?: HttpParams | any): string {
+    if (!params) return '';
+    if (params instanceof HttpParams) {
+      return params.toString();
+    }
+    if (typeof params === 'object') {
+      try {
+        return Object.keys(params)
+          .sort()
+          .map(k => `${k}=${encodeURIComponent(params[k])}`)
+          .join('&');
+      } catch {
+        return JSON.stringify(params);
+      }
+    }
+    return String(params);
+  }
+
   getApi(endpoint: string, params?: HttpParams | any): Observable<any> {
     const clean = this.cleanEndpoint(endpoint);
-    const cacheKey = `${clean}?${params ? JSON.stringify(params) : ''}`;
-
-    const network$ = this.http.get(
+    return this.http.get(
       `${this.apiUrl}/${clean}`,
       { params }
     ).pipe(
-      retry({ count: 1, delay: 1000 }),
-      tap(response => {
-        this.cache.set(cacheKey, {
-          value: response,
-          expiresAt: Date.now() + this.CACHE_TTL_MS
-        });
-      }),
       catchError(this.handleError)
     );
-
-    // If cache hit (and not expired), emit cached data instantly while refreshing in background
-    if (this.isCacheValid(cacheKey)) {
-      const cachedVal = this.cache.get(cacheKey)!.value;
-      return new Observable(subscriber => {
-        // Emit cached value immediately for instant UI response
-        subscriber.next(cachedVal);
-
-        // Fetch fresh data in the background
-        const subscription = network$.subscribe({
-          next: (freshVal) => {
-            // Only emit if the response actually changed to minimize UI paint cycles
-            if (JSON.stringify(freshVal) !== JSON.stringify(cachedVal)) {
-              subscriber.next(freshVal);
-            }
-            subscriber.complete();
-          },
-          error: () => {
-            // Avoid failing the stream if we have cache, just complete it
-            subscriber.complete();
-          }
-        });
-
-        return () => subscription.unsubscribe();
-      });
-    }
-
-    return network$;
   }
 
   postApi(endpoint: string, payload: any): Observable<any> {

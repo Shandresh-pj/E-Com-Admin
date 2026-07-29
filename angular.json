@@ -56,7 +56,7 @@
                   "inlineCritical": false
                 },
                 "fonts": {
-                  "inline": false
+                  "inline": true
                 }
               }
             },
@@ -105,8 +105,5 @@
         }
       }
     }
-  },
-  "cli": {
-    "analytics": false
   }
 }

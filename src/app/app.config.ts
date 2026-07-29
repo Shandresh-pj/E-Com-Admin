@@ -18,6 +18,8 @@ import {
   provideRouter,
   withComponentInputBinding,
   withInMemoryScrolling,
+  withPreloading,
+  PreloadAllModules,
   TitleStrategy
 } from '@angular/router';
 
@@ -56,7 +58,11 @@ export const appConfig: ApplicationConfig = {
         anchorScrolling: 'enabled',
       }),
 
-      withComponentInputBinding()
+      withComponentInputBinding(),
+
+      // Preload all lazy chunks in the background after initial load
+      // so sub-page navigation is instant instead of triggering network fetches
+      withPreloading(PreloadAllModules)
     ),
 
     {

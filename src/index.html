@@ -9,45 +9,267 @@
   <meta name="description" content="SVK Enterprise ERP — Multi-branch, multi-vendor management platform with AI-powered analytics.">
   <link rel="icon" type="image/x-icon" href="favicon.ico">
 
-  <!-- Preconnect to reduce DNS + TLS handshake latency -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous">
   <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
   <link rel="dns-prefetch" href="https://code.iconify.design">
   <link rel="dns-prefetch" href="https://checkout.razorpay.com">
 
-  <!--
-    CRITICAL: Inline minimal CSS to paint a loading skeleton BEFORE any JS loads.
-    This dramatically reduces perceived FCP and LCP on mobile.
-  -->
   <style>
+    /* ── Reset ──────────────────────────────────────────────── */
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-    html,body{height:100%;width:100%;background:#0f172a;font-family:system-ui,-apple-system,sans-serif;overflow-x:hidden}
-    #app-loading{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:linear-gradient(135deg,#0f172a 0%,#1e293b 50%,#0f172a 100%);z-index:9999;transition:opacity .4s ease}
-    #app-loading.hide{opacity:0;pointer-events:none}
-    .loader-logo{width:64px;height:64px;border-radius:16px;background:linear-gradient(135deg,#6366f1,#8b5cf6);display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:900;color:#fff;margin-bottom:24px;box-shadow:0 0 40px rgba(99,102,241,.4);animation:pulse 2s ease-in-out infinite}
-    .loader-brand{color:#fff;font-size:22px;font-weight:700;letter-spacing:.5px;margin-bottom:6px}
-    .loader-sub{color:#94a3b8;font-size:13px;letter-spacing:.3px;margin-bottom:32px}
-    .loader-bar{width:200px;height:3px;background:#1e293b;border-radius:99px;overflow:hidden}
-    .loader-fill{height:100%;width:30%;border-radius:99px;background:linear-gradient(90deg,#6366f1,#8b5cf6,#06b6d4);animation:load 2s ease-in-out infinite}
-    @keyframes pulse{0%,100%{box-shadow:0 0 40px rgba(99,102,241,.4)}50%{box-shadow:0 0 60px rgba(99,102,241,.7)}}
-    @keyframes load{0%{transform:translateX(-100%)}100%{transform:translateX(400%)}}
-    app-root:empty+*{display:none}
+    html,body{height:100%;width:100%;overflow-x:hidden;font-family:system-ui,-apple-system,sans-serif}
+
+    /* ── Full-screen loader overlay ─────────────────────────── */
+    #svk-loader{
+      position:fixed;inset:0;z-index:99999;
+      display:flex;flex-direction:column;
+      align-items:center;justify-content:center;
+      overflow:hidden;
+    }
+
+    /* ── Blurred animated background ───────────────────────── */
+    #svk-loader .bg{
+      position:absolute;inset:0;
+      background:#050b18;
+    }
+    /* Floating glow blobs */
+    #svk-loader .blob{
+      position:absolute;border-radius:50%;
+      filter:blur(80px);opacity:.55;
+      animation:floatBlob 8s ease-in-out infinite;
+    }
+    #svk-loader .blob-1{
+      width:clamp(260px,45vw,520px);height:clamp(260px,45vw,520px);
+      background:radial-gradient(circle,#6366f1,#4f46e5);
+      top:-10%;left:-10%;animation-delay:0s;
+    }
+    #svk-loader .blob-2{
+      width:clamp(200px,38vw,440px);height:clamp(200px,38vw,440px);
+      background:radial-gradient(circle,#06b6d4,#0891b2);
+      bottom:-12%;right:-8%;animation-delay:-3s;
+    }
+    #svk-loader .blob-3{
+      width:clamp(180px,30vw,360px);height:clamp(180px,30vw,360px);
+      background:radial-gradient(circle,#8b5cf6,#7c3aed);
+      bottom:10%;left:15%;animation-delay:-5s;
+    }
+    #svk-loader .blob-4{
+      width:clamp(120px,20vw,280px);height:clamp(120px,20vw,280px);
+      background:radial-gradient(circle,#ec4899,#db2777);
+      top:15%;right:12%;animation-delay:-1.5s;
+    }
+
+    /* Glassmorphic blur overlay on top of blobs */
+    #svk-loader .glass-bg{
+      position:absolute;inset:0;
+      backdrop-filter:blur(60px) saturate(1.8);
+      -webkit-backdrop-filter:blur(60px) saturate(1.8);
+      background:rgba(5,11,24,.55);
+    }
+
+    /* Animated grid lines */
+    #svk-loader .grid{
+      position:absolute;inset:0;
+      background-image:
+        linear-gradient(rgba(99,102,241,.06) 1px,transparent 1px),
+        linear-gradient(90deg,rgba(99,102,241,.06) 1px,transparent 1px);
+      background-size:48px 48px;
+      animation:gridShift 20s linear infinite;
+    }
+
+    /* ── Center card ────────────────────────────────────────── */
+    #svk-loader .card{
+      position:relative;z-index:2;
+      display:flex;flex-direction:column;align-items:center;
+      gap:clamp(12px,2.5vw,20px);
+      padding:clamp(28px,5vw,48px) clamp(24px,6vw,60px);
+      border-radius:clamp(20px,3vw,32px);
+      background:rgba(255,255,255,.04);
+      border:1px solid rgba(255,255,255,.1);
+      backdrop-filter:blur(24px) saturate(1.6);
+      -webkit-backdrop-filter:blur(24px) saturate(1.6);
+      box-shadow:
+        0 0 0 1px rgba(99,102,241,.15),
+        0 40px 80px rgba(0,0,0,.5),
+        inset 0 1px 0 rgba(255,255,255,.1);
+      animation:cardIn .7s cubic-bezier(.34,1.56,.64,1) both;
+      max-width:90vw;
+    }
+
+    /* ── Logo ring spinner ──────────────────────────────────── */
+    .logo-wrap{
+      position:relative;
+      width:clamp(72px,14vw,96px);
+      height:clamp(72px,14vw,96px);
+    }
+    .logo-ring{
+      position:absolute;inset:-6px;
+      border-radius:50%;
+      border:2px solid transparent;
+      border-top-color:#6366f1;
+      border-right-color:#06b6d4;
+      animation:spinRing 1.4s linear infinite;
+    }
+    .logo-ring-2{
+      position:absolute;inset:-12px;
+      border-radius:50%;
+      border:1.5px solid transparent;
+      border-bottom-color:rgba(139,92,246,.5);
+      border-left-color:rgba(6,182,212,.5);
+      animation:spinRing 2.2s linear infinite reverse;
+    }
+    .logo-dots{
+      position:absolute;inset:-18px;
+      animation:spinRing 3s linear infinite;
+    }
+    .logo-dots::before,.logo-dots::after{
+      content:'';position:absolute;
+      width:6px;height:6px;border-radius:50%;
+      background:#6366f1;top:0;left:50%;transform:translateX(-50%);
+    }
+    .logo-dots::after{
+      background:#06b6d4;bottom:0;top:auto;
+    }
+    .logo-box{
+      width:100%;height:100%;
+      border-radius:clamp(16px,3vw,22px);
+      background:linear-gradient(135deg,#6366f1 0%,#8b5cf6 50%,#06b6d4 100%);
+      display:flex;align-items:center;justify-content:center;
+      font-size:clamp(26px,5vw,36px);
+      font-weight:900;color:#fff;
+      letter-spacing:-1px;
+      box-shadow:0 8px 32px rgba(99,102,241,.45);
+      animation:logoPulse 2.5s ease-in-out infinite;
+    }
+
+    /* ── Brand text ─────────────────────────────────────────── */
+    .brand-name{
+      font-size:clamp(18px,4vw,26px);
+      font-weight:800;letter-spacing:-.3px;
+      background:linear-gradient(135deg,#fff 40%,#a5b4fc);
+      -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+      animation:fadeSlideUp .6s .2s both;
+    }
+    .brand-sub{
+      font-size:clamp(11px,2vw,13px);
+      color:rgba(148,163,184,.8);letter-spacing:.8px;
+      text-transform:uppercase;font-weight:500;
+      animation:fadeSlideUp .6s .35s both;
+    }
+
+    /* ── Animated progress bar ──────────────────────────────── */
+    .progress-wrap{
+      width:clamp(180px,40vw,260px);
+      animation:fadeSlideUp .6s .45s both;
+    }
+    .progress-track{
+      height:3px;background:rgba(255,255,255,.08);
+      border-radius:99px;overflow:hidden;
+      margin-bottom:8px;
+    }
+    .progress-fill{
+      height:100%;border-radius:99px;
+      background:linear-gradient(90deg,#6366f1,#8b5cf6,#06b6d4,#6366f1);
+      background-size:200% 100%;
+      animation:progressShimmer 1.8s ease-in-out infinite;
+      width:100%;
+    }
+    .progress-label{
+      display:flex;justify-content:space-between;align-items:center;
+    }
+    .progress-text{
+      font-size:11px;color:rgba(148,163,184,.6);font-weight:500;
+      letter-spacing:.3px;
+    }
+    .progress-pct{
+      font-size:11px;color:#818cf8;font-weight:600;
+      font-variant-numeric:tabular-nums;
+    }
+
+    /* ── Status indicator dots ──────────────────────────────── */
+    .status-dots{
+      display:flex;gap:6px;align-items:center;
+      animation:fadeSlideUp .6s .55s both;
+    }
+    .sdot{
+      width:6px;height:6px;border-radius:50%;
+      background:#6366f1;
+      animation:dotBounce 1.2s ease-in-out infinite;
+    }
+    .sdot:nth-child(2){animation-delay:.2s;background:#8b5cf6}
+    .sdot:nth-child(3){animation-delay:.4s;background:#06b6d4}
+
+    /* ── Floating particles ─────────────────────────────────── */
+    .particles{position:absolute;inset:0;z-index:1;pointer-events:none;overflow:hidden}
+    .particle{
+      position:absolute;border-radius:50%;
+      animation:particleFloat linear infinite;
+      opacity:0;
+    }
+
+    /* ── Loader exit animation ──────────────────────────────── */
+    #svk-loader.hide{
+      animation:loaderExit .6s cubic-bezier(.4,0,.2,1) forwards;
+    }
+
+    /* ── Keyframes ──────────────────────────────────────────── */
+    @keyframes floatBlob{
+      0%,100%{transform:translate(0,0) scale(1)}
+      33%{transform:translate(3%,4%) scale(1.06)}
+      66%{transform:translate(-2%,-3%) scale(.96)}
+    }
+    @keyframes gridShift{
+      from{background-position:0 0}
+      to{background-position:48px 48px}
+    }
+    @keyframes spinRing{
+      from{transform:rotate(0deg)}
+      to{transform:rotate(360deg)}
+    }
+    @keyframes logoPulse{
+      0%,100%{box-shadow:0 8px 32px rgba(99,102,241,.45)}
+      50%{box-shadow:0 8px 48px rgba(99,102,241,.75),0 0 60px rgba(6,182,212,.25)}
+    }
+    @keyframes progressShimmer{
+      0%{background-position:200% 0}
+      100%{background-position:-200% 0}
+    }
+    @keyframes dotBounce{
+      0%,80%,100%{transform:scale(1);opacity:.5}
+      40%{transform:scale(1.5);opacity:1}
+    }
+    @keyframes cardIn{
+      from{opacity:0;transform:scale(.88) translateY(16px)}
+      to{opacity:1;transform:scale(1) translateY(0)}
+    }
+    @keyframes fadeSlideUp{
+      from{opacity:0;transform:translateY(10px)}
+      to{opacity:1;transform:translateY(0)}
+    }
+    @keyframes particleFloat{
+      0%{transform:translateY(100vh) rotate(0deg);opacity:0}
+      10%{opacity:1}
+      90%{opacity:.5}
+      100%{transform:translateY(-10vh) rotate(720deg);opacity:0}
+    }
+    @keyframes loaderExit{
+      0%{opacity:1;transform:scale(1)}
+      100%{opacity:0;transform:scale(1.04);pointer-events:none}
+    }
   </style>
 
-  <!-- Non-blocking Google Fonts: media=print trick unblocks FCP -->
+  <!-- Async Google Fonts: non-blocking, display=swap unblocks FCP -->
   <link
     href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@500;600;700;800;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap"
     rel="stylesheet" media="print" onload="this.media='all'">
   <noscript>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   </noscript>
-
-  <!-- Material Icons: non-blocking async load -->
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons&display=swap"
     rel="stylesheet" media="print" onload="this.media='all'">
 
-  <!-- Bootstrap CSS: non-blocking async load (layout not needed until JS runs) -->
+  <!-- Async Bootstrap CSS -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
     rel="stylesheet"
     integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
@@ -57,48 +279,141 @@
     href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
     media="print" onload="this.media='all'">
 
-  <!-- Third-party scripts: defer so they never block main thread -->
+  <!-- Third-party scripts: all deferred (never block render) -->
   <script src="https://code.iconify.design/2/2.0.3/iconify.min.js" defer></script>
   <script src="https://checkout.razorpay.com/v1/checkout.js" defer></script>
 </head>
 
 <body class="mat-typography">
 
-  <!-- Inline Loading Splash — displays instantly while Angular JS loads -->
-  <div id="app-loading" aria-live="polite" aria-label="Loading application">
-    <div class="loader-logo">S</div>
-    <div class="loader-brand">SVK Enterprise</div>
-    <div class="loader-sub">Initializing workspace…</div>
-    <div class="loader-bar"><div class="loader-fill"></div></div>
+  <!-- ── Animated Loader ──────────────────────────────────── -->
+  <div id="svk-loader" role="status" aria-label="Loading SVK Enterprise">
+
+    <!-- Blurred animated background -->
+    <div class="bg">
+      <div class="blob blob-1"></div>
+      <div class="blob blob-2"></div>
+      <div class="blob blob-3"></div>
+      <div class="blob blob-4"></div>
+    </div>
+    <div class="glass-bg"></div>
+    <div class="grid"></div>
+
+    <!-- Floating particles container (generated by JS) -->
+    <div class="particles" id="particles"></div>
+
+    <!-- Center glass card -->
+    <div class="card">
+      <!-- Logo with spinner rings -->
+      <div class="logo-wrap">
+        <div class="logo-ring-2"></div>
+        <div class="logo-ring"></div>
+        <div class="logo-dots"></div>
+        <div class="logo-box">S</div>
+      </div>
+
+      <div class="brand-name">SVK Enterprise</div>
+      <div class="brand-sub">Workspace Initializing</div>
+
+      <!-- Progress bar -->
+      <div class="progress-wrap">
+        <div class="progress-track">
+          <div class="progress-fill"></div>
+        </div>
+        <div class="progress-label">
+          <span class="progress-text">Loading modules…</span>
+          <span class="progress-pct" id="pct">0%</span>
+        </div>
+      </div>
+
+      <!-- Bounce dots -->
+      <div class="status-dots">
+        <div class="sdot"></div>
+        <div class="sdot"></div>
+        <div class="sdot"></div>
+      </div>
+    </div>
   </div>
+  <!-- ── End Loader ──────────────────────────────────────── -->
 
   <app-root></app-root>
 
-  <!-- Bootstrap JS: deferred so it doesn't block paint -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
     integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
     crossorigin="anonymous" defer></script>
 
-  <!-- Hide the loading overlay once Angular has bootstrapped -->
   <script>
+    /* ── Generate floating particles ── */
+    (function () {
+      var container = document.getElementById('particles');
+      var colors = ['#6366f1','#8b5cf6','#06b6d4','#ec4899','#f59e0b'];
+      for (var i = 0; i < 28; i++) {
+        var p = document.createElement('div');
+        p.className = 'particle';
+        var size = (Math.random() * 5 + 2).toFixed(1);
+        var left = (Math.random() * 100).toFixed(1);
+        var dur = (Math.random() * 12 + 8).toFixed(1);
+        var delay = (Math.random() * 10).toFixed(1);
+        p.style.cssText = [
+          'width:' + size + 'px',
+          'height:' + size + 'px',
+          'left:' + left + '%',
+          'background:' + colors[Math.floor(Math.random() * colors.length)],
+          'animation-duration:' + dur + 's',
+          'animation-delay:-' + delay + 's',
+          'box-shadow:0 0 ' + (size * 3) + 'px ' + colors[Math.floor(Math.random() * colors.length)]
+        ].join(';');
+        container.appendChild(p);
+      }
+    })();
+
+    /* ── Animated progress counter ── */
+    (function () {
+      var pct = document.getElementById('pct');
+      var count = 0;
+      var interval = setInterval(function () {
+        count += Math.floor(Math.random() * 4) + 1;
+        if (count >= 90) { count = 90; clearInterval(interval); }
+        if (pct) pct.textContent = count + '%';
+      }, 80);
+      // Store interval reference for cleanup
+      window._loaderInterval = interval;
+    })();
+
+    /* ── Hide loader when Angular finishes rendering ── */
     document.addEventListener('DOMContentLoaded', function () {
       var observer = new MutationObserver(function () {
         var root = document.querySelector('app-root');
         if (root && root.children.length > 0) {
-          var loader = document.getElementById('app-loading');
-          if (loader) {
-            loader.classList.add('hide');
-            setTimeout(function () { loader.remove(); }, 500);
-          }
+          // Jump to 100% before hiding
+          var pct = document.getElementById('pct');
+          if (pct) pct.textContent = '100%';
+          clearInterval(window._loaderInterval);
+
+          setTimeout(function () {
+            var loader = document.getElementById('svk-loader');
+            if (loader) {
+              loader.classList.add('hide');
+              setTimeout(function () {
+                if (loader.parentNode) loader.parentNode.removeChild(loader);
+              }, 650);
+            }
+          }, 300);
           observer.disconnect();
         }
       });
       observer.observe(document.body, { childList: true, subtree: true });
-      // Fallback: remove loader after 8 seconds
+
+      // Hard fallback at 9s
       setTimeout(function () {
-        var loader = document.getElementById('app-loading');
-        if (loader) { loader.classList.add('hide'); setTimeout(function () { loader.remove(); }, 500); }
-      }, 8000);
+        var loader = document.getElementById('svk-loader');
+        if (loader) {
+          loader.classList.add('hide');
+          setTimeout(function () {
+            if (loader.parentNode) loader.parentNode.removeChild(loader);
+          }, 650);
+        }
+      }, 9000);
     });
   </script>
 </body>

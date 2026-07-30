@@ -20,6 +20,7 @@ import { CommonService } from 'src/app/Securities/Services/common.service';
 import { SessionService } from 'src/app/Securities/Services/session.service';
 import { SocketService } from 'src/app/Securities/Services/socket.service';
 import { ChangeDetectorRef } from '@angular/core';
+import { environment } from 'src/environment/environment';
 
 export interface PosProduct {
   id: number;
@@ -28,7 +29,9 @@ export interface PosProduct {
   category: string;
   price: number;
   stock: number;
+  stock_in_hand?: number;
   unit: string;
+  base_unit?: string;
   isWeighable: boolean;
   image: string;
   manufacture_date?: string | null;
@@ -177,13 +180,20 @@ export class PosBillingComponent implements OnInit {
     return this.cartItems().length;
   });
 
-  // Filtered Products
+  // Filtered Products (Guaranteed ALL category display & flexible category matching)
   filteredProducts = computed(() => {
     const q = this.searchQuery().toLowerCase().trim();
-    const cat = this.selectedCategory();
+    const cat = (this.selectedCategory() || '').trim();
+    const isAll = !cat || cat.toUpperCase() === 'ALL';
+
     return this.products.filter(p => {
-      const matchCat = cat === 'ALL' || p.category === cat;
-      const matchQ = !q || p.name.toLowerCase().includes(q) || p.code.toLowerCase().includes(q);
+      const pCat = (p.category || '').trim();
+      const matchCat = isAll || pCat.toLowerCase() === cat.toLowerCase() || pCat.toLowerCase().includes(cat.toLowerCase()) || cat.toLowerCase().includes(pCat.toLowerCase());
+
+      const pName = (p.name || '').toLowerCase();
+      const pCode = (p.code || '').toLowerCase();
+      const matchQ = !q || pName.includes(q) || pCode.includes(q) || pCat.toLowerCase().includes(q);
+
       return matchCat && matchQ;
     });
   });
@@ -394,24 +404,35 @@ export class PosBillingComponent implements OnInit {
         if (res && (res.data || Array.isArray(res))) {
           const list = Array.isArray(res) ? res : res.data;
           if (Array.isArray(list)) {
-            this.products = list.map((p: any) => ({
-              id: p.id,
-              code: p.barcode || p.code || p.sku || `SKU-${p.id}`,
-              name: p.name || p.title || 'Product',
-              category: p.category_name || p.category || 'General',
-              price: Number(p.price ?? p.selling_price ?? 0),
-              stock: Number(p.stock_in_hand ?? p.stock ?? p.quantity ?? 0),
-              unit: p.unit || (p.is_weighable ? 'kg' : 'pcs'),
-              isWeighable: Boolean(p.is_weighable || p.unit === 'kg'),
-              image: p.image || p.thumbnail || '',
-              manufacture_date: p.manufacture_date || null,
-              expiry_date: p.expiry_date || null
-            }));
+            this.products = list.map((p: any) => {
+              const primaryImg = p.image || (Array.isArray(p.images) && p.images.length > 0 ? p.images[0] : p.thumbnail) || '';
+              const unitName = p.unit || p.base_unit || (p.is_weighable ? 'Kg' : 'pcs');
+              const stockVal = Number(p.stock_in_hand ?? p.stock ?? p.quantity ?? 0);
+              const rawCat = typeof p.category === 'object' && p.category ? (p.category.name || p.category.title) : (p.category_name || p.category);
+              const categoryName = String(rawCat || 'General').trim();
+
+              return {
+                id: p.id,
+                code: p.barcode || p.code || p.sku || `SKU-${p.id}`,
+                name: p.name || p.title || 'Product',
+                category: categoryName,
+                price: Number(p.price ?? p.selling_price ?? 0),
+                stock: stockVal,
+                stock_in_hand: stockVal,
+                unit: unitName,
+                base_unit: p.base_unit || unitName,
+                isWeighable: Boolean(p.is_weighable || unitName.toLowerCase() === 'kg' || unitName.toLowerCase() === 'g'),
+                image: primaryImg,
+                manufacture_date: p.manufacture_date || null,
+                expiry_date: p.expiry_date || null
+              };
+            });
 
             // Dynamically build/merge categories list from API products
             const catSet = new Set<string>(['ALL']);
             this.products.forEach(p => { if (p.category) catSet.add(p.category); });
             this.categories = Array.from(catSet);
+            this.cdr.detectChanges();
 
             // Check expiry on load and push notifications
             this.checkProductsExpiryOnLoad(this.products);
@@ -433,6 +454,43 @@ export class PosBillingComponent implements OnInit {
         showConfirmButton: false,
         timer: 1500
       });
+    }
+  }
+
+  // ── Product Image & Icon Helpers ─────────────────────────────────────────
+
+  getProductImage(product: PosProduct): string {
+    if (!product || !product.image) return '';
+    const img = product.image.trim();
+    if (img.startsWith('http://') || img.startsWith('https://') || img.startsWith('data:')) {
+      return img;
+    }
+    const cleanPath = img.startsWith('/') ? img : `/${img}`;
+    const baseUrl = environment.apiUrl.replace(/\/api\/?$/, '');
+    return `${baseUrl}${cleanPath}`;
+  }
+
+  getCategoryIcon(category: string): string {
+    const cat = (category || '').toLowerCase();
+    if (cat.includes('fruit') || cat.includes('veg') || cat.includes('apple') || cat.includes('produce')) return 'eco';
+    if (cat.includes('beverage') || cat.includes('drink') || cat.includes('juice') || cat.includes('water')) return 'local_drink';
+    if (cat.includes('dairy') || cat.includes('milk') || cat.includes('cheese') || cat.includes('butter')) return 'water_drop';
+    if (cat.includes('snack') || cat.includes('bakery') || cat.includes('bread') || cat.includes('cake')) return 'bakery_dining';
+    if (cat.includes('meat') || cat.includes('fish') || cat.includes('chicken') || cat.includes('food')) return 'restaurant';
+    if (cat.includes('electronic') || cat.includes('gadget') || cat.includes('mobile') || cat.includes('tech')) return 'devices';
+    if (cat.includes('fashion') || cat.includes('cloth') || cat.includes('wear')) return 'checkroom';
+    if (cat.includes('beauty') || cat.includes('care') || cat.includes('cosmetic')) return 'spa';
+    return 'shopping_bag';
+  }
+
+  onImageError(event: Event): void {
+    const imgEl = event.target as HTMLElement;
+    if (imgEl) {
+      imgEl.style.display = 'none';
+      const fallbackEl = imgEl.nextElementSibling as HTMLElement;
+      if (fallbackEl) {
+        fallbackEl.style.display = 'flex';
+      }
     }
   }
 
@@ -561,11 +619,27 @@ export class PosBillingComponent implements OnInit {
     );
   }
 
-  updateQuantity(item: CartItem, delta: number) {
+  onCartQuantityInputChange(item: CartItem, val: any) {
+    const num = parseFloat(val);
+    if (isNaN(num) || num <= 0) return;
     this.cartItems.update(items =>
       items.map(i => {
         if (i.product.id === item.product.id) {
-          const newQty = Math.max(0.1, Math.round((i.quantity + delta) * 100) / 100);
+          const newQty = Math.round(num * 100) / 100;
+          const newTotal = (newQty * i.unitPrice) * (1 - i.discountPct / 100);
+          return { ...i, quantity: newQty, totalPrice: Math.round(newTotal * 100) / 100 };
+        }
+        return i;
+      })
+    );
+  }
+
+  updateQuantity(item: CartItem, delta: number) {
+    const step = item.product.isWeighable ? (Math.abs(delta) === 1 ? (delta > 0 ? 0.25 : -0.25) : delta) : delta;
+    this.cartItems.update(items =>
+      items.map(i => {
+        if (i.product.id === item.product.id) {
+          const newQty = Math.max(0.01, Math.round((i.quantity + step) * 100) / 100);
           const newTotal = (newQty * i.unitPrice) * (1 - i.discountPct / 100);
           return { ...i, quantity: newQty, totalPrice: Math.round(newTotal * 100) / 100 };
         }

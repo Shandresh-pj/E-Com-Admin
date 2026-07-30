@@ -128,29 +128,53 @@
         @for (prod of filteredProducts(); track prod.id) {
         <div class="product-card liquid-glass-card" [class.out-of-stock]="prod.stock <= 0" (click)="addToCart(prod)">
 
-          <div class="product-header">
-            <span class="product-category">{{ prod.category }}</span>
-            @if (prod.stock <= 0) { <span class="weigh-badge out-stock-badge">OUT OF STOCK</span>
-              } @else if (prod.stock <= 10) { <span class="weigh-badge low-stock-badge">Stock: {{ prod.stock }} {{
-                prod.unit }}</span>
-                } @else if (prod.isWeighable) {
-                <span class="weigh-badge"><mat-icon>scale</mat-icon> Weighable</span>
-                }
+          <!-- Product Image Container with Fallback Icon & Badges -->
+          <div class="product-img-wrap">
+            @if (getProductImage(prod)) {
+            <img [src]="getProductImage(prod)" [alt]="prod.name" class="product-img" (error)="onImageError($event)">
+            <div class="product-img-fallback" style="display: none;">
+              <mat-icon>{{ getCategoryIcon(prod.category) }}</mat-icon>
+            </div>
+            } @else {
+            <div class="product-img-fallback">
+              <mat-icon>{{ getCategoryIcon(prod.category) }}</mat-icon>
+            </div>
+            }
+
+            <div class="product-badges-overlay">
+              <span class="category-chip">{{ prod.category }}</span>
+              @if (prod.stock <= 0) {
+              <span class="stock-chip out-stock">OUT OF STOCK</span>
+              } @else if (prod.stock <= 10) {
+              <span class="stock-chip low-stock">{{ prod.stock }} {{ prod.unit }} left</span>
+              } @else {
+              <span class="stock-chip in-stock">{{ prod.stock }} {{ prod.unit }}</span>
+              }
+            </div>
           </div>
 
-          <h3 class="product-title">{{ prod.name }}</h3>
-          <span class="sku-code">SKU: {{ prod.code }}</span>
-
-          <div class="product-footer">
-            <div class="price-wrap">
-              <span class="currency">₹</span>
-              <span class="amount">{{ prod.price | number:'1.2-2' }}</span>
-              <span class="unit">/ {{ prod.unit }}</span>
+          <div class="product-card-body">
+            <h3 class="product-title" [matTooltip]="prod.name">{{ prod.name }}</h3>
+            <div class="product-sub-meta">
+              <span class="sku-code">SKU: {{ prod.code }}</span>
+              @if (prod.expiry_date) {
+              <span class="exp-badge" [matTooltip]="'Mfg: ' + (prod.manufacture_date || 'N/A') + ' • Exp: ' + prod.expiry_date">
+                <mat-icon>event</mat-icon> {{ prod.expiry_date }}
+              </span>
+              }
             </div>
 
-            <button mat-icon-button class="add-cart-btn" [disabled]="prod.stock <= 0" matTooltip="Add to cart">
-              <mat-icon>add_shopping_cart</mat-icon>
-            </button>
+            <div class="product-footer">
+              <div class="price-wrap">
+                <span class="currency">₹</span>
+                <span class="amount">{{ prod.price | number:'1.2-2' }}</span>
+                <span class="unit">/{{ prod.unit }}</span>
+              </div>
+
+              <button type="button" class="add-cart-btn" [disabled]="prod.stock <= 0" matTooltip="Add to cart">
+                <mat-icon>add_shopping_cart</mat-icon>
+              </button>
+            </div>
           </div>
 
         </div>
@@ -207,11 +231,16 @@
 
           <!-- Center: Quantity stepper -->
           <div class="qty-controls">
-            <button type="button" class="qty-btn minus-btn" (click)="updateQuantity(item, -1)" matTooltip="Decrease">
+            <button type="button" class="qty-btn minus-btn" (click)="updateQuantity(item, -1)" matTooltip="Decrease quantity">
               <mat-icon>remove</mat-icon>
             </button>
-            <span class="qty-val">{{ item.quantity }}</span>
-            <button type="button" class="qty-btn plus-btn" (click)="updateQuantity(item, 1)" matTooltip="Increase">
+            <input type="number" class="qty-val-input"
+              [ngModel]="item.quantity"
+              (ngModelChange)="onCartQuantityInputChange(item, $event)"
+              [step]="item.product.isWeighable ? '0.05' : '1'"
+              min="0.01" max="9999"
+              matTooltip="Type custom quantity (e.g. 1.25)">
+            <button type="button" class="qty-btn plus-btn" (click)="updateQuantity(item, 1)" matTooltip="Increase quantity">
               <mat-icon>add</mat-icon>
             </button>
           </div>

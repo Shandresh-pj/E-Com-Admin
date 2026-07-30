@@ -113,6 +113,8 @@ export class Payroll implements OnInit {
 
     this.salaryAssignForm = this.fb.group({
       employee_id: [1, Validators.required],
+      salary_type: ['MONTHLY', Validators.required],
+      daily_rate: [1500, [Validators.required, Validators.min(0)]],
       basic_salary: [50000, [Validators.required, Validators.min(0)]],
       hra: [20000, Validators.min(0)],
       da: [4000, Validators.min(0)],
@@ -125,6 +127,44 @@ export class Payroll implements OnInit {
       loan_deduction: [0, Validators.min(0)],
       advance: [0, Validators.min(0)]
     });
+  }
+
+  get computedGross(): number {
+    const v = this.salaryAssignForm?.value;
+    if (!v) return 0;
+    const base = v.salary_type === 'DAILY' ? ((v.daily_rate || 0) * 26) : (v.basic_salary || 0);
+    return base + (v.hra || 0) + (v.da || 0) + (v.allowances || 0);
+  }
+
+  get computedDeductions(): number {
+    const v = this.salaryAssignForm?.value;
+    if (!v) return 0;
+    return (v.pf || 0) + (v.esi || 0) + (v.tds || 0) + (v.pt || 0) + (v.loan_deduction || 0) + (v.advance || 0);
+  }
+
+  get computedNet(): number {
+    return Math.max(0, this.computedGross - this.computedDeductions);
+  }
+
+  autoCalculateStatutory() {
+    const v = this.salaryAssignForm.value;
+    const isDaily = v.salary_type === 'DAILY';
+    const basic = isDaily ? (v.daily_rate * 26) : v.basic_salary;
+    const hra = Math.round(basic * 0.4);
+    const da = Math.round(basic * 0.08);
+    const pf = Math.round(basic * 0.12);
+    const esi = Math.round((basic + hra) * 0.0075);
+    const pt = basic >= 15000 ? 200 : 0;
+
+    this.salaryAssignForm.patchValue({
+      basic_salary: basic,
+      hra,
+      da,
+      pf,
+      esi,
+      pt
+    });
+    this.cdr.detectChanges();
   }
 
   ngOnInit() {
@@ -173,14 +213,20 @@ export class Payroll implements OnInit {
     if (!targetEmp) return;
 
     this.selectedEmployeeForSalary = targetEmp;
+    const sType = targetEmp.salary_type || 'MONTHLY';
+    const bSalary = targetEmp.basic_salary || targetEmp.salary || 50000;
+    const dRate = targetEmp.daily_rate || Math.round(bSalary / 26);
+
     this.salaryAssignForm.patchValue({
       employee_id: targetEmp.id,
-      basic_salary: targetEmp.basic_salary || 50000,
-      hra: targetEmp.hra || Math.round((targetEmp.basic_salary || 50000) * 0.4),
+      salary_type: sType,
+      daily_rate: dRate,
+      basic_salary: bSalary,
+      hra: targetEmp.hra || Math.round(bSalary * 0.4),
       da: targetEmp.da || 4000,
       allowances: targetEmp.allowances || 5000,
       overtime_rate: targetEmp.overtime_rate || 250,
-      pf: targetEmp.pf || Math.round((targetEmp.basic_salary || 50000) * 0.12),
+      pf: targetEmp.pf || Math.round(bSalary * 0.12),
       esi: targetEmp.esi || 540,
       tds: targetEmp.tds || 2000,
       pt: targetEmp.pt || 200,

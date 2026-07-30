@@ -201,3 +201,168 @@
     </div>
   </div>
 </div>
+
+<!-- Salary Structure Assignment Modal -->
+@if (showSalaryAssignModal) {
+<div class="salary-modal-backdrop" (click)="showSalaryAssignModal = false">
+  <div class="salary-modal-card" (click)="$event.stopPropagation()">
+
+    <div class="salary-modal-header">
+      <div class="header-left">
+        <div class="header-orb"><mat-icon>engineering</mat-icon></div>
+        <div>
+          <h3>Salary Structure & Statutory Setup</h3>
+          <span class="subtitle">Assign Daily Wager / Monthly Salary & Statutory PF/ESI Deductions</span>
+        </div>
+      </div>
+      <button type="button" class="close-modal-btn" (click)="showSalaryAssignModal = false">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+
+    <form [formGroup]="salaryAssignForm" (ngSubmit)="saveSalaryAssignment()">
+      <div class="salary-modal-body">
+
+        <!-- Select Employee & Salary Type Row -->
+        <div class="salary-config-row">
+          <div class="form-group-item">
+            <label class="field-label"><mat-icon>person</mat-icon> Select Employee:</label>
+            <select formControlName="employee_id" class="custom-select-input" (change)="openSalaryAssignment(employees[+$any($event.target).value])">
+              @for (emp of employees; track emp.id) {
+              <option [value]="emp.id">{{ emp.name }} ({{ emp.designation || 'Staff' }})</option>
+              }
+            </select>
+          </div>
+
+          <div class="form-group-item">
+            <label class="field-label"><mat-icon>payments</mat-icon> Salary Basis / Type:</label>
+            <div class="salary-type-toggle">
+              <button type="button" class="type-toggle-btn"
+                [class.active]="salaryAssignForm.get('salary_type')?.value === 'MONTHLY'"
+                (click)="salaryAssignForm.patchValue({ salary_type: 'MONTHLY' })">
+                <mat-icon>calendar_month</mat-icon> Monthly Salaried
+              </button>
+              <button type="button" class="type-toggle-btn"
+                [class.active]="salaryAssignForm.get('salary_type')?.value === 'DAILY'"
+                (click)="salaryAssignForm.patchValue({ salary_type: 'DAILY' })">
+                <mat-icon>today</mat-icon> Daily Wage Wager
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Statutory Auto Calculation Quick Action -->
+        <div class="auto-calc-strip">
+          <div class="strip-info">
+            <mat-icon>auto_awesome</mat-icon>
+            <span>Auto-fill statutory Indian Payroll Standards (PF 12%, ESI 0.75%, HRA 40%, PT)</span>
+          </div>
+          <button type="button" class="auto-calc-btn" (click)="autoCalculateStatutory()">
+            <mat-icon>bolt</mat-icon> Auto-Calculate Statutory
+          </button>
+        </div>
+
+        <div class="salary-breakdown-grid">
+
+          <!-- Left: Earnings -->
+          <div class="breakdown-card earnings-card">
+            <h4 class="card-subtitle text-success"><mat-icon>trending_up</mat-icon> Earnings & Allowances</h4>
+
+            @if (salaryAssignForm.get('salary_type')?.value === 'DAILY') {
+            <div class="input-field-group">
+              <label>Daily Per-Day Rate (₹)</label>
+              <input type="number" formControlName="daily_rate" placeholder="1500" class="salary-num-input">
+              <span class="field-hint">26 Working Days = Est. ₹{{ (salaryAssignForm.get('daily_rate')?.value || 0) * 26 }} Base</span>
+            </div>
+            } @else {
+            <div class="input-field-group">
+              <label>Monthly Basic Salary (₹)</label>
+              <input type="number" formControlName="basic_salary" placeholder="50000" class="salary-num-input">
+            </div>
+            }
+
+            <div class="input-field-group">
+              <label>HRA - House Rent Allowance (₹)</label>
+              <input type="number" formControlName="hra" placeholder="20000" class="salary-num-input">
+            </div>
+
+            <div class="input-field-group">
+              <label>DA - Dearness Allowance (₹)</label>
+              <input type="number" formControlName="da" placeholder="4000" class="salary-num-input">
+            </div>
+
+            <div class="input-field-group">
+              <label>Other Special Allowances (₹)</label>
+              <input type="number" formControlName="allowances" placeholder="5000" class="salary-num-input">
+            </div>
+
+            <div class="input-field-group">
+              <label>Overtime Per-Hour Rate (₹)</label>
+              <input type="number" formControlName="overtime_rate" placeholder="250" class="salary-num-input">
+            </div>
+          </div>
+
+          <!-- Right: Statutory & Other Deductions -->
+          <div class="breakdown-card deductions-card">
+            <h4 class="card-subtitle text-danger"><mat-icon>trending_down</mat-icon> Statutory & Other Deductions</h4>
+
+            <div class="input-field-group">
+              <label>PF - Provident Fund (12%) (₹)</label>
+              <input type="number" formControlName="pf" placeholder="6000" class="salary-num-input">
+            </div>
+
+            <div class="input-field-group">
+              <label>ESI - State Insurance (0.75%) (₹)</label>
+              <input type="number" formControlName="esi" placeholder="540" class="salary-num-input">
+            </div>
+
+            <div class="input-field-group">
+              <label>TDS Tax Deduction (₹)</label>
+              <input type="number" formControlName="tds" placeholder="2000" class="salary-num-input">
+            </div>
+
+            <div class="input-field-group">
+              <label>PT - Professional Tax (₹)</label>
+              <input type="number" formControlName="pt" placeholder="200" class="salary-num-input">
+            </div>
+
+            <div class="input-field-group">
+              <label>Loan / Advance Repayment (₹)</label>
+              <input type="number" formControlName="loan_deduction" placeholder="0" class="salary-num-input">
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Est. Net Salary Summary Bar -->
+        <div class="salary-summary-banner">
+          <div class="summary-col">
+            <span class="sum-lbl">Gross Earnings</span>
+            <span class="sum-val text-success">₹{{ formatAmount(computedGross) }}</span>
+          </div>
+          <div class="sum-sep">−</div>
+          <div class="summary-col">
+            <span class="sum-lbl">Total Deductions</span>
+            <span class="sum-val text-danger">₹{{ formatAmount(computedDeductions) }}</span>
+          </div>
+          <div class="sum-sep">=</div>
+          <div class="summary-col highlight">
+            <span class="sum-lbl">Estimated Net Payout</span>
+            <span class="sum-val net-val">₹{{ formatAmount(computedNet) }}</span>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="salary-modal-footer">
+        <button type="button" class="cancel-modal-btn" (click)="showSalaryAssignModal = false">Cancel</button>
+        <button type="submit" class="save-salary-btn" [disabled]="loading">
+          <mat-icon>check_circle</mat-icon> Save Salary Structure
+        </button>
+      </div>
+    </form>
+
+  </div>
+</div>
+}
+

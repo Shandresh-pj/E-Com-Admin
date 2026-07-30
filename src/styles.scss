@@ -3327,6 +3327,89 @@ html.dark {
 .topbar-search-result-name { font-size: 0.875rem; font-weight: 500; color: var(--text-primary); }
 .topbar-search-result-path { font-size: 0.75rem; color: var(--text-muted); }
 .topbar-search-empty { padding: 24px; text-align: center; color: var(--text-muted); font-size: 0.875rem; }
+
+@media print {
+  html, body, app-root, mat-sidenav-container, mat-sidenav-content, main, router-outlet {
+    background: #ffffff !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: visible !important;
+    box-shadow: none !important;
+    width: 100% !important;
+    height: auto !important;
+  }
+
+  mat-sidenav,
+  .sidebar,
+  .app-sidebar,
+  header,
+  .header,
+  .topbar,
+  .top-header,
+  .pos-top-bar,
+  .pos-main-layout,
+  .pos-mobile-tabs,
+  .ambient-glow,
+  .no-print,
+  .no-print-backdrop,
+  .customizer-toolbar,
+  .modal-footer {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    height: 0 !important;
+    width: 0 !important;
+    overflow: hidden !important;
+  }
+
+  .glass-modal-backdrop.no-print-backdrop,
+  .receipt-modal-card-customizable {
+    position: absolute !important;
+    left: 0 !important;
+    top: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    height: auto !important;
+    max-height: none !important;
+    background: transparent !important;
+    backdrop-filter: none !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    overflow: visible !important;
+    display: block !important;
+    visibility: visible !important;
+  }
+
+  .receipt-stage-container {
+    background: transparent !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    width: 100% !important;
+    height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+    display: block !important;
+    visibility: visible !important;
+
+    * {
+      visibility: visible !important;
+    }
+  }
+
+  .printable-receipt {
+    box-shadow: none !important;
+    border: none !important;
+    margin: 0 auto !important;
+    border-radius: 0 !important;
+  }
+
+  @page {
+    size: auto;
+    margin: 5mm;
+  }
+}
 .topbar-search-footer {
   padding: 8px 16px; border-top: 1px solid var(--glass-border-subtle);
   display: flex; align-items: center; justify-content: center;

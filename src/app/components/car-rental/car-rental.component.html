@@ -1,0 +1,301 @@
+<div class="cr-page">
+
+  <!-- Hero Header -->
+  <div class="rental-hero-glass">
+    <div class="cr-hero-content">
+      <div class="cr-hero-badges">
+        <span class="cr-badge-emerald"><i class="ri-car-fill"></i> Zoomcar / BluSmart / Hertz Enterprise</span>
+        <span class="cr-badge-indigo">Zero Security Deposit Available</span>
+      </div>
+      <h1 class="cr-hero-title">Car Rental &amp; Subscription Hub</h1>
+      <p class="cr-hero-subtitle">Book self-drive SUVs, electric sedans, luxury wedding cars, and long-term corporate monthly subscriptions.</p>
+    </div>
+
+    <!-- Category Filter Pills -->
+    <div class="cr-filter-pills">
+      <button class="cr-pill-btn cr-pill-btn--self-drive"
+              [class.active]="selectedCategoryTab === 'Self Drive'"
+              (click)="selectedCategoryTab = 'Self Drive'; filterFleet()">
+        <i class="ri-car-fill"></i> Self Drive
+      </button>
+      <button class="cr-pill-btn cr-pill-btn--chauffeur"
+              [class.active]="selectedCategoryTab === 'Chauffeur Driven'"
+              (click)="selectedCategoryTab = 'Chauffeur Driven'; filterFleet()">
+        <i class="ri-user-star-line"></i> Chauffeur Driven
+      </button>
+      <button class="cr-pill-btn cr-pill-btn--luxury"
+              [class.active]="selectedCategoryTab === 'Wedding & Luxury'"
+              (click)="selectedCategoryTab = 'Wedding & Luxury'; filterFleet()">
+        <i class="ri-vip-crown-fill"></i> Luxury &amp; Wedding
+      </button>
+    </div>
+  </div>
+
+  <!-- Reservation Bar -->
+  <div class="cr-reservation-bar">
+    <h2 class="cr-reservation-title">
+      <i class="ri-search-eye-line icon-emerald"></i> Configure Reservation Dates &amp; Pickup Spot
+    </h2>
+    <div class="cr-reservation-grid">
+      <div class="cr-field">
+        <label class="cr-field-label">Select Hub / City</label>
+        <select [(ngModel)]="selectedCity" (change)="filterFleet()" class="cr-field-select">
+          <option value="All Cities">All Hubs (Bengaluru, Mumbai, Delhi)</option>
+          <option value="Bengaluru">Bengaluru (Airport &amp; Indiranagar)</option>
+          <option value="Mumbai">Mumbai (Bandra &amp; BKC Terminal)</option>
+          <option value="Delhi-NCR">Delhi-NCR (Aerocity &amp; Gurgaon)</option>
+          <option value="Goa">Goa (Panjim &amp; Airport Express)</option>
+        </select>
+      </div>
+      <div class="cr-field">
+        <label class="cr-field-label">Pickup Date &amp; Time</label>
+        <input type="datetime-local" [(ngModel)]="pickupDateTime" (change)="calculateRentalDuration()" class="cr-field-input"/>
+      </div>
+      <div class="cr-field">
+        <label class="cr-field-label">Return Date &amp; Time</label>
+        <input type="datetime-local" [(ngModel)]="returnDateTime" (change)="calculateRentalDuration()" class="cr-field-input"/>
+      </div>
+      <div class="cr-field">
+        <label class="cr-field-label">Calculated Duration</label>
+        <div class="cr-duration-display">
+          <span>{{ rentalDaysCount }} Days ({{ rentalHoursCount }} Hrs)</span>
+          <span class="cr-unlim-badge">Unlimited KM</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Filter Chips Row -->
+    <div class="cr-filter-chips">
+      <div class="cr-chips-left">
+        <span class="cr-filter-label">Filter By:</span>
+        <button class="cr-chip-btn"
+                [class.cr-chip-btn--active]="transmissionFilter === 'Automatic'"
+                (click)="transmissionFilter = transmissionFilter === 'Automatic' ? 'ALL' : 'Automatic'; filterFleet()">
+          ⚡ Automatic Only
+        </button>
+        <button class="cr-chip-btn cr-chip-btn--indigo"
+                [class.cr-chip-btn--active-indigo]="fuelFilter === 'Electric'"
+                (click)="fuelFilter = fuelFilter === 'Electric' ? 'ALL' : 'Electric'; filterFleet()">
+          🌱 100% EV Electric
+        </button>
+        <label class="cr-chip-checkbox">
+          <input type="checkbox" [(ngModel)]="doorstepDelivery" class="cr-checkbox"/>
+          <span>🏠 Doorstep Delivery &amp; Return (+ ₹250)</span>
+        </label>
+      </div>
+      <div class="cr-chips-right">
+        Showing <strong class="cr-count-highlight">{{ filteredFleetList.length }}</strong> available vehicles
+      </div>
+    </div>
+  </div>
+
+  <!-- Packages Bar -->
+  <div class="cr-packages-grid">
+    @for (pkg of rentalPackages; track pkg.id) {
+      <div class="cr-package-card" [class.cr-package-card--active]="selectedPackageId === pkg.id" (click)="selectedPackageId = pkg.id">
+        <span class="cr-package-label">Rental Package</span>
+        <h4 class="cr-package-name">{{ pkg.name || pkg.label }}</h4>
+        <p class="cr-package-price">Starts ₹{{ pkg.basePrice || pkg.hours * 200 }}</p>
+      </div>
+    }
+  </div>
+
+  <!-- Fleet Catalog Grid -->
+  <div class="cr-fleet-grid">
+    @for (car of filteredFleetList; track car.id) {
+      <div class="fleet-card-glass">
+
+        <!-- Image Wrap -->
+        <div class="cr-image-wrap">
+          <img [src]="car.image" class="cr-car-image" [alt]="car.title"/>
+          <div class="cr-image-gradient"></div>
+          <div class="cr-card-badges-top">
+            <span class="cr-cat-chip">{{ car.category }}</span>
+            <span class="cr-fuel-chip" [class.cr-fuel-chip--ev]="car.fuelType === 'Electric'">
+              {{ car.fuelType || 'Petrol' }}
+            </span>
+          </div>
+          <div class="cr-rating-badge">★ {{ car.rating || 4.9 }} ({{ car.tripsCount || 120 }}+ trips)</div>
+        </div>
+
+        <!-- Card Body -->
+        <div class="cr-card-body">
+          <div>
+            <h3 class="cr-car-title">{{ car.title }}</h3>
+            <p class="cr-car-location"><i class="ri-map-pin-line"></i> {{ car.locationHub || 'Central Hub, Airport Express' }}</p>
+          </div>
+
+          <!-- Specs Grid -->
+          <div class="cr-specs-grid">
+            <div class="cr-spec-item">
+              <span class="cr-spec-label">Transmission</span>
+              <strong class="cr-spec-value">{{ car.transmission }}</strong>
+            </div>
+            <div class="cr-spec-item">
+              <span class="cr-spec-label">Seating</span>
+              <strong class="cr-spec-value"><i class="ri-user-3-line"></i> {{ car.seating }} Seats</strong>
+            </div>
+            <div class="cr-spec-item">
+              <span class="cr-spec-label">Deposit</span>
+              <strong class="cr-spec-value cr-spec-value--emerald">₹{{ car.depositAmount || 0 }}</strong>
+            </div>
+          </div>
+
+          <!-- Features -->
+          <div class="cr-features-row">
+            @for (feat of (car.features || ['Unlimited KM', 'Insured']); track feat) {
+              <span class="cr-feat-badge">✓ {{ feat }}</span>
+            }
+          </div>
+
+          <!-- Pricing Footer -->
+          <div class="cr-pricing-footer">
+            <div>
+              <span class="cr-price-label">Rate / Day</span>
+              <div class="cr-daily-rate">₹{{ car.dailyRate }}<span class="cr-rate-unit">/day</span></div>
+            </div>
+            <button class="cr-book-btn" (click)="openBookingModal(car)">
+              <i class="ri-calendar-check-line"></i> Reserve Now
+            </button>
+          </div>
+        </div>
+      </div>
+    }
+  </div>
+
+  <!-- Active Reservations -->
+  @if (confirmedReservations.length > 0) {
+    <div class="cr-reservations-panel">
+      <h3 class="cr-panel-title"><i class="ri-bookmark-3-line"></i> Your Active Car Reservations</h3>
+      <div class="cr-reservations-grid">
+        @for (res of confirmedReservations; track res.id) {
+          <div class="cr-reservation-card">
+            <div class="cr-res-left">
+              <img [src]="res.car.image" class="cr-res-thumb" [alt]="res.car.title"/>
+              <div>
+                <h4 class="cr-res-title">{{ res.car.title }}</h4>
+                <p class="cr-res-ref">Booking Ref: {{ res.id }} • Confirmed</p>
+                <p class="cr-res-pickup">Pickup: {{ res.pickupTime }}</p>
+              </div>
+            </div>
+            <div class="cr-res-right">
+              <span class="cr-res-total">₹{{ res.totalPaid }}</span>
+              <span class="cr-res-otp">Key OTP: {{ res.handoverOtp }}</span>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+  }
+
+  <!-- Booking Modal -->
+  @if (selectedCarForBooking) {
+    <div class="cr-modal-overlay">
+      <div class="cr-modal">
+
+        <!-- Modal Header -->
+        <div class="cr-modal-header">
+          <div>
+            <span class="cr-modal-step">Step {{ bookingStep }} of 2</span>
+            <h3 class="cr-modal-title">Confirm Rental Booking</h3>
+          </div>
+          <button class="cr-modal-close" (click)="closeBookingModal()">✕</button>
+        </div>
+
+        <!-- Modal Body -->
+        <div class="cr-modal-body">
+          <!-- Car Summary -->
+          <div class="cr-modal-car-row">
+            <img [src]="selectedCarForBooking.image" class="cr-modal-thumb" [alt]="selectedCarForBooking.title"/>
+            <div>
+              <h4 class="cr-modal-car-title">{{ selectedCarForBooking.title }}</h4>
+              <p class="cr-modal-car-meta">{{ selectedCarForBooking.type }} • {{ selectedCarForBooking.transmission }} • {{ selectedCarForBooking.seating }} Seats</p>
+              <span class="cr-modal-car-rate">Rate: ₹{{ selectedCarForBooking.dailyRate }}/day</span>
+            </div>
+          </div>
+
+          <!-- Step 1 -->
+          @if (bookingStep === 1) {
+            <div class="cr-step-form">
+              <div class="cr-form-row-2">
+                <div class="cr-field">
+                  <label class="cr-field-label">Rider Full Name</label>
+                  <input type="text" [(ngModel)]="riderName" class="cr-field-input"/>
+                </div>
+                <div class="cr-field">
+                  <label class="cr-field-label">Mobile Phone Number</label>
+                  <input type="text" [(ngModel)]="riderPhone" class="cr-field-input"/>
+                </div>
+              </div>
+              <div class="cr-field">
+                <label class="cr-field-label">Driving License Number (DL Verification)</label>
+                <input type="text" [(ngModel)]="drivingLicenseNo" placeholder="DL-142026889201" class="cr-field-input"/>
+              </div>
+              @if (doorstepDelivery) {
+                <div class="cr-field">
+                  <label class="cr-field-label">Doorstep Dropoff Address</label>
+                  <input type="text" [(ngModel)]="doorstepAddress" placeholder="Enter house/office address..." class="cr-field-input"/>
+                </div>
+              }
+              <div class="cr-protection-box">
+                <label class="cr-protection-label">
+                  <div class="cr-protection-left">
+                    <input type="checkbox" [(ngModel)]="addInsuranceProtection" class="cr-checkbox"/>
+                    <strong>Full Damage Protection &amp; Roadside Assistance</strong>
+                  </div>
+                  <span class="cr-protection-price">+ ₹299/day</span>
+                </label>
+                <p class="cr-protection-desc">Zero deductible insurance for accidental damage, flat tire, and key replacement.</p>
+              </div>
+            </div>
+          }
+
+          <!-- Step 2 -->
+          @if (bookingStep === 2) {
+            <div class="cr-fare-summary">
+              <h4 class="cr-fare-title">Itemized Rental Estimate</h4>
+              <div class="cr-fare-row">
+                <span>Base Rental Rate ({{ rentalDaysCount }} Days × ₹{{ selectedCarForBooking.dailyRate }})</span>
+                <span>₹{{ selectedCarForBooking.dailyRate * rentalDaysCount }}</span>
+              </div>
+              @if (doorstepDelivery) {
+                <div class="cr-fare-row">
+                  <span>Doorstep Delivery &amp; Pickup Fee</span><span>₹250</span>
+                </div>
+              }
+              @if (addInsuranceProtection) {
+                <div class="cr-fare-row">
+                  <span>Damage Protection Plan</span><span>₹{{ 299 * rentalDaysCount }}</span>
+                </div>
+              }
+              <div class="cr-fare-row">
+                <span>Refundable Security Deposit</span>
+                <span class="cr-fare-deposit">₹{{ selectedCarForBooking.depositAmount || 0 }} (Fully Refundable)</span>
+              </div>
+              <div class="cr-fare-row">
+                <span>GST Tax (5%)</span>
+                <span>₹{{ (selectedCarForBooking.dailyRate * rentalDaysCount * 0.05) | number:'1.2-2' }}</span>
+              </div>
+              <div class="cr-fare-total-row">
+                <span>Total Amount Payable</span>
+                <span class="cr-fare-total-amount">₹{{ calculateTotalRentalCost() | number:'1.2-2' }}</span>
+              </div>
+            </div>
+          }
+        </div>
+
+        <!-- Modal Footer -->
+        <div class="cr-modal-footer">
+          @if (bookingStep === 1) {
+            <button class="cr-modal-back-btn" (click)="closeBookingModal()">Cancel</button>
+            <button class="cr-modal-next-btn" (click)="bookingStep = 2">Proceed to Payment →</button>
+          } @else {
+            <button class="cr-modal-back-btn" (click)="bookingStep = 1">← Back</button>
+            <button class="cr-modal-confirm-btn" (click)="confirmRentalBooking()">Confirm &amp; Reserve Car Now</button>
+          }
+        </div>
+      </div>
+    </div>
+  }
+
+</div>

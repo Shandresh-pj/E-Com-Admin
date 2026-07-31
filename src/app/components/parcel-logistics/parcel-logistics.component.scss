@@ -1,0 +1,186 @@
+// ═══════════════════════════════════════════════════════════════════════════
+//  parcel-logistics.component.scss
+//  Premium Liquid Glass — Express Parcel & Freight Logistics
+// ═══════════════════════════════════════════════════════════════════════════
+@use '../_shared/mobility-glass' as g;
+
+:host { display: block; }
+
+.parcel-container {
+  min-height: 100vh;
+  color: var(--text-primary);
+  padding: 1.5rem;
+  border-radius: var(--radius-xl, 24px);
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  animation: floatUp 0.4s ease both;
+  @media (min-width: 768px) { padding: 2rem; }
+}
+
+// ── Header ────────────────────────────────────────────────────────────────
+.logistics-header {
+  @include g.glass-header(
+    rgba(234, 88, 12, 0.3),
+    rgba(15, 23, 42, 0.5),
+    rgba(79, 70, 229, 0.2),
+    rgba(249, 115, 22, 0.18)
+  );
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.header-content { position: relative; z-index: 2; }
+.badge-row { display: flex; align-items: center; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 0.5rem; }
+
+.badge {
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.625rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  &-orange { @include g.glass-badge(22); }
+  &-indigo { @include g.glass-badge(240); }
+}
+
+.pulse-dot { @include g.pulse-dot(#f97316); }
+
+.header-title {
+  font-size: 1.5rem; font-weight: 900; color: var(--text-primary); margin: 0;
+  @media (min-width: 768px) { font-size: 2.25rem; }
+}
+.header-subtitle { font-size: 0.8125rem; color: var(--text-muted); margin-top: 0.25rem; }
+
+// ── Category Tabs ─────────────────────────────────────────────────────────
+.category-tabs {
+  position: relative;
+  z-index: 5;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.375rem;
+  @include g.glass-surface(16px);
+  padding: 0.5rem;
+  border-radius: var(--radius-lg, 20px);
+  box-shadow: var(--glass-shadow);
+}
+
+.tab-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius-md, 12px);
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: all var(--transition-base);
+
+  &:hover { color: var(--text-primary); }
+
+  &.btn-orange.active { background: #ea580c; color: #fff; box-shadow: 0 4px 16px rgba(234,88,12,0.35); }
+  &.btn-indigo.active { background: var(--brand-primary); color: #fff; box-shadow: 0 4px 16px rgba(79,70,229,0.35); }
+  &.btn-purple.active { background: #9333ea; color: #fff; box-shadow: 0 4px 16px rgba(147,51,234,0.35); }
+}
+
+// ── Main Grid ─────────────────────────────────────────────────────────────
+.parcel-main-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+  @media (min-width: 1024px) { grid-template-columns: 1fr 2fr; }
+}
+
+.glass-panel {
+  @include g.glass-surface(24px);
+  border-radius: var(--radius-xl, 24px);
+  padding: 1.5rem;
+  box-shadow: var(--glass-shadow-lg);
+}
+
+.consignment-card { display: flex; flex-direction: column; gap: 1rem; }
+
+.form-title {
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding-bottom: 0.625rem;
+  border-bottom: 1px solid var(--glass-border-subtle);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  .icon-orange { color: #fb923c; font-size: 1.125rem; }
+}
+
+.form-group-stack { display: flex; flex-direction: column; gap: 0.75rem; }
+.form-group { display: flex; flex-direction: column; gap: 0.3rem; }
+
+.form-label {
+  font-size: 0.5625rem;
+  font-weight: 800;
+  color: var(--text-subtle);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.form-input { @include g.glass-input(); }
+.form-select {
+  @include g.glass-input();
+  cursor: pointer;
+  font-weight: 600;
+  option { background: var(--page-bg); color: var(--text-primary); }
+}
+
+// ── Addon Box ─────────────────────────────────────────────────────────────
+.addon-box {
+  padding: 0.875rem;
+  border-radius: var(--radius-md, 12px);
+  background: rgba(249, 115, 22, 0.06);
+  border: 1px solid rgba(249, 115, 22, 0.25);
+  transition: border-color var(--transition-base);
+  &:hover { border-color: rgba(249, 115, 22, 0.45); }
+}
+
+.addon-label { display: flex; align-items: center; justify-content: space-between; cursor: pointer; }
+.checkbox-group { display: flex; align-items: center; gap: 0.5rem; }
+.addon-checkbox { accent-color: #f97316; cursor: pointer; }
+.addon-text { font-size: 0.8125rem; font-weight: 700; color: var(--text-primary); }
+.addon-price { font-size: 0.8125rem; color: #fb923c; font-weight: 800; }
+
+// ── Submit Button ─────────────────────────────────────────────────────────
+.submit-dispatch-btn {
+  @include g.gradient-btn(#ea580c, #4f46e5, rgba(234, 88, 12, 0.35));
+  width: 100%;
+  padding: 0.875rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  font-size: 0.8125rem;
+}
+
+// ── Map + Vehicles ─────────────────────────────────────────────────────────
+.map-vehicle-section { display: flex; flex-direction: column; gap: 1.5rem; }
+
+.map-wrapper {
+  height: 300px;
+  border-radius: var(--radius-xl, 24px);
+  overflow: hidden;
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow-lg);
+}
+
+.vehicle-card-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+  @media (min-width: 640px) { grid-template-columns: repeat(2, 1fr); }
+}

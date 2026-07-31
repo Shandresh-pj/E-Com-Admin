@@ -1,0 +1,80 @@
+<div class="lt-wrapper">
+
+  <!-- Map Area -->
+  <div class="lt-map-area">
+    <app-mobility-map [pickupAddress]="selectedBooking()?.pickupLocation || 'MG Road, Bengaluru'"
+                      [dropAddress]="selectedBooking()?.dropLocation || 'Koramangala, Bengaluru'">
+    </app-mobility-map>
+
+    <!-- Top Header Bar -->
+    <div class="lt-top-bar">
+      <!-- Trip ID Badge -->
+      <div class="lt-trip-badge">
+        <span class="lt-live-dot"></span>
+        <div>
+          <div class="lt-trip-label">Live Trip Telemetry</div>
+          <div class="lt-trip-id">Trip ID: {{ selectedBooking()?.id || 'BK-99201' }}</div>
+        </div>
+      </div>
+
+      <!-- Speed / ETA Meters -->
+      <div class="lt-meters">
+        <div class="lt-meter-item">
+          <span class="lt-meter-label">Live Speed</span>
+          <span class="lt-meter-value lt-meter-value--indigo">{{ currentSpeed }} KM/H</span>
+        </div>
+        <div class="lt-meter-divider"></div>
+        <div class="lt-meter-item">
+          <span class="lt-meter-label">ETA Arrival</span>
+          <span class="lt-meter-value lt-meter-value--emerald">{{ remainingMinutes }} Mins</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bottom Dock -->
+    <div class="lt-bottom-dock">
+
+      <!-- Driver Info -->
+      <div class="lt-driver-info">
+        <div class="lt-driver-avatar-wrap">
+          <img [src]="selectedBooking()?.driver?.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80'"
+               class="lt-driver-avatar" alt="driver"/>
+        </div>
+        <div>
+          <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.2rem;">
+            <h3 class="lt-driver-name">{{ selectedBooking()?.driver?.name || 'Rajesh Kumar' }}</h3>
+            <span class="lt-driver-rating">★ {{ selectedBooking()?.driver?.rating || 4.9 }}</span>
+          </div>
+          <div class="lt-driver-vehicle">{{ selectedBooking()?.driver?.vehicle || 'Prime Sedan — KA 01 MJ 8821' }}</div>
+          <div class="lt-driver-phone">{{ selectedBooking()?.driver?.phone || '+91 98765 43210' }}</div>
+        </div>
+      </div>
+
+      <!-- Route Progress -->
+      <div class="lt-route-progress">
+        <div class="lt-route-labels">
+          <span class="lt-pickup-label">Pickup: {{ selectedBooking()?.pickupLocation || 'MG Road Metro' }}</span>
+          <span class="lt-drop-label">Drop: {{ selectedBooking()?.dropLocation || 'Koramangala 5th Block' }}</span>
+        </div>
+        <input type="range" min="0" max="100" [(ngModel)]="playbackProgress" class="lt-progress-slider"/>
+        <div class="lt-progress-km">
+          <span>0.0 KM</span>
+          <span>Route Progress: {{ playbackProgress }}%</span>
+          <span>{{ selectedBooking()?.distanceKm || 8.4 }} KM</span>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="lt-actions">
+        <button class="lt-call-btn" (click)="callDriver()">
+          <i class="ri-phone-fill"></i> Call Driver
+        </button>
+        <button class="lt-sos-btn" (click)="triggerSosEmergency()">
+          <i class="ri-alarm-warning-fill"></i> SOS Emergency
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+</div>

@@ -81,6 +81,36 @@
   --transition-spring: 400ms cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
+/* Premium Sidebar Navigation Caption Subheader Styling */
+.nav-caption {
+  font-size: 0.70rem !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.08em !important;
+  text-transform: uppercase !important;
+  color: #64748b !important;
+  padding: 16px 16px 6px !important;
+  margin-top: 8px !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  user-select: none !important;
+
+  &::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: rgba(226, 232, 240, 0.85);
+  }
+}
+html.dark .nav-caption,
+body.dark .nav-caption,
+.dark-theme .nav-caption {
+  color: #94a3b8 !important;
+  &::after {
+    background: rgba(255, 255, 255, 0.10) !important;
+  }
+}
+
 /* Dark Mode Tokens */
 html.dark, html .dark-theme {
   --glass-bg: rgba(15, 23, 42, 0.75);

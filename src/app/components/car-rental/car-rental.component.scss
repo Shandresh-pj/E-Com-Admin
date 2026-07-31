@@ -1,0 +1,644 @@
+// ═══════════════════════════════════════════════════════════════════════════
+//  car-rental.component.scss
+//  Premium Liquid Glass — Car Rental & Subscription Hub
+// ═══════════════════════════════════════════════════════════════════════════
+@use '../_shared/mobility-glass' as g;
+
+:host { display: block; }
+
+// ── Filter Chips ──────────────────────────────────────────────────────────
+.cr-filter-chips {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  padding-top: 0.875rem;
+  border-top: 1px solid var(--glass-border-subtle);
+}
+
+.cr-chips-left { display: flex; align-items: center; flex-wrap: wrap; gap: 0.5rem; }
+.cr-chips-right { font-size: 0.75rem; color: var(--text-muted); }
+.cr-count-highlight { color: var(--text-primary); font-weight: 700; }
+
+.cr-filter-label { font-size: 0.75rem; color: var(--text-subtle); font-weight: 600; }
+
+.cr-chip-btn {
+  padding: 0.375rem 0.875rem;
+  border-radius: var(--radius-md, 12px);
+  border: 1px solid var(--glass-border);
+  background: var(--glass-bg);
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all var(--transition-base);
+
+  &--active, &:hover {
+    background: rgba(16,185,129,0.12);
+    color: var(--color-success);
+    border-color: rgba(16,185,129,0.4);
+  }
+
+  &--active-indigo {
+    background: rgba(79,70,229,0.12);
+    color: #818cf8;
+    border-color: rgba(79,70,229,0.4);
+  }
+}
+
+.cr-chip-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.375rem 0.875rem;
+  border-radius: var(--radius-md, 12px);
+  border: 1px solid var(--glass-border);
+  background: var(--glass-bg);
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.cr-checkbox { accent-color: #10b981; cursor: pointer; }
+
+// ── Packages Bar ──────────────────────────────────────────────────────────
+.cr-packages-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+  @media (min-width: 768px) { grid-template-columns: repeat(4, 1fr); }
+}
+
+.cr-package-card {
+  @include g.glass-surface(16px);
+  border-radius: var(--radius-lg, 20px);
+  padding: 1.125rem;
+  cursor: pointer;
+  transition: all var(--transition-base);
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+
+  &--active {
+    border-color: rgba(16,185,129,0.55);
+    background: rgba(16,185,129,0.07);
+    box-shadow: 0 0 24px rgba(16,185,129,0.15), inset 0 0 0 1px rgba(16,185,129,0.3);
+  }
+
+  &:hover:not(.cr-package-card--active) { border-color: var(--glass-border); background: var(--glass-bg-hover); }
+}
+
+.cr-package-label { font-size: 0.5625rem; text-transform: uppercase; font-weight: 800; color: var(--text-subtle); letter-spacing: 0.08em; }
+.cr-package-name  { font-size: 0.75rem; font-weight: 700; color: var(--text-primary); margin: 0; }
+.cr-package-price { font-size: 0.875rem; font-weight: 900; color: var(--color-success); margin: 0; }
+
+// ── Fleet Card Additional Classes ──────────────────────────────────────────
+.cr-card-badges-top {
+  position: absolute;
+  top: 0.75rem;
+  left: 0.75rem;
+  right: 0.75rem;
+  display: flex;
+  justify-content: space-between;
+  z-index: 5;
+}
+
+.cr-cat-chip {
+  padding: 0.25rem 0.5rem;
+  border-radius: 9999px;
+  font-size: 0.5625rem;
+  font-weight: 700;
+  background: rgba(0,0,0,0.7);
+  backdrop-filter: blur(8px);
+  color: #e2e8f0;
+  border: 1px solid rgba(255,255,255,0.12);
+}
+
+.cr-fuel-chip {
+  padding: 0.25rem 0.5rem;
+  border-radius: 9999px;
+  font-size: 0.5625rem;
+  font-weight: 700;
+  background: rgba(99,102,241,0.15);
+  color: #a5b4fc;
+  border: 1px solid rgba(99,102,241,0.3);
+
+  &--ev {
+    background: rgba(16,185,129,0.15);
+    color: #6ee7b7;
+    border-color: rgba(16,185,129,0.3);
+  }
+}
+
+.cr-rating-badge {
+  position: absolute;
+  bottom: 0.75rem;
+  left: 0.75rem;
+  padding: 0.2rem 0.625rem;
+  border-radius: 9999px;
+  font-size: 0.5625rem;
+  font-weight: 800;
+  background: rgba(0,0,0,0.8);
+  backdrop-filter: blur(8px);
+  color: #fbbf24;
+  border: 1px solid rgba(245,158,11,0.3);
+  z-index: 5;
+}
+
+.cr-car-location {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.6875rem;
+  color: var(--text-muted);
+  margin: 0.2rem 0 0;
+  i { color: var(--color-success); }
+}
+
+.cr-specs-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.5rem;
+  padding: 0.625rem 0;
+  border-top: 1px solid var(--glass-border-subtle);
+  border-bottom: 1px solid var(--glass-border-subtle);
+}
+
+.cr-spec-item { display: flex; flex-direction: column; gap: 0.1rem; }
+.cr-spec-label { font-size: 0.5625rem; text-transform: uppercase; color: var(--text-subtle); font-weight: 700; }
+.cr-spec-value { font-size: 0.75rem; font-weight: 700; color: var(--text-primary); &--emerald { color: var(--color-success); } }
+
+.cr-features-row { display: flex; flex-wrap: wrap; gap: 0.25rem; }
+.cr-feat-badge {
+  padding: 0.15rem 0.5rem;
+  border-radius: var(--radius-sm, 6px);
+  font-size: 0.5625rem;
+  background: var(--glass-bg);
+  color: var(--text-muted);
+  border: 1px solid var(--glass-border-subtle);
+}
+
+.cr-pricing-footer {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--glass-border-subtle);
+  margin-top: auto;
+}
+
+.cr-price-label { font-size: 0.5625rem; text-transform: uppercase; color: var(--text-subtle); display: block; margin-bottom: 0.15rem; }
+.cr-daily-rate  { font-size: 1.375rem; font-weight: 900; color: var(--color-success); letter-spacing: -0.02em; font-family: var(--font-display); }
+.cr-rate-unit   { font-size: 0.75rem; color: var(--text-muted); font-weight: 400; }
+
+// ── Active Reservations Panel ─────────────────────────────────────────────
+.cr-reservations-panel {
+  @include g.glass-surface(24px);
+  border-radius: var(--radius-xl, 24px);
+  padding: 1.5rem;
+  box-shadow: var(--glass-shadow-lg);
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.cr-panel-title {
+  font-size: 0.9375rem; font-weight: 700; color: var(--text-primary);
+  display: flex; align-items: center; gap: 0.5rem;
+  i { color: var(--color-success); }
+}
+
+.cr-reservations-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.75rem;
+  @media (min-width: 768px) { grid-template-columns: repeat(2, 1fr); }
+}
+
+.cr-reservation-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem;
+  border-radius: var(--radius-lg, 20px);
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border-subtle);
+  transition: border-color var(--transition-base);
+  animation: slideInUp 0.3s ease both;
+  &:hover { border-color: rgba(16,185,129,0.35); }
+}
+
+.cr-res-left { display: flex; align-items: center; gap: 0.75rem; }
+.cr-res-thumb { width: 4rem; height: 3rem; border-radius: var(--radius-sm, 8px); object-fit: cover; border: 1px solid var(--glass-border-subtle); }
+.cr-res-title { font-size: 0.8125rem; font-weight: 700; color: var(--text-primary); margin: 0 0 0.15rem; }
+.cr-res-ref   { font-size: 0.6875rem; color: var(--color-success); margin: 0 0 0.1rem; }
+.cr-res-pickup{ font-size: 0.6875rem; color: var(--text-muted); margin: 0; }
+.cr-res-right { text-align: right; flex-shrink: 0; display: flex; flex-direction: column; gap: 0.25rem; align-items: flex-end; }
+.cr-res-total { font-size: 0.875rem; font-weight: 800; color: var(--text-primary); }
+.cr-res-otp   { padding: 0.15rem 0.5rem; border-radius: var(--radius-sm, 6px); font-size: 0.5625rem; font-weight: 800; background: rgba(16,185,129,0.12); color: var(--color-success); border: 1px solid rgba(16,185,129,0.3); }
+
+// ── Booking Modal ─────────────────────────────────────────────────────────
+.cr-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  background: rgba(2, 6, 23, 0.78);
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  animation: fadeIn 0.2s ease both;
+}
+
+.cr-modal {
+  position: relative;
+  width: 100%;
+  max-width: 38rem;
+  max-height: 92vh;
+  overflow-y: auto;
+  border-radius: var(--radius-xl, 24px);
+  @include g.glass-surface(28px);
+  box-shadow: var(--glass-shadow-lg), 0 0 60px rgba(16,185,129,0.12);
+  animation: scaleIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  color: var(--text-primary);
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+
+  &::before {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0; height: 2px;
+    background: linear-gradient(90deg, #10b981, #4f46e5);
+    border-radius: var(--radius-xl, 24px) var(--radius-xl, 24px) 0 0;
+  }
+}
+
+.cr-modal-header {
+  display: flex; justify-content: space-between; align-items: flex-start;
+  padding-bottom: 1rem; border-bottom: 1px solid var(--glass-border-subtle);
+}
+
+.cr-modal-step   { font-size: 0.5625rem; font-weight: 800; text-transform: uppercase; color: var(--color-success); letter-spacing: 0.08em; display: block; margin-bottom: 0.2rem; }
+.cr-modal-title  { font-size: 1.125rem; font-weight: 900; color: var(--text-primary); margin: 0; letter-spacing: -0.01em; }
+
+.cr-modal-close {
+  width: 2rem; height: 2rem; border-radius: 50%;
+  background: var(--glass-bg); border: 1px solid var(--glass-border);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.875rem; color: var(--text-muted); cursor: pointer;
+  transition: all var(--transition-base); flex-shrink: 0;
+  &:hover { background: var(--color-error-bg); color: var(--color-error); border-color: var(--color-error); transform: rotate(90deg); }
+}
+
+.cr-modal-body { display: flex; flex-direction: column; gap: 1rem; }
+
+.cr-modal-car-row {
+  display: flex; align-items: center; gap: 1rem; padding: 1rem;
+  border-radius: var(--radius-lg, 20px); background: var(--glass-bg);
+  border: 1px solid rgba(16,185,129,0.2);
+}
+
+.cr-modal-thumb   { width: 5rem; height: 3.5rem; border-radius: var(--radius-sm, 8px); object-fit: cover; border: 1px solid rgba(16,185,129,0.3); flex-shrink: 0; }
+.cr-modal-car-title{ font-size: 0.9375rem; font-weight: 800; color: var(--text-primary); margin: 0 0 0.15rem; }
+.cr-modal-car-meta { font-size: 0.75rem; color: var(--text-muted); margin: 0 0 0.15rem; }
+.cr-modal-car-rate { font-size: 0.75rem; font-weight: 800; color: var(--color-success); }
+
+.cr-step-form { display: flex; flex-direction: column; gap: 0.875rem; }
+.cr-form-row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+
+.cr-protection-box {
+  padding: 0.875rem; border-radius: var(--radius-md, 12px);
+  background: rgba(79,70,229,0.06); border: 1px solid rgba(79,70,229,0.25);
+}
+.cr-protection-label { display: flex; align-items: center; justify-content: space-between; cursor: pointer; }
+.cr-protection-left  { display: flex; align-items: center; gap: 0.5rem; font-size: 0.8125rem; font-weight: 700; color: var(--text-primary); }
+.cr-protection-price { font-size: 0.8125rem; font-weight: 700; color: #818cf8; flex-shrink: 0; }
+.cr-protection-desc  { font-size: 0.6875rem; color: var(--text-muted); margin: 0.375rem 0 0 1.5rem; }
+
+// ── Fare Summary ──────────────────────────────────────────────────────────
+.cr-fare-summary {
+  display: flex; flex-direction: column; gap: 0.625rem; padding: 1rem;
+  border-radius: var(--radius-lg, 20px); background: var(--glass-bg);
+  border: 1px solid var(--glass-border-subtle);
+}
+
+.cr-fare-title {
+  font-size: 0.6875rem; font-weight: 800; text-transform: uppercase;
+  color: var(--text-subtle); letter-spacing: 0.08em;
+  padding-bottom: 0.5rem; border-bottom: 1px solid var(--glass-border-subtle);
+  margin-bottom: 0.25rem;
+}
+
+.cr-fare-row {
+  display: flex; justify-content: space-between; align-items: center;
+  font-size: 0.8125rem; color: var(--text-secondary);
+  span:last-child { font-weight: 600; color: var(--text-primary); }
+}
+
+.cr-fare-deposit { color: var(--color-success) !important; font-weight: 700 !important; }
+
+.cr-fare-total-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding-top: 0.75rem; border-top: 1px solid var(--glass-border-subtle);
+  font-size: 0.9375rem; font-weight: 800; color: var(--text-primary);
+}
+
+.cr-fare-total-amount { font-size: 1.5rem; font-weight: 900; color: var(--color-success); font-family: var(--font-display); }
+
+// ── Modal Footer Buttons ──────────────────────────────────────────────────
+.cr-modal-footer {
+  display: flex; justify-content: space-between; align-items: center;
+  padding-top: 1rem; border-top: 1px solid var(--glass-border-subtle);
+  gap: 0.75rem;
+}
+
+.cr-modal-back-btn {
+  padding: 0.625rem 1.25rem; border-radius: var(--radius-md, 12px);
+  background: var(--glass-bg); border: 1px solid var(--glass-border);
+  color: var(--text-muted); font-size: 0.8125rem; font-weight: 700;
+  cursor: pointer; transition: all var(--transition-base);
+  &:hover { color: var(--text-primary); background: var(--glass-bg-hover); }
+}
+
+.cr-modal-next-btn {
+  @include g.gradient-btn(#059669, #10b981, rgba(5,150,105,0.35));
+  padding: 0.75rem 1.5rem;
+}
+
+.cr-modal-confirm-btn {
+  @include g.gradient-btn(#059669, #4f46e5, rgba(5,150,105,0.35));
+  padding: 0.75rem 1.5rem;
+}
+
+// ── Page Container (Tailwind compat wrapper) ─────────────────────────────
+.cr-page {
+  min-height: 100vh;
+  color: var(--text-primary);
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  animation: floatUp 0.4s ease both;
+  @media (min-width: 768px) { padding: 2rem; }
+}
+
+// ── Hero Header ────────────────────────────────────────────────────────────
+.rental-hero-glass {
+  @include g.glass-header(
+    rgba(6, 78, 59, 0.35),
+    rgba(15, 23, 42, 0.55),
+    rgba(49, 46, 129, 0.3),
+    rgba(16, 185, 129, 0.15)
+  );
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  margin-bottom: 0;
+
+  @media (min-width: 1024px) {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+}
+
+.cr-hero-content { position: relative; z-index: 2; }
+
+.cr-hero-badges {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 0.625rem;
+}
+
+.cr-badge-emerald { @include g.glass-badge(160); }
+.cr-badge-indigo  { @include g.glass-badge(240); }
+.cr-badge-amber   { @include g.glass-badge(45); }
+
+.cr-hero-title {
+  font-size: 1.75rem; font-weight: 900; color: var(--text-primary);
+  letter-spacing: -0.025em; margin: 0 0 0.25rem;
+  @media (min-width: 768px) { font-size: 2.5rem; }
+}
+
+.cr-hero-subtitle { font-size: 0.8125rem; color: var(--text-muted); margin: 0; }
+
+// ── Category Filter Pills ─────────────────────────────────────────────────
+.cr-filter-pills {
+  position: relative;
+  z-index: 5;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.375rem;
+  @include g.glass-surface(16px);
+  padding: 0.5rem;
+  border-radius: var(--radius-lg, 20px);
+  box-shadow: var(--glass-shadow);
+}
+
+.cr-pill-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius-md, 12px);
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: all var(--transition-base);
+
+  &:hover { color: var(--text-primary); }
+  &--self-drive.active { background: #059669; color: #fff; box-shadow: 0 4px 16px rgba(5,150,105,0.35); }
+  &--chauffeur.active  { background: var(--brand-primary); color: #fff; box-shadow: 0 4px 16px rgba(79,70,229,0.35); }
+  &--luxury.active     { background: #d97706; color: #fff; box-shadow: 0 4px 16px rgba(217,119,6,0.35); }
+}
+
+// ── Search & Reservation Bar ──────────────────────────────────────────────
+.cr-reservation-bar {
+  @include g.glass-surface(24px);
+  border-radius: var(--radius-xl, 24px);
+  padding: 1.5rem;
+  box-shadow: var(--glass-shadow-lg);
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.cr-reservation-title {
+  font-size: 0.8125rem; font-weight: 700; color: var(--text-primary);
+  text-transform: uppercase; letter-spacing: 0.06em;
+  display: flex; align-items: center; gap: 0.5rem;
+  padding-bottom: 0.625rem;
+  border-bottom: 1px solid var(--glass-border-subtle);
+  .icon-emerald { color: var(--color-success); }
+}
+
+.cr-reservation-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+  @media (min-width: 768px) { grid-template-columns: repeat(4, 1fr); }
+}
+
+.cr-field { display: flex; flex-direction: column; gap: 0.3rem; }
+
+.cr-field-label {
+  font-size: 0.5625rem; font-weight: 800; color: var(--text-subtle);
+  text-transform: uppercase; letter-spacing: 0.08em;
+}
+
+.cr-field-input  { @include g.glass-input(); }
+.cr-field-select {
+  @include g.glass-input();
+  cursor: pointer;
+  option { background: var(--page-bg); color: var(--text-primary); }
+}
+
+.cr-duration-display {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius-md, 12px);
+  background: rgba(16, 185, 129, 0.06);
+  border: 1px solid rgba(16, 185, 129, 0.25);
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: var(--color-success);
+}
+
+.cr-unlim-badge {
+  font-size: 0.5625rem;
+  background: rgba(16,185,129,0.15);
+  padding: 0.2rem 0.5rem;
+  border-radius: var(--radius-sm, 8px);
+  color: var(--color-success);
+  border: 1px solid rgba(16,185,129,0.3);
+}
+
+// ── Fleet Cards Grid ──────────────────────────────────────────────────────
+.cr-fleet-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+  @media (min-width: 640px)  { grid-template-columns: repeat(2, 1fr); }
+  @media (min-width: 1280px) { grid-template-columns: repeat(3, 1fr); }
+}
+
+.fleet-card-glass {
+  @include g.glass-surface(20px);
+  @include g.glass-card-shimmer();
+  border-radius: 1.75rem;
+  overflow: hidden;
+  transition: all var(--transition-spring);
+  animation: floatUp 0.5s ease both;
+  @for $i from 1 through 9 { &:nth-child(#{$i}) { animation-delay: #{$i * 0.06}s; } }
+
+  &:hover {
+    transform: translateY(-6px);
+    border-color: rgba(16, 185, 129, 0.45);
+    box-shadow: var(--glass-shadow-lg), 0 0 28px rgba(16, 185, 129, 0.15);
+
+    .cr-car-image { transform: scale(1.06); }
+  }
+}
+
+// ── Car Image ─────────────────────────────────────────────────────────────
+.cr-image-wrap {
+  position: relative;
+  height: 11rem;
+  overflow: hidden;
+  background: linear-gradient(135deg, rgba(6,78,59,0.3), rgba(15,23,42,0.8));
+}
+
+.cr-car-image {
+  width: 100%; height: 100%; object-fit: cover;
+  transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.cr-image-gradient {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(0,0,0,0.7), transparent 60%);
+  pointer-events: none;
+}
+
+.cr-status-badge {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+}
+
+.cr-available { @include g.status-pill(160, 75%, 55%, 0.15); }
+.cr-reserved  { @include g.status-pill(0, 70%, 60%, 0.15); }
+
+.cr-type-badge {
+  position: absolute;
+  bottom: 0.75rem;
+  left: 0.75rem;
+  @include g.glass-badge(160);
+}
+
+// ── Card Body ─────────────────────────────────────────────────────────────
+.cr-card-body { padding: 1.25rem; display: flex; flex-direction: column; gap: 0.75rem; }
+
+.cr-car-title { font-size: 1rem; font-weight: 800; color: var(--text-primary); margin: 0; }
+
+.cr-car-specs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.375rem;
+}
+
+.cr-spec-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+  padding: 0.2rem 0.5rem;
+  border-radius: var(--radius-sm, 8px);
+  font-size: 0.625rem;
+  font-weight: 700;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border-subtle);
+  color: var(--text-muted);
+}
+
+// ── Pricing ───────────────────────────────────────────────────────────────
+.cr-pricing { display: flex; align-items: flex-end; justify-content: space-between; }
+
+.cr-price-block {}
+.cr-price-label { font-size: 0.5625rem; font-weight: 800; color: var(--text-subtle); text-transform: uppercase; display: block; margin-bottom: 0.15rem; }
+.cr-daily-rate  { font-size: 1.375rem; font-weight: 900; color: var(--color-success); letter-spacing: -0.02em; font-family: var(--font-display); }
+.cr-hourly-rate { font-size: 0.6875rem; color: var(--text-muted); margin-top: 0.1rem; }
+
+.cr-book-btn {
+  @include g.gradient-btn(#059669, #10b981, rgba(5,150,105,0.35));
+  display: flex; align-items: center; gap: 0.375rem;
+  padding: 0.625rem 1.125rem; font-size: 0.75rem;
+}
+
+// ── Rental Detail Packages ─────────────────────────────────────────────────
+.package-pill-glass {
+  @include g.glass-surface(16px);
+  border-radius: var(--radius-md, 12px);
+  padding: 0.875rem;
+  cursor: pointer;
+  transition: all var(--transition-base);
+
+  &:hover, &.is-active {
+    background: rgba(16, 185, 129, 0.08);
+    border-color: rgba(16, 185, 129, 0.45);
+    box-shadow: 0 0 20px rgba(16, 185, 129, 0.15);
+  }
+}

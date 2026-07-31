@@ -11,7 +11,7 @@ const EM = UserType.EMPLOYEE;
 
 export const navItems: NavItem[] = [
   {
-    navCap: 'Home',
+    navCap: 'Main',
   },
   {
     displayName: 'Dashboard',
@@ -20,11 +20,62 @@ export const navItems: NavItem[] = [
     bgcolor: 'primary',
   },
   {
-    navCap: 'Admin',
+    navCap: 'Mobility & Fleet',
+  },
+  {
+    displayName: 'Mobility Cockpit',
+    iconName: 'car',
+    route: '/dashboard/mobility-dashboard',
+    bgcolor: 'primary',
+  },
+  {
+    displayName: 'Ride Booking',
+    iconName: 'steering-wheel',
+    route: '/dashboard/ride-booking',
+    bgcolor: 'success',
+  },
+  {
+    displayName: 'Car Rentals',
+    iconName: 'key',
+    route: '/dashboard/car-rental',
+    bgcolor: 'warning',
+  },
+  {
+    displayName: 'Parcel Logistics',
+    iconName: 'truck',
+    route: '/dashboard/parcel-logistics',
+    bgcolor: 'error',
+  },
+  {
+    displayName: 'Fleet Management',
+    iconName: 'radar',
+    route: '/dashboard/fleet-management',
+    bgcolor: 'info',
+  },
+  {
+    displayName: 'Corporate Transit',
+    iconName: 'building',
+    route: '/dashboard/corporate-transport',
+    bgcolor: 'primary',
+  },
+  {
+    displayName: 'Live Tracking',
+    iconName: 'map-pin',
+    route: '/dashboard/live-tracking',
+    bgcolor: 'success',
+  },
+  {
+    displayName: 'Driver Verification',
+    iconName: 'user-check',
+    route: '/dashboard/vehicle-driver-verification',
+    bgcolor: 'warning',
+  },
+  {
+    navCap: 'Administration',
     roles: [SA, A, BR],
   },
   {
-    displayName: 'App Admin',
+    displayName: 'Admin Console',
     iconName: 'shield',
     route: '/admin',
     bgcolor: 'primary',
@@ -38,11 +89,11 @@ export const navItems: NavItem[] = [
     roles: [SA, A, BR],
   },
   {
-    navCap: 'Branch',
+    navCap: 'Branch Control',
     roles: [SA, A, BR, BM],
   },
   {
-    displayName: 'App Branch',
+    displayName: 'Branches',
     iconName: 'building-store',
     route: '/branch',
     bgcolor: 'warning',
@@ -53,64 +104,64 @@ export const navItems: NavItem[] = [
     roles: [SA, A, BR, BM],
   },
   {
-    displayName: 'App Employee',
+    displayName: 'Employee Roster',
     iconName: 'user-check',
     route: '/employees',
     bgcolor: 'success',
     roles: [SA, A, BR, BM],
   },
   {
-    navCap: 'Roles',
+    navCap: 'Access & Security',
     roles: [SA, A, BR],
   },
   {
-    displayName: 'App Role Access',
+    displayName: 'Role Permissions',
     iconName: 'lock-access',
     route: '/role-access',
     bgcolor: 'warning',
     roles: [SA, A, BR, BM],
   },
   {
-    displayName: 'App Roles',
+    displayName: 'System Roles',
     iconName: 'key',
     route: '/roles',
     bgcolor: 'success',
     roles: [SA, A, BR],
   },
 
-  { navCap: 'Catalog', roles: [SA, A, BR, BM, SK] },
+  { navCap: 'Catalog & Products', roles: [SA, A, BR, BM, SK] },
   {
-    displayName: 'Product Attribute',
+    displayName: 'Product Attributes',
     iconName: 'tag',
     route: '/product-attribute',
     bgcolor: 'primary',
     roles: [SA, A, BR, BM, SK],
   },
   {
-    displayName: 'Attribute Value',
+    displayName: 'Attribute Values',
     iconName: 'list-details',
     route: '/attribute-value',
     bgcolor: 'warning',
     roles: [SA, A, BR, BM, SK],
   },
   {
-    displayName: 'Category',
+    displayName: 'Categories',
     iconName: 'category',
     route: '/category',
     bgcolor: 'success',
     roles: [SA, A, BR, BM, SK],
   },
   {
-    displayName: 'Product',
+    displayName: 'Products',
     iconName: 'box',
     route: '/product',
     bgcolor: 'error',
     roles: [SA, A, BR, BM, SK, EM],
   },
 
-  { navCap: 'Sales', roles: [SA, A, BR, BM, SK] },
+  { navCap: 'Sales & Billing', roles: [SA, A, BR, BM, SK] },
   {
-    displayName: 'POS Billing Machine',
+    displayName: 'POS Terminal',
     iconName: 'receipt-2',
     route: '/pos-billing',
     bgcolor: 'success',
@@ -131,28 +182,28 @@ export const navItems: NavItem[] = [
     roles: [SA, A, BR, BM, SK],
   },
   {
-    displayName: 'Invoice Generator',
+    displayName: 'Invoices',
     iconName: 'file-text',
     route: '/invoices',
     bgcolor: 'warning',
     roles: [SA, A, BR, BM, SK]
   },
   {
-    displayName: 'Manage Plans',
+    displayName: 'Subscription Plans',
     iconName: 'diamond',
     route: '/manage-subscription-plans',
     bgcolor: 'secondary',
     roles: [SA, A, BR]
   },
   {
-    displayName: 'Upgrade Plan',
+    displayName: 'Plan Upgrade',
     iconName: 'premium-rights',
     route: '/subscription-plans',
     bgcolor: 'primary',
     roles: [SA, A, BR, BM]
   },
   {
-    displayName: 'Billing & Invoices',
+    displayName: 'Billing History',
     iconName: 'receipt',
     route: '/billing-history',
     bgcolor: 'success',
@@ -166,14 +217,14 @@ export const navItems: NavItem[] = [
     roles: [SA, A, BR]
   },
   {
-    displayName: 'Payment Checkout',
+    displayName: 'Checkout',
     iconName: 'credit-card',
     route: '/checkout',
     bgcolor: 'info',
     roles: [SA, A, BR, BM, SK, EM, DB]
   },
 
-  { navCap: 'Audit', roles: [SA, A, BR, BM] },
+  { navCap: 'Audit & Compliance', roles: [SA, A, BR, BM] },
   {
     displayName: 'Audit Logs',
     iconName: 'clipboard-list',
@@ -182,9 +233,9 @@ export const navItems: NavItem[] = [
     roles: [SA, A, BR, BM],
   },
 
-  { navCap: 'Inventory & Stocks', roles: [SA, A, BR, BM, SK] },
+  { navCap: 'Inventory & Stock', roles: [SA, A, BR, BM, SK] },
   {
-    displayName: 'Stocks',
+    displayName: 'Stock Inventory',
     iconName: 'box-seam',
     route: '/stocks',
     bgcolor: 'primary',
@@ -200,7 +251,7 @@ export const navItems: NavItem[] = [
 
   { navCap: 'Logistics & Finance', roles: [SA, A, BR, BM, SK] },
   {
-    displayName: 'Hardware & Devices',
+    displayName: 'Hardware Devices',
     iconName: 'devices',
     route: '/devices',
     bgcolor: 'warning',
@@ -221,44 +272,44 @@ export const navItems: NavItem[] = [
     roles: [SA, A, BR, BM, DB],
   },
   {
-    displayName: 'Payments',
+    displayName: 'Payment Records',
     iconName: 'credit-card',
     route: '/payments',
     bgcolor: 'success',
     roles: [SA, A, BR, BM, SK],
   },
 
-  { navCap: 'Workforce', roles: [SA, A, BR, BM, SK, DB, EM] },
+  { navCap: 'Workforce & HR', roles: [SA, A, BR, BM, SK, DB, EM] },
   {
-    displayName: 'Workforce Console',
+    displayName: 'Workforce Hub',
     iconName: 'settings',
     route: '/workforce',
     bgcolor: 'primary',
     roles: [SA, A, BR, BM],
   },
   {
-    displayName: 'Shifts & Schedules',
+    displayName: 'Shifts & Rosters',
     iconName: 'clock',
     route: '/shifts',
     bgcolor: 'info',
     roles: [SA, A, BR, BM],
   },
   {
-    displayName: 'Break Deduction Rules',
+    displayName: 'Break Rules',
     iconName: 'cup',
     route: '/break-policies',
     bgcolor: 'warning',
     roles: [SA, A, BR, BM],
   },
   {
-    displayName: 'Biometric Sensors',
+    displayName: 'Biometrics',
     iconName: 'fingerprint',
     route: '/biometric',
     bgcolor: 'success',
     roles: [SA, A, BR, BM],
   },
   {
-    displayName: 'GPS Geofencing',
+    displayName: 'Geofencing',
     iconName: 'map-pin',
     route: '/geofencing',
     bgcolor: 'error',
@@ -286,14 +337,14 @@ export const navItems: NavItem[] = [
     roles: [SA, A, BR, BM, SK, DB, EM],
   },
   {
-    displayName: 'Company Calendar',
+    displayName: 'Calendar',
     iconName: 'calendar-event',
     route: '/calendar',
     bgcolor: 'info',
     roles: [SA, A, BR, BM, EM],
   },
   {
-    displayName: 'Document Verification',
+    displayName: 'Employee Documents',
     iconName: 'file-check',
     route: '/employee-documents',
     bgcolor: 'warning',
@@ -307,16 +358,16 @@ export const navItems: NavItem[] = [
     roles: [SA, A, BR, BM, EM],
   },
 
-  { navCap: 'Operations & Workflows', roles: [SA, A, BR, BM, SK, EM] },
+  { navCap: 'Operations & Alerts', roles: [SA, A, BR, BM, SK, EM] },
   {
-    displayName: 'Workflow Approvals',
+    displayName: 'Approvals',
     iconName: 'checkup-list',
     route: '/approvals',
     bgcolor: 'primary',
     roles: [SA, A, BR, BM, SK, EM],
   },
   {
-    displayName: 'Alerts',
+    displayName: 'System Alerts',
     iconName: 'alert-circle',
     route: '/alerts',
     bgcolor: 'error',
@@ -328,7 +379,23 @@ export const navItems: NavItem[] = [
     bgcolor: 'warning',
   },
 
-  { navCap: 'Settings' },
+  { navCap: 'Communication', roles: [SA, A, BR, BM, SK, DB, EM] },
+  {
+    displayName: 'Secure Chat',
+    iconName: 'messages',
+    route: '/communication',
+    bgcolor: 'primary',
+    roles: [SA, A, BR, BM, SK, DB, EM],
+  },
+  {
+    displayName: 'Team Meetings',
+    iconName: 'video',
+    route: '/communication/meetings',
+    bgcolor: 'success',
+    roles: [SA, A, BR, BM, SK, DB, EM],
+  },
+
+  { navCap: 'System Settings' },
   {
     displayName: 'Profile',
     iconName: 'user',
@@ -336,21 +403,21 @@ export const navItems: NavItem[] = [
     bgcolor: 'primary',
   },
   {
-    displayName: 'Translation Console',
+    displayName: 'Translations',
     iconName: 'language',
     route: '/translations',
     bgcolor: 'primary',
     roles: [SA, A, BR],
   },
   {
-    displayName: 'Menu Bar',
+    displayName: 'Menu Config',
     iconName: 'layout-navbar',
     route: '/menu-bar',
     bgcolor: 'warning',
     roles: [SA, A, BR],
   },
   {
-    displayName: 'Status',
+    displayName: 'System Status',
     iconName: 'list-check',
     route: '/status',
     bgcolor: 'warning',

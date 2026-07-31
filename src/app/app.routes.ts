@@ -1,4 +1,3 @@
-
 import { Routes } from '@angular/router';
 
 import { BlankComponent } from './layouts/blank/blank.component';
@@ -17,20 +16,20 @@ export const routes: Routes = [
   {
     path: '',
     component: HomeComponent,
-    title: 'Enterprise ERP & Multi-Vendor OS',
+    title: 'Enterprise ERP & Mobility OS',
     pathMatch: 'full'
   },
 
   {
     path: 'home',
     component: HomeComponent,
-    title: 'Enterprise ERP & Multi-Vendor OS'
+    title: 'Enterprise ERP & Mobility OS'
   },
 
   {
     path: 'contact',
     component: ContactComponent,
-    title: 'Enterprise Workspace Request & Zero-Trust Check'
+    title: 'Workspace Access & Support'
   },
 
   // Public pages
@@ -60,6 +59,70 @@ export const routes: Routes = [
       },
 
       {
+        path: 'mobility-dashboard',
+        loadComponent: () =>
+          import('./components/mobility-dashboard/mobility-dashboard.component')
+            .then(m => m.MobilityDashboardComponent),
+        title: 'Mobility Cockpit'
+      },
+
+      {
+        path: 'ride-booking',
+        loadComponent: () =>
+          import('./components/ride-booking/ride-booking.component')
+            .then(m => m.RideBookingComponent),
+        title: 'Ride Booking'
+      },
+
+      {
+        path: 'car-rental',
+        loadComponent: () =>
+          import('./components/car-rental/car-rental.component')
+            .then(m => m.CarRentalComponent),
+        title: 'Car Rentals'
+      },
+
+      {
+        path: 'parcel-logistics',
+        loadComponent: () =>
+          import('./components/parcel-logistics/parcel-logistics.component')
+            .then(m => m.ParcelLogisticsComponent),
+        title: 'Parcel Logistics'
+      },
+
+      {
+        path: 'fleet-management',
+        loadComponent: () =>
+          import('./components/fleet-management/fleet-management.component')
+            .then(m => m.FleetManagementComponent),
+        title: 'Fleet Management'
+      },
+
+      {
+        path: 'corporate-transport',
+        loadComponent: () =>
+          import('./components/corporate-transport/corporate-transport.component')
+            .then(m => m.CorporateTransportComponent),
+        title: 'Corporate Transit'
+      },
+
+      {
+        path: 'live-tracking',
+        loadComponent: () =>
+          import('./components/live-tracking/live-tracking.component')
+            .then(m => m.LiveTrackingComponent),
+        title: 'Live Tracking'
+      },
+
+      {
+        path: 'vehicle-driver-verification',
+        loadComponent: () =>
+          import('./components/vehicle-driver-verification/vehicle-driver-verification.component')
+            .then(m => m.VehicleDriverVerificationComponent),
+        title: 'Driver Verification'
+      },
+
+      {
         path: 'subscription-plans',
         loadComponent: () => 
           import('./pages/subscription-plans/subscription-plans.component')
@@ -72,7 +135,7 @@ export const routes: Routes = [
         loadComponent: () => 
           import('./pages/billing-history/billing-history')
             .then(m => m.BillingHistoryComponent),
-        title: 'Billing & Invoice History'
+        title: 'Billing History'
       },
 
       {
@@ -88,9 +151,8 @@ export const routes: Routes = [
         loadComponent: () => 
           import('./components/standard-checkout/standard-checkout')
             .then(m => m.StandardCheckoutComponent),
-        title: 'Standard Payment Checkout'
+        title: 'Checkout'
       },
-
 
       {
         path: '',
@@ -113,7 +175,6 @@ export const routes: Routes = [
             .then(m => m.ComponentsRoutes)
       },
 
-      // Direct route shortcuts removed since routes are now natively flat.
     ]
   },
 

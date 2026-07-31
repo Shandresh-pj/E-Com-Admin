@@ -11,5 +11,6 @@ export const environment = {
   // ⚠️  CRITICAL: Use a LIVE key (rzp_live_...) in production.
   //               Test keys (rzp_test_...) will NOT process real payments.
   //               Replace this with the live key from your Razorpay Dashboard.
-  razorpayKeyId: 'rzp_test_TE4sr2G8bmm7c3' // ← REPLACE WITH rzp_live_... for production
+  razorpayKeyId: 'rzp_test_TE4sr2G8bmm7c3', // ← REPLACE WITH rzp_live_... for production
+  googleMapsApiKey: 'YOUR_GOOGLE_MAPS_API_KEY'
 };

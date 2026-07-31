@@ -1,0 +1,110 @@
+<div class="parcel-container">
+  
+  <!-- Header Banner -->
+  <div class="logistics-header">
+    <div class="header-glow"></div>
+    <div class="header-content">
+      <div class="badge-row">
+        <span class="badge badge-orange">Porter / Blowhorn / Dunzo Enterprise</span>
+        <span class="badge badge-indigo"><span class="pulse-dot"></span> Instant Delivery & Freight Dispatch</span>
+      </div>
+      <h1 class="header-title">Express Parcel & Freight Logistics</h1>
+      <p class="header-subtitle">Book 2-wheeler express parcel delivery, Tata Ace (Chota Hathi), Bolero Pickup, 14ft LCV, and heavy container freight trucks.</p>
+    </div>
+
+    <!-- Category Tabs -->
+    <div class="category-tabs">
+      <button (click)="activeCategoryTab = 'Express Bike'" [class.active]="activeCategoryTab === 'Express Bike'" class="tab-btn btn-orange">
+        <i class="ri-motorbike-line"></i> Express Bike (< 20 kg)
+      </button>
+      
+      <button (click)="activeCategoryTab = 'Mini Truck'" [class.active]="activeCategoryTab === 'Mini Truck'" class="tab-btn btn-indigo">
+        <i class="ri-truck-line"></i> Mini Trucks (750kg - 1.7T)
+      </button>
+
+      <button (click)="activeCategoryTab = 'Heavy Freight'" [class.active]="activeCategoryTab === 'Heavy Freight'" class="tab-btn btn-purple">
+        <i class="ri-instance-line"></i> Heavy Container Trucks
+      </button>
+    </div>
+  </div>
+
+  <div class="parcel-main-grid">
+    
+    <!-- Dispatch Form -->
+    <div class="glass-panel consignment-card">
+      <h2 class="form-title">
+        <i class="ri-truck-fill icon-orange"></i> Consignment Booking Form
+      </h2>
+
+      <!-- Address Pickers -->
+      <div class="form-group-stack">
+        <div class="form-group">
+          <label class="form-label">Pickup Warehouse / Location</label>
+          <input type="text" [(ngModel)]="pickupLocation" placeholder="Enter pickup address..." class="form-input" />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Delivery Destination</label>
+          <input type="text" [(ngModel)]="dropLocation" placeholder="Enter delivery address..." class="form-input" />
+        </div>
+      </div>
+
+      <!-- Goods Type Selector -->
+      <div class="form-group">
+        <label class="form-label">Goods Category</label>
+        <select [(ngModel)]="selectedGoodsType" class="form-select font-semibold">
+          <option value="House Moving & Furniture">House Moving & Furniture</option>
+          <option value="Electronics & Appliances">Electronics & Appliances</option>
+          <option value="Industrial Raw Material">Industrial Raw Material</option>
+          <option value="Textiles & Garments">Textiles & Garments</option>
+          <option value="FMCG & Groceries">FMCG & Groceries</option>
+          <option value="Documents & Small Parcels">Documents & Small Parcels</option>
+        </select>
+      </div>
+
+      <!-- Helpers Addon Checkbox -->
+      <div class="addon-box">
+        <label class="addon-label">
+          <div class="checkbox-group">
+            <input type="checkbox" [(ngModel)]="addHelpers" class="addon-checkbox" />
+            <span class="addon-text">Add Loading/Unloading Helpers</span>
+          </div>
+          <span class="addon-price">+ ₹350</span>
+        </label>
+      </div>
+
+      <!-- Receiver OTP Mobile -->
+      <div class="form-group">
+        <label class="form-label">Receiver Contact Mobile (For Handover OTP)</label>
+        <input type="text" [(ngModel)]="receiverPhone" class="form-input" />
+      </div>
+
+      <button (click)="createParcelDispatch()" class="submit-dispatch-btn">
+        Confirm & Dispatch Freight Truck →
+      </button>
+    </div>
+
+    <!-- Right Side Vehicle Cards & Map Grid -->
+    <div class="map-vehicle-section">
+      
+      <!-- Vector Map -->
+      <div class="map-wrapper">
+        <app-mobility-map [pickupAddress]="pickupLocation" [dropAddress]="dropLocation"></app-mobility-map>
+      </div>
+
+      <!-- Category Vehicle Options Grid -->
+      <div class="vehicle-card-grid">
+        @for (cat of logisticsCategories(); track cat.id) {
+          <app-vehicle-card [category]="cat"
+                            [estimatedFare]="cat.baseFare + 14.2 * cat.perKm"
+                            [isSelected]="selectedCategory?.id === cat.id"
+                            (onSelect)="selectedCategory = $event">
+          </app-vehicle-card>
+        }
+      </div>
+
+    </div>
+
+  </div>
+
+</div>

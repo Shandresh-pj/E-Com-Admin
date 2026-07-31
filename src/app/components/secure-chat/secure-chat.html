@@ -1,0 +1,863 @@
+<div class="secure-chat-wrapper liquid-theme" [class.mobile-open]="isMobileSidebarOpen">
+  <!-- Ambient Liquid Background Blobs -->
+  <div class="liquid-blob blob-1"></div>
+  <div class="liquid-blob blob-2"></div>
+  <div class="liquid-blob blob-3"></div>
+
+  <!-- Mobile Top Bar Navigation Drawer Trigger -->
+  <div class="mobile-top-bar glass-panel">
+    <button mat-icon-button (click)="isMobileSidebarOpen = !isMobileSidebarOpen" class="drawer-toggle-btn">
+      <mat-icon>{{ isMobileSidebarOpen ? 'close' : 'menu' }}</mat-icon>
+    </button>
+    <div class="mobile-title">
+      <mat-icon color="primary">security</mat-icon>
+      <span>Secure Workspace</span>
+    </div>
+    <div class="mobile-avatar" (click)="showProfileModal = true">
+      <div class="user-avatar-small" [style.background]="getAvatarGradient(userProfile.name)">
+        @if (!userProfile.avatarUrl) {
+          <span>{{ userProfile.name.charAt(0).toUpperCase() }}</span>
+        } @else {
+          <img [src]="userProfile.avatarUrl" alt="Avatar" />
+        }
+      </div>
+    </div>
+  </div>
+
+  <!-- Sidebar: Live Liquid Search, View Switcher & Conversation / Status / Call History List -->
+  <div class="chat-sidebar glass-panel" [class.show-mobile]="isMobileSidebarOpen">
+    <!-- Sidebar Header: User Profile Trigger, Liquid Search Bar & Add Action -->
+    <div class="sidebar-header">
+      <div
+        class="user-profile-trigger"
+        (click)="showProfileModal = true"
+        matTooltip="Profile Settings"
+      >
+        <div class="user-avatar-small" [style.background]="getAvatarGradient(userProfile.name)">
+          @if (userProfile.avatarUrl) {
+            <img [src]="userProfile.avatarUrl" alt="Avatar" class="avatar-img" />
+          } @else {
+            <span>{{ userProfile.name.charAt(0).toUpperCase() }}</span>
+          }
+          <span class="status-dot" [class]="userProfile.status.toLowerCase()"></span>
+        </div>
+      </div>
+
+      <div class="liquid-search-box">
+        <mat-icon class="search-icon">search</mat-icon>
+        <input
+          type="text"
+          [(ngModel)]="searchQuery"
+          (input)="onSearchInput()"
+          placeholder="Search chats or call history..."
+          class="liquid-search-input"
+        />
+        @if (searchQuery) {
+          <button mat-icon-button class="clear-btn" (click)="clearSearch()">
+            <mat-icon>close</mat-icon>
+          </button>
+        }
+      </div>
+
+      <button
+        mat-mini-fab
+        [color]="isNewChatPanelOpen ? 'accent' : 'primary'"
+        (click)="toggleNewChatPanel()"
+        matTooltip="New Chat"
+        class="add-chat-btn liquid-btn glow-btn"
+      >
+        <mat-icon>{{ isNewChatPanelOpen ? 'close' : 'add' }}</mat-icon>
+      </button>
+    </div>
+
+    <!-- Sidebar View Switcher: Chats | Status Stories | Calls -->
+    <div class="sidebar-view-switcher">
+      <button [class.active]="activeSidebarView === 'CHATS'" (click)="activeSidebarView = 'CHATS'">
+        <mat-icon>chat</mat-icon> Chats
+      </button>
+      <button [class.active]="activeSidebarView === 'STATUS'" (click)="activeSidebarView = 'STATUS'">
+        <mat-icon>donut_large</mat-icon> Status <span class="green-unread-dot"></span>
+      </button>
+      <button [class.active]="activeSidebarView === 'CALLS'" (click)="activeSidebarView = 'CALLS'">
+        <mat-icon>call</mat-icon> Calls
+      </button>
+    </div>
+
+    <!-- Category Filter Tabs (For Chats View) -->
+    @if (activeSidebarView === 'CHATS') {
+      <div class="category-tabs">
+        <button [class.active]="activeTab === 'ALL'" (click)="activeTab = 'ALL'">All</button>
+        <button [class.active]="activeTab === 'UNREAD'" (click)="activeTab = 'UNREAD'">Unread</button>
+        <button [class.active]="activeTab === 'DIRECT'" (click)="activeTab = 'DIRECT'">Direct</button>
+        <button [class.active]="activeTab === 'GROUPS'" (click)="activeTab = 'GROUPS'">Groups</button>
+      </div>
+    }
+
+    <!-- Directory Search Overlay Dropdown -->
+    @if (isNewChatPanelOpen || (searchQuery.trim().length > 0 && directoryResults.length > 0)) {
+      <div class="directory-overlay-panel glass-panel animate-slide-down custom-scrollbar">
+        <div class="overlay-header">
+          <span><mat-icon class="sm-icon">people</mat-icon> Enterprise Directory</span>
+          <span class="results-count">{{ directoryResults.length }} contacts</span>
+        </div>
+        <div class="directory-list">
+          @for (user of directoryResults; track user.id) {
+            <div class="directory-item-card" (click)="startDirectChat(user)">
+              <div class="avatar-bubble" [style.background]="getAvatarGradient(user.name)">
+                <span>{{ user.name.charAt(0).toUpperCase() }}</span>
+              </div>
+              <div class="user-meta">
+                <div class="user-name">{{ user.name }}</div>
+                <div class="user-sub">{{ user.role }} &bull; {{ user.email }}</div>
+              </div>
+              <button mat-icon-button color="primary" class="chat-icon-btn">
+                <mat-icon>chat</mat-icon>
+              </button>
+            </div>
+          } @empty {
+            <div class="empty-search">
+              <p>No matching employees found in directory.</p>
+            </div>
+          }
+        </div>
+      </div>
+    }
+
+    <!-- Conversation List View -->
+    @if (activeSidebarView === 'CHATS') {
+      <div class="conversation-list custom-scrollbar">
+        @for (conv of filteredConversations; track conv.id) {
+          <div
+            class="conv-item animate-pop"
+            [class.selected]="activeConversation?.id === conv.id"
+            (click)="selectConversation(conv)"
+          >
+            <div class="conv-avatar" [style.background]="getAvatarGradient(conv.title || 'Conversation')">
+              <span class="avatar-text">{{ (conv.title || 'C').charAt(0).toUpperCase() }}</span>
+              <span class="online-indicator"></span>
+            </div>
+            <div class="conv-details">
+              <div class="conv-top-row">
+                <span class="conv-name">{{ conv.title || 'Direct Conversation' }}</span>
+                @if (conv.latestMessage) {
+                  <span class="conv-time">{{ conv.latestMessage.created_at | date:'shortTime' }}</span>
+                }
+              </div>
+              <div class="conv-bottom-row">
+                <div class="preview-flex">
+                  @if (conv.latestMessage && conv.latestMessage.sender_id === currentUserId) {
+                    <span class="msg-ticks">
+                      @if (!conv.latestMessage.is_delivered && !conv.latestMessage.is_read) {
+                        <span class="single-tick">✓</span>
+                      } @else if (conv.latestMessage.is_delivered && !conv.latestMessage.is_read) {
+                        <span class="double-tick">✓✓</span>
+                      } @else if (conv.latestMessage.is_read) {
+                        <span class="double-tick seen">✓✓</span>
+                      }
+                    </span>
+                  }
+                  <span class="conv-preview">{{ conv.latestMessage?.content || 'No messages yet' }}</span>
+                </div>
+                <div class="badge-flex">
+                  @if (isMutedConv(conv.id)) {
+                    <mat-icon class="mute-badge">volume_off</mat-icon>
+                  }
+                  @if (isPinned(conv.id)) {
+                    <mat-icon class="pin-badge" (click)="togglePinConversation(conv.id, $event)">push_pin</mat-icon>
+                  }
+                  @if (conv.unreadCount && conv.unreadCount > 0) {
+                    <span class="badge-unread">{{ conv.unreadCount }}</span>
+                  }
+                </div>
+              </div>
+            </div>
+          </div>
+        } @empty {
+          @if (!isNewChatPanelOpen) {
+            <div class="empty-list">
+              <div class="empty-icon-wrap">
+                <mat-icon>forum</mat-icon>
+              </div>
+              <h4>No Active Conversations</h4>
+              <p>Start a secure end-to-end encrypted chat with your team or department.</p>
+              <button mat-raised-button color="primary" (click)="toggleNewChatPanel()" class="liquid-btn full-btn">
+                <mat-icon>add_comment</mat-icon> Start New Chat
+              </button>
+            </div>
+          }
+        }
+      </div>
+    }
+
+    <!-- WhatsApp Status / Stories Sidebar View -->
+    @if (activeSidebarView === 'STATUS') {
+      <div class="status-sidebar-panel custom-scrollbar">
+        <div class="status-header">
+          <h3>Status</h3>
+          <div class="status-actions">
+            <button mat-icon-button (click)="showAddStatusMenu = !showAddStatusMenu" matTooltip="Add Status">
+              <mat-icon>add_circle_outline</mat-icon>
+            </button>
+          </div>
+
+          <!-- Add Status Dropdown Menu -->
+          @if (showAddStatusMenu) {
+            <div class="add-status-dropdown glass-panel animate-pop">
+              <label class="dropdown-item">
+                <mat-icon>collections</mat-icon>
+                <span>Photos &amp; videos</span>
+                <input type="file" (change)="onStatusFileSelected($event)" accept="image/*,video/*" style="display: none;" />
+              </label>
+              <div class="dropdown-item" (click)="addTextStatus()">
+                <mat-icon>edit</mat-icon>
+                <span>Text status</span>
+              </div>
+            </div>
+          }
+        </div>
+
+        <!-- My Status Card -->
+        <div class="my-status-card" (click)="myStatuses.length > 0 ? openStatusViewer(myStatuses[0]) : showAddStatusMenu = true">
+          <div class="my-avatar-wrapper">
+            <div class="my-avatar" [style.background]="getAvatarGradient(userProfile.name)">
+              @if (userProfile.avatarUrl) {
+                <img [src]="userProfile.avatarUrl" alt="My Status" />
+              } @else {
+                <span>{{ userProfile.name.charAt(0).toUpperCase() }}</span>
+              }
+            </div>
+            <label class="plus-badge" (click)="$event.stopPropagation()">
+              <mat-icon>add</mat-icon>
+              <input type="file" (change)="onStatusFileSelected($event)" accept="image/*,video/*" style="display: none;" />
+            </label>
+          </div>
+          <div class="status-meta">
+            <h4>My status</h4>
+            <p>{{ myStatuses.length > 0 ? 'Tap to view status updates' : 'Click to add status update' }}</p>
+          </div>
+        </div>
+
+        <!-- Recent Updates Section -->
+        <div class="recent-updates-section">
+          <h4 class="section-title">Recent updates</h4>
+
+          @for (s of recentStatuses; track s.id) {
+            <div class="status-item-card" (click)="openStatusViewer(s)">
+              <div class="status-avatar-ring">
+                <div class="status-avatar" [style.background]="getAvatarGradient(s.userName)">
+                  <span>{{ s.userName.charAt(0).toUpperCase() }}</span>
+                </div>
+              </div>
+              <div class="status-meta">
+                <h4>{{ s.userName }}</h4>
+                <p>{{ s.time }}</p>
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+    }
+
+    <!-- WhatsApp Calls / Call History Sidebar View -->
+    @if (activeSidebarView === 'CALLS') {
+      <div class="calls-sidebar-panel custom-scrollbar">
+        <div class="calls-header">
+          <h3>Call History</h3>
+          <button mat-mini-fab color="primary" (click)="toggleNewChatPanel()" matTooltip="Start New Call" class="liquid-btn">
+            <mat-icon>add_call</mat-icon>
+          </button>
+        </div>
+
+        <div class="call-history-list">
+          @for (log of callHistoryLogs; track log.id) {
+            <div class="call-log-card animate-pop">
+              <div class="call-avatar" [style.background]="getAvatarGradient(log.caller_name)">
+                <span>{{ log.caller_name.charAt(0).toUpperCase() }}</span>
+              </div>
+              <div class="call-meta">
+                <h4 class="caller-name">{{ log.caller_name }}</h4>
+                <div class="call-type-row">
+                  <mat-icon class="direction-icon" [class]="log.direction.toLowerCase()">
+                    {{ log.direction === 'INCOMING' ? 'call_received' : (log.direction === 'OUTGOING' ? 'call_made' : 'call_missed') }}
+                  </mat-icon>
+                  <span class="call-sub">{{ log.created_at | date:'shortTime' }} {{ log.duration ? ('&bull; ' + log.duration) : '' }}</span>
+                </div>
+              </div>
+              <div class="call-actions-end">
+                <button mat-icon-button color="primary" (click)="redialCall(log, 'AUDIO')" matTooltip="Audio Call">
+                  <mat-icon>call</mat-icon>
+                </button>
+                <button mat-icon-button color="accent" (click)="redialCall(log, 'VIDEO')" matTooltip="Video Call">
+                  <mat-icon>videocam</mat-icon>
+                </button>
+              </div>
+            </div>
+          } @empty {
+            <div class="empty-calls">
+              <mat-icon>phone_disabled</mat-icon>
+              <p>No recent call logs.</p>
+            </div>
+          }
+        </div>
+      </div>
+    }
+  </div>
+
+  <!-- Main Chat Window -->
+  @if (activeConversation) {
+    <div class="chat-main glass-panel">
+      <!-- Active Chat Header -->
+      <div class="chat-header">
+        <div class="header-info">
+          <div class="header-title-row">
+            <div class="header-avatar" [style.background]="getAvatarGradient(activeConversation.title || 'Chat')">
+              <span>{{ (activeConversation.title || 'C').charAt(0).toUpperCase() }}</span>
+            </div>
+            <div>
+              <h3>{{ activeConversation.title || 'Direct Chat' }}</h3>
+              <span class="e2ee-badge">
+                <mat-icon>verified_user</mat-icon> E2E Encrypted &bull; Signal Protocol
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div class="header-actions">
+          <button mat-icon-button color="primary" (click)="startCall('AUDIO')" matTooltip="Audio Call" class="call-btn glass-btn">
+            <mat-icon>call</mat-icon>
+          </button>
+          <button mat-icon-button color="accent" (click)="startCall('VIDEO')" matTooltip="Video Call" class="call-btn glass-btn">
+            <mat-icon>videocam</mat-icon>
+          </button>
+
+          <!-- WhatsApp Options Menu Button -->
+          <button mat-icon-button (click)="isOptionsMenuOpen = !isOptionsMenuOpen" matTooltip="More options" class="options-btn glass-btn">
+            <mat-icon>more_vert</mat-icon>
+          </button>
+
+          <!-- Custom Elevated Options Dropdown Card -->
+          @if (isOptionsMenuOpen) {
+            <div class="custom-options-dropdown glass-panel animate-pop">
+              <div class="option-item" (click)="openContactInfo()">
+                <mat-icon class="opt-icon info">info</mat-icon>
+                <span>Contact info</span>
+              </div>
+              <div class="option-item" (click)="togglePinConversation(activeConversation.id); isOptionsMenuOpen = false">
+                <mat-icon class="opt-icon pin">{{ isPinned(activeConversation.id) ? 'push_pin' : 'keep' }}</mat-icon>
+                <span>{{ isPinned(activeConversation.id) ? 'Unpin chat' : 'Pin chat' }}</span>
+              </div>
+              <div class="option-item" (click)="toggleMuteNotifications(activeConversation.id); isOptionsMenuOpen = false">
+                <mat-icon class="opt-icon mute">{{ isMutedConv(activeConversation.id) ? 'volume_up' : 'volume_off' }}</mat-icon>
+                <span>{{ isMutedConv(activeConversation.id) ? 'Unmute notifications' : 'Mute notifications' }}</span>
+              </div>
+              <div class="dropdown-divider"></div>
+              <div class="option-item danger" (click)="clearCurrentChat(); isOptionsMenuOpen = false">
+                <mat-icon class="opt-icon clear">block</mat-icon>
+                <span>Clear chat</span>
+              </div>
+              <div class="option-item danger" (click)="deleteCurrentChat(); isOptionsMenuOpen = false">
+                <mat-icon class="opt-icon delete">delete</mat-icon>
+                <span>Delete chat</span>
+              </div>
+              <div class="option-item" (click)="closeCurrentChat(); isOptionsMenuOpen = false">
+                <mat-icon class="opt-icon close">close</mat-icon>
+                <span>Close chat</span>
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- Messages Container -->
+      <div class="messages-container custom-scrollbar" #scrollContainer>
+        <div class="encryption-notice-card glass-panel">
+          <mat-icon>lock</mat-icon>
+          <span>End-to-End Encrypted &bull; Protected by Signal Protocol Mesh</span>
+        </div>
+
+        @for (msg of messages; track msg.id) {
+          <div class="message-bubble animate-bubble" [class.my-message]="msg.sender_id === currentUserId">
+            <div class="message-header">
+              <span class="sender-name">{{ msg.sender_name }}</span>
+            </div>
+
+            <!-- Text Content -->
+            @if (msg.content) {
+              <div class="message-body">
+                <p>{{ msg.content }}</p>
+              </div>
+            }
+
+            <!-- Image Media -->
+            @if (msg.media_type === 'IMAGE') {
+              <div class="media-preview">
+                <img [src]="msg.media_url" alt="Attachment" class="chat-img" />
+              </div>
+            }
+
+            <!-- Voice Note Player -->
+            @if (msg.media_type === 'AUDIO_VOICE_NOTE') {
+              <div class="voice-note-player">
+                <mat-icon class="voice-mic-icon">mic</mat-icon>
+                <audio controls [src]="msg.media_url" class="voice-audio-element"></audio>
+              </div>
+            }
+
+            <!-- File Attachment -->
+            @if (msg.media_type === 'FILE' || msg.media_type === 'DOCUMENT') {
+              <div class="file-attachment">
+                <mat-icon>insert_drive_file</mat-icon>
+                <a [href]="msg.media_url" target="_blank" download>{{ msg.file_name || 'Download Attachment' }}</a>
+              </div>
+            }
+
+            <!-- Reactions Bar -->
+            @if (msg.reactions && (msg.reactions | keyvalue).length > 0) {
+              <div class="reactions-bar">
+                @for (r of (msg.reactions | keyvalue); track r.key) {
+                  <span class="reaction-chip">
+                    {{ r.key }} {{ r.value.length }}
+                  </span>
+                }
+              </div>
+            }
+
+            <!-- Compact Bottom Row: Timestamp + Single/Double/Blue Ticks -->
+            <div class="msg-footer-meta">
+              <span class="message-time">{{ msg.created_at | date:'shortTime' }}</span>
+              @if (msg.sender_id === currentUserId) {
+                <span class="msg-ticks">
+                  @if (!msg.is_delivered && !msg.is_read) {
+                    <span class="single-tick" matTooltip="Sent (Offline)">✓</span>
+                  } @else if (msg.is_delivered && !msg.is_read) {
+                    <span class="double-tick" matTooltip="Delivered (Online)">✓✓</span>
+                  } @else if (msg.is_read) {
+                    <span class="double-tick seen" matTooltip="Read">✓✓</span>
+                  }
+                </span>
+              }
+            </div>
+
+            <!-- Quick Hover Reaction Bar -->
+            <div class="quick-reaction-picker">
+              <button class="add-reaction-btn" (click)="addReaction(msg.id, '👍')">👍</button>
+              <button class="add-reaction-btn" (click)="addReaction(msg.id, '❤️')">❤️</button>
+              <button class="add-reaction-btn" (click)="addReaction(msg.id, '🔥')">🔥</button>
+              <button class="add-reaction-btn" (click)="addReaction(msg.id, '🎉')">🎉</button>
+            </div>
+          </div>
+        }
+      </div>
+
+      <!-- Redesigned Liquid Glass Attachment Dropup Menu -->
+      @if (showAttachmentMenu) {
+        <div class="attachment-tray-dropup glass-panel animate-pop">
+          <label class="tray-item photo-item" matTooltip="Photos & Videos">
+            <mat-icon>image</mat-icon> Photos &amp; Videos
+            <input type="file" (change)="onFileSelected($event)" accept="image/*,video/*" style="display:none;" />
+          </label>
+          <label class="tray-item doc-item" matTooltip="Documents & Files">
+            <mat-icon>insert_drive_file</mat-icon> Document / PDF
+            <input type="file" (change)="onFileSelected($event)" accept=".pdf,.doc,.docx,.xls,.xlsx,.zip,.txt" style="display:none;" />
+          </label>
+        </div>
+      }
+
+      <!-- Emoji Picker -->
+      @if (showEmojiPicker) {
+        <div class="rich-emoji-picker-card glass-panel animate-pop">
+          <div class="emoji-picker-header">
+            <button [class.active]="activeEmojiCategory === 'ALL'" (click)="activeEmojiCategory = 'ALL'">All</button>
+            <button [class.active]="activeEmojiCategory === 'SMILEYS'" (click)="activeEmojiCategory = 'SMILEYS'">😊</button>
+            <button [class.active]="activeEmojiCategory === 'HANDS'" (click)="activeEmojiCategory = 'HANDS'">👍</button>
+            <button [class.active]="activeEmojiCategory === 'HEARTS'" (click)="activeEmojiCategory = 'HEARTS'">❤️</button>
+            <button [class.active]="activeEmojiCategory === 'OBJECTS'" (click)="activeEmojiCategory = 'OBJECTS'">🔥</button>
+          </div>
+          <div class="emoji-grid-container custom-scrollbar">
+            @for (emoji of currentEmojiList; track $index) {
+              <span class="large-emoji-tile" (click)="appendEmoji(emoji)">
+                {{ emoji }}
+              </span>
+            }
+          </div>
+        </div>
+      }
+
+      <!-- Input Bar / Live Voice Recording Interface -->
+      <div class="chat-input-bar">
+        @if (!isRecordingVoice) {
+          <button mat-icon-button (click)="showAttachmentMenu = !showAttachmentMenu" matTooltip="Attach File" class="attach-btn">
+            <mat-icon>attach_file</mat-icon>
+          </button>
+
+          <button mat-icon-button (click)="showEmojiPicker = !showEmojiPicker" matTooltip="Add Emoji" class="emoji-toggle-btn">
+            <mat-icon>sentiment_satisfied_alt</mat-icon>
+          </button>
+
+          <input
+            type="text"
+            [(ngModel)]="newMessageText"
+            (ngModelChange)="onMessageInputChange()"
+            (keyup.enter)="sendMessage()"
+            placeholder="Type an encrypted message... (Use @ to mention)"
+            class="message-input"
+          />
+
+          <button
+            mat-icon-button
+            color="accent"
+            (click)="toggleVoiceRecording()"
+            matTooltip="Hold / Tap to Record Voice Note"
+            class="record-btn"
+          >
+            <mat-icon>mic</mat-icon>
+          </button>
+
+          <button mat-fab color="primary" (click)="sendMessage()" [disabled]="!newMessageText.trim()" class="send-btn liquid-btn">
+            <mat-icon>send</mat-icon>
+          </button>
+        } @else {
+          <div class="live-voice-recording-container animate-pop">
+            <div class="recording-status">
+              <span class="pulsing-red-dot"></span>
+              <span class="timer-text">Recording Voice Note &bull; {{ formattedRecordingTime }}</span>
+            </div>
+
+            <!-- Waveform Animation -->
+            <div class="audio-waveform-bars">
+              <span class="wave-bar b1"></span>
+              <span class="wave-bar b2"></span>
+              <span class="wave-bar b3"></span>
+              <span class="wave-bar b4"></span>
+              <span class="wave-bar b5"></span>
+            </div>
+
+            <div class="voice-actions">
+              <button mat-icon-button color="warn" (click)="cancelVoiceRecording()" matTooltip="Cancel Recording">
+                <mat-icon>delete_forever</mat-icon>
+              </button>
+              <button mat-fab color="primary" (click)="toggleVoiceRecording()" matTooltip="Send Voice Note" class="send-voice-btn">
+                <mat-icon>send</mat-icon>
+              </button>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+  } @else {
+    <!-- Professional Liquid Showcase Placeholder -->
+    <div class="chat-placeholder-showcase glass-panel custom-scrollbar">
+      <div class="empty-showcase-center">
+        <div class="showcase-icon-sphere">
+          <mat-icon>forum</mat-icon>
+        </div>
+
+        <h1 class="hero-title">Secure Workspace Communication</h1>
+        <p class="hero-subtitle">
+          Encrypted messaging, WebRTC calls, and file sharing across your <strong>Company &bull; Branch &bull; Department &bull; Team</strong>.
+        </p>
+
+        <!-- Action Grid Launcher -->
+        <div class="action-grid-launcher">
+          <div class="launcher-card" (click)="toggleNewChatPanel()">
+            <div class="icon-wrap primary-glow">
+              <mat-icon>chat_bubble</mat-icon>
+            </div>
+            <h4>Direct Message</h4>
+            <p>Start private 1-to-1 chat with team members.</p>
+          </div>
+
+          <div class="launcher-card" (click)="toggleNewChatPanel()">
+            <div class="icon-wrap accent-glow">
+              <mat-icon>groups</mat-icon>
+            </div>
+            <h4>Team Channels</h4>
+            <p>Collaborate in real-time within your department or project team.</p>
+          </div>
+
+          <div class="launcher-card" (click)="toggleNewChatPanel()">
+            <div class="icon-wrap warn-glow">
+              <mat-icon>campaign</mat-icon>
+            </div>
+            <h4>Company Announcements</h4>
+            <p>Broadcast organizational notices and announcements.</p>
+          </div>
+        </div>
+
+        <!-- Trust Metrics Footer Bar -->
+        <div class="trust-metrics-bar">
+          <div class="metric-item">
+            <mat-icon>lock</mat-icon>
+            <span>AES-256 GCM E2EE</span>
+          </div>
+          <div class="metric-divider"></div>
+          <div class="metric-item">
+            <mat-icon>bolt</mat-icon>
+            <span>Real-Time Socket.IO Mesh</span>
+          </div>
+          <div class="metric-divider"></div>
+          <div class="metric-item">
+            <mat-icon>videocam</mat-icon>
+            <span>HD WebRTC Media</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Redesigned User Profile & Status Settings Modal -->
+  @if (showProfileModal) {
+    <div class="modal-backdrop" (click)="showProfileModal = false">
+      <div class="modal-content glass-panel animate-pop" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <div class="modal-header-title">
+            <mat-icon color="primary">account_circle</mat-icon>
+            <h3>User Profile &amp; Status</h3>
+          </div>
+          <button mat-icon-button (click)="showProfileModal = false"><mat-icon>close</mat-icon></button>
+        </div>
+
+        <div class="profile-modal-body">
+          <div class="avatar-upload-section">
+            <div class="profile-avatar-large" [style.background]="getAvatarGradient(userProfile.name)">
+              @if (userProfile.avatarUrl) {
+                <img [src]="userProfile.avatarUrl" alt="Avatar" />
+              } @else {
+                <span>{{ userProfile.name.charAt(0).toUpperCase() }}</span>
+              }
+              <label class="camera-floating-badge" matTooltip="Upload New Avatar">
+                <mat-icon>photo_camera</mat-icon>
+                <input type="file" (change)="onFileSelected($event)" accept="image/*" style="display: none;" />
+              </label>
+            </div>
+            <span class="upload-hint">Click camera icon to change avatar</span>
+          </div>
+
+          <div class="form-section">
+            <div class="form-field-group">
+              <label>Full Display Name</label>
+              <input type="text" [(ngModel)]="userProfile.name" class="liquid-input-field" placeholder="Your Name" />
+            </div>
+
+            <div class="form-field-group">
+              <label>Presence Status</label>
+              <div class="status-options-grid">
+                <button class="status-opt" [class.selected]="userProfile.status === 'ONLINE'" (click)="userProfile.status = 'ONLINE'">
+                  <span class="status-dot online"></span> Online
+                </button>
+                <button class="status-opt" [class.selected]="userProfile.status === 'AWAY'" (click)="userProfile.status = 'AWAY'">
+                  <span class="status-dot away"></span> Away
+                </button>
+                <button class="status-opt" [class.selected]="userProfile.status === 'BUSY'" (click)="userProfile.status = 'BUSY'">
+                  <span class="status-dot busy"></span> Busy
+                </button>
+                <button class="status-opt" [class.selected]="userProfile.status === 'OFFLINE'" (click)="userProfile.status = 'OFFLINE'">
+                  <span class="status-dot offline"></span> Invisible
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button mat-raised-button color="primary" (click)="saveProfile()" class="liquid-btn full-width">Save Profile Changes</button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- WhatsApp Full-Screen Status Story Viewer Modal -->
+  @if (activeViewingStatus) {
+    <div class="status-story-modal-overlay animate-pop" (click)="closeStatusViewer()">
+      <div class="status-story-card" (click)="$event.stopPropagation()">
+        <div class="story-progress-bar">
+          <div class="story-progress-fill"></div>
+        </div>
+
+        <div class="story-header">
+          <div class="story-user-info">
+            <div class="story-avatar" [style.background]="getAvatarGradient(activeViewingStatus.userName || 'User')">
+              <span>{{ (activeViewingStatus.userName || userProfile.name).charAt(0).toUpperCase() }}</span>
+            </div>
+            <div>
+              <h4>{{ activeViewingStatus.userName || userProfile.name }}</h4>
+              <span class="story-time">{{ activeViewingStatus.time || 'Just now' }}</span>
+            </div>
+          </div>
+          <button mat-icon-button (click)="closeStatusViewer()" class="close-story-btn">
+            <mat-icon>close</mat-icon>
+          </button>
+        </div>
+
+        <div class="story-body">
+          @if (activeViewingStatus.mediaUrl) {
+            <img [src]="activeViewingStatus.mediaUrl" alt="Status Story" class="story-media-img" />
+          }
+          @if (activeViewingStatus.text) {
+            <div class="story-text-card">
+              <p>{{ activeViewingStatus.text }}</p>
+            </div>
+          }
+        </div>
+
+        <!-- Status Story Reply Bar & Heart Button -->
+        <div class="story-footer-bar">
+          <input type="text" [(ngModel)]="statusReplyText" (keyup.enter)="sendReplyToStatus()" placeholder="Reply to {{ activeViewingStatus.userName || 'Status' }}..." class="status-reply-input" />
+          <button mat-icon-button (click)="likeStatus(activeViewingStatus)" class="status-heart-btn" [class.liked]="activeViewingStatus.isLiked" matTooltip="Like Status">
+            <mat-icon>{{ activeViewingStatus.isLiked ? 'favorite' : 'favorite_border' }}</mat-icon>
+          </button>
+          <button mat-icon-button color="primary" (click)="sendReplyToStatus()" class="status-send-btn" matTooltip="Send Reply">
+            <mat-icon>send</mat-icon>
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Dedicated Contact Info Popup Modal -->
+  @if (showContactInfoModal) {
+    <div class="modal-backdrop animate-pop" (click)="closeContactInfo()">
+      <div class="modal-content contact-info-card glass-panel" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <div class="modal-header-title">
+            <mat-icon color="primary">account_circle</mat-icon>
+            <h3>Contact Information</h3>
+          </div>
+          <button mat-icon-button (click)="closeContactInfo()"><mat-icon>close</mat-icon></button>
+        </div>
+
+        <div class="profile-modal-body">
+          <div class="contact-avatar-header">
+            <div class="contact-avatar-sphere" [style.background]="getAvatarGradient(activeConversation?.title || 'PJSV Super Admin')">
+              <span>{{ (activeConversation?.title || 'PJSV Super Admin').charAt(0).toUpperCase() }}</span>
+            </div>
+            <h2>{{ activeConversation?.title || 'PJSV Super Admin' }}</h2>
+            <p class="contact-email">pjshandresh@gmail.com &bull; Super Admin</p>
+            <span class="status-online-pill"><span class="green-dot"></span> Online</span>
+          </div>
+
+          <div class="contact-details-list">
+            <div class="detail-row">
+              <mat-icon class="detail-icon">phone</mat-icon>
+              <div class="detail-meta">
+                <span class="label">Phone Number</span>
+                <span class="value">+1 (555) 019-2834</span>
+              </div>
+            </div>
+            <div class="detail-row">
+              <mat-icon class="detail-icon">business</mat-icon>
+              <div class="detail-meta">
+                <span class="label">Department &amp; Branch</span>
+                <span class="value">Headquarters &bull; Engineering</span>
+              </div>
+            </div>
+            <div class="detail-row">
+              <mat-icon class="detail-icon">verified_user</mat-icon>
+              <div class="detail-meta">
+                <span class="label">Encryption Status</span>
+                <span class="value green-text">Signal Protocol Mesh AES-256</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="contact-actions-grid">
+            <button class="action-btn" (click)="startCall('AUDIO'); closeContactInfo()">
+              <mat-icon color="primary">call</mat-icon>
+              <span>Audio Call</span>
+            </button>
+            <button class="action-btn" (click)="startCall('VIDEO'); closeContactInfo()">
+              <mat-icon color="accent">videocam</mat-icon>
+              <span>Video Call</span>
+            </button>
+            <button class="action-btn danger" (click)="clearCurrentChat(); closeContactInfo()">
+              <mat-icon color="warn">delete</mat-icon>
+              <span>Clear Chat</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Incoming Call Dialog Overlay -->
+  @if (incomingCallSession) {
+    <div class="call-dialog-overlay">
+      <div class="call-card glass-panel">
+        <mat-icon class="pulse-icon">phone_in_talk</mat-icon>
+        <h3>Incoming {{ incomingCallSession.call_type }} Call</h3>
+        <p>{{ incomingCallSession.caller_name }} is calling you...</p>
+        <div class="call-actions">
+          <button mat-fab color="primary" (click)="acceptIncomingCall()"><mat-icon>call</mat-icon></button>
+          <button mat-fab color="warn" (click)="rejectIncomingCall()"><mat-icon>call_end</mat-icon></button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Active WebRTC 1-to-1 Call Overlay -->
+  @if (activeCallSession) {
+    <div class="active-call-overlay animate-pop" [class.audio-call-theme]="activeCallSession.call_type === 'AUDIO'" [class.video-call-theme]="activeCallSession.call_type === 'VIDEO'">
+      <div class="call-header-info">
+        <span class="call-chip">
+          <mat-icon class="sm-icon">{{ activeCallSession.call_type === 'AUDIO' ? 'graphic_eq' : 'videocam' }}</mat-icon>
+          Live {{ activeCallSession.call_type }} Call &bull; Encrypted
+        </span>
+        <h2>{{ activeCallSession.caller_name }}</h2>
+        <p>Room: {{ activeCallSession.meeting_code }}</p>
+      </div>
+
+      <!-- AUDIO CALL THEME: Glowing Avatar & Sound Visualizer -->
+      @if (activeCallSession.call_type === 'AUDIO') {
+        <div class="call-audio-visualizer-container">
+          <div class="audio-avatar-sphere" [style.background]="getAvatarGradient(activeCallSession.caller_name || 'User')">
+            <span>{{ (activeCallSession.caller_name || 'User').charAt(0).toUpperCase() }}</span>
+            <div class="pulse-ring pr-1"></div>
+            <div class="pulse-ring pr-2"></div>
+            <div class="pulse-ring pr-3"></div>
+          </div>
+          <div class="audio-waveform-live">
+            <div class="wave-bar wb-1"></div>
+            <div class="wave-bar wb-2"></div>
+            <div class="wave-bar wb-3"></div>
+            <div class="wave-bar wb-4"></div>
+            <div class="wave-bar wb-5"></div>
+            <div class="wave-bar wb-6"></div>
+            <div class="wave-bar wb-7"></div>
+          </div>
+        </div>
+      }
+
+      <!-- VIDEO CALL THEME: Dual HD Camera Feeds -->
+      @if (activeCallSession.call_type === 'VIDEO') {
+        <div class="call-video-grid">
+          <div class="video-box local-video">
+            <video #localCallVideo autoplay playsinline [muted]="true" class="video-feed-element"></video>
+            <span class="video-label">You (Local Camera)</span>
+          </div>
+          <div class="video-box remote-video">
+            <video #remoteCallVideo autoplay playsinline class="video-feed-element"></video>
+            <span class="video-label">{{ activeCallSession.caller_name }}</span>
+          </div>
+        </div>
+      }
+
+      <!-- Call Control Bar -->
+      <div class="call-controls-bar glass-panel">
+        <button mat-fab [color]="isMuted ? 'warn' : 'primary'" (click)="toggleMute()" [matTooltip]="isMuted ? 'Unmute' : 'Mute'">
+          <mat-icon>{{ isMuted ? 'mic_off' : 'mic' }}</mat-icon>
+        </button>
+        @if (activeCallSession.call_type === 'VIDEO') {
+          <button mat-fab [color]="isVideoOff ? 'warn' : 'primary'" (click)="toggleVideo()" [matTooltip]="isVideoOff ? 'Turn Camera On' : 'Turn Camera Off'">
+            <mat-icon>{{ isVideoOff ? 'videocam_off' : 'videocam' }}</mat-icon>
+          </button>
+        }
+        <button mat-fab [color]="isScreenSharing ? 'accent' : 'primary'" (click)="toggleScreenShare()" [matTooltip]="isScreenSharing ? 'Stop Screen Share' : 'Share Screen'">
+          <mat-icon>screen_share</mat-icon>
+        </button>
+        <button mat-fab color="warn" (click)="endCall()" matTooltip="End Call">
+          <mat-icon>call_end</mat-icon>
+        </button>
+      </div>
+    </div>
+  }
+</div>

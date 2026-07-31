@@ -1,0 +1,94 @@
+<div class="ride-booking-container">
+  
+  <!-- Header Banner -->
+  <div class="booking-header">
+    <div class="header-glow"></div>
+    <div class="header-content">
+      <div class="badge-row">
+        <span class="badge badge-primary">Uber / Rapido / Ola Enterprise</span>
+        <span class="badge badge-success"><span class="pulse-dot"></span> Instant Auto & Cab Dispatching</span>
+      </div>
+      <h1 class="header-title">Ride Booking & Taxi Hailing</h1>
+      <p class="header-subtitle">Book Bike Taxis, Auto Rickshaws, Prime Sedans, SUVs, and BluSmart 100% Electric Cabs.</p>
+    </div>
+
+    <!-- Category Pills -->
+    <div class="category-pills">
+      <button (click)="activeType = 'Passenger'" [class.active]="activeType === 'Passenger'" class="pill-btn">
+        <i class="ri-taxi-fill"></i> Passenger Rides
+      </button>
+      <button (click)="activeType = 'Rental'" [class.active]="activeType === 'Rental'" class="pill-btn pill-purple">
+        <i class="ri-time-line"></i> Hourly Rentals
+      </button>
+    </div>
+  </div>
+
+  <div class="booking-main-grid">
+    
+    <!-- Ride Dispatch Form -->
+    <div class="glass-panel dispatch-form-card">
+      <h2 class="form-title">
+        <i class="ri-map-pin-user-line icon-indigo"></i> Enter Destination & Pickup
+      </h2>
+
+      <!-- Address Pickers -->
+      <div class="form-group-stack">
+        <div class="form-group">
+          <label class="form-label">Pickup Location</label>
+          <input type="text" [(ngModel)]="pickupLocation" class="form-input" />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Drop Location</label>
+          <input type="text" [(ngModel)]="dropLocation" class="form-input" />
+        </div>
+      </div>
+
+      <!-- Payment Method -->
+      <div class="form-group">
+        <label class="form-label">Payment Method</label>
+        <select [(ngModel)]="paymentMethod" class="form-select">
+          <option value="UPI / Wallet">UPI / Google Pay / Wallet</option>
+          <option value="Cash to Driver">Cash to Driver</option>
+          <option value="Corporate Credit Card">Corporate Account Credit</option>
+        </select>
+      </div>
+
+      <!-- Coupon Promo Code -->
+      <div class="form-group">
+        <label class="form-label">Promo Coupon</label>
+        <div class="promo-input-row">
+          <input type="text" [(ngModel)]="couponCode" placeholder="Enter FIRST50..." class="form-input font-mono" />
+          <button (click)="applyCoupon()" class="promo-btn">Apply</button>
+        </div>
+      </div>
+
+      <button (click)="confirmRideBooking()" class="submit-booking-btn">
+        Book Ride Now →
+      </button>
+    </div>
+
+    <!-- Map & Vehicle Cards Grid -->
+    <div class="map-vehicle-section">
+      
+      <!-- Vector Map -->
+      <div class="map-wrapper">
+        <app-mobility-map [pickupAddress]="pickupLocation" [dropAddress]="dropLocation"></app-mobility-map>
+      </div>
+
+      <!-- Vehicle Options Grid -->
+      <div class="vehicle-card-grid">
+        @for (cat of vehicleCategories(); track cat.id) {
+          <app-vehicle-card [category]="cat"
+                            [estimatedFare]="calculateFare(cat)"
+                            [isSelected]="selectedCategory?.id === cat.id"
+                            (onSelect)="selectedCategory = $event">
+          </app-vehicle-card>
+        }
+      </div>
+
+    </div>
+
+  </div>
+
+</div>

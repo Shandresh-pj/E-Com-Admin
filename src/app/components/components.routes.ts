@@ -506,5 +506,95 @@ export const ComponentsRoutes: Routes = [
       title: 'Standard Payment Checkout',
       urls: [{ title: 'Checkout', url: '/checkout' }]
     }
+  },
+  {
+    path: 'communication',
+    loadComponent: () => import('./secure-chat/secure-chat').then(m => m.SecureChatComponent),
+    canActivate: [RoleGuard],
+    data: {
+      title: 'Secure Communications Platform',
+      urls: [{ title: 'Communication', url: '/communication' }]
+    }
+  },
+  {
+    path: 'communication/meetings',
+    loadComponent: () => import('./team-meetings/team-meetings').then(m => m.TeamMeetingsComponent),
+    canActivate: [RoleGuard],
+    data: {
+      title: 'Team Meetings & Screen Sharing',
+      urls: [{ title: 'Team Meetings', url: '/communication/meetings' }]
+    }
+  },
+  {
+    path: 'ride-booking',
+    loadComponent: () => import('./ride-booking/ride-booking.component').then(m => m.RideBookingComponent),
+    canActivate: [RoleGuard],
+    data: {
+      title: 'Ride & Taxi Booking',
+      urls: [{ title: 'Ride Booking', url: '/ride-booking' }]
+    }
+  },
+  {
+    path: 'car-rental',
+    loadComponent: () => import('./car-rental/car-rental.component').then(m => m.CarRentalComponent),
+    canActivate: [RoleGuard],
+    data: {
+      title: 'Car Rental & Subscriptions',
+      urls: [{ title: 'Car Rental', url: '/car-rental' }]
+    }
+  },
+  {
+    path: 'parcel-logistics',
+    loadComponent: () => import('./parcel-logistics/parcel-logistics.component').then(m => m.ParcelLogisticsComponent),
+    canActivate: [RoleGuard],
+    data: {
+      title: 'Express Parcel & Freight Logistics',
+      urls: [{ title: 'Parcel Logistics', url: '/parcel-logistics' }]
+    }
+  },
+  {
+    path: 'fleet-management',
+    loadComponent: () => import('./fleet-management/fleet-management.component').then(m => m.FleetManagementComponent),
+    canActivate: [RoleGuard],
+    data: {
+      title: 'Fleet Management',
+      urls: [{ title: 'Fleet Management', url: '/fleet-management' }]
+    }
+  },
+  {
+    path: 'corporate-transport',
+    loadComponent: () => import('./corporate-transport/corporate-transport.component').then(m => m.CorporateTransportComponent),
+    canActivate: [RoleGuard],
+    data: {
+      title: 'Corporate & School Transit',
+      urls: [{ title: 'Corporate Transport', url: '/corporate-transport' }]
+    }
+  },
+  {
+    path: 'live-tracking',
+    loadComponent: () => import('./live-tracking/live-tracking.component').then(m => m.LiveTrackingComponent),
+    canActivate: [RoleGuard],
+    data: {
+      title: 'Live GPS Telemetry',
+      urls: [{ title: 'Live Tracking', url: '/live-tracking' }]
+    }
+  },
+  {
+    path: 'mobility-dashboard',
+    loadComponent: () => import('./mobility-dashboard/mobility-dashboard.component').then(m => m.MobilityDashboardComponent),
+    canActivate: [RoleGuard],
+    data: {
+      title: 'Mobility Executive Cockpit',
+      urls: [{ title: 'Mobility Dashboard', url: '/mobility-dashboard' }]
+    }
+  },
+  {
+    path: 'vehicle-driver-verification',
+    loadComponent: () => import('./vehicle-driver-verification/vehicle-driver-verification.component').then(m => m.VehicleDriverVerificationComponent),
+    canActivate: [RoleGuard],
+    data: {
+      title: 'Vehicle & Driver Verification KYC',
+      urls: [{ title: 'Verification', url: '/vehicle-driver-verification' }]
+    }
   }
 ];

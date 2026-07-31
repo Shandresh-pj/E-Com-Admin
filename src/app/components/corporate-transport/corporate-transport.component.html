@@ -1,0 +1,115 @@
+<div class="corporate-container">
+  
+  <!-- Header Banner -->
+  <div class="portal-header">
+    <div class="header-glow"></div>
+    <div class="header-content">
+      <span class="header-badge">B2B Enterprise & School Transit Portal</span>
+      <h1 class="header-title">Corporate & School Transportation</h1>
+      <p class="header-subtitle">Automated employee shift rosters, school bus child tracking, contract billing invoicing, and security escort tracking.</p>
+    </div>
+
+    <div class="module-switcher">
+      <button (click)="activeModule = 'corporate'" [class.active]="activeModule === 'corporate'" class="module-btn btn-corporate">
+        <i class="ri-building-4-line"></i> Corporate Shift Transit
+      </button>
+      <button (click)="activeModule = 'school'" [class.active]="activeModule === 'school'" class="module-btn btn-school">
+        <i class="ri-bus-line"></i> School Bus Transit
+      </button>
+    </div>
+  </div>
+
+  <!-- Corporate Contracts Grid -->
+  <div class="contracts-grid">
+    <div class="contract-card card-purple">
+      <div class="card-icon icon-purple">
+        <i class="ri-building-4-line"></i>
+      </div>
+      <h3 class="card-title">TechCorp Global Inc</h3>
+      <p class="card-desc">450 Active Employees • Morning & Night Shift Rosters</p>
+      <div class="card-footer">
+        <span class="footer-label">Monthly Contract:</span>
+        <strong class="footer-value value-purple">₹8,50,000 / mo</strong>
+      </div>
+    </div>
+
+    <div class="contract-card card-emerald">
+      <div class="card-icon icon-emerald">
+        <i class="ri-hospital-line"></i>
+      </div>
+      <h3 class="card-title">Apollo Health Network</h3>
+      <p class="card-desc">120 Doctors & Staff • 24/7 On-Call Emergency Transit</p>
+      <div class="card-footer">
+        <span class="footer-label">Monthly Contract:</span>
+        <strong class="footer-value value-emerald">₹4,20,000 / mo</strong>
+      </div>
+    </div>
+
+    <div class="contract-card card-amber">
+      <div class="card-icon icon-amber">
+        <i class="ri-graduation-cap-line"></i>
+      </div>
+      <h3 class="card-title">Greenwood International School</h3>
+      <p class="card-desc">14 GPS Buses • Real-Time Parent SMS Alert System</p>
+      <div class="card-footer">
+        <span class="footer-label">Monthly Contract:</span>
+        <strong class="footer-value value-amber">₹6,80,000 / mo</strong>
+      </div>
+    </div>
+  </div>
+
+  <!-- Employee Shift Roster Table -->
+  <div class="roster-panel">
+    <div class="panel-header">
+      <h3 class="panel-title">
+        <i class="ri-calendar-event-line icon-purple"></i> Active Shift Pickup Routes (Today)
+      </h3>
+      <button (click)="createRoster()" class="action-btn">
+        <i class="ri-add-line"></i> Generate Auto Roster
+      </button>
+    </div>
+
+    <div class="table-responsive">
+      <table class="roster-table">
+        <thead>
+          <tr>
+            <th>Route ID</th>
+            <th>Client</th>
+            <th>Shift Time</th>
+            <th>Vehicle Assigned</th>
+            <th>Pax Count</th>
+            <th>Security Escort</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (r of rosters; track r.id) {
+            <tr>
+              <td class="cell-id">{{ r.id }}</td>
+              <td class="cell-client">{{ r.clientName }}</td>
+              <td class="cell-time">{{ r.shiftTime }}</td>
+              <td>{{ r.vehicleAssigned }}</td>
+              <td class="cell-pax">{{ r.paxCount }} Passengers</td>
+              <td>
+                @if (r.securityEscort) {
+                  <span class="escort-guarded">
+                    <i class="ri-shield-check-line"></i> Guard Guarded
+                  </span>
+                } @else {
+                  <span class="escort-standard">Standard</span>
+                }
+              </td>
+              <td>
+                <span [class.status-dispatched]="r.status === 'DISPATCHED'" [class.status-pending]="r.status !== 'DISPATCHED'" class="status-pill">
+                  {{ r.status }}
+                </span>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+
+</div>

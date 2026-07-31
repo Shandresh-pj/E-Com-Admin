@@ -1,0 +1,49 @@
+<div class="vc-card" [class.vc-card--selected]="isSelected" (click)="onSelect.emit(category)">
+
+  <!-- Badge Row -->
+  <div class="vc-card__badge-row">
+    <span class="vc-card__type-badge">{{ category.tag || category.type }}</span>
+    @if (category.isEV) {
+      <span class="vc-card__ev-badge">
+        <i class="ri-charging-pile-fill"></i> 100% EV
+      </span>
+    }
+  </div>
+
+  <!-- Body: Icon + Info -->
+  <div class="vc-card__body">
+    <div class="vc-card__icon-wrap">
+      <i [class]="category.icon"></i>
+    </div>
+    <div class="vc-card__info">
+      <h3 class="vc-card__name">{{ category.name }}</h3>
+      <div class="vc-card__meta">
+        <span><i class="ri-user-line"></i> {{ category.capacity }}</span>
+        <span class="sep">•</span>
+        <span><i class="ri-suitcase-line"></i> {{ category.luggage }}</span>
+      </div>
+      <div class="vc-card__eta-row">
+        <span class="vc-card__eta"><i class="ri-time-line"></i> ETA {{ category.eta }}</span>
+        @if (category.dynamicMultiplier > 1.0) {
+          <span class="vc-card__surge-badge">⚡ {{ category.dynamicMultiplier }}x Surge</span>
+        }
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer: Fare + Select Button -->
+  <div class="vc-card__footer">
+    <div class="vc-card__pricing">
+      <span class="vc-card__fare-label">Estimated Fare</span>
+      <div class="vc-card__fare-value">
+        <strong>₹{{ estimatedFare | number:'1.2-2' }}</strong>
+        <span>incl. taxes</span>
+      </div>
+    </div>
+    <button class="vc-card__select-btn">
+      {{ isSelected ? 'Selected' : 'Select' }}
+      <i class="ri-arrow-right-line"></i>
+    </button>
+  </div>
+
+</div>

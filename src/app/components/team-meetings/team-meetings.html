@@ -1,0 +1,376 @@
+<div class="meetings-universe" [class.in-meeting]="isMeetingActive">
+  <!-- Aurora Ambient Blobs -->
+  <div class="aurora-blob a1"></div>
+  <div class="aurora-blob a2"></div>
+  <div class="aurora-blob a3"></div>
+
+  <!-- ACTIVE MEETING ROOM -->
+  @if (isMeetingActive) {
+    <div class="meeting-room-wrapper animate-fade-in">
+      <!-- Top Control Bar -->
+      <div class="meeting-top-bar glass-dark">
+        <div class="meeting-identity">
+          <div class="live-indicator">
+            <span class="live-dot"></span>
+            <span class="live-label">LIVE</span>
+          </div>
+          <div class="meeting-info">
+            <span class="room-title">Enterprise Meeting Room</span>
+            <code class="room-code-chip">{{ currentMeetingCode }}</code>
+          </div>
+          <div class="meeting-timer">
+            <mat-icon>schedule</mat-icon>
+            <span>{{ formattedDuration }}</span>
+          </div>
+        </div>
+
+        <div class="top-bar-actions">
+          <button class="glass-pill-btn" (click)="copyMeetingCode()" matTooltip="Copy Room Code">
+            <mat-icon>{{ copiedCode ? 'check_circle' : 'content_copy' }}</mat-icon>
+            <span>{{ copiedCode ? 'Copied!' : 'Share Code' }}</span>
+          </button>
+          <button class="glass-pill-btn danger-pill" (click)="leaveMeeting()">
+            <mat-icon>call_end</mat-icon>
+            <span>Leave Meeting</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Main Meeting Stage -->
+      <div class="meeting-stage" [class.with-sidebar]="showParticipantsPanel || showChatPanel">
+        <!-- Video Grid -->
+        <div class="video-grid">
+          <!-- Local Feed -->
+          <div class="participant-tile local-tile" [class.video-off]="isVideoOff">
+            <video #localVideo autoplay playsinline [muted]="true" class="video-stream"></video>
+
+            @if (isVideoOff) {
+              <div class="video-off-placeholder">
+                <div class="avatar-circle" [style.background]="getAvatarGradient('You')">Y</div>
+                <span>Camera Off</span>
+              </div>
+            }
+
+            <div class="tile-overlay-bar">
+              <div class="participant-name-tag">
+                <mat-icon class="mic-status" [class.muted]="isMuted">{{ isMuted ? 'mic_off' : 'mic' }}</mat-icon>
+                <span>You (Host)</span>
+              </div>
+              <span class="quality-badge">HD</span>
+            </div>
+
+            @if (!isMuted) {
+              <div class="speaking-ring"></div>
+            }
+            @if (isScreenSharing) {
+              <div class="screen-share-badge">
+                <mat-icon>screen_share</mat-icon> Sharing
+              </div>
+            }
+          </div>
+
+          <!-- Remote Participants Waiting Tile -->
+          <div class="participant-tile remote-tile">
+            <div class="waiting-animation">
+              <div class="ripple-ring r1"></div>
+              <div class="ripple-ring r2"></div>
+              <div class="ripple-ring r3"></div>
+              <mat-icon class="waiting-icon-center">groups</mat-icon>
+            </div>
+            <p class="waiting-message">Waiting for team members…<br/>
+              <strong>Share code: {{ currentMeetingCode }}</strong>
+            </p>
+            <div class="tile-overlay-bar">
+              <span class="participant-name-tag">Room Participant</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sidebar Panel (Participants / Chat) -->
+        @if (showParticipantsPanel || showChatPanel) {
+          <div class="meeting-sidebar glass-dark">
+            <div class="sidebar-tabs">
+              <button [class.active]="showParticipantsPanel" (click)="showParticipantsPanel = true; showChatPanel = false">
+                <mat-icon>people</mat-icon> Participants ({{ mockParticipants.length }})
+              </button>
+              <button [class.active]="showChatPanel" (click)="showChatPanel = true; showParticipantsPanel = false">
+                <mat-icon>chat</mat-icon> Chat
+              </button>
+            </div>
+
+            <!-- Participants List -->
+            @if (showParticipantsPanel) {
+              <div class="participants-list custom-scrollbar">
+                @for (p of mockParticipants; track p.id) {
+                  <div class="participant-card">
+                    <div class="p-avatar" [style.background]="p.avatarColor">{{ p.name.charAt(0).toUpperCase() }}</div>
+                    <div class="p-meta">
+                      <span class="p-name">{{ p.name }}</span>
+                      <span class="p-status">{{ p.isMuted ? 'Muted' : 'Unmuted' }} • {{ p.isVideoOff ? 'Camera Off' : 'Camera On' }}</span>
+                    </div>
+                    <div class="p-icons">
+                      <mat-icon [class.icon-red]="p.isMuted">{{ p.isMuted ? 'mic_off' : 'mic' }}</mat-icon>
+                      <mat-icon [class.icon-red]="p.isVideoOff">{{ p.isVideoOff ? 'videocam_off' : 'videocam' }}</mat-icon>
+                    </div>
+                  </div>
+                }
+              </div>
+            }
+
+            <!-- In-Meeting Chat -->
+            @if (showChatPanel) {
+              <div class="in-meeting-chat">
+                <div class="chat-messages custom-scrollbar">
+                  @for (msg of chatMessages; track $index) {
+                    <div class="chat-msg">
+                      <span class="msg-name">{{ msg.name }}</span>
+                      <p class="msg-text">{{ msg.text }}</p>
+                      <span class="msg-time">{{ msg.time }}</span>
+                    </div>
+                  } @empty {
+                    <div class="empty-chat">
+                      <mat-icon>chat_bubble_outline</mat-icon>
+                      <p>No messages yet. Say hello! 👋</p>
+                    </div>
+                  }
+                </div>
+                <div class="chat-input-row">
+                  <input [(ngModel)]="chatInput" (keyup.enter)="sendChatMessage()" placeholder="Send a message..." class="chat-field" />
+                  <button (click)="sendChatMessage()" [disabled]="!chatInput.trim()" class="send-chat-btn">
+                    <mat-icon>send</mat-icon>
+                  </button>
+                </div>
+              </div>
+            }
+          </div>
+        }
+      </div>
+
+      <!-- Floating Controls Dock -->
+      <div class="controls-dock glass-dark">
+        <button class="control-btn" [class.active-ctrl]="!isMuted" [class.danger-ctrl]="isMuted" (click)="toggleMute()" matTooltip="{{ isMuted ? 'Unmute' : 'Mute' }}">
+          <mat-icon>{{ isMuted ? 'mic_off' : 'mic' }}</mat-icon>
+          <span>{{ isMuted ? 'Unmute' : 'Mute' }}</span>
+        </button>
+        <button class="control-btn" [class.active-ctrl]="!isVideoOff" [class.danger-ctrl]="isVideoOff" (click)="toggleVideo()" matTooltip="{{ isVideoOff ? 'Start Video' : 'Stop Video' }}">
+          <mat-icon>{{ isVideoOff ? 'videocam_off' : 'videocam' }}</mat-icon>
+          <span>{{ isVideoOff ? 'Start Video' : 'Stop Video' }}</span>
+        </button>
+        <button class="control-btn" [class.accent-ctrl]="isScreenSharing" (click)="toggleScreenShare()" matTooltip="{{ isScreenSharing ? 'Stop Sharing' : 'Share Screen' }}">
+          <mat-icon>{{ isScreenSharing ? 'stop_screen_share' : 'screen_share' }}</mat-icon>
+          <span>{{ isScreenSharing ? 'Stop Share' : 'Share Screen' }}</span>
+        </button>
+        <button class="control-btn" [class.accent-ctrl]="isHandRaised" (click)="isHandRaised = !isHandRaised" matTooltip="Raise Hand">
+          <mat-icon>{{ isHandRaised ? 'back_hand' : 'pan_tool' }}</mat-icon>
+          <span>{{ isHandRaised ? 'Lower Hand' : 'Raise Hand' }}</span>
+        </button>
+        <button class="control-btn" [class.accent-ctrl]="showParticipantsPanel" (click)="showParticipantsPanel = !showParticipantsPanel; showChatPanel = false" matTooltip="Participants">
+          <mat-icon>people</mat-icon>
+          <span>Participants</span>
+        </button>
+        <button class="control-btn" [class.accent-ctrl]="showChatPanel" (click)="showChatPanel = !showChatPanel; showParticipantsPanel = false" matTooltip="Meeting Chat">
+          <mat-icon>chat</mat-icon>
+          <span>Chat</span>
+        </button>
+        <div class="dock-divider"></div>
+        <button class="control-btn end-btn" (click)="leaveMeeting()" matTooltip="Leave Meeting">
+          <mat-icon>call_end</mat-icon>
+          <span>End Call</span>
+        </button>
+      </div>
+    </div>
+  } @else {
+    <!-- HOME CONSOLE (Pre-Meeting State) -->
+    <div class="home-console animate-fade-in">
+      <!-- Hero Header -->
+      <div class="meetings-hero">
+        <div class="hero-content">
+          <div class="hero-badge glass-badge">
+            <mat-icon>videocam</mat-icon>
+            <span>WebRTC Enterprise HD Meetings</span>
+          </div>
+          <h1 class="hero-title">Team Meetings <span class="gradient-text">&amp; Calls</span></h1>
+          <p class="hero-sub">Host, join, and manage end-to-end encrypted HD video meetings, screen sharing sessions, and audio calls — all within your secure workspace.</p>
+        </div>
+
+        <div class="hero-stats-row">
+          <div class="stat-pill glass-pill">
+            <mat-icon>lock</mat-icon>
+            <span>AES-256 Encrypted</span>
+          </div>
+          <div class="stat-pill glass-pill">
+            <mat-icon>hd</mat-icon>
+            <span>1080p HD Quality</span>
+          </div>
+          <div class="stat-pill glass-pill">
+            <mat-icon>bolt</mat-icon>
+            <span>Sub-100ms Latency</span>
+          </div>
+          <div class="stat-pill glass-pill">
+            <mat-icon>group_add</mat-icon>
+            <span>Up to 50 Participants</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Action Cards -->
+      <div class="action-cards-row">
+        <!-- Instant Meeting Card -->
+        <div class="action-card instant-card animate-pop" (click)="startInstantMeeting()">
+          <div class="card-glow-bg glow-violet"></div>
+          <div class="card-icon-sphere violet-sphere">
+            <mat-icon>video_call</mat-icon>
+            <div class="sphere-ring s-r1"></div>
+            <div class="sphere-ring s-r2"></div>
+          </div>
+          <h3>New Instant Meeting</h3>
+          <p>Generate a unique encrypted room code and start a video session immediately.</p>
+          <div class="card-cta">
+            <span>Start Now</span>
+            <mat-icon>arrow_forward</mat-icon>
+          </div>
+          <div class="card-badge">VIDEO + AUDIO</div>
+        </div>
+
+        <!-- Join with Code Card -->
+        <div class="action-card join-card animate-pop">
+          <div class="card-glow-bg glow-cyan"></div>
+          <div class="card-icon-sphere cyan-sphere">
+            <mat-icon>keyboard</mat-icon>
+          </div>
+          <h3>Join with Code</h3>
+          <p>Enter a meeting code shared by your team lead, manager, or colleagues.</p>
+          <div class="join-code-field">
+            <mat-icon class="field-icon">meeting_room</mat-icon>
+            <input type="text" [(ngModel)]="meetingCodeInput" placeholder="e.g. MEET-X7Y9Z2" (keyup.enter)="joinMeetingWithCode()" class="code-input-field" />
+          </div>
+          <button class="join-cta-btn" (click)="joinMeetingWithCode()" [disabled]="!meetingCodeInput.trim()">
+            <mat-icon>login</mat-icon>
+            <span>Join Meeting</span>
+          </button>
+        </div>
+
+        <!-- Schedule / Browse Card -->
+        <div class="action-card schedule-card animate-pop">
+          <div class="card-glow-bg glow-amber"></div>
+          <div class="card-icon-sphere amber-sphere">
+            <mat-icon>calendar_month</mat-icon>
+          </div>
+          <div class="sched-header-flex">
+            <h3>Scheduled Meetings</h3>
+            <button mat-icon-button (click)="openScheduleModal(); $event.stopPropagation()" matTooltip="Schedule New Meeting" class="add-sched-btn">
+              <mat-icon>add_circle_outline</mat-icon>
+            </button>
+          </div>
+          <p>Upcoming meetings planned for your company, branch, or department.</p>
+          <div class="scheduled-list custom-scrollbar">
+            @for (m of scheduledMeetings; track m.code) {
+              <div class="scheduled-item" (click)="joinScheduledMeeting(m.code)">
+                <div class="sched-left">
+                  <mat-icon class="sched-type-icon" [class.audio]="m.type === 'AUDIO'">{{ m.type === 'AUDIO' ? 'call' : 'videocam' }}</mat-icon>
+                  <div>
+                    <span class="sched-title">{{ m.title }}</span>
+                    <span class="sched-time">{{ m.time }} &bull; {{ m.participants }} participants</span>
+                  </div>
+                </div>
+                <mat-icon class="join-icon">arrow_forward_ios</mat-icon>
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+
+      <!-- Tabs -->
+      <div class="history-section">
+        <div class="section-header">
+          <h2 class="section-title"><mat-icon>history</mat-icon> Call &amp; Meeting Logs</h2>
+          <div class="section-tab-strip">
+            <button [class.active]="activeTab === 'JOIN'" (click)="activeTab = 'JOIN'">Recent</button>
+            <button [class.active]="activeTab === 'HISTORY'" (click)="activeTab = 'HISTORY'">All History</button>
+          </div>
+        </div>
+
+        <div class="history-cards-grid">
+          @for (item of displayedCallHistory; track item.meeting_code) {
+            <div class="history-card glass-card animate-pop">
+              <div class="history-card-header">
+                <div class="call-avatar" [style.background]="getAvatarGradient(item.caller_name || 'User')">
+                  {{ (item.caller_name || 'U').charAt(0).toUpperCase() }}
+                </div>
+                <div class="call-meta">
+                  <h4>{{ item.caller_name || 'Unknown' }}</h4>
+                  <code class="code-tag">{{ item.meeting_code || 'N/A' }}</code>
+                </div>
+                <div class="call-badges">
+                  <span class="type-badge" [class.audio-badge]="item.call_type === 'AUDIO'">
+                    <mat-icon>{{ item.call_type === 'AUDIO' ? 'call' : 'videocam' }}</mat-icon>
+                    {{ item.call_type }}
+                  </span>
+                  <span class="status-badge ended">{{ item.status || 'ENDED' }}</span>
+                </div>
+              </div>
+              <div class="history-card-footer">
+                <span class="call-time"><mat-icon>schedule</mat-icon>{{ item.started_at | date:'medium' }}</span>
+                @if (item.duration) {
+                  <span class="call-duration"><mat-icon>timer</mat-icon>{{ item.duration }}</span>
+                }
+              </div>
+            </div>
+          } @empty {
+            <div class="empty-history glass-card">
+              <mat-icon>video_off</mat-icon>
+              <h4>No meeting history yet</h4>
+              <p>Start or join a meeting to see your activity here.</p>
+              <button class="start-btn" (click)="startInstantMeeting()">
+                <mat-icon>video_call</mat-icon> Start First Meeting
+              </button>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Dynamic Schedule Meeting Dialog Modal -->
+  @if (showScheduleModal) {
+    <div class="modal-backdrop animate-pop" (click)="showScheduleModal = false">
+      <div class="modal-content glass-panel" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <div class="modal-header-title">
+            <mat-icon color="primary">event</mat-icon>
+            <h3>Schedule New Meeting</h3>
+          </div>
+          <button mat-icon-button (click)="showScheduleModal = false"><mat-icon>close</mat-icon></button>
+        </div>
+
+        <div class="modal-body">
+          <div class="form-group">
+            <label>Meeting Title</label>
+            <input type="text" [(ngModel)]="newMeetingTitle" placeholder="e.g. Q4 Growth Sync" class="form-input" />
+          </div>
+          <div class="form-group">
+            <label>Scheduled Date &amp; Time</label>
+            <input type="text" [(ngModel)]="newMeetingTime" placeholder="e.g. Tomorrow 3:30 PM" class="form-input" />
+          </div>
+          <div class="form-group">
+            <label>Call Format</label>
+            <div class="type-selector">
+              <button [class.active]="newMeetingType === 'VIDEO'" (click)="newMeetingType = 'VIDEO'">
+                <mat-icon>videocam</mat-icon> Video + Audio
+              </button>
+              <button [class.active]="newMeetingType === 'AUDIO'" (click)="newMeetingType = 'AUDIO'">
+                <mat-icon>call</mat-icon> Audio Only
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button mat-raised-button color="primary" (click)="saveScheduledMeeting()" [disabled]="!newMeetingTitle.trim()" class="liquid-btn full-btn">
+            Schedule Meeting
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+</div>

@@ -1,0 +1,254 @@
+<div class="verification-container">
+  
+  <!-- Header Banner -->
+  <div class="audit-header">
+    <div class="header-glow"></div>
+    <div class="header-content">
+      <div class="badge-row">
+        <span class="badge badge-primary">Zero-Trust Verification Engine</span>
+        <span class="badge badge-success"><span class="pulse-dot"></span> KYC & RC Audit Console</span>
+      </div>
+      <h1 class="header-title">Vehicle & Driver Verification</h1>
+      <p class="header-subtitle">Audit driving licenses, commercial permits, police background clearance, and vehicle fitness certificates.</p>
+    </div>
+
+    <!-- Section Switcher Tabs -->
+    <div class="section-switcher">
+      <button (click)="activeTab = 'drivers'" [class.active]="activeTab === 'drivers'" class="tab-btn btn-indigo">
+        <i class="ri-user-follow-line"></i> Driver KYC ({{ drivers().length }})
+      </button>
+      
+      <button (click)="activeTab = 'vehicles'" [class.active]="activeTab === 'vehicles'" class="tab-btn btn-emerald">
+        <i class="ri-shield-check-line"></i> Vehicle RC & Permit ({{ vehicles().length }})
+      </button>
+
+      <button (click)="activeTab = 'categories'" [class.active]="activeTab === 'categories'" class="tab-btn btn-purple">
+        <i class="ri-grid-fill"></i> Vehicle Types ({{ categories().length }})
+      </button>
+    </div>
+  </div>
+
+  <!-- Quick Metrics Grid -->
+  <div class="metrics-grid">
+    <div class="metric-card card-emerald">
+      <span class="metric-title">Verified Drivers</span>
+      <h3 class="metric-value text-emerald">{{ countApprovedDrivers() }} / {{ drivers().length }}</h3>
+      <span class="metric-subtext subtext-emerald"><i class="ri-checkbox-circle-fill"></i> Police Clearance Valid</span>
+    </div>
+
+    <div class="metric-card card-indigo">
+      <span class="metric-title">Vehicles Audited</span>
+      <h3 class="metric-value text-indigo">{{ countApprovedVehicles() }} / {{ vehicles().length }}</h3>
+      <span class="metric-subtext subtext-indigo"><i class="ri-shield-user-fill"></i> RC & Permit Verified</span>
+    </div>
+
+    <div class="metric-card card-amber">
+      <span class="metric-title">Under Review</span>
+      <h3 class="metric-value text-amber">{{ countPending() }} Records</h3>
+      <span class="metric-subtext subtext-amber"><i class="ri-time-fill"></i> Awaiting KYC Approval</span>
+    </div>
+
+    <div class="metric-card card-purple">
+      <span class="metric-title">Active Vehicle Types</span>
+      <h3 class="metric-value text-purple">13 Categories</h3>
+      <span class="metric-subtext">Passenger & Logistics</span>
+    </div>
+  </div>
+
+  <!-- TAB 1: DRIVERS VERIFICATION TABLE -->
+  @if (activeTab === 'drivers') {
+    <div class="table-panel">
+      <div class="panel-header">
+        <h3 class="panel-title">
+          <i class="ri-user-star-line icon-indigo"></i> Driver KYC & License Verification Audit
+        </h3>
+        
+        <div class="search-wrap">
+          <input type="text" [(ngModel)]="driverSearch" placeholder="Search driver name, DL or phone..." class="search-input" />
+        </div>
+      </div>
+
+      <div class="table-responsive">
+        <table class="audit-table">
+          <thead>
+            <tr>
+              <th>Driver Name</th>
+              <th>Driving License (DL)</th>
+              <th>Badge No</th>
+              <th>Police Clearance</th>
+              <th>Aadhaar KYC</th>
+              <th>Status</th>
+              <th class="text-right">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (d of filteredDrivers(); track d.id) {
+              <tr>
+                <td class="cell-driver">
+                  <img [src]="d.avatar" class="driver-avatar" />
+                  <div class="driver-info">
+                    <span class="driver-name">{{ d.name }}</span>
+                    <span class="driver-phone">{{ d.phone }}</span>
+                  </div>
+                </td>
+
+                <td>
+                  <span class="dl-no">{{ d.verification.dlNo }}</span>
+                  <span class="dl-expiry">Exp: {{ d.verification.dlExpiry }}</span>
+                </td>
+
+                <td class="badge-no">{{ d.verification.badgeNo }}</td>
+
+                <td>
+                  <span [class.status-verified]="d.verification.policeVerification === 'VERIFIED'" [class.status-pending]="d.verification.policeVerification !== 'VERIFIED'" class="check-text">
+                    <i class="ri-shield-check-line"></i> {{ d.verification.policeVerification }}
+                  </span>
+                </td>
+
+                <td>
+                  <span [class.status-verified]="d.verification.aadhaarVerification === 'VERIFIED'" [class.status-pending]="d.verification.aadhaarVerification !== 'VERIFIED'" class="check-text">
+                    <i class="ri-shield-check-line"></i> {{ d.verification.aadhaarVerification }}
+                  </span>
+                </td>
+
+                <td>
+                  <span [class.pill-approved]="d.verification.status === 'APPROVED'" [class.pill-pending]="d.verification.status !== 'APPROVED'" class="status-pill">
+                    {{ d.verification.status }}
+                  </span>
+                </td>
+
+                <td class="text-right">
+                  @if (d.verification.status !== 'APPROVED') {
+                    <button (click)="verifyDriver(d)" class="approve-btn">
+                      Verify & Approve
+                    </button>
+                  } @else {
+                    <span class="verified-label">
+                      <i class="ri-checkbox-circle-fill"></i> Verified
+                    </span>
+                  }
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  }
+
+  <!-- TAB 2: VEHICLE VERIFICATION TABLE -->
+  @if (activeTab === 'vehicles') {
+    <div class="table-panel">
+      <div class="panel-header">
+        <h3 class="panel-title">
+          <i class="ri-car-line icon-emerald"></i> Vehicle Registration (RC) & Permit Inspection
+        </h3>
+        
+        <div class="search-wrap">
+          <input type="text" [(ngModel)]="vehicleSearch" placeholder="Search registration no or chassis..." class="search-input" />
+        </div>
+      </div>
+
+      <div class="table-responsive">
+        <table class="audit-table">
+          <thead>
+            <tr>
+              <th>Registration No</th>
+              <th>Make & Model</th>
+              <th>Chassis / Engine</th>
+              <th>Commercial Permit</th>
+              <th>Insurance Expiry</th>
+              <th>Status</th>
+              <th class="text-right">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (v of filteredVehicles(); track v.id) {
+              <tr>
+                <td>
+                  <span class="reg-no">{{ v.regNo }}</span>
+                  <span class="vehicle-category">{{ v.category }}</span>
+                </td>
+
+                <td class="make-model">{{ v.makeModel }}</td>
+
+                <td>
+                  <span class="mono-code">{{ v.chassisNo }}</span>
+                  <span class="mono-subcode">{{ v.engineNo }}</span>
+                </td>
+
+                <td class="permit-status">{{ v.verification.permitStatus }}</td>
+
+                <td class="insurance-expiry">{{ v.verification.insuranceExpiry }}</td>
+
+                <td>
+                  <span [class.pill-approved]="v.verification.status === 'APPROVED'" [class.pill-pending]="v.verification.status !== 'APPROVED'" class="status-pill">
+                    {{ v.verification.status }}
+                  </span>
+                </td>
+
+                <td class="text-right">
+                  @if (v.verification.status !== 'APPROVED') {
+                    <button (click)="verifyVehicle(v)" class="approve-btn">
+                      Clear Vehicle RC
+                    </button>
+                  } @else {
+                    <span class="verified-label">
+                      <i class="ri-checkbox-circle-fill"></i> Cleared
+                    </span>
+                  }
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  }
+
+  <!-- TAB 3: VEHICLE TYPES CATEGORY CONFIGURATOR -->
+  @if (activeTab === 'categories') {
+    <div class="category-grid">
+      @for (cat of categories(); track cat.id) {
+        <div class="category-card">
+          <div class="card-header-row">
+            <div class="icon-title-group">
+              <div class="cat-icon">
+                <i [class]="cat.icon"></i>
+              </div>
+              <div>
+                <h3 class="cat-name">{{ cat.name }}</h3>
+                <span class="cat-type">{{ cat.type }} • Tag: {{ cat.tag }}</span>
+              </div>
+            </div>
+
+            @if (cat.isEV) {
+              <span class="ev-badge">100% EV</span>
+            }
+          </div>
+
+          <div class="rates-box">
+            <div class="rate-col">
+              <span class="rate-label">Base Fare</span>
+              <strong class="rate-val">₹{{ cat.baseFare }}</strong>
+            </div>
+            <div class="rate-col">
+              <span class="rate-label">Per KM Rate</span>
+              <strong class="rate-val text-emerald">₹{{ cat.perKm }}</strong>
+            </div>
+            <div class="rate-col">
+              <span class="rate-label">Per Min Rate</span>
+              <strong class="rate-val text-purple">₹{{ cat.perMin }}</strong>
+            </div>
+          </div>
+
+          <div class="card-footer">
+            <span>Capacity: <strong>{{ cat.capacity }}</strong></span>
+            <span>ETA: <strong class="text-emerald">{{ cat.eta }}</strong></span>
+          </div>
+        </div>
+      }
+    </div>
+  }
+
+</div>

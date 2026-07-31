@@ -300,47 +300,57 @@ export class FullComponent implements OnInit {
     let allowedMenus: any[] = [];
     const allStandardMenus = [
       { id: 1, name: 'App Admin', path: '/admin', icon: 'bi-shield-lock-fill', isActive: true },
-      { id: 2, name: 'Branch', path: '/branch', icon: 'bi-shop', isActive: true },
+      { id: 2, name: 'Branch', path: '/branch', icon: 'bi-building-fill', isActive: true },
       { id: 3, name: 'Employee', path: '/employees', icon: 'bi-people-fill', isActive: true },
       { id: 4, name: 'Roles', path: '/roles', icon: 'bi-key-fill', isActive: true },
       { id: 5, name: 'Role Access', path: '/role-access', icon: 'bi-shield-check', isActive: true },
       { id: 6, name: 'Profile', path: '/profile', icon: 'bi-person-badge-fill', isActive: true },
-      { id: 7, name: 'Menu Bar', path: '/menubar', icon: 'bi-list-ul', isActive: true },
+      { id: 7, name: 'Menu Bar', path: '/menubar', icon: 'bi-list-stars', isActive: true },
       { id: 8, name: 'Status', path: '/status', icon: 'bi-check2-square', isActive: true },
-      { id: 9, name: 'Product Attribute', path: '/product-attribute', icon: 'bi-tag-fill', isActive: true },
+      { id: 9, name: 'Product Attribute', path: '/product-attribute', icon: 'bi-sliders', isActive: true },
       { id: 10, name: 'Attribute Value', path: '/attribute-value', icon: 'bi-tags-fill', isActive: true },
       { id: 11, name: 'Category', path: '/category', icon: 'bi-folder-fill', isActive: true },
       { id: 12, name: 'Product', path: '/product', icon: 'bi-box-seam-fill', isActive: true },
-      { id: 13, name: 'Orders', path: '/orders', icon: 'bi-cart-fill', isActive: true },
-      { id: 99, name: 'Coupons', path: '/coupons', icon: 'bi-ticket-detailed-fill', isActive: true },
+      { id: 13, name: 'Orders', path: '/orders', icon: 'bi-bag-check-fill', isActive: true },
+      { id: 99, name: 'Coupons', path: '/coupons', icon: 'bi-ticket-perforated-fill', isActive: true },
       { id: 14, name: 'Change Password', path: '/change-password', icon: 'bi-lock-fill', isActive: true },
       { id: 15, name: 'Audit Logs', path: '/audit-logs', icon: 'bi-clock-history', isActive: true },
       { id: 16, name: 'Alerts', path: '/alerts', icon: 'bi-exclamation-triangle-fill', isActive: true },
       { id: 17, name: 'Attendance', path: '/attendance', icon: 'bi-calendar-check-fill', isActive: true },
-      { id: 18, name: 'Branch Stocks', path: '/branch-stocks', icon: 'bi-house-gear-fill', isActive: true },
-      { id: 19, name: 'Stocks', path: '/stocks', icon: 'bi-box2-fill', isActive: true },
+      { id: 18, name: 'Branch Stocks', path: '/branch-stocks', icon: 'bi-houses-fill', isActive: true },
+      { id: 19, name: 'Stocks', path: '/stocks', icon: 'bi-boxes', isActive: true },
       { id: 20, name: 'Payroll', path: '/payroll', icon: 'bi-cash-coin', isActive: true },
       { id: 21, name: 'Leave', path: '/leave', icon: 'bi-airplane-fill', isActive: true },
       { id: 22, name: 'Delivery Tracking', path: '/delivery-tracking', icon: 'bi-truck', isActive: true },
       { id: 23, name: 'Payments', path: '/payments', icon: 'bi-credit-card-2-front-fill', isActive: true },
       { id: 24, name: 'Notifications', path: '/notifications', icon: 'bi-bell-fill', isActive: true },
       { id: 25, name: 'Workforce Console', path: '/workforce', icon: 'bi-gear-wide-connected', isActive: true },
-      { id: 26, name: 'Invoice Generator', path: '/invoices', icon: 'bi-file-text', isActive: true },
-      { id: 27, name: 'Approvals', path: '/approvals', icon: 'bi-check-square', isActive: true },
+      { id: 26, name: 'Invoice Generator', path: '/invoices', icon: 'bi-file-earmark-text-fill', isActive: true },
+      { id: 27, name: 'Approvals', path: '/approvals', icon: 'bi-patch-check-fill', isActive: true },
       { id: 28, name: 'Workforce Requests', path: '/workforce-requests', icon: 'bi-briefcase-fill', isActive: true },
       { id: 29, name: 'Leave Management', path: '/leave', icon: 'bi-calendar-x-fill', isActive: true },
-      { id: 30, name: 'CRM Contacts', path: '/crm-contacts', icon: 'bi-people-fill', isActive: true },
+      { id: 30, name: 'CRM Contacts', path: '/crm-contacts', icon: 'bi-person-rolodex', isActive: true },
       { id: 31, name: 'Profit & Loss', path: '/profit-loss', icon: 'bi-pie-chart-fill', isActive: true },
       { id: 32, name: 'Manage Plans', path: '/manage-subscription-plans', icon: 'bi-gem', isActive: true },
       { id: 33, name: 'Upgrade Plan', path: '/subscription-plans', icon: 'bi-star-fill', isActive: true },
-      { id: 34, name: 'Billing History', path: '/billing-history', icon: 'receipt', isActive: true },
-      { id: 35, name: 'Subscription Coupons', path: '/subscription-coupons', icon: 'ticket', isActive: true },
-      { id: 36, name: 'Standard Checkout', path: '/checkout', icon: 'credit-card', isActive: true },
-      { id: 37, name: 'Company Calendar', path: '/calendar', icon: 'calendar-event', isActive: true },
-      { id: 38, name: 'Document Verification', path: '/employee-documents', icon: 'file-check', isActive: true },
-      { id: 39, name: 'Translation Console', path: '/translations', icon: 'language', isActive: true },
-      { id: 40, name: 'POS Billing Machine', path: '/pos-billing', icon: 'bi-receipt-cutoff', isActive: true },
-      { id: 41, name: 'Hardware & Devices', path: '/devices', icon: 'bi-cpu-fill', isActive: true }
+      { id: 34, name: 'Billing History', path: '/billing-history', icon: 'bi-receipt', isActive: true },
+      { id: 35, name: 'Subscription Coupons', path: '/subscription-coupons', icon: 'bi-ticket-detailed-fill', isActive: true },
+      { id: 36, name: 'Standard Checkout', path: '/checkout', icon: 'bi-credit-card-fill', isActive: true },
+      { id: 37, name: 'Company Calendar', path: '/calendar', icon: 'bi-calendar-event-fill', isActive: true },
+      { id: 38, name: 'Document Verification', path: '/employee-documents', icon: 'bi-file-earmark-check-fill', isActive: true },
+      { id: 39, name: 'Translation Console', path: '/translations', icon: 'bi-translate', isActive: true },
+      { id: 40, name: 'POS Billing Machine', path: '/pos-billing', icon: 'bi-calculator-fill', isActive: true },
+      { id: 41, name: 'Hardware & Devices', path: '/devices', icon: 'bi-cpu-fill', isActive: true },
+      { id: 42, name: 'Secure Communications', path: '/communication', icon: 'bi-chat-dots-fill', isActive: true },
+      { id: 43, name: 'Team Meetings & Calls', path: '/communication/meetings', icon: 'bi-camera-video-fill', isActive: true },
+      { id: 101, name: 'Mobility Executive Cockpit', path: '/dashboard/mobility-dashboard', icon: 'bi-car-front-fill', isActive: true },
+      { id: 102, name: 'Ride & Taxi Booking', path: '/dashboard/ride-booking', icon: 'bi-steering-wheel', isActive: true },
+      { id: 103, name: 'Car Rental & Subscriptions', path: '/dashboard/car-rental', icon: 'bi-key-fill', isActive: true },
+      { id: 104, name: 'Parcel & Freight Logistics', path: '/dashboard/parcel-logistics', icon: 'bi-truck-front-fill', isActive: true },
+      { id: 105, name: 'Fleet Asset & GPS Control', path: '/dashboard/fleet-management', icon: 'bi-radar', isActive: true },
+      { id: 106, name: 'Corporate & School Transit', path: '/dashboard/corporate-transport', icon: 'bi-building-fill-gear', isActive: true },
+      { id: 107, name: 'Live GPS Telemetry', path: '/dashboard/live-tracking', icon: 'bi-geo-alt-fill', isActive: true },
+      { id: 108, name: 'KYC & Vehicle Verification', path: '/dashboard/vehicle-driver-verification', icon: 'bi-person-check-fill', isActive: true }
     ];
 
     if (isSuperAdmin) {
@@ -374,12 +384,29 @@ export class FullComponent implements OnInit {
 
     const groupings = [
       {
+        navCap: 'Mobility & Fleet OS',
+        paths: [
+          '/dashboard/mobility-dashboard',
+          '/dashboard/ride-booking',
+          '/dashboard/car-rental',
+          '/dashboard/parcel-logistics',
+          '/dashboard/fleet-management',
+          '/dashboard/corporate-transport',
+          '/dashboard/live-tracking',
+          '/dashboard/vehicle-driver-verification'
+        ]
+      },
+      {
+        navCap: 'Communication & Collaboration',
+        paths: ['/communication', '/communication/meetings']
+      },
+      {
         navCap: 'Administration & Roles',
         paths: ['/admin', '/crm-contacts', '/branch', '/employees', '/role-access', '/roles', '/audit-logs']
       },
       {
         navCap: 'Catalog & Products',
-        paths: ['/category', '/product', '/product-attribute', '/attribute-value', '/coupons']
+        paths: ['/product-attribute', '/attribute-value', '/category', '/product', '/coupons']
       },
       {
         navCap: 'POS Billing & Hardware',
@@ -505,18 +532,37 @@ export class FullComponent implements OnInit {
   // names. Map the known-bad ones to a real equivalent; everything else
   // passes through as-is since most DB values already match a real glyph.
   private static readonly ICON_ALIASES: Record<string, string> = {
+    archive: 'shield-lock-fill',
     badge: 'person-badge-fill',
+    building: 'building-fill',
     settings: 'gear-wide-connected',
     'plane-departure': 'airplane-fill',
-    'map-pin': 'geo-alt-fill',
-    'git-merge': 'shop',
-    category: 'tags-fill',
-    'shopping-cart': 'cart-fill',
+    'map-pin': 'truck',
+    'git-merge': 'houses-fill',
+    category: 'folder-fill',
+    tag: 'sliders',
+    box: 'box-seam-fill',
+    database: 'boxes',
+    'shopping-cart': 'bag-check-fill',
+    ticket: 'ticket-perforated-fill',
     'clipboard-list': 'clock-history',
-    'list-details': 'list-ul',
-    'receipt-2': 'receipt-cutoff',
+    'list-details': 'tags-fill',
+    'list-check': 'check2-square',
+    'receipt-2': 'calculator-fill',
     devices: 'cpu-fill',
-    'chart-pie': 'pie-chart-fill'
+    'chart-pie': 'pie-chart-fill',
+    messages: 'chat-dots-fill',
+    video: 'camera-video-fill',
+    bell: 'bell-fill',
+    calendar: 'calendar-check-fill',
+    'calendar-event': 'calendar-event-fill',
+    'file-text': 'file-earmark-text-fill',
+    'file-check': 'file-earmark-check-fill',
+    checkbox: 'patch-check-fill',
+    diamond: 'gem',
+    star: 'star-fill',
+    receipt: 'receipt',
+    language: 'translate'
   };
 
   private mapIcon(icon?: string): string {

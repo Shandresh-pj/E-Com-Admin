@@ -1,0 +1,246 @@
+// ═══════════════════════════════════════════════════════════════════════════
+//  live-tracking.component.scss
+//  Premium Liquid Glass — Fullscreen Live Trip Telemetry
+// ═══════════════════════════════════════════════════════════════════════════
+@use '../_shared/mobility-glass' as g;
+
+:host { display: block; width: 100%; height: 100%; }
+
+.lt-wrapper {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--page-bg);
+  color: var(--text-primary);
+}
+
+// ── Map Area ──────────────────────────────────────────────────────────────
+.lt-map-area {
+  flex: 1;
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+// ── Top Header Bar ────────────────────────────────────────────────────────
+.lt-top-bar {
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  right: 1rem;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  pointer-events: auto;
+  animation: slideInUp 0.4s ease both;
+}
+
+.lt-trip-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1.125rem;
+  border-radius: var(--radius-lg, 20px);
+  @include g.glass-surface(20px);
+  box-shadow: var(--glass-shadow-lg);
+}
+
+.lt-live-dot { @include g.pulse-dot(#10b981, 0.6rem); }
+
+.lt-trip-label {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.lt-trip-id {
+  font-size: 0.6875rem;
+  color: var(--color-success);
+  font-family: monospace;
+  font-weight: 600;
+}
+
+// ── Speed / ETA Meters ────────────────────────────────────────────────────
+.lt-meters {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  padding: 0.75rem 1.5rem;
+  border-radius: var(--radius-lg, 20px);
+  @include g.glass-surface(20px);
+  box-shadow: var(--glass-shadow-lg);
+  border-color: rgba(79, 70, 229, 0.25);
+}
+
+.lt-meter-item {}
+
+.lt-meter-label {
+  display: block;
+  font-size: 0.5625rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-subtle);
+  margin-bottom: 0.1rem;
+}
+
+.lt-meter-value {
+  font-size: 1.25rem;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  font-family: var(--font-display);
+  &--indigo  { color: #818cf8; }
+  &--emerald { color: var(--color-success); }
+}
+
+.lt-meter-divider { width: 1px; height: 2rem; background: var(--glass-border-subtle); }
+
+// ── Bottom Dock ───────────────────────────────────────────────────────────
+.lt-bottom-dock {
+  position: absolute;
+  bottom: 1.5rem;
+  left: 1.5rem;
+  right: 1.5rem;
+  z-index: 30;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  padding: 1.25rem 1.5rem;
+  border-radius: var(--radius-xl, 24px);
+  @include g.glass-surface(28px);
+  box-shadow: var(--glass-shadow-lg), 0 0 40px rgba(0,0,0,0.3);
+  animation: slideInUp 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 0.1s both;
+
+  @media (min-width: 768px) {
+    flex-direction: row;
+    align-items: center;
+  }
+}
+
+// ── Driver Info ────────────────────────────────────────────────────────────
+.lt-driver-info { display: flex; align-items: center; gap: 1rem; }
+
+.lt-driver-avatar-wrap {
+  position: relative;
+  flex-shrink: 0;
+
+  &::after {
+    content: '';
+    position: absolute;
+    inset: -3px;
+    border-radius: 50%;
+    border: 2px solid var(--color-success);
+    animation: glowPulse 2s ease-in-out infinite;
+    --glow-color: rgba(16,185,129,0.4);
+  }
+}
+
+.lt-driver-avatar {
+  width: 3rem;
+  height: 3rem;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--color-success);
+  display: block;
+}
+
+.lt-driver-name {
+  font-size: 0.9375rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0 0 0.15rem;
+}
+
+.lt-driver-rating { @include g.glass-badge(45); }
+
+.lt-driver-vehicle {
+  font-size: 0.75rem;
+  color: #818cf8;
+  font-weight: 600;
+  margin-top: 0.15rem;
+}
+
+.lt-driver-phone {
+  font-size: 0.6875rem;
+  color: var(--text-muted);
+}
+
+// ── Route Progress ────────────────────────────────────────────────────────
+.lt-route-progress {
+  flex: 1;
+  max-width: 28rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.lt-route-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  .lt-pickup-label  { color: var(--color-success); }
+  .lt-drop-label    { color: #818cf8; }
+}
+
+.lt-progress-slider {
+  width: 100%;
+  height: 0.375rem;
+  border-radius: 9999px;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border-subtle);
+  accent-color: var(--brand-primary);
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  outline: none;
+
+  &::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 1.25rem;
+    height: 1.25rem;
+    border-radius: 50%;
+    background: var(--brand-primary);
+    border: 2px solid #fff;
+    box-shadow: 0 2px 8px rgba(79,70,229,0.4);
+    cursor: pointer;
+    transition: transform var(--transition-spring);
+    &:hover { transform: scale(1.2); }
+  }
+}
+
+.lt-progress-km {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.5625rem;
+  color: var(--text-subtle);
+}
+
+// ── Action Buttons ────────────────────────────────────────────────────────
+.lt-actions { display: flex; align-items: center; gap: 0.75rem; flex-shrink: 0; }
+
+.lt-call-btn {
+  @include g.gradient-btn(#059669, #10b981, rgba(5,150,105,0.35));
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1.25rem;
+  font-size: 0.75rem;
+}
+
+.lt-sos-btn {
+  @include g.gradient-btn(#dc2626, #ef4444, rgba(220,38,38,0.4));
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1.25rem;
+  font-size: 0.75rem;
+  animation: glowPulse 1.5s ease-in-out infinite;
+  --glow-color: rgba(239,68,68,0.4);
+
+  &:hover { animation: sosShake 0.4s ease; }
+}

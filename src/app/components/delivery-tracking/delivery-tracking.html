@@ -1,168 +1,328 @@
-<mat-card class="cardWithShadow theme-card">
-  <mat-card-header>
-    <div class="header-container">
-      <mat-card-title class="m-b-0">Delivery Dispatch & Tracking</mat-card-title>
-      @if (!showStartForm && !showLocationForm && perm.hasRoleAction('canCreate')) {
-        <button mat-flat-button color="primary" (click)="toggleStartForm()">
-          <mat-icon class="icon-16 m-r-4">local_shipping</mat-icon> Dispatch New Delivery
-        </button>
-      }
+<div class="delivery-tracking-wrapper liquid-theme">
+  <!-- Top App Module Switcher Header -->
+  <div class="tracking-top-header glass-card">
+    <div class="header-title-flex">
+      <div class="title-icon-sphere">
+        <mat-icon>{{ appMode === 'RIDE_BOOKING' ? 'directions_bike' : appMode === 'FOOD_DELIVERY' ? 'fastfood' : appMode === 'DRIVER_CONSOLE' ? 'sports_motorsports' : 'navigation' }}</mat-icon>
+      </div>
+      <div>
+        <h2 class="main-title">GPS Mobility &amp; Fleet Logistics Platform</h2>
+        <p class="sub-title">Production-grade Google Maps Platform integration for Ride Booking, Food Delivery &amp; Live Tracking.</p>
+      </div>
     </div>
-  </mat-card-header>
 
-  <!-- Start Delivery Form -->
-  @if (showStartForm) {
-    <mat-card-content class="p-24 b-t-1">
-      <form [formGroup]="trackingForm">
-        <div class="row">
-          <!-- Selection Fields (Only shown if NOT auto-mapped) -->
-          @if (!detectedEmployee) {
-            <div class="col-lg-4 col-md-6 col-sm-12 m-b-16">
-              <mat-label class="f-w-600 m-b-8 d-block">Company <span class="text-danger">*</span></mat-label>
-              <mat-form-field appearance="outline" class="w-100">
-                <mat-select formControlName="company_id" placeholder="Select Company">
-                  @for(c of companies; track c.id) {
-                    <mat-option [value]="c.id">{{ c.name }}</mat-option>
-                  }
-                </mat-select>
-              </mat-form-field>
-            </div>
+    <!-- Mode Switcher Tabs (Rapido Ride | Swiggy Food | Fleet Admin | Driver Console) -->
+    <div class="mode-switcher-bar glass-panel">
+      <button [class.active]="appMode === 'RIDE_BOOKING'" (click)="setAppMode('RIDE_BOOKING')">
+        <mat-icon>two_wheeler</mat-icon> Rapido Ride
+      </button>
+      <button [class.active]="appMode === 'FOOD_DELIVERY'" (click)="setAppMode('FOOD_DELIVERY')">
+        <mat-icon>restaurant</mat-icon> Swiggy Food
+      </button>
+      <button [class.active]="appMode === 'FLEET_ADMIN'" (click)="setAppMode('FLEET_ADMIN')">
+        <mat-icon>dashboard</mat-icon> Fleet Command
+      </button>
+      <button [class.active]="appMode === 'DRIVER_CONSOLE'" (click)="setAppMode('DRIVER_CONSOLE')">
+        <mat-icon>alt_route</mat-icon> Driver Partner
+      </button>
+    </div>
+  </div>
 
-            <div class="col-lg-4 col-md-6 col-sm-12 m-b-16">
-              <mat-label class="f-w-600 m-b-8 d-block">Branch <span class="text-danger">*</span></mat-label>
-              <mat-form-field appearance="outline" class="w-100">
-                <mat-select formControlName="branch_id" placeholder="Select Branch">
-                  @for(b of branches; track b.id) {
-                    <mat-option [value]="b.id">{{ b.name }}</mat-option>
-                  }
-                </mat-select>
-              </mat-form-field>
-            </div>
+  <!-- Map Controls Bar (Tile Layers, Traffic Layer, Geofence & Live Simulation) -->
+  <div class="api-key-banner glass-panel">
+    <div class="banner-content">
+      <mat-icon class="banner-icon">map</mat-icon>
+      <div>
+        @if (mapEngine === 'LEAFLET') {
+          <strong>OpenStreetMap Live CartoDB Engine Active</strong> — High-accuracy real-time telemetry. Enter production API key in <code>src/environment/environment.ts</code> to switch to Google Maps JS SDK.
+        } @else {
+          <strong>Google Maps Platform SDK Active</strong> — Connected to Places, Directions &amp; Traffic SDKs.
+        }
+      </div>
+    </div>
 
-            <div class="col-lg-4 col-md-6 col-sm-12 m-b-16">
-              <mat-label class="f-w-600 m-b-8 d-block">Delivery Agent <span class="text-danger">*</span></mat-label>
-              <mat-form-field appearance="outline" class="w-100">
-                <mat-select formControlName="delivery_boy_id" placeholder="Select Agent">
-                  @for(e of employees; track e.id) {
-                    <mat-option [value]="e.id">{{ e.name }}</mat-option>
-                  }
-                </mat-select>
-              </mat-form-field>
-            </div>
-          }
+    <div class="map-controls-group">
+      <!-- Traffic Layer Toggle -->
+      <button mat-stroked-button (click)="toggleTrafficLayer()" [class.active-layer]="showTrafficLayer" class="layer-btn">
+        <mat-icon>traffic</mat-icon> Traffic {{ showTrafficLayer ? 'ON' : 'OFF' }}
+      </button>
 
-          <!-- Order Selection -->
-          <div class="col-lg-4 col-md-6 col-sm-12 m-b-16">
-            <mat-label class="f-w-600 m-b-8 d-block">Order / Invoice <span class="text-danger">*</span></mat-label>
-            <mat-form-field appearance="outline" class="w-100">
-              <mat-select formControlName="order_id" placeholder="Select Invoice">
-                @for(o of orders; track o.id) {
-                  <mat-option [value]="o.id">{{ o.invoice_no }} ({{ o.status }})</mat-option>
-                }
-              </mat-select>
-            </mat-form-field>
+      <!-- Geofence Toggle -->
+      <button mat-stroked-button (click)="toggleGeofence()" [class.active-layer]="showGeofence" class="layer-btn">
+        <mat-icon>blur_circular</mat-icon> Geofence {{ showGeofence ? 'ON' : 'OFF' }}
+      </button>
+
+      <!-- Tile Switcher -->
+      <div class="tile-switcher-pill">
+        <button [class.active]="mapTileStyle === 'STREET'" (click)="setTileStyle('STREET')" matTooltip="Street View">
+          <mat-icon>streetview</mat-icon> Street
+        </button>
+        <button [class.active]="mapTileStyle === 'DARK'" (click)="setTileStyle('DARK')" matTooltip="Tactical Night View">
+          <mat-icon>dark_mode</mat-icon> Dark
+        </button>
+        <button [class.active]="mapTileStyle === 'SATELLITE'" (click)="setTileStyle('SATELLITE')" matTooltip="Satellite Imagery">
+          <mat-icon>satellite</mat-icon> Satellite
+        </button>
+      </div>
+
+      <!-- Live Motion Button -->
+      <button mat-raised-button [color]="isSimulating ? 'accent' : 'primary'" (click)="toggleSimulation()" class="sim-toggle-btn">
+        <mat-icon>{{ isSimulating ? 'pause_circle' : 'play_circle' }}</mat-icon>
+        {{ isSimulating ? 'Pause Motion' : 'Live Motion' }}
+      </button>
+    </div>
+  </div>
+
+  <!-- 🚕 RAPIDO RIDE BOOKING MODULE VIEW -->
+  @if (appMode === 'RIDE_BOOKING') {
+    <div class="ride-booking-layout">
+      <!-- Booking Control Panel -->
+      <div class="booking-panel glass-panel">
+        <h3 class="panel-heading"><mat-icon color="primary">two_wheeler</mat-icon> Book a Rapido Ride or Delivery</h3>
+
+        <!-- Pickup & Destination Places Inputs -->
+        <div class="places-input-group">
+          <div class="input-row">
+            <mat-icon class="green-dot">fiber_manual_record</mat-icon>
+            <input type="text" [(ngModel)]="pickupInput" placeholder="Pickup Location (Search Google Places...)" class="place-input" />
           </div>
-
-          <!-- Lat/Long Inputs -->
-          <div class="col-lg-4 col-md-6 col-sm-12 m-b-16">
-            <mat-label class="f-w-600 m-b-8 d-block">Starting Latitude <span class="text-danger">*</span></mat-label>
-            <mat-form-field appearance="outline" class="w-100">
-              <input matInput type="number" step="0.0001" formControlName="latitude" placeholder="e.g. 40.7128">
-            </mat-form-field>
-          </div>
-
-          <div class="col-lg-4 col-md-6 col-sm-12 m-b-16">
-            <mat-label class="f-w-600 m-b-8 d-block">Starting Longitude <span class="text-danger">*</span></mat-label>
-            <mat-form-field appearance="outline" class="w-100">
-              <input matInput type="number" step="0.0001" formControlName="longitude" placeholder="e.g. -74.0060">
-            </mat-form-field>
+          <div class="input-divider"></div>
+          <div class="input-row">
+            <mat-icon class="red-dot">location_on</mat-icon>
+            <input type="text" [(ngModel)]="destinationInput" placeholder="Destination Address..." class="place-input" />
           </div>
         </div>
 
-        <div class="m-t-16">
-          <button mat-stroked-button class="me-3" (click)="toggleStartForm()" [disabled]="loading">Cancel</button>
-          <button mat-flat-button color="primary" (click)="startDelivery()" [disabled]="loading || trackingForm.invalid">
-            Dispatch Delivery
-          </button>
+        <!-- Vehicle Type Selector -->
+        <h4 class="section-label">Select Vehicle Category</h4>
+        <div class="vehicle-grid">
+          <div class="vehicle-card" [class.selected]="selectedVehicle === 'BIKE'" (click)="selectVehicle('BIKE')">
+            <span class="v-icon">🏍️</span>
+            <div class="v-meta">
+              <h5>Rapido Bike</h5>
+              <p>Quick &amp; Affordable</p>
+            </div>
+            <span class="v-price">${{ getFareForVehicle('BIKE') }}</span>
+          </div>
+
+          <div class="vehicle-card" [class.selected]="selectedVehicle === 'AUTO'" (click)="selectVehicle('AUTO')">
+            <span class="v-icon">🛺</span>
+            <div class="v-meta">
+              <h5>Auto Rickshaw</h5>
+              <p>3-Seater Comfort</p>
+            </div>
+            <span class="v-price">${{ getFareForVehicle('AUTO') }}</span>
+          </div>
+
+          <div class="vehicle-card" [class.selected]="selectedVehicle === 'CAB_SEDAN'" (click)="selectVehicle('CAB_SEDAN')">
+            <span class="v-icon">🚗</span>
+            <div class="v-meta">
+              <h5>Cab Sedan</h5>
+              <p>AC 4-Seater</p>
+            </div>
+            <span class="v-price">${{ getFareForVehicle('CAB_SEDAN') }}</span>
+          </div>
+
+          <div class="vehicle-card" [class.selected]="selectedVehicle === 'DELIVERY_TRUCK'" (click)="selectVehicle('DELIVERY_TRUCK')">
+            <span class="v-icon">🚚</span>
+            <div class="v-meta">
+              <h5>Logistics Truck</h5>
+              <p>Cargo Heavy Loads</p>
+            </div>
+            <span class="v-price">${{ getFareForVehicle('DELIVERY_TRUCK') }}</span>
+          </div>
         </div>
-      </form>
-    </mat-card-content>
+
+        <!-- Fare Breakdown Card -->
+        @if (estimatedFare) {
+          <div class="fare-breakdown-card glass-panel">
+            <div class="fare-row"><span>Base Fare</span><span>${{ estimatedFare.baseFare }}</span></div>
+            <div class="fare-row"><span>Distance Fare ({{ estimatedFare.distanceKm }} km)</span><span>${{ estimatedFare.distanceFare }}</span></div>
+            <div class="fare-row"><span>Time Fare ({{ estimatedFare.durationMins }} mins)</span><span>${{ estimatedFare.timeFare }}</span></div>
+            @if (estimatedFare.surgeAmount > 0) {
+              <div class="fare-row surge"><span>Peak Surge (1.25x)</span><span>+${{ estimatedFare.surgeAmount }}</span></div>
+            }
+            <div class="fare-row"><span>GST &amp; Tax</span><span>${{ estimatedFare.tax }}</span></div>
+            <div class="fare-total"><span>Total Estimated Fare</span><span class="total-amount">${{ estimatedFare.totalFare }}</span></div>
+          </div>
+        }
+
+        <!-- Book Action Button -->
+        <button mat-raised-button color="primary" class="confirm-ride-btn liquid-btn" (click)="confirmBooking()">
+          {{ activeBookingState === 'SEARCHING_DRIVER' ? 'Matching Captain...' : 'Book Rapido Ride ($' + (estimatedFare?.totalFare || 0) + ')' }}
+        </button>
+      </div>
+
+      <!-- Live Map View Container -->
+      <div class="map-view-container glass-panel">
+        <div #mapContainer class="live-map-element"></div>
+      </div>
+    </div>
   }
 
-  <!-- Update Location Form -->
-  @else if (showLocationForm) {
-    <mat-card-content class="p-24 b-t-1">
-      <h3 class="f-w-600 m-b-16">Update Coordinates (Tracking ID: #{{ selectedTrackingId }})</h3>
-      <form [formGroup]="locationForm">
-        <div class="row">
-          <div class="col-lg-6 col-md-6 col-sm-12 m-b-16">
-            <mat-label class="f-w-600 m-b-8 d-block">Current Latitude <span class="text-danger">*</span></mat-label>
-            <mat-form-field appearance="outline" class="w-100">
-              <input matInput type="number" step="0.0001" formControlName="latitude" placeholder="e.g. 40.7128">
-            </mat-form-field>
-          </div>
-
-          <div class="col-lg-6 col-md-6 col-sm-12 m-b-16">
-            <mat-label class="f-w-600 m-b-8 d-block">Current Longitude <span class="text-danger">*</span></mat-label>
-            <mat-form-field appearance="outline" class="w-100">
-              <input matInput type="number" step="0.0001" formControlName="longitude" placeholder="e.g. -74.0060">
-            </mat-form-field>
-          </div>
+  <!-- 🍔 SWIGGY / ZOMATO FOOD DELIVERY MODULE VIEW -->
+  @else if (appMode === 'FOOD_DELIVERY') {
+    <div class="live-map-layout">
+      <!-- Left Sidebar: Active Food Orders -->
+      <div class="shipments-sidebar glass-panel custom-scrollbar">
+        <div class="sidebar-search-box">
+          <mat-icon>search</mat-icon>
+          <input type="text" [(ngModel)]="searchQuery" placeholder="Search order or customer..." class="search-input" />
         </div>
 
-        <div class="m-t-16">
-          <button mat-stroked-button class="me-3" (click)="cancelLocationUpdate()" [disabled]="loading">Cancel</button>
-          <button mat-flat-button color="primary" (click)="submitLocationUpdate()" [disabled]="loading || locationForm.invalid">
-            Save Location
-          </button>
-        </div>
-      </form>
-    </mat-card-content>
-  }
-
-  <!-- Table View -->
-  @else {
-    <mat-card-content class="b-t-1">
-      <app-mat-table
-        [columns]="tableColumns"
-        [tableData]="trackings"
-        [showAction]="false"
-        [showSearch]="true"
-        [isLoading]="loading"
-        [customTemplates]="{ coordinates: coordinatesTpl, status: statusTpl }">
-      </app-mat-table>
-
-      <ng-template #coordinatesTpl let-row>
-        {{ row.latitude }}, {{ row.longitude }}
-      </ng-template>
-
-      <ng-template #statusTpl let-row>
-        <div class="d-flex align-items-center gap-12 flex-wrap">
-          <span class="badge" [ngClass]="{
-            'bg-success': row.status === 'DELIVERED',
-            'bg-warning': row.status === 'ON_THE_WAY',
-            'bg-info': row.status === 'MOVING'
-          }">
-            {{ row.status }}
-          </span>
-
-          @if (row.status !== 'DELIVERED' && perm.hasRoleAction('canUpdate')) {
-            <button mat-icon-button color="primary" matTooltip="Update Location" (click)="openLocationDialog(row)">
-              <mat-icon class="text-primary">my_location</mat-icon>
-            </button>
-
-            <button mat-flat-button color="primary" class="btn-approve btn-xs" (click)="markAsDelivered(row)">
-              <mat-icon class="icon-14 m-r-2">check</mat-icon> Delivered
-            </button>
-          }
-
-          @if (perm.hasRoleAction('canDelete')) {
-            <button mat-icon-button color="warn" matTooltip="Delete Track" (click)="deleteTracking(row)">
-              <mat-icon class="text-danger">delete</mat-icon>
-            </button>
+        <div class="shipment-cards-list">
+          @for (track of filteredTrackings; track track.id) {
+            <div class="shipment-card animate-pop" [class.selected]="selectedActiveTrack?.id === track.id" (click)="selectTrackForMap(track)">
+              <div class="card-top">
+                <span class="invoice-tag">{{ track.invoice_no }}</span>
+                <span class="status-chip" [class]="track.status?.toLowerCase()">{{ track.status }}</span>
+              </div>
+              <div class="card-agent-row">
+                <div class="agent-avatar" [style.background]="track.delivery_boy_avatar || 'linear-gradient(135deg,#6366f1,#a855f7)'">
+                  {{ (track.delivery_boy_name || 'A').charAt(0).toUpperCase() }}
+                </div>
+                <div class="agent-meta">
+                  <h4>{{ track.delivery_boy_name }}</h4>
+                  <p>{{ track.vehicle_no }}</p>
+                </div>
+              </div>
+              <div class="card-bottom">
+                <span class="meta-item"><mat-icon>near_me</mat-icon> {{ track.distance_remaining || '2.4 km' }}</span>
+                <span class="meta-item"><mat-icon>schedule</mat-icon> {{ track.eta || '14 mins' }}</span>
+              </div>
+            </div>
           }
         </div>
-      </ng-template>
-    </mat-card-content>
+      </div>
+
+      <!-- Right Main Map Container -->
+      <div class="map-view-container glass-panel">
+        <div #mapContainer class="live-map-element"></div>
+
+        <!-- Telemetry HUD Overlay -->
+        <div class="simulated-map-hud">
+          <div class="hud-top-bar">
+            <div class="hud-chip live-chip">
+              <span class="green-pulse-dot"></span> LIVE FOOD DELIVERY
+            </div>
+            <div class="hud-chip telemetry-chip">
+              <mat-icon>speed</mat-icon> Speed: <strong>{{ selectedActiveTrack?.speed || '42 km/h' }}</strong>
+            </div>
+            <div class="hud-chip eta-chip">
+              <mat-icon>timer</mat-icon> Doorstep ETA: <strong>{{ selectedActiveTrack?.eta || '14 mins' }}</strong>
+            </div>
+          </div>
+
+          @if (selectedActiveTrack) {
+            <div class="driver-floating-card glass-panel animate-pop">
+              <div class="driver-card-header">
+                <div class="driver-avatar-sphere" [style.background]="selectedActiveTrack.delivery_boy_avatar">
+                  {{ (selectedActiveTrack.delivery_boy_name || 'A').charAt(0).toUpperCase() }}
+                </div>
+                <div>
+                  <h3>{{ selectedActiveTrack.delivery_boy_name }}</h3>
+                  <p class="vehicle-text">{{ selectedActiveTrack.vehicle_no }} &bull; In Transit</p>
+                </div>
+              </div>
+
+              <div class="destination-details">
+                <div class="dest-row">
+                  <mat-icon color="primary">person</mat-icon>
+                  <div>
+                    <span class="label">Customer</span>
+                    <span class="value">{{ selectedActiveTrack.customer_name }}</span>
+                  </div>
+                </div>
+                <div class="dest-row">
+                  <mat-icon color="accent">location_on</mat-icon>
+                  <div>
+                    <span class="label">Delivery Address</span>
+                    <span class="value">{{ selectedActiveTrack.customer_address }}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="driver-actions-row">
+                <a [href]="'tel:' + selectedActiveTrack.delivery_boy_phone" class="action-pill call">
+                  <mat-icon>call</mat-icon> Call Partner
+                </a>
+                <button (click)="openLocationDialog(selectedActiveTrack)" class="action-pill update">
+                  <mat-icon>my_location</mat-icon> Update GPS
+                </button>
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
   }
-</mat-card>
+
+  <!-- 🏁 DRIVER PARTNER CONSOLE VIEW -->
+  @if (appMode === 'DRIVER_CONSOLE') {
+    <div class="driver-console-layout glass-panel">
+      <div class="driver-status-card glass-card">
+        <div class="d-flex align-items-center justify-content-between">
+          <div class="d-flex align-items-center gap-12">
+            <div class="driver-avatar-sphere" style="background: linear-gradient(135deg, #10b981, #059669);">AV</div>
+            <div>
+              <h3>Alex Vance (Captain ID: #DRV-882)</h3>
+              <p class="mb-0 text-muted">Vehicle: NY-882-TRK &bull; Yamaha FZ 150</p>
+            </div>
+          </div>
+
+          <div class="d-flex align-items-center gap-12">
+            <span class="status-chip" [class.online]="isDriverOnline" [class.offline]="!isDriverOnline">
+              {{ isDriverOnline ? 'ONLINE' : 'OFFLINE' }}
+            </span>
+            <button mat-raised-button [color]="isDriverOnline ? 'warn' : 'primary'" (click)="isDriverOnline = !isDriverOnline">
+              {{ isDriverOnline ? 'Go Offline' : 'Go Online' }}
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="driver-map-wrapper">
+        <div #mapContainer class="live-map-element"></div>
+      </div>
+    </div>
+  }
+
+  <!-- 🚚 FLEET COMMAND ADMIN VIEW -->
+  @if (appMode === 'FLEET_ADMIN') {
+    <div class="live-map-layout">
+      <!-- Active Shipments List -->
+      <div class="shipments-sidebar glass-panel custom-scrollbar">
+        <div class="filter-pills">
+          <button [class.active]="statusFilter === 'ALL'" (click)="statusFilter = 'ALL'">All</button>
+          <button [class.active]="statusFilter === 'ON_THE_WAY'" (click)="statusFilter = 'ON_THE_WAY'">Moving</button>
+          <button [class.active]="statusFilter === 'DELIVERED'" (click)="statusFilter = 'DELIVERED'">Delivered</button>
+        </div>
+
+        <div class="shipment-cards-list">
+          @for (track of filteredTrackings; track track.id) {
+            <div class="shipment-card animate-pop" [class.selected]="selectedActiveTrack?.id === track.id" (click)="selectTrackForMap(track)">
+              <div class="card-top">
+                <span class="invoice-tag">{{ track.invoice_no }}</span>
+                <span class="status-chip" [class]="track.status?.toLowerCase()">{{ track.status }}</span>
+              </div>
+              <div class="card-agent-row">
+                <div class="agent-avatar" [style.background]="track.delivery_boy_avatar">
+                  {{ (track.delivery_boy_name || 'A').charAt(0).toUpperCase() }}
+                </div>
+                <div class="agent-meta">
+                  <h4>{{ track.delivery_boy_name }}</h4>
+                  <p>{{ track.vehicle_no }}</p>
+                </div>
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- Map View -->
+      <div class="map-view-container glass-panel">
+        <div #mapContainer class="live-map-element"></div>
+      </div>
+    </div>
+  }
+</div>

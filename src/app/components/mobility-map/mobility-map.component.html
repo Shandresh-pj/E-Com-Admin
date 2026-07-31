@@ -1,0 +1,134 @@
+<div class="mm-map">
+
+  <!-- Map Canvas -->
+  <div class="mm-map__canvas" #mapContainer>
+
+    <!-- Grid Pattern -->
+    <svg class="mm-map__grid-svg" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%">
+      <defs>
+        <pattern id="mm-grid" width="40" height="40" patternUnits="userSpaceOnUse">
+          <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#6366f1" stroke-width="0.5" stroke-dasharray="3 5"/>
+        </pattern>
+      </defs>
+      <rect width="100%" height="100%" fill="url(#mm-grid)"/>
+    </svg>
+
+    <!-- Route + Markers SVG -->
+    <svg class="mm-map__route-svg" viewBox="0 0 800 500" preserveAspectRatio="none">
+      <defs>
+        <linearGradient id="mm-route-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%"   stop-color="#10b981"/>
+          <stop offset="50%"  stop-color="#6366f1"/>
+          <stop offset="100%" stop-color="#ec4899"/>
+        </linearGradient>
+        <filter id="mm-glow">
+          <feGaussianBlur stdDeviation="3" result="blur"/>
+          <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+      </defs>
+
+      <!-- Geofence Zone -->
+      <circle cx="400" cy="250" r="185" fill="#6366f1" fill-opacity="0.04"
+              stroke="#6366f1" stroke-opacity="0.2" stroke-dasharray="6 6"/>
+
+      <!-- Route Shadow -->
+      <path d="M 150 385 Q 290 205, 425 265 T 655 125"
+            fill="none" stroke="#6366f1" stroke-width="8" stroke-linecap="round" opacity="0.18"/>
+
+      <!-- Animated Route Line -->
+      <path class="mm-map__route-path"
+            d="M 150 385 Q 290 205, 425 265 T 655 125"
+            fill="none" stroke="url(#mm-route-grad)" stroke-width="4"
+            stroke-linecap="round" stroke-dasharray="14 7" filter="url(#mm-glow)"/>
+
+      <!-- Traffic Layer -->
+      @if (showTraffic()) {
+        <path d="M 290 205 Q 360 238, 425 265" fill="none" stroke="#ef4444" stroke-width="9" stroke-opacity="0.65" stroke-linecap="round"/>
+        <path d="M 425 265 Q 530 185, 655 125" fill="none" stroke="#f59e0b" stroke-width="9" stroke-opacity="0.65" stroke-linecap="round"/>
+      }
+
+      <!-- Pickup Marker -->
+      <g transform="translate(150, 385)">
+        <circle cx="0" cy="0" r="22" fill="#10b981" fill-opacity="0.15" class="mm-map__pin-ripple"/>
+        <circle cx="0" cy="0" r="11" fill="#10b981" stroke="#fff" stroke-width="2.5" filter="url(#mm-glow)"/>
+        <text x="0" y="28" text-anchor="middle" fill="#10b981" font-size="10" font-weight="800" font-family="Inter, sans-serif">PICKUP</text>
+      </g>
+
+      <!-- Destination Marker -->
+      <g transform="translate(655, 125)">
+        <circle cx="0" cy="0" r="22" fill="#ec4899" fill-opacity="0.15" class="mm-map__pin-ripple"/>
+        <circle cx="0" cy="0" r="11" fill="#ec4899" stroke="#fff" stroke-width="2.5" filter="url(#mm-glow)"/>
+        <text x="0" y="-18" text-anchor="middle" fill="#ec4899" font-size="10" font-weight="800" font-family="Inter, sans-serif">DESTINATION</text>
+      </g>
+
+      <!-- Live Driver Pins -->
+      @for (driver of activeDrivers(); track driver.id; let i = $index) {
+        <g class="mm-map__driver-pin"
+           [attr.transform]="'translate(' + getX(driver, i) + ', ' + getY(driver, i) + ')'"
+           (click)="selectDriver(driver)">
+          <circle cx="0" cy="0" r="18" class="mm-map__pin-ripple"
+                  [attr.fill]="driver.status === 'IN_TRIP' ? '#8b5cf6' : '#3b82f6'" fill-opacity="0.25"/>
+          <circle cx="0" cy="0" r="13"
+                  [attr.fill]="driver.status === 'IN_TRIP' ? '#8b5cf6' : '#3b82f6'"
+                  stroke="#fff" stroke-width="2.5" filter="url(#mm-glow)"/>
+          <rect x="-36" y="-33" width="72" height="16" rx="5" fill="#0f172a" fill-opacity="0.88" stroke="#334155" stroke-width="0.5"/>
+          <text x="0" y="-21" text-anchor="middle" fill="#fff" font-size="9" font-weight="700" font-family="Inter, sans-serif">
+            {{ driver.name.split(' ')[0] }}
+          </text>
+        </g>
+      }
+    </svg>
+
+    <!-- Floating Top Controls -->
+    <div class="mm-map__controls">
+      <div class="mm-map__live-badge">
+        <span class="mm-map__pulse"></span>
+        <span class="mm-map__live-label">Live GPS Telemetry</span>
+        <span class="mm-map__driver-count">{{ activeDrivers().length }} Drivers Online</span>
+      </div>
+      <div class="mm-map__ctrl-btns">
+        <button class="mm-map__ctrl-btn" [class.mm-map__ctrl-btn--active]="showTraffic()" (click)="toggleTraffic()">
+          <i class="ri-radar-line"></i> Traffic Layer
+        </button>
+        <button class="mm-map__ctrl-btn mm-map__ctrl-btn--primary" (click)="resetView()">
+          <i class="ri-focus-3-line"></i> Center Route
+        </button>
+      </div>
+    </div>
+
+    <!-- Driver Tooltip -->
+    @if (selectedDriver()) {
+      <div class="mm-map__tooltip">
+        <div class="mm-map__tooltip-head">
+          <div class="mm-map__tooltip-driver">
+            <img [src]="selectedDriver()?.avatar" class="mm-map__tooltip-avatar" alt="driver"/>
+            <div>
+              <div class="mm-map__tooltip-name">{{ selectedDriver()?.name }}</div>
+              <div class="mm-map__tooltip-vehicle">{{ selectedDriver()?.vehicle }}</div>
+            </div>
+          </div>
+          <button class="mm-map__tooltip-close" (click)="selectedDriver.set(null)">✕</button>
+        </div>
+        <div class="mm-map__tooltip-stats">
+          <div class="mm-map__stat-cell">
+            <span class="mm-map__stat-label">Rating</span>
+            <span class="mm-map__stat-value mm-map__stat-value--amber">★ {{ selectedDriver()?.rating }}</span>
+          </div>
+          <div class="mm-map__stat-cell">
+            <span class="mm-map__stat-label">Status</span>
+            <span class="mm-map__stat-value mm-map__stat-value--emerald">{{ selectedDriver()?.status }}</span>
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- Bottom Stats Bar -->
+    <div class="mm-map__stats-bar">
+      <div>ETA: <strong class="mm-map__stat-highlight mm-map__stat-highlight--emerald">8 Mins</strong></div>
+      <div class="mm-map__stat-divider"></div>
+      <div>Distance: <strong class="mm-map__stat-highlight mm-map__stat-highlight--indigo">14.2 KM</strong></div>
+    </div>
+
+  </div>
+
+</div>

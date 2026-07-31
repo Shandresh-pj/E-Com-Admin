@@ -1,0 +1,460 @@
+// ═══════════════════════════════════════════════════════════════════════════
+//  vehicle-driver-verification.component.scss
+//  Premium Liquid Glass — Zero-Trust KYC & RC Audit Console
+// ═══════════════════════════════════════════════════════════════════════════
+@use '../_shared/mobility-glass' as g;
+
+:host { display: block; }
+
+// ── Page Container ────────────────────────────────────────────────────────
+.verification-container {
+  min-height: 100vh;
+  color: var(--text-primary);
+  padding: 1.5rem;
+  border-radius: var(--radius-xl, 24px);
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  animation: floatUp 0.4s ease both;
+
+  @media (min-width: 768px) { padding: 2rem; }
+}
+
+// ── Header ────────────────────────────────────────────────────────────────
+.audit-header {
+  @include g.glass-header(
+    rgba(99, 102, 241, 0.3),
+    rgba(15, 23, 42, 0.5),
+    rgba(147, 51, 234, 0.25),
+    rgba(99, 102, 241, 0.18)
+  );
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+
+  @media (min-width: 1024px) {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+}
+
+.header-glow {
+  position: absolute;
+  right: -2.5rem;
+  bottom: -2.5rem;
+  width: 16rem;
+  height: 16rem;
+  background: rgba(99, 102, 241, 0.15);
+  border-radius: 50%;
+  filter: blur(48px);
+  pointer-events: none;
+}
+
+.header-content { position: relative; z-index: 10; }
+
+.badge-row { display: flex; align-items: center; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 0.5rem; }
+
+.badge {
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.625rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  border: 1px solid transparent;
+
+  &-primary { @include g.glass-badge(240); }
+  &-success  { @include g.glass-badge(160); }
+}
+
+.pulse-dot { @include g.pulse-dot(#10b981); }
+
+.header-title {
+  font-size: 1.5rem;
+  font-weight: 900;
+  color: var(--text-primary);
+  letter-spacing: -0.025em;
+  margin: 0 0 0.25rem;
+
+  @media (min-width: 768px) { font-size: 2.25rem; }
+}
+
+.header-subtitle { font-size: 0.8125rem; color: var(--text-muted); margin: 0; }
+
+// ── Section Switcher ──────────────────────────────────────────────────────
+.section-switcher {
+  position: relative;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.375rem;
+  @include g.glass-surface(16px);
+  padding: 0.5rem;
+  border-radius: var(--radius-lg, 20px);
+  box-shadow: var(--glass-shadow);
+}
+
+.tab-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius-md, 12px);
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  transition: all var(--transition-base);
+
+  &:hover { color: var(--text-primary); }
+
+  &.btn-indigo.active { background: var(--brand-primary); color: #fff; box-shadow: 0 4px 16px rgba(79,70,229,0.35); }
+  &.btn-emerald.active { background: #059669; color: #fff; box-shadow: 0 4px 16px rgba(5,150,105,0.35); }
+  &.btn-purple.active { background: #9333ea; color: #fff; box-shadow: 0 4px 16px rgba(147,51,234,0.35); }
+}
+
+// ── Metrics Grid ──────────────────────────────────────────────────────────
+.metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+
+  @media (min-width: 1024px) { grid-template-columns: repeat(4, 1fr); }
+}
+
+.metric-card {
+  @include g.glass-surface(20px);
+  @include g.glass-card-shimmer();
+  @include g.hover-float(-4px);
+  padding: 1.25rem;
+  border-radius: var(--radius-xl, 24px);
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+  animation: floatUp 0.5s ease both;
+
+  @for $i from 1 through 4 { &:nth-child(#{$i}) { animation-delay: #{$i * 0.07}s; } }
+}
+
+.metric-title {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  color: var(--text-subtle);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.metric-value {
+  font-size: 1.5rem;
+  font-weight: 900;
+  color: var(--text-primary);
+  letter-spacing: -0.02em;
+  font-family: var(--font-display);
+  animation: counterUp 0.6s ease both;
+
+  &.text-emerald { color: #34d399; }
+  &.text-indigo  { color: #818cf8; }
+  &.text-amber   { color: #fbbf24; }
+  &.text-purple  { color: #c084fc; }
+}
+
+.metric-subtext {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+
+  &.subtext-emerald { color: #34d399; }
+  &.subtext-indigo  { color: #818cf8; }
+  &.subtext-amber   { color: #fbbf24; }
+}
+
+// ── Table Panel ───────────────────────────────────────────────────────────
+.table-panel {
+  @include g.glass-surface(24px);
+  border-radius: var(--radius-xl, 24px);
+  box-shadow: var(--glass-shadow-lg);
+  overflow: hidden;
+  animation: floatUp 0.4s ease both;
+}
+
+.panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid var(--glass-border-subtle);
+}
+
+.panel-title {
+  font-size: 0.9375rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0;
+
+  .icon-indigo  { color: #818cf8; font-size: 1.125rem; }
+  .icon-emerald { color: var(--color-success); font-size: 1.125rem; }
+}
+
+.search-wrap { flex: 1; max-width: 24rem; }
+
+.search-input { @include g.glass-input(); width: 100%; }
+
+.table-responsive { overflow-x: auto; }
+
+// ── Audit Table ───────────────────────────────────────────────────────────
+.audit-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8125rem;
+  color: var(--text-secondary);
+
+  thead {
+    background: rgba(0, 0, 0, 0.06);
+    border-bottom: 1px solid var(--glass-border-subtle);
+
+    th {
+      padding: 0.875rem 1.25rem;
+      font-size: 0.625rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-subtle);
+      white-space: nowrap;
+      text-align: left;
+
+      &.text-right { text-align: right; }
+    }
+  }
+
+  tbody tr {
+    border-bottom: 1px solid var(--glass-border-subtle);
+    transition: background var(--transition-fast);
+    animation: slideInUp 0.3s ease both;
+
+    @for $i from 1 through 10 { &:nth-child(#{$i}) { animation-delay: #{$i * 0.04}s; } }
+
+    &:hover { background: rgba(79, 70, 229, 0.03); }
+
+    td {
+      padding: 1rem 1.25rem;
+      vertical-align: middle;
+
+      &.text-right { text-align: right; }
+    }
+  }
+}
+
+// ── Driver Cell ───────────────────────────────────────────────────────────
+.cell-driver {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.driver-avatar {
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--glass-border);
+  flex-shrink: 0;
+}
+
+.driver-info { display: flex; flex-direction: column; gap: 0.1rem; }
+.driver-name { font-size: 0.8125rem; font-weight: 700; color: var(--text-primary); }
+.driver-phone { font-size: 0.6875rem; color: var(--text-muted); }
+
+// ── DL Info ───────────────────────────────────────────────────────────────
+.dl-no     { display: block; font-size: 0.8125rem; font-weight: 700; font-family: monospace; color: var(--text-primary); }
+.dl-expiry { display: block; font-size: 0.6875rem; color: var(--text-muted); }
+.badge-no  { font-weight: 700; font-family: monospace; color: var(--text-secondary); }
+
+// ── Verification Status ───────────────────────────────────────────────────
+.check-text {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--text-muted);
+
+  &.status-verified { color: var(--color-success); }
+  &.status-pending  { color: var(--color-warning); }
+}
+
+// ── Status Pill ───────────────────────────────────────────────────────────
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem 0.625rem;
+  border-radius: 9999px;
+  font-size: 0.625rem;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  border: 1px solid transparent;
+
+  &.pill-approved {
+    background: rgba(16, 185, 129, 0.12);
+    color: var(--color-success);
+    border-color: rgba(16, 185, 129, 0.3);
+  }
+
+  &.pill-pending {
+    background: rgba(245, 158, 11, 0.1);
+    color: #f59e0b;
+    border-color: rgba(245, 158, 11, 0.3);
+  }
+}
+
+// ── Action Buttons ────────────────────────────────────────────────────────
+.approve-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.4rem 0.875rem;
+  border-radius: var(--radius-sm, 8px);
+  font-size: 0.6875rem;
+  font-weight: 800;
+  cursor: pointer;
+  background: rgba(79, 70, 229, 0.1);
+  border: 1px solid rgba(79, 70, 229, 0.3);
+  color: #818cf8;
+  transition: all var(--transition-base);
+  white-space: nowrap;
+
+  &:hover {
+    background: var(--brand-primary);
+    color: #fff;
+    border-color: transparent;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 14px rgba(79, 70, 229, 0.35);
+  }
+}
+
+.verified-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  color: var(--color-success);
+}
+
+// ── Vehicle RC Table Specifics ─────────────────────────────────────────────
+.reg-no {
+  display: block;
+  font-size: 0.8125rem;
+  font-weight: 800;
+  font-family: monospace;
+  color: var(--text-primary);
+}
+
+.vehicle-category { @include g.glass-badge(240); margin-top: 0.25rem; display: inline-flex; }
+.make-model       { font-weight: 600; color: var(--text-secondary); }
+.mono-code        { display: block; font-family: monospace; font-size: 0.75rem; font-weight: 600; color: var(--text-primary); }
+.mono-subcode     { display: block; font-family: monospace; font-size: 0.6875rem; color: var(--text-muted); }
+.permit-status    { font-weight: 700; color: #818cf8; }
+.insurance-expiry { font-weight: 600; color: var(--text-secondary); }
+
+// ── Category Configurator Grid ────────────────────────────────────────────
+.category-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+
+  @media (min-width: 640px) { grid-template-columns: repeat(2, 1fr); }
+  @media (min-width: 1024px) { grid-template-columns: repeat(3, 1fr); }
+}
+
+.category-card {
+  @include g.glass-surface(20px);
+  @include g.glass-card-shimmer();
+  @include g.hover-float(-5px);
+  border-radius: var(--radius-xl, 24px);
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem;
+  animation: floatUp 0.5s ease both;
+
+  @for $i from 1 through 13 { &:nth-child(#{$i}) { animation-delay: #{$i * 0.05}s; } }
+}
+
+.card-header-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.icon-title-group { display: flex; align-items: flex-start; gap: 0.75rem; }
+
+.cat-icon {
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: var(--radius-sm, 8px);
+  background: rgba(79, 70, 229, 0.1);
+  border: 1px solid rgba(79, 70, 229, 0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+  color: #818cf8;
+  flex-shrink: 0;
+  transition: transform var(--transition-spring);
+
+  .category-card:hover & { transform: scale(1.1) rotate(-4deg); }
+}
+
+.cat-name { font-size: 0.9375rem; font-weight: 800; color: var(--text-primary); margin: 0 0 0.1rem; }
+.cat-type { font-size: 0.6875rem; color: var(--text-muted); font-weight: 500; }
+
+.ev-badge { @include g.status-pill(160, 75%, 55%, 0.12); font-size: 0.5625rem; animation: pulseGlow 2.5s ease-in-out infinite; }
+
+.rates-box {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.5rem;
+  padding: 0.75rem;
+  border-radius: var(--radius-md, 12px);
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border-subtle);
+}
+
+.rate-col { display: flex; flex-direction: column; gap: 0.15rem; }
+.rate-label { font-size: 0.5625rem; color: var(--text-subtle); text-transform: uppercase; font-weight: 700; letter-spacing: 0.06em; }
+.rate-val {
+  font-size: 0.9375rem;
+  font-weight: 900;
+  color: var(--text-primary);
+  &.text-emerald { color: #34d399; }
+  &.text-purple  { color: #c084fc; }
+}
+
+.card-footer {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  padding-top: 0.625rem;
+  border-top: 1px solid var(--glass-border-subtle);
+
+  strong { color: var(--text-primary); }
+  .text-emerald { color: #34d399; }
+}

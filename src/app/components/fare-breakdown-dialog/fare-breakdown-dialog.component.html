@@ -1,0 +1,76 @@
+<div class="fd-overlay">
+  <div class="fd-dialog">
+
+    <!-- Header -->
+    <div class="fd-header">
+      <div class="fd-header__left">
+        <div class="fd-header__icon"><i class="ri-calculator-line"></i></div>
+        <div>
+          <h3 class="fd-header__title">Dynamic Fare Breakdown</h3>
+          <p class="fd-header__subtitle">{{ category?.name }} Rate Card</p>
+        </div>
+      </div>
+      <button class="fd-header__close" (click)="onClose.emit()">✕</button>
+    </div>
+
+    <!-- Line Items -->
+    <div class="fd-items">
+      <div class="fd-row">
+        <span class="fd-row__label">Base Fare</span>
+        <span class="fd-row__amount">₹{{ breakdown?.baseFare | number:'1.2-2' }}</span>
+      </div>
+      <div class="fd-row">
+        <span class="fd-row__label">Distance ({{ breakdown?.distanceKm }} KM × ₹{{ category?.perKm }}/km)</span>
+        <span class="fd-row__amount">₹{{ breakdown?.distanceFare | number:'1.2-2' }}</span>
+      </div>
+      <div class="fd-row">
+        <span class="fd-row__label">Time ({{ breakdown?.durationMin }} Mins × ₹{{ category?.perMin }}/min)</span>
+        <span class="fd-row__amount">₹{{ breakdown?.timeFare | number:'1.2-2' }}</span>
+      </div>
+
+      @if (breakdown?.surgeMultiplier && breakdown.surgeMultiplier > 1.0) {
+        <div class="fd-row fd-row--surge">
+          <span class="fd-row__label"><i class="ri-flashlight-line"></i> High Demand Surge ({{ breakdown.surgeMultiplier }}x)</span>
+          <span class="fd-row__amount">Applied</span>
+        </div>
+      }
+
+      @if (breakdown?.tollCharges) {
+        <div class="fd-row">
+          <span class="fd-row__label">Highway Toll Charges</span>
+          <span class="fd-row__amount">₹{{ breakdown.tollCharges | number:'1.2-2' }}</span>
+        </div>
+      }
+
+      @if (breakdown?.nightCharge) {
+        <div class="fd-row">
+          <span class="fd-row__label">Night Shift Charge</span>
+          <span class="fd-row__amount">₹{{ breakdown.nightCharge | number:'1.2-2' }}</span>
+        </div>
+      }
+
+      <div class="fd-row">
+        <span class="fd-row__label">GST / Taxes (5%)</span>
+        <span class="fd-row__amount">₹{{ breakdown?.taxGst | number:'1.2-2' }}</span>
+      </div>
+
+      @if (breakdown?.discount && breakdown.discount > 0) {
+        <div class="fd-divider"></div>
+        <div class="fd-row fd-row--discount">
+          <span class="fd-row__label"><i class="ri-coupon-3-line"></i> Promo Coupon Discount</span>
+          <span class="fd-row__amount">- ₹{{ breakdown.discount | number:'1.2-2' }}</span>
+        </div>
+      }
+    </div>
+
+    <!-- Total -->
+    <div class="fd-total">
+      <div>
+        <span class="fd-total__label">Total Fare Payable</span>
+        <div class="fd-total__amount">₹{{ breakdown?.totalFare | number:'1.2-2' }}</div>
+      </div>
+      <button class="fd-total__btn" (click)="onClose.emit()">Got It</button>
+    </div>
+
+  </div>
+</div>

@@ -1,0 +1,202 @@
+// ═══════════════════════════════════════════════════════════════════════════
+//  fare-breakdown-dialog.component.scss
+//  Premium Liquid Glass — Dynamic Fare Breakdown Modal
+// ═══════════════════════════════════════════════════════════════════════════
+@use '../_shared/mobility-glass' as g;
+
+:host { display: contents; }
+
+// ── Backdrop Overlay ─────────────────────────────────────────────────────
+.fd-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  background: rgba(2, 6, 23, 0.7);
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  animation: fadeIn 0.2s ease both;
+
+  html:not(.dark) & {
+    background: rgba(15, 23, 42, 0.45);
+  }
+}
+
+// ── Dialog Panel ─────────────────────────────────────────────────────────
+.fd-dialog {
+  position: relative;
+  width: 100%;
+  max-width: 26rem;
+  border-radius: var(--radius-xl, 24px);
+  @include g.glass-surface(28px);
+  box-shadow: var(--glass-shadow-lg), 0 0 60px rgba(79, 70, 229, 0.15);
+  overflow: hidden;
+  animation: scaleIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  color: var(--text-primary);
+
+  // Top accent gradient line
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, #4f46e5, #8b5cf6, #ec4899);
+    z-index: 10;
+  }
+}
+
+// ── Header ────────────────────────────────────────────────────────────────
+.fd-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.5rem 1.5rem 1.125rem;
+  border-bottom: 1px solid var(--glass-border-subtle);
+}
+
+.fd-header__left {
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+}
+
+.fd-header__icon {
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: var(--radius-md, 12px);
+  background: rgba(79, 70, 229, 0.12);
+  border: 1px solid rgba(79, 70, 229, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+  color: #818cf8;
+  flex-shrink: 0;
+}
+
+.fd-header__title {
+  font-size: 0.9375rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin: 0 0 0.1rem;
+  letter-spacing: -0.01em;
+}
+
+.fd-header__subtitle {
+  font-size: 0.6875rem;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.fd-header__close {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all var(--transition-base);
+  flex-shrink: 0;
+
+  &:hover {
+    background: var(--color-error-bg);
+    color: var(--color-error);
+    border-color: var(--color-error);
+    transform: rotate(90deg);
+  }
+}
+
+// ── Line Items ────────────────────────────────────────────────────────────
+.fd-items {
+  padding: 1rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+}
+
+.fd-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.8125rem;
+  animation: slideInUp 0.3s ease both;
+
+  @for $i from 1 through 8 {
+    &:nth-child(#{$i}) { animation-delay: #{$i * 0.04}s; }
+  }
+}
+
+.fd-row__label { color: var(--text-secondary); }
+
+.fd-row__amount {
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+// Surge Row
+.fd-row--surge {
+  background: rgba(245, 158, 11, 0.08);
+  border: 1px solid rgba(245, 158, 11, 0.2);
+  border-radius: var(--radius-sm, 8px);
+  padding: 0.5rem 0.75rem;
+  color: #f59e0b;
+  font-weight: 700;
+
+  .fd-row__amount { color: #f59e0b; }
+}
+
+// Discount Row
+.fd-row--discount {
+  .fd-row__label { color: var(--color-success); font-weight: 700; }
+  .fd-row__amount { color: var(--color-success); }
+}
+
+.fd-divider {
+  height: 1px;
+  background: var(--glass-border-subtle);
+  margin: 0.25rem 0;
+}
+
+// ── Total Footer ──────────────────────────────────────────────────────────
+.fd-total {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.125rem 1.5rem 1.5rem;
+  border-top: 1px solid var(--glass-border-subtle);
+}
+
+.fd-total__label {
+  display: block;
+  font-size: 0.625rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-subtle);
+  margin-bottom: 0.25rem;
+}
+
+.fd-total__amount {
+  font-size: 1.875rem;
+  font-weight: 900;
+  color: var(--color-success);
+  letter-spacing: -0.03em;
+  font-family: var(--font-display);
+  animation: counterUp 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 0.3s both;
+}
+
+.fd-total__btn {
+  @include g.gradient-btn(#4f46e5, #8b5cf6, rgba(79, 70, 229, 0.35));
+  padding: 0.75rem 1.75rem;
+  letter-spacing: 0.02em;
+}

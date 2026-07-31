@@ -1,0 +1,291 @@
+// ═══════════════════════════════════════════════════════════════════════════
+//  _mobility-glass.scss
+//  Shared Premium Liquid Glass Design System — Mobility Components
+//  Mixins · Keyframes · Tokens · Helpers
+// ═══════════════════════════════════════════════════════════════════════════
+
+// ── Shared Keyframes ────────────────────────────────────────────────────────
+
+@keyframes shimmerSweep {
+  0%   { left: -100%; }
+  100% { left: 160%; }
+}
+
+@keyframes pulseGlow {
+  0%, 100% { opacity: 0.85; transform: scale(1); }
+  50%       { opacity: 1;    transform: scale(1.05); }
+}
+
+@keyframes floatUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideInUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.88); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes dashRoute {
+  to { stroke-dashoffset: 0; }
+}
+
+@keyframes rippleOut {
+  0%   { transform: scale(1); opacity: 0.7; }
+  100% { transform: scale(2.8); opacity: 0; }
+}
+
+@keyframes orbitSpin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+@keyframes glowPulse {
+  0%, 100% { box-shadow: 0 0 12px var(--glow-color, rgba(99,102,241,0.3)); }
+  50%       { box-shadow: 0 0 28px var(--glow-color, rgba(99,102,241,0.6)), 0 0 48px var(--glow-color, rgba(99,102,241,0.2)); }
+}
+
+@keyframes sosShake {
+  0%, 100% { transform: translateX(0); }
+  20%       { transform: translateX(-4px) rotate(-1deg); }
+  40%       { transform: translateX(4px)  rotate(1deg); }
+  60%       { transform: translateX(-3px); }
+  80%       { transform: translateX(3px); }
+}
+
+@keyframes energyFill {
+  from { transform: scaleX(0); }
+  to   { transform: scaleX(1); }
+}
+
+@keyframes counterUp {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes dotBounce {
+  0%, 80%, 100% { transform: scale(0); }
+  40%           { transform: scale(1); }
+}
+
+@keyframes livePing {
+  0%   { transform: scale(1);   opacity: 1; }
+  75%  { transform: scale(1.8); opacity: 0; }
+  100% { transform: scale(1.8); opacity: 0; }
+}
+
+@keyframes rotateGradient {
+  from { background-position: 0% 50%; }
+  to   { background-position: 100% 50%; }
+}
+
+@keyframes barGrow {
+  from { width: 0 !important; }
+}
+
+// ── Glass Surface Mixin ─────────────────────────────────────────────────────
+
+@mixin glass-surface($blur: 20px, $bg-var: --glass-bg, $border-var: --glass-border) {
+  background: var(#{$bg-var});
+  backdrop-filter: blur($blur) saturate(180%);
+  -webkit-backdrop-filter: blur($blur) saturate(180%);
+  border: 1px solid var(#{$border-var});
+  box-shadow: var(--glass-shadow);
+}
+
+// ── Glass Card with Shimmer ─────────────────────────────────────────────────
+
+@mixin glass-card-shimmer() {
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 55%;
+    height: 100%;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(255, 255, 255, 0.1),
+      transparent
+    );
+    transform: skewX(-20deg);
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  &:hover::before {
+    animation: shimmerSweep 0.75s ease forwards;
+  }
+}
+
+// ── Glass Header Banner ─────────────────────────────────────────────────────
+
+@mixin glass-header($from, $via, $to, $accent-rgba) {
+  position: relative;
+  overflow: hidden;
+  padding: 1.5rem;
+  border-radius: var(--radius-xl, 24px);
+  background: linear-gradient(135deg, $from 0%, $via 50%, $to 100%);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  box-shadow: 0 20px 48px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255,255,255,0.08);
+
+  &::after {
+    content: '';
+    position: absolute;
+    right: -3rem;
+    bottom: -3rem;
+    width: 18rem;
+    height: 18rem;
+    background: $accent-rgba;
+    border-radius: 50%;
+    filter: blur(56px);
+    pointer-events: none;
+  }
+
+  @media (min-width: 1024px) {
+    padding: 2rem;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+}
+
+// ── Status Pill ─────────────────────────────────────────────────────────────
+
+@mixin status-pill($hue, $sat: 85%, $light: 65%, $alpha: 0.15) {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.2rem 0.65rem;
+  border-radius: 9999px;
+  font-size: 0.625rem;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  background: hsla($hue, $sat, $light, $alpha);
+  color: hsl($hue, $sat, 75%);
+  border: 1px solid hsla($hue, $sat, $light, 0.3);
+}
+
+// ── KPI Card Variant ────────────────────────────────────────────────────────
+
+@mixin kpi-accent($hue) {
+  &:hover {
+    border-color: hsla($hue, 80%, 60%, 0.4);
+    box-shadow: var(--glass-shadow-lg), 0 0 24px hsla($hue, 80%, 60%, 0.12);
+  }
+  .kpi__icon { background: hsla($hue, 80%, 60%, 0.12); color: hsl($hue, 80%, 72%); border-color: hsla($hue, 80%, 60%, 0.25); }
+  .kpi__value { color: hsl($hue, 80%, 72%); }
+}
+
+// ── Form Field ──────────────────────────────────────────────────────────────
+
+@mixin glass-input() {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius-md, 12px);
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border-subtle);
+  color: var(--text-primary);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  font-family: var(--font-primary);
+  outline: none;
+  transition: border-color var(--transition-base), box-shadow var(--transition-base), background var(--transition-base);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  box-sizing: border-box;
+
+  &::placeholder { color: var(--text-subtle); }
+
+  &:focus {
+    border-color: var(--brand-primary);
+    box-shadow: 0 0 0 3px var(--brand-primary-light);
+    background: var(--glass-bg-hover);
+  }
+}
+
+// ── Pulse Dot ───────────────────────────────────────────────────────────────
+
+@mixin pulse-dot($color: #10b981, $size: 0.45rem) {
+  display: inline-block;
+  width: $size;
+  height: $size;
+  border-radius: 50%;
+  background: $color;
+  animation: livePing 1.5s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+
+// ── Gradient Badge ──────────────────────────────────────────────────────────
+
+@mixin glass-badge($hue) {
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.625rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  background: hsla($hue, 80%, 60%, 0.15);
+  color: hsl($hue, 80%, 75%);
+  border: 1px solid hsla($hue, 80%, 60%, 0.3);
+}
+
+// ── Hover Float ─────────────────────────────────────────────────────────────
+
+@mixin hover-float($y: -5px) {
+  transition: transform var(--transition-spring), box-shadow var(--transition-spring), border-color var(--transition-base);
+  &:hover {
+    transform: translateY($y);
+    box-shadow: var(--glass-shadow-lg);
+  }
+}
+
+// ── Gradient Button ─────────────────────────────────────────────────────────
+
+@mixin gradient-btn($from, $to, $glow-rgba) {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(90deg, $from, $to);
+  color: #ffffff;
+  font-weight: 800;
+  font-size: 0.8125rem;
+  border: none;
+  border-radius: var(--radius-md, 12px);
+  cursor: pointer;
+  box-shadow: 0 6px 20px $glow-rgba;
+  transition: opacity var(--transition-base), transform var(--transition-base), box-shadow var(--transition-base);
+
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    transform: translateX(-100%);
+    transition: transform 0.6s ease;
+  }
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 28px $glow-rgba;
+    &::after { transform: translateX(100%); }
+  }
+  &:active { transform: translateY(0); }
+}

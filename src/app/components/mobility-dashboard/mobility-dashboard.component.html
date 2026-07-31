@@ -1,0 +1,153 @@
+<div class="cockpit-container">
+  
+  <!-- Header Banner & Role Selector Switcher -->
+  <div class="cockpit-header">
+    <div class="header-glow"></div>
+    <div class="header-content">
+      <div class="badge-row">
+        <span class="badge badge-primary">Executive Analytics Cockpit</span>
+        <span class="badge badge-success">
+          <span class="pulse-dot"></span> Platform Version 22.0
+        </span>
+      </div>
+      <h1 class="header-title">Enterprise Mobility & Fleet OS</h1>
+      <p class="header-subtitle">Multi-role executive dashboard for Super Admin, Fleet Partners, Drivers, and B2B Clients.</p>
+    </div>
+
+    <!-- Dynamic Role Switcher Dropdown -->
+    <div class="role-switcher">
+      <div class="icon-wrapper">
+        <i class="ri-user-settings-line"></i>
+      </div>
+      <div class="switcher-group">
+        <label class="switcher-label">Viewport Role</label>
+        <select [(ngModel)]="currentRole" (change)="switchRole(currentRole)" class="switcher-select">
+          <option value="super_admin">Super Admin Cockpit</option>
+          <option value="company">Company Executive View</option>
+          <option value="branch">Branch Manager View</option>
+          <option value="fleet_owner">Fleet Owner View</option>
+          <option value="driver">Driver Viewport</option>
+          <option value="customer">Customer App View</option>
+          <option value="corporate">Corporate Client View</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- Key Metrics KPI Cards Grid -->
+  <div class="kpi-grid">
+    <div class="kpi-card kpi-indigo">
+      <div class="kpi-header">
+        <span class="kpi-title">Bookings Today</span>
+        <div class="kpi-icon"><i class="ri-taxi-line"></i></div>
+      </div>
+      <h3 class="kpi-value">{{ stats()?.metrics?.totalBookingsToday || 1482 }}</h3>
+      <span class="kpi-subtext subtext-success"><i class="ri-arrow-up-line"></i> +14.2% vs yesterday</span>
+    </div>
+
+    <div class="kpi-card kpi-emerald">
+      <div class="kpi-header">
+        <span class="kpi-title">Active Rides Now</span>
+        <div class="kpi-icon"><i class="ri-radar-line"></i></div>
+      </div>
+      <h3 class="kpi-value text-indigo">{{ stats()?.metrics?.activeRidesNow || 342 }}</h3>
+      <span class="kpi-subtext subtext-indigo"><span class="pulse-dot"></span> Real-time GPS Tracking</span>
+    </div>
+
+    <div class="kpi-card kpi-emerald-glow">
+      <div class="kpi-header">
+        <span class="kpi-title">Revenue Today</span>
+        <div class="kpi-icon"><i class="ri-wallet-3-line"></i></div>
+      </div>
+      <h3 class="kpi-value text-emerald">₹{{ (stats()?.metrics?.totalRevenueToday || 489250) | number:'1.2-2' }}</h3>
+      <span class="kpi-subtext subtext-emerald">Gross Billing Total</span>
+    </div>
+
+    <div class="kpi-card kpi-purple">
+      <div class="kpi-header">
+        <span class="kpi-title">Drivers Online</span>
+        <div class="kpi-icon"><i class="ri-user-star-line"></i></div>
+      </div>
+      <h3 class="kpi-value text-purple">{{ stats()?.metrics?.activeDriversOnline || 890 }}</h3>
+      <span class="kpi-subtext">{{ stats()?.metrics?.fleetUtilizationRate || '87.4%' }} Utilization Rate</span>
+    </div>
+  </div>
+
+  <!-- Live Dispatch Queue & Revenue Vertical Charts -->
+  <div class="main-content-grid">
+    
+    <!-- Live Dispatch Queue Table -->
+    <div class="glass-panel dispatch-panel">
+      <div class="panel-header">
+        <h3 class="panel-title">
+          <i class="ri-radar-line icon-emerald"></i> Live Dispatch Queue & Active Rides
+        </h3>
+        <span class="panel-badge">
+          <span class="pulse-dot"></span> Live Stream
+        </span>
+      </div>
+
+      <div class="ride-list">
+        @for (booking of activeBookings(); track booking.id) {
+          <div class="ride-item">
+            <div class="ride-item-top">
+              <div class="service-badge-group">
+                <span class="service-pill">{{ booking.serviceType }}</span>
+                <span class="booking-id">#{{ booking.id }}</span>
+              </div>
+              <span class="fare-text">₹{{ booking.fare }}</span>
+            </div>
+
+            <div class="location-grid">
+              <div class="location-col">
+                <span class="location-label">Pickup</span>
+                <span class="location-value">{{ booking.pickupLocation }}</span>
+              </div>
+              <div class="location-col">
+                <span class="location-label">Drop</span>
+                <span class="location-value">{{ booking.dropLocation }}</span>
+              </div>
+            </div>
+
+            <div class="ride-item-footer">
+              <span class="driver-info">Driver: <strong>{{ booking.driver ? booking.driver.name : 'Assigning...' }}</strong></span>
+              <span class="status-pill">{{ booking.status }}</span>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- Monthly Vertical Revenue Charts -->
+    <div class="glass-panel revenue-panel">
+      <h3 class="panel-title panel-header">
+        <i class="ri-bar-chart-fill icon-indigo"></i> Monthly Vertical Revenue
+      </h3>
+
+      <div class="revenue-chart-list">
+        @for (item of stats()?.revenueChart || defaultRevenueChart; track item.month) {
+          <div class="chart-row">
+            <div class="chart-row-header">
+              <span class="month-name">{{ item.month }}</span>
+              <span class="total-revenue">₹{{ (item.ride + item.rental + item.logistics) | number }}</span>
+            </div>
+            <div class="chart-bar-track">
+              <div class="bar-segment bar-indigo" [style.width.%]="(item.ride / 250000) * 100"></div>
+              <div class="bar-segment bar-purple" [style.width.%]="(item.rental / 250000) * 100"></div>
+              <div class="bar-segment bar-emerald" [style.width.%]="(item.logistics / 250000) * 100"></div>
+            </div>
+          </div>
+        }
+      </div>
+
+      <div class="chart-legend">
+        <div class="legend-item"><span class="dot dot-indigo"></span> Ride Hailing</div>
+        <div class="legend-item"><span class="dot dot-purple"></span> Car Rental</div>
+        <div class="legend-item"><span class="dot dot-emerald"></span> Logistics</div>
+      </div>
+
+    </div>
+
+  </div>
+
+</div>

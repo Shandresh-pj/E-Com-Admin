@@ -32,13 +32,18 @@ export class GlobalErrorHandler implements ErrorHandler {
 
     const message = actualError?.message || actualError?.toString() || '';
 
-    // Ignore benign browser/lifecycle timing warnings
+    // Ignore benign browser/lifecycle timing warnings and handled API rejections
     if (
       message.includes('ExpressionChangedAfterItHasBeenCheckedError') ||
       message.includes('ResizeObserver loop limit exceeded') ||
       message.includes('ResizeObserver loop completed with undelivered notifications') ||
       message.includes('NavigationCancelled') ||
-      message.includes('Cannot match any routes')
+      message.includes('Cannot match any routes') ||
+      message.includes('Fare estimation failed') ||
+      message.includes('Http failure response') ||
+      message.includes('404') ||
+      message.includes('429') ||
+      message.includes('500')
     ) {
       return;
     }

@@ -36,16 +36,16 @@
         <i class="ri-truck-fill icon-orange"></i> Consignment Booking Form
       </h2>
 
-      <!-- Address Pickers -->
+      <!-- Address Pickers with Google Autocomplete -->
       <div class="form-group-stack">
         <div class="form-group">
-          <label class="form-label">Pickup Warehouse / Location</label>
-          <input type="text" [(ngModel)]="pickupLocation" placeholder="Enter pickup address..." class="form-input" />
+          <label class="form-label"><i class="ri-map-pin-user-fill icon-orange"></i> Pickup Warehouse / Location</label>
+          <input #pickupInput type="text" [(ngModel)]="pickupLocation" placeholder="Search Google pickup address..." class="form-input" />
         </div>
 
         <div class="form-group">
-          <label class="form-label">Delivery Destination</label>
-          <input type="text" [(ngModel)]="dropLocation" placeholder="Enter delivery address..." class="form-input" />
+          <label class="form-label"><i class="ri-map-pin-5-fill icon-emerald"></i> Delivery Destination</label>
+          <input #dropInput type="text" [(ngModel)]="dropLocation" placeholder="Search Google delivery destination..." class="form-input" />
         </div>
       </div>
 

@@ -88,14 +88,23 @@ export interface RentalCar {
   id: string;
   title: string;
   type: 'Self Drive' | 'Chauffeur Driven';
-  category: 'Hatchback' | 'Sedan' | 'SUV' | 'Luxury' | 'Van/Bus';
+  category: 'Hatchback' | 'Sedan' | 'SUV' | 'Luxury' | 'Van/Bus' | 'EV';
   hourlyRate: number;
   dailyRate: number;
-  fuelIncluded: boolean;
+  fuelIncluded?: boolean;
   transmission: 'Automatic' | 'Manual';
   seating: number;
   image: string;
-  status: 'Available' | 'Reserved';
+  images?: string[];
+  status?: 'Available' | 'Reserved' | 'Rented' | 'Under Service';
+  city?: string;
+  fuelType?: 'Electric' | 'Petrol' | 'Diesel';
+  locationHub?: string;
+  rating?: number;
+  tripsCount?: number;
+  features?: string[];
+  depositAmount?: number;
+  isEV?: boolean;
 }
 
 export interface DashboardMetrics {

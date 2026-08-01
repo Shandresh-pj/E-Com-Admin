@@ -1,94 +1,560 @@
 <div class="ride-booking-container">
   
-  <!-- Header Banner -->
-  <div class="booking-header">
-    <div class="header-glow"></div>
-    <div class="header-content">
-      <div class="badge-row">
-        <span class="badge badge-primary">Uber / Rapido / Ola Enterprise</span>
-        <span class="badge badge-success"><span class="pulse-dot"></span> Instant Auto & Cab Dispatching</span>
-      </div>
-      <h1 class="header-title">Ride Booking & Taxi Hailing</h1>
-      <p class="header-subtitle">Book Bike Taxis, Auto Rickshaws, Prime Sedans, SUVs, and BluSmart 100% Electric Cabs.</p>
-    </div>
-
-    <!-- Category Pills -->
-    <div class="category-pills">
-      <button (click)="activeType = 'Passenger'" [class.active]="activeType === 'Passenger'" class="pill-btn">
-        <i class="ri-taxi-fill"></i> Passenger Rides
+  <!-- Navigation Top Bar (Tabs) -->
+  <div class="top-nav-bar">
+    <div class="nav-tabs">
+      <button (click)="activeTab.set('new_booking')" [class.active]="activeTab() === 'new_booking'" class="nav-tab-btn">
+        <i class="ri-taxi-fill"></i> Book New Ride
       </button>
-      <button (click)="activeType = 'Rental'" [class.active]="activeType === 'Rental'" class="pill-btn pill-purple">
-        <i class="ri-time-line"></i> Hourly Rentals
-      </button>
-    </div>
-  </div>
-
-  <div class="booking-main-grid">
-    
-    <!-- Ride Dispatch Form -->
-    <div class="glass-panel dispatch-form-card">
-      <h2 class="form-title">
-        <i class="ri-map-pin-user-line icon-indigo"></i> Enter Destination & Pickup
-      </h2>
-
-      <!-- Address Pickers -->
-      <div class="form-group-stack">
-        <div class="form-group">
-          <label class="form-label">Pickup Location</label>
-          <input type="text" [(ngModel)]="pickupLocation" class="form-input" />
-        </div>
-
-        <div class="form-group">
-          <label class="form-label">Drop Location</label>
-          <input type="text" [(ngModel)]="dropLocation" class="form-input" />
-        </div>
-      </div>
-
-      <!-- Payment Method -->
-      <div class="form-group">
-        <label class="form-label">Payment Method</label>
-        <select [(ngModel)]="paymentMethod" class="form-select">
-          <option value="UPI / Wallet">UPI / Google Pay / Wallet</option>
-          <option value="Cash to Driver">Cash to Driver</option>
-          <option value="Corporate Credit Card">Corporate Account Credit</option>
-        </select>
-      </div>
-
-      <!-- Coupon Promo Code -->
-      <div class="form-group">
-        <label class="form-label">Promo Coupon</label>
-        <div class="promo-input-row">
-          <input type="text" [(ngModel)]="couponCode" placeholder="Enter FIRST50..." class="form-input font-mono" />
-          <button (click)="applyCoupon()" class="promo-btn">Apply</button>
-        </div>
-      </div>
-
-      <button (click)="confirmRideBooking()" class="submit-booking-btn">
-        Book Ride Now →
-      </button>
-    </div>
-
-    <!-- Map & Vehicle Cards Grid -->
-    <div class="map-vehicle-section">
-      
-      <!-- Vector Map -->
-      <div class="map-wrapper">
-        <app-mobility-map [pickupAddress]="pickupLocation" [dropAddress]="dropLocation"></app-mobility-map>
-      </div>
-
-      <!-- Vehicle Options Grid -->
-      <div class="vehicle-card-grid">
-        @for (cat of vehicleCategories(); track cat.id) {
-          <app-vehicle-card [category]="cat"
-                            [estimatedFare]="calculateFare(cat)"
-                            [isSelected]="selectedCategory?.id === cat.id"
-                            (onSelect)="selectedCategory = $event">
-          </app-vehicle-card>
+      <button (click)="activeTab.set('active_rides')" [class.active]="activeTab() === 'active_rides'" class="nav-tab-btn">
+        <i class="ri-radar-fill"></i> Active Rides & History
+        @if (mobilityService.activeBookings().length > 0) {
+          <span class="badge-count">{{ mobilityService.activeBookings().length }}</span>
         }
+      </button>
+    </div>
+
+    <div class="live-status-chip">
+      <span class="pulse-dot-green"></span>
+      <span>Live Dispatch Server Active</span>
+    </div>
+  </div>
+
+  @if (activeTab() === 'new_booking') {
+    
+    <!-- Header Banner -->
+    <div class="booking-header">
+      <div class="header-glow"></div>
+      <div class="header-content">
+        <div class="badge-row">
+          <span class="badge badge-primary">Uber / Rapido / BluSmart Platform</span>
+          <span class="badge badge-success"><span class="pulse-dot"></span> Instant AI Dispatch Engine</span>
+          @if (distanceKm > 0) {
+            <span class="badge badge-amber">⚡ Dynamic Pricing Active</span>
+          }
+        </div>
+        <h1 class="header-title">Ride Booking & Mobility Hailing</h1>
+        <p class="header-subtitle">Book Bike Taxis, Auto Rickshaws, Prime Sedans, SUVs, and BluSmart 100% Electric Cabs with real-time tracking.</p>
+      </div>
+
+      <!-- Service Mode Switcher Pills -->
+      <div class="category-pills">
+        <button (click)="changeActiveType('Passenger')" [class.active]="activeType === 'Passenger'" class="pill-btn">
+          <i class="ri-taxi-fill"></i> Daily Rides
+        </button>
+        <button (click)="changeActiveType('Rental')" [class.active]="activeType === 'Rental'" class="pill-btn pill-purple">
+          <i class="ri-time-line"></i> Hourly Rentals
+        </button>
+        <button (click)="changeActiveType('Outstation')" [class.active]="activeType === 'Outstation'" class="pill-btn pill-teal">
+          <i class="ri-road-map-line"></i> Outstation Flat
+        </button>
+      </div>
+    </div>
+
+    <!-- MAIN DISPATCH GRID -->
+    <div class="booking-main-grid">
+      
+      <!-- Ride Dispatch Form Card -->
+      <div class="glass-panel dispatch-form-card">
+        
+        <div class="form-header-row">
+          <h2 class="form-title">
+            <i class="ri-map-pin-user-fill icon-indigo"></i> Pickup & Destination
+          </h2>
+          <button (click)="swapLocations()" class="swap-locations-btn" [class.spinning]="isSwappingLocations" title="Swap Pickup & Drop">
+            <i class="ri-arrow-up-down-line"></i> Swap
+          </button>
+        </div>
+
+        <!-- Address Pickers Stack -->
+        <div class="form-group-stack">
+          <div class="form-group input-with-icon">
+            <span class="dot-indicator dot-green"></span>
+            <label class="form-label">Pickup Location</label>
+            <input #pickupInput type="text" [(ngModel)]="pickupLocation" (change)="updateDistanceDuration()" class="form-input" placeholder="Search pickup address..." />
+          </div>
+
+          <div class="form-group input-with-icon">
+            <span class="dot-indicator dot-red"></span>
+            <label class="form-label">Drop Location</label>
+            <input #dropInput type="text" [(ngModel)]="dropLocation" (change)="updateDistanceDuration()" class="form-input" placeholder="Search destination address..." />
+          </div>
+        </div>
+
+        <!-- Quick Location Presets Chips (Rendered only when dynamic presets are provided) -->
+        @if (quickPresets.length > 0) {
+          <div class="presets-section">
+            <span class="presets-label">Popular Destinations:</span>
+            <div class="preset-chips-scroll">
+              @for (preset of quickPresets; track preset.title) {
+                <button (click)="selectPreset(preset, 'drop')" class="preset-chip">
+                  <i [class]="preset.icon"></i> {{ preset.title }}
+                </button>
+              }
+            </div>
+          </div>
+        }
+
+        <!-- Distance & Duration Stats Strip -->
+        <div class="trip-stats-strip">
+          <div class="stat-box">
+            <i class="ri-map-pin-distance-line icon-indigo"></i>
+            <div>
+              <span class="stat-val">{{ distanceKm > 0 ? (distanceKm + ' km') : '--' }}</span>
+              <span class="stat-lbl">Trip Distance</span>
+            </div>
+          </div>
+          <div class="stat-divider"></div>
+          <div class="stat-box">
+            <i class="ri-time-line icon-emerald"></i>
+            <div>
+              <span class="stat-val">{{ estimatedMinutes > 0 ? ('~' + estimatedMinutes + ' mins') : '--' }}</span>
+              <span class="stat-lbl">Estimated Time</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Additional Ride Options (Rentals / Outstation / Schedule) -->
+        @if (activeType === 'Rental') {
+          <div class="form-group">
+            <label class="form-label">Rental Package</label>
+            <select [(ngModel)]="rentalPackage" class="form-select">
+              <option value="2 Hours / 20 Km">2 Hours / 20 Km Package (City Run)</option>
+              <option value="4 Hours / 40 Km">4 Hours / 40 Km Package (Half Day)</option>
+              <option value="8 Hours / 80 Km">8 Hours / 80 Km Package (Full Day)</option>
+              <option value="12 Hours / 120 Km">12 Hours / 120 Km Package (Executive)</option>
+            </select>
+          </div>
+        }
+
+        <!-- Payment Method -->
+        <div class="form-group">
+          <label class="form-label">Payment Method</label>
+          <select [(ngModel)]="paymentMethod" class="form-select">
+            <option value="UPI / Wallet">⚡ UPI / Google Pay / Wallet (Instant Auto-Pay)</option>
+            <option value="Credit Card">💳 Credit / Debit Card</option>
+            <option value="Cash to Driver">💵 Cash to Driver</option>
+            <option value="Corporate Credit Card">🏢 Corporate Account Invoice</option>
+          </select>
+        </div>
+
+        <!-- Coupon Promo Code Section -->
+        <div class="form-group">
+          <label class="form-label">Promo Code / Coupon</label>
+          
+          @if (appliedCoupon) {
+            <div class="applied-coupon-banner">
+              <div class="coupon-info">
+                <i class="ri-ticket-2-fill icon-amber"></i>
+                <div>
+                  <strong>{{ appliedCoupon.code }}</strong> - {{ appliedCoupon.label }}
+                </div>
+              </div>
+              <button (click)="removeCoupon()" class="remove-coupon-btn">Remove</button>
+            </div>
+          } @else {
+            <div class="promo-input-row">
+              <input type="text" [(ngModel)]="couponCode" placeholder="Enter promo code..." class="form-input font-mono" />
+              <button (click)="applyCouponCode()" class="promo-btn">Apply</button>
+            </div>
+            
+            @if (promoCodes.length > 0) {
+              <div class="quick-coupons-row">
+                @for (p of promoCodes; track p.code) {
+                  <span (click)="applyCouponCode(p.code)" class="quick-coupon-tag">+ {{ p.code }}</span>
+                }
+              </div>
+            }
+          }
+        </div>
+
+        <!-- Selected Vehicle & Fare Summary -->
+        @if (getSelectedCategory(); as cat) {
+          <div class="fare-summary-box">
+            <div class="fare-main-row">
+              <div class="cat-summary">
+                <i [class]="cat.icon" class="cat-icon"></i>
+                <div>
+                  <h4 class="cat-name">{{ cat.name }}</h4>
+                  <span class="cat-eta">ETA {{ cat.eta }}</span>
+                </div>
+              </div>
+              
+              <div class="fare-amount-col">
+                <span class="fare-price">₹{{ calculateFare(cat) }}</span>
+                <button (click)="openFareModal()" class="view-breakdown-btn">
+                  Breakdown <i class="ri-information-line"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        }
+
+        <!-- SUBMIT BOOKING BUTTON -->
+        <button (click)="confirmRideBooking()" [disabled]="bookingStep() !== 'IDLE' || !pickupLocation.trim() || !dropLocation.trim() || distanceKm === 0" class="submit-booking-btn">
+          @if (bookingStep() === 'IDLE') {
+            <span>Book Ride Now →</span>
+          } @else if (bookingStep() === 'SEARCHING') {
+            <span><i class="ri-loader-4-line spin"></i> Searching Driver...</span>
+          } @else {
+            <span>Ride Confirmed!</span>
+          }
+        </button>
+
+      </div>
+
+      <!-- Map & Vehicle Options Grid -->
+      <div class="map-vehicle-section">
+        
+        <!-- Map View Component -->
+        <div class="map-wrapper">
+          <app-mobility-map [pickupAddress]="pickupLocation"
+                            [dropAddress]="dropLocation"
+                            [vehicleCategory]="getSelectedCategory()?.id || 'BIKE'">
+          </app-mobility-map>
+        </div>
+
+        <!-- Vehicle Categories Grid -->
+        <div class="vehicle-card-grid">
+          @for (cat of vehicleCategories(); track cat.id) {
+            <app-vehicle-card [category]="cat"
+                              [estimatedFare]="calculateFare(cat)"
+                              [isSelected]="getSelectedCategory()?.id === cat.id"
+                              (onSelect)="selectCategory($event)">
+            </app-vehicle-card>
+          }
+          @if (vehicleCategories().length === 0) {
+            <div class="empty-state" style="grid-column: 1 / -1; padding: 2rem;">
+              <i class="ri-car-line empty-icon"></i>
+              <h3>No vehicle categories available</h3>
+              <p>Vehicle inventory is currently empty or loading from backend API.</p>
+            </div>
+          }
+        </div>
+
       </div>
 
     </div>
 
-  </div>
+  } @else {
+    
+    <!-- ACTIVE RIDES & HISTORY TAB CONTENT -->
+    <div class="active-rides-container glass-panel">
+      <h2 class="section-title"><i class="ri-history-line icon-indigo"></i> Ride Booking History & Active Trips</h2>
+      
+      @if (mobilityService.activeBookings().length === 0) {
+        <div class="empty-state">
+          <i class="ri-taxi-wifi-line empty-icon"></i>
+          <h3>No active rides found</h3>
+          <p>Book your first ride to track live drivers and review past trip receipts.</p>
+          <button (click)="activeTab.set('new_booking')" class="promo-btn">Book a Ride Now</button>
+        </div>
+      } @else {
+        <div class="bookings-list-grid">
+          @for (booking of mobilityService.activeBookings(); track booking.id) {
+            <div class="booking-history-card">
+              <div class="card-header">
+                <div class="booking-code-wrap">
+                  <span class="booking-id">#{{ booking.id }}</span>
+                  <span class="service-tag">{{ booking.serviceType }}</span>
+                </div>
+                <span class="status-badge" [class.badge-active]="booking.status === 'DRIVER_ASSIGNED' || booking.status === 'IN_PROGRESS'" [class.badge-completed]="booking.status === 'COMPLETED'">
+                  {{ booking.status }}
+                </span>
+              </div>
+
+              <div class="card-addresses">
+                <div class="addr-line">
+                  <span class="dot dot-green"></span>
+                  <span class="addr-text">{{ booking.pickupLocation }}</span>
+                </div>
+                <div class="addr-line">
+                  <span class="dot dot-red"></span>
+                  <span class="addr-text">{{ booking.dropLocation }}</span>
+                </div>
+              </div>
+
+              <div class="card-driver-info">
+                <div class="driver-profile-sm">
+                  <i class="ri-user-star-line avatar-icon"></i>
+                  <div>
+                    <strong>{{ booking.driver.name || 'Assigned Driver' }}</strong>
+                    <span class="veh-name">{{ booking.vehicleName }} • {{ booking.driver.vehicle || 'KA-01-EQ-9988' }}</span>
+                  </div>
+                </div>
+                <div class="fare-tag">₹{{ booking.fare }}</div>
+              </div>
+
+              <div class="card-footer-actions">
+                @if (booking.status === 'DRIVER_ASSIGNED' || booking.status === 'IN_PROGRESS') {
+                  <button (click)="activeTab.set('new_booking')" class="track-live-btn">
+                    <i class="ri-radar-line"></i> Track Live Ride
+                  </button>
+                } @else {
+                  <button (click)="activeTab.set('new_booking')" class="rebook-btn">
+                    <i class="ri-repeat-line"></i> Book Again
+                  </button>
+                }
+              </div>
+            </div>
+          }
+        </div>
+      }
+    </div>
+
+  }
+
+  <!-- ════════════════════════════════════════════════════════════════════ -->
+  <!-- OVERLAY 1: RADAR SEARCHING ANIMATION MODAL -->
+  <!-- ════════════════════════════════════════════════════════════════════ -->
+  @if (bookingStep() === 'SEARCHING') {
+    <div class="modal-overlay">
+      <div class="glass-panel radar-search-card">
+        <div class="radar-animation-container">
+          <div class="radar-ring ring-1"></div>
+          <div class="radar-ring ring-2"></div>
+          <div class="radar-ring ring-3"></div>
+          <div class="radar-center-icon">
+            <i class="ri-taxi-fill spin-pulse"></i>
+          </div>
+        </div>
+
+        <h3 class="radar-title">Finding Nearest Drivers...</h3>
+        <p class="radar-subtitle">{{ searchingStatusText() }}</p>
+
+        <!-- Progress Step Checklist -->
+        <div class="searching-steps-list">
+          <div class="step-item" [class.done]="searchingStepIndex() >= 1">
+            <i class="ri-check-line icon-done"></i> 1. Requesting Live Dispatch Server
+          </div>
+          <div class="step-item" [class.done]="searchingStepIndex() >= 2" [class.current]="searchingStepIndex() === 2">
+            <i class="ri-radar-line icon-spin"></i> 2. Matching nearby 4 top-rated drivers
+          </div>
+          <div class="step-item" [class.done]="searchingStepIndex() >= 3" [class.current]="searchingStepIndex() === 3">
+            <i class="ri-checkbox-circle-line icon-done"></i> 3. Driver Acceptance & OTP PIN code setup
+          </div>
+        </div>
+
+        <button (click)="cancelBooking()" class="cancel-search-btn">Cancel Request</button>
+      </div>
+    </div>
+  }
+
+  <!-- ════════════════════════════════════════════════════════════════════ -->
+  <!-- OVERLAY 2: LIVE DRIVER ASSIGNED & TRACKING DRAWER/CARD -->
+  <!-- ════════════════════════════════════════════════════════════════════ -->
+  @if (bookingStep() === 'ASSIGNED' || bookingStep() === 'IN_TRIP') {
+    <div class="modal-overlay">
+      <div class="glass-panel live-tracking-modal">
+        
+        <div class="tracking-modal-header">
+          <div class="status-badge-live">
+            <span class="pulse-dot-green"></span>
+            @if (bookingStep() === 'ASSIGNED') {
+              <span>Driver En Route to Pickup (ETA 4 mins)</span>
+            } @else {
+              <span>Trip in Progress (ETA 18 mins)</span>
+            }
+          </div>
+          
+          <span class="booking-code-chip">ID: {{ currentBooking()?.id || 'MOB-882190' }}</span>
+        </div>
+
+        <!-- Driver Details Card -->
+        <div class="driver-details-card">
+          <div class="driver-main-info">
+            <div class="avatar-wrap">
+              <i class="ri-user-smile-fill avatar-icon"></i>
+            </div>
+            
+            <div class="driver-text">
+              <h3 class="driver-name">{{ currentBooking()?.driver?.name || 'Rajesh Kumar' }}</h3>
+              <div class="rating-row">
+                <span class="stars">⭐ 4.89</span>
+                <span class="trips">• 1,420 Completed Trips</span>
+              </div>
+              <div class="vehicle-no-badge">
+                <i class="ri-shield-check-fill icon-emerald"></i> {{ currentBooking()?.driver?.vehicle || 'KA-01-EQ-9988' }} (Prime Sedan)
+              </div>
+            </div>
+          </div>
+
+          <!-- OTP PIN SECURITY CODE -->
+          <div class="otp-security-box">
+            <span class="otp-label">Share OTP with Driver:</span>
+            <strong class="otp-code">{{ rideOtp() }}</strong>
+          </div>
+        </div>
+
+        <!-- Action Call/Message Buttons -->
+        <div class="action-buttons-row">
+          <button (click)="simulateCallDriver()" class="action-btn btn-call">
+            <i class="ri-phone-fill"></i> Call Driver
+          </button>
+          <button (click)="simulateMessageDriver()" class="action-btn btn-message">
+            <i class="ri-message-3-fill"></i> Send Message
+          </button>
+        </div>
+
+        <!-- Live Status Timeline Bar -->
+        <div class="timeline-container">
+          <div class="progress-bar-bg">
+            <div class="progress-bar-fill" [style.width.%]="tripProgress()"></div>
+          </div>
+
+          <div class="timeline-nodes">
+            <div class="node done">
+              <i class="ri-checkbox-circle-fill"></i>
+              <span>Assigned</span>
+            </div>
+            <div class="node" [class.done]="tripProgress() >= 40" [class.active]="bookingStep() === 'ASSIGNED'">
+              <i class="ri-car-fill"></i>
+              <span>En Route</span>
+            </div>
+            <div class="node" [class.done]="tripProgress() >= 70" [class.active]="bookingStep() === 'IN_TRIP'">
+              <i class="ri-navigation-fill"></i>
+              <span>In Trip</span>
+            </div>
+            <div class="node" [class.done]="tripProgress() >= 100">
+              <i class="ri-flag-fill"></i>
+              <span>Complete</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Pickup & Drop Summary -->
+        <div class="address-summary-box">
+          <div class="addr-item">
+            <span class="dot dot-green"></span>
+            <div>
+              <span class="lbl">Pickup</span>
+              <strong>{{ currentBooking()?.pickupLocation || pickupLocation }}</strong>
+            </div>
+          </div>
+          <div class="addr-item">
+            <span class="dot dot-red"></span>
+            <div>
+              <span class="lbl">Destination</span>
+              <strong>{{ currentBooking()?.dropLocation || dropLocation }}</strong>
+            </div>
+          </div>
+        </div>
+
+        <div class="tracking-footer">
+          <span class="fare-total">Fare: <strong>₹{{ currentBooking()?.fare }}</strong> ({{ paymentMethod }})</span>
+          <button (click)="cancelBooking()" class="cancel-ride-btn">Cancel Ride</button>
+        </div>
+
+      </div>
+    </div>
+  }
+
+  <!-- ════════════════════════════════════════════════════════════════════ -->
+  <!-- OVERLAY 3: FARE BREAKDOWN MODAL -->
+  <!-- ════════════════════════════════════════════════════════════════════ -->
+  @if (isFareModalOpen) {
+    <div class="modal-overlay" (click)="closeFareModal()">
+      <div class="glass-panel fare-breakdown-modal" (click)="$event.stopPropagation()">
+        
+        <div class="modal-header">
+          <h3><i class="ri-file-text-line icon-indigo"></i> Fare Breakdown Details</h3>
+          <button (click)="closeFareModal()" class="close-modal-btn">&times;</button>
+        </div>
+
+        @if (currentFareBreakdown(); as fb) {
+          <div class="breakdown-list">
+            <div class="breakdown-item">
+              <span>Base Fare</span>
+              <strong>₹{{ fb.baseFare }}</strong>
+            </div>
+            <div class="breakdown-item">
+              <span>Distance Fare ({{ fb.distanceKm }} km)</span>
+              <strong>₹{{ fb.distanceFare }}</strong>
+            </div>
+            <div class="breakdown-item">
+              <span>Time / Duration Fare ({{ fb.durationMin }} mins)</span>
+              <strong>₹{{ fb.timeFare }}</strong>
+            </div>
+            
+            @if (fb.surgeMultiplier > 1.0) {
+              <div class="breakdown-item surge-item">
+                <span>⚡ Surge Multiplier ({{ fb.surgeMultiplier }}x)</span>
+                <strong>+⚡ Active</strong>
+              </div>
+            }
+
+            @if (fb.tollCharges > 0) {
+              <div class="breakdown-item">
+                <span>Highway Toll Charges</span>
+                <strong>₹{{ fb.tollCharges }}</strong>
+              </div>
+            }
+
+            <div class="breakdown-item">
+              <span>Government GST Tax (5%)</span>
+              <strong>₹{{ fb.taxGst }}</strong>
+            </div>
+
+            @if (fb.discount > 0) {
+              <div class="breakdown-item discount-item">
+                <span>Promo Discount Applied</span>
+                <strong>-₹{{ fb.discount }}</strong>
+              </div>
+            }
+
+            <div class="breakdown-divider"></div>
+
+            <div class="breakdown-total">
+              <span>Total Estimated Fare</span>
+              <strong class="total-price">₹{{ fb.totalFare }}</strong>
+            </div>
+          </div>
+        }
+
+        <button (click)="closeFareModal()" class="submit-booking-btn">Done</button>
+      </div>
+    </div>
+  }
+
+  <!-- ════════════════════════════════════════════════════════════════════ -->
+  <!-- OVERLAY 4: TRIP RATING MODAL -->
+  <!-- ════════════════════════════════════════════════════════════════════ -->
+  @if (isRatingModalOpen) {
+    <div class="modal-overlay">
+      <div class="glass-panel rating-modal">
+        <div class="success-icon-wrap">
+          <i class="ri-checkbox-circle-fill icon-emerald"></i>
+        </div>
+
+        <h3>Trip Completed!</h3>
+        <p>You have safely arrived at <strong>{{ dropLocation }}</strong>.</p>
+
+        <!-- Star Rating Picker -->
+        <div class="stars-picker">
+          @for (star of [1, 2, 3, 4, 5]; track star) {
+            <i (click)="selectedRating = star"
+               [class.active]="star <= selectedRating"
+               class="ri-star-fill star-icon"></i>
+          }
+        </div>
+
+        <!-- Driver Tip Chips -->
+        <div class="tip-section">
+          <span class="tip-lbl">Add a Driver Tip:</span>
+          <div class="tip-chips">
+            <button (click)="driverTip = 0" [class.active]="driverTip === 0" class="tip-btn">No Tip</button>
+            <button (click)="driverTip = 20" [class.active]="driverTip === 20" class="tip-btn">₹20</button>
+            <button (click)="driverTip = 50" [class.active]="driverTip === 50" class="tip-btn">₹50</button>
+            <button (click)="driverTip = 100" [class.active]="driverTip === 100" class="tip-btn">₹100</button>
+          </div>
+        </div>
+
+        <div class="modal-actions-row">
+          <button (click)="skipRating()" class="skip-btn">Skip</button>
+          <button (click)="submitRating()" class="submit-rating-btn">Submit Rating</button>
+        </div>
+      </div>
+    </div>
+  }
 
 </div>

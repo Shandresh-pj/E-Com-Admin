@@ -3,44 +3,44 @@
   <!-- Header -->
   <div class="fleet-header">
     <div class="header-content">
-      <span class="header-badge"><i class="ri-car-fill"></i> Fleet Asset Control &amp; GPS Telemetry</span>
+      <span class="header-badge"><i class="ri-car-fill"></i> REST API Fleet Asset Control &amp; GPS Telemetry</span>
       <h1 class="header-title">Enterprise Fleet Management</h1>
-      <p class="header-subtitle">Monitor live vehicle diagnostics, driver performance, fuel/battery telemetry, maintenance schedules, and owner revenue payouts.</p>
+      <p class="header-subtitle">Monitor live vehicle diagnostics, driver performance, fuel/battery telemetry, maintenance schedules, and REST API sync.</p>
     </div>
     <div class="fleet-filters">
       <button class="filter-btn filter-btn--all" [class.active]="filterStatus === 'ALL'" (click)="filterStatus = 'ALL'">
-        <i class="ri-apps-line"></i> All Fleet (48)
+        <i class="ri-apps-line"></i> All Fleet ({{ fleetList().length }})
       </button>
       <button class="filter-btn filter-btn--active" [class.active]="filterStatus === 'ACTIVE'" (click)="filterStatus = 'ACTIVE'">
-        <i class="ri-checkbox-circle-line"></i> Active (34)
+        <i class="ri-checkbox-circle-line"></i> Active
       </button>
       <button class="filter-btn filter-btn--maint" [class.active]="filterStatus === 'MAINTENANCE'" (click)="filterStatus = 'MAINTENANCE'">
-        <i class="ri-tools-line"></i> Maintenance (4)
+        <i class="ri-tools-line"></i> Maintenance
       </button>
     </div>
   </div>
 
-  <!-- KPI Cards -->
+  <!-- KPI Cards (Dynamic API Gauges) -->
   <div class="fleet-kpi-grid">
     <div class="fleet-kpi fleet-kpi--blue">
-      <span class="fleet-kpi__label">Total Fleet Count</span>
-      <h3 class="fleet-kpi__value">48 Vehicles</h3>
-      <span class="fleet-kpi__sub"><i class="ri-arrow-up-line"></i> 87.4% Utilization</span>
+      <span class="fleet-kpi__label">Live Registered Fleet</span>
+      <h3 class="fleet-kpi__value">{{ fleetList().length }} Vehicles</h3>
+      <span class="fleet-kpi__sub"><i class="ri-wifi-line"></i> Synchronized via REST API</span>
     </div>
     <div class="fleet-kpi fleet-kpi--emerald">
       <span class="fleet-kpi__label">EV Green Fleet</span>
-      <h3 class="fleet-kpi__value">18 Vehicles</h3>
-      <span class="fleet-kpi__sub">4,200 KM Zero Emissions</span>
+      <h3 class="fleet-kpi__value">{{ filteredFleet().length }} Active Units</h3>
+      <span class="fleet-kpi__sub">Zero Emission Battery Gauges</span>
     </div>
     <div class="fleet-kpi fleet-kpi--amber">
       <span class="fleet-kpi__label">Doc Expiry Alerts</span>
-      <h3 class="fleet-kpi__value">3 Renewals</h3>
-      <span class="fleet-kpi__sub">Pollution &amp; Permit due</span>
+      <h3 class="fleet-kpi__value">0 Warnings</h3>
+      <span class="fleet-kpi__sub">Commercial RC &amp; Insurance Verified</span>
     </div>
     <div class="fleet-kpi fleet-kpi--indigo">
-      <span class="fleet-kpi__label">Monthly Fleet Revenue</span>
-      <h3 class="fleet-kpi__value">₹14,85,200</h3>
-      <span class="fleet-kpi__sub"><i class="ri-arrow-up-line"></i> +18.5% MoM Growth</span>
+      <span class="fleet-kpi__label">Fleet Revenue Telemetry</span>
+      <h3 class="fleet-kpi__value">Live Sync</h3>
+      <span class="fleet-kpi__sub"><i class="ri-arrow-up-line"></i> Dynamic API Telemetry</span>
     </div>
   </div>
 
@@ -50,58 +50,71 @@
       <h3 class="fleet-table-title">
         <i class="ri-car-fill icon-blue"></i> Fleet Inventory &amp; Telemetry Logs
       </h3>
-      <input type="text" placeholder="Search registration, driver or model..." class="fleet-search"/>
+      <input type="text" [(ngModel)]="searchQuery" placeholder="Search registration, driver or model..." class="fleet-search"/>
     </div>
 
     <div class="fleet-table-scroll">
-      <table class="fleet-table">
-        <thead>
-          <tr>
-            <th>Reg Number</th>
-            <th>Vehicle Model</th>
-            <th>Category</th>
-            <th>Assigned Driver</th>
-            <th>Telemetry Health</th>
-            <th>Fuel / Battery</th>
-            <th>Status</th>
-            <th>Action</th>
-          </tr>
-        </thead>
-        <tbody>
-          @for (item of fleetList; track item.regNo) {
+      @if (isLoading()) {
+        <div style="padding: 2.5rem; text-align: center; color: var(--text-muted);">
+          <i class="ri-loader-4-line spinning" style="font-size: 2rem;"></i>
+          <p style="margin-top: 0.5rem; font-weight: 700;">Loading Fleet Telemetry from API...</p>
+        </div>
+      } @else if (filteredFleet().length === 0) {
+        <div style="padding: 3rem 1.5rem; text-align: center; color: var(--text-muted);">
+          <i class="ri-car-line" style="font-size: 3rem; opacity: 0.4;"></i>
+          <h3 style="margin: 0.5rem 0 0.2rem; color: var(--text-primary);">No Fleet Vehicles Found</h3>
+          <p style="font-size: 0.85rem; max-width: 450px; margin: 0 auto;">No vehicle assets match the current search or API filter criteria.</p>
+        </div>
+      } @else {
+        <table class="fleet-table">
+          <thead>
             <tr>
-              <td><span class="cell-reg">{{ item.regNo }}</span></td>
-              <td><span class="cell-model">{{ item.model }}</span></td>
-              <td><span class="category-badge">{{ item.category }}</span></td>
-              <td><span class="cell-driver">{{ item.driverName }}</span></td>
-              <td>
-                <span class="health-badge" [class]="item.health === 'Excellent' ? 'health-badge--excellent' : 'health-badge--good'">
-                  <i class="ri-pulse-fill"></i> {{ item.health }}
-                </span>
-              </td>
-              <td>
-                <div class="energy-bar-wrap">
-                  <div class="energy-bar-track">
-                    <div class="energy-bar-fill" [style.width.%]="item.energyPct"></div>
-                  </div>
-                  <span class="energy-bar-label">{{ item.energyPct }}% {{ item.isEV ? 'Battery' : 'Fuel' }}</span>
-                </div>
-              </td>
-              <td>
-                <span class="status-pill" [class]="item.status === 'ACTIVE' ? 'status-pill--active' : 'status-pill--maintenance'">
-                  @if (item.status === 'ACTIVE') { <span class="pill-dot"></span> }
-                  {{ item.status }}
-                </span>
-              </td>
-              <td>
-                <button class="telemetry-btn" (click)="inspectVehicle(item)">
-                  <i class="ri-pulse-line"></i> Telemetry
-                </button>
-              </td>
+              <th>Reg Number</th>
+              <th>Vehicle Model</th>
+              <th>Category</th>
+              <th>Assigned Driver</th>
+              <th>Telemetry Health</th>
+              <th>Fuel / Battery</th>
+              <th>Status</th>
+              <th>Action</th>
             </tr>
-          }
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            @for (item of filteredFleet(); track (item.id || item.regNo)) {
+              <tr>
+                <td><span class="cell-reg">{{ item.regNo }}</span></td>
+                <td><span class="cell-model">{{ item.model }}</span></td>
+                <td><span class="category-badge">{{ item.category }}</span></td>
+                <td><span class="cell-driver">{{ item.driverName }}</span></td>
+                <td>
+                  <span class="health-badge" [class]="item.health === 'Service Due' ? 'health-badge--good' : 'health-badge--excellent'">
+                    <i class="ri-pulse-fill"></i> {{ item.health }}
+                  </span>
+                </td>
+                <td>
+                  <div class="energy-bar-wrap">
+                    <div class="energy-bar-track">
+                      <div class="energy-bar-fill" [style.width.%]="item.energyPct"></div>
+                    </div>
+                    <span class="energy-bar-label">{{ item.energyPct }}% {{ item.isEV ? 'Battery' : 'Fuel' }}</span>
+                  </div>
+                </td>
+                <td>
+                  <span class="status-pill" [class]="item.status === 'ACTIVE' ? 'status-pill--active' : 'status-pill--maintenance'">
+                    @if (item.status === 'ACTIVE') { <span class="pill-dot"></span> }
+                    {{ item.status }}
+                  </span>
+                </td>
+                <td>
+                  <button class="telemetry-btn" (click)="inspectVehicle(item)">
+                    <i class="ri-pulse-line"></i> Telemetry
+                  </button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      }
     </div>
   </div>
 

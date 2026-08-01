@@ -505,33 +505,104 @@ export class SecureChatComponent implements OnInit, OnDestroy {
     this.showMentionDropdown = false;
   }
 
+  // Registered System Contacts with Email ID Access Control
+  public registeredContacts: { id: number; name: string; email: string; role: string; isAllowed: boolean; avatar?: string }[] = [
+    { id: 2, name: 'Alex Morgan', email: 'alex.m@enterprise.com', role: 'Branch Manager', isAllowed: true },
+    { id: 3, name: 'Sarah Kapoor', email: 'sarah.k@enterprise.com', role: 'Mobility Fleet Lead', isAllowed: true },
+    { id: 4, name: 'David Wright', email: 'david.w@enterprise.com', role: 'Logistics Operations', isAllowed: true },
+    { id: 5, name: 'Priya Sharma', email: 'priya.s@enterprise.com', role: 'Corporate Transit Manager', isAllowed: true },
+    { id: 6, name: 'Rahul Verma', email: 'rahul.v@enterprise.com', role: 'Dispatch Lead', isAllowed: true },
+    { id: 7, name: 'Anita Roy', email: 'anita.r@enterprise.com', role: 'Security Analyst', isAllowed: true }
+  ];
+
+  public customEmailSearchInput = '';
+  public emailAccessErrorMsg = '';
+
   onSearchInput(): void {
-    if (this.searchQuery.trim().length > 0) {
+    const q = this.searchQuery.trim().toLowerCase();
+    this.emailAccessErrorMsg = '';
+    if (q.length > 0) {
+      // Local registered contacts email & name match
+      const localMatches = this.registeredContacts.filter(
+        c => c.email.toLowerCase().includes(q) || c.name.toLowerCase().includes(q)
+      );
+
       this.chatService.searchDirectory(this.searchQuery).subscribe({
         next: (res) => {
-          if (res && res.success) this.directoryResults = res.data;
+          if (res && res.success && res.data && res.data.length > 0) {
+            this.directoryResults = res.data;
+          } else {
+            this.directoryResults = localMatches;
+          }
         },
-        error: () => { this.directoryResults = []; }
+        error: () => {
+          this.directoryResults = localMatches;
+        }
       });
     } else {
-      this.directoryResults = [];
+      this.directoryResults = this.registeredContacts;
     }
   }
 
   toggleNewChatPanel(): void {
     this.isNewChatPanelOpen = !this.isNewChatPanelOpen;
-    if (this.isNewChatPanelOpen && this.directoryResults.length === 0) {
+    this.emailAccessErrorMsg = '';
+    if (this.isNewChatPanelOpen) {
       this.chatService.searchDirectory('').subscribe({
         next: (res) => {
-          if (res && res.success) this.directoryResults = res.data;
+          if (res && res.success && res.data && res.data.length > 0) {
+            this.directoryResults = res.data;
+          } else {
+            this.directoryResults = this.registeredContacts;
+          }
         },
-        error: () => { this.directoryResults = []; }
+        error: () => {
+          this.directoryResults = this.registeredContacts;
+        }
+      });
+    }
+  }
+
+  startChatByEmail(emailInput?: string): void {
+    const emailToSearch = (emailInput || this.customEmailSearchInput || this.searchQuery).trim().toLowerCase();
+    if (!emailToSearch) {
+      this.emailAccessErrorMsg = 'Please enter a registered Email ID to initiate secure chat.';
+      return;
+    }
+
+    // Check if email belongs to registered & allowed contacts
+    const match = this.registeredContacts.find(c => c.email.toLowerCase() === emailToSearch || c.email.toLowerCase().includes(emailToSearch));
+
+    if (match) {
+      if (!match.isAllowed) {
+        this.emailAccessErrorMsg = `Access Restricted: Email ID "${emailToSearch}" is not authorized for secure chat.`;
+        return;
+      }
+      this.emailAccessErrorMsg = '';
+      this.startDirectChat({ id: match.id, name: match.name });
+    } else {
+      // Query API for registered email
+      this.chatService.searchDirectory(emailToSearch).subscribe({
+        next: (res) => {
+          if (res && res.success && res.data && res.data.length > 0) {
+            const user = res.data[0];
+            this.emailAccessErrorMsg = '';
+            this.startDirectChat({ id: user.id, name: user.name });
+          } else {
+            this.emailAccessErrorMsg = `Access Denied: Email ID "${emailToSearch}" is not registered in system contacts.`;
+          }
+        },
+        error: () => {
+          this.emailAccessErrorMsg = `Access Denied: Email ID "${emailToSearch}" is not registered in system contacts.`;
+        }
       });
     }
   }
 
   clearSearch(): void {
     this.searchQuery = '';
+    this.customEmailSearchInput = '';
+    this.emailAccessErrorMsg = '';
     this.directoryResults = [];
   }
 

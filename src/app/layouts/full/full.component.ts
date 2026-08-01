@@ -343,14 +343,14 @@ export class FullComponent implements OnInit {
       { id: 41, name: 'Hardware & Devices', path: '/devices', icon: 'bi-cpu-fill', isActive: true },
       { id: 42, name: 'Secure Communications', path: '/communication', icon: 'bi-chat-dots-fill', isActive: true },
       { id: 43, name: 'Team Meetings & Calls', path: '/communication/meetings', icon: 'bi-camera-video-fill', isActive: true },
-      { id: 101, name: 'Mobility Executive Cockpit', path: '/dashboard/mobility-dashboard', icon: 'bi-car-front-fill', isActive: true },
-      { id: 102, name: 'Ride & Taxi Booking', path: '/dashboard/ride-booking', icon: 'bi-steering-wheel', isActive: true },
-      { id: 103, name: 'Car Rental & Subscriptions', path: '/dashboard/car-rental', icon: 'bi-key-fill', isActive: true },
-      { id: 104, name: 'Parcel & Freight Logistics', path: '/dashboard/parcel-logistics', icon: 'bi-truck-front-fill', isActive: true },
-      { id: 105, name: 'Fleet Asset & GPS Control', path: '/dashboard/fleet-management', icon: 'bi-radar', isActive: true },
-      { id: 106, name: 'Corporate & School Transit', path: '/dashboard/corporate-transport', icon: 'bi-building-fill-gear', isActive: true },
-      { id: 107, name: 'Live GPS Telemetry', path: '/dashboard/live-tracking', icon: 'bi-geo-alt-fill', isActive: true },
-      { id: 108, name: 'KYC & Vehicle Verification', path: '/dashboard/vehicle-driver-verification', icon: 'bi-person-check-fill', isActive: true }
+      { id: 101, name: 'Mobility Executive Cockpit', path: '/mobility-dashboard', icon: 'bi-car-front-fill', isActive: true },
+      { id: 102, name: 'Ride & Taxi Booking', path: '/ride-booking', icon: 'bi-steering-wheel', isActive: true },
+      { id: 103, name: 'Car Rental & Subscriptions', path: '/car-rental', icon: 'bi-key-fill', isActive: true },
+      { id: 104, name: 'Parcel & Freight Logistics', path: '/parcel-logistics', icon: 'bi-truck-front-fill', isActive: true },
+      { id: 105, name: 'Fleet Asset & GPS Control', path: '/fleet-management', icon: 'bi-radar', isActive: true },
+      { id: 106, name: 'Corporate & School Transit', path: '/corporate-transport', icon: 'bi-building-fill-gear', isActive: true },
+      { id: 107, name: 'Live GPS Telemetry', path: '/live-tracking', icon: 'bi-geo-alt-fill', isActive: true },
+      { id: 108, name: 'KYC & Vehicle Verification', path: '/vehicle-driver-verification', icon: 'bi-person-check-fill', isActive: true }
     ];
 
     if (isSuperAdmin) {
@@ -386,14 +386,14 @@ export class FullComponent implements OnInit {
       {
         navCap: 'Mobility & Fleet OS',
         paths: [
-          '/dashboard/mobility-dashboard',
-          '/dashboard/ride-booking',
-          '/dashboard/car-rental',
-          '/dashboard/parcel-logistics',
-          '/dashboard/fleet-management',
-          '/dashboard/corporate-transport',
-          '/dashboard/live-tracking',
-          '/dashboard/vehicle-driver-verification'
+          '/mobility-dashboard',
+          '/ride-booking',
+          '/car-rental',
+          '/parcel-logistics',
+          '/fleet-management',
+          '/corporate-transport',
+          '/live-tracking',
+          '/vehicle-driver-verification'
         ]
       },
       {

@@ -59,69 +59,13 @@ export const routes: Routes = [
       },
 
       {
-        path: 'mobility-dashboard',
-        loadComponent: () =>
-          import('./components/mobility-dashboard/mobility-dashboard.component')
-            .then(m => m.MobilityDashboardComponent),
-        title: 'Mobility Cockpit'
+        path: '',
+        loadChildren: () =>
+          import('./pages/pages.routes')
+            .then(m => m.PagesRoutes)
       },
 
-      {
-        path: 'ride-booking',
-        loadComponent: () =>
-          import('./components/ride-booking/ride-booking.component')
-            .then(m => m.RideBookingComponent),
-        title: 'Ride Booking'
-      },
-
-      {
-        path: 'car-rental',
-        loadComponent: () =>
-          import('./components/car-rental/car-rental.component')
-            .then(m => m.CarRentalComponent),
-        title: 'Car Rentals'
-      },
-
-      {
-        path: 'parcel-logistics',
-        loadComponent: () =>
-          import('./components/parcel-logistics/parcel-logistics.component')
-            .then(m => m.ParcelLogisticsComponent),
-        title: 'Parcel Logistics'
-      },
-
-      {
-        path: 'fleet-management',
-        loadComponent: () =>
-          import('./components/fleet-management/fleet-management.component')
-            .then(m => m.FleetManagementComponent),
-        title: 'Fleet Management'
-      },
-
-      {
-        path: 'corporate-transport',
-        loadComponent: () =>
-          import('./components/corporate-transport/corporate-transport.component')
-            .then(m => m.CorporateTransportComponent),
-        title: 'Corporate Transit'
-      },
-
-      {
-        path: 'live-tracking',
-        loadComponent: () =>
-          import('./components/live-tracking/live-tracking.component')
-            .then(m => m.LiveTrackingComponent),
-        title: 'Live Tracking'
-      },
-
-      {
-        path: 'vehicle-driver-verification',
-        loadComponent: () =>
-          import('./components/vehicle-driver-verification/vehicle-driver-verification.component')
-            .then(m => m.VehicleDriverVerificationComponent),
-        title: 'Driver Verification'
-      },
-
+      // ─── Subscription & Billing ─────────────────────────────────────────────
       {
         path: 'subscription-plans',
         loadComponent: () => 
@@ -154,6 +98,7 @@ export const routes: Routes = [
         title: 'Checkout'
       },
 
+      // ─── Lazy Feature Modules ───────────────────────────────────────────────
       {
         path: '',
         loadChildren: () =>
@@ -168,6 +113,7 @@ export const routes: Routes = [
             .then(m => m.ExtraRoutes)
       },
 
+      // ─── All component routes (mobility, fleet, HR, etc.) ──────────────────
       {
         path: '',
         loadChildren: () =>
@@ -176,6 +122,7 @@ export const routes: Routes = [
       },
 
     ]
+
   },
 
   {

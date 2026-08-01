@@ -93,13 +93,31 @@
       </div>
     }
 
-    <!-- Directory Search Overlay Dropdown -->
+    <!-- Directory Search Overlay Dropdown (Email ID Based Access Control) -->
     @if (isNewChatPanelOpen || (searchQuery.trim().length > 0 && directoryResults.length > 0)) {
       <div class="directory-overlay-panel glass-panel animate-slide-down custom-scrollbar">
         <div class="overlay-header">
-          <span><mat-icon class="sm-icon">people</mat-icon> Enterprise Directory</span>
-          <span class="results-count">{{ directoryResults.length }} contacts</span>
+          <span><mat-icon class="sm-icon">verified_user</mat-icon> Registered Contacts &amp; Email Directory</span>
+          <span class="results-count">{{ directoryResults.length }} Registered Contacts</span>
         </div>
+
+        <!-- Registered Email ID Direct Start Box -->
+        <div class="email-chat-direct-box">
+          <mat-icon class="email-icon">email</mat-icon>
+          <input type="email" [(ngModel)]="customEmailSearchInput" (keyup.enter)="startChatByEmail()" placeholder="Enter registered user email (e.g. alex.m@enterprise.com)..." class="email-input"/>
+          <button mat-raised-button color="primary" (click)="startChatByEmail()" class="email-start-btn">
+            <mat-icon>lock</mat-icon> Start Chat
+          </button>
+        </div>
+
+        <!-- Security Access Warning Banner -->
+        @if (emailAccessErrorMsg) {
+          <div class="email-access-warning">
+            <mat-icon class="warn-icon">gpp_bad</mat-icon>
+            <span>{{ emailAccessErrorMsg }}</span>
+          </div>
+        }
+
         <div class="directory-list">
           @for (user of directoryResults; track user.id) {
             <div class="directory-item-card" (click)="startDirectChat(user)">
@@ -107,16 +125,20 @@
                 <span>{{ user.name.charAt(0).toUpperCase() }}</span>
               </div>
               <div class="user-meta">
-                <div class="user-name">{{ user.name }}</div>
-                <div class="user-sub">{{ user.role }} &bull; {{ user.email }}</div>
+                <div class="user-name">
+                  {{ user.name }}
+                  <span class="email-verified-tag"><mat-icon class="micro-icon">verified</mat-icon> Registered Email</span>
+                </div>
+                <div class="user-sub">{{ user.role }} &bull; <strong>{{ user.email }}</strong></div>
               </div>
-              <button mat-icon-button color="primary" class="chat-icon-btn">
+              <button mat-icon-button color="primary" class="chat-icon-btn" title="Start Secure Chat">
                 <mat-icon>chat</mat-icon>
               </button>
             </div>
           } @empty {
             <div class="empty-search">
-              <p>No matching employees found in directory.</p>
+              <mat-icon style="font-size: 2rem; opacity: 0.4;">person_search</mat-icon>
+              <p>No registered contacts found matching this Email ID.</p>
             </div>
           }
         </div>

@@ -596,5 +596,28 @@ export const ComponentsRoutes: Routes = [
       title: 'Vehicle & Driver Verification KYC',
       urls: [{ title: 'Verification', url: '/vehicle-driver-verification' }]
     }
+  },
+
+  // ─── Delivery Tracking (Logistics & Finance section) ───────────────────────
+  {
+    path: 'delivery-tracking',
+    loadComponent: () => import('./delivery-tracking/delivery-tracking').then(m => m.DeliveryTracking),
+    canActivate: [RoleGuard],
+    data: {
+      title: 'Delivery Tracking',
+      urls: [{ title: 'Delivery Tracking', url: '/delivery-tracking' }]
+    }
+  },
+
+  // ─── Subscription Management ────────────────────────────────────────────────
+  {
+    path: 'manage-subscription-plans',
+    loadComponent: () => import('./subscription-plans/subscription-plans').then(m => m.SubscriptionPlansComponent),
+    canActivate: [RoleGuard],
+    data: {
+      title: 'Manage Subscription Plans',
+      urls: [{ title: 'Subscription Plans', url: '/manage-subscription-plans' }]
+    }
   }
 ];
+

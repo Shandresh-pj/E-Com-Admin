@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { MobilityService } from '../../services/mobility.service';
+import { CommonService } from '../../Securities/Services/common.service';
 import { VehicleCategory } from '../../models/mobility.models';
 
 export interface DriverVerificationRecord {
@@ -57,6 +58,7 @@ export interface VehicleVerificationRecord {
 export class VehicleDriverVerificationComponent implements OnInit {
   private http = inject(HttpClient);
   private mobilityService = inject(MobilityService);
+  private commonService = inject(CommonService);
 
   public activeTab: 'drivers' | 'vehicles' | 'categories' = 'drivers';
   public drivers = signal<DriverVerificationRecord[]>([]);
@@ -66,8 +68,6 @@ export class VehicleDriverVerificationComponent implements OnInit {
   public driverSearch: string = '';
   public vehicleSearch: string = '';
 
-  private baseUrl = 'http://localhost:4000/api/v1';
-
   ngOnInit(): void {
     this.fetchDrivers();
     this.fetchVehicles();
@@ -76,25 +76,51 @@ export class VehicleDriverVerificationComponent implements OnInit {
   }
 
   fetchDrivers(): void {
-    this.http.get<{ success: boolean; drivers: DriverVerificationRecord[] }>(`${this.baseUrl}/verification/drivers`)
+    this.commonService.getApi('v1/verification/drivers')
       .subscribe({
         next: (res) => {
-          if (res.drivers) this.drivers.set(res.drivers);
+          if (res?.drivers || res?.data) {
+            this.drivers.set(res.drivers || res.data);
+          } else {
+            this.drivers.set([]);
+          }
         },
         error: () => {
-          this.drivers.set(this.getFallbackDrivers());
+          this.commonService.getApi('verification/drivers').subscribe({
+            next: (res2) => {
+              if (res2?.drivers || res2?.data) {
+                this.drivers.set(res2.drivers || res2.data);
+              } else {
+                this.drivers.set([]);
+              }
+            },
+            error: () => this.drivers.set([])
+          });
         }
       });
   }
 
   fetchVehicles(): void {
-    this.http.get<{ success: boolean; vehicles: VehicleVerificationRecord[] }>(`${this.baseUrl}/verification/vehicles`)
+    this.commonService.getApi('v1/verification/vehicles')
       .subscribe({
         next: (res) => {
-          if (res.vehicles) this.vehicles.set(res.vehicles);
+          if (res?.vehicles || res?.data) {
+            this.vehicles.set(res.vehicles || res.data);
+          } else {
+            this.vehicles.set([]);
+          }
         },
         error: () => {
-          this.vehicles.set(this.getFallbackVehicles());
+          this.commonService.getApi('verification/vehicles').subscribe({
+            next: (res2) => {
+              if (res2?.vehicles || res2?.data) {
+                this.vehicles.set(res2.vehicles || res2.data);
+              } else {
+                this.vehicles.set([]);
+              }
+            },
+            error: () => this.vehicles.set([])
+          });
         }
       });
   }
@@ -163,65 +189,5 @@ export class VehicleDriverVerificationComponent implements OnInit {
     const pendingDrivers = this.drivers().filter(d => d.verification.status !== 'APPROVED').length;
     const pendingVehicles = this.vehicles().filter(v => v.verification.status !== 'APPROVED').length;
     return pendingDrivers + pendingVehicles;
-  }
-
-  private getFallbackDrivers(): DriverVerificationRecord[] {
-    return [
-      {
-        id: 'DRV-101',
-        name: 'Rajesh Kumar',
-        phone: '+91 98765 43210',
-        email: 'rajesh.k@mobility.com',
-        rating: 4.9,
-        totalTrips: 1420,
-        vehicle: 'Prime Sedan - KA 01 MJ 8821',
-        category: 'sedan',
-        status: 'AVAILABLE',
-        avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80',
-        verification: { dlNo: 'DL-142011099201', badgeNo: 'BDG-99201', dlExpiry: '2029-12-31', policeVerification: 'VERIFIED', aadhaarVerification: 'VERIFIED', status: 'APPROVED' }
-      },
-      {
-        id: 'DRV-104',
-        name: 'Mohammed Ali',
-        phone: '+91 97400 11223',
-        email: 'm.ali@mobility.com',
-        rating: 4.7,
-        totalTrips: 650,
-        vehicle: 'Taxi Bike - KA 02 EX 9011',
-        category: 'bike',
-        status: 'AVAILABLE',
-        avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=150&q=80',
-        verification: { dlNo: 'DL-882021004122', badgeNo: 'BDG-77401', dlExpiry: '2027-04-12', policeVerification: 'PENDING', aadhaarVerification: 'VERIFIED', status: 'UNDER_REVIEW' }
-      }
-    ];
-  }
-
-  private getFallbackVehicles(): VehicleVerificationRecord[] {
-    return [
-      {
-        id: 'VEC-901',
-        regNo: 'KA 01 MJ 8821',
-        makeModel: 'Hyundai Xcent Prime Sedan',
-        category: 'Prime Sedan',
-        type: 'Passenger',
-        ownerName: 'OmniTrans Fleet Corp',
-        chassisNo: 'MEHXXC10992019482',
-        engineNo: 'ENG-99201-HYU',
-        fuelType: 'Petrol',
-        verification: { rcStatus: 'VALID', permitStatus: 'COMMERCIAL_NATIONAL', insuranceExpiry: '2027-03-31', pucStatus: 'VALID', fitnessExpiry: '2028-11-30', status: 'APPROVED' }
-      },
-      {
-        id: 'VEC-904',
-        regNo: 'KA 51 MB 1234',
-        makeModel: 'Toyota Innova Crysta 2.4Z',
-        category: 'SUV Exec',
-        type: 'Passenger',
-        ownerName: 'Suresh Gowda',
-        chassisNo: 'TOY-INN-511234901',
-        engineNo: 'ENG-TOY-2.4D-881',
-        fuelType: 'Diesel',
-        verification: { rcStatus: 'VALID', permitStatus: 'ALL_INDIA_PERMIT', insuranceExpiry: '2026-09-30', pucStatus: 'EXPIRED_WARNING', fitnessExpiry: '2027-04-10', status: 'UNDER_REVIEW' }
-      }
-    ];
   }
 }

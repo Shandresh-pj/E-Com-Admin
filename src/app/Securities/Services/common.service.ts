@@ -32,7 +32,11 @@ export class CommonService {
   }
 
   private cleanEndpoint(endpoint: string): string {
-    return (endpoint || '').replace(/^\/+/, '');
+    let clean = (endpoint || '').replace(/^\/+/, '');
+    if (clean.toLowerCase().startsWith('api/')) {
+      clean = clean.substring(4);
+    }
+    return clean;
   }
 
   private isCacheValid(key: string): boolean {

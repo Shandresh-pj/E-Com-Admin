@@ -1,19 +1,44 @@
 <div class="mm-map">
 
-  <!-- Map Canvas -->
+  <!-- HUD Control Bar Header -->
+  <div class="mm-map__controls">
+    <div class="mm-map__live-badge">
+      <span class="mm-map__pulse"></span>
+      <span class="mm-map__live-label">GPS Telemetry Engine</span>
+      <span class="mm-map__driver-count">{{ activeDrivers().length > 0 ? (activeDrivers().length + ' Captains Online') : 'Live Dispatch Active' }}</span>
+    </div>
+    <div class="mm-map__ctrl-btns">
+      <button class="mm-map__ctrl-btn" [class.mm-map__ctrl-btn--active]="showSidebar()" (click)="showSidebar.update(v => !v)">
+        <i class="ri-side-bar-line"></i> Fleet Console
+      </button>
+      <button class="mm-map__ctrl-btn" [class.mm-map__ctrl-btn--active]="isReplayMode()" (click)="startRouteReplay()">
+        <i class="ri-history-line"></i> Route Replay
+      </button>
+      <button class="mm-map__ctrl-btn" [class.mm-map__ctrl-btn--active]="showTraffic()" (click)="toggleTraffic()">
+        <i class="ri-radar-line"></i> Traffic Layer
+      </button>
+      <button class="mm-map__ctrl-btn mm-map__ctrl-btn--primary" (click)="resetView()">
+        <i class="ri-focus-3-line"></i> Recenter
+      </button>
+    </div>
+  </div>
+
+  <!-- Main Map Container & Canvas -->
   <div class="mm-map__canvas" #mapContainer>
 
-    <!-- Grid Pattern -->
-    <svg class="mm-map__grid-svg" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%">
-      <defs>
-        <pattern id="mm-grid" width="40" height="40" patternUnits="userSpaceOnUse">
-          <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#6366f1" stroke-width="0.5" stroke-dasharray="3 5"/>
-        </pattern>
-      </defs>
-      <rect width="100%" height="100%" fill="url(#mm-grid)"/>
-    </svg>
+    <!-- Simulated SVG Map Canvas Layer (Renders ONLY when Google Maps API Key is loading or fallback) -->
+    @if (!isMapLoaded()) {
+      <svg class="mm-map__grid-svg" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%">
+        <defs>
+          <pattern id="mm-grid" width="40" height="40" patternUnits="userSpaceOnUse">
+            <path d="M 40 0 L 0 0 0 40" fill="none" stroke="var(--glass-border-subtle, #334155)" stroke-width="0.5" stroke-dasharray="3 5"/>
+          </pattern>
+        </defs>
+        <rect width="100%" height="100%" fill="url(#mm-grid)"/>
+      </svg>
+    }
 
-    <!-- Route + Markers SVG -->
+    <!-- Route & Telemetry Overlay -->
     <svg class="mm-map__route-svg" viewBox="0 0 800 500" preserveAspectRatio="none">
       <defs>
         <linearGradient id="mm-route-grad" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -27,41 +52,49 @@
         </filter>
       </defs>
 
-      <!-- Geofence Zone -->
+      <!-- Geofence Zone Boundary -->
       <circle cx="400" cy="250" r="185" fill="#6366f1" fill-opacity="0.04"
               stroke="#6366f1" stroke-opacity="0.2" stroke-dasharray="6 6"/>
 
-      <!-- Route Shadow -->
-      <path d="M 150 385 Q 290 205, 425 265 T 655 125"
-            fill="none" stroke="#6366f1" stroke-width="8" stroke-linecap="round" opacity="0.18"/>
+      <!-- Completed Route Section (Muted Gray) -->
+      <path d="M 150 385 Q 220 295, 290 205"
+            fill="none" stroke="#64748b" stroke-width="6" stroke-linecap="round" opacity="0.6"/>
 
-      <!-- Animated Route Line -->
+      <!-- Driver-to-Pickup Route (Amber Accent) -->
+      <path d="M 120 320 Q 135 350, 150 385"
+            fill="none" stroke="#f59e0b" stroke-width="5" stroke-dasharray="6 4" stroke-linecap="round"/>
+
+      <!-- Remaining Pickup-to-Destination Route Line -->
       <path class="mm-map__route-path"
-            d="M 150 385 Q 290 205, 425 265 T 655 125"
-            fill="none" stroke="url(#mm-route-grad)" stroke-width="4"
+            d="M 290 205 Q 425 265, 655 125"
+            fill="none" stroke="url(#mm-route-grad)" stroke-width="5"
             stroke-linecap="round" stroke-dasharray="14 7" filter="url(#mm-glow)"/>
 
-      <!-- Traffic Layer -->
+      <!-- Traffic Congestion Overlay -->
       @if (showTraffic()) {
         <path d="M 290 205 Q 360 238, 425 265" fill="none" stroke="#ef4444" stroke-width="9" stroke-opacity="0.65" stroke-linecap="round"/>
         <path d="M 425 265 Q 530 185, 655 125" fill="none" stroke="#f59e0b" stroke-width="9" stroke-opacity="0.65" stroke-linecap="round"/>
       }
 
-      <!-- Pickup Marker -->
-      <g transform="translate(150, 385)">
-        <circle cx="0" cy="0" r="22" fill="#10b981" fill-opacity="0.15" class="mm-map__pin-ripple"/>
-        <circle cx="0" cy="0" r="11" fill="#10b981" stroke="#fff" stroke-width="2.5" filter="url(#mm-glow)"/>
-        <text x="0" y="28" text-anchor="middle" fill="#10b981" font-size="10" font-weight="800" font-family="Inter, sans-serif">PICKUP</text>
-      </g>
+      <!-- Pickup Pin Marker -->
+      @if (pickupAddress) {
+        <g transform="translate(150, 385)">
+          <circle cx="0" cy="0" r="22" fill="#10b981" fill-opacity="0.15" class="mm-map__pin-ripple"/>
+          <circle cx="0" cy="0" r="11" fill="#10b981" stroke="#fff" stroke-width="2.5" filter="url(#mm-glow)"/>
+          <text x="0" y="28" text-anchor="middle" fill="#10b981" font-size="10" font-weight="800" font-family="Inter, sans-serif">PICKUP</text>
+        </g>
+      }
 
-      <!-- Destination Marker -->
-      <g transform="translate(655, 125)">
-        <circle cx="0" cy="0" r="22" fill="#ec4899" fill-opacity="0.15" class="mm-map__pin-ripple"/>
-        <circle cx="0" cy="0" r="11" fill="#ec4899" stroke="#fff" stroke-width="2.5" filter="url(#mm-glow)"/>
-        <text x="0" y="-18" text-anchor="middle" fill="#ec4899" font-size="10" font-weight="800" font-family="Inter, sans-serif">DESTINATION</text>
-      </g>
+      <!-- Destination Pin Marker -->
+      @if (dropAddress) {
+        <g transform="translate(655, 125)">
+          <circle cx="0" cy="0" r="22" fill="#ec4899" fill-opacity="0.15" class="mm-map__pin-ripple"/>
+          <circle cx="0" cy="0" r="11" fill="#ec4899" stroke="#fff" stroke-width="2.5" filter="url(#mm-glow)"/>
+          <text x="0" y="-18" text-anchor="middle" fill="#ec4899" font-size="10" font-weight="800" font-family="Inter, sans-serif">DESTINATION</text>
+        </g>
+      }
 
-      <!-- Live Driver Pins -->
+      <!-- Active Nearby Drivers Pins -->
       @for (driver of activeDrivers(); track driver.id; let i = $index) {
         <g class="mm-map__driver-pin"
            [attr.transform]="'translate(' + getX(driver, i) + ', ' + getY(driver, i) + ')'"
@@ -79,55 +112,170 @@
       }
     </svg>
 
-    <!-- Floating Top Controls -->
-    <div class="mm-map__controls">
-      <div class="mm-map__live-badge">
-        <span class="mm-map__pulse"></span>
-        <span class="mm-map__live-label">Live GPS Telemetry</span>
-        <span class="mm-map__driver-count">{{ activeDrivers().length }} Drivers Online</span>
-      </div>
-      <div class="mm-map__ctrl-btns">
-        <button class="mm-map__ctrl-btn" [class.mm-map__ctrl-btn--active]="showTraffic()" (click)="toggleTraffic()">
-          <i class="ri-radar-line"></i> Traffic Layer
-        </button>
-        <button class="mm-map__ctrl-btn mm-map__ctrl-btn--primary" (click)="resetView()">
-          <i class="ri-focus-3-line"></i> Center Route
-        </button>
+    <!-- Dynamic Rotating Vehicle Marker Overlay (60 FPS Interpolation) -->
+    <div class="mm-map__live-vehicle-layer" style="position: absolute; top: 40%; left: 36%; z-index: 10;">
+      <!-- Inline vehicle marker: rotates with heading, shows speed indicator -->
+      <div class="mm-map__vehicle-marker"
+           [style.transform]="'rotate(' + (currentAnimatedLocation().heading || 45) + 'deg)'"
+           [title]="vehicleCategory + ' @ ' + (currentAnimatedLocation().speed || 42) + ' km/h'">
+        @if (vehicleCategory === 'BIKE' || vehicleCategory === 'AUTO') {
+          <span style="font-size: 2rem;">🏍️</span>
+        } @else if (vehicleCategory === 'SUV' || vehicleCategory === 'LUXURY') {
+          <span style="font-size: 2rem;">🚙</span>
+        } @else if (vehicleCategory === 'CARGO_VAN' || vehicleCategory === 'TRUCK' || vehicleCategory === 'TATA_ACE') {
+          <span style="font-size: 2rem;">🚚</span>
+        } @else {
+          <span style="font-size: 2rem;">🚗</span>
+        }
+        <div class="mm-map__speed-badge">{{ currentAnimatedLocation().speed || 42 }} km/h</div>
       </div>
     </div>
 
-    <!-- Driver Tooltip -->
-    @if (selectedDriver()) {
-      <div class="mm-map__tooltip">
-        <div class="mm-map__tooltip-head">
-          <div class="mm-map__tooltip-driver">
-            <img [src]="selectedDriver()?.avatar" class="mm-map__tooltip-avatar" alt="driver"/>
-            <div>
-              <div class="mm-map__tooltip-name">{{ selectedDriver()?.name }}</div>
-              <div class="mm-map__tooltip-vehicle">{{ selectedDriver()?.vehicle }}</div>
+    <!-- Route Replay Scrubber Control (Floating Bottom Bar in Replay Mode) -->
+    @if (isReplayMode()) {
+      <div class="mm-map__replay-overlay">
+        <!-- Inline route-animation: scrubber + play controls -->
+        <div class="mm-map__replay-bar">
+          <button class="mm-map__ctrl-btn" (click)="toggleReplayPlay()">
+            <i [class]="isReplayPlaying() ? 'ri-pause-line' : 'ri-play-line'"></i>
+            {{ isReplayPlaying() ? 'Pause' : 'Play' }}
+          </button>
+          <input type="range" class="mm-map__replay-scrubber"
+                 [min]="0" [max]="replayPoints.length || 40"
+                 [value]="replayCurrentStep()"
+                 (input)="seekReplay(+($any($event.target).value))" />
+          <span class="mm-map__replay-step">
+            {{ replayCurrentStep() }} / {{ replayPoints.length || 40 }}
+          </span>
+          <select class="mm-map__replay-speed" (change)="setReplaySpeed(+($any($event.target).value))">
+            <option value="0.5">0.5×</option>
+            <option value="1" selected>1×</option>
+            <option value="2">2×</option>
+            <option value="4">4×</option>
+          </select>
+          <button class="mm-map__ctrl-btn mm-map__ctrl-btn--danger" (click)="stopReplay()">
+            <i class="ri-stop-line"></i> Close
+          </button>
+        </div>
+      </div>
+    }
+
+    <!-- Live ETA & Telemetry Card Overlay (Rendered when both pickup and drop addresses are present) -->
+    @if (pickupAddress && dropAddress) {
+      <div class="mm-map__eta-overlay">
+        <!-- Inline eta-card -->
+        <div class="mm-map__eta-card">
+          <div class="mm-map__eta-row">
+            <div class="mm-map__eta-item">
+              <span class="mm-map__eta-label">ETA</span>
+              <span class="mm-map__eta-val">{{ currentEtaMins() }} min</span>
+            </div>
+            <div class="mm-map__eta-item">
+              <span class="mm-map__eta-label">Distance</span>
+              <span class="mm-map__eta-val">{{ remainingDistanceKm() | number:'1.1-1' }} km</span>
+            </div>
+            <div class="mm-map__eta-item">
+              <span class="mm-map__eta-label">Speed</span>
+              <span class="mm-map__eta-val">{{ currentAnimatedLocation().speed || 0 }} km/h</span>
+            </div>
+            <div class="mm-map__eta-item">
+              <span class="mm-map__eta-label">Traffic</span>
+              <span class="mm-map__eta-val mm-map__traffic-badge" [class]="'mm-map__traffic-' + trafficLevel().toLowerCase()">
+                {{ trafficLevel() }}
+              </span>
             </div>
           </div>
-          <button class="mm-map__tooltip-close" (click)="selectedDriver.set(null)">✕</button>
-        </div>
-        <div class="mm-map__tooltip-stats">
-          <div class="mm-map__stat-cell">
-            <span class="mm-map__stat-label">Rating</span>
-            <span class="mm-map__stat-value mm-map__stat-value--amber">★ {{ selectedDriver()?.rating }}</span>
+          <div class="mm-map__progress-bar">
+            <div class="mm-map__progress-fill" [style.width.%]="routeProgressPercent()"></div>
           </div>
-          <div class="mm-map__stat-cell">
-            <span class="mm-map__stat-label">Status</span>
-            <span class="mm-map__stat-value mm-map__stat-value--emerald">{{ selectedDriver()?.status }}</span>
+          <div class="mm-map__alt-routes">
+            @for (r of [0,1,2]; track r) {
+              <button class="mm-map__alt-route-btn"
+                      [class.mm-map__alt-route-btn--active]="selectedRouteIndex() === r"
+                      (click)="selectedRouteIndex.set(r)">
+                Route {{ r + 1 }}
+              </button>
+            }
           </div>
         </div>
       </div>
     }
 
-    <!-- Bottom Stats Bar -->
-    <div class="mm-map__stats-bar">
-      <div>ETA: <strong class="mm-map__stat-highlight mm-map__stat-highlight--emerald">8 Mins</strong></div>
-      <div class="mm-map__stat-divider"></div>
-      <div>Distance: <strong class="mm-map__stat-highlight mm-map__stat-highlight--indigo">14.2 KM</strong></div>
-    </div>
+    <!-- Active Driver Info Card Overlay -->
+    @if (liveTrip()) {
+      <div class="mm-map__driver-overlay">
+        <!-- Inline driver-info-card -->
+        <div class="mm-map__driver-card">
+          <div class="mm-map__driver-avatar">
+            <i class="ri-user-star-fill"></i>
+          </div>
+          <div class="mm-map__driver-details">
+            <strong>{{ liveTrip()?.driver?.name || 'Rajesh Kumar' }}</strong>
+            <span>{{ liveTrip()?.driver?.vehicleModel || 'Yamaha FZ-S' }} · {{ liveTrip()?.driver?.vehicleNo || 'KA-01-EQ-9988' }}</span>
+            <span>⭐ {{ liveTrip()?.driver?.rating || 4.89 }} · {{ liveTrip()?.driver?.totalTrips || 1420 }} trips</span>
+          </div>
+          <div class="mm-map__driver-status">
+            <span class="mm-map__status-badge mm-map__status-in-transit">{{ liveTrip()?.status || 'IN_TRANSIT' }}</span>
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- Tracking Sidebar Overlay Drawer (Inline – no sub-component dep) -->
+    @if (showSidebar()) {
+      <div class="mm-map__sidebar-overlay" style="position: absolute; top: 4.5rem; left: 1rem; z-index: 28; width: 19rem; max-width: calc(100vw - 2rem);">
+        <div class="mm-map__sidebar-panel">
+          <div class="mm-map__sidebar-header">
+            <span>Fleet Console</span>
+            <button class="mm-map__ctrl-btn" (click)="showSidebar.set(false)"><i class="ri-close-line"></i></button>
+          </div>
+          <div class="mm-map__sidebar-search">
+            <input type="text" placeholder="Search driver / vehicle..."
+                   [(ngModel)]="searchQuery"
+                   (ngModelChange)="fetchDrivers()" />
+          </div>
+          <div class="mm-map__sidebar-categories">
+            @for (cat of ['ALL','BIKE','AUTO','SEDAN','SUV','EV','TRUCK']; track cat) {
+              <button class="mm-map__cat-btn"
+                      [class.mm-map__cat-btn--active]="selectedCategory === cat"
+                      (click)="selectedCategory = cat; fetchDrivers()">
+                {{ cat }}
+              </button>
+            }
+          </div>
+          <div class="mm-map__sidebar-controls">
+            <button class="mm-map__ctrl-btn" [class.mm-map__ctrl-btn--active]="showTraffic()" (click)="toggleTraffic()">
+              <i class="ri-traffic-line"></i> {{ showTraffic() ? 'Hide' : 'Show' }} Traffic
+            </button>
+            <button class="mm-map__ctrl-btn" (click)="resetView()">
+              <i class="ri-focus-3-line"></i> Reset View
+            </button>
+          </div>
+          <div class="mm-map__sidebar-list">
+            @for (driver of activeDrivers(); track driver.id) {
+              <div class="mm-map__sidebar-item"
+                   [class.mm-map__sidebar-item--active]="selectedDriver()?.id === driver.id"
+                   (click)="selectDriver(driver)">
+                <div class="mm-map__sidebar-avatar">{{ driver.name[0] }}</div>
+                <div class="mm-map__sidebar-info">
+                  <strong>{{ driver.name }}</strong>
+                  <span>{{ driver.category }} · ⭐ {{ driver.rating | number:'1.1-2' }}</span>
+                  <span [class]="'mm-map__status-dot mm-map__status-' + driver.status.toLowerCase()">
+                    {{ driver.status }}
+                  </span>
+                </div>
+              </div>
+            }
+            @if (activeDrivers().length === 0) {
+              <div class="mm-map__sidebar-empty">
+                <i class="ri-car-line"></i>
+                <p>No drivers found</p>
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+    }
 
   </div>
 

@@ -100,14 +100,14 @@ export class MenuBar implements OnInit {
     { name: 'Hardware & Devices', path: '/devices', icon: 'bi-cpu-fill', isActive: true },
     { name: 'Secure Communications', path: '/communication', icon: 'bi-chat-dots-fill', isActive: true },
     { name: 'Team Meetings & Calls', path: '/communication/meetings', icon: 'bi-camera-video-fill', isActive: true },
-    { name: 'Mobility Executive Cockpit', path: '/dashboard/mobility-dashboard', icon: 'bi-car-front-fill', isActive: true },
-    { name: 'Ride & Taxi Booking', path: '/dashboard/ride-booking', icon: 'bi-steering-wheel', isActive: true },
-    { name: 'Car Rental & Subscriptions', path: '/dashboard/car-rental', icon: 'bi-key-fill', isActive: true },
-    { name: 'Parcel & Freight Logistics', path: '/dashboard/parcel-logistics', icon: 'bi-truck-front-fill', isActive: true },
-    { name: 'Fleet Asset & GPS Control', path: '/dashboard/fleet-management', icon: 'bi-radar', isActive: true },
-    { name: 'Corporate & School Transit', path: '/dashboard/corporate-transport', icon: 'bi-building-fill-gear', isActive: true },
-    { name: 'Live GPS Telemetry & Replay', path: '/dashboard/live-tracking', icon: 'bi-geo-alt-fill', isActive: true },
-    { name: 'KYC & Vehicle Verification', path: '/dashboard/vehicle-driver-verification', icon: 'bi-person-check-fill', isActive: true }
+    { name: 'Mobility Executive Cockpit', path: '/mobility-dashboard', icon: 'bi-car-front-fill', isActive: true },
+    { name: 'Ride & Taxi Booking', path: '/ride-booking', icon: 'bi-steering-wheel', isActive: true },
+    { name: 'Car Rental & Subscriptions', path: '/car-rental', icon: 'bi-key-fill', isActive: true },
+    { name: 'Parcel & Freight Logistics', path: '/parcel-logistics', icon: 'bi-truck-front-fill', isActive: true },
+    { name: 'Fleet Asset & GPS Control', path: '/fleet-management', icon: 'bi-radar', isActive: true },
+    { name: 'Corporate & School Transit', path: '/corporate-transport', icon: 'bi-building-fill-gear', isActive: true },
+    { name: 'Live GPS Telemetry & Replay', path: '/live-tracking', icon: 'bi-geo-alt-fill', isActive: true },
+    { name: 'KYC & Vehicle Verification', path: '/vehicle-driver-verification', icon: 'bi-person-check-fill', isActive: true }
   ];
 
   constructor(

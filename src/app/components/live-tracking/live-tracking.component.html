@@ -2,8 +2,8 @@
 
   <!-- Map Area -->
   <div class="lt-map-area">
-    <app-mobility-map [pickupAddress]="selectedBooking()?.pickupLocation || 'MG Road, Bengaluru'"
-                      [dropAddress]="selectedBooking()?.dropLocation || 'Koramangala, Bengaluru'">
+    <app-mobility-map [pickupAddress]="selectedBooking()?.pickupLocation || ''"
+                      [dropAddress]="selectedBooking()?.dropLocation || ''">
     </app-mobility-map>
 
     <!-- Top Header Bar -->
@@ -13,7 +13,13 @@
         <span class="lt-live-dot"></span>
         <div>
           <div class="lt-trip-label">Live Trip Telemetry</div>
-          <div class="lt-trip-id">Trip ID: {{ selectedBooking()?.id || 'BK-99201' }}</div>
+          <div class="lt-trip-id">
+            @if (selectedBooking()) {
+              Trip ID: {{ selectedBooking()?.id }}
+            } @else {
+              No Active Trip
+            }
+          </div>
         </div>
       </div>
 
@@ -21,60 +27,69 @@
       <div class="lt-meters">
         <div class="lt-meter-item">
           <span class="lt-meter-label">Live Speed</span>
-          <span class="lt-meter-value lt-meter-value--indigo">{{ currentSpeed }} KM/H</span>
+          <span class="lt-meter-value lt-meter-value--indigo">{{ selectedBooking() ? currentSpeed + ' KM/H' : '0 KM/H' }}</span>
         </div>
         <div class="lt-meter-divider"></div>
         <div class="lt-meter-item">
           <span class="lt-meter-label">ETA Arrival</span>
-          <span class="lt-meter-value lt-meter-value--emerald">{{ remainingMinutes }} Mins</span>
+          <span class="lt-meter-value lt-meter-value--emerald">{{ selectedBooking() ? (selectedBooking()?.estimatedMinutes || 15) + ' Mins' : '--' }}</span>
         </div>
       </div>
     </div>
 
     <!-- Bottom Dock -->
-    <div class="lt-bottom-dock">
+    @if (selectedBooking()) {
+      <div class="lt-bottom-dock">
 
-      <!-- Driver Info -->
-      <div class="lt-driver-info">
-        <div class="lt-driver-avatar-wrap">
-          <img [src]="selectedBooking()?.driver?.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80'"
-               class="lt-driver-avatar" alt="driver"/>
-        </div>
-        <div>
-          <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.2rem;">
-            <h3 class="lt-driver-name">{{ selectedBooking()?.driver?.name || 'Rajesh Kumar' }}</h3>
-            <span class="lt-driver-rating">★ {{ selectedBooking()?.driver?.rating || 4.9 }}</span>
+        <!-- Driver Info -->
+        <div class="lt-driver-info">
+          <div class="lt-driver-avatar-wrap">
+            <img [src]="selectedBooking()?.driver?.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80'"
+                 class="lt-driver-avatar" alt="driver"/>
           </div>
-          <div class="lt-driver-vehicle">{{ selectedBooking()?.driver?.vehicle || 'Prime Sedan — KA 01 MJ 8821' }}</div>
-          <div class="lt-driver-phone">{{ selectedBooking()?.driver?.phone || '+91 98765 43210' }}</div>
+          <div>
+            <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.2rem;">
+              <h3 class="lt-driver-name">{{ selectedBooking()?.driver?.name || 'Assigned Driver' }}</h3>
+              <span class="lt-driver-rating">★ {{ selectedBooking()?.driver?.rating || 5.0 }}</span>
+            </div>
+            <div class="lt-driver-vehicle">{{ selectedBooking()?.driver?.vehicle || selectedBooking()?.vehicleName }}</div>
+            <div class="lt-driver-phone">{{ selectedBooking()?.driver?.phone || '+91 98765 43210' }}</div>
+          </div>
+        </div>
+
+        <!-- Route Progress -->
+        <div class="lt-route-progress">
+          <div class="lt-route-labels">
+            <span class="lt-pickup-label">Pickup: {{ selectedBooking()?.pickupLocation }}</span>
+            <span class="lt-drop-label">Drop: {{ selectedBooking()?.dropLocation }}</span>
+          </div>
+          <input type="range" min="0" max="100" [(ngModel)]="playbackProgress" class="lt-progress-slider"/>
+          <div class="lt-progress-km">
+            <span>0.0 KM</span>
+            <span>Route Progress: {{ playbackProgress }}%</span>
+            <span>{{ selectedBooking()?.distanceKm || 0 }} KM</span>
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="lt-actions">
+          <button class="lt-call-btn" (click)="callDriver()">
+            <i class="ri-phone-fill"></i> Call Driver
+          </button>
+          <button class="lt-sos-btn" (click)="triggerSosEmergency()">
+            <i class="ri-alarm-warning-fill"></i> SOS Emergency
+          </button>
+        </div>
+
+      </div>
+    } @else {
+      <div class="lt-bottom-dock" style="justify-content: center; text-align: center; padding: 1.5rem;">
+        <div>
+          <h4 style="margin: 0; color: var(--text-primary); font-weight: 800;"><i class="ri-radar-line icon-indigo"></i> Waiting for Active Trip Dispatches...</h4>
+          <p style="margin: 0.3rem 0 0; font-size: 0.8rem; color: var(--text-muted);">Book a ride or dispatch a consignment to view real-time telemetry and GPS position on the map.</p>
         </div>
       </div>
-
-      <!-- Route Progress -->
-      <div class="lt-route-progress">
-        <div class="lt-route-labels">
-          <span class="lt-pickup-label">Pickup: {{ selectedBooking()?.pickupLocation || 'MG Road Metro' }}</span>
-          <span class="lt-drop-label">Drop: {{ selectedBooking()?.dropLocation || 'Koramangala 5th Block' }}</span>
-        </div>
-        <input type="range" min="0" max="100" [(ngModel)]="playbackProgress" class="lt-progress-slider"/>
-        <div class="lt-progress-km">
-          <span>0.0 KM</span>
-          <span>Route Progress: {{ playbackProgress }}%</span>
-          <span>{{ selectedBooking()?.distanceKm || 8.4 }} KM</span>
-        </div>
-      </div>
-
-      <!-- Action Buttons -->
-      <div class="lt-actions">
-        <button class="lt-call-btn" (click)="callDriver()">
-          <i class="ri-phone-fill"></i> Call Driver
-        </button>
-        <button class="lt-sos-btn" (click)="triggerSosEmergency()">
-          <i class="ri-alarm-warning-fill"></i> SOS Emergency
-        </button>
-      </div>
-
-    </div>
+    }
   </div>
 
 </div>

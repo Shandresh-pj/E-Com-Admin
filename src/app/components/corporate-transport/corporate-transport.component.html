@@ -19,95 +19,88 @@
     </div>
   </div>
 
-  <!-- Corporate Contracts Grid -->
+  <!-- Corporate Contracts Grid (100% Dynamic API Response) -->
   <div class="contracts-grid">
-    <div class="contract-card card-purple">
-      <div class="card-icon icon-purple">
-        <i class="ri-building-4-line"></i>
+    @for (c of contracts(); track c.id) {
+      <div class="contract-card" [class.card-purple]="c.themeColor === 'purple'" [class.card-emerald]="c.themeColor === 'emerald'" [class.card-amber]="c.themeColor === 'amber'">
+        <div class="card-icon" [class.icon-purple]="c.themeColor === 'purple'" [class.icon-emerald]="c.themeColor === 'emerald'" [class.icon-amber]="c.themeColor === 'amber'">
+          <i [class]="c.icon"></i>
+        </div>
+        <h3 class="card-title">{{ c.clientName }}</h3>
+        <p class="card-desc">{{ c.activeEmployees }} Active Employees • {{ c.category }}</p>
+        <div class="card-footer">
+          <span class="footer-label">Monthly Contract:</span>
+          <strong class="footer-value" [class.value-purple]="c.themeColor === 'purple'" [class.value-emerald]="c.themeColor === 'emerald'" [class.value-amber]="c.themeColor === 'amber'">
+            ₹{{ c.monthlyAmount | number }} / mo
+          </strong>
+        </div>
       </div>
-      <h3 class="card-title">TechCorp Global Inc</h3>
-      <p class="card-desc">450 Active Employees • Morning & Night Shift Rosters</p>
-      <div class="card-footer">
-        <span class="footer-label">Monthly Contract:</span>
-        <strong class="footer-value value-purple">₹8,50,000 / mo</strong>
-      </div>
-    </div>
-
-    <div class="contract-card card-emerald">
-      <div class="card-icon icon-emerald">
-        <i class="ri-hospital-line"></i>
-      </div>
-      <h3 class="card-title">Apollo Health Network</h3>
-      <p class="card-desc">120 Doctors & Staff • 24/7 On-Call Emergency Transit</p>
-      <div class="card-footer">
-        <span class="footer-label">Monthly Contract:</span>
-        <strong class="footer-value value-emerald">₹4,20,000 / mo</strong>
-      </div>
-    </div>
-
-    <div class="contract-card card-amber">
-      <div class="card-icon icon-amber">
-        <i class="ri-graduation-cap-line"></i>
-      </div>
-      <h3 class="card-title">Greenwood International School</h3>
-      <p class="card-desc">14 GPS Buses • Real-Time Parent SMS Alert System</p>
-      <div class="card-footer">
-        <span class="footer-label">Monthly Contract:</span>
-        <strong class="footer-value value-amber">₹6,80,000 / mo</strong>
-      </div>
-    </div>
+    }
   </div>
 
-  <!-- Employee Shift Roster Table -->
+  <!-- Employee Shift Roster Table (Dynamic REST API Response) -->
   <div class="roster-panel">
     <div class="panel-header">
       <h3 class="panel-title">
-        <i class="ri-calendar-event-line icon-purple"></i> Active Shift Pickup Routes (Today)
+        <i class="ri-calendar-event-line icon-purple"></i> Active Shift Pickup Routes (REST API Synchronized)
       </h3>
       <button (click)="createRoster()" class="action-btn">
-        <i class="ri-add-line"></i> Generate Auto Roster
+        <i class="ri-add-line"></i> Generate Dynamic Auto Roster
       </button>
     </div>
 
     <div class="table-responsive">
-      <table class="roster-table">
-        <thead>
-          <tr>
-            <th>Route ID</th>
-            <th>Client</th>
-            <th>Shift Time</th>
-            <th>Vehicle Assigned</th>
-            <th>Pax Count</th>
-            <th>Security Escort</th>
-            <th>Status</th>
-          </tr>
-        </thead>
-        <tbody>
-          @for (r of rosters; track r.id) {
+      @if (isLoading()) {
+        <div style="padding: 2.5rem; text-align: center; color: var(--text-muted);">
+          <i class="ri-loader-4-line spinning" style="font-size: 2rem;"></i>
+          <p style="margin-top: 0.5rem; font-weight: 700;">Loading Corporate Shift Rosters from API...</p>
+        </div>
+      } @else if (rosters().length === 0) {
+        <div style="padding: 3rem 1.5rem; text-align: center; color: var(--text-muted);">
+          <i class="ri-building-4-line" style="font-size: 3rem; opacity: 0.4;"></i>
+          <h3 style="margin: 0.5rem 0 0.2rem; color: var(--text-primary);">No Active Corporate Shift Rosters</h3>
+          <p style="font-size: 0.85rem; max-width: 450px; margin: 0 auto;">Click "Generate Dynamic Auto Roster" above to dispatch a new corporate shift transit roster.</p>
+        </div>
+      } @else {
+        <table class="roster-table">
+          <thead>
             <tr>
-              <td class="cell-id">{{ r.id }}</td>
-              <td class="cell-client">{{ r.clientName }}</td>
-              <td class="cell-time">{{ r.shiftTime }}</td>
-              <td>{{ r.vehicleAssigned }}</td>
-              <td class="cell-pax">{{ r.paxCount }} Passengers</td>
-              <td>
-                @if (r.securityEscort) {
-                  <span class="escort-guarded">
-                    <i class="ri-shield-check-line"></i> Guard Guarded
-                  </span>
-                } @else {
-                  <span class="escort-standard">Standard</span>
-                }
-              </td>
-              <td>
-                <span [class.status-dispatched]="r.status === 'DISPATCHED'" [class.status-pending]="r.status !== 'DISPATCHED'" class="status-pill">
-                  {{ r.status }}
-                </span>
-              </td>
+              <th>Route ID</th>
+              <th>Client</th>
+              <th>Shift Time</th>
+              <th>Vehicle Assigned</th>
+              <th>Pax Count</th>
+              <th>Security Escort</th>
+              <th>Status</th>
             </tr>
-          }
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            @for (r of rosters(); track r.id) {
+              <tr>
+                <td class="cell-id">{{ r.id }}</td>
+                <td class="cell-client">{{ r.clientName }}</td>
+                <td class="cell-time">{{ r.shiftTime }}</td>
+                <td>{{ r.vehicleAssigned }}</td>
+                <td class="cell-pax">{{ r.paxCount }} Passengers</td>
+                <td>
+                  @if (r.securityEscort) {
+                    <span class="escort-guarded">
+                      <i class="ri-shield-check-line"></i> Guard Guarded
+                    </span>
+                  } @else {
+                    <span class="escort-standard">Standard</span>
+                  }
+                </td>
+                <td>
+                  <span [class.status-dispatched]="r.status === 'DISPATCHED'" [class.status-pending]="r.status !== 'DISPATCHED'" class="status-pill">
+                    {{ r.status }}
+                  </span>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      }
     </div>
 
   </div>

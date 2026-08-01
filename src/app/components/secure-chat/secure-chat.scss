@@ -1602,3 +1602,89 @@ html.dark .liquid-theme .liquid-blob,
   &:hover { transform:translateY(-2px); box-shadow:0 12px 28px rgba($violet,.45) !important; }
 }
 .glow-btn { animation: glowPulse 2.5s ease-in-out infinite; }
+
+// ── Registered Email ID Access Control & Direct Search Box ───────────────
+.email-chat-direct-box {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  background: rgba(15, 23, 42, 0.45);
+  border: 1px solid var(--glass-border-subtle, rgba(255, 255, 255, 0.1));
+  border-radius: 12px;
+  margin: 0.75rem 0;
+
+  html:not(.dark) & {
+    background: rgba(241, 245, 249, 0.7);
+  }
+
+  .email-icon {
+    color: #818cf8;
+    font-size: 1.25rem;
+    width: 1.25rem;
+    height: 1.25rem;
+  }
+
+  .email-input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: var(--text-primary, #fff);
+    font-size: 0.825rem;
+
+    &::placeholder {
+      color: var(--text-muted, #94a3b8);
+    }
+  }
+
+  .email-start-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.35rem 0.85rem !important;
+    border-radius: 8px !important;
+    font-size: 0.75rem !important;
+    font-weight: 700 !important;
+  }
+}
+
+.email-access-warning {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 0.85rem;
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid rgba(239, 68, 68, 0.35);
+  border-radius: 10px;
+  color: #f87171;
+  font-size: 0.78rem;
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+
+  .warn-icon {
+    color: #ef4444;
+    font-size: 1.1rem;
+    width: 1.1rem;
+    height: 1.1rem;
+  }
+}
+
+.email-verified-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: #10b981;
+  background: rgba(16, 185, 129, 0.15);
+  padding: 1px 6px;
+  border-radius: 4px;
+  margin-left: 0.4rem;
+
+  .micro-icon {
+    font-size: 0.75rem;
+    width: 0.75rem;
+    height: 0.75rem;
+  }
+}

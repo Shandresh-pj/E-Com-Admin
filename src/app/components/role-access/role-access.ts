@@ -17,6 +17,8 @@ import { PermissionService } from 'src/app/Securities/Services/permissions.servi
 
 import { ALL_APP_ROUTES_37 } from 'src/app/Securities/Models/menus';
 
+import { TablerIconsModule } from 'angular-tabler-icons';
+
 type AccessLevel = 'global' | 'admin' | 'branch' | 'employee';
 
 @Component({
@@ -30,7 +32,8 @@ type AccessLevel = 'global' | 'admin' | 'branch' | 'employee';
     MatButtonModule,
     MatCardModule,
     MatProgressSpinnerModule,
-    MatTooltipModule
+    MatTooltipModule,
+    TablerIconsModule
   ],
   templateUrl: './role-access.html',
   styleUrl: './role-access.scss',
@@ -64,14 +67,83 @@ export class RoleAccess implements OnInit {
   workingAssignments = new Set<number>();
 
   searchQuery: string = '';
+  selectedStatusFilter: 'ALL' | 'GRANTED' | 'DENIED' | 'NA' = 'ALL';
+  selectedCategoryFilter: string = 'ALL';
+
+  readonly categoryTabs = [
+    { key: 'ALL', label: 'All Modules', icon: 'layout-grid' },
+    { key: 'ADMIN', label: 'Admin', icon: 'shield' },
+    { key: 'BRANCH', label: 'Branch Control', icon: 'building-store' },
+    { key: 'EMPLOYEE', label: 'Employee Access', icon: 'users' },
+    { key: 'MOBILITY', label: 'Car Rental & Mobility', icon: 'car' },
+    { key: 'CATALOG', label: 'Catalog & Products', icon: 'box' },
+    { key: 'FINANCE', label: 'Sales & Finance', icon: 'receipt' },
+  ];
+
+  setCategoryFilter(catKey: string): void {
+    this.selectedCategoryFilter = catKey;
+  }
+
+  getModuleCategory(menu: any): string {
+    const path = (menu?.path || '').toLowerCase();
+    const cat = (menu?.category || '').toLowerCase();
+
+    if (cat === 'admin' || ['/admin', '/roles', '/role-access', '/audit-logs', '/crm-contacts', '/menubar'].some(p => path === p)) return 'ADMIN';
+    if (['/branch', '/branch-stocks'].some(p => path === p)) return 'BRANCH';
+    if (cat === 'workforce' || ['/employees', '/workforce', '/shifts', '/break-policies', '/biometric', '/geofencing', '/calendar', '/employee-documents', '/workforce-requests', '/attendance', '/leave', '/payroll'].some(p => path === p)) return 'EMPLOYEE';
+    if (['/car-rental', '/mobility-dashboard', '/ride-booking', '/parcel-logistics', '/fleet-management', '/corporate-transport', '/live-tracking', '/vehicle-driver-verification'].some(p => path === p)) return 'MOBILITY';
+    if (cat === 'catalog' || ['/product', '/category', '/product-attribute', '/attribute-value', '/coupons'].some(p => path === p)) return 'CATALOG';
+    if (cat === 'finance' || cat === 'sales' || ['/orders', '/invoices', '/payments', '/profit-loss', '/billing-history', '/subscription-plans', '/manage-subscription-plans', '/subscription-coupons', '/checkout', '/pos-billing', '/devices'].some(p => path === p)) return 'FINANCE';
+
+    return 'OTHER';
+  }
+
+  getCategoryCount(catKey: string): number {
+    if (catKey === 'ALL') return this.menus.length;
+    return this.menus.filter(m => this.getModuleCategory(m) === catKey).length;
+  }
+
+  setStatusFilter(filter: 'ALL' | 'GRANTED' | 'DENIED' | 'NA'): void {
+    this.selectedStatusFilter = filter;
+  }
+
+  isAnyAssignedForMenu(menu: any): boolean {
+    const perms = this.actions.map(a => this.getPermission(menu, a)).filter(p => !!p);
+    return perms.some(p => this.workingAssignments.has(p.id));
+  }
+
+  resetFilters(): void {
+    this.searchQuery = '';
+    this.selectedStatusFilter = 'ALL';
+    this.selectedCategoryFilter = 'ALL';
+  }
 
   get filteredMenus(): any[] {
     const q = (this.searchQuery || '').trim().toLowerCase();
-    if (!q) return this.menus;
-    return this.menus.filter(m =>
-      (m.name || '').toLowerCase().includes(q) ||
-      (m.path || '').toLowerCase().includes(q)
-    );
+
+    return this.menus.filter(m => {
+      // 1. Search Query Filter
+      if (q) {
+        const matchesName = (m.name || '').toLowerCase().includes(q);
+        const matchesPath = (m.path || '').toLowerCase().includes(q);
+        if (!matchesName && !matchesPath) return false;
+      }
+
+      // 2. Status Pill Filter
+      if (this.selectedStatusFilter === 'GRANTED') {
+        if (!this.isAnyAssignedForMenu(m)) return false;
+      }
+      if (this.selectedStatusFilter === 'DENIED') {
+        if (this.isAnyAssignedForMenu(m)) return false;
+      }
+
+      // 3. Category Filter
+      if (this.selectedCategoryFilter !== 'ALL') {
+        if (this.getModuleCategory(m) !== this.selectedCategoryFilter) return false;
+      }
+
+      return true;
+    });
   }
 
   get totalPermissionsCount(): number {

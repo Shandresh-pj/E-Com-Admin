@@ -340,6 +340,11 @@ export class Invoices implements OnInit, OnDestroy {
 
   // ── Download Logic (with automatic file creation & progress events) ───
   downloadCustomInvoice() {
+    if (!this.selectedOrder && this.ordersList.length > 0) {
+      this.selectedOrder = this.ordersList[0];
+      this.onOrderChange();
+    }
+
     if (!this.selectedOrder) {
       this.alert.warning('Please select an order first.');
       return;
@@ -360,7 +365,7 @@ export class Invoices implements OnInit, OnDestroy {
       }
     });
 
-    this.http.get(`${this.apiUrl}/orders/invoice/${this.selectedOrder.id}`, {
+    this.http.get(`${this.apiUrl}/orders/invoice-pdf/${this.selectedOrder.id}`, {
       params,
       responseType: 'blob',
       reportProgress: true,
@@ -375,27 +380,64 @@ export class Invoices implements OnInit, OnDestroy {
           }
           this.cdr.detectChanges();
         } else if (event.type === 4) { // Response complete
-          const blob = event.body;
+          const blob = event.body as Blob;
+
+          // Handle server JSON error returned as Blob
+          if (blob && blob.type === 'application/json') {
+            const reader = new FileReader();
+            reader.onload = () => {
+              try {
+                const parsed = JSON.parse(reader.result as string);
+                this.alert.error(parsed?.message || 'Failed to generate invoice PDF.');
+              } catch {
+                this.alert.error('Failed to generate or download invoice PDF.');
+              }
+              this.isDownloading = false;
+              this.downloadProgress = 0;
+              this.cdr.detectChanges();
+            };
+            reader.readAsText(blob);
+            return;
+          }
+
           const url = window.URL.createObjectURL(blob);
           const a = document.createElement('a');
           a.href = url;
-          a.download = `Invoice-${this.selectedOrder.invoice_no || this.selectedOrder.id}.pdf`;
+          const safeName = (this.selectedOrder.invoice_no || `INV-${this.selectedOrder.id}`).replace(/[/\\?%*:|"<>]/g, '-');
+          a.download = `Invoice-${safeName}.pdf`;
           document.body.appendChild(a);
           a.click();
           document.body.removeChild(a);
           window.URL.revokeObjectURL(url);
-          
+
           this.isDownloading = false;
           this.downloadProgress = 0;
           this.alert.success('Invoice PDF downloaded successfully!');
           this.cdr.detectChanges();
         }
       },
-      error: (err) => {
-        console.error(err);
+      error: (err: any) => {
+        console.error('Invoice Download Error:', err);
         this.isDownloading = false;
         this.downloadProgress = 0;
-        this.alert.error('Failed to generate or download invoice PDF.');
+
+        if (err?.error instanceof Blob) {
+          const reader = new FileReader();
+          reader.onload = () => {
+            try {
+              const parsed = JSON.parse(reader.result as string);
+              this.alert.error(parsed?.message || 'Failed to generate or download invoice PDF.');
+            } catch {
+              this.alert.error('Failed to generate or download invoice PDF.');
+            }
+            this.cdr.detectChanges();
+          };
+          reader.readAsText(err.error);
+          return;
+        }
+
+        const msg = err?.error?.message || err?.message || 'Failed to generate or download invoice PDF.';
+        this.alert.error(msg);
         this.cdr.detectChanges();
       }
     });

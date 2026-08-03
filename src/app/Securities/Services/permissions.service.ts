@@ -253,8 +253,30 @@ export class PermissionService {
       if (hasMenu) return true;
     }
 
-    // If explicit DB permissions or menus exist but target is not in them, return false for non-super-admin
-    return false;
+    // Role-based default fallback check for non-Super-Admin roles
+    const userType = this.normalizeUserType(this.auth.getUserType());
+
+    // Strict admin-only paths
+    const adminOnlyPaths = ['/admin', '/roles', '/role-access', '/audit-logs', '/menubar'];
+    const isAdminOnly = adminOnlyPaths.some(p => targetNormalized === p || targetNormalized.startsWith(p + '/'));
+    if (isAdminOnly) {
+      return userType === UserType.SUPER_ADMIN || userType === UserType.ADMIN || userType === UserType.BRANCH;
+    }
+
+    // Branch manager allowed paths
+    const branchManagerRestricted = ['/admin', '/roles', '/role-access', '/menubar'];
+    if (userType === UserType.BRANCH_MANAGER) {
+      return !branchManagerRestricted.some(p => targetNormalized === p || targetNormalized.startsWith(p + '/'));
+    }
+
+    // Employee / Shopkeeper / Delivery Boy restricted paths
+    const employeeRestricted = ['/admin', '/roles', '/role-access', '/menubar', '/manage-subscription-plans', '/payroll', '/audit-logs'];
+    if (userType === UserType.EMPLOYEE || userType === UserType.SHOPKEEPER || userType === UserType.DELIVERY_BOY) {
+      return !employeeRestricted.some(p => targetNormalized === p || targetNormalized.startsWith(p + '/'));
+    }
+
+    const rolePerms = ROLE_PERMISSIONS[userType];
+    return rolePerms ? rolePerms.canRead : false;
   }
 
   // ─── Domain Specific RBAC Helpers ──────────────────────────────────────────

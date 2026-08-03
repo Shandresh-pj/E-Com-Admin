@@ -359,7 +359,7 @@ export class FullComponent implements OnInit {
       allowedMenus = apiMenus.filter((m: any) => {
         if (!m || typeof m !== 'object' || m.isActive === false) return false;
         return this.permissionService.hasPermission(m.id, 'READ') ||
-               this.permissionService.hasPagePermission(m.path || m.route);
+          this.permissionService.hasPagePermission(m.path || m.route);
       });
       if (allowedMenus.length === 0) {
         allowedMenus = allStandardMenus.filter(m => this.permissionService.hasPagePermission(m.path));
@@ -383,23 +383,7 @@ export class FullComponent implements OnInit {
     ];
 
     const groupings = [
-      {
-        navCap: 'Mobility & Fleet OS',
-        paths: [
-          '/mobility-dashboard',
-          '/ride-booking',
-          '/car-rental',
-          '/parcel-logistics',
-          '/fleet-management',
-          '/corporate-transport',
-          '/live-tracking',
-          '/vehicle-driver-verification'
-        ]
-      },
-      {
-        navCap: 'Communication & Collaboration',
-        paths: ['/communication', '/communication/meetings']
-      },
+
       {
         navCap: 'Administration & Roles',
         paths: ['/admin', '/crm-contacts', '/branch', '/employees', '/role-access', '/roles', '/audit-logs']
@@ -427,7 +411,24 @@ export class FullComponent implements OnInit {
       {
         navCap: 'Operations & Settings',
         paths: ['/approvals', '/notifications', '/profile', '/translations', '/menubar', '/status', '/change-password']
-      }
+      },
+      {
+        navCap: 'Mobility & Fleet OS',
+        paths: [
+          '/mobility-dashboard',
+          '/ride-booking',
+          '/car-rental',
+          '/parcel-logistics',
+          '/fleet-management',
+          '/corporate-transport',
+          '/live-tracking',
+          '/vehicle-driver-verification'
+        ]
+      },
+      {
+        navCap: 'Communication & Collaboration',
+        paths: ['/communication', '/communication/meetings']
+      },
     ];
 
     const isAdmin = this.authService.isSuperAdmin() || this.authService.getUserType() === 'Admin';
@@ -519,8 +520,30 @@ export class FullComponent implements OnInit {
       seen.add(key);
       return true;
     });
-    this.navItems.set(deduped);
-    this.filteredNavItems.set(deduped);
+
+    // Prune empty section captions (navCap) that have 0 visible child items under them
+    const pruned: NavItem[] = [];
+    for (let i = 0; i < deduped.length; i++) {
+      const item = deduped[i];
+      if (item.navCap) {
+        let hasChildren = false;
+        for (let j = i + 1; j < deduped.length; j++) {
+          if (deduped[j].navCap) break;
+          if (deduped[j].displayName || deduped[j].route) {
+            hasChildren = true;
+            break;
+          }
+        }
+        if (hasChildren) {
+          pruned.push(item);
+        }
+      } else {
+        pruned.push(item);
+      }
+    }
+
+    this.navItems.set(pruned);
+    this.filteredNavItems.set(pruned);
 
     this.updateNavBadges();
   }
@@ -592,7 +615,7 @@ export class FullComponent implements OnInit {
         }
         continue;
       }
-      
+
       const matchesName = !!item.displayName && item.displayName.toLowerCase().includes(q);
       const matchesRoute = !!item.route && item.route.toLowerCase().includes(q);
       const capMatches = !!currentCap && !!currentCap.navCap && currentCap.navCap.toLowerCase().includes(q);

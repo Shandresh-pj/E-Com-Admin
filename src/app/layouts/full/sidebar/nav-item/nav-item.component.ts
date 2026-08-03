@@ -121,25 +121,24 @@ export class AppNavItemComponent implements OnChanges, OnInit, OnDestroy {
     // background does not persist after navigating to another menu.
     (event?.currentTarget as HTMLElement | undefined)?.blur();
 
-    if (!item.children || !item.children.length) {
+    const isLeaf = !item.children || !item.children.length;
+    if (isLeaf) {
       if (item.route) {
         this.router.navigate([item.route], { queryParams: item.queryParams || {} });
       }
-    }
-    if (item.children && item.children.length) {
+      if (window.innerWidth < 1024) {
+        this.notify.emit();
+      }
+    } else {
       this.expanded = !this.expanded;
     }
-    //scroll
+
+    // scroll
     window.scroll({
       top: 0,
       left: 0,
       behavior: 'smooth',
     });
-    if (!this.expanded) {
-      if (window.innerWidth < 1024) {
-        this.notify.emit();
-      }
-    }
   }
 
   openExternalLink(url: string): void {
@@ -149,10 +148,9 @@ export class AppNavItemComponent implements OnChanges, OnInit, OnDestroy {
   }
 
   onSubItemSelected(item: NavItem) {
-    if (!item.children || !item.children.length) {
-      if (this.expanded && window.innerWidth < 1024) {
-        this.notify.emit();
-      }
+    const isLeaf = !item.children || !item.children.length;
+    if (isLeaf && window.innerWidth < 1024) {
+      this.notify.emit();
     }
   }
 }

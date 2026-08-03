@@ -257,10 +257,21 @@
             <span class="stat-badge">{{ grantedPermissionsCount }} / {{ totalPermissionsCount }} Granted</span>
             <span class="stat-percent">{{ grantedPercentage }}%</span>
           </div>
-          <span class="legend-pill pill-granted">GRANTED</span>
-          <span class="legend-pill pill-denied">DENIED</span>
-          <span class="legend-na">N/A</span>
+          <button type="button" class="legend-pill pill-all" [class.active-filter]="selectedStatusFilter === 'ALL'" (click)="setStatusFilter('ALL')">ALL</button>
+          <button type="button" class="legend-pill pill-granted" [class.active-filter]="selectedStatusFilter === 'GRANTED'" (click)="setStatusFilter('GRANTED')">GRANTED</button>
+          <button type="button" class="legend-pill pill-denied" [class.active-filter]="selectedStatusFilter === 'DENIED'" (click)="setStatusFilter('DENIED')">DENIED</button>
         </div>
+      </div>
+
+      <!-- Category Filter Tabs -->
+      <div class="category-tabs-bar">
+        @for (tab of categoryTabs; track tab.key) {
+          <button type="button" class="cat-tab-btn" [class.active-cat]="selectedCategoryFilter === tab.key" (click)="setCategoryFilter(tab.key)">
+            <i-tabler [name]="tab.icon" class="cat-icon icon-16"></i-tabler>
+            <span class="cat-label">{{ tab.label }}</span>
+            <span class="cat-count">{{ getCategoryCount(tab.key) }}</span>
+          </button>
+        }
       </div>
 
       <!-- Control Toolbar: Search & Bulk Actions -->
@@ -324,8 +335,11 @@
             <tr class="matrix-row" [class.row-even]="even">
               <td class="cell-module">
                 <div class="module-cell-inner">
-                  <span class="module-dot"></span>
+                  <span class="module-dot" [class]="'dot-cat-' + getModuleCategory(menu).toLowerCase()"></span>
                   <span class="module-name">{{ menu.name }}</span>
+                  <span class="module-cat-badge" [class]="'badge-cat-' + getModuleCategory(menu).toLowerCase()">
+                    {{ getModuleCategory(menu) }}
+                  </span>
                 </div>
               </td>
               @for (action of actions; track action) {
@@ -359,7 +373,12 @@
             @if (filteredMenus.length === 0) {
               <tr>
                 <td colspan="7" class="text-center p-24 text-muted f-s-13 font-semibold">
-                  No modules match your search filter "{{ searchQuery }}".
+                  <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; padding: 20px;">
+                    <span>No modules match your current filter (Search: "{{ searchQuery || 'None' }}", Status: {{ selectedStatusFilter }}).</span>
+                    <button type="button" class="bulk-btn" (click)="resetFilters()" style="padding: 4px 12px; font-size: 12px; border-radius: 8px; background: rgba(99,102,241,0.1); color: #6366f1; border: 1px solid rgba(99,102,241,0.2); cursor: pointer;">
+                      Reset Filters
+                    </button>
+                  </div>
                 </td>
               </tr>
             }

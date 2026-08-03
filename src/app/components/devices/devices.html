@@ -14,7 +14,7 @@
       <div>
         <h1 class="header-title">{{ 'Hardware & Devices Auto-Detection Console' | translate }}</h1>
         <p class="header-subtitle">
-          Intelligent multi-protocol hardware scanner for POS Billing Machines, Barcode Scanners, Electronic Scales &amp; Payment Terminals
+          Intelligent multi-protocol hardware manager for Thermal Printers, Barcode Scanners, Electronic Scales, Payment Terminals, NFC &amp; Biometric Readers
         </p>
       </div>
     </div>
@@ -24,6 +24,16 @@
         <span class="pulse-dot"></span>
         <span><strong>{{ deviceService.connectedCount() }} / {{ deviceService.allDevices().length }}</strong> Devices Online</span>
       </div>
+
+      <button mat-stroked-button class="glass-btn glass-btn-secondary" (click)="pushSystemAccessAndEnable()">
+        <mat-icon>security</mat-icon>
+        <span>Push System Access</span>
+      </button>
+
+      <button mat-stroked-button class="glass-btn glass-btn-secondary" (click)="openWirelessScanner()">
+        <mat-icon>radar</mat-icon>
+        <span>Wireless Radar Sweep</span>
+      </button>
 
       <button mat-stroked-button class="glass-btn glass-btn-secondary" (click)="openAddModal()">
         <mat-icon>add_link</mat-icon>
@@ -37,65 +47,205 @@
     </div>
   </div>
 
-  <!-- Telemetry Cards Grid -->
+  <!-- System Hardware Capability & Radio Analytics Bar -->
+  <div class="system-analytics-card">
+    <div class="analytics-title">
+      <mat-icon class="text-primary">analytics</mat-icon>
+      <span>System Hardware &amp; Radio Capabilities Analytics</span>
+    </div>
+
+    <div class="analytics-chips">
+      <div class="analytics-chip" [class.active]="deviceService.systemAnalytics().networkOnline">
+        <mat-icon>wifi</mat-icon>
+        <span>Network: {{ deviceService.systemAnalytics().networkOnline ? deviceService.systemAnalytics().effectiveNetworkType.toUpperCase() : 'Offline' }}</span>
+      </div>
+
+      <div class="analytics-chip" [class.active]="deviceService.systemAnalytics().bluetoothAvailable" [class.warn]="!deviceService.systemAnalytics().bluetoothAvailable">
+        <mat-icon>bluetooth</mat-icon>
+        <span>Bluetooth: {{ deviceService.systemAnalytics().bluetoothAvailable ? 'Enabled' : 'Disabled (OS)' }}</span>
+      </div>
+
+      <div class="analytics-chip" [class.active]="deviceService.systemAnalytics().webUsbSupported">
+        <mat-icon>usb</mat-icon>
+        <span>WebUSB: {{ deviceService.systemAnalytics().webUsbSupported ? 'Supported' : 'N/A' }}</span>
+      </div>
+
+      <div class="analytics-chip" [class.active]="deviceService.systemAnalytics().webSerialSupported">
+        <mat-icon>settings_ethernet</mat-icon>
+        <span>WebSerial COM: {{ deviceService.systemAnalytics().webSerialSupported ? 'Supported' : 'N/A' }}</span>
+      </div>
+
+      <div class="analytics-chip" [class.active]="deviceService.systemAnalytics().webHidSupported">
+        <mat-icon>keyboard</mat-icon>
+        <span>WebHID: {{ deviceService.systemAnalytics().webHidSupported ? 'Supported' : 'N/A' }}</span>
+      </div>
+
+      <div class="analytics-chip" [class.active]="deviceService.systemAnalytics().nfcSupported">
+        <mat-icon>nfc</mat-icon>
+        <span>WebNFC: {{ deviceService.systemAnalytics().nfcSupported ? 'Supported' : 'N/A' }}</span>
+      </div>
+
+      <div class="analytics-chip" [class.active]="deviceService.systemAnalytics().cameraSupported">
+        <mat-icon>camera_alt</mat-icon>
+        <span>Camera Scanner: {{ deviceService.systemAnalytics().cameraSupported ? 'Supported' : 'N/A' }}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Radio Power Toggle Bar (WiFi & Bluetooth Enable/Disable) -->
+  <div class="radio-toggles-card">
+    <div class="radio-toggle-item" [class.enabled]="wifiRadioEnabled">
+      <div class="radio-info">
+        <div class="r-icon text-info"><mat-icon>wifi</mat-icon></div>
+        <div>
+          <div class="r-title">WiFi 5GHz / 2.4GHz Radio</div>
+          <div class="r-status" [class.on]="wifiRadioEnabled">
+            {{ wifiRadioEnabled ? 'Radio Enabled & Listening for Network POS Printers' : 'WiFi Radio Turned Off' }}
+          </div>
+        </div>
+      </div>
+      <mat-slide-toggle [checked]="wifiRadioEnabled" (change)="toggleWifiRadio()" color="primary"></mat-slide-toggle>
+    </div>
+
+    <div class="radio-toggle-item" [class.enabled]="bluetoothRadioEnabled" [class.system-off]="!deviceService.osBluetoothAvailable()">
+      <div class="radio-info">
+        <div class="r-icon text-warning"><mat-icon>bluetooth</mat-icon></div>
+        <div>
+          <div class="r-title">
+            Bluetooth LE &amp; Air Radio
+            @if (!deviceService.osBluetoothAvailable()) {
+              <span class="os-off-chip"><mat-icon>error_outline</mat-icon> OS Disabled</span>
+            }
+          </div>
+          <div class="r-status" [class.on]="bluetoothRadioEnabled && deviceService.osBluetoothAvailable()">
+            @if (!deviceService.osBluetoothAvailable()) {
+              <span class="text-danger">Windows System Bluetooth is OFF in OS Quick Settings</span>
+            } @else {
+              {{ bluetoothRadioEnabled ? 'Radio Enabled & Ready to Pair BLE Scanners & Terminals' : 'Bluetooth Radio Turned Off' }}
+            }
+          </div>
+        </div>
+      </div>
+
+      <div class="radio-controls-right">
+        @if (!deviceService.osBluetoothAvailable()) {
+          <button mat-stroked-button class="btn-os-guide" (click)="promptSystemBluetoothTurnOn()">
+            <mat-icon>bluetooth_searching</mat-icon> Pair via Browser
+          </button>
+        }
+        <mat-slide-toggle [checked]="bluetoothRadioEnabled" (change)="toggleBluetoothRadio()" color="accent"></mat-slide-toggle>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filter & Search Toolbar Card -->
+  <div class="toolbar-glass-card">
+    <!-- Category Connection Filters -->
+    <div class="filter-pills-group">
+      <button class="pill-btn" [class.active]="connectionFilter === 'ALL'" (click)="setConnectionFilter('ALL')">
+        <mat-icon>hub</mat-icon>
+        <span>All Channels ({{ deviceService.allDevices().length }})</span>
+      </button>
+      <button class="pill-btn wired-pill" [class.active]="connectionFilter === 'WIRED'" (click)="setConnectionFilter('WIRED')">
+        <mat-icon>cable</mat-icon>
+        <span>Wired Direct ({{ deviceService.wiredCount() }})</span>
+      </button>
+
+      <button class="pill-btn wireless-pill" [class.active]="connectionFilter === 'WIRELESS'" (click)="setConnectionFilter('WIRELESS')">
+        <mat-icon>sensors</mat-icon>
+        <span>Wireless Air / WiFi / BLE ({{ deviceService.wirelessCount() }})</span>
+      </button>
+    </div>
+
+    <!-- Search Input & Type Filter -->
+    <div class="toolbar-controls">
+      <div class="search-input-wrapper">
+        <mat-icon>search</mat-icon>
+        <input type="text" [(ngModel)]="searchQuery" placeholder="Search device name, IP address, COM port, MAC address..." />
+        @if (searchQuery) {
+          <mat-icon class="clear-icon" (click)="searchQuery = ''">close</mat-icon>
+        }
+      </div>
+
+      <div class="select-wrapper">
+        <mat-form-field appearance="outline" class="density-compact">
+          <mat-label>Device Category</mat-label>
+          <mat-select [(ngModel)]="typeFilter">
+            <mat-option value="ALL">All Hardware Types</mat-option>
+            <mat-option value="THERMAL_PRINTER">Thermal Printers</mat-option>
+            <mat-option value="BARCODE_SCANNER">Barcode Scanners</mat-option>
+            <mat-option value="WEIGH_SCALE">Weighing Scales</mat-option>
+            <mat-option value="CARD_READER">Card / Payment Terminals</mat-option>
+            <mat-option value="CUSTOMER_DISPLAY">Customer VFD Displays</mat-option>
+            <mat-option value="BIOMETRIC_READER">Biometric Readers</mat-option>
+            <mat-option value="CASH_DRAWER">Cash Drawers</mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+    </div>
+  </div>
+
+  <!-- Telemetry Overview Stats -->
   <div class="telemetry-grid">
     <div class="telemetry-card">
-      <div class="t-icon text-primary"><mat-icon>wifi_tethering</mat-icon></div>
+      <div class="t-icon text-primary"><mat-icon>cable</mat-icon></div>
       <div class="t-info">
-        <span class="t-label">WebSerial &amp; WebUSB Status</span>
-        <span class="t-value text-success">Active &amp; Listening</span>
+        <span class="t-label">WebSerial &amp; WebUSB Listener</span>
+        <span class="t-value text-success">Connected (COM / USB)</span>
       </div>
     </div>
 
     <div class="telemetry-card">
-      <div class="t-icon text-warning"><mat-icon>speed</mat-icon></div>
+      <div class="t-icon text-info"><mat-icon>wifi</mat-icon></div>
       <div class="t-info">
-        <span class="t-label">Avg Bus Latency</span>
-        <span class="t-value">4.2 ms</span>
+        <span class="t-label">WiFi IP &amp; LAN Subnet Stream</span>
+        <span class="t-value" [class.text-muted]="!wifiRadioEnabled">{{ wifiRadioEnabled ? 'Port 9100 / 8080 Active' : 'WiFi Radio Off' }}</span>
       </div>
     </div>
 
     <div class="telemetry-card">
-      <div class="t-icon text-info"><mat-icon>data_object</mat-icon></div>
+      <div class="t-icon text-warning"><mat-icon>bluetooth_searching</mat-icon></div>
       <div class="t-info">
-        <span class="t-label">Packets Processed</span>
-        <span class="t-value">17,440 pks</span>
+        <span class="t-label">Bluetooth LE &amp; NFC Tap</span>
+        <span class="t-value" [class.text-muted]="!bluetoothRadioEnabled">
+          {{ bluetoothRadioEnabled ? '2.4GHz / 13.56MHz Ready' : 'Bluetooth OFF' }}
+        </span>
       </div>
     </div>
 
     <div class="telemetry-card">
-      <div class="t-icon text-secondary"><mat-icon>autorenew</mat-icon></div>
+      <div class="t-icon text-secondary"><mat-icon>speed</mat-icon></div>
       <div class="t-info">
-        <span class="t-label">Auto-Reconnect Protocol</span>
-        <span class="t-value text-primary">Enabled (1000ms)</span>
+        <span class="t-label">Avg Channel Latency</span>
+        <span class="t-value text-primary">3.8 ms</span>
       </div>
     </div>
   </div>
 
   <!-- Connected Hardware Fleet Section Heading -->
   <div class="section-heading">
-    <h2><mat-icon>devices</mat-icon> Connected POS Hardware Fleet</h2>
-    <span class="badge-count">{{ deviceService.allDevices().length }} Devices Registered</span>
+    <h2><mat-icon>devices</mat-icon> Registered Hardware Fleet</h2>
+    <span class="badge-count">{{ filteredDevices().length }} Devices Match Filter</span>
   </div>
 
   <!-- Devices Cards Grid -->
-  @if (deviceService.allDevices().length === 0 && !deviceService.scanning()) {
+  @if (filteredDevices().length === 0 && !deviceService.scanning()) {
     <div class="empty-glass-card">
       <div class="empty-icon-orb"><mat-icon>devices_other</mat-icon></div>
-      <h3>No Hardware Devices Connected</h3>
-      <p>Click "Auto-Detect Devices" to automatically scan WebUSB, WebSerial, WiFi IP &amp; Bluetooth ports or manually add your billing hardware.</p>
+      <h3>No Hardware Devices Found</h3>
+      <p>No connected POS devices match your selected connection channel or search query. Enable WiFi / Bluetooth radios and click "Auto-Detect Devices" or launch the "Wireless Radar Sweep".</p>
       <div class="empty-actions">
         <button mat-flat-button class="glass-btn glass-btn-primary" (click)="runAutoDiscovery()">
           <mat-icon>sync</mat-icon> Auto-Detect Devices
         </button>
-        <button mat-stroked-button class="glass-btn glass-btn-secondary" (click)="openAddModal()">
-          <mat-icon>add_link</mat-icon> Manual Connect
+        <button mat-stroked-button class="glass-btn glass-btn-secondary" (click)="openWirelessScanner()">
+          <mat-icon>radar</mat-icon> Wireless Radar Sweep
         </button>
       </div>
     </div>
   } @else {
     <div class="devices-grid">
-      @for (device of deviceService.allDevices(); track device.id) {
+      @for (device of filteredDevices(); track device.id) {
       <div class="device-card liquid-glass-card" [class.disconnected]="device.status !== 'CONNECTED'">
         
         <div class="card-top-accent" [ngClass]="getProtocolBadge(device.protocol).class"></div>
@@ -107,21 +257,29 @@
           </div>
 
           <div class="protocol-badge" [ngClass]="getProtocolBadge(device.protocol).class">
-            {{ getProtocolBadge(device.protocol).label }}
+            <mat-icon class="proto-icon">{{ getProtocolBadge(device.protocol).icon }}</mat-icon>
+            <span>{{ getProtocolBadge(device.protocol).label }}</span>
           </div>
         </div>
 
         <div class="device-card-body">
           <h3 class="device-name">{{ device.name }}</h3>
-          <p class="device-port">
+          
+          <div class="device-port-line">
             <mat-icon>settings_ethernet</mat-icon>
-            <span>{{ device.portOrAddress }}</span>
-          </p>
+            <span class="port-addr">{{ device.portOrAddress }}</span>
+            <span class="channel-badge" [class.wired]="(device.connectionCategory || deviceService.inferCategory(device.protocol)) === 'WIRED'">
+              {{ (device.connectionCategory || deviceService.inferCategory(device.protocol)) === 'WIRED' ? 'Wired Bus' : 'Wireless Air' }}
+            </span>
+          </div>
 
           <!-- Metadata Chips -->
           <div class="metadata-chips">
             @if (device.wifiSsid) {
-              <span class="meta-chip"><mat-icon>wifi</mat-icon> {{ device.wifiSsid }}</span>
+              <span class="meta-chip"><mat-icon>wifi</mat-icon> SSID: {{ device.wifiSsid }}</span>
+            }
+            @if (device.macAddress) {
+              <span class="meta-chip"><mat-icon>qr_code</mat-icon> MAC: {{ device.macAddress }}</span>
             }
             @if (device.firmwareVersion) {
               <span class="meta-chip"><mat-icon>memory</mat-icon> FW: {{ device.firmwareVersion }}</span>
@@ -132,41 +290,54 @@
             @if (device.metadata && device.metadata['paperWidth']) {
               <span class="meta-chip"><mat-icon>receipt</mat-icon> Paper: {{ device.metadata['paperWidth'] }}</span>
             }
-            @if (device.metadata && device.metadata['unit']) {
-              <span class="meta-chip"><mat-icon>scale</mat-icon> Tare: {{ device.metadata['tare'] || 0 }} {{ device.metadata['unit'] }}</span>
-            }
           </div>
 
-          <!-- Latency & Signal Strength Telemetry Meter -->
-          <div class="telemetry-meter">
+          <!-- Wireless Telemetry: Battery & Signal Strength -->
+          <div class="telemetry-meter-group">
             <div class="meter-labels">
               <span class="latency-badge">
                 <mat-icon>bolt</mat-icon>
                 <span>Latency: <strong>{{ device.latencyMs }} ms</strong></span>
               </span>
+              
               <span class="signal-badge" [class.high]="device.signalStrength >= 90" [class.med]="device.signalStrength >= 70 && device.signalStrength < 90">
                 <mat-icon>signal_cellular_alt</mat-icon>
-                <span>Signal: <strong>{{ device.signalStrength }}%</strong></span>
+                <span>Signal: <strong>{{ device.signalStrength }}%</strong> {{ device.signalDbm ? '(' + device.signalDbm + ' dBm)' : '' }}</span>
               </span>
             </div>
+
             <div class="progress-bar-container">
               <div class="progress-fill" [style.width.%]="device.signalStrength" [class.high]="device.signalStrength >= 90" [class.med]="device.signalStrength >= 70 && device.signalStrength < 90"></div>
             </div>
+
+            @if (device.batteryLevel !== undefined && device.batteryLevel !== null) {
+              <div class="battery-line">
+                <mat-icon [style.color]="device.batteryLevel > 30 ? '#10b981' : '#ef4444'">
+                  {{ device.batteryLevel > 80 ? 'battery_full' : (device.batteryLevel > 40 ? 'battery_5_bar' : 'battery_2_bar') }}
+                </mat-icon>
+                <span>Battery Charge: <strong>{{ device.batteryLevel }}%</strong></span>
+              </div>
+            }
           </div>
         </div>
 
         <div class="device-card-footer">
           <div class="footer-left">
-            <button mat-icon-button class="action-icon-btn" [matTooltip]="device.autoReconnect ? 'Auto-Reconnect Enabled' : 'Auto-Reconnect Disabled'" (click)="toggleReconnect(device)">
+            <button mat-icon-button class="action-icon-btn" [matTooltip]="device.autoReconnect ? 'Auto-Reconnect Active' : 'Auto-Reconnect Disabled'" (click)="toggleReconnect(device)">
               <mat-icon [style.color]="device.autoReconnect ? '#10b981' : '#94a3b8'">autorenew</mat-icon>
             </button>
             <span class="packets-text">{{ device.packetsReceived | number }} pks</span>
           </div>
 
           <div class="footer-right">
-            <button mat-button class="glass-btn-sm" (click)="testDevice(device)">
-              <mat-icon>play_arrow</mat-icon> Test Device
+            <button mat-button class="glass-btn-sm btn-diag" (click)="openDiagnosticModal(device)">
+              <mat-icon>health_and_safety</mat-icon> Diag
             </button>
+
+            <button mat-button class="glass-btn-sm" (click)="testDevice(device)">
+              <mat-icon>play_arrow</mat-icon> Test
+            </button>
+
             <button mat-icon-button class="action-icon-btn text-danger" matTooltip="Disconnect" (click)="removeDevice(device)">
               <mat-icon>power_settings_new</mat-icon>
             </button>
@@ -178,7 +349,139 @@
   </div>
   }
 
-  <!-- Manual Device Connection Modal -->
+  <!-- Wireless Radar Scanner Modal with Real OS Bluetooth Status & Dynamic Selection -->
+  @if (showWirelessScannerModal) {
+    <div class="modal-overlay-glass" (click)="closeWirelessScanner()">
+      <div class="modal-glass-card radar-modal" (click)="$event.stopPropagation()">
+        
+        <div class="modal-header">
+          <div class="m-title-icon"><mat-icon class="spin-slow">radar</mat-icon> Available Wireless Devices Scanner</div>
+          <button mat-icon-button (click)="closeWirelessScanner()"><mat-icon>close</mat-icon></button>
+        </div>
+
+        <!-- Radios Bar inside Scanner -->
+        <div class="scanner-radios-bar">
+          <span class="r-badge" [class.on]="wifiRadioEnabled">
+            <mat-icon>wifi</mat-icon> WiFi: {{ wifiRadioEnabled ? 'ON' : 'OFF' }}
+          </span>
+          <span class="r-badge" [class.on]="bluetoothRadioEnabled" [class.off-warn]="!deviceService.osBluetoothAvailable()">
+            <mat-icon>bluetooth</mat-icon> Bluetooth: {{ bluetoothRadioEnabled ? 'ON' : 'OFF' }}
+          </span>
+
+          <div class="scanner-filter-pills">
+            <button [class.active]="scannerFilter === 'ALL'" (click)="scannerFilter = 'ALL'">All</button>
+            <button [class.active]="scannerFilter === 'WIFI'" (click)="scannerFilter = 'WIFI'" [disabled]="!wifiRadioEnabled">WiFi</button>
+            <button [class.active]="scannerFilter === 'BLUETOOTH'" (click)="scannerFilter = 'BLUETOOTH'" [disabled]="!bluetoothRadioEnabled">Bluetooth</button>
+          </div>
+        </div>
+
+        <!-- OS Bluetooth OFF Warning Alert -->
+        @if (!deviceService.osBluetoothAvailable()) {
+          <div class="os-bt-warning-box">
+            <mat-icon>bluetooth_disabled</mat-icon>
+            <div class="warn-msg">
+              <strong>Windows System Bluetooth is Turned OFF</strong>
+              <p>Turn ON Bluetooth in your Windows OS Settings (taskbar quick settings) or pair via Web Bluetooth.</p>
+            </div>
+            <button mat-stroked-button class="glass-btn-secondary" (click)="promptSystemBluetoothTurnOn()">
+              <mat-icon>bluetooth_searching</mat-icon> Pair via Web BT
+            </button>
+          </div>
+        }
+
+        <!-- Radios OFF Compulsory Enable Banner -->
+        @if (!wifiRadioEnabled && !bluetoothRadioEnabled) {
+          <div class="radios-disabled-banner">
+            <mat-icon>portable_wifi_off</mat-icon>
+            <div class="banner-text">
+              <h4>WiFi &amp; Bluetooth Radios are Turned OFF</h4>
+              <p>Turn on wireless radios to perform a multi-band sweep for nearby Printers, Barcode Scanners &amp; NFC Terminals.</p>
+            </div>
+            <button mat-flat-button class="glass-btn-primary" (click)="enableAllRadiosAndScan()">
+              <mat-icon>power_settings_new</mat-icon> Enable Radios &amp; Scan
+            </button>
+          </div>
+        } @else {
+          <!-- Radar Sweep Animation Visual -->
+          <div class="radar-visual-container">
+            <div class="radar-screen">
+              <div class="radar-sweep" [class.sweeping]="isScanningWireless"></div>
+              <div class="radar-ring ring-1"></div>
+              <div class="radar-ring ring-2"></div>
+              <div class="radar-ring ring-3"></div>
+
+              <div class="radar-center-dot"></div>
+
+              @for (cand of filteredCandidates(); track cand.id) {
+                <div class="radar-blip-dot" [class.selected]="cand === selectedCandidate" [matTooltip]="cand.name" (click)="selectCandidate(cand)"></div>
+              }
+            </div>
+            <p class="radar-status-text">
+              {{ isScanningWireless ? 'Sweeping Bluetooth LE 2.4GHz Air & WiFi 5GHz Frequencies...' : 'Click a device below to select and connect.' }}
+            </p>
+          </div>
+
+          <!-- Discovered Candidates List with Select & Connect Actions -->
+          <div class="candidates-list">
+            @if (isScanningWireless) {
+              <div class="scanning-loader">
+                <mat-progress-bar mode="query"></mat-progress-bar>
+                <span>Scanning for nearby available WiFi &amp; Bluetooth POS peripherals...</span>
+              </div>
+            } @else if (filteredCandidates().length === 0) {
+              <div class="no-candidates">
+                <mat-icon>sensors_off</mat-icon>
+                <div>No available wireless devices discovered. Ensure devices are turned on and in pairing mode.</div>
+              </div>
+            } @else {
+              @for (cand of filteredCandidates(); track cand.id) {
+                <div class="candidate-row" [class.selected-cand]="cand === selectedCandidate" (click)="selectCandidate(cand)">
+                  <div class="cand-selection-radio">
+                    <mat-icon>{{ cand === selectedCandidate ? 'radio_button_checked' : 'radio_button_unchecked' }}</mat-icon>
+                  </div>
+
+                  <div class="cand-info">
+                    <div class="cand-name">{{ cand.name }}</div>
+                    <div class="cand-meta">
+                      <span class="cand-proto">{{ cand.protocol }}</span> • 
+                      <span>{{ cand.portOrAddress }}</span> • 
+                      <span class="cand-signal"><mat-icon>signal_cellular_alt</mat-icon> {{ cand.signalStrength }}% ({{ cand.signalDbm }} dBm)</span>
+                    </div>
+                  </div>
+
+                  <div class="cand-action">
+                    @if (cand.paired) {
+                      <span class="paired-text"><mat-icon>check_circle</mat-icon> Connected</span>
+                    } @else {
+                      <button mat-flat-button class="glass-btn-primary btn-sm" (click)="$event.stopPropagation(); pairWirelessCandidate(cand)">
+                        <mat-icon>link</mat-icon> Select &amp; Connect
+                      </button>
+                    }
+                  </div>
+                </div>
+              }
+            }
+          </div>
+        }
+
+        <div class="modal-footer">
+          <button mat-stroked-button class="glass-btn-secondary" (click)="startWirelessScan()" [disabled]="isScanningWireless">
+            <mat-icon>refresh</mat-icon> Rescan Air
+          </button>
+          
+          @if (selectedCandidate && !selectedCandidate.paired) {
+            <button mat-flat-button class="glass-btn-primary" (click)="pairWirelessCandidate(selectedCandidate)">
+              <mat-icon>link</mat-icon> Connect Selected Device
+            </button>
+          }
+          <button mat-button (click)="closeWirelessScanner()">Done</button>
+        </div>
+
+      </div>
+    </div>
+  }
+
+  <!-- Multi-Tabbed Manual Device Connection Modal -->
   @if (showAddModal) {
     <div class="modal-overlay-glass" (click)="closeAddModal()">
       <div class="modal-glass-card" (click)="$event.stopPropagation()">
@@ -188,9 +491,22 @@
           <button mat-icon-button (click)="closeAddModal()"><mat-icon>close</mat-icon></button>
         </div>
 
+        <!-- Connection Channel Tabs -->
+        <div class="modal-tabs">
+          <button [class.active]="activeAddTab === 'WIRED'" (click)="setAddModalTab('WIRED')">
+            <mat-icon>cable</mat-icon> Wired Direct (COM / USB)
+          </button>
+          <button [class.active]="activeAddTab === 'WIRELESS_NET'" (click)="setAddModalTab('WIRELESS_NET')">
+            <mat-icon>wifi</mat-icon> Wireless Network (WiFi / LAN)
+          </button>
+          <button [class.active]="activeAddTab === 'WIRELESS_AIR'" (click)="setAddModalTab('WIRELESS_AIR')">
+            <mat-icon>bluetooth_searching</mat-icon> Wireless Air (BLE / NFC)
+          </button>
+        </div>
+
         <div class="modal-form">
           <mat-form-field appearance="outline" class="full-width">
-            <mat-label>Hardware Name</mat-label>
+            <mat-label>Hardware Display Name</mat-label>
             <input matInput [(ngModel)]="newDevice.name" placeholder="e.g. Star Micronics Thermal Printer">
           </mat-form-field>
 
@@ -198,7 +514,7 @@
             <mat-form-field appearance="outline">
               <mat-label>Device Type</mat-label>
               <mat-select [(ngModel)]="newDevice.type">
-                <mat-option value="THERMAL_PRINTER">Thermal Printer</mat-option>
+                <mat-option value="THERMAL_PRINTER">Thermal Receipt Printer</mat-option>
                 <mat-option value="BARCODE_SCANNER">Barcode Scanner</mat-option>
                 <mat-option value="WEIGH_SCALE">Weighing Scale</mat-option>
                 <mat-option value="CARD_READER">Card Payment POS</mat-option>
@@ -210,28 +526,108 @@
 
             <mat-form-field appearance="outline">
               <mat-label>Connection Protocol</mat-label>
-              <mat-select [(ngModel)]="newDevice.protocol">
-                <mat-option value="WEB_USB">WebUSB Direct</mat-option>
-                <mat-option value="WEB_SERIAL">WebSerial COM</mat-option>
-                <mat-option value="WIFI_IP">WiFi IP Wireless</mat-option>
-                <mat-option value="ETHERNET_LAN">Ethernet LAN</mat-option>
-                <mat-option value="BLUETOOTH">Bluetooth LE</mat-option>
-                <mat-option value="WEBSOCKET_LAN">LAN WebSocket</mat-option>
-                <mat-option value="MQTT_CLOUD">MQTT Cloud IoT</mat-option>
-                <mat-option value="HID_KEYBOARD">USB HID Emulation</mat-option>
+              <mat-select [(ngModel)]="newDevice.protocol" (selectionChange)="onProtocolSelectChange()">
+                @if (activeAddTab === 'WIRED') {
+                  <mat-option value="WEB_USB">WebUSB Direct</mat-option>
+                  <mat-option value="WEB_SERIAL">WebSerial COM</mat-option>
+                  <mat-option value="ETHERNET_LAN">Ethernet LAN Cable</mat-option>
+                  <mat-option value="HID_KEYBOARD">USB HID Emulation</mat-option>
+                } @else if (activeAddTab === 'WIRELESS_NET') {
+                  <mat-option value="WIFI_IP">WiFi IP Wireless</mat-option>
+                  <mat-option value="WEBSOCKET_LAN">LAN WebSocket</mat-option>
+                  <mat-option value="MQTT_CLOUD">MQTT Cloud IoT</mat-option>
+                } @else {
+                  <mat-option value="BLUETOOTH_LE">Bluetooth LE Air</mat-option>
+                  <mat-option value="BLUETOOTH">Bluetooth Classic</mat-option>
+                  <mat-option value="NFC_TAP">NFC / RFID Tap</mat-option>
+                  <mat-option value="ZIGBEE_MESH">Zigbee Mesh</mat-option>
+                }
               </mat-select>
             </mat-form-field>
           </div>
 
-          <mat-form-field appearance="outline" class="full-width">
-            <mat-label>IP Address / COM Port</mat-label>
-            <input matInput [(ngModel)]="newDevice.portOrAddress" placeholder="192.168.1.105:9100 or COM3">
-          </mat-form-field>
+          <div class="form-row-2">
+            <mat-form-field appearance="outline">
+              <mat-label>Port / Address / MAC</mat-label>
+              <input matInput [(ngModel)]="newDevice.portOrAddress" placeholder="COM3, 192.168.1.100, or MAC">
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Baud Rate / Subnet</mat-label>
+              <input matInput type="number" [(ngModel)]="newDevice.baudRate" placeholder="9600 or 115200">
+            </mat-form-field>
+          </div>
+
+          @if (activeAddTab !== 'WIRED') {
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>WiFi Network SSID (Optional)</mat-label>
+              <input matInput [(ngModel)]="newDevice.wifiSsid" placeholder="Store_POS_5G">
+            </mat-form-field>
+          }
         </div>
 
         <div class="modal-footer">
           <button mat-button (click)="closeAddModal()">Cancel</button>
-          <button mat-flat-button class="glass-btn-primary" (click)="submitAddDevice()">Connect Device</button>
+          <button mat-flat-button class="glass-btn-primary" (click)="submitAddDevice()">Connect Hardware Device</button>
+        </div>
+
+      </div>
+    </div>
+  }
+
+  <!-- Diagnostic Suite Modal -->
+  @if (showDiagnosticModal) {
+    <div class="modal-overlay-glass" (click)="closeDiagnosticModal()">
+      <div class="modal-glass-card diagnostic-modal" (click)="$event.stopPropagation()">
+        
+        <div class="modal-header">
+          <h2><mat-icon>health_and_safety</mat-icon> Hardware Diagnostic Suite</h2>
+          <button mat-icon-button (click)="closeDiagnosticModal()"><mat-icon>close</mat-icon></button>
+        </div>
+
+        <div class="diagnostic-device-summary" *ngIf="selectedDiagnosticDevice">
+          <div class="diag-icon-orb"><mat-icon>{{ getDeviceIcon(selectedDiagnosticDevice.type) }}</mat-icon></div>
+          <div>
+            <h3>{{ selectedDiagnosticDevice.name }}</h3>
+            <p>{{ selectedDiagnosticDevice.protocol }} • {{ selectedDiagnosticDevice.portOrAddress }}</p>
+          </div>
+        </div>
+
+        <!-- Diagnostic Progress Bar -->
+        <div class="diag-progress-wrapper">
+          <mat-progress-bar mode="determinate" [value]="diagnosticProgress"></mat-progress-bar>
+          <div class="diag-pct">{{ diagnosticProgress }}% Completed</div>
+        </div>
+
+        <!-- 5-Stage Step Checklist -->
+        <div class="diagnostic-steps-list">
+          @for (step of diagnosticSteps; track step.name) {
+            <div class="diag-step-item" [ngClass]="step.status.toLowerCase()">
+              <div class="step-status-icon">
+                @if (step.status === 'PASSED') {
+                  <mat-icon class="text-success">check_circle</mat-icon>
+                } @else if (step.status === 'RUNNING') {
+                  <mat-icon class="spin text-primary">sync</mat-icon>
+                } @else if (step.status === 'FAILED') {
+                  <mat-icon class="text-danger">cancel</mat-icon>
+                } @else {
+                  <mat-icon class="text-muted">radio_button_unchecked</mat-icon>
+                }
+              </div>
+
+              <div class="step-details">
+                <div class="step-title">{{ step.name }}</div>
+                <div class="step-desc">{{ step.detail }}</div>
+              </div>
+            </div>
+          }
+        </div>
+
+        <div class="modal-footer">
+          <button mat-stroked-button class="glass-btn-secondary" (click)="runFullDiagnostics(selectedDiagnosticDevice!)" [disabled]="isRunningDiagnostic">
+            <mat-icon>replay</mat-icon> Re-run Suite
+          </button>
+          <button mat-flat-button class="glass-btn-primary" (click)="closeDiagnosticModal()">Close</button>
         </div>
 
       </div>

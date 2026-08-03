@@ -14,11 +14,38 @@ import { AlertService } from 'src/app/Securities/Services/alert.service';
 import { PermissionService } from 'src/app/Securities/Services/permissions.service';
 import { AuthService } from 'src/app/Securities/Services/auth.service';
 import { environment } from 'src/environment/environment';
-import { GoogleMapsService, FareCalculation, RideBooking, LocationCoordinates } from 'src/app/services/google-maps.service';
+import { GoogleMapsService, FareCalculation, LocationCoordinates } from 'src/app/services/google-maps.service';
 import { TableColumn } from 'src/utils/mat-table/mat-table';
 
 declare var google: any;
 declare var L: any;
+
+export interface DeliveryTrackingRecord {
+  id: number;
+  order_id: number;
+  invoice_no: string;
+  delivery_boy_id: number;
+  delivery_boy_name: string;
+  delivery_boy_phone?: string;
+  delivery_boy_avatar?: string;
+  vehicle_no?: string;
+  vehicle_type?: string;
+  speed?: string;
+  eta?: string;
+  distance_remaining?: string;
+  latitude: number;
+  longitude: number;
+  pickup_address: string;
+  pickup_latitude: number;
+  pickup_longitude: number;
+  delivery_address: string;
+  delivery_latitude: number;
+  delivery_longitude: number;
+  customer_name?: string;
+  customer_address?: string;
+  status: string;
+  created_at: string;
+}
 
 @Component({
   selector: 'app-delivery-tracking',
@@ -58,19 +85,21 @@ export class DeliveryTracking implements OnInit, OnDestroy, AfterViewInit {
   leafletMapInstance: any = null;
   leafletTileLayer: any = null;
   leafletMarker: any = null;
+  leafletPickupMarker: any = null;
+  leafletDestMarker: any = null;
   leafletCompletedPolyline: any = null;
   leafletRemainingPolyline: any = null;
   leafletGeofenceCircle: any = null;
 
   isSimulating = true;
   simulationInterval: any = null;
-  currentWaypointIndex = 2;
+  currentWaypointIndex = 1;
 
   // Selected Vehicle Type for Ride & Logistics Booking
   selectedVehicle: 'BIKE' | 'AUTO' | 'CAB_SEDAN' | 'CAB_SUV' | 'DELIVERY_TRUCK' = 'BIKE';
   surgeMultiplier = 1.25; // Dynamic peak hours surge
 
-  pickupInput = 'Central City Hub, 5th Avenue, NY';
+  pickupInput = 'Central City Store Hub, 5th Avenue, NY';
   destinationInput = '742 Evergreen Terrace, Brooklyn, NY';
   pickupCoords: LocationCoordinates = { lat: 40.7278, lng: -74.0260, address: 'Central City Hub' };
   destCoords: LocationCoordinates = { lat: 40.7030, lng: -73.9910, address: '742 Evergreen Terrace' };
@@ -85,11 +114,9 @@ export class DeliveryTracking implements OnInit, OnDestroy, AfterViewInit {
   streetWaypoints: [number, number][] = [
     [40.7278, -74.0260],
     [40.7240, -74.0210],
-    [40.7200, -74.0160],
     [40.7160, -74.0110],
     [40.7128, -74.0060],
     [40.7095, -74.0010],
-    [40.7060, -73.9960],
     [40.7030, -73.9910]
   ];
 
@@ -101,7 +128,7 @@ export class DeliveryTracking implements OnInit, OnDestroy, AfterViewInit {
     { columnDef: 'status', header: 'Status', type: 'badge' }
   ];
 
-  trackings: any[] = [];
+  trackings: DeliveryTrackingRecord[] = [];
   orders: any[] = [];
   employees: any[] = [];
   companies: any[] = [];
@@ -117,15 +144,17 @@ export class DeliveryTracking implements OnInit, OnDestroy, AfterViewInit {
   showStartForm = false;
   showLocationForm = false;
   selectedTrackingId: number | null = null;
-  selectedActiveTrack: any = null;
+  selectedActiveTrack: DeliveryTrackingRecord | null = null;
   loading = false;
   currentUser: any = null;
   detectedEmployee: any = null;
 
-  mockLiveDeliveries = [
+  mockLiveDeliveries: DeliveryTrackingRecord[] = [
     {
       id: 101,
+      order_id: 101,
       invoice_no: 'TRIP-2026-089',
+      delivery_boy_id: 1,
       delivery_boy_name: 'Alex Vance (Rapido Captain)',
       delivery_boy_phone: '+1 (555) 234-5678',
       delivery_boy_avatar: 'linear-gradient(135deg,#6366f1,#a855f7)',
@@ -134,16 +163,23 @@ export class DeliveryTracking implements OnInit, OnDestroy, AfterViewInit {
       speed: '42 km/h',
       eta: '12 mins',
       distance_remaining: '2.4 km',
+      pickup_address: 'Central City Store Hub, 5th Avenue, NY',
+      pickup_latitude: 40.7278,
+      pickup_longitude: -74.0260,
+      delivery_address: '742 Evergreen Terrace, Brooklyn, NY',
+      delivery_latitude: 40.7030,
+      delivery_longitude: -73.9910,
       latitude: 40.7128,
       longitude: -74.0060,
       customer_name: 'Sophia Bennett',
-      customer_address: '742 Evergreen Terrace, Brooklyn, NY',
       status: 'ON_THE_WAY',
       created_at: 'Today 10:15 AM'
     },
     {
       id: 102,
+      order_id: 102,
       invoice_no: 'SWIGGY-2026-092',
+      delivery_boy_id: 2,
       delivery_boy_name: 'Marcus Chen (Zomato Partner)',
       delivery_boy_phone: '+1 (555) 876-5432',
       delivery_boy_avatar: 'linear-gradient(135deg,#10b981,#059669)',
@@ -152,10 +188,15 @@ export class DeliveryTracking implements OnInit, OnDestroy, AfterViewInit {
       speed: '38 km/h',
       eta: '18 mins',
       distance_remaining: '4.8 km',
+      pickup_address: 'Downtown Logistics Hub, Broadway, NY',
+      pickup_latitude: 40.7350,
+      pickup_longitude: -73.9980,
+      delivery_address: '120 Broadway Ave, Manhattan, NY',
+      delivery_latitude: 40.7110,
+      delivery_longitude: -74.0090,
       latitude: 40.7306,
       longitude: -73.9352,
       customer_name: 'David Miller',
-      customer_address: '120 Broadway Ave, Manhattan, NY',
       status: 'MOVING',
       created_at: 'Today 11:30 AM'
     }
@@ -175,6 +216,12 @@ export class DeliveryTracking implements OnInit, OnDestroy, AfterViewInit {
       delivery_boy_id: ['', Validators.required],
       company_id: ['', Validators.required],
       branch_id: ['', Validators.required],
+      pickup_address: ['Central City Store Hub, 5th Avenue, NY', Validators.required],
+      pickup_latitude: [40.7278, [Validators.required, Validators.min(-90), Validators.max(90)]],
+      pickup_longitude: [-74.0260, [Validators.required, Validators.min(-180), Validators.max(180)]],
+      delivery_address: ['742 Evergreen Terrace, Brooklyn, NY', Validators.required],
+      delivery_latitude: [40.7030, [Validators.required, Validators.min(-90), Validators.max(90)]],
+      delivery_longitude: [-73.9910, [Validators.required, Validators.min(-180), Validators.max(180)]],
       latitude: [40.7128, [Validators.required, Validators.min(-90), Validators.max(90)]],
       longitude: [-74.0060, [Validators.required, Validators.min(-180), Validators.max(180)]]
     });
@@ -205,6 +252,17 @@ export class DeliveryTracking implements OnInit, OnDestroy, AfterViewInit {
     }
   }
 
+  calculateDistanceKm(lat1: number, lon1: number, lat2: number, lon2: number): number {
+    const R = 6371; // Radius of earth in km
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+              Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+              Math.sin(dLon/2) * Math.sin(dLon/2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    return parseFloat((R * c).toFixed(2));
+  }
+
   setAppMode(mode: 'RIDE_BOOKING' | 'FOOD_DELIVERY' | 'FLEET_ADMIN' | 'DRIVER_CONSOLE') {
     this.appMode = mode;
     this.cdr.detectChanges();
@@ -221,8 +279,14 @@ export class DeliveryTracking implements OnInit, OnDestroy, AfterViewInit {
   }
 
   updateFareEstimate() {
-    const distanceKm = 4.2;
-    const durationMins = 14;
+    const distanceKm = this.calculateDistanceKm(
+      this.pickupCoords.lat,
+      this.pickupCoords.lng,
+      this.destCoords.lat,
+      this.destCoords.lng
+    ) || 4.2;
+    const durationMins = Math.ceil(distanceKm * 3);
+
     this.estimatedFare = this.mapsService.calculateFare(
       distanceKm,
       durationMins,
@@ -232,7 +296,13 @@ export class DeliveryTracking implements OnInit, OnDestroy, AfterViewInit {
   }
 
   getFareForVehicle(type: 'BIKE' | 'AUTO' | 'CAB_SEDAN' | 'CAB_SUV' | 'DELIVERY_TRUCK'): number {
-    return this.mapsService.calculateFare(4.2, 14, type, this.surgeMultiplier).totalFare;
+    const dist = this.calculateDistanceKm(
+      this.pickupCoords.lat,
+      this.pickupCoords.lng,
+      this.destCoords.lat,
+      this.destCoords.lng
+    ) || 4.2;
+    return this.mapsService.calculateFare(dist, Math.ceil(dist * 3), type, this.surgeMultiplier).totalFare;
   }
 
   confirmBooking() {
@@ -286,24 +356,41 @@ export class DeliveryTracking implements OnInit, OnDestroy, AfterViewInit {
     }
 
     const active = this.selectedActiveTrack || this.mockLiveDeliveries[0];
-    const currentPos = this.streetWaypoints[this.currentWaypointIndex];
+    
+    // Assign Pickup & Delivery Coordinates
+    const pickupLat = Number(active.pickup_latitude || this.pickupCoords.lat);
+    const pickupLng = Number(active.pickup_longitude || this.pickupCoords.lng);
+    const destLat = Number(active.delivery_latitude || this.destCoords.lat);
+    const destLng = Number(active.delivery_longitude || this.destCoords.lng);
+    const riderLat = Number(active.latitude || (pickupLat + destLat) / 2);
+    const riderLng = Number(active.longitude || (pickupLng + destLng) / 2);
 
-    this.leafletMapInstance = L.map(this.mapContainerRef.nativeElement).setView(currentPos, 14);
+    this.streetWaypoints = [
+      [pickupLat, pickupLng],
+      [pickupLat * 0.7 + destLat * 0.3, pickupLng * 0.7 + destLng * 0.3],
+      [riderLat, riderLng],
+      [pickupLat * 0.3 + destLat * 0.7, pickupLng * 0.3 + destLng * 0.7],
+      [destLat, destLng]
+    ];
+
+    const currentPos: [number, number] = [riderLat, riderLng];
+
+    this.leafletMapInstance = L.map(this.mapContainerRef.nativeElement).setView(currentPos, 13);
 
     this.updateLeafletTileLayer();
 
     // Geofencing Circle Boundary (2.5 km Delivery Zone)
     if (this.showGeofence) {
-      this.leafletGeofenceCircle = L.circle([40.7128, -74.0060], {
+      this.leafletGeofenceCircle = L.circle([pickupLat, pickupLng], {
         color: '#6366f1',
         fillColor: '#6366f1',
         fillOpacity: 0.08,
-        radius: 2500
+        radius: 3500
       }).addTo(this.leafletMapInstance);
-      this.leafletGeofenceCircle.bindPopup('<b>Active Operational Geofence Boundary (2.5 KM Radius)</b>');
+      this.leafletGeofenceCircle.bindPopup('<b>Active Operational Geofence Zone (3.5 KM Radius)</b>');
     }
 
-    // Delivery Vehicle Marker with Live Pulsing Radar Aura
+    // Live Delivery Rider Vehicle Pin
     const vehicleIconChar = this.selectedVehicle === 'BIKE' ? '🏍️' : this.selectedVehicle === 'AUTO' ? '🛺' : '🚗';
     const vehicleHtml = `<div class="leaflet-agent-pin"><div class="pulse-ring"></div><div class="pin-inner">${vehicleIconChar}</div></div>`;
     const agentIcon = L.divIcon({
@@ -314,26 +401,27 @@ export class DeliveryTracking implements OnInit, OnDestroy, AfterViewInit {
     });
 
     this.leafletMarker = L.marker(currentPos, { icon: agentIcon }).addTo(this.leafletMapInstance);
-    this.leafletMarker.bindPopup(`<b>${active.delivery_boy_name}</b><br>Vehicle: ${active.vehicle_no}<br>Status: ${active.status}`).openPopup();
+    this.leafletMarker.bindPopup(`<b>${active.delivery_boy_name || 'Delivery Rider'}</b><br>Vehicle: ${active.vehicle_no || 'Standard'}<br>Status: ${active.status}`).openPopup();
 
-    // Central Pickup / Warehouse Hub Pin
+    // Store / Warehouse Pickup Hub Pin (Green)
     const warehouseIcon = L.divIcon({
       className: 'custom-leaflet-marker',
       html: `<div class="leaflet-dest-pin warehouse">🏬</div>`,
       iconSize: [36, 36],
       iconAnchor: [18, 18]
     });
-    L.marker(this.streetWaypoints[0], { icon: warehouseIcon }).addTo(this.leafletMapInstance).bindPopup('<b>Pickup Hub / Restaurant</b>');
+    this.leafletPickupMarker = L.marker([pickupLat, pickupLng], { icon: warehouseIcon }).addTo(this.leafletMapInstance);
+    this.leafletPickupMarker.bindPopup(`<b>Pickup Location</b><br>${active.pickup_address || this.pickupInput}`);
 
-    // Customer Destination Pin
+    // Customer Destination Pin (Red)
     const customerIcon = L.divIcon({
       className: 'custom-leaflet-marker',
       html: `<div class="leaflet-dest-pin customer">📍</div>`,
       iconSize: [36, 36],
       iconAnchor: [18, 18]
     });
-    const destPos = this.streetWaypoints[this.streetWaypoints.length - 1];
-    L.marker(destPos, { icon: customerIcon }).addTo(this.leafletMapInstance).bindPopup(`<b>Customer: ${active.customer_name}</b><br>${active.customer_address}`);
+    this.leafletDestMarker = L.marker([destLat, destLng], { icon: customerIcon }).addTo(this.leafletMapInstance);
+    this.leafletDestMarker.bindPopup(`<b>Delivery Address (Customer: ${active.customer_name || 'Valued Customer'})</b><br>${active.delivery_address || this.destinationInput}`);
 
     this.drawRoutePolylines();
     this.cdr.detectChanges();
@@ -449,8 +537,11 @@ export class DeliveryTracking implements OnInit, OnDestroy, AfterViewInit {
       this.selectedActiveTrack.latitude = nextPos[0];
       this.selectedActiveTrack.longitude = nextPos[1];
 
-      const remDistanceKm = ((this.streetWaypoints.length - 1 - this.currentWaypointIndex) * 0.4).toFixed(1);
-      const remEtaMins = Math.ceil((this.streetWaypoints.length - 1 - this.currentWaypointIndex) * 2.5);
+      const destLat = Number(this.selectedActiveTrack.delivery_latitude || 40.7030);
+      const destLng = Number(this.selectedActiveTrack.delivery_longitude || -73.9910);
+      
+      const remDistanceKm = this.calculateDistanceKm(nextPos[0], nextPos[1], destLat, destLng);
+      const remEtaMins = Math.ceil(remDistanceKm * 3.5);
 
       this.selectedActiveTrack.distance_remaining = `${remDistanceKm} km`;
       this.selectedActiveTrack.eta = `${remEtaMins} mins`;
@@ -507,18 +598,30 @@ export class DeliveryTracking implements OnInit, OnDestroy, AfterViewInit {
     });
   }
 
-  selectTrackForMap(track: any) {
+  selectTrackForMap(track: DeliveryTrackingRecord) {
     this.selectedActiveTrack = track;
-    this.currentWaypointIndex = 2;
-    const lat = track.latitude || 40.7128;
-    const lng = track.longitude || -74.0060;
+    this.currentWaypointIndex = 1;
 
-    if (this.mapEngine === 'LEAFLET' && this.leafletMapInstance) {
-      this.leafletMapInstance.setView([lat, lng], 14);
-      if (this.leafletMarker) {
-        this.leafletMarker.setLatLng([lat, lng]);
-      }
-      this.drawRoutePolylines();
+    this.pickupInput = track.pickup_address || 'Central City Hub';
+    this.destinationInput = track.delivery_address || 'Customer Delivery Address';
+
+    this.pickupCoords = {
+      lat: Number(track.pickup_latitude || 40.7278),
+      lng: Number(track.pickup_longitude || -74.0260),
+      address: track.pickup_address
+    };
+
+    this.destCoords = {
+      lat: Number(track.delivery_latitude || 40.7030),
+      lng: Number(track.delivery_longitude || -73.9910),
+      address: track.delivery_address
+    };
+
+    const lat = Number(track.latitude || 40.7128);
+    const lng = Number(track.longitude || -74.0060);
+
+    if (this.mapEngine === 'LEAFLET') {
+      this.renderLeafletMap();
     } else if (this.mapEngine === 'GOOGLE' && this.googleMapInstance) {
       this.googleMapInstance.setCenter({ lat, lng });
     }
@@ -534,7 +637,9 @@ export class DeliveryTracking implements OnInit, OnDestroy, AfterViewInit {
       list = list.filter(t =>
         (t.invoice_no || '').toLowerCase().includes(q) ||
         (t.delivery_boy_name || '').toLowerCase().includes(q) ||
-        (t.customer_name || '').toLowerCase().includes(q)
+        (t.customer_name || '').toLowerCase().includes(q) ||
+        (t.pickup_address || '').toLowerCase().includes(q) ||
+        (t.delivery_address || '').toLowerCase().includes(q)
       );
     }
     return list;
@@ -592,8 +697,16 @@ export class DeliveryTracking implements OnInit, OnDestroy, AfterViewInit {
             const order = this.orders.find(o => o.id === item.order_id);
             return {
               ...item,
-              delivery_boy_name: dboy ? dboy.name : `ID: ${item.delivery_boy_id}`,
-              invoice_no: order ? order.invoice_no : `Order #${item.order_id}`,
+              delivery_boy_name: item.delivery_boy_name || (dboy ? dboy.name : `ID: ${item.delivery_boy_id}`),
+              invoice_no: item.invoice_no || (order ? order.invoice_no : `Order #${item.order_id}`),
+              pickup_address: item.pickup_address || 'Central City Store Hub',
+              pickup_latitude: Number(item.pickup_latitude || 40.7278),
+              pickup_longitude: Number(item.pickup_longitude || -74.0260),
+              delivery_address: item.delivery_address || 'Customer Delivery Address',
+              delivery_latitude: Number(item.delivery_latitude || 40.7030),
+              delivery_longitude: Number(item.delivery_longitude || -73.9910),
+              latitude: Number(item.latitude || 40.7128),
+              longitude: Number(item.longitude || -74.0060),
               created_at: item.created_at ? new Date(item.created_at).toLocaleString() : '-'
             };
           });
@@ -676,8 +789,8 @@ export class DeliveryTracking implements OnInit, OnDestroy, AfterViewInit {
     const payload = {
       order_id: original.order_id,
       delivery_boy_id: original.delivery_boy_id,
-      company_id: original.company_id,
-      branch_id: original.branch_id,
+      company_id: (original as any).company_id || 1,
+      branch_id: (original as any).branch_id || 1,
       latitude: Number(this.locationForm.value.latitude),
       longitude: Number(this.locationForm.value.longitude),
       status: original.status

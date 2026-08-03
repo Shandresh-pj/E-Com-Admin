@@ -30,6 +30,15 @@ export class SocketService {
       }
       this.currentToken = token;
     }
+    if (!this.currentToken) {
+      try {
+        const storedToken = localStorage.getItem('token') || localStorage.getItem('auth_token') || sessionStorage.getItem('token');
+        if (storedToken) {
+          this.currentToken = storedToken;
+        }
+      } catch (e) {}
+    }
+
     if (!this.currentToken) return;
 
     if (this.socket && this.socket.connected) return;

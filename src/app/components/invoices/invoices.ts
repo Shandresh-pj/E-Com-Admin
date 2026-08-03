@@ -191,10 +191,10 @@ export class Invoices implements OnInit, OnDestroy {
     if (!this.selectedOrder) return;
     const payload = JSON.stringify({
       inv: this.selectedOrder.invoice_no || 'N/A',
-      cmp: this.currentCompany?.name,
+      cmp: this.currentCompany?.name || 'SVK E-Commerce',
       tot: this.calculatePreviewTotal().toFixed(2),
     });
-    const url = `https://chart.googleapis.com/chart?cht=qr&chs=200x200&chl=${encodeURIComponent(payload)}&choe=UTF-8&chld=H|1`;
+    const url = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(payload)}&color=1e1b4b&bgcolor=ffffff`;
     this.qrRawUrl = url;
     this.liveQrUrl = this.sanitizer.bypassSecurityTrustUrl(url);
     this.cdr.detectChanges();

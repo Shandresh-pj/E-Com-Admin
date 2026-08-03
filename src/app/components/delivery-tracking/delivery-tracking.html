@@ -175,7 +175,7 @@
             <div class="shipment-card animate-pop" [class.selected]="selectedActiveTrack?.id === track.id" (click)="selectTrackForMap(track)">
               <div class="card-top">
                 <span class="invoice-tag">{{ track.invoice_no }}</span>
-                <span class="status-chip" [class]="track.status?.toLowerCase()">{{ track.status }}</span>
+                <span class="status-chip" [class]="(track.status || '').toLowerCase()">{{ track.status }}</span>
               </div>
               <div class="card-agent-row">
                 <div class="agent-avatar" [style.background]="track.delivery_boy_avatar || 'linear-gradient(135deg,#6366f1,#a855f7)'">
@@ -227,17 +227,17 @@
 
               <div class="destination-details">
                 <div class="dest-row">
-                  <mat-icon color="primary">person</mat-icon>
+                  <mat-icon color="primary">store</mat-icon>
                   <div>
-                    <span class="label">Customer</span>
-                    <span class="value">{{ selectedActiveTrack.customer_name }}</span>
+                    <span class="label">Pickup Location &amp; Coordinates</span>
+                    <span class="value">{{ selectedActiveTrack.pickup_address }} ({{ selectedActiveTrack.pickup_latitude }}, {{ selectedActiveTrack.pickup_longitude }})</span>
                   </div>
                 </div>
                 <div class="dest-row">
                   <mat-icon color="accent">location_on</mat-icon>
                   <div>
-                    <span class="label">Delivery Address</span>
-                    <span class="value">{{ selectedActiveTrack.customer_address }}</span>
+                    <span class="label">Delivery Destination &amp; Coordinates</span>
+                    <span class="value">{{ selectedActiveTrack.delivery_address || selectedActiveTrack.customer_address }} ({{ selectedActiveTrack.delivery_latitude }}, {{ selectedActiveTrack.delivery_longitude }})</span>
                   </div>
                 </div>
               </div>
@@ -303,7 +303,7 @@
             <div class="shipment-card animate-pop" [class.selected]="selectedActiveTrack?.id === track.id" (click)="selectTrackForMap(track)">
               <div class="card-top">
                 <span class="invoice-tag">{{ track.invoice_no }}</span>
-                <span class="status-chip" [class]="track.status?.toLowerCase()">{{ track.status }}</span>
+                <span class="status-chip" [class]="(track.status || '').toLowerCase()">{{ track.status }}</span>
               </div>
               <div class="card-agent-row">
                 <div class="agent-avatar" [style.background]="track.delivery_boy_avatar">

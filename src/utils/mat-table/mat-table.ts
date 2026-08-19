@@ -1,6 +1,7 @@
 import {
   AfterViewInit,
   ChangeDetectorRef,
+  ChangeDetectionStrategy,
   Component,
   EventEmitter,
   Input,
@@ -38,6 +39,7 @@ export interface TableColumn {
 @Component({
   selector: 'app-mat-table',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule,
     MatTableModule,
@@ -114,12 +116,10 @@ export class MatTable implements OnInit, AfterViewInit {
   }
 
   private refreshView() {
-    setTimeout(() => {
-      try {
-        this.table?.renderRows();
-      } catch {}
-      this.cdr.detectChanges();
-    });
+    try {
+      this.table?.renderRows();
+    } catch {}
+    this.cdr.markForCheck();
   }
 
   applyFilter(event: Event | string) {

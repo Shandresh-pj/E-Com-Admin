@@ -4,6 +4,7 @@ import { SessionService } from '../Services/session.service';
 import { AuthService } from '../Services/auth.service';
 import { PermissionService } from '../Services/permissions.service';
 import { TokenService } from '../Services/token.service';
+import { environment } from 'src/environment/environment';
 import { map } from 'rxjs/operators';
 
 export const RoleGuard: CanActivateFn = (route, state) => {
@@ -13,45 +14,37 @@ export const RoleGuard: CanActivateFn = (route, state) => {
   const permissionService = inject(PermissionService);
   const tokenService = inject(TokenService);
 
-  if (!tokenService.getToken()) {
+  if (!tokenService.isLoggedIn()) {
+    tokenService.clearAll();
     router.navigate(['/authentication/login']);
     return false;
   }
 
-  // Wait for session data to be loaded
+  // Wait for session data to be loaded before evaluating permissions.
+  // This prevents a race condition on browser refresh where the session
+  // is still hydrating when the guard first runs.
   return session.waitForLoad().pipe(
     map(() => {
-      // Super Admin always gets access
+      // Super Admin always gets full access — no further checks needed.
       if (auth.isSuperAdmin()) {
         return true;
       }
 
       const url = state.url.split('?')[0];
 
-      // 1. Dynamic DB permission check
+      // Primary check: DB-driven permission for this page path.
       if (permissionService.hasPagePermission(url)) {
         return true;
       }
 
-      // 2. Static role check from route data
-      const expectedRoles: string[] = route.data['roles'] ?? [];
-      const userType = auth.getUserType();
-
-      if (expectedRoles.length > 0) {
-        const normalizedUserType = String(userType).toLowerCase().trim();
-        const matchesRole = expectedRoles.some(r => String(r).toLowerCase().trim() === normalizedUserType);
-        if (matchesRole) {
-          return true;
-        }
-      } else {
-        // Fallback: allow navigation if authenticated and route has no explicit restriction
-        return true;
+      // SEC-15: Never expose internal route/role info in production logs.
+      if (!environment.production) {
+        console.warn(`[RoleGuard] Access denied for userType="${auth.getUserType()}" on URL: ${url}`);
       }
 
-      // Deny & redirect to 403 unauthorized page
-      console.warn(`[RoleGuard] Access denied for userType: ${userType} to URL: ${url}`);
       router.navigate(['/unauthorized']);
       return false;
     })
   );
 };
+

@@ -87,9 +87,17 @@ export class Approvals implements OnInit, OnDestroy {
     private cdr: ChangeDetectorRef
   ) {}
 
+  // canApprove is true when the user has the APPROVE permission on /approvals
+  // OR is Super Admin. We do NOT check getUserType() === 'Admin' here because
+  // that hardcodes a role name and bypasses the DB permission system.
+  get canApproveRequests(): boolean {
+    return this.perm.hasRoleAction('canApprove', '/approvals');
+  }
+
   ngOnInit() {
-    this.isAdmin = this.authService.isSuperAdmin() || this.authService.getUserType() === 'Admin';
     this.isSuperAdmin = this.authService.isSuperAdmin();
+    // isAdmin derives from DB-assigned approve permission, not role name
+    this.isAdmin = this.canApproveRequests;
 
     this.loadRequests();
     this.setupRealtimeSocket();

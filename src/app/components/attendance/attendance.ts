@@ -130,17 +130,11 @@ export class Attendance implements OnInit, OnDestroy {
   filteredBranches: any[] = [];
 
   get isAdminUser(): boolean {
-    if (!this.currentUser) return false;
-    const type = String(this.currentUser.userType || this.currentUser.user_type || '').toLowerCase();
-    const role = String(this.currentUser.role || '').toLowerCase();
-    return !!(
-      this.currentUser.isSuperAdmin ||
-      type === 'super_admin' ||
-      type === 'admin' ||
-      role === 'super_admin' ||
-      role === 'admin' ||
-      role === 'super admin'
-    );
+    // Use auth service + DB permission check instead of inspecting raw user object properties.
+    // perm.hasRoleAction returns true for Super Admin automatically.
+    return this.auth.isSuperAdmin() ||
+           this.perm.hasRoleAction('canManage', '/attendance') ||
+           this.perm.hasRoleAction('canUpdate', '/attendance');
   }
 
   constructor(

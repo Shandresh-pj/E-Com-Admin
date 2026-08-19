@@ -64,18 +64,17 @@ export class SocketService {
       });
 
       this.socket.onAny((event: string, data: any) => {
-        this.ngZone.run(() => {
-          console.log(`[Socket.IO] Real-time event '${event}':`, data);
-          this.eventSubject.next({ event, data });
+        this.eventSubject.next({ event, data });
 
-          if (event === 'permissions-updated') {
-            console.log('Received updated permissions via socket', data);
+        if (event === 'permissions-updated') {
+          this.ngZone.run(() => {
             this.sessionRefreshSubject.next({ permissions: data });
-          } else if (event === 'logout') {
-            console.log('Force logout event received via socket', data);
+          });
+        } else if (event === 'logout') {
+          this.ngZone.run(() => {
             this.sessionExpiredSubject.next();
-          }
-        });
+          });
+        }
       });
 
       this.socket.on('disconnect', (reason) => {

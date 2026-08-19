@@ -81,7 +81,10 @@ export class Stocks implements OnInit, OnDestroy {
   }
 
   get isAdmin(): boolean {
-    return this.authService.isSuperAdmin() || this.authService.getUserType() === 'Admin';
+    // Use DB permission check instead of hardcoded role name.
+    // hasRoleAction returns true for Super Admin automatically.
+    return this.perm.hasRoleAction('canManage', '/stocks') ||
+           this.perm.hasRoleAction('canUpdate', '/stocks');
   }
 
   abs(value: number): number {

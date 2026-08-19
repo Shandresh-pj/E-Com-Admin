@@ -93,7 +93,10 @@ export class BranchStocks implements OnInit, OnDestroy {
   }
 
   get isAdmin(): boolean {
-    return this.authService.isSuperAdmin() || this.authService.getUserType() === 'Admin';
+    // Use DB permission check instead of hardcoded role name.
+    // hasRoleAction returns true for Super Admin automatically.
+    return this.perm.hasRoleAction('canManage', '/branch-stocks') ||
+           this.perm.hasRoleAction('canUpdate', '/branch-stocks');
   }
 
   ngOnInit() {

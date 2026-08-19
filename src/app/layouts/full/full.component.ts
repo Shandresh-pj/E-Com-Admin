@@ -1,10 +1,10 @@
 import { BreakpointObserver, MediaMatcher } from '@angular/cdk/layout';
 import { Component, OnInit, ViewChild, ViewEncapsulation, effect, signal, untracked } from '@angular/core';
-import { Subscription } from 'rxjs';
+import { Subscription, Subject } from 'rxjs';
 import { MatSidenav, MatSidenavContent } from '@angular/material/sidenav';
 import { CoreService } from 'src/app/services/core.service';
 
-import { filter } from 'rxjs/operators';
+import { filter, debounceTime } from 'rxjs/operators';
 import { NavigationEnd, Router } from '@angular/router';
 import { NavService } from '../../services/nav.service';
 import { RouterModule } from '@angular/router';
@@ -66,11 +66,11 @@ export class FullComponent implements OnInit {
    * them are dropped.
    */
   private buildNavItems() {
+    // Super Admin sees the complete navigation — no DB permission check needed.
     if (this.authService.isSuperAdmin()) return navItems;
 
-    const currentUserType = this.authService.getUserType();
-    const normUserType = String(currentUserType).toLowerCase().trim();
-
+    // For all other roles, visibility is driven exclusively by DB-granted permissions.
+    // Collect paths granted via menu assignment (JWT menus array).
     const grantedPaths = new Set(
       this.authService.getMenus()
         .filter((m: any) => m && (typeof m === 'object' ? m.path || m.route : m))
@@ -81,17 +81,24 @@ export class FullComponent implements OnInit {
     );
 
     const visible = navItems.filter((item: NavItem) => {
-      if (!item.route) return true; // captions are pruned below
+      // Section captions (navCap items have no route) — include tentatively;
+      // they are pruned below if no items under them are visible.
+      if (!item.route) return true;
+
       const itemRouteNorm = item.route.toLowerCase().replace(/\/+$/, '');
 
-      if (grantedPaths.has(itemRouteNorm) || grantedPaths.has('all') || grantedPaths.has('*')) return true;
-      if (this.permissionService.hasPagePermission(item.route)) return true;
-      if (item.roles && item.roles.length) {
-        return item.roles.some(r => String(r).toLowerCase().trim() === normUserType);
+      // Explicit menu grant covers all paths
+      if (grantedPaths.has(itemRouteNorm) || grantedPaths.has('all') || grantedPaths.has('*')) {
+        return true;
       }
-      return false;
+
+      // DB permission check (covers universal paths + any DB-granted permission).
+      // NOTE: item.roles is intentionally NOT used here — sidebar visibility must
+      // match what RoleGuard enforces. Static role arrays bypass DB permissions.
+      return this.permissionService.hasPagePermission(item.route);
     });
 
+    // Prune section captions that have no visible items beneath them.
     return visible.filter((item: NavItem, i: number) => {
       if (!item.navCap) return true;
       for (let j = i + 1; j < visible.length; j++) {
@@ -165,12 +172,21 @@ export class FullComponent implements OnInit {
       });
   }
 
+  private badgeRefresh$ = new Subject<void>();
+
   ngOnInit(): void {
-    this.loadDynamicMenus();
+    // Note: loadDynamicMenus is handled reactively by effect() in constructor
+
+    // Debounce rapid badge count requests across socket events
+    this.socketSubscription = new Subscription();
+    this.socketSubscription.add(
+      this.badgeRefresh$.pipe(debounceTime(500)).subscribe(() => {
+        this.fetchBadgeCounts();
+      })
+    );
 
     // Subscribe to WebSocket events
     this.socketService.connect();
-    this.socketSubscription = new Subscription();
 
     this.socketSubscription.add(
       this.socketService.on('new-notification').subscribe((notif: any) => {
@@ -188,19 +204,19 @@ export class FullComponent implements OnInit {
 
     this.socketSubscription.add(
       this.socketService.on('product-approval-update').subscribe(() => {
-        this.fetchBadgeCounts();
+        this.badgeRefresh$.next();
       })
     );
 
     this.socketSubscription.add(
       this.socketService.on('stock-update').subscribe(() => {
-        this.fetchBadgeCounts();
+        this.badgeRefresh$.next();
       })
     );
 
     this.socketSubscription.add(
       this.socketService.on('branch-transfer-update').subscribe(() => {
-        this.fetchBadgeCounts();
+        this.badgeRefresh$.next();
       })
     );
 
@@ -236,8 +252,9 @@ export class FullComponent implements OnInit {
       }
     });
 
-    const isAdmin = this.authService.isSuperAdmin() || this.authService.getUserType() === 'Admin';
-    if (isAdmin) {
+    // Only load pending approvals count for users who can approve products
+    const canApproveProducts = this.permissionService.canApproveProducts();
+    if (canApproveProducts) {
       this.commonService.getApi('products', { status: 'Pending Approval', limit: 1 }).subscribe({
         next: (res: any) => {
           this.pendingApprovalsCount = res?.total || 0;
@@ -328,7 +345,6 @@ export class FullComponent implements OnInit {
       { id: 26, name: 'Invoice Generator', path: '/invoices', icon: 'bi-file-earmark-text-fill', isActive: true },
       { id: 27, name: 'Approvals', path: '/approvals', icon: 'bi-patch-check-fill', isActive: true },
       { id: 28, name: 'Workforce Requests', path: '/workforce-requests', icon: 'bi-briefcase-fill', isActive: true },
-      { id: 29, name: 'Leave Management', path: '/leave', icon: 'bi-calendar-x-fill', isActive: true },
       { id: 30, name: 'CRM Contacts', path: '/crm-contacts', icon: 'bi-person-rolodex', isActive: true },
       { id: 31, name: 'Profit & Loss', path: '/profit-loss', icon: 'bi-pie-chart-fill', isActive: true },
       { id: 32, name: 'Manage Plans', path: '/manage-subscription-plans', icon: 'bi-gem', isActive: true },
@@ -431,7 +447,10 @@ export class FullComponent implements OnInit {
       },
     ];
 
-    const isAdmin = this.authService.isSuperAdmin() || this.authService.getUserType() === 'Admin';
+    // SEC-12: Use DB-driven permission check instead of hardcoded userType string comparison.
+    // getUserType() === 'Admin' bypassed the RBAC system — any role string mismatch breaks it.
+    const isAdmin = this.authService.isSuperAdmin() ||
+                    this.permissionService.hasRoleAction('canRead', '/alerts');
     let colorToggle = true;
 
     for (const group of groupings) {

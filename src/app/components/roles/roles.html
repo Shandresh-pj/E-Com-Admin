@@ -1,18 +1,14 @@
 <mat-card class="cardWithShadow theme-card">
 
     <mat-card-header>
-
         <div class="header-container">
-
             <mat-card-title class="m-b-0">
                 {{ 'roles.title' | translate }}
             </mat-card-title>
-
         </div>
-
     </mat-card-header>
 
-    @if (perm.hasRoleAction('canCreate')) {
+    @if ((isEditing && perm.hasRoleAction('canUpdate')) || (!isEditing && perm.hasRoleAction('canCreate'))) {
     <mat-card-content class="b-t-1">
 
         <form [formGroup]="RolesForm">
@@ -39,8 +35,8 @@
                     {{ 'common.cancel' | translate }}
                 </button>
 
-                <button mat-flat-button color="primary" (click)="onsubmit(RolesForm)">
-                    {{ 'common.submit' | translate }}
+                <button mat-flat-button color="primary" [disabled]="isSubmitting" (click)="onsubmit(RolesForm)">
+                    {{ isEditing ? ('common.update' | translate) : ('common.submit' | translate) }}
                 </button>
 
             </div>
@@ -52,11 +48,18 @@
 
     <mat-card-content class="b-t-1">
 
-        <app-mat-table [columns]="tableColumns" [tableData]="Roles" [showAction]="false" [Extra_Column]="false">
+        <app-mat-table
+            [columns]="tableColumns"
+            [tableData]="Roles"
+            [showAction]="perm.hasRoleAction('canUpdate') || perm.hasRoleAction('canDelete')"
+            [showEdit]="perm.hasRoleAction('canUpdate')"
+            [showDelete]="perm.hasRoleAction('canDelete')"
+            [Extra_Column]="false"
+            (editClick)="onEdit($event)"
+            (deleteClick)="onDelete($event)">
         </app-mat-table>
 
     </mat-card-content>
-
 
 
 </mat-card>

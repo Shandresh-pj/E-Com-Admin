@@ -1,315 +1,535 @@
-<div class="liquid-wrapper">
-  <!-- Ambient Liquid Glow Background Orbs -->
-  <div class="liquid-bg-orb liquid-bg-orb-1"></div>
-  <div class="liquid-bg-orb liquid-bg-orb-2"></div>
-  <div class="liquid-bg-orb liquid-bg-orb-3"></div>
+<div class="cp-root">
 
-  <!-- Header Banner -->
-  <header class="glass-header">
-    <div class="header-left">
-      <div class="header-badge">
-        <span class="pulse-dot"></span>
-        PROMOTION ENGINE
+
+  <!-- ──────────────── AMBIENT ORBS ──────────────── -->
+  <div class="cp-orbs" aria-hidden="true">
+    <div class="cp-orb cp-orb--violet"></div>
+    <div class="cp-orb cp-orb--pink"></div>
+    <div class="cp-orb cp-orb--cyan"></div>
+    <div class="cp-grid-overlay"></div>
+  </div>
+
+  <!-- ──────────────── HERO HEADER ──────────────── -->
+  <header class="cp-hero">
+    <div class="cp-hero__left">
+
+      <div class="cp-hero__badge">
+        <span class="cp-badge__dot"></span>
+        <span class="cp-badge__text">PROMOTION ENGINE</span>
+        <span class="cp-badge__sep">·</span>
+        <span class="cp-badge__text">LIVE</span>
       </div>
-      <h1 class="header-title">Subscription Vouchers & Coupons</h1>
-      <p class="header-subtitle">Create, manage, and distribute enterprise discount passcodes and multi-tier trial vouchers.</p>
+
+      <h1 class="cp-hero__title">
+        Vouchers &amp;
+        <span class="cp-gradient-text">Coupons</span>
+      </h1>
+
+      <p class="cp-hero__sub">
+        Create, distribute and track enterprise discount codes, trial extensions, and promotional vouchers.
+      </p>
+
     </div>
 
-    <div class="header-actions">
-      <button class="glass-btn primary-glass-btn" (click)="toggleForm()">
-        <mat-icon>{{ showForm() ? 'close' : 'add_circle' }}</mat-icon>
-        <span>{{ showForm() ? 'Close Form' : 'Create New Voucher' }}</span>
+    <div class="cp-hero__right">
+      <button
+        class="cp-btn-primary"
+        [class.cp-btn-primary--close]="showForm()"
+        (click)="toggleForm()"
+        id="toggle-form-btn">
+        <span class="cp-btn-primary__bg"></span>
+        <mat-icon class="cp-btn-primary__icon">
+          {{ showForm() ? 'close' : 'add' }}
+        </mat-icon>
+        <span class="cp-btn-primary__label">
+          {{ showForm() ? 'Cancel' : 'New Voucher' }}
+        </span>
       </button>
     </div>
   </header>
 
-  <!-- Interactive Voucher Creator Drawer / Form -->
+  <!-- ──────────────── STATS RIBBON ──────────────── -->
+  <div class="cp-stats">
+    <div class="cp-stat cp-stat--indigo">
+      <div class="cp-stat__icon-wrap">
+        <mat-icon>confirmation_number</mat-icon>
+      </div>
+      <div class="cp-stat__body">
+        <span class="cp-stat__num">{{ coupons().length }}</span>
+        <span class="cp-stat__label">Total</span>
+      </div>
+      <div class="cp-stat__glow"></div>
+    </div>
+
+    <div class="cp-stat cp-stat--emerald">
+      <div class="cp-stat__icon-wrap">
+        <mat-icon>verified</mat-icon>
+      </div>
+      <div class="cp-stat__body">
+        <span class="cp-stat__num">{{ activeCount() }}</span>
+        <span class="cp-stat__label">Active</span>
+      </div>
+      <div class="cp-stat__glow"></div>
+    </div>
+
+    <div class="cp-stat cp-stat--rose">
+      <div class="cp-stat__icon-wrap">
+        <mat-icon>block</mat-icon>
+      </div>
+      <div class="cp-stat__body">
+        <span class="cp-stat__num">{{ inactiveCount() }}</span>
+        <span class="cp-stat__label">Inactive</span>
+      </div>
+      <div class="cp-stat__glow"></div>
+    </div>
+
+    <div class="cp-stat cp-stat--amber">
+      <div class="cp-stat__icon-wrap">
+        <mat-icon>local_fire_department</mat-icon>
+      </div>
+      <div class="cp-stat__body">
+        <span class="cp-stat__num">{{ totalClaims() }}</span>
+        <span class="cp-stat__label">Claims</span>
+      </div>
+      <div class="cp-stat__glow"></div>
+    </div>
+  </div>
+
+  <!-- ──────────────── CREATE FORM DRAWER ──────────────── -->
   @if (showForm()) {
-    <div class="glass-card form-drawer">
-      <div class="form-drawer-header">
-        <div class="drawer-title">
-          <mat-icon class="drawer-icon">auto_awesome</mat-icon>
-          <span>Generate Cyber Voucher</span>
+    <div class="cp-drawer" id="coupon-form-drawer">
+
+      <!-- Drawer top neon bar -->
+      <div class="cp-drawer__topbar">
+        <div class="cp-drawer__topbar-icon">
+          <mat-icon>auto_awesome</mat-icon>
         </div>
-        <p class="drawer-hint">Configure custom rules, discount values, and valid timeframes for subscriptions.</p>
+        <div class="cp-drawer__topbar-text">
+          <h2 class="cp-drawer__title">Generate Voucher</h2>
+          <p class="cp-drawer__subtitle">Configure discount rules, validity windows, and usage limits.</p>
+        </div>
       </div>
 
-      <div class="drawer-content-grid">
-        <!-- Form Input Controls -->
-        <form [formGroup]="couponForm" (ngSubmit)="onSubmit()" class="coupon-form">
-          <div class="form-grid">
-            
-            <!-- Code -->
-            <div class="form-group">
-              <label class="form-label">Voucher Passcode</label>
-              <div class="input-wrapper">
-                <mat-icon class="input-icon">confirmation_number</mat-icon>
-                <input 
-                  type="text" 
-                  formControlName="code" 
-                  placeholder="e.g. CYBER50" 
+      <!-- Drawer body grid: form | preview -->
+      <div class="cp-drawer__body">
+
+        <!-- ── FORM ─────────────────────────────── -->
+        <form
+          [formGroup]="couponForm"
+          (ngSubmit)="onSubmit()"
+          class="cp-form"
+          autocomplete="off"
+          novalidate>
+
+          <div class="cp-form__grid">
+
+            <!-- Voucher Code -->
+            <div class="cp-field cp-field--full">
+              <label class="cp-field__label" for="cp-code">
+                <mat-icon class="cp-field__lbl-icon">tag</mat-icon>
+                Voucher Code
+              </label>
+              <div class="cp-field__wrap">
+                <input
+                  id="cp-code"
+                  type="text"
+                  formControlName="code"
+                  placeholder="E.G. SAVE50"
+                  class="cp-field__input cp-field__input--mono"
                   (input)="formatCodeInput($event)"
-                  class="glass-input code-input">
+                  autocomplete="off"
+                  spellcheck="false">
+                <span class="cp-field__tag">A–Z · 0–9 · - _</span>
               </div>
               @if (couponForm.get('code')?.touched && couponForm.get('code')?.invalid) {
-                <div class="form-error">
-                  Must be uppercase alphanumeric (A-Z, 0-9, -, _)
-                </div>
+                <p class="cp-field__error">
+                  <mat-icon>error_outline</mat-icon>
+                  Uppercase alphanumeric only (A-Z, 0-9, -, _), max 30 chars.
+                </p>
               }
             </div>
 
-            <!-- Type -->
-            <div class="form-group">
-              <label class="form-label">Discount Benefit Type</label>
-              <div class="input-wrapper">
-                <mat-icon class="input-icon">tune</mat-icon>
-                <select formControlName="discount_type" class="glass-input glass-select">
+            <!-- Discount Type -->
+            <div class="cp-field">
+              <label class="cp-field__label" for="cp-type">
+                <mat-icon class="cp-field__lbl-icon">tune</mat-icon>
+                Discount Type
+              </label>
+              <div class="cp-field__wrap cp-field__wrap--select">
+                <select id="cp-type" formControlName="discount_type" class="cp-field__input cp-field__select">
                   @for (t of discountTypes; track t.value) {
                     <option [value]="t.value">{{ t.label }}</option>
                   }
                 </select>
+                <mat-icon class="cp-field__chevron">expand_more</mat-icon>
               </div>
             </div>
 
-            <!-- Dynamic Value depending on type -->
-            @if (['percentage', 'flat', 'extra_days', 'extra_months'].includes(couponForm.get('discount_type')?.value)) {
-              <div class="form-group">
-                <label class="form-label">
-                  {{ couponForm.get('discount_type')?.value === 'percentage' ? 'Percentage Off (%)' : (couponForm.get('discount_type')?.value === 'flat' ? 'Flat Amount (₹)' : 'Bonus Units') }}
+            <!-- Dynamic value fields -->
+            @if (['percentage','flat','extra_days','extra_months'].includes(couponForm.get('discount_type')?.value)) {
+              <div class="cp-field">
+                <label class="cp-field__label" for="cp-val">
+                  <mat-icon class="cp-field__lbl-icon">analytics</mat-icon>
+                  {{ couponForm.get('discount_type')?.value === 'percentage' ? 'Percentage (%)' : couponForm.get('discount_type')?.value === 'flat' ? 'Amount (₹)' : 'Bonus Units' }}
                 </label>
-                <div class="input-wrapper">
-                  <mat-icon class="input-icon">analytics</mat-icon>
-                  <input type="number" formControlName="discount_value" placeholder="10" class="glass-input">
+                <div class="cp-field__wrap">
+                  <input id="cp-val" type="number" formControlName="discount_value" placeholder="10" class="cp-field__input" min="0">
                 </div>
               </div>
             }
 
             @if (couponForm.get('discount_type')?.value === 'free_trial_extension') {
-              <div class="form-group">
-                <label class="form-label">Trial Extension (Days)</label>
-                <div class="input-wrapper">
-                  <mat-icon class="input-icon">timelapse</mat-icon>
-                  <input type="number" formControlName="free_trial_days" placeholder="14" class="glass-input">
+              <div class="cp-field">
+                <label class="cp-field__label" for="cp-trial">
+                  <mat-icon class="cp-field__lbl-icon">timelapse</mat-icon>
+                  Trial Extension (Days)
+                </label>
+                <div class="cp-field__wrap">
+                  <input id="cp-trial" type="number" formControlName="free_trial_days" placeholder="14" class="cp-field__input" min="1">
                 </div>
               </div>
             }
 
             @if (couponForm.get('discount_type')?.value === 'buy_x_get_y') {
-              <div class="form-group">
-                <label class="form-label">Buy Months (X)</label>
-                <div class="input-wrapper">
-                  <mat-icon class="input-icon">shopping_bag</mat-icon>
-                  <input type="number" formControlName="buy_x_months" placeholder="3" class="glass-input">
+              <div class="cp-field">
+                <label class="cp-field__label" for="cp-buyx">
+                  <mat-icon class="cp-field__lbl-icon">shopping_bag</mat-icon>
+                  Buy (X) Months
+                </label>
+                <div class="cp-field__wrap">
+                  <input id="cp-buyx" type="number" formControlName="buy_x_months" placeholder="3" class="cp-field__input" min="1">
                 </div>
               </div>
-              <div class="form-group">
-                <label class="form-label">Free Months (Y)</label>
-                <div class="input-wrapper">
-                  <mat-icon class="input-icon">card_giftcard</mat-icon>
-                  <input type="number" formControlName="get_y_months" placeholder="1" class="glass-input">
+              <div class="cp-field">
+                <label class="cp-field__label" for="cp-gety">
+                  <mat-icon class="cp-field__lbl-icon">card_giftcard</mat-icon>
+                  Free (Y) Months
+                </label>
+                <div class="cp-field__wrap">
+                  <input id="cp-gety" type="number" formControlName="get_y_months" placeholder="1" class="cp-field__input" min="1">
                 </div>
               </div>
             }
 
             <!-- Usage Limit -->
-            <div class="form-group">
-              <label class="form-label">Max Claim Count (0 = Unlimited)</label>
-              <div class="input-wrapper">
-                <mat-icon class="input-icon">people_alt</mat-icon>
-                <input type="number" formControlName="usage_limit" placeholder="100" class="glass-input">
+            <div class="cp-field">
+              <label class="cp-field__label" for="cp-usage">
+                <mat-icon class="cp-field__lbl-icon">people_alt</mat-icon>
+                Max Claims
+              </label>
+              <div class="cp-field__wrap">
+                <input id="cp-usage" type="number" formControlName="usage_limit" placeholder="100" class="cp-field__input" min="0">
+                <span class="cp-field__hint">0 = unlimited</span>
               </div>
             </div>
 
-            <!-- Min Order Value -->
-            <div class="form-group">
-              <label class="form-label">Min Cart Value (₹)</label>
-              <div class="input-wrapper">
-                <mat-icon class="input-icon">account_balance_wallet</mat-icon>
-                <input type="number" formControlName="min_order_value" placeholder="0" class="glass-input">
+            <!-- Min Order -->
+            <div class="cp-field">
+              <label class="cp-field__label" for="cp-min">
+                <mat-icon class="cp-field__lbl-icon">account_balance_wallet</mat-icon>
+                Min Cart (₹)
+              </label>
+              <div class="cp-field__wrap">
+                <input id="cp-min" type="number" formControlName="min_order_value" placeholder="0" class="cp-field__input" min="0">
               </div>
             </div>
 
-            <!-- Validity Dates -->
-            <div class="form-group">
-              <label class="form-label">Valid From</label>
-              <div class="input-wrapper">
-                <mat-icon class="input-icon">event</mat-icon>
-                <input type="date" formControlName="valid_from" class="glass-input">
+            <!-- Dates row -->
+            <div class="cp-field">
+              <label class="cp-field__label" for="cp-from">
+                <mat-icon class="cp-field__lbl-icon">event</mat-icon>
+                Valid From
+              </label>
+              <div class="cp-field__wrap">
+                <input id="cp-from" type="date" formControlName="valid_from" class="cp-field__input">
               </div>
             </div>
 
-            <div class="form-group">
-              <label class="form-label">Valid Until</label>
-              <div class="input-wrapper">
-                <mat-icon class="input-icon">event_busy</mat-icon>
-                <input type="date" formControlName="valid_until" class="glass-input">
+            <div class="cp-field">
+              <label class="cp-field__label" for="cp-until">
+                <mat-icon class="cp-field__lbl-icon">event_busy</mat-icon>
+                Valid Until
+              </label>
+              <div class="cp-field__wrap">
+                <input id="cp-until" type="date" formControlName="valid_until" class="cp-field__input">
               </div>
             </div>
-          </div>
 
-          <div class="form-actions">
-            <button type="button" class="glass-btn secondary-btn" (click)="toggleForm()">Cancel</button>
-            <button type="submit" class="glass-btn submit-btn" [disabled]="couponForm.invalid || isLoading()">
-              <mat-icon>verified</mat-icon>
-              <span>Publish Voucher Passcode</span>
+          </div><!-- /form grid -->
+
+          <!-- Actions -->
+          <div class="cp-form__actions">
+            <button type="button" class="cp-btn-ghost" (click)="toggleForm()">
+              <mat-icon>close</mat-icon>
+              Cancel
+            </button>
+            <button
+              type="submit"
+              class="cp-btn-submit"
+              [disabled]="couponForm.invalid || isLoading()">
+              @if (isLoading()) {
+                <div class="cp-btn-submit__spinner"></div>
+              } @else {
+                <mat-icon>rocket_launch</mat-icon>
+              }
+              <span>Publish Voucher</span>
             </button>
           </div>
+
         </form>
 
-        <!-- Live Hologram Voucher Ticket Preview -->
-        <div class="voucher-preview-side">
-          <div class="preview-title">Real-Time Ticket Preview</div>
-          <div class="preview-ticket-card">
-            <div class="stub-left">
-              <div class="ticket-brand">SVK CYBER</div>
-              <div class="ticket-badge">{{ getBadgeText(couponForm.value) }}</div>
+        <!-- ── LIVE HOLOGRAPHIC PREVIEW ────────── -->
+        <div class="cp-preview">
+          <div class="cp-preview__label">
+            <span class="cp-preview__live">LIVE</span>
+            Real-time Preview
+          </div>
+
+          <div class="cp-ticket" [class.cp-ticket--lit]="!!couponForm.get('code')?.value">
+
+            <!-- animated holographic overlay -->
+            <div class="cp-ticket__holo"></div>
+
+            <!-- sparkle particles -->
+            <div class="cp-ticket__sparks">
+              <span class="cp-spark"></span>
+              <span class="cp-spark"></span>
+              <span class="cp-spark"></span>
+              <span class="cp-spark"></span>
             </div>
-            <div class="stub-divider">
-              <div class="cutout top-cut"></div>
-              <div class="dashed-line"></div>
-              <div class="cutout bottom-cut"></div>
+
+            <!-- Brand row -->
+            <div class="cp-ticket__top">
+              <span class="cp-ticket__brand">SVK E-COM</span>
+              <span class="cp-ticket__pulse"></span>
             </div>
-            <div class="stub-right">
-              <div class="preview-code">{{ couponForm.get('code')?.value || 'YOUR-CODE' }}</div>
-              <div class="preview-meta">Claim limit: {{ couponForm.get('usage_limit')?.value || '∞' }} uses</div>
-              <div class="preview-badge">LIVE PREVIEW</div>
+
+            <!-- Big discount display -->
+            <div class="cp-ticket__deal">
+              {{ getBadgeText(couponForm.value) }}
+            </div>
+
+            <!-- Perforated tear line -->
+            <div class="cp-ticket__tear">
+              <span class="cp-ticket__notch cp-ticket__notch--l"></span>
+              <span class="cp-ticket__dashes"></span>
+              <span class="cp-ticket__notch cp-ticket__notch--r"></span>
+            </div>
+
+            <!-- Code block -->
+            <div class="cp-ticket__code-block">
+              <span class="cp-ticket__code-lbl">CODE</span>
+              <span class="cp-ticket__code">
+                {{ couponForm.get('code')?.value || '— — —' }}
+              </span>
+            </div>
+
+            <!-- Footer -->
+            <div class="cp-ticket__foot">
+              <span>{{ couponForm.get('usage_limit')?.value || '∞' }} claims</span>
+              <span class="cp-ticket__status">PREVIEW</span>
+            </div>
+
+          </div><!-- /ticket -->
+
+          <!-- Discount type icons legend -->
+          <div class="cp-preview__legend">
+            <div class="cp-legend-row">
+              @for (t of discountTypes.slice(0,3); track t.value) {
+                <span
+                  class="cp-legend-chip"
+                  [class.cp-legend-chip--active]="couponForm.get('discount_type')?.value === t.value">
+                  {{ t.label }}
+                </span>
+              }
             </div>
           </div>
         </div>
-      </div>
-    </div>
+
+      </div><!-- /drawer body -->
+    </div><!-- /drawer -->
   }
 
-  <!-- Filter & Search Controls Bar -->
-  <div class="glass-controls-bar">
-    <div class="search-box">
-      <mat-icon class="search-icon">search</mat-icon>
-      <input 
-        type="text" 
-        [value]="searchQuery()" 
-        (input)="searchQuery.set($any($event.target).value)" 
-        placeholder="Search vouchers by passcode or discount type..." 
-        class="glass-input search-input">
+  <!-- ──────────────── CONTROLS BAR ──────────────── -->
+  <div class="cp-controls">
+
+    <!-- Search -->
+    <div class="cp-search">
+      <mat-icon class="cp-search__icon">search</mat-icon>
+      <input
+        type="text"
+        id="cp-search-input"
+        [value]="searchQuery()"
+        (input)="searchQuery.set($any($event.target).value)"
+        placeholder="Search by code or type…"
+        class="cp-search__input">
+      @if (searchQuery()) {
+        <button class="cp-search__clear" (click)="searchQuery.set('')" title="Clear">
+          <mat-icon>close</mat-icon>
+        </button>
+      }
     </div>
 
-    <div class="filter-pills">
-      <button class="pill-btn" [class.active]="selectedFilter() === 'all'" (click)="selectedFilter.set('all')">
-        All ({{ coupons().length }})
+    <!-- Filter pills -->
+    <div class="cp-filters" role="group" aria-label="Filter vouchers">
+      <button
+        class="cp-filter-pill"
+        [class.cp-filter-pill--on]="selectedFilter() === 'all'"
+        (click)="selectedFilter.set('all')">
+        All
+        <span class="cp-filter-pill__count">{{ coupons().length }}</span>
       </button>
-      <button class="pill-btn" [class.active]="selectedFilter() === 'active'" (click)="selectedFilter.set('active')">
+      <button
+        class="cp-filter-pill cp-filter-pill--green"
+        [class.cp-filter-pill--on]="selectedFilter() === 'active'"
+        (click)="selectedFilter.set('active')">
         Active
+        <span class="cp-filter-pill__count">{{ activeCount() }}</span>
       </button>
-      <button class="pill-btn" [class.active]="selectedFilter() === 'inactive'" (click)="selectedFilter.set('inactive')">
+      <button
+        class="cp-filter-pill cp-filter-pill--red"
+        [class.cp-filter-pill--on]="selectedFilter() === 'inactive'"
+        (click)="selectedFilter.set('inactive')">
         Inactive
+        <span class="cp-filter-pill__count">{{ inactiveCount() }}</span>
       </button>
     </div>
-  </div>
 
-  <!-- Loading State Loader -->
+  </div><!-- /controls -->
+
+  <!-- ──────────────── LOADING ──────────────── -->
   @if (isLoading()) {
-    <div class="loading-state">
-      <mat-spinner diameter="48" class="cyber-spinner"></mat-spinner>
-      <p>Retrieving active voucher keys...</p>
-    </div>
-  }
-
-  <!-- Empty State -->
-  @if (!isLoading() && filteredCoupons().length === 0) {
-    <div class="glass-card empty-card">
-      <div class="empty-icon-wrap">
-        <mat-icon class="empty-icon">confirmation_number</mat-icon>
+    <div class="cp-loader">
+      <div class="cp-loader__ring">
+        <div class="cp-loader__arc"></div>
       </div>
-      <h3>No Vouchers Found</h3>
-      <p>There are no active voucher codes matching your filter criteria. Click below to create your first promotion passcode.</p>
-      <button class="glass-btn primary-glass-btn" (click)="toggleForm()">
-        <mat-icon>add_circle</mat-icon>
-        <span>Create Coupon Code</span>
-      </button>
+      <p class="cp-loader__text">Fetching vouchers…</p>
     </div>
   }
 
-  <!-- Liquid Voucher Ticket Cards Grid -->
-  @if (!isLoading() && filteredCoupons().length > 0) {
-    <div class="vouchers-grid">
-      @for (coupon of filteredCoupons(); track coupon.code || coupon.id) {
-        <div 
-          class="ticket-voucher-card" 
-          [class.coupon-copied]="copiedCode() === coupon.code">
-          
-          <!-- Top Banner Header -->
-          <div class="ticket-header">
-            <span class="status-indicator" [class.active-status]="coupon.is_active" [class.inactive-status]="!coupon.is_active">
-              <span class="status-dot"></span>
-              {{ coupon.is_active ? 'ACTIVE' : 'INACTIVE' }}
-            </span>
-
-            <span class="benefit-chip">
-              {{ getBadgeText(coupon) }}
-            </span>
-          </div>
-
-          <!-- Main Passcode Stub -->
-          <div class="passcode-container">
-            <div class="passcode-display">
-              <span class="code-text">{{ coupon.code }}</span>
-            </div>
-
-            <button 
-              class="copy-btn" 
-              (click)="copyCode(coupon.code)" 
-              [title]="'Copy ' + coupon.code">
-              <mat-icon>{{ copiedCode() === coupon.code ? 'check' : 'content_copy' }}</mat-icon>
-              <span>{{ copiedCode() === coupon.code ? 'Copied' : 'Copy' }}</span>
-            </button>
-          </div>
-
-          <!-- Voucher Ticket Perforation Divider -->
-          <div class="ticket-perforation">
-            <div class="notch notch-left"></div>
-            <div class="dashed-border"></div>
-            <div class="notch notch-right"></div>
-          </div>
-
-          <!-- Voucher Meta Specs -->
-          <div class="ticket-specs">
-            <div class="spec-row">
-              <span class="spec-label">Discount Type</span>
-              <span class="spec-value highlight-text">{{ coupon.discount_type | uppercase }}</span>
-            </div>
-
-            @if (coupon.min_order_value) {
-              <div class="spec-row">
-                <span class="spec-label">Min Order Value</span>
-                <span class="spec-value">₹{{ coupon.min_order_value }}</span>
-              </div>
-            }
-
-            <!-- Usage Progress Meter -->
-            <div class="usage-meter">
-              <div class="meter-labels">
-                <span>Claims Count</span>
-                <span>{{ coupon.used_count }} / {{ coupon.usage_limit > 0 ? coupon.usage_limit : '∞' }}</span>
-              </div>
-              <div class="meter-bar">
-                <div 
-                  class="meter-fill" 
-                  [style.width.%]="coupon.usage_limit > 0 ? (coupon.used_count / coupon.usage_limit) * 100 : 100">
-                </div>
-              </div>
-            </div>
-
-            <!-- Validity Expiration Info -->
-            @if (coupon.valid_until) {
-              <div class="validity-bar">
-                <mat-icon class="clock-icon">schedule</mat-icon>
-                <span>Valid until: {{ coupon.valid_until | date:'longDate' }}</span>
-              </div>
-            }
-          </div>
-
-        </div>
+  <!-- ──────────────── EMPTY STATE ──────────────── -->
+  @if (!isLoading() && filteredCoupons().length === 0) {
+    <div class="cp-empty">
+      <div class="cp-empty__icon">
+        <mat-icon>confirmation_number</mat-icon>
+        <div class="cp-empty__ping"></div>
+      </div>
+      <h3 class="cp-empty__title">
+        {{ searchQuery() ? 'No results found' : 'No vouchers yet' }}
+      </h3>
+      <p class="cp-empty__desc">
+        @if (searchQuery()) {
+          Try different keywords or <button class="cp-link" (click)="searchQuery.set('')">clear your search</button>.
+        } @else {
+          Create your first promotional voucher to start distributing enterprise discounts.
+        }
+      </p>
+      @if (!searchQuery()) {
+        <button class="cp-btn-primary" (click)="toggleForm()">
+          <span class="cp-btn-primary__bg"></span>
+          <mat-icon class="cp-btn-primary__icon">add</mat-icon>
+          <span class="cp-btn-primary__label">Create Voucher</span>
+        </button>
       }
     </div>
   }
 
-</div>
+  <!-- ──────────────── VOUCHER CARD GRID ──────────────── -->
+  @if (!isLoading() && filteredCoupons().length > 0) {
+    <div class="cp-grid">
+      @for (c of filteredCoupons(); track c.id ?? c.code; let i = $index) {
+        <article
+          class="cp-card"
+          [class.cp-card--active]="c.is_active"
+          [class.cp-card--inactive]="!c.is_active"
+          [class.cp-card--copied]="copiedCode() === c.code"
+          [style.animation-delay.ms]="i * 55">
+
+          <!-- Animated border glow on hover -->
+          <div class="cp-card__glow"></div>
+
+          <!-- Card header strip -->
+          <div class="cp-card__header">
+            <span class="cp-card__status" [class.on]="c.is_active" [class.off]="!c.is_active">
+              <span class="cp-card__status-dot"></span>
+              {{ c.is_active ? 'ACTIVE' : 'INACTIVE' }}
+            </span>
+            <span class="cp-card__deal-badge">{{ getBadgeText(c) }}</span>
+          </div>
+
+          <!-- Code + copy row -->
+          <div class="cp-card__code-row">
+            <div class="cp-card__code-inner">
+              <span class="cp-card__code-eyebrow">VOUCHER CODE</span>
+              <span class="cp-card__code-val">{{ c.code }}</span>
+            </div>
+            <button
+              class="cp-card__copy"
+              [class.cp-card__copy--done]="copiedCode() === c.code"
+              (click)="copyCode(c.code)"
+              [title]="'Copy ' + c.code"
+              [attr.aria-label]="'Copy coupon code ' + c.code">
+              <mat-icon>{{ copiedCode() === c.code ? 'check_circle' : 'content_copy' }}</mat-icon>
+              <span>{{ copiedCode() === c.code ? 'Copied' : 'Copy' }}</span>
+            </button>
+          </div>
+
+          <!-- Perforated divider -->
+          <div class="cp-card__perf">
+            <span class="cp-card__notch cp-card__notch--l"></span>
+            <span class="cp-card__dots"></span>
+            <span class="cp-card__notch cp-card__notch--r"></span>
+          </div>
+
+          <!-- Meta grid -->
+          <div class="cp-card__meta">
+            <div class="cp-card__meta-item">
+              <span class="cp-card__meta-key">Type</span>
+              <span class="cp-card__meta-val cp-card__meta-val--type">{{ c.discount_type }}</span>
+            </div>
+            @if (c.min_order_value) {
+              <div class="cp-card__meta-item">
+                <span class="cp-card__meta-key">Min Cart</span>
+                <span class="cp-card__meta-val">₹{{ c.min_order_value }}</span>
+              </div>
+            }
+          </div>
+
+          <!-- Usage progress -->
+          <div class="cp-card__usage">
+            <div class="cp-card__usage-header">
+              <span class="cp-card__usage-lbl">Claims</span>
+              <span class="cp-card__usage-val">
+                <strong>{{ c.used_count }}</strong>
+                <span class="cp-card__sep">/</span>
+                {{ c.usage_limit > 0 ? c.usage_limit : '∞' }}
+              </span>
+            </div>
+            <div class="cp-card__track">
+              <div
+                class="cp-card__fill"
+                [style.width.%]="c.usage_limit > 0 ? (c.used_count / c.usage_limit) * 100 : 100"
+                [class.cp-card__fill--full]="c.usage_limit > 0 && c.used_count >= c.usage_limit">
+              </div>
+            </div>
+          </div>
+
+          <!-- Expiry footer -->
+          @if (c.valid_until) {
+            <div class="cp-card__expiry">
+              <mat-icon class="cp-card__expiry-icon">schedule</mat-icon>
+              Expires {{ c.valid_until | date:'mediumDate' }}
+            </div>
+          }
+
+        </article>
+      }
+    </div><!-- /grid -->
+
+    <!-- Result count -->
+    <p class="cp-grid-footer">
+      Showing <strong>{{ filteredCoupons().length }}</strong> of <strong>{{ coupons().length }}</strong> vouchers
+    </p>
+  }
+
+</div><!-- /cp-root -->

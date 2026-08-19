@@ -27,6 +27,17 @@
             <p class="welcome-sub">
               Real-time workspace overview across workforce intelligence, inventory, and branch operations.
             </p>
+            <!-- System status pills -->
+            <div class="banner-status-row">
+              <div class="status-pill status-pill--green">
+                <span class="status-dot bg-success"></span>
+                <span>All Systems Operational</span>
+              </div>
+              <div class="status-pill status-pill--indigo">
+                <mat-icon style="font-size:12px;width:12px;height:12px">bolt</mat-icon>
+                <span>Real-time Sync Active</span>
+              </div>
+            </div>
           </div>
 
           <div class="banner-right">
@@ -212,7 +223,7 @@
 
       <!-- Quick Launch Modules -->
       <div class="col-12 col-lg-6 animate-slide-in-right delay-5">
-        <mat-card class="smart-widget-card h-100">
+        <mat-card class="smart-widget-card h-100 d-flex flex-column">
           <mat-card-header class="widget-header">
             <div class="d-flex align-items-center gap-10">
               <div class="widget-icon-bg bg-emerald">
@@ -224,7 +235,7 @@
               </div>
             </div>
           </mat-card-header>
-          <mat-card-content class="p-16">
+          <mat-card-content class="p-16 flex-grow-1">
             <div class="smart-nav-grid">
 
               @if (perm.hasPagePermission('/workforce')) {

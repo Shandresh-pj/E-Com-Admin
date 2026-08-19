@@ -1,47 +1,14 @@
 import { Routes } from '@angular/router';
-import { CrmContacts } from './crm-contacts/crm-contacts';
-import { Coupons } from './coupons/coupons';
-import { SubscriptionPlansComponent } from './subscription-plans/subscription-plans';
-import { AppAdmin } from './app-admin/app-admin';
-import { Branch } from './branch/branch';
-import { Employees } from './employees/employees';
-import { Roles } from './roles/roles';
-import { RoleAccess } from './role-access/role-access';
-import { Profile } from './profile/profile';
-import { MenuBar } from './menu-bar/menu-bar';
-import { Status } from './status/status';
-import { ProductAttribute } from './product-attribute/product-attribute';
-import { AttributeValue } from './attribute-value/attribute-value';
-import { Category } from './category/category';
-import { Product } from './product/product';
-import { Orders } from './orders/orders';
-import { ChangePassword } from './change-password/change-password';
-import { AuditLogs } from './audit-logs/audit-logs';
-import { Alerts } from './alerts/alerts';
-import { Attendance } from './attendance/attendance';
-import { BranchStocks } from './branch-stocks/branch-stocks';
-import { Stocks } from './stocks/stocks';
-import { Payroll } from './payroll/payroll';
-import { Leave } from './leave/leave';
-import { DeliveryTracking } from './delivery-tracking/delivery-tracking';
-import { Payments } from './payments/payments';
-import { Notifications } from './notifications/notifications';
-import { Workforce } from './workforce/workforce';
-import { Invoices } from './invoices/invoices';
-import { Approvals } from './approvals/approvals';
-import { EmployeeDocumentsComponent } from './employee-documents/employee-documents';
 import { RoleGuard } from '../Securities/Guard/role.guard';
-import { UserType } from '../Securities/Models/role-access';
 
-const SA = UserType.SUPER_ADMIN;
-const A = UserType.ADMIN;
-const BR = UserType.BRANCH;
-const BM = UserType.BRANCH_MANAGER;
-const SK = UserType.SHOPKEEPER;
-const EM = UserType.EMPLOYEE;
-const DB = UserType.DELIVERY_BOY;
+// PERF-1 FIX: All components are now lazy-loaded via loadComponent().
+// Previously, 26+ components were imported at the top of this file and
+// shipped in the same initial JS bundle — causing a massive startup load.
+// Now each component is split into its own chunk and loaded on demand.
 
 export const ComponentsRoutes: Routes = [
+
+  // ─── POS & Devices ────────────────────────────────────────────────────────
   {
     path: 'pos-billing',
     loadComponent: () => import('./pos-billing/pos-billing').then(m => m.PosBillingComponent),
@@ -60,6 +27,8 @@ export const ComponentsRoutes: Routes = [
       urls: [{ title: 'Hardware & Devices', url: '/devices' }]
     }
   },
+
+  // ─── Finance ──────────────────────────────────────────────────────────────
   {
     path: 'profit-loss',
     loadComponent: () => import('./profit-loss/profit-loss').then(m => m.ProfitLossComponent),
@@ -69,402 +38,152 @@ export const ComponentsRoutes: Routes = [
       urls: [{ title: 'Profit & Loss', url: '/profit-loss' }]
     }
   },
+
+  // ─── Administration ───────────────────────────────────────────────────────
   {
     path: 'admin',
-    component: AppAdmin,
+    loadComponent: () => import('./app-admin/app-admin').then(m => m.AppAdmin),
     canActivate: [RoleGuard],
     data: {
       title: 'App Admin',
-      urls: [
-        { title: 'App Admin', url: '/admin' }
-      ]
+      urls: [{ title: 'App Admin', url: '/admin' }]
     }
   },
-
   {
     path: 'branch',
-    component: Branch,
+    loadComponent: () => import('./branch/branch').then(m => m.Branch),
     canActivate: [RoleGuard],
     data: {
       title: 'Branch',
-      urls: [
-        { title: 'Branch', url: '/branch' }
-      ]
+      urls: [{ title: 'Branch', url: '/branch' }]
     }
   },
-
   {
     path: 'employees',
-    component: Employees,
+    loadComponent: () => import('./employees/employees').then(m => m.Employees),
     canActivate: [RoleGuard],
     data: {
       title: 'Employees',
-      urls: [
-        { title: 'Employees', url: '/employees' }
-      ]
+      urls: [{ title: 'Employees', url: '/employees' }]
     }
   },
-
   {
     path: 'roles',
-    component: Roles,
+    loadComponent: () => import('./roles/roles').then(m => m.Roles),
     canActivate: [RoleGuard],
     data: {
       title: 'Roles',
-      urls: [
-        { title: 'Roles', url: '/roles' }
-      ]
+      urls: [{ title: 'Roles', url: '/roles' }]
     }
   },
-
   {
     path: 'role-access',
-    component: RoleAccess,
+    loadComponent: () => import('./role-access/role-access').then(m => m.RoleAccess),
     canActivate: [RoleGuard],
     data: {
       title: 'Role Access',
-      urls: [
-        { title: 'Role Access', url: '/role-access' }
-      ]
+      urls: [{ title: 'Role Access', url: '/role-access' }]
     }
   },
 
+  // ─── Universal / Settings ─────────────────────────────────────────────────
   {
     path: 'profile',
-    component: Profile,
+    loadComponent: () => import('./profile/profile').then(m => m.Profile),
+    canActivate: [RoleGuard],
     data: {
       title: 'Profile',
-      urls: [
-        { title: 'Profile', url: '/profile' }
-      ]
+      urls: [{ title: 'Profile', url: '/profile' }]
     }
   },
-
-  {
-    path: 'menubar',
-    component: MenuBar,
-    canActivate: [RoleGuard],
-    data: {
-      title: 'Menu Bar',
-      urls: [
-        { title: 'Menu Bar', url: '/menubar' }
-      ]
-    }
-  },
-
-  {
-    path: 'status',
-    component: Status,
-    canActivate: [RoleGuard],
-    data: {
-      title: 'Status',
-      urls: [
-        { title: 'Status', url: '/status' }
-      ]
-    }
-  },
-
-  {
-    path: 'product-attribute',
-    component: ProductAttribute,
-    canActivate: [RoleGuard],
-    data: {
-      title: 'Product Attribute',
-      urls: [
-        {
-          title: 'Product Attribute',
-          url: '/product-attribute'
-        }
-      ]
-    }
-  },
-
-  {
-    path: 'attribute-value',
-    component: AttributeValue,
-    canActivate: [RoleGuard],
-    data: {
-      title: 'Attribute Value',
-      urls: [
-        {
-          title: 'Attribute Value',
-          url: '/attribute-value'
-        }
-      ]
-    }
-  },
-
-  {
-    path: 'category',
-    component: Category,
-    canActivate: [RoleGuard],
-    data: {
-      title: 'Category',
-      urls: [
-        {
-          title: 'Category',
-          url: '/category'
-        }
-      ]
-    }
-  },
-
-  {
-    path: 'product',
-    component: Product,
-    canActivate: [RoleGuard],
-    data: {
-      title: 'Product',
-      urls: [
-        {
-          title: 'Product',
-          url: '/product'
-        }
-      ]
-    }
-  },
-
-  {
-    path: 'orders',
-    component: Orders,
-    canActivate: [RoleGuard],
-    data: {
-      title: 'Orders',
-      urls: [
-        {
-          title: 'Orders',
-          url: '/orders'
-        }
-      ]
-    }
-  },
-
   {
     path: 'change-password',
-    component: ChangePassword,
+    loadComponent: () => import('./change-password/change-password').then(m => m.ChangePassword),
+    canActivate: [RoleGuard],
     data: {
       title: 'Change Password',
-      urls: [
-        {
-          title: 'Change Password',
-          url: '/change-password'
-        }
-      ]
-    }
-  },
-
-  {
-    path: 'audit-logs',
-    component: AuditLogs,
-    canActivate: [RoleGuard],
-    data: {
-      title: 'Audit Logs',
-      urls: [
-        { title: 'Audit Logs', url: '/audit-logs' }
-      ]
-    }
-  },
-
-  {
-    path: 'alerts',
-    component: Alerts,
-    canActivate: [RoleGuard],
-    data: {
-      title: 'Alerts',
-      urls: [{ title: 'Alerts', url: '/alerts' }]
-    }
-  },
-  {
-    path: 'attendance',
-    component: Attendance,
-    canActivate: [RoleGuard],
-    data: {
-      title: 'Attendance',
-      urls: [{ title: 'Attendance', url: '/attendance' }]
-    }
-  },
-  {
-    path: 'branch-stocks',
-    component: BranchStocks,
-    canActivate: [RoleGuard],
-    data: {
-      title: 'Branch Stocks',
-      urls: [{ title: 'Branch Stocks', url: '/branch-stocks' }]
-    }
-  },
-  {
-    path: 'stocks',
-    component: Stocks,
-    canActivate: [RoleGuard],
-    data: {
-      title: 'Stocks',
-      urls: [{ title: 'Stocks', url: '/stocks' }]
-    }
-  },
-  {
-    path: 'payroll',
-    component: Payroll,
-    canActivate: [RoleGuard],
-    data: {
-      title: 'Payroll',
-      urls: [{ title: 'Payroll', url: '/payroll' }]
-    }
-  },
-  {
-    path: 'leave',
-    component: Leave,
-    canActivate: [RoleGuard],
-    data: {
-      title: 'Leave',
-      urls: [{ title: 'Leave', url: '/leave' }]
-    }
-  },
-  {
-    path: 'delivery-tracking',
-    component: DeliveryTracking,
-    canActivate: [RoleGuard],
-    data: {
-      title: 'Delivery Tracking',
-      urls: [{ title: 'Delivery Tracking', url: '/delivery-tracking' }]
-    }
-  },
-  {
-    path: 'payments',
-    component: Payments,
-    canActivate: [RoleGuard],
-    data: {
-      title: 'Payments',
-      urls: [{ title: 'Payments', url: '/payments' }]
+      urls: [{ title: 'Change Password', url: '/change-password' }]
     }
   },
   {
     path: 'notifications',
-    component: Notifications,
+    loadComponent: () => import('./notifications/notifications').then(m => m.Notifications),
+    canActivate: [RoleGuard],
     data: {
       title: 'Notifications',
       urls: [{ title: 'Notifications', url: '/notifications' }]
     }
   },
   {
-    path: 'workforce',
-    component: Workforce,
+    path: 'menubar',
+    loadComponent: () => import('./menu-bar/menu-bar').then(m => m.MenuBar),
     canActivate: [RoleGuard],
     data: {
-      title: 'Workforce Console',
-      urls: [{ title: 'Workforce Console', url: '/workforce' }]
+      title: 'Menu Bar',
+      urls: [{ title: 'Menu Bar', url: '/menubar' }]
     }
   },
   {
-    path: 'shifts',
-    component: Workforce,
+    path: 'status',
+    loadComponent: () => import('./status/status').then(m => m.Status),
     canActivate: [RoleGuard],
     data: {
-      title: 'Shifts & Schedules',
-      urls: [{ title: 'Shifts & Schedules', url: '/shifts' }]
+      title: 'Status',
+      urls: [{ title: 'Status', url: '/status' }]
+    }
+  },
+
+  // ─── Catalog ──────────────────────────────────────────────────────────────
+  {
+    path: 'product-attribute',
+    loadComponent: () => import('./product-attribute/product-attribute').then(m => m.ProductAttribute),
+    canActivate: [RoleGuard],
+    data: {
+      title: 'Product Attribute',
+      urls: [{ title: 'Product Attribute', url: '/product-attribute' }]
     }
   },
   {
-    path: 'break-policies',
-    component: Workforce,
+    path: 'attribute-value',
+    loadComponent: () => import('./attribute-value/attribute-value').then(m => m.AttributeValue),
     canActivate: [RoleGuard],
     data: {
-      title: 'Break Deduction Rules',
-      urls: [{ title: 'Break Deduction Rules', url: '/break-policies' }]
+      title: 'Attribute Value',
+      urls: [{ title: 'Attribute Value', url: '/attribute-value' }]
     }
   },
   {
-    path: 'biometric',
-    component: Workforce,
+    path: 'category',
+    loadComponent: () => import('./category/category').then(m => m.Category),
     canActivate: [RoleGuard],
     data: {
-      title: 'Biometric Sensors & Terminals',
-      urls: [{ title: 'Biometric Sensors', url: '/biometric' }]
+      title: 'Category',
+      urls: [{ title: 'Category', url: '/category' }]
     }
   },
   {
-    path: 'geofencing',
-    component: Workforce,
+    path: 'product',
+    loadComponent: () => import('./product/product').then(m => m.Product),
     canActivate: [RoleGuard],
     data: {
-      title: 'GPS Geofencing Boundaries',
-      urls: [{ title: 'GPS Geofencing', url: '/geofencing' }]
+      title: 'Product',
+      urls: [{ title: 'Product', url: '/product' }]
     }
   },
+
+  // ─── Sales & Billing ──────────────────────────────────────────────────────
   {
-    path: 'calendar',
-    loadComponent: () => import('./calendar/calendar').then(m => m.CompanyCalendarComponent),
+    path: 'orders',
+    loadComponent: () => import('./orders/orders').then(m => m.Orders),
     canActivate: [RoleGuard],
     data: {
-      title: 'Company Calendar',
-      urls: [{ title: 'Company Calendar', url: '/calendar' }]
-    }
-  },
-  {
-    path: 'employee-documents',
-    component: EmployeeDocumentsComponent,
-    canActivate: [RoleGuard],
-    data: {
-      title: 'KYC Document Vault',
-      urls: [{ title: 'KYC Document Vault', url: '/employee-documents' }]
-    }
-  },
-  {
-    path: 'translations',
-    loadComponent: () => import('./translation-management/translation-management').then(m => m.TranslationManagementComponent),
-    canActivate: [RoleGuard],
-    data: {
-      title: 'Translation & Localization Console',
-      urls: [{ title: 'Translation Console', url: '/translations' }]
-    }
-  },
-  {
-    path: 'settings/translations',
-    loadComponent: () => import('./translation-management/translation-management').then(m => m.TranslationManagementComponent),
-    canActivate: [RoleGuard],
-    data: {
-      title: 'Translation & Localization Console',
-      urls: [{ title: 'Settings', url: '/settings' }, { title: 'Translations', url: '/settings/translations' }]
-    }
-  },
-  {
-    path: 'workforce-requests',
-    loadComponent: () => import('./workforce-requests/workforce-requests').then(m => m.WorkforceRequests),
-    canActivate: [RoleGuard],
-    data: {
-      title: 'Workforce Requests',
-      urls: [{ title: 'Workforce Requests', url: '/workforce-requests' }]
-    }
-  },
-  {
-    path: 'invoices',
-    component: Invoices,
-    canActivate: [RoleGuard],
-    data: {
-      title: 'Invoice Generator',
-      urls: [{ title: 'Invoice Generator', url: '/invoices' }]
-    }
-  },
-  {
-    path: 'approvals',
-    component: Approvals,
-    canActivate: [RoleGuard],
-    data: {
-      title: 'Workflow Approvals',
-      urls: [{ title: 'Workflow Approvals', url: '/approvals' }]
-    }
-  },
-  {
-    path: 'crm-contacts',
-    component: CrmContacts,
-    canActivate: [RoleGuard],
-    data: {
-      title: 'CRM Contacts',
-      urls: [{ title: 'CRM Contacts', url: '/crm-contacts' }]
+      title: 'Orders',
+      urls: [{ title: 'Orders', url: '/orders' }]
     }
   },
   {
     path: 'coupons',
-    component: Coupons,
+    loadComponent: () => import('./coupons/coupons').then(m => m.Coupons),
     canActivate: [RoleGuard],
     data: {
       title: 'Coupons Management',
@@ -472,8 +191,17 @@ export const ComponentsRoutes: Routes = [
     }
   },
   {
+    path: 'invoices',
+    loadComponent: () => import('./invoices/invoices').then(m => m.Invoices),
+    canActivate: [RoleGuard],
+    data: {
+      title: 'Invoice Generator',
+      urls: [{ title: 'Invoice Generator', url: '/invoices' }]
+    }
+  },
+  {
     path: 'manage-subscription-plans',
-    component: SubscriptionPlansComponent,
+    loadComponent: () => import('./subscription-plans/subscription-plans').then(m => m.SubscriptionPlansComponent),
     canActivate: [RoleGuard],
     data: {
       title: 'Subscription Plans Management',
@@ -507,6 +235,211 @@ export const ComponentsRoutes: Routes = [
       urls: [{ title: 'Checkout', url: '/checkout' }]
     }
   },
+
+  // ─── Audit & Compliance ───────────────────────────────────────────────────
+  {
+    path: 'audit-logs',
+    loadComponent: () => import('./audit-logs/audit-logs').then(m => m.AuditLogs),
+    canActivate: [RoleGuard],
+    data: {
+      title: 'Audit Logs',
+      urls: [{ title: 'Audit Logs', url: '/audit-logs' }]
+    }
+  },
+
+  // ─── Operations & Alerts ─────────────────────────────────────────────────
+  {
+    path: 'alerts',
+    loadComponent: () => import('./alerts/alerts').then(m => m.Alerts),
+    canActivate: [RoleGuard],
+    data: {
+      title: 'Alerts',
+      urls: [{ title: 'Alerts', url: '/alerts' }]
+    }
+  },
+  {
+    path: 'approvals',
+    loadComponent: () => import('./approvals/approvals').then(m => m.Approvals),
+    canActivate: [RoleGuard],
+    data: {
+      title: 'Workflow Approvals',
+      urls: [{ title: 'Workflow Approvals', url: '/approvals' }]
+    }
+  },
+
+  // ─── Inventory & Stock ────────────────────────────────────────────────────
+  {
+    path: 'stocks',
+    loadComponent: () => import('./stocks/stocks').then(m => m.Stocks),
+    canActivate: [RoleGuard],
+    data: {
+      title: 'Stocks',
+      urls: [{ title: 'Stocks', url: '/stocks' }]
+    }
+  },
+  {
+    path: 'branch-stocks',
+    loadComponent: () => import('./branch-stocks/branch-stocks').then(m => m.BranchStocks),
+    canActivate: [RoleGuard],
+    data: {
+      title: 'Branch Stocks',
+      urls: [{ title: 'Branch Stocks', url: '/branch-stocks' }]
+    }
+  },
+
+  // ─── Logistics ────────────────────────────────────────────────────────────
+  {
+    path: 'delivery-tracking',
+    loadComponent: () => import('./delivery-tracking/delivery-tracking').then(m => m.DeliveryTracking),
+    canActivate: [RoleGuard],
+    data: {
+      title: 'Delivery Tracking',
+      urls: [{ title: 'Delivery Tracking', url: '/delivery-tracking' }]
+    }
+  },
+  {
+    path: 'payments',
+    loadComponent: () => import('./payments/payments').then(m => m.Payments),
+    canActivate: [RoleGuard],
+    data: {
+      title: 'Payments',
+      urls: [{ title: 'Payments', url: '/payments' }]
+    }
+  },
+
+  // ─── Workforce & HR ───────────────────────────────────────────────────────
+  {
+    path: 'attendance',
+    loadComponent: () => import('./attendance/attendance').then(m => m.Attendance),
+    canActivate: [RoleGuard],
+    data: {
+      title: 'Attendance',
+      urls: [{ title: 'Attendance', url: '/attendance' }]
+    }
+  },
+  {
+    path: 'payroll',
+    loadComponent: () => import('./payroll/payroll').then(m => m.Payroll),
+    canActivate: [RoleGuard],
+    data: {
+      title: 'Payroll',
+      urls: [{ title: 'Payroll', url: '/payroll' }]
+    }
+  },
+  {
+    path: 'leave',
+    loadComponent: () => import('./leave/leave').then(m => m.Leave),
+    canActivate: [RoleGuard],
+    data: {
+      title: 'Leave',
+      urls: [{ title: 'Leave', url: '/leave' }]
+    }
+  },
+  {
+    path: 'workforce',
+    loadComponent: () => import('./workforce/workforce').then(m => m.Workforce),
+    canActivate: [RoleGuard],
+    data: {
+      title: 'Workforce Console',
+      urls: [{ title: 'Workforce Console', url: '/workforce' }]
+    }
+  },
+  {
+    path: 'shifts',
+    loadComponent: () => import('./workforce/workforce').then(m => m.Workforce),
+    canActivate: [RoleGuard],
+    data: {
+      title: 'Shifts & Schedules',
+      urls: [{ title: 'Shifts & Schedules', url: '/shifts' }]
+    }
+  },
+  {
+    path: 'break-policies',
+    loadComponent: () => import('./workforce/workforce').then(m => m.Workforce),
+    canActivate: [RoleGuard],
+    data: {
+      title: 'Break Deduction Rules',
+      urls: [{ title: 'Break Deduction Rules', url: '/break-policies' }]
+    }
+  },
+  {
+    path: 'biometric',
+    loadComponent: () => import('./workforce/workforce').then(m => m.Workforce),
+    canActivate: [RoleGuard],
+    data: {
+      title: 'Biometric Sensors & Terminals',
+      urls: [{ title: 'Biometric Sensors', url: '/biometric' }]
+    }
+  },
+  {
+    path: 'geofencing',
+    loadComponent: () => import('./workforce/workforce').then(m => m.Workforce),
+    canActivate: [RoleGuard],
+    data: {
+      title: 'GPS Geofencing Boundaries',
+      urls: [{ title: 'GPS Geofencing', url: '/geofencing' }]
+    }
+  },
+  {
+    path: 'calendar',
+    loadComponent: () => import('./calendar/calendar').then(m => m.CompanyCalendarComponent),
+    canActivate: [RoleGuard],
+    data: {
+      title: 'Company Calendar',
+      urls: [{ title: 'Company Calendar', url: '/calendar' }]
+    }
+  },
+  {
+    path: 'employee-documents',
+    loadComponent: () => import('./employee-documents/employee-documents').then(m => m.EmployeeDocumentsComponent),
+    canActivate: [RoleGuard],
+    data: {
+      title: 'KYC Document Vault',
+      urls: [{ title: 'KYC Document Vault', url: '/employee-documents' }]
+    }
+  },
+  {
+    path: 'workforce-requests',
+    loadComponent: () => import('./workforce-requests/workforce-requests').then(m => m.WorkforceRequests),
+    canActivate: [RoleGuard],
+    data: {
+      title: 'Workforce Requests',
+      urls: [{ title: 'Workforce Requests', url: '/workforce-requests' }]
+    }
+  },
+
+  // ─── CRM ──────────────────────────────────────────────────────────────────
+  {
+    path: 'crm-contacts',
+    loadComponent: () => import('./crm-contacts/crm-contacts').then(m => m.CrmContacts),
+    canActivate: [RoleGuard],
+    data: {
+      title: 'CRM Contacts',
+      urls: [{ title: 'CRM Contacts', url: '/crm-contacts' }]
+    }
+  },
+
+  // ─── Settings & Localization ──────────────────────────────────────────────
+  {
+    path: 'translations',
+    loadComponent: () => import('./translation-management/translation-management').then(m => m.TranslationManagementComponent),
+    canActivate: [RoleGuard],
+    data: {
+      title: 'Translation & Localization Console',
+      urls: [{ title: 'Translation Console', url: '/translations' }]
+    }
+  },
+  {
+    path: 'settings/translations',
+    loadComponent: () => import('./translation-management/translation-management').then(m => m.TranslationManagementComponent),
+    canActivate: [RoleGuard],
+    data: {
+      title: 'Translation & Localization Console',
+      urls: [{ title: 'Settings', url: '/settings' }, { title: 'Translations', url: '/settings/translations' }]
+    }
+  },
+
+  // ─── Communication ────────────────────────────────────────────────────────
   {
     path: 'communication',
     loadComponent: () => import('./secure-chat/secure-chat').then(m => m.SecureChatComponent),
@@ -525,6 +458,8 @@ export const ComponentsRoutes: Routes = [
       urls: [{ title: 'Team Meetings', url: '/communication/meetings' }]
     }
   },
+
+  // ─── Mobility & Fleet ─────────────────────────────────────────────────────
   {
     path: 'ride-booking',
     loadComponent: () => import('./ride-booking/ride-booking.component').then(m => m.RideBookingComponent),
@@ -597,27 +532,4 @@ export const ComponentsRoutes: Routes = [
       urls: [{ title: 'Verification', url: '/vehicle-driver-verification' }]
     }
   },
-
-  // ─── Delivery Tracking (Logistics & Finance section) ───────────────────────
-  {
-    path: 'delivery-tracking',
-    loadComponent: () => import('./delivery-tracking/delivery-tracking').then(m => m.DeliveryTracking),
-    canActivate: [RoleGuard],
-    data: {
-      title: 'Delivery Tracking',
-      urls: [{ title: 'Delivery Tracking', url: '/delivery-tracking' }]
-    }
-  },
-
-  // ─── Subscription Management ────────────────────────────────────────────────
-  {
-    path: 'manage-subscription-plans',
-    loadComponent: () => import('./subscription-plans/subscription-plans').then(m => m.SubscriptionPlansComponent),
-    canActivate: [RoleGuard],
-    data: {
-      title: 'Manage Subscription Plans',
-      urls: [{ title: 'Subscription Plans', url: '/manage-subscription-plans' }]
-    }
-  }
 ];
-

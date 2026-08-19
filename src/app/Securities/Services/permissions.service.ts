@@ -2,29 +2,63 @@ import { Injectable, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { SessionService } from './session.service';
 import { AuthService } from './auth.service';
-import { ROLE_PERMISSIONS, UserType } from '../Models/role-access';
+import { ROLE_PERMISSIONS, PermissionAction, UserType } from '../Models/role-access';
 
 /**
  * Maps DB permission action strings to UI action keys.
- * Supports READ, WRITE, CREATE, UPDATE, DELETE, APPROVE, ALL, *, and FULL.
+ * Extended to cover all granular actions supported by the RBAC system.
  */
-const DB_ACTION_MAP: Record<string, Array<'canCreate' | 'canRead' | 'canUpdate' | 'canDelete' | 'canApprove'>> = {
-  READ: ['canRead'],
-  WRITE: ['canCreate'],
-  CREATE: ['canCreate'],
-  UPDATE: ['canUpdate'],
-  DELETE: ['canDelete'],
-  APPROVE: ['canApprove'],
-  ALL: ['canRead', 'canCreate', 'canUpdate', 'canDelete', 'canApprove'],
-  '*': ['canRead', 'canCreate', 'canUpdate', 'canDelete', 'canApprove'],
-  FULL: ['canRead', 'canCreate', 'canUpdate', 'canDelete', 'canApprove'],
+const DB_ACTION_MAP: Record<string, PermissionAction[]> = {
+  READ:        ['canRead'],
+  WRITE:       ['canCreate'],
+  CREATE:      ['canCreate'],
+  UPDATE:      ['canUpdate'],
+  DELETE:      ['canDelete'],
+  APPROVE:     ['canApprove'],
+  EXPORT:      ['canExport'],
+  IMPORT:      ['canImport'],
+  ASSIGN:      ['canAssign'],
+  REVOKE:      ['canRevoke'],
+  ACTIVATE:    ['canActivate'],
+  DEACTIVATE:  ['canDeactivate'],
+  RESTORE:     ['canRestore'],
+  MANAGE:      ['canManage'],
+  CONFIGURE:   ['canConfigure'],
+  ALL: [
+    'canRead', 'canCreate', 'canUpdate', 'canDelete', 'canApprove',
+    'canExport', 'canImport', 'canAssign', 'canRevoke', 'canActivate',
+    'canDeactivate', 'canRestore', 'canManage', 'canConfigure',
+  ],
+  '*': [
+    'canRead', 'canCreate', 'canUpdate', 'canDelete', 'canApprove',
+    'canExport', 'canImport', 'canAssign', 'canRevoke', 'canActivate',
+    'canDeactivate', 'canRestore', 'canManage', 'canConfigure',
+  ],
+  FULL: [
+    'canRead', 'canCreate', 'canUpdate', 'canDelete', 'canApprove',
+    'canExport', 'canImport', 'canAssign', 'canRevoke', 'canActivate',
+    'canDeactivate', 'canRestore', 'canManage', 'canConfigure',
+  ],
 };
+
+/**
+ * Paths universally accessible by ALL authenticated users regardless of role or
+ * DB-assigned permissions. These never need an explicit permission grant.
+ */
+const UNIVERSAL_PATHS = [
+  '/dashboard',
+  '/profile',
+  '/change-password',
+  '/notifications',
+  '/unauthorized',
+];
 
 @Injectable({
   providedIn: 'root'
 })
 export class PermissionService {
 
+  /** Signal incremented whenever permissions change; use in computed/effects. */
   permissionsUpdated = signal<number>(0);
 
   constructor(
@@ -50,9 +84,100 @@ export class PermissionService {
     return UserType.EMPLOYEE;
   }
 
+  // ─── Core permission matching helpers ──────────────────────────────────────
+
   /**
-   * Fine-grained check: does the user hold the given action on the given menu?
-   * Supports READ, WRITE, CREATE, UPDATE, DELETE, APPROVE, ALL, *, FULL.
+   * Returns true if any DB permission entry matches the given path and action key.
+   * Path matching is prefix-aware (e.g. /orders also matches /orders/123).
+   */
+  private matchesDbPermission(path: string, action: PermissionAction): boolean {
+    const permissions = this.session.getPermissions();
+    if (!Array.isArray(permissions) || permissions.length === 0) return false;
+
+    const targetNorm = (path || '').toLowerCase().replace(/\/+$/, '');
+
+    return permissions.some((p: any) => {
+      // Match menu by path or name
+      const menuPath = (p.menu?.path || p.menu_path || p.path || '').toLowerCase().replace(/\/+$/, '');
+      const menuName = (p.menu?.name || p.menu_name || p.name || '').toLowerCase();
+
+      const pathMatches = menuPath && (targetNorm === menuPath || targetNorm.startsWith(menuPath + '/'));
+      const nameMatches = menuName && (targetNorm === menuName || targetNorm.startsWith(menuName + '/'));
+      if (!pathMatches && !nameMatches) return false;
+
+      if (p.is_denied === true || p.denied === true) return false;
+
+      // Check action
+      const actUpper = (p.action || '').toUpperCase();
+      if (actUpper === 'ALL' || actUpper === '*' || actUpper === 'FULL') return true;
+
+      const uiActions: PermissionAction[] = DB_ACTION_MAP[actUpper] ?? [];
+      if (uiActions.includes(action)) return true;
+
+      // Check boolean flags directly on the permission record
+      const flagMap: Record<PermissionAction, string[]> = {
+        canRead:       ['canRead', 'can_read'],
+        canCreate:     ['canCreate', 'can_create'],
+        canUpdate:     ['canUpdate', 'can_update'],
+        canDelete:     ['canDelete', 'can_delete'],
+        canApprove:    ['canApprove', 'can_approve'],
+        canExport:     ['canExport', 'can_export'],
+        canImport:     ['canImport', 'can_import'],
+        canAssign:     ['canAssign', 'can_assign'],
+        canRevoke:     ['canRevoke', 'can_revoke'],
+        canActivate:   ['canActivate', 'can_activate'],
+        canDeactivate: ['canDeactivate', 'can_deactivate'],
+        canRestore:    ['canRestore', 'can_restore'],
+        canManage:     ['canManage', 'can_manage'],
+        canConfigure:  ['canConfigure', 'can_configure'],
+      };
+      const flags = flagMap[action] ?? [];
+      return flags.some(f => p[f] === true);
+    });
+  }
+
+  /**
+   * Returns true if the user has any DB permission (any action) for the given path.
+   * Used for page-level access checks in route guards and sidebar filtering.
+   */
+  private hasAnyDbPermissionForPath(path: string): boolean {
+    const permissions = this.session.getPermissions();
+    if (!Array.isArray(permissions) || permissions.length === 0) return false;
+
+    const targetNorm = (path || '').toLowerCase().replace(/\/+$/, '');
+
+    return permissions.some((p: any) => {
+      if (p.is_denied === true || p.denied === true) return false;
+
+      const menuPath = (p.menu?.path || p.menu_path || p.path || '').toLowerCase().replace(/\/+$/, '');
+      const menuName = (p.menu?.name || p.menu_name || p.name || '').toLowerCase();
+
+      const pathMatches = menuPath && (targetNorm === menuPath || targetNorm.startsWith(menuPath + '/'));
+      const nameMatches = menuName && (targetNorm === menuName || targetNorm.startsWith(menuName + '/'));
+
+      if (!pathMatches && !nameMatches) return false;
+
+      const actUpper = (p.action || '').toUpperCase();
+      if (['READ', 'WRITE', 'CREATE', 'UPDATE', 'DELETE', 'APPROVE', 'EXPORT', 'IMPORT',
+           'ASSIGN', 'REVOKE', 'ACTIVATE', 'DEACTIVATE', 'RESTORE', 'MANAGE', 'CONFIGURE',
+           'ALL', '*', 'FULL'].includes(actUpper)) return true;
+
+      // Any positive boolean flag counts
+      const positiveFlags = [
+        'canRead', 'can_read', 'canCreate', 'can_create',
+        'canUpdate', 'can_update', 'canDelete', 'can_delete',
+        'canApprove', 'can_approve', 'canExport', 'can_export',
+      ];
+      return positiveFlags.some(f => p[f] === true);
+    });
+  }
+
+  // ─── Public API ─────────────────────────────────────────────────────────────
+
+  /**
+   * Fine-grained check: does the user hold the given action on the given menu ID?
+   * Supports READ, WRITE, CREATE, UPDATE, DELETE, APPROVE, EXPORT, IMPORT,
+   * ASSIGN, REVOKE, ACTIVATE, DEACTIVATE, RESTORE, MANAGE, CONFIGURE, ALL, *, FULL.
    */
   hasPermission(menuId: number, action: string): boolean {
     this.permissionsUpdated();
@@ -60,18 +185,8 @@ export class PermissionService {
     if (this.auth.isSuperAdmin()) return true;
 
     const permissions = this.session.getPermissions();
-
     if (!Array.isArray(permissions) || permissions.length === 0) {
-      const userType = this.normalizeUserType(this.auth.getUserType());
-      const rolePerms = ROLE_PERMISSIONS[userType];
-      if (!rolePerms) return false;
-      const actUpper = (action || '').toUpperCase();
-      if (actUpper === 'READ') return rolePerms.canRead;
-      if (actUpper === 'WRITE' || actUpper === 'CREATE') return rolePerms.canCreate;
-      if (actUpper === 'UPDATE') return rolePerms.canUpdate;
-      if (actUpper === 'DELETE') return rolePerms.canDelete;
-      if (actUpper === 'APPROVE') return rolePerms.canApprove;
-      if (actUpper === 'ALL' || actUpper === '*' || actUpper === 'FULL') return rolePerms.canRead;
+      // No DB permissions — only Super Admin has access by default
       return false;
     }
 
@@ -84,249 +199,170 @@ export class PermissionService {
       const actUpper = (p.action || '').toUpperCase();
       if (actUpper === 'ALL' || actUpper === '*' || actUpper === 'FULL') return true;
       if (actUpper === reqActionUpper) return true;
-      if ((reqActionUpper === 'WRITE' || reqActionUpper === 'CREATE') && (actUpper === 'WRITE' || actUpper === 'CREATE')) return true;
+      if ((reqActionUpper === 'WRITE' || reqActionUpper === 'CREATE') &&
+          (actUpper === 'WRITE' || actUpper === 'CREATE')) return true;
 
-      if (reqActionUpper === 'READ' && (p.canRead === true || p.can_read === true)) return true;
-      if ((reqActionUpper === 'WRITE' || reqActionUpper === 'CREATE') && (p.canCreate === true || p.can_create === true)) return true;
-      if (reqActionUpper === 'UPDATE' && (p.canUpdate === true || p.can_update === true)) return true;
-      if (reqActionUpper === 'DELETE' && (p.canDelete === true || p.can_delete === true)) return true;
-      if (reqActionUpper === 'APPROVE' && (p.canApprove === true || p.can_approve === true)) return true;
+      const reqAction = reqActionUpper.toLowerCase() as PermissionAction;
+      const validActions: PermissionAction[] = [
+        'canRead', 'canCreate', 'canUpdate', 'canDelete', 'canApprove',
+        'canExport', 'canImport', 'canAssign', 'canRevoke', 'canActivate',
+        'canDeactivate', 'canRestore', 'canManage', 'canConfigure',
+      ];
+
+      if (validActions.includes(reqAction as PermissionAction)) {
+        const snake = reqAction.replace(/([A-Z])/g, '_$1').toLowerCase().replace('can_', 'can_');
+        if (p[reqAction] === true || p[snake] === true) return true;
+      }
 
       return false;
     });
   }
 
   /**
-   * Coarse-grained UI guard (hide/show buttons like Add, Edit, Delete, Approve).
-   * Supports READ, WRITE, CREATE, UPDATE, DELETE, APPROVE, ALL.
+   * Coarse-grained UI guard — controls button/form visibility (Add, Edit, Delete, Approve, etc.)
+   *
+   * Precedence:
+   * 1. Super Admin → always true
+   * 2. DB permissions matching current path → use DB result
+   * 3. No DB permissions → false (strict least-privilege)
+   *
+   * @param action  The permission action to check
+   * @param menuNameOrPath  Explicit path/name; falls back to current router URL
    */
   hasRoleAction(
-    action: 'canCreate' | 'canRead' | 'canUpdate' | 'canDelete' | 'canApprove',
+    action: PermissionAction,
     menuNameOrPath?: string
   ): boolean {
     this.permissionsUpdated();
 
     if (this.auth.isSuperAdmin()) return true;
 
-    const permissions = this.session.getPermissions();
     const target = menuNameOrPath || this.router.url.split('?')[0];
-    const targetNormalized = target.toLowerCase().replace(/\/+$/, '');
 
-    if (Array.isArray(permissions) && permissions.length > 0) {
-      const matches = permissions.filter((p: any) => {
-        const menuName = (p.menu?.name || p.menu_name || p.name || '').toLowerCase();
-        const menuPath = (p.menu?.path || p.menu_path || p.path || '').toLowerCase().replace(/\/+$/, '');
-        return targetNormalized === menuName || targetNormalized === menuPath || targetNormalized.startsWith(menuPath + '/');
-      });
+    // Check DB permissions first
+    if (this.matchesDbPermission(target, action)) return true;
 
-      if (matches.length > 0) {
-        return matches.some((p: any) => {
-          if (action === 'canRead' && (p.canRead === true || p.can_read === true)) return true;
-          if (action === 'canCreate' && (p.canCreate === true || p.can_create === true)) return true;
-          if (action === 'canUpdate' && (p.canUpdate === true || p.can_update === true)) return true;
-          if (action === 'canDelete' && (p.canDelete === true || p.can_delete === true)) return true;
-          if (action === 'canApprove' && (p.canApprove === true || p.can_approve === true || p.action === 'APPROVE')) return true;
-
-          const actUpper = (p.action || '').toUpperCase();
-          if (actUpper === 'ALL' || actUpper === '*' || actUpper === 'FULL') return true;
-
-          const uiActions = DB_ACTION_MAP[actUpper] ?? [];
-          return uiActions.includes(action);
+    // Also check DB menus (granted access via menu assignment implies canRead at minimum)
+    if (action === 'canRead') {
+      const menus = this.session.getMenus();
+      if (Array.isArray(menus) && menus.length > 0) {
+        const targetNorm = target.toLowerCase().replace(/\/+$/, '');
+        const hasMenu = menus.some((m: any) => {
+          if (typeof m === 'string') {
+            if (m === 'ALL' || m === '*') return true;
+            return targetNorm === m.toLowerCase().replace(/\/+$/, '');
+          }
+          const menuPath = (m.path || m.route || m.menu_path || '').toLowerCase().replace(/\/+$/, '');
+          return targetNorm === menuPath || targetNorm.startsWith(menuPath + '/');
         });
+        if (hasMenu) return true;
       }
     }
 
-    const defaultPaths = [
-      '/dashboard',
-      '/change-password',
-      '/profile',
-      '/billing-history',
-      '/subscription-plans',
-      '/subscription-coupons',
-      '/checkout',
-      '/pos-billing',
-      '/devices',
-      '/profit-loss',
-      '/attendance',
-      '/leave',
-      '/workforce',
-      '/employees',
-      '/branch',
-      '/product',
-      '/orders',
-      '/crm-contacts',
-      '/role-access',
-      '/roles',
-      '/product-attribute',
-      '/attribute-value',
-      '/category',
-      '/coupons',
-      '/invoices',
-      '/audit-logs',
-      '/stocks',
-      '/branch-stocks',
-      '/delivery-tracking',
-      '/payments',
-      '/shifts',
-      '/break-policies',
-      '/biometric',
-      '/geofencing',
-      '/workforce-requests',
-      '/calendar',
-      '/employee-documents',
-      '/payroll',
-      '/approvals',
-      '/alerts',
-      '/notifications'
-    ];
-    if (defaultPaths.some(p => targetNormalized === p || targetNormalized.startsWith(p + '/'))) {
-      const userType = this.normalizeUserType(this.auth.getUserType());
-      return ROLE_PERMISSIONS[userType]?.[action] ?? true;
-    }
-
-    const userType = this.normalizeUserType(this.auth.getUserType());
-    return ROLE_PERMISSIONS[userType]?.[action] ?? false;
+    // No DB permission found → strict deny (no hardcoded fallback for non-Super-Admin)
+    return false;
   }
 
   /**
-   * Evaluates page-level route access for guards & sidebar filtering.
-   * Super Admin has full access to ALL pages.
-   * Other roles access DB Granted Role Access Matrix, DB Menus, or Role Defaults.
+   * Page-level route access — used by RoleGuard and sidebar filtering.
+   *
+   * Precedence:
+   * 1. Super Admin → always true
+   * 2. Universal paths → always true
+   * 3. DB-granted permissions → true if any permission exists for path
+   * 4. DB-granted menus → true if menu assigned
+   * 5. All other cases → false (strict least-privilege)
    */
   hasPagePermission(path: string): boolean {
     this.permissionsUpdated();
 
     if (this.auth.isSuperAdmin()) return true;
 
-    // Universal accessible paths for ALL roles
-    const universalPaths = [
-      '/dashboard',
-      '/profile',
-      '/change-password',
-      '/notifications',
-      '/subscription-plans',
-      '/unauthorized'
-    ];
-    const targetNormalized = (path || '').toLowerCase().replace(/\/+$/, '');
-    if (universalPaths.some(p => targetNormalized === p || targetNormalized.startsWith(p + '/'))) {
+    const targetNorm = (path || '').toLowerCase().replace(/\/+$/, '');
+
+    // Universal paths accessible by all authenticated users
+    if (UNIVERSAL_PATHS.some(p => targetNorm === p || targetNorm.startsWith(p + '/'))) {
       return true;
     }
 
-    // Check DB granted permissions (Role Access Matrix)
-    const permissions = this.session.getPermissions();
-    if (Array.isArray(permissions) && permissions.length > 0) {
-      const hasGrantedPermission = permissions.some((p: any) => {
-        const menuPath = (p.menu?.path || p.menu_path || p.path || '').toLowerCase().replace(/\/+$/, '');
-        const menuName = (p.menu?.name || p.menu_name || p.name || '').toLowerCase();
-        
-        const pathMatches = menuPath && (targetNormalized === menuPath || targetNormalized.startsWith(menuPath + '/'));
-        const nameMatches = menuName && (targetNormalized === menuName || targetNormalized.startsWith(menuName + '/'));
-
-        if (!pathMatches && !nameMatches) return false;
-
-        if (p.is_denied === true || p.denied === true) return false;
-
-        const actUpper = (p.action || '').toUpperCase();
-        if (['READ', 'WRITE', 'CREATE', 'UPDATE', 'DELETE', 'APPROVE', 'ALL', '*', 'FULL'].includes(actUpper)) return true;
-        if (p.canRead === true || p.can_read === true || p.canCreate === true || p.can_create === true || p.canUpdate === true || p.can_update === true || p.canDelete === true || p.can_delete === true || p.canApprove === true || p.can_approve === true) return true;
-
-        return true;
-      });
-
-      if (hasGrantedPermission) {
-        return true;
-      }
+    // Check DB-granted permissions
+    if (this.hasAnyDbPermissionForPath(path)) {
+      return true;
     }
 
-    // Check DB granted menus
+    // Check DB-granted menus
     const menus = this.session.getMenus();
     if (Array.isArray(menus) && menus.length > 0) {
       const hasMenu = menus.some((m: any) => {
         if (typeof m === 'string') {
-          if (m === 'ALL') return true;
-          const strNormalized = m.toLowerCase().replace(/\/+$/, '');
-          return targetNormalized === strNormalized || targetNormalized.startsWith(strNormalized + '/');
+          if (m === 'ALL' || m === '*') return true;
+          const strNorm = m.toLowerCase().replace(/\/+$/, '');
+          return targetNorm === strNorm || targetNorm.startsWith(strNorm + '/');
         }
         const menuPath = (m.path || m.route || m.menu_path || m.name || '').toLowerCase().replace(/\/+$/, '');
-        return targetNormalized === menuPath || targetNormalized.startsWith(menuPath + '/');
+        return menuPath && (targetNorm === menuPath || targetNorm.startsWith(menuPath + '/'));
       });
       if (hasMenu) return true;
     }
 
-    // Role-based default fallback check for non-Super-Admin roles
-    const userType = this.normalizeUserType(this.auth.getUserType());
-
-    // Strict admin-only paths
-    const adminOnlyPaths = ['/admin', '/roles', '/role-access', '/audit-logs', '/menubar'];
-    const isAdminOnly = adminOnlyPaths.some(p => targetNormalized === p || targetNormalized.startsWith(p + '/'));
-    if (isAdminOnly) {
-      return userType === UserType.SUPER_ADMIN || userType === UserType.ADMIN || userType === UserType.BRANCH;
-    }
-
-    // Branch manager allowed paths
-    const branchManagerRestricted = ['/admin', '/roles', '/role-access', '/menubar'];
-    if (userType === UserType.BRANCH_MANAGER) {
-      return !branchManagerRestricted.some(p => targetNormalized === p || targetNormalized.startsWith(p + '/'));
-    }
-
-    // Employee / Shopkeeper / Delivery Boy restricted paths
-    const employeeRestricted = ['/admin', '/roles', '/role-access', '/menubar', '/manage-subscription-plans', '/payroll', '/audit-logs'];
-    if (userType === UserType.EMPLOYEE || userType === UserType.SHOPKEEPER || userType === UserType.DELIVERY_BOY) {
-      return !employeeRestricted.some(p => targetNormalized === p || targetNormalized.startsWith(p + '/'));
-    }
-
-    const rolePerms = ROLE_PERMISSIONS[userType];
-    return rolePerms ? rolePerms.canRead : false;
+    // Strict deny — no implicit access for non-Super-Admin
+    return false;
   }
 
-  // ─── Domain Specific RBAC Helpers ──────────────────────────────────────────
+  // ─── Domain-Specific RBAC Helpers ──────────────────────────────────────────
+  // These domain helpers check DB permissions + Super Admin override.
+  // They no longer rely on hardcoded role-name comparisons except for Super Admin.
 
   canApproveLeave(): boolean {
     this.permissionsUpdated();
     if (this.auth.isSuperAdmin()) return true;
-    const userType = this.normalizeUserType(this.auth.getUserType());
-    const isEmp = userType === UserType.EMPLOYEE || userType === UserType.SHOPKEEPER || userType === UserType.DELIVERY_BOY;
-    if (isEmp) return false;
     return this.hasRoleAction('canApprove', '/leave');
   }
 
   canManagePayroll(): boolean {
     this.permissionsUpdated();
     if (this.auth.isSuperAdmin()) return true;
-    const userType = this.normalizeUserType(this.auth.getUserType());
-    return userType === UserType.ADMIN || userType === UserType.BRANCH_MANAGER || userType === UserType.BRANCH;
+    return this.hasRoleAction('canManage', '/payroll') ||
+           this.hasRoleAction('canRead', '/payroll');
   }
 
   canManageWorkforce(): boolean {
     this.permissionsUpdated();
     if (this.auth.isSuperAdmin()) return true;
-    const userType = this.normalizeUserType(this.auth.getUserType());
-    return userType === UserType.ADMIN || userType === UserType.BRANCH_MANAGER || userType === UserType.BRANCH;
+    return this.hasRoleAction('canManage', '/workforce') ||
+           this.hasRoleAction('canRead', '/workforce');
   }
 
   canManageEmployees(): boolean {
     this.permissionsUpdated();
     if (this.auth.isSuperAdmin()) return true;
-    const userType = this.normalizeUserType(this.auth.getUserType());
-    return userType === UserType.ADMIN || userType === UserType.BRANCH_MANAGER || userType === UserType.BRANCH;
+    return this.hasRoleAction('canManage', '/employees') ||
+           this.hasRoleAction('canRead', '/employees');
   }
 
+  /**
+   * Returns true only for low-privilege roles (Employee/Shopkeeper/Delivery_Boy)
+   * that use self-service workflows (e.g. submit own leave request).
+   * Super Admin is not an employee in this context.
+   */
   isEmployeeSelfService(): boolean {
     this.permissionsUpdated();
     if (this.auth.isSuperAdmin()) return false;
     const userType = this.normalizeUserType(this.auth.getUserType());
-    return userType === UserType.EMPLOYEE || userType === UserType.SHOPKEEPER || userType === UserType.DELIVERY_BOY;
+    return userType === UserType.EMPLOYEE ||
+           userType === UserType.SHOPKEEPER ||
+           userType === UserType.DELIVERY_BOY;
   }
 
   /**
-   * Returns true only for Super Admin and Admin roles.
-   * Used to gate purchase-cost / margin fields in product forms and reports.
+   * Returns true only for Super Admin and users with DB permission to view purchase cost.
+   * Gates purchase-cost / margin fields in product forms and reports.
    */
   canViewPurchaseCost(): boolean {
     this.permissionsUpdated();
     if (this.auth.isSuperAdmin()) return true;
-    const userType = this.normalizeUserType(this.auth.getUserType());
-    return userType === UserType.ADMIN;
+    return this.hasRoleAction('canRead', '/profit-loss') ||
+           this.hasRoleAction('canManage', '/profit-loss');
   }
 
   /**
@@ -347,13 +383,63 @@ export class PermissionService {
   }
 
   /**
-   * Returns true only if the user can manage (approve / reject) products.
-   * Super Admin and Admin can approve; Branch users submit for approval.
+   * Returns true only if the user can manage (approve/reject) products.
+   * Requires DB canApprove permission on /product, or Super Admin.
    */
   canApproveProducts(): boolean {
     this.permissionsUpdated();
     if (this.auth.isSuperAdmin()) return true;
-    const userType = this.normalizeUserType(this.auth.getUserType());
-    return userType === UserType.ADMIN || userType === UserType.BRANCH_MANAGER;
+    return this.hasRoleAction('canApprove', '/product');
+  }
+
+  // ─── Extended Granular Permission Helpers ──────────────────────────────────
+
+  canExport(path?: string): boolean {
+    this.permissionsUpdated();
+    if (this.auth.isSuperAdmin()) return true;
+    return this.hasRoleAction('canExport', path);
+  }
+
+  canImport(path?: string): boolean {
+    this.permissionsUpdated();
+    if (this.auth.isSuperAdmin()) return true;
+    return this.hasRoleAction('canImport', path);
+  }
+
+  canAssign(path?: string): boolean {
+    this.permissionsUpdated();
+    if (this.auth.isSuperAdmin()) return true;
+    return this.hasRoleAction('canAssign', path);
+  }
+
+  canRevoke(path?: string): boolean {
+    this.permissionsUpdated();
+    if (this.auth.isSuperAdmin()) return true;
+    return this.hasRoleAction('canRevoke', path);
+  }
+
+  canActivateRecord(path?: string): boolean {
+    this.permissionsUpdated();
+    if (this.auth.isSuperAdmin()) return true;
+    return this.hasRoleAction('canActivate', path);
+  }
+
+  canDeactivateRecord(path?: string): boolean {
+    this.permissionsUpdated();
+    if (this.auth.isSuperAdmin()) return true;
+    return this.hasRoleAction('canDeactivate', path);
+  }
+
+  canRestoreRecord(path?: string): boolean {
+    this.permissionsUpdated();
+    if (this.auth.isSuperAdmin()) return true;
+    return this.hasRoleAction('canRestore', path);
+  }
+
+  canManageConfig(path?: string): boolean {
+    this.permissionsUpdated();
+    if (this.auth.isSuperAdmin()) return true;
+    return this.hasRoleAction('canManage', path) ||
+           this.hasRoleAction('canConfigure', path);
   }
 }

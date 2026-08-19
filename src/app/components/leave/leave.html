@@ -1,5 +1,7 @@
-<!-- Leave Balances Header Cards (Liquid Glass) -->
+<!-- ══ Leave Balance Summary Cards ══════════════════════════════════════════ -->
 <div class="row m-b-24">
+
+  <!-- Casual Leave -->
   <div class="col-lg-3 col-sm-6 m-b-16">
     <div class="glass-card border-left-primary p-20">
       <div class="d-flex align-items-center justify-content-between">
@@ -13,6 +15,8 @@
       </div>
     </div>
   </div>
+
+  <!-- Sick Leave -->
   <div class="col-lg-3 col-sm-6 m-b-16">
     <div class="glass-card border-left-warning p-20">
       <div class="d-flex align-items-center justify-content-between">
@@ -26,6 +30,8 @@
       </div>
     </div>
   </div>
+
+  <!-- Earned Leave -->
   <div class="col-lg-3 col-sm-6 m-b-16">
     <div class="glass-card border-left-success p-20">
       <div class="d-flex align-items-center justify-content-between">
@@ -39,6 +45,8 @@
       </div>
     </div>
   </div>
+
+  <!-- Emergency Leave -->
   <div class="col-lg-3 col-sm-6 m-b-16">
     <div class="glass-card border-left-info p-20">
       <div class="d-flex align-items-center justify-content-between">
@@ -52,53 +60,84 @@
       </div>
     </div>
   </div>
+
 </div>
 
-<!-- Main Leave Management Table Card -->
+<!-- ══ Main Table Card ══════════════════════════════════════════════════════ -->
 <div class="row">
   <div class="col-12">
     <div class="glass-card p-24">
+
+      <!-- Card Header -->
       <div class="d-flex align-items-center justify-content-between m-b-24 flex-wrap gap-16">
         <div>
           <h4 class="f-w-800 text-primary m-b-4 d-flex align-items-center gap-8">
-            <mat-icon class="text-primary">event_note</mat-icon> Leave Application & Approval Console
+            <mat-icon class="text-primary">event_note</mat-icon>
+            Leave Application &amp; Approval Console
           </h4>
-          <p class="f-s-13 text-muted m-b-0">Employees submit leave applications. Admin & Super Admin review, approve, or reject requests.</p>
+          <p class="f-s-13 text-muted m-b-0">
+            Employees submit leave applications. Admin &amp; Super Admin review, approve, or reject requests.
+          </p>
         </div>
 
         <div class="d-flex align-items-center gap-12">
-          <button mat-stroked-button color="primary" (click)="loadLeaveRequests()" [disabled]="loading">
+          <button mat-stroked-button color="primary"
+                  (click)="loadLeaveRequests()"
+                  [disabled]="loading"
+                  aria-label="Refresh leave list">
             <mat-icon>refresh</mat-icon> Refresh
           </button>
-
-          <button mat-flat-button color="primary" (click)="toggleForm()">
-            <mat-icon>add</mat-icon> Apply For Leave
+          <button mat-flat-button color="primary"
+                  (click)="toggleForm()"
+                  aria-label="Apply for leave">
+            <mat-icon>{{ showForm ? 'close' : 'add' }}</mat-icon>
+            {{ showForm ? 'Cancel' : 'Apply For Leave' }}
           </button>
         </div>
       </div>
 
-      <!-- Apply Leave Form Panel -->
+      <!-- ── Leave Application Form ──────────────────────────────────────── -->
       @if (showForm) {
-        <div class="p-24 bg-light-primary rounded-16 m-b-24 b-1 b-primary">
-          <h5 class="f-w-700 text-primary m-b-16">Submit New Leave Application</h5>
-          
-          <form [formGroup]="leaveForm" (ngSubmit)="submitLeaveRequest()">
+        <div class="leave-form-panel m-b-24">
+          <h5 class="f-w-700 text-primary m-b-16 d-flex align-items-center gap-8">
+            <mat-icon>assignment</mat-icon>
+            Submit New Leave Application
+          </h5>
+
+          <!-- Date range error banner -->
+          @if (leaveForm.hasError('dateRangeInvalid') && leaveForm.get('to_date')?.touched) {
+            <div class="leave-error-banner m-b-16" role="alert">
+              <mat-icon>error_outline</mat-icon>
+              <span>End date cannot be before the start date. Please correct the dates.</span>
+            </div>
+          }
+
+          <form [formGroup]="leaveForm" (ngSubmit)="submitLeaveRequest()" novalidate>
             <div class="row">
-              <div class="col-md-4">
+
+              <!-- Employee -->
+              <div class="col-md-4 col-sm-6 col-12">
                 <mat-form-field appearance="outline" class="w-100">
                   <mat-label>Select Employee</mat-label>
-                  <mat-select formControlName="employee_id">
+                  <mat-select formControlName="employee_id" id="lv-employee">
                     @for (emp of employees; track emp.id) {
                       <mat-option [value]="emp.id">{{ emp.name }} ({{ emp.email }})</mat-option>
                     }
+                    @if (employees.length === 0) {
+                      <mat-option disabled>No employees found</mat-option>
+                    }
                   </mat-select>
+                  @if (leaveForm.get('employee_id')?.hasError('required') && leaveForm.get('employee_id')?.touched) {
+                    <mat-error>Employee selection is required</mat-error>
+                  }
                 </mat-form-field>
               </div>
 
-              <div class="col-md-4">
+              <!-- Leave Type -->
+              <div class="col-md-4 col-sm-6 col-12">
                 <mat-form-field appearance="outline" class="w-100">
                   <mat-label>Leave Type</mat-label>
-                  <mat-select formControlName="leave_type">
+                  <mat-select formControlName="leave_type" id="lv-type">
                     @for (type of leaveTypes; track type) {
                       <mat-option [value]="type">{{ type }} LEAVE</mat-option>
                     }
@@ -106,61 +145,132 @@
                 </mat-form-field>
               </div>
 
-              <div class="col-md-4">
+              <!-- Duration (auto-calculated, read-only display) -->
+              <div class="col-md-4 col-sm-6 col-12">
                 <mat-form-field appearance="outline" class="w-100">
                   <mat-label>Duration (Days)</mat-label>
-                  <input matInput type="number" formControlName="total_days">
+                  <input matInput
+                         type="number"
+                         formControlName="total_days"
+                         id="lv-days"
+                         min="1"
+                         readonly
+                         tabindex="-1">
+                  <mat-hint>Auto-calculated from dates</mat-hint>
                 </mat-form-field>
               </div>
 
-              <div class="col-md-6">
+              <!-- From Date -->
+              <div class="col-md-6 col-12">
                 <mat-form-field appearance="outline" class="w-100">
                   <mat-label>From Date</mat-label>
-                  <input matInput [matDatepicker]="fromPicker" formControlName="from_date" placeholder="Choose From Date" (focus)="fromPicker.open()" (dateChange)="calculateLeaveDays()">
+                  <input matInput
+                         [matDatepicker]="fromPicker"
+                         formControlName="from_date"
+                         id="lv-from"
+                         placeholder="Select start date"
+                         [min]="today"
+                         (focus)="fromPicker.open()"
+                         readonly>
                   <mat-datepicker-toggle matIconSuffix [for]="fromPicker"></mat-datepicker-toggle>
                   <mat-datepicker #fromPicker></mat-datepicker>
+                  @if (leaveForm.get('from_date')?.hasError('required') && leaveForm.get('from_date')?.touched) {
+                    <mat-error>Start date is required</mat-error>
+                  }
                 </mat-form-field>
               </div>
 
-              <div class="col-md-6">
+              <!-- To Date -->
+              <div class="col-md-6 col-12">
                 <mat-form-field appearance="outline" class="w-100">
                   <mat-label>To Date</mat-label>
-                  <input matInput [matDatepicker]="toPicker" formControlName="to_date" placeholder="Choose To Date" (focus)="toPicker.open()" (dateChange)="calculateLeaveDays()">
+                  <input matInput
+                         [matDatepicker]="toPicker"
+                         formControlName="to_date"
+                         id="lv-to"
+                         placeholder="Select end date"
+                         [min]="minToDate || today"
+                         (focus)="toPicker.open()"
+                         readonly>
                   <mat-datepicker-toggle matIconSuffix [for]="toPicker"></mat-datepicker-toggle>
                   <mat-datepicker #toPicker></mat-datepicker>
+                  @if (leaveForm.get('to_date')?.hasError('required') && leaveForm.get('to_date')?.touched) {
+                    <mat-error>End date is required</mat-error>
+                  }
+                  @if (leaveForm.hasError('dateRangeInvalid') && leaveForm.get('to_date')?.touched) {
+                    <mat-error>End date must be on or after start date</mat-error>
+                  }
                 </mat-form-field>
               </div>
 
+              <!-- Reason -->
               <div class="col-12">
                 <mat-form-field appearance="outline" class="w-100">
                   <mat-label>Reason for Leave</mat-label>
-                  <textarea matInput formControlName="reason" rows="3" placeholder="Provide reason..."></textarea>
+                  <textarea matInput
+                            formControlName="reason"
+                            id="lv-reason"
+                            rows="3"
+                            placeholder="Please provide a detailed reason (minimum 10 characters)..."></textarea>
+                  @if (leaveForm.get('reason')?.hasError('required') && leaveForm.get('reason')?.touched) {
+                    <mat-error>Reason is required</mat-error>
+                  }
+                  @if (leaveForm.get('reason')?.hasError('minlength') && leaveForm.get('reason')?.touched) {
+                    <mat-error>Reason must be at least 10 characters</mat-error>
+                  }
                 </mat-form-field>
               </div>
+
+            </div>
+            <!-- /Row -->
+
+            <!-- Form Actions -->
+            <div class="d-flex justify-content-end gap-12 m-t-8">
+              <button type="button" mat-stroked-button (click)="toggleForm()">
+                <mat-icon>close</mat-icon> Cancel
+              </button>
+              <button type="submit"
+                      mat-flat-button
+                      color="primary"
+                      [disabled]="loading || leaveForm.invalid">
+                @if (loading) {
+                  <mat-spinner diameter="18" color="accent"></mat-spinner>
+                } @else {
+                  <mat-icon>send</mat-icon>
+                }
+                {{ loading ? 'Submitting…' : 'Submit Application' }}
+              </button>
             </div>
 
-            <div class="d-flex justify-content-end gap-12">
-              <button type="button" mat-stroked-button (click)="toggleForm()">Cancel</button>
-              <button type="submit" mat-flat-button color="primary" [disabled]="loading">Submit Application</button>
-            </div>
           </form>
         </div>
       }
+      <!-- /Leave Form -->
 
-      <!-- Reusable Dynamic MatTable Component -->
-      <app-mat-table 
-        [columns]="tableColumns" 
+      <!-- ── Loading Indicator ─────────────────────────────────────────── -->
+      @if (loading && !showForm) {
+        <div class="d-flex justify-content-center align-items-center p-24">
+          <mat-spinner diameter="36"></mat-spinner>
+        </div>
+      }
+
+      <!-- ── Data Table ────────────────────────────────────────────────── -->
+      <app-mat-table
+        [columns]="tableColumns"
         [tableData]="leaveRequests"
+        [isLoading]="loading"
         [showAction]="true"
         [showView]="true"
-        [showEdit]="perm.canApproveLeave()"
-        [showDelete]="perm.canApproveLeave()"
+        [showEdit]="canApprove"
+        [showDelete]="canApprove"
         [showSearch]="true"
         [enableExport]="true"
+        title="Leave Requests"
         (ViewClick)="viewLeave($event)"
         (editClick)="approveLeave($event)"
         (deleteClick)="rejectLeave($event)"
       ></app-mat-table>
+      <!-- Tooltips: Edit button = Approve, Delete button = Reject -->
 
     </div>
   </div>

@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http';
-import { Observable, throwError } from 'rxjs';
-import { catchError, tap, retry } from 'rxjs/operators';
+import { Observable, of, throwError } from 'rxjs';
+import { catchError, tap } from 'rxjs/operators';
 import { environment } from 'src/environment/environment';
 
 /**
@@ -67,18 +67,58 @@ export class CommonService {
     return String(params);
   }
 
+  /**
+   * SEC-14: Proper SWR (Stale-While-Revalidate) implementation.
+   * - Cache HIT (valid, non-expired): returns cached data immediately via of()
+   * - Cache MISS / expired: fetches from network, populates cache on success
+   * - Mutating methods (post/put/patch/delete) call clearCache() to invalidate
+   */
   getApi(endpoint: string, params?: HttpParams | any): Observable<any> {
-    const clean = this.cleanEndpoint(endpoint);
+    const clean    = this.cleanEndpoint(endpoint);
+    const cacheKey = `${clean}|${this.serializeParams(params)}`;
+
+    // Cache HIT — return stale data immediately
+    if (this.isCacheValid(cacheKey)) {
+      return of(this.cache.get(cacheKey)!.value);
+    }
+
+    // Cache MISS — fetch from network and populate cache
     return this.http.get(
       `${this.apiUrl}/${clean}`,
       { params }
     ).pipe(
+      tap(response => {
+        this.cache.set(cacheKey, {
+          value:     response,
+          expiresAt: Date.now() + this.CACHE_TTL_MS
+        });
+      }),
       catchError(this.handleError)
     );
   }
 
+  /**
+   * Invalidate cache entries related to the target endpoint resource prefix.
+   * E.g. 'leave/apply' -> invalidates all 'leave' cache entries.
+   */
+  invalidateCacheForEndpoint(endpoint: string): void {
+    const clean = this.cleanEndpoint(endpoint);
+    const resourcePrefix = clean.split('/')[0].split('?')[0].toLowerCase();
+    
+    if (!resourcePrefix) {
+      this.clearCache();
+      return;
+    }
+
+    for (const key of this.cache.keys()) {
+      if (key.startsWith(resourcePrefix + '|') || key.startsWith(resourcePrefix + '/')) {
+        this.cache.delete(key);
+      }
+    }
+  }
+
   postApi(endpoint: string, payload: any): Observable<any> {
-    this.clearCache();
+    this.invalidateCacheForEndpoint(endpoint);
     return this.http.post(
       `${this.apiUrl}/${this.cleanEndpoint(endpoint)}`,
       payload
@@ -88,7 +128,7 @@ export class CommonService {
   }
 
   putApi(endpoint: string, payload: any): Observable<any> {
-    this.clearCache();
+    this.invalidateCacheForEndpoint(endpoint);
     return this.http.put(
       `${this.apiUrl}/${this.cleanEndpoint(endpoint)}`,
       payload
@@ -98,7 +138,7 @@ export class CommonService {
   }
 
   patchApi(endpoint: string, payload: any): Observable<any> {
-    this.clearCache();
+    this.invalidateCacheForEndpoint(endpoint);
     return this.http.patch(
       `${this.apiUrl}/${this.cleanEndpoint(endpoint)}`,
       payload
@@ -108,7 +148,7 @@ export class CommonService {
   }
 
   deleteApi(endpoint: string): Observable<any> {
-    this.clearCache();
+    this.invalidateCacheForEndpoint(endpoint);
     return this.http.delete(
       `${this.apiUrl}/${this.cleanEndpoint(endpoint)}`
     ).pipe(
@@ -117,7 +157,7 @@ export class CommonService {
   }
 
   postFormData(endpoint: string, payload: FormData): Observable<any> {
-    this.clearCache();
+    this.invalidateCacheForEndpoint(endpoint);
     return this.http.post(
       `${this.apiUrl}/${this.cleanEndpoint(endpoint)}`,
       payload
@@ -127,7 +167,7 @@ export class CommonService {
   }
 
   putFormData(endpoint: string, payload: FormData): Observable<any> {
-    this.clearCache();
+    this.invalidateCacheForEndpoint(endpoint);
     return this.http.put(
       `${this.apiUrl}/${this.cleanEndpoint(endpoint)}`,
       payload
@@ -137,7 +177,10 @@ export class CommonService {
   }
 
   private handleError(error: HttpErrorResponse): Observable<never> {
-    console.error('[CommonService]', error);
+    // SEC-15: Only log in development — prevent internal API paths leaking to users in production
+    if (!environment.production) {
+      console.error('[CommonService] HTTP error:', error);
+    }
     return throwError(() => error);
   }
 }

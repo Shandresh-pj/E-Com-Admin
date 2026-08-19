@@ -107,14 +107,40 @@
           <mat-checkbox color="primary" class="remember-chk">Keep session active for 30 days</mat-checkbox>
         </div>
 
+        <!-- SEC-10: Lockout Banner -->
+        @if (isLockedOut) {
+          <div class="login-lockout-banner" role="alert" aria-live="assertive">
+            <mat-icon>lock_clock</mat-icon>
+            <div>
+              <strong>Too many failed attempts</strong>
+              <p>Account temporarily locked. Try again in <b>{{ lockoutSecondsRemaining }}s</b></p>
+            </div>
+          </div>
+        }
+
+        <!-- Failed attempts warning (3-4 attempts) -->
+        @if (!isLockedOut && failedAttempts >= 3) {
+          <div class="login-warn-banner" role="alert">
+            <mat-icon>warning</mat-icon>
+            <span>{{ MAX_FAILED_ATTEMPTS - failedAttempts }} attempt(s) remaining before lockout</span>
+          </div>
+        }
+
         <!-- Submit CTA Button with Shimmer Animation -->
-        <button mat-raised-button color="primary" class="submit-cta-btn" type="submit" [disabled]="LoginForm.invalid || isLoading">
+        <button mat-raised-button color="primary" class="submit-cta-btn" type="submit"
+                [disabled]="LoginForm.invalid || isLoading || isLockedOut"
+                [attr.aria-busy]="isLoading">
           <span class="cta-shimmer" aria-hidden="true"></span>
           @if (isLoading) {
             <div class="loading-state">
               <mat-spinner diameter="20"></mat-spinner>
               <span>Authenticating Workspace...</span>
             </div>
+          } @else if (isLockedOut) {
+            <span class="cta-inner">
+              <mat-icon>lock</mat-icon>
+              <span>Locked · {{ lockoutSecondsRemaining }}s</span>
+            </span>
           } @else {
             <span class="cta-inner">
               <span>Access Dashboard</span>

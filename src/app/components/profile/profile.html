@@ -1,345 +1,461 @@
 <div class="pf-page">
 
   <!-- ══ AMBIENT BACKGROUND ORBS ══════════════════════════════════════════ -->
-  <div class="pf-bg-orb pf-orb-1"></div>
-  <div class="pf-bg-orb pf-orb-2"></div>
-  <div class="pf-bg-orb pf-orb-3"></div>
+  <div class="pf-bg-orb pf-orb-1" aria-hidden="true"></div>
+  <div class="pf-bg-orb pf-orb-2" aria-hidden="true"></div>
+  <div class="pf-bg-orb pf-orb-3" aria-hidden="true"></div>
 
   <!-- ══ HERO COVER BAND ══════════════════════════════════════════════════ -->
-  <div class="pf-hero-cover" [style.background-image]="coverPreview ? 'url(' + coverPreview + ')' : null">
-    <div class="pf-cover-overlay"></div>
-    <div class="pf-cover-mesh"></div>
+  <div class="pf-hero-cover"
+       [style.background-image]="coverPreview ? 'url(' + coverPreview + ')' : null"
+       role="img"
+       [attr.aria-label]="'Cover photo for ' + (ProfileForm.get('name')?.value || 'user')">
+    <div class="pf-cover-overlay" aria-hidden="true"></div>
+    <div class="pf-cover-mesh"    aria-hidden="true"></div>
+    <div class="pf-cover-grid"    aria-hidden="true"></div>
 
-    <!-- Cover Edit -->
+    <!-- Cover Edit Button -->
     <label class="pf-cover-edit-btn" for="coverFileInput" title="Change cover photo">
-      <i-tabler name="photo-edit" class="icon-15 d-flex"></i-tabler>
+      <i-tabler name="photo-edit" class="icon-14 d-flex"></i-tabler>
       <span>Edit Cover</span>
       <input id="coverFileInput" type="file" accept="image/*" hidden (change)="onCoverChange($event)">
     </label>
   </div>
 
-  <!-- ══ MAIN GRID ═════════════════════════════════════════════════════════ -->
+  <!-- ══ MAIN GRID ═══════════════════════════════════════════════════════ -->
   <div class="pf-grid">
 
     <!-- ── LEFT COLUMN ─────────────────────────────────────────────────── -->
-    <aside class="pf-col-left">
+    <aside class="pf-col-left" aria-label="Profile sidebar">
 
       <!-- Identity Card -->
       <div class="pf-identity-card">
-        <!-- Avatar -->
+
+        <!-- Avatar with pulsing ring -->
         <div class="pf-avatar-wrap">
           <div class="pf-avatar-ring">
             <div class="pf-avatar-inner">
-              <ng-container *ngIf="avatarPreview; else initialsBlock">
-                <img [src]="avatarPreview" alt="Avatar" class="pf-avatar-img" (error)="onImageError('avatar')">
-              </ng-container>
-              <ng-template #initialsBlock>
-                <span class="pf-avatar-initials">{{ initials }}</span>
-              </ng-template>
-              <label class="pf-avatar-hover-overlay" for="avatarFileInput" title="{{ 'profile.change_photo' | translate }}">
+              @if (avatarPreview) {
+                <img [src]="avatarPreview" alt="Profile photo" class="pf-avatar-img"
+                     (error)="onImageError('avatar')">
+              } @else {
+                <span class="pf-avatar-initials" aria-label="User initials">{{ initials }}</span>
+              }
+              <!-- Hover overlay for camera -->
+              <label class="pf-avatar-hover-overlay" for="avatarFileInputSide"
+                     title="{{ 'profile.change_photo' | translate }}">
                 <i-tabler name="camera" class="icon-18 d-flex"></i-tabler>
-                <span class="pf-avatar-hover-text">{{ 'profile.change' | translate }}</span>
-                <input id="avatarFileInput" type="file" accept="image/*" hidden (change)="onAvatarChange($event)">
+                <span class="pf-avatar-hover-text">Change</span>
+                <input id="avatarFileInputSide" type="file" accept="image/*" hidden (change)="onAvatarChange($event)">
               </label>
             </div>
-            <span class="pf-avatar-status-dot"></span>
+            <!-- Online indicator -->
+            <span class="pf-avatar-status-dot" aria-label="Online" title="Online"></span>
           </div>
         </div>
 
         <!-- Identity Info -->
         <div class="pf-identity-info">
-          <h2 class="pf-name">{{ ProfileForm.get('name')?.value || ProfileData?.name || 'User' }}</h2>
+          <h2 class="pf-name">
+            {{ ProfileForm.get('name')?.value || ProfileData?.name || 'User' }}
+          </h2>
           <div class="pf-role-chip">
-            <i-tabler name="shield-check" class="icon-12 d-flex"></i-tabler>
+            <i-tabler name="shield-check" class="icon-11 d-flex"></i-tabler>
             {{ ProfileData?.userType || 'Admin' }}
           </div>
           <p class="pf-email-hint">{{ ProfileData?.email || '—' }}</p>
         </div>
 
-        <!-- Divider -->
+        <!-- Profile Completion Progress -->
+        <div class="pf-completion">
+          <div class="pf-completion-label">
+            <span>{{ 'profile.completion' | translate }}</span>
+            <span class="pf-completion-pct">{{ profileCompletionPct }}%</span>
+          </div>
+          <div class="pf-progress-bar">
+            <div class="pf-progress-fill" [style.width]="profileCompletionPct + '%'"></div>
+          </div>
+        </div>
+
         <div class="pf-divider"></div>
 
         <!-- Quick Stats -->
         <div class="pf-quick-stats">
-          <div *ngFor="let s of stats" class="pf-stat-item">
-            <div class="pf-stat-icon-wrap">
-              <i-tabler [name]="s.icon" class="icon-16 d-flex"></i-tabler>
+          @for (s of stats; track s.label) {
+            <div class="pf-stat-item">
+              <div class="pf-stat-icon-wrap">
+                <i-tabler [name]="s.icon" class="icon-16 d-flex"></i-tabler>
+              </div>
+              <div class="pf-stat-text">
+                <span class="pf-stat-val">{{ s.value }}</span>
+                <span class="pf-stat-label">{{ s.label | translate }}</span>
+              </div>
             </div>
-            <div class="pf-stat-text">
-              <span class="pf-stat-val">{{ s.value }}</span>
-              <span class="pf-stat-label">{{ s.label | translate }}</span>
-            </div>
-          </div>
+          }
         </div>
 
-        <!-- Divider -->
         <div class="pf-divider"></div>
 
-        <!-- Links / Actions -->
-        <nav class="pf-sidebar-nav">
-          <button class="pf-snav-item" [class.active]="activeSection === 'account'" (click)="activeSection = 'account'">
+        <!-- Sidebar Navigation -->
+        <nav class="pf-sidebar-nav" aria-label="Profile sections">
+
+          <button class="pf-snav-item"
+                  [class.active]="activeSection === 'account'"
+                  (click)="activeSection = 'account'"
+                  type="button"
+                  aria-label="Account Details">
             <i-tabler name="user-edit" class="icon-16 d-flex"></i-tabler>
             <span>{{ 'profile.account_details' | translate }}</span>
-            <i-tabler name="chevron-right" class="icon-13 d-flex ms-auto"></i-tabler>
+            <i-tabler name="chevron-right" class="icon-12 d-flex ms-auto"></i-tabler>
           </button>
-          <button class="pf-snav-item" [class.active]="activeSection === 'security'" (click)="activeSection = 'security'">
+
+          <button class="pf-snav-item"
+                  [class.active]="activeSection === 'security'"
+                  (click)="activeSection = 'security'"
+                  type="button"
+                  aria-label="Security">
             <i-tabler name="lock" class="icon-16 d-flex"></i-tabler>
             <span>{{ 'profile.security' | translate }}</span>
-            <i-tabler name="chevron-right" class="icon-13 d-flex ms-auto"></i-tabler>
+            <i-tabler name="chevron-right" class="icon-12 d-flex ms-auto"></i-tabler>
           </button>
-          <button class="pf-snav-item" [class.active]="activeSection === 'activity'" (click)="activeSection = 'activity'">
+
+          <button class="pf-snav-item"
+                  [class.active]="activeSection === 'activity'"
+                  (click)="activeSection = 'activity'"
+                  type="button"
+                  aria-label="Activity">
             <i-tabler name="activity" class="icon-16 d-flex"></i-tabler>
             <span>{{ 'profile.activity' | translate }}</span>
-            <i-tabler name="chevron-right" class="icon-13 d-flex ms-auto"></i-tabler>
+            <i-tabler name="chevron-right" class="icon-12 d-flex ms-auto"></i-tabler>
           </button>
-          <a class="pf-snav-item" routerLink="/employee-documents">
+
+          <a class="pf-snav-item" routerLink="/employee-documents" aria-label="My Documents">
             <i-tabler name="file-certificate" class="icon-16 d-flex"></i-tabler>
             <span>{{ 'profile.my_documents' | translate }}</span>
-            <span class="pf-snav-badge">{{ 'profile.kyc' | translate }}</span>
+            <span class="pf-snav-badge">KYC</span>
           </a>
+
         </nav>
+
       </div>
+      <!-- /Identity Card -->
 
     </aside>
 
     <!-- ── RIGHT COLUMN ─────────────────────────────────────────────────── -->
     <main class="pf-col-right">
 
-      <!-- ── SECTION: Account Details ──────────────────────────────────── -->
-      <div class="pf-section" *ngIf="activeSection === 'account'">
+      <!-- ════ SECTION: Account Details ════════════════════════════════════ -->
+      @if (activeSection === 'account') {
+        <div class="pf-section" role="region" aria-labelledby="section-account-title">
 
-        <!-- Section Header -->
-        <div class="pf-section-header">
-          <div class="pf-section-icon">
-            <i-tabler name="user-edit" class="icon-20 d-flex"></i-tabler>
-          </div>
-          <div>
-            <h2 class="pf-section-title">{{ 'profile.account_details' | translate }}</h2>
-            <p class="pf-section-sub">{{ 'profile.account_sub' | translate }}</p>
-          </div>
-          <div class="pf-section-header-actions">
-            <span class="pf-save-indicator" *ngIf="isSaving">
-              <span class="pf-mini-spinner"></span> {{ 'profile.saving' | translate }}…
-            </span>
-          </div>
-        </div>
-
-        <!-- Form -->
-        <form [formGroup]="ProfileForm" (ngSubmit)="onSubmit()">
-
-          <!-- Avatar Upload Strip -->
-          <div class="pf-avatar-strip">
-            <div class="pf-avatar-strip-preview">
-              <ng-container *ngIf="avatarPreview; else initials2">
-                <img [src]="avatarPreview" alt="Avatar" class="pf-avatar-strip-img">
-              </ng-container>
-              <ng-template #initials2>
-                <span class="pf-avatar-strip-initials">{{ initials }}</span>
-              </ng-template>
+          <!-- Section Header -->
+          <div class="pf-section-header">
+            <div class="pf-section-icon">
+              <i-tabler name="user-edit" class="icon-22 d-flex"></i-tabler>
             </div>
-            <div class="pf-avatar-strip-info">
-              <h4>{{ 'profile.profile_photo' | translate }}</h4>
-              <p>{{ 'profile.photo_requirements' | translate }}</p>
+            <div>
+              <h2 class="pf-section-title" id="section-account-title">
+                {{ 'profile.account_details' | translate }}
+              </h2>
+              <p class="pf-section-sub">{{ 'profile.account_sub' | translate }}</p>
             </div>
-            <label for="avatarFileInput2" class="pf-btn ghost sm">
-              <i-tabler name="upload" class="icon-14 d-flex"></i-tabler>
-              {{ 'profile.upload_photo' | translate }}
-              <input id="avatarFileInput2" type="file" accept="image/*" hidden (change)="onAvatarChange($event)">
-            </label>
+            <div class="pf-section-header-actions">
+              @if (isSaving) {
+                <span class="pf-save-indicator" aria-live="polite">
+                  <span class="pf-mini-spinner"></span>
+                  {{ 'profile.saving' | translate }}…
+                </span>
+              }
+            </div>
           </div>
 
-          <!-- Fields Grid -->
-          <div class="pf-fields-grid">
+          <!-- Form -->
+          <form [formGroup]="ProfileForm" (ngSubmit)="onSubmit()" novalidate>
 
-            <!-- Full Name -->
-            <div class="pf-field">
-              <label class="pf-field-label">
-                <i-tabler name="user" class="icon-13 d-flex"></i-tabler>
-                {{ 'profile.full_name' | translate }} <span class="pf-req">*</span>
-              </label>
-              <div class="pf-input-wrap">
-                <input class="pf-input" formControlName="name" placeholder="{{ 'profile.enter_name' | translate }}">
+            <!-- Avatar Upload Strip -->
+            <div class="pf-avatar-strip">
+              <div class="pf-avatar-strip-preview">
+                @if (avatarPreview) {
+                  <img [src]="avatarPreview" alt="Avatar preview" class="pf-avatar-strip-img">
+                } @else {
+                  <span class="pf-avatar-strip-initials">{{ initials }}</span>
+                }
               </div>
-              <span class="pf-field-error" *ngIf="ProfileForm.get('name')?.touched && ProfileForm.get('name')?.hasError('required')">
-                {{ 'error.name_required' | translate }}
+              <div class="pf-avatar-strip-info">
+                <h4>{{ 'profile.profile_photo' | translate }}</h4>
+                <p>{{ 'profile.photo_requirements' | translate }}</p>
+              </div>
+              <label for="avatarFileInputForm" class="pf-btn ghost sm" style="cursor:pointer;">
+                <i-tabler name="upload" class="icon-14 d-flex"></i-tabler>
+                {{ 'profile.upload_photo' | translate }}
+                <input id="avatarFileInputForm" type="file" accept="image/*" hidden (change)="onAvatarChange($event)">
+              </label>
+            </div>
+
+            <!-- Fields Grid -->
+            <div class="pf-fields-grid">
+
+              <!-- Full Name -->
+              <div class="pf-field">
+                <label class="pf-field-label" for="pf-name">
+                  <i-tabler name="user" class="icon-13 d-flex"></i-tabler>
+                  {{ 'profile.full_name' | translate }} <span class="pf-req">*</span>
+                </label>
+                <div class="pf-input-wrap">
+                  <input id="pf-name" class="pf-input" formControlName="name"
+                         placeholder="{{ 'profile.enter_name' | translate }}"
+                         autocomplete="name">
+                </div>
+                @if (ProfileForm.get('name')?.touched && ProfileForm.get('name')?.hasError('required')) {
+                  <span class="pf-field-error" role="alert">
+                    <i-tabler name="alert-circle" class="icon-12 d-flex"></i-tabler>
+                    {{ 'error.name_required' | translate }}
+                  </span>
+                }
+              </div>
+
+              <!-- Email (Locked) -->
+              <div class="pf-field">
+                <label class="pf-field-label" for="pf-email">
+                  <i-tabler name="mail" class="icon-13 d-flex"></i-tabler>
+                  {{ 'profile.email_address' | translate }}
+                  <span class="pf-lock-badge">
+                    <i-tabler name="lock" class="icon-10 d-flex"></i-tabler>
+                    {{ 'profile.locked' | translate }}
+                  </span>
+                </label>
+                <div class="pf-input-wrap locked">
+                  <input id="pf-email" class="pf-input" formControlName="email" readonly
+                         placeholder="{{ 'profile.email_address' | translate }}"
+                         autocomplete="email">
+                  <i-tabler name="lock" class="icon-14 d-flex pf-input-suffix-icon"></i-tabler>
+                </div>
+              </div>
+
+              <!-- Mobile (Locked) -->
+              <div class="pf-field">
+                <label class="pf-field-label" for="pf-mobile">
+                  <i-tabler name="device-mobile" class="icon-13 d-flex"></i-tabler>
+                  {{ 'profile.mobile_number' | translate }}
+                  <span class="pf-lock-badge">
+                    <i-tabler name="lock" class="icon-10 d-flex"></i-tabler>
+                    {{ 'profile.locked' | translate }}
+                  </span>
+                </label>
+                <div class="pf-input-wrap locked">
+                  <input id="pf-mobile" class="pf-input" formControlName="mobilenumber" readonly
+                         placeholder="{{ 'profile.mobile_number' | translate }}"
+                         autocomplete="tel">
+                  <i-tabler name="lock" class="icon-14 d-flex pf-input-suffix-icon"></i-tabler>
+                </div>
+              </div>
+
+              <!-- Role (Locked) -->
+              <div class="pf-field">
+                <label class="pf-field-label" for="pf-role">
+                  <i-tabler name="shield" class="icon-13 d-flex"></i-tabler>
+                  {{ 'profile.role' | translate }}
+                  <span class="pf-lock-badge">
+                    <i-tabler name="lock" class="icon-10 d-flex"></i-tabler>
+                    {{ 'profile.locked' | translate }}
+                  </span>
+                </label>
+                <div class="pf-input-wrap locked">
+                  <input id="pf-role" class="pf-input" formControlName="userType" readonly
+                         placeholder="{{ 'profile.role' | translate }}">
+                  <i-tabler name="lock" class="icon-14 d-flex pf-input-suffix-icon"></i-tabler>
+                </div>
+              </div>
+
+              <!-- Address (Full Width) -->
+              <div class="pf-field pf-field-full">
+                <label class="pf-field-label" for="pf-address">
+                  <i-tabler name="map-pin" class="icon-13 d-flex"></i-tabler>
+                  {{ 'profile.physical_address' | translate }} <span class="pf-req">*</span>
+                </label>
+                <div class="pf-input-wrap">
+                  <textarea id="pf-address" class="pf-input pf-textarea" formControlName="address"
+                            rows="3"
+                            placeholder="{{ 'profile.enter_address' | translate }}"></textarea>
+                </div>
+                @if (ProfileForm.get('address')?.touched && ProfileForm.get('address')?.hasError('required')) {
+                  <span class="pf-field-error" role="alert">
+                    <i-tabler name="alert-circle" class="icon-12 d-flex"></i-tabler>
+                    {{ 'error.address_required' | translate }}
+                  </span>
+                }
+              </div>
+
+            </div>
+            <!-- /Fields Grid -->
+
+            <!-- Action Row -->
+            <div class="pf-form-actions">
+              <button type="button" class="pf-btn ghost" (click)="onReset()">
+                <i-tabler name="rotate-clockwise" class="icon-14 d-flex"></i-tabler>
+                {{ 'profile.reset' | translate }}
+              </button>
+              <button type="submit" class="pf-btn primary"
+                      [class.loading]="isSaving"
+                      [disabled]="isSaving"
+                      [attr.aria-busy]="isSaving">
+                @if (isSaving) {
+                  <span class="pf-mini-spinner" aria-hidden="true"></span>
+                  {{ 'profile.saving' | translate }}…
+                } @else {
+                  <i-tabler name="device-floppy" class="icon-14 d-flex"></i-tabler>
+                  {{ 'profile.save_profile' | translate }}
+                }
+              </button>
+            </div>
+
+          </form>
+
+        </div>
+      }
+      <!-- /Account Section -->
+
+      <!-- ════ SECTION: Security ════════════════════════════════════════════ -->
+      @if (activeSection === 'security') {
+        <div class="pf-section" role="region" aria-labelledby="section-security-title">
+
+          <div class="pf-section-header">
+            <div class="pf-section-icon green">
+              <i-tabler name="lock" class="icon-22 d-flex"></i-tabler>
+            </div>
+            <div>
+              <h2 class="pf-section-title" id="section-security-title">
+                {{ 'profile.security' | translate }}
+              </h2>
+              <p class="pf-section-sub">{{ 'profile.security_sub' | translate }}</p>
+            </div>
+          </div>
+
+          <!-- Security Action Cards -->
+          <div class="pf-security-cards">
+
+            <!-- Change Password -->
+            <div class="pf-security-card">
+              <div class="pf-security-card-icon">
+                <i-tabler name="key" class="icon-22 d-flex"></i-tabler>
+              </div>
+              <div class="pf-security-card-body">
+                <h4>{{ 'profile.change_password' | translate }}</h4>
+                <p>{{ 'profile.change_password_sub' | translate }}</p>
+              </div>
+              <a routerLink="/change-password" class="pf-btn sm primary">
+                <i-tabler name="arrow-right" class="icon-14 d-flex"></i-tabler>
+                {{ 'profile.update' | translate }}
+              </a>
+            </div>
+
+            <!-- KYC Verification -->
+            <div class="pf-security-card">
+              <div class="pf-security-card-icon success">
+                <i-tabler name="shield-check" class="icon-22 d-flex"></i-tabler>
+              </div>
+              <div class="pf-security-card-body">
+                <h4>{{ 'profile.kyc' | translate }}</h4>
+                <p>{{ 'profile.kyc_sub' | translate }}</p>
+              </div>
+              <a routerLink="/employee-documents" class="pf-btn sm success">
+                <i-tabler name="file-certificate" class="icon-14 d-flex"></i-tabler>
+                {{ 'profile.view' | translate }}
+              </a>
+            </div>
+
+            <!-- Active Sessions -->
+            <div class="pf-security-card">
+              <div class="pf-security-card-icon warning">
+                <i-tabler name="device-desktop-analytics" class="icon-22 d-flex"></i-tabler>
+              </div>
+              <div class="pf-security-card-body">
+                <h4>{{ 'profile.active_sessions' | translate }}</h4>
+                <p>{{ 'profile.active_sessions_sub' | translate }}</p>
+              </div>
+              <span class="pf-session-badge">
+                1 {{ 'profile.active' | translate }}
               </span>
             </div>
 
-            <!-- Email (Locked) -->
-            <div class="pf-field">
-              <label class="pf-field-label">
-                <i-tabler name="mail" class="icon-13 d-flex"></i-tabler>
-                {{ 'profile.email_address' | translate }} <span class="pf-lock-badge"><i-tabler name="lock" class="icon-10 d-flex"></i-tabler> {{ 'profile.locked' | translate }}</span>
-              </label>
-              <div class="pf-input-wrap locked">
-                <input class="pf-input" formControlName="email" readonly placeholder="{{ 'profile.email_address' | translate }}">
-                <i-tabler name="lock" class="icon-14 d-flex pf-input-suffix-icon"></i-tabler>
+          </div>
+
+          <!-- Session Metadata -->
+          <div class="pf-info-grid">
+
+            <div class="pf-info-card">
+              <i-tabler name="clock" class="icon-16 d-flex"></i-tabler>
+              <div>
+                <span class="pf-info-label">{{ 'profile.last_login' | translate }}</span>
+                <span class="pf-info-value">
+                  {{ 'profile.today_at' | translate }} {{ getCurrentTime() }}
+                </span>
               </div>
             </div>
 
-            <!-- Mobile (Locked) -->
-            <div class="pf-field">
-              <label class="pf-field-label">
-                <i-tabler name="device-mobile" class="icon-13 d-flex"></i-tabler>
-                {{ 'profile.mobile_number' | translate }} <span class="pf-lock-badge"><i-tabler name="lock" class="icon-10 d-flex"></i-tabler> {{ 'profile.locked' | translate }}</span>
-              </label>
-              <div class="pf-input-wrap locked">
-                <input class="pf-input" formControlName="mobilenumber" readonly placeholder="{{ 'profile.mobile_number' | translate }}">
-                <i-tabler name="lock" class="icon-14 d-flex pf-input-suffix-icon"></i-tabler>
+            <div class="pf-info-card">
+              <i-tabler name="device-laptop" class="icon-16 d-flex"></i-tabler>
+              <div>
+                <span class="pf-info-label">{{ 'profile.device' | translate }}</span>
+                <span class="pf-info-value">{{ 'profile.web_browser' | translate }}</span>
               </div>
             </div>
 
-            <!-- Role (Locked) -->
-            <div class="pf-field">
-              <label class="pf-field-label">
-                <i-tabler name="shield" class="icon-13 d-flex"></i-tabler>
-                {{ 'profile.role' | translate }} <span class="pf-lock-badge"><i-tabler name="lock" class="icon-10 d-flex"></i-tabler> {{ 'profile.locked' | translate }}</span>
-              </label>
-              <div class="pf-input-wrap locked">
-                <input class="pf-input" formControlName="userType" readonly placeholder="{{ 'profile.role' | translate }}">
-                <i-tabler name="lock" class="icon-14 d-flex pf-input-suffix-icon"></i-tabler>
+            <div class="pf-info-card">
+              <i-tabler name="map-pin" class="icon-16 d-flex"></i-tabler>
+              <div>
+                <span class="pf-info-label">{{ 'profile.location' | translate }}</span>
+                <span class="pf-info-value">{{ 'profile.india' | translate }}</span>
               </div>
-            </div>
-
-            <!-- Address (Full Width) -->
-            <div class="pf-field pf-field-full">
-              <label class="pf-field-label">
-                <i-tabler name="map-pin" class="icon-13 d-flex"></i-tabler>
-                {{ 'profile.physical_address' | translate }} <span class="pf-req">*</span>
-              </label>
-              <div class="pf-input-wrap">
-                <textarea class="pf-input pf-textarea" formControlName="address" rows="3"
-                  placeholder="{{ 'profile.enter_address' | translate }}"></textarea>
-              </div>
-              <span class="pf-field-error" *ngIf="ProfileForm.get('address')?.touched && ProfileForm.get('address')?.hasError('required')">
-                {{ 'error.address_required' | translate }}
-              </span>
             </div>
 
           </div>
 
-          <!-- Action Row -->
-          <div class="pf-form-actions">
-            <button type="button" class="pf-btn ghost" (click)="onReset()">
-              <i-tabler name="rotate-clockwise" class="icon-14 d-flex"></i-tabler>
-              {{ 'profile.reset' | translate }}
-            </button>
-            <button type="submit" class="pf-btn primary" [class.loading]="isSaving" [disabled]="isSaving">
-              <span class="pf-mini-spinner" *ngIf="isSaving"></span>
-              <i-tabler name="device-floppy" class="icon-14 d-flex" *ngIf="!isSaving"></i-tabler>
-              {{ isSaving ? ('profile.saving' | translate) : ('profile.save_profile' | translate) }}
-            </button>
-          </div>
-
-        </form>
-      </div>
-
-      <!-- ── SECTION: Security ─────────────────────────────────────────── -->
-      <div class="pf-section" *ngIf="activeSection === 'security'">
-        <div class="pf-section-header">
-          <div class="pf-section-icon green">
-            <i-tabler name="lock" class="icon-20 d-flex"></i-tabler>
-          </div>
-          <div>
-            <h2 class="pf-section-title">{{ 'profile.security' | translate }}</h2>
-            <p class="pf-section-sub">{{ 'profile.security_sub' | translate }}</p>
-          </div>
         </div>
+      }
+      <!-- /Security Section -->
 
-        <div class="pf-security-cards">
-          <div class="pf-security-card">
-            <div class="pf-security-card-icon">
-              <i-tabler name="key" class="icon-22 d-flex"></i-tabler>
-            </div>
-            <div class="pf-security-card-body">
-              <h4>{{ 'profile.change_password' | translate }}</h4>
-              <p>{{ 'profile.change_password_sub' | translate }}</p>
-            </div>
-            <a routerLink="/change-password" class="pf-btn sm primary">
-              <i-tabler name="arrow-right" class="icon-14 d-flex"></i-tabler>
-              {{ 'profile.update' | translate }}
-            </a>
-          </div>
+      <!-- ════ SECTION: Activity ════════════════════════════════════════════ -->
+      @if (activeSection === 'activity') {
+        <div class="pf-section" role="region" aria-labelledby="section-activity-title">
 
-          <div class="pf-security-card">
-            <div class="pf-security-card-icon success">
-              <i-tabler name="shield-check" class="icon-22 d-flex"></i-tabler>
+          <div class="pf-section-header">
+            <div class="pf-section-icon purple">
+              <i-tabler name="activity" class="icon-22 d-flex"></i-tabler>
             </div>
-            <div class="pf-security-card-body">
-              <h4>{{ 'profile.kyc' | translate }}</h4>
-              <p>{{ 'profile.kyc_sub' | translate }}</p>
-            </div>
-            <a routerLink="/employee-documents" class="pf-btn sm success">
-              <i-tabler name="file-certificate" class="icon-14 d-flex"></i-tabler>
-              {{ 'profile.view' | translate }}
-            </a>
-          </div>
-
-          <div class="pf-security-card">
-            <div class="pf-security-card-icon warning">
-              <i-tabler name="device-desktop-analytics" class="icon-22 d-flex"></i-tabler>
-            </div>
-            <div class="pf-security-card-body">
-              <h4>{{ 'profile.active_sessions' | translate }}</h4>
-              <p>{{ 'profile.active_sessions_sub' | translate }}</p>
-            </div>
-            <span class="pf-session-badge">1 {{ 'profile.active' | translate }}</span>
-          </div>
-        </div>
-
-        <!-- Info Cards Row -->
-        <div class="pf-info-grid">
-          <div class="pf-info-card">
-            <i-tabler name="clock" class="icon-16 d-flex"></i-tabler>
             <div>
-              <span class="pf-info-label">{{ 'profile.last_login' | translate }}</span>
-              <span class="pf-info-value">{{ 'profile.today_at' | translate }} {{ getCurrentTime() }}</span>
+              <h2 class="pf-section-title" id="section-activity-title">
+                {{ 'profile.recent_activity' | translate }}
+              </h2>
+              <p class="pf-section-sub">{{ 'profile.recent_activity_sub' | translate }}</p>
             </div>
           </div>
-          <div class="pf-info-card">
-            <i-tabler name="device-laptop" class="icon-16 d-flex"></i-tabler>
-            <div>
-              <span class="pf-info-label">{{ 'profile.device' | translate }}</span>
-              <span class="pf-info-value">{{ 'profile.web_browser' | translate }}</span>
-            </div>
-          </div>
-          <div class="pf-info-card">
-            <i-tabler name="map-pin" class="icon-16 d-flex"></i-tabler>
-            <div>
-              <span class="pf-info-label">{{ 'profile.location' | translate }}</span>
-              <span class="pf-info-value">{{ 'profile.india' | translate }}</span>
-            </div>
-          </div>
-        </div>
-      </div>
 
-      <!-- ── SECTION: Activity ─────────────────────────────────────────── -->
-      <div class="pf-section" *ngIf="activeSection === 'activity'">
-        <div class="pf-section-header">
-          <div class="pf-section-icon purple">
-            <i-tabler name="activity" class="icon-20 d-flex"></i-tabler>
-          </div>
-          <div>
-            <h2 class="pf-section-title">{{ 'profile.recent_activity' | translate }}</h2>
-            <p class="pf-section-sub">{{ 'profile.recent_activity_sub' | translate }}</p>
-          </div>
-        </div>
-
-        <div class="pf-timeline">
-          <div class="pf-timeline-item" *ngFor="let act of recentActivity">
-            <div class="pf-timeline-dot" [class]="'dot-' + act.color"></div>
-            <div class="pf-timeline-content">
-              <div class="pf-timeline-header">
-                <i-tabler [name]="act.icon" class="icon-14 d-flex"></i-tabler>
-                <span class="pf-timeline-title">{{ act.title }}</span>
-                <span class="pf-timeline-time">{{ act.time }}</span>
+          <div class="pf-timeline" role="list">
+            @for (act of recentActivity; track act.title) {
+              <div class="pf-timeline-item" role="listitem">
+                <div class="pf-timeline-dot" [class]="'dot-' + act.color" aria-hidden="true"></div>
+                <div class="pf-timeline-content">
+                  <div class="pf-timeline-header">
+                    <i-tabler [name]="act.icon" class="icon-14 d-flex"></i-tabler>
+                    <span class="pf-timeline-title">{{ act.title }}</span>
+                    <span class="pf-timeline-time">{{ act.time }}</span>
+                  </div>
+                  <p class="pf-timeline-desc">{{ act.desc }}</p>
+                </div>
               </div>
-              <p class="pf-timeline-desc">{{ act.desc }}</p>
-            </div>
+            }
           </div>
+
         </div>
-      </div>
+      }
+      <!-- /Activity Section -->
 
     </main>
+    <!-- /Right Column -->
+
   </div>
+  <!-- /Grid -->
+
 </div>

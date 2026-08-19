@@ -810,8 +810,9 @@ export class Product {
           },
         });
 
-        const isAdmin = this.authService.isSuperAdmin() || this.authService.getUserType() === 'Admin';
-        if (isAdmin && (data?.approval_status === 'Pending Approval' || data?.approval_status === 'Approved' || data?.approval_status === 'Draft')) {
+        // Use permission-service check instead of hardcoded role name.
+        const canApprove = this.perm.canApproveProducts();
+        if (canApprove && (data?.approval_status === 'Pending Approval' || data?.approval_status === 'Approved' || data?.approval_status === 'Draft')) {
           dialogRef.afterClosed().subscribe(() => {
             this.showApprovalActions(data);
           });

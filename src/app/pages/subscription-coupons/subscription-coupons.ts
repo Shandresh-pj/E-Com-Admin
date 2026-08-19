@@ -23,12 +23,15 @@ export class SubscriptionCouponsComponent implements OnInit {
   couponForm: FormGroup;
 
   discountTypes = [
-    { value: 'percentage', label: 'Percentage (%)', icon: 'percent' },
-    { value: 'flat', label: 'Flat Amount (₹)', icon: 'payments' },
-    { value: 'extra_days', label: 'Extra Days', icon: 'today' },
-    { value: 'extra_months', label: 'Extra Months', icon: 'date_range' },
-    { value: 'free_trial_extension', label: 'Free Trial Extension', icon: 'card_giftcard' },
-    { value: 'buy_x_get_y', label: 'Buy X Get Y', icon: 'shopping_bag' }
+    { value: 'percentage',            label: 'Percentage (%)',         icon: 'percent' },
+    { value: 'flat',                   label: 'Flat Amount (₹)',        icon: 'payments' },
+    { value: 'extra_days',             label: 'Extra Days',             icon: 'today' },
+    { value: 'extra_months',           label: 'Extra Months',           icon: 'date_range' },
+    { value: 'free_trial_extension',   label: 'Free Trial Extension',   icon: 'card_giftcard' },
+    { value: 'buy_x_get_y',            label: 'Buy X Get Y',            icon: 'shopping_bag' },
+    { value: 'renewal',                label: 'Renewal Discount',       icon: 'autorenew' },
+    { value: 'first_purchase',         label: 'First Purchase',         icon: 'new_releases' },
+    { value: 'referral',               label: 'Referral Reward',        icon: 'people' },
   ];
 
   constructor(
@@ -37,17 +40,17 @@ export class SubscriptionCouponsComponent implements OnInit {
     private alert: AlertService
   ) {
     this.couponForm = this.fb.group({
-      code: ['', [Validators.required, Validators.maxLength(30), Validators.pattern('^[A-Z0-9_-]+$')]],
-      discount_type: ['percentage', Validators.required],
-      discount_value: [10, [Validators.min(0)]],
-      buy_x_months: [1],
-      get_y_months: [1],
+      code:            ['', [Validators.required, Validators.maxLength(30), Validators.pattern('^[A-Z0-9_-]+$')]],
+      discount_type:   ['percentage', Validators.required],
+      discount_value:  [10, [Validators.min(0)]],
+      buy_x_months:    [1],
+      get_y_months:    [1],
       free_trial_days: [7],
-      usage_limit: [100],
+      usage_limit:     [100],
       min_order_value: [0],
-      valid_from: [''],
-      valid_until: [''],
-      is_active: [true]
+      valid_from:      [''],
+      valid_until:     [''],
+      is_active:       [true]
     });
   }
 
@@ -59,11 +62,7 @@ export class SubscriptionCouponsComponent implements OnInit {
     this.isLoading.set(true);
     this.commonService.getApi('subscription-coupons').subscribe({
       next: (res: any) => {
-        if (res?.success) {
-          this.coupons.set(res.data || []);
-        } else {
-          this.coupons.set([]);
-        }
+        this.coupons.set(res?.success ? (res.data || []) : []);
         this.isLoading.set(false);
       },
       error: (err: any) => {
@@ -74,19 +73,29 @@ export class SubscriptionCouponsComponent implements OnInit {
   }
 
   filteredCoupons = computed(() => {
-    const q = this.searchQuery().toLowerCase().trim();
+    const q      = this.searchQuery().toLowerCase().trim();
     const filter = this.selectedFilter();
     return this.coupons().filter(c => {
-      const matchSearch = !q || (c.code || '').toLowerCase().includes(q) || (c.discount_type || '').toLowerCase().includes(q);
-      const matchFilter = filter === 'all' || (filter === 'active' && c.is_active) || (filter === 'inactive' && !c.is_active);
+      const matchSearch = !q
+        || (c.code          || '').toLowerCase().includes(q)
+        || (c.discount_type || '').toLowerCase().includes(q);
+      const matchFilter =
+        filter === 'all'
+        || (filter === 'active'   && c.is_active)
+        || (filter === 'inactive' && !c.is_active);
       return matchSearch && matchFilter;
     });
   });
 
+  // Derived stats
+  activeCount   = computed(() => this.coupons().filter(c => c.is_active).length);
+  inactiveCount = computed(() => this.coupons().filter(c => !c.is_active).length);
+  totalClaims   = computed(() => this.coupons().reduce((s, c) => s + (c.used_count || 0), 0));
+
   copyCode(code: string): void {
-    navigator.clipboard.writeText(code);
+    navigator.clipboard.writeText(code).catch(() => {});
     this.copiedCode.set(code);
-    this.alert.success(`Coupon code ${code} copied to clipboard!`, 'Copied!');
+    this.alert.success(`Code "${code}" copied to clipboard!`, 'Copied ✓');
     setTimeout(() => this.copiedCode.set(null), 2500);
   }
 
@@ -116,14 +125,11 @@ export class SubscriptionCouponsComponent implements OnInit {
       next: (res: any) => {
         this.isLoading.set(false);
         if (res?.success) {
-          this.alert.success(`Coupon ${formVal.code} created successfully!`, 'Coupon Created 🎉');
+          this.alert.success(`Voucher "${formVal.code}" published successfully!`, '🎉 Voucher Created');
           this.showForm.set(false);
           this.couponForm.reset({
-            code: '',
-            discount_type: 'percentage',
-            discount_value: 10,
-            usage_limit: 100,
-            is_active: true
+            code: '', discount_type: 'percentage', discount_value: 10,
+            usage_limit: 100, min_order_value: 0, is_active: true
           });
           this.fetchCoupons();
         } else {
@@ -139,13 +145,16 @@ export class SubscriptionCouponsComponent implements OnInit {
 
   getBadgeText(c: any): string {
     switch (c.discount_type) {
-      case 'percentage': return `${c.discount_value}% OFF`;
-      case 'flat': return `₹${c.discount_value} OFF`;
-      case 'extra_days': return `+${c.discount_value} Extra Days`;
-      case 'extra_months': return `+${c.discount_value} Extra Months`;
-      case 'free_trial_extension': return `+${c.free_trial_days || c.discount_value} Trial Days`;
-      case 'buy_x_get_y': return `Buy ${c.buy_x_months} Get ${c.get_y_months} Free`;
-      default: return `${c.discount_value || 'PROMO'} OFF`;
+      case 'percentage':          return `${c.discount_value || 0}% OFF`;
+      case 'flat':                return `₹${c.discount_value || 0} OFF`;
+      case 'extra_days':          return `+${c.discount_value || 0} Days`;
+      case 'extra_months':        return `+${c.discount_value || 0} Months`;
+      case 'free_trial_extension': return `+${c.free_trial_days || c.discount_value || 0} Trial Days`;
+      case 'buy_x_get_y':         return `Buy ${c.buy_x_months || 1} Get ${c.get_y_months || 1}`;
+      case 'renewal':             return `${c.discount_value || 0}% Renewal`;
+      case 'first_purchase':      return `${c.discount_value || 0}% First`;
+      case 'referral':            return `${c.discount_value || 0}% Referral`;
+      default:                    return `${c.discount_value || 'PROMO'} OFF`;
     }
   }
 }

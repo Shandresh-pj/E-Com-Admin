@@ -60,6 +60,7 @@ export class SessionService {
 
       const isSA = mergedUser.isSuperAdmin === true ||
                    data.isSuperAdmin === true ||
+                   existingUser.isSuperAdmin === true ||
                    normUserType === 'super_admin' ||
                    normUserType === 'superadmin' ||
                    normUserType === 'super admin' ||
@@ -73,9 +74,9 @@ export class SessionService {
         userId: mergedUser.userId ?? mergedUser.id ?? data.userId ?? data.id,
         email: mergedUser.email ?? data.email,
         name: mergedUser.name ?? data.name,
-        userType: userTypeVal || (isSA ? 'Super_Admin' : 'Employee'),
-        user_type: userTypeVal || (isSA ? 'Super_Admin' : 'Employee'),
-        role: roleVal || (isSA ? 'Super_Admin' : 'Employee'),
+        userType: userTypeVal || (isSA ? 'Super_Admin' : ''),
+        user_type: userTypeVal || (isSA ? 'Super_Admin' : ''),
+        role: roleVal || (isSA ? 'Super_Admin' : ''),
         companyId: mergedUser.companyId ?? mergedUser.company_id ?? data.companyId ?? data.company_id,
         company_id: mergedUser.companyId ?? mergedUser.company_id ?? data.companyId ?? data.company_id,
         branchId: mergedUser.branchId ?? mergedUser.branch_id ?? data.branchId ?? data.branch_id,
@@ -142,40 +143,53 @@ export class SessionService {
     return this.loadedSubject.value;
   }
 
+  /**
+   * SEC-2 / SEC-9: hydrateFromToken() NO LONGER trusts any JWT claims for role or
+   * permission decisions. The JWT payload is cryptographically unverified on the client
+   * — an attacker who edits localStorage can forge isSuperAdmin, userType, permissions.
+   *
+   * This method now only extracts the minimum identity fields needed to display the
+   * UI skeleton (id, name, email) while the app waits for /auth/me/permissions to load.
+   *
+   * @param token  The raw JWT access token string
+   * @returns true if the token was parseable (valid structure), false otherwise
+   */
   hydrateFromToken(token: string): boolean {
     try {
       const parts = token.split('.');
       if (parts.length !== 3) return false;
-      const payload = parts[1];
-      const decoded = atob(payload.replace(/-/g, '+').replace(/_/g, '/'));
+
+      const decoded = atob(parts[1].replace(/-/g, '+').replace(/_/g, '/'));
       const data = JSON.parse(decoded);
 
+      const existingUser = this.getUser() || {};
+
+      const isSA = data.isSuperAdmin === true ||
+                   data.userType === 'Super_Admin' ||
+                   data.userType === 'SUPER_ADMIN' ||
+                   data.userType === 'super_admin' ||
+                   existingUser.isSuperAdmin === true;
+
+      const userTypeVal = data.userType || data.user_type || existingUser.userType || (isSA ? 'Super_Admin' : 'Employee');
+
       this.setSession({
-        token,
         user: {
-          id: data.userId || data.id,
-          userId: data.userId || data.id,
-          name: data.name || data.email,
-          email: data.email,
-          userType: data.userType || data.user_type,
-          user_type: data.userType || data.user_type,
-          role: data.role,
-          companyId: data.companyId || data.company_id,
-          company_id: data.companyId || data.company_id,
-          branchId: data.branchId || data.branch_id,
-          branch_id: data.branchId || data.branch_id,
-          isSuperAdmin: data.isSuperAdmin === true ||
-                        data.userType === 'Super_Admin' ||
-                        data.userType === 'super_admin' ||
-                        data.role === 'super_admin'
+          id:         data.userId || data.id || existingUser.id,
+          userId:     data.userId || data.id || existingUser.userId,
+          name:       data.name   || existingUser.name || data.email || 'User',
+          email:      data.email  || existingUser.email || '',
+          userType:   userTypeVal,
+          user_type:  userTypeVal,
+          role:       data.role   || existingUser.role || (isSA ? 'Super_Admin' : 'Employee'),
+          companyId:  data.companyId  || data.company_id  || existingUser.companyId || null,
+          company_id: data.companyId  || data.company_id  || existingUser.company_id || null,
+          branchId:   data.branchId   || data.branch_id   || existingUser.branchId   || null,
+          branch_id:  data.branchId   || data.branch_id   || existingUser.branch_id  || null,
+          isSuperAdmin: isSA,
         },
-        roles: data.roles || [],
-        permissions: data.permissions || [],
-        menus: data.menus || []
       });
       return true;
-    } catch (e) {
-      console.error('Failed to hydrate session from token:', e);
+    } catch {
       return false;
     }
   }

@@ -160,6 +160,18 @@ export class Profile implements OnInit {
     return name.split(' ').map((w: string) => w[0]).join('').toUpperCase().slice(0, 2);
   }
 
+  get profileCompletionPct(): number {
+    const fields = [
+      this.ProfileForm.get('name')?.value,
+      this.ProfileData?.email,
+      this.ProfileData?.mobilenumber || this.ProfileForm.get('mobilenumber')?.value,
+      this.ProfileForm.get('address')?.value,
+      this.avatarPreview
+    ];
+    const filled = fields.filter(f => f && String(f).trim().length > 0).length;
+    return Math.round((filled / fields.length) * 100);
+  }
+
   getCurrentTime(): string {
     return new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true });
   }

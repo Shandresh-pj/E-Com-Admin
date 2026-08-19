@@ -1,54 +1,36 @@
-import { Component, OnInit, ViewEncapsulation } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { MatCardModule } from '@angular/material/card';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatSelectModule } from '@angular/material/select';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
 import { CouponService, Coupon } from '../../services/coupon.service';
-import { MatTable } from 'src/utils/mat-table/mat-table';
 
 @Component({
   selector: 'app-coupons',
   standalone: true,
   imports: [
+    CommonModule,
     FormsModule,
     ReactiveFormsModule,
-    MatButtonModule,
     MatIconModule,
-    MatCardModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatSelectModule,
     MatDatepickerModule,
     MatNativeDateModule,
     MatTooltipModule,
-    MatProgressSpinnerModule,
-    MatTable
+    MatFormFieldModule,
+    MatInputModule,
   ],
   templateUrl: './coupons.html',
-  styleUrls: ['./coupons.scss'],
-  encapsulation: ViewEncapsulation.None
+  styleUrls: ['./coupons.scss']
 })
 export class Coupons implements OnInit {
   coupons: any[] = [];
-  tableColumns = [
-    { columnDef: 'code', header: 'Coupon Code' },
-    { columnDef: '_discountStr', header: 'Discount' },
-    { columnDef: '_startDateStr', header: 'Start Date' },
-    { columnDef: '_expiryStr', header: 'Expiry Date' },
-    { columnDef: '_usageStr', header: 'Usage' },
-    { columnDef: '_perUserLimitStr', header: 'User Limit' },
-    { columnDef: '_statusStr', header: 'Status' }
-  ];
   isLoading = false;
 
-  // Inline form state — replaces MatDialog
+  // Form state
   Coupon_Form = false;
   editingCoupon: Coupon | null = null;
   couponForm: FormGroup;
@@ -64,19 +46,25 @@ export class Coupons implements OnInit {
     this.loadCoupons();
   }
 
+  // ── Computed Stats ──────────────────────────────────────────
+  activeCount():  number { return this.coupons.filter(c => c.is_active).length; }
+  percentCount(): number { return this.coupons.filter(c => c.type === 'percent').length; }
+  bogoCount():    number { return this.coupons.filter(c => c.type === 'bogo').length; }
+
+  // ── Form ────────────────────────────────────────────────────
   private buildForm(coupon: Coupon | null): FormGroup {
     return this.fb.group({
-      id: [coupon?.id ?? null],
-      code: [coupon?.code || '', Validators.required],
-      type: [coupon?.type || 'percent', Validators.required],
-      value: [coupon?.value ?? null],
-      buy_x: [coupon?.buy_x ?? null],
-      get_y: [coupon?.get_y ?? null],
-      start_date: [coupon?.start_date ?? null],
-      expiry_date: [coupon?.expiry_date ?? null],
-      usage_limit: [coupon?.usage_limit ?? null],
-      per_user_limit: [coupon?.per_user_limit ?? null],
-      is_active: [coupon !== null ? coupon.is_active : true]
+      id:              [coupon?.id ?? null],
+      code:            [coupon?.code || '', [Validators.required]],
+      type:            [coupon?.type || 'percent', Validators.required],
+      value:           [coupon?.value ?? null],
+      buy_x:           [coupon?.buy_x ?? null],
+      get_y:           [coupon?.get_y ?? null],
+      start_date:      [coupon?.start_date ?? null],
+      expiry_date:     [coupon?.expiry_date ?? null],
+      usage_limit:     [coupon?.usage_limit ?? null],
+      per_user_limit:  [coupon?.per_user_limit ?? null],
+      is_active:       [coupon !== null ? coupon.is_active : true]
     });
   }
 
@@ -84,6 +72,7 @@ export class Coupons implements OnInit {
     this.editingCoupon = coupon ?? null;
     this.couponForm = this.buildForm(coupon ?? null);
     this.Coupon_Form = true;
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
   closeForm(): void {
@@ -99,81 +88,66 @@ export class Coupons implements OnInit {
     }
 
     const payload = { ...this.couponForm.value };
-    if (!payload.id) {
-      delete payload.id;
-    }
-    // Ensure numeric value for non-monetary types
-    if (payload.type === 'bogo' || payload.type === 'free_shipping') {
-      payload.value = 0;
-    }
+    if (!payload.id) delete payload.id;
+    if (payload.type === 'bogo' || payload.type === 'free_shipping') payload.value = 0;
 
-    if (this.editingCoupon?.id) {
-      this.couponService.updateCoupon(this.editingCoupon.id, payload).subscribe({
-        next: () => {
-          this.closeForm();
-          this.loadCoupons();
-        },
-        error: (err: any) => {
-          console.error('Failed to update coupon', err);
-        }
-      });
-    } else {
-      this.couponService.createCoupon(payload).subscribe({
-        next: () => {
-          this.closeForm();
-          this.loadCoupons();
-        },
-        error: (err: any) => {
-          console.error('Failed to create coupon', err);
-        }
-      });
-    }
+    const obs = this.editingCoupon?.id
+      ? this.couponService.updateCoupon(this.editingCoupon.id, payload)
+      : this.couponService.createCoupon(payload);
+
+    obs.subscribe({
+      next: () => {
+        this.closeForm();
+        this.loadCoupons();
+      },
+      error: (err: any) => {
+        console.error('[Coupons] Save failed', err);
+      }
+    });
   }
 
   loadCoupons(): void {
     this.isLoading = true;
     this.couponService.getCoupons().subscribe({
       next: (res: any) => {
-        const rawData = res.data ? res.data : res;
-        this.coupons = rawData.map((c: any) => {
-          let discountStr = '';
-          if (c.type === 'percent') discountStr = `${c.value}%`;
-          else if (c.type === 'flat') discountStr = `₹${c.value}`;
-          else if (c.type === 'bogo') discountStr = `Buy ${c.buy_x} Get ${c.get_y}`;
-          else if (c.type === 'free_shipping') discountStr = `Free Shipping`;
+        const raw = res?.data ?? res ?? [];
+        this.coupons = raw.map((c: any) => {
+          let _discountStr = '';
+          if (c.type === 'percent')       _discountStr = `${c.value}% OFF`;
+          else if (c.type === 'flat')     _discountStr = `₹${c.value} OFF`;
+          else if (c.type === 'bogo')     _discountStr = `Buy ${c.buy_x} Get ${c.get_y}`;
+          else if (c.type === 'free_shipping') _discountStr = 'Free Shipping';
 
           return {
             ...c,
-            _discountStr: discountStr,
-            _startDateStr: c.start_date ? new Date(c.start_date).toLocaleDateString() : 'Immediate',
-            _expiryStr: c.expiry_date ? new Date(c.expiry_date).toLocaleDateString() : 'No Expiry',
-            _usageStr: `${c.usage_count || 0} / ${c.usage_limit ? c.usage_limit : '∞'}`,
+            _discountStr,
+            _startDateStr:    c.start_date  ? new Date(c.start_date).toLocaleDateString()  : 'Immediate',
+            _expiryStr:       c.expiry_date ? new Date(c.expiry_date).toLocaleDateString() : 'No Expiry',
+            _usageStr:        `${c.usage_count || 0} / ${c.usage_limit ?? '∞'}`,
             _perUserLimitStr: c.per_user_limit ? `${c.per_user_limit} / user` : 'No Limit',
-            _statusStr: c.is_active ? 'Active' : 'Inactive'
           };
         });
         this.isLoading = false;
       },
-      error: (err) => {
-        console.error('Failed to load coupons', err);
+      error: (err: any) => {
+        console.error('[Coupons] Load failed', err);
         this.isLoading = false;
       }
     });
   }
 
   deleteCoupon(couponOrId: any): void {
-    const id = typeof couponOrId === 'string' ? couponOrId : (couponOrId?.id || couponOrId);
-    if (confirm('Are you sure you want to delete this coupon?')) {
-      this.couponService.deleteCoupon(id).subscribe(() => {
-        this.loadCoupons();
-      });
-    }
+    const id = typeof couponOrId === 'number' || typeof couponOrId === 'string'
+      ? couponOrId
+      : couponOrId?.id;
+    if (!confirm('Delete this coupon? This action cannot be undone.')) return;
+    this.couponService.deleteCoupon(id).subscribe(() => this.loadCoupons());
   }
 
   toggleStatus(couponOrId: any): void {
-    const id = typeof couponOrId === 'string' ? couponOrId : (couponOrId?.id || couponOrId);
-    this.couponService.toggleStatus(id).subscribe(() => {
-      this.loadCoupons();
-    });
+    const id = typeof couponOrId === 'number' || typeof couponOrId === 'string'
+      ? couponOrId
+      : couponOrId?.id;
+    this.couponService.toggleStatus(id).subscribe(() => this.loadCoupons());
   }
 }

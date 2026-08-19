@@ -413,7 +413,7 @@ export const navItems: NavItem[] = [
   {
     displayName: 'Menu Config',
     iconName: 'layout-navbar',
-    route: '/menu-bar',
+    route: '/menubar',
     bgcolor: 'warning',
     roles: [SA, A, BR],
   },

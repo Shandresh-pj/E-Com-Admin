@@ -1,215 +1,464 @@
-<mat-card class="cardWithShadow theme-card">
+<div class="ck-root">
 
-  <mat-card-header>
-    <div class="header-container">
-      <mat-card-title class="m-b-0">Coupons Management</mat-card-title>
+  <!-- ════ AMBIENT BACKGROUND ════ -->
+  <div class="ck-bg" aria-hidden="true">
+    <div class="ck-orb ck-orb--a"></div>
+    <div class="ck-orb ck-orb--b"></div>
+    <div class="ck-orb ck-orb--c"></div>
+    <div class="ck-grid"></div>
+  </div>
+
+  <!-- ════ PAGE HERO ════ -->
+  <header class="ck-hero">
+    <div class="ck-hero__info">
+      <div class="ck-hero__eyebrow">
+        <span class="ck-dot"></span>
+        <span>COUPON MANAGEMENT</span>
+        <span class="ck-sep">·</span>
+        <span>{{ coupons.length }} COUPON{{ coupons.length !== 1 ? 'S' : '' }}</span>
+      </div>
+      <h1 class="ck-hero__title">
+        Product
+        <span class="ck-shimmer-text">Coupons</span>
+      </h1>
+      <p class="ck-hero__sub">
+        Create percent, flat, BOGO, and free-shipping discount codes for your product catalogue.
+      </p>
+    </div>
+
+    <div class="ck-hero__actions">
       @if (!Coupon_Form) {
-        <button mat-flat-button class="btn-rounded btn-gradient" (click)="openForm()">
-          <mat-icon>add</mat-icon> Add Coupon
+        <button class="ck-btn-primary" (click)="openForm()" id="add-coupon-btn">
+          <span class="ck-btn-primary__shine"></span>
+          <mat-icon>add_circle</mat-icon>
+          <span>New Coupon</span>
+        </button>
+      } @else {
+        <button class="ck-btn-ghost" (click)="closeForm()">
+          <mat-icon>arrow_back</mat-icon>
+          <span>Back to List</span>
         </button>
       }
     </div>
-  </mat-card-header>
+  </header>
 
-  <!-- ─── TABLE VIEW ─── -->
+  <!-- ════ SUMMARY CHIPS ════ -->
   @if (!Coupon_Form) {
-  <mat-card-content class="b-t-1">
+    <div class="ck-chips">
+      <div class="ck-chip ck-chip--violet">
+        <mat-icon>local_offer</mat-icon>
+        <div class="ck-chip__body">
+          <span class="ck-chip__num">{{ coupons.length }}</span>
+          <span class="ck-chip__lbl">Total</span>
+        </div>
+      </div>
+      <div class="ck-chip ck-chip--emerald">
+        <mat-icon>verified</mat-icon>
+        <div class="ck-chip__body">
+          <span class="ck-chip__num">{{ activeCount() }}</span>
+          <span class="ck-chip__lbl">Active</span>
+        </div>
+      </div>
+      <div class="ck-chip ck-chip--amber">
+        <mat-icon>percent</mat-icon>
+        <div class="ck-chip__body">
+          <span class="ck-chip__num">{{ percentCount() }}</span>
+          <span class="ck-chip__lbl">% Off</span>
+        </div>
+      </div>
+      <div class="ck-chip ck-chip--rose">
+        <mat-icon>shopping_bag</mat-icon>
+        <div class="ck-chip__body">
+          <span class="ck-chip__num">{{ bogoCount() }}</span>
+          <span class="ck-chip__lbl">BOGO</span>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- ════ TABLE VIEW ════ -->
+  @if (!Coupon_Form) {
 
     <!-- Loading -->
     @if (isLoading) {
-      <div class="d-flex justify-content-center p-32">
-        <mat-spinner [diameter]="40"></mat-spinner>
+      <div class="ck-loader">
+        <div class="ck-loader__ring"></div>
+        <p>Loading coupons…</p>
       </div>
     }
 
-    <!-- Empty State -->
+    <!-- Empty -->
     @if (!isLoading && coupons.length === 0) {
-      <div class="d-flex flex-column align-items-center justify-content-center p-48" style="gap: 16px;">
-        <mat-icon style="font-size: 48px; width: 48px; height: 48px; color: var(--text-secondary);">local_offer</mat-icon>
-        <p class="f-s-16 m-0" style="color: var(--text-secondary);">No coupons found.</p>
-        <button mat-stroked-button class="btn-rounded" style="color: var(--brand-primary);" (click)="openForm()">
-          Create your first coupon
+      <div class="ck-empty">
+        <div class="ck-empty__orbit">
+          <mat-icon class="ck-empty__icon">local_offer</mat-icon>
+          <div class="ck-empty__ring"></div>
+        </div>
+        <h3>No coupons yet</h3>
+        <p>Create your first discount coupon to boost sales and reward loyal customers.</p>
+        <button class="ck-btn-primary" (click)="openForm()">
+          <span class="ck-btn-primary__shine"></span>
+          <mat-icon>add_circle</mat-icon>
+          <span>Create First Coupon</span>
         </button>
       </div>
     }
 
-    <!-- Table -->
+    <!-- Coupon Cards Grid -->
     @if (!isLoading && coupons.length > 0) {
-      <div class="table-responsive">
-        <app-mat-table
-          [columns]="tableColumns"
-          [tableData]="coupons"
-          [showAction]="true"
-          [showView]="false"
-          [Extra_Column]="false"
-          [showEdit]="true"
-          [showDelete]="true"
-          (editClick)="openForm($event)"
-          (deleteClick)="deleteCoupon($event)">
-        </app-mat-table>
-      </div>
-    }
+      <div class="ck-grid-cards">
+        @for (c of coupons; track c.id; let i = $index) {
+          <article
+            class="ck-card"
+            [class.ck-card--active]="c.is_active"
+            [class.ck-card--inactive]="!c.is_active"
+            [style.animation-delay.ms]="i * 60">
 
-  </mat-card-content>
-  }
+            <!-- Hover glow -->
+            <div class="ck-card__glow"></div>
 
-  <!-- ─── INLINE FORM VIEW ─── -->
-  @else {
-  <mat-card-content class="b-t-1">
-    <form [formGroup]="couponForm" class="premium-form-grid p-t-24">
+            <!-- Type badge ribbon -->
+            <div class="ck-card__ribbon" [attr.data-type]="c.type">
+              {{ c.type === 'percent' ? '%' : c.type === 'flat' ? '₹' : c.type === 'bogo' ? 'BOGO' : '🚚' }}
+            </div>
 
-      <div class="divider">
-        <span>{{ editingCoupon ? 'Edit Coupon' : 'Create New Coupon' }}</span>
-      </div>
+            <!-- Status badge -->
+            <div class="ck-card__top">
+              <span class="ck-card__status" [class.on]="c.is_active" [class.off]="!c.is_active">
+                <span class="ck-status-dot"></span>
+                {{ c.is_active ? 'ACTIVE' : 'INACTIVE' }}
+              </span>
+              <span class="ck-card__type-chip">{{ c.type | uppercase }}</span>
+            </div>
 
-      <!-- Code & Status -->
-      <div class="form-row">
-        <div class="field-container">
-          <mat-label class="f-w-600 m-b-8 d-block">Coupon Code <span class="text-danger">*</span></mat-label>
-          <mat-form-field appearance="outline" class="w-100">
-            <mat-icon matPrefix style="margin-right: 8px;">tag</mat-icon>
-            <input matInput formControlName="code" placeholder="e.g. SUMMER2026" style="text-transform: uppercase; font-weight: 600;">
-            @if (couponForm.get('code')?.invalid && couponForm.get('code')?.touched) {
-              <mat-error>Coupon code is required</mat-error>
-            }
-          </mat-form-field>
-        </div>
+            <!-- Code row -->
+            <div class="ck-card__code-row">
+              <div>
+                <div class="ck-card__code-label">COUPON CODE</div>
+                <div class="ck-card__code">{{ c.code }}</div>
+              </div>
+              <div class="ck-card__discount">{{ c._discountStr }}</div>
+            </div>
 
-        <div class="field-container">
-          <mat-label class="f-w-600 m-b-8 d-block">Status</mat-label>
-          <mat-form-field appearance="outline" class="w-100">
-            <mat-select formControlName="is_active">
-              <mat-option [value]="true">
-                <div class="flex items-center gap-8">
-                  <span class="status-dot bg-success"></span> Active
+            <!-- Perforated tear -->
+            <div class="ck-card__tear">
+              <span class="ck-card__notch ck-card__notch--l"></span>
+              <span class="ck-card__line"></span>
+              <span class="ck-card__notch ck-card__notch--r"></span>
+            </div>
+
+            <!-- Meta grid -->
+            <div class="ck-card__meta">
+              <div class="ck-card__meta-pair">
+                <mat-icon class="ck-meta-icon">event_available</mat-icon>
+                <div>
+                  <span class="ck-meta-key">Start</span>
+                  <span class="ck-meta-val">{{ c._startDateStr }}</span>
                 </div>
-              </mat-option>
-              <mat-option [value]="false">
-                <div class="flex items-center gap-8">
-                  <span class="status-dot bg-warn"></span> Inactive
+              </div>
+              <div class="ck-card__meta-pair">
+                <mat-icon class="ck-meta-icon">event_busy</mat-icon>
+                <div>
+                  <span class="ck-meta-key">Expires</span>
+                  <span class="ck-meta-val">{{ c._expiryStr }}</span>
                 </div>
-              </mat-option>
-            </mat-select>
-          </mat-form-field>
-        </div>
-      </div>
+              </div>
+              <div class="ck-card__meta-pair">
+                <mat-icon class="ck-meta-icon">people</mat-icon>
+                <div>
+                  <span class="ck-meta-key">Usage</span>
+                  <span class="ck-meta-val">{{ c._usageStr }}</span>
+                </div>
+              </div>
+              <div class="ck-card__meta-pair">
+                <mat-icon class="ck-meta-icon">person</mat-icon>
+                <div>
+                  <span class="ck-meta-key">Per User</span>
+                  <span class="ck-meta-val">{{ c._perUserLimitStr }}</span>
+                </div>
+              </div>
+            </div>
 
-      <div class="divider">
-        <span>Discount Configuration</span>
-      </div>
+            <!-- Usage bar -->
+            <div class="ck-card__usage">
+              <div class="ck-card__usage-track">
+                <div class="ck-card__usage-fill"
+                     [style.width.%]="c.usage_limit ? (c.usage_count / c.usage_limit) * 100 : 100">
+                </div>
+              </div>
+            </div>
 
-      <!-- Type & Value -->
-      <div class="form-row">
-        <div class="field-container">
-          <mat-label class="f-w-600 m-b-8 d-block">Discount Type <span class="text-danger">*</span></mat-label>
-          <mat-form-field appearance="outline" class="w-100">
-            <mat-select formControlName="type">
-              <mat-option value="percent">
-                <div class="flex items-center gap-8"><mat-icon>percent</mat-icon> Percentage (%)</div>
-              </mat-option>
-              <mat-option value="flat">
-                <div class="flex items-center gap-8"><mat-icon>attach_money</mat-icon> Fixed Amount</div>
-              </mat-option>
-              <mat-option value="bogo">
-                <div class="flex items-center gap-8"><mat-icon>filter_2</mat-icon> Buy X Get Y</div>
-              </mat-option>
-              <mat-option value="free_shipping">
-                <div class="flex items-center gap-8"><mat-icon>local_shipping</mat-icon> Free Shipping</div>
-              </mat-option>
-            </mat-select>
-          </mat-form-field>
-        </div>
+            <!-- Actions -->
+            <div class="ck-card__actions">
+              <button
+                class="ck-action-btn ck-action-btn--toggle"
+                [class.active]="c.is_active"
+                (click)="toggleStatus(c)"
+                [matTooltip]="c.is_active ? 'Deactivate' : 'Activate'">
+                <mat-icon>{{ c.is_active ? 'toggle_on' : 'toggle_off' }}</mat-icon>
+              </button>
+              <button
+                class="ck-action-btn ck-action-btn--edit"
+                (click)="openForm(c)"
+                matTooltip="Edit Coupon">
+                <mat-icon>edit</mat-icon>
+              </button>
+              <button
+                class="ck-action-btn ck-action-btn--delete"
+                (click)="deleteCoupon(c)"
+                matTooltip="Delete Coupon">
+                <mat-icon>delete_outline</mat-icon>
+              </button>
+            </div>
 
-        @if (couponForm.get('type')?.value === 'percent' || couponForm.get('type')?.value === 'flat') {
-        <div class="field-container">
-          <mat-label class="f-w-600 m-b-8 d-block">Discount Value</mat-label>
-          <mat-form-field appearance="outline" class="w-100">
-            <span matTextPrefix class="m-r-4">{{ couponForm.get('type')?.value === 'flat' ? '₹' : '' }}</span>
-            <input matInput type="number" formControlName="value" placeholder="0.00">
-            <span matTextSuffix class="m-l-4">{{ couponForm.get('type')?.value === 'percent' ? '%' : '' }}</span>
-          </mat-form-field>
-        </div>
+          </article>
         }
       </div>
+    }
 
-      <!-- BOGO Fields -->
-      @if (couponForm.get('type')?.value === 'bogo') {
-      <div class="form-row">
-        <div class="field-container">
-          <mat-label class="f-w-600 m-b-8 d-block">Buy X Items</mat-label>
-          <mat-form-field appearance="outline" class="w-100">
-            <mat-icon matPrefix style="margin-right: 8px;">shopping_basket</mat-icon>
-            <input matInput type="number" formControlName="buy_x" placeholder="e.g. 2">
-          </mat-form-field>
-        </div>
-        <div class="field-container">
-          <mat-label class="f-w-600 m-b-8 d-block">Get Y Items Free</mat-label>
-          <mat-form-field appearance="outline" class="w-100">
-            <mat-icon matPrefix style="margin-right: 8px; color: #10b981;">redeem</mat-icon>
-            <input matInput type="number" formControlName="get_y" placeholder="e.g. 1">
-          </mat-form-field>
-        </div>
-      </div>
-      }
-
-      <div class="divider">
-        <span>Limits &amp; Expiry</span>
-      </div>
-
-      <div class="form-row">
-        <div class="field-container">
-          <mat-label class="f-w-600 m-b-8 d-block">Start Date</mat-label>
-          <mat-form-field appearance="outline" class="w-100">
-            <mat-icon matPrefix style="margin-right: 8px;">event_available</mat-icon>
-            <input matInput [matDatepicker]="startPicker" formControlName="start_date" placeholder="Select start date">
-            <mat-datepicker-toggle matIconSuffix [for]="startPicker"></mat-datepicker-toggle>
-            <mat-datepicker #startPicker></mat-datepicker>
-          </mat-form-field>
-        </div>
-
-        <div class="field-container">
-          <mat-label class="f-w-600 m-b-8 d-block">Expiry Date</mat-label>
-          <mat-form-field appearance="outline" class="w-100">
-            <mat-icon matPrefix style="margin-right: 8px;">event_busy</mat-icon>
-            <input matInput [matDatepicker]="picker" formControlName="expiry_date" placeholder="Select expiry date">
-            <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
-            <mat-datepicker #picker></mat-datepicker>
-          </mat-form-field>
-        </div>
-      </div>
-
-      <div class="form-row">
-        <div class="field-container">
-          <mat-label class="f-w-600 m-b-8 d-block">Total Usage Limit</mat-label>
-          <mat-form-field appearance="outline" class="w-100">
-            <mat-icon matPrefix style="margin-right: 8px;">people</mat-icon>
-            <input matInput type="number" formControlName="usage_limit" placeholder="Leave blank for unlimited">
-            <mat-icon matSuffix matTooltip="Maximum number of times this coupon can be used by all customers.">info</mat-icon>
-          </mat-form-field>
-        </div>
-
-        <div class="field-container">
-          <mat-label class="f-w-600 m-b-8 d-block">Per-User Usage Limit</mat-label>
-          <mat-form-field appearance="outline" class="w-100">
-            <mat-icon matPrefix style="margin-right: 8px;">person</mat-icon>
-            <input matInput type="number" formControlName="per_user_limit" placeholder="Leave blank for unlimited per user">
-            <mat-icon matSuffix matTooltip="Maximum number of times a single customer can use this coupon.">info</mat-icon>
-          </mat-form-field>
-        </div>
-      </div>
-
-      <div class="flex m-t-12" style="justify-content: flex-end; gap: 16px;">
-        <button mat-stroked-button class="btn-rounded Cancel_Button" type="button" (click)="closeForm()">
-          <mat-icon>close</mat-icon> Cancel
-        </button>
-        <button mat-flat-button class="btn-rounded btn-gradient" type="button" [disabled]="couponForm.invalid" (click)="saveCoupon()">
-          <mat-icon>{{ editingCoupon ? 'save' : 'add' }}</mat-icon>
-          {{ editingCoupon ? 'Save Changes' : 'Create Coupon' }}
-        </button>
-      </div>
-
-    </form>
-  </mat-card-content>
   }
 
-</mat-card>
+  <!-- ════ INLINE CREATE / EDIT FORM ════ -->
+  @if (Coupon_Form) {
+    <div class="ck-form-wrap">
+
+      <!-- Form top accent bar -->
+      <div class="ck-form-bar"></div>
+
+      <div class="ck-form-inner">
+
+        <!-- Form header -->
+        <div class="ck-form-head">
+          <div class="ck-form-head__icon">
+            <mat-icon>{{ editingCoupon ? 'edit_note' : 'auto_awesome' }}</mat-icon>
+          </div>
+          <div>
+            <h2 class="ck-form-head__title">
+              {{ editingCoupon ? 'Edit Coupon' : 'Create New Coupon' }}
+            </h2>
+            <p class="ck-form-head__sub">
+              {{ editingCoupon ? 'Update the coupon details below.' : 'Configure a new discount coupon for your store.' }}
+            </p>
+          </div>
+        </div>
+
+        <form [formGroup]="couponForm" class="ck-form" novalidate autocomplete="off">
+
+          <!-- ── Section: Identity ── -->
+          <div class="ck-section">
+            <div class="ck-section__head">
+              <mat-icon class="ck-section__icon">fingerprint</mat-icon>
+              Identity &amp; Status
+            </div>
+            <div class="ck-section__grid">
+
+              <div class="ck-field">
+                <label class="ck-field__lbl" for="f-code">
+                  <mat-icon>tag</mat-icon> Coupon Code <span class="req">*</span>
+                </label>
+                <input
+                  id="f-code"
+                  type="text"
+                  formControlName="code"
+                  placeholder="e.g. SUMMER2026"
+                  class="ck-field__input ck-field__input--mono"
+                  style="text-transform:uppercase">
+                @if (couponForm.get('code')?.invalid && couponForm.get('code')?.touched) {
+                  <span class="ck-field__err"><mat-icon>error_outline</mat-icon> Code is required</span>
+                }
+              </div>
+
+              <div class="ck-field">
+                <label class="ck-field__lbl" for="f-status">
+                  <mat-icon>toggle_on</mat-icon> Status
+                </label>
+                <div class="ck-toggle-row">
+                  <button type="button"
+                    class="ck-toggle-opt"
+                    [class.ck-toggle-opt--on]="couponForm.get('is_active')?.value === true"
+                    (click)="couponForm.get('is_active')?.setValue(true)">
+                    <span class="ck-toggle-dot ck-toggle-dot--green"></span> Active
+                  </button>
+                  <button type="button"
+                    class="ck-toggle-opt"
+                    [class.ck-toggle-opt--off]="couponForm.get('is_active')?.value === false"
+                    (click)="couponForm.get('is_active')?.setValue(false)">
+                    <span class="ck-toggle-dot ck-toggle-dot--red"></span> Inactive
+                  </button>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- ── Section: Discount ── -->
+          <div class="ck-section">
+            <div class="ck-section__head">
+              <mat-icon class="ck-section__icon">local_offer</mat-icon>
+              Discount Configuration
+            </div>
+            <div class="ck-section__grid">
+
+              <!-- Discount type selector pills -->
+              <div class="ck-field ck-field--full">
+                <label class="ck-field__lbl">
+                  <mat-icon>tune</mat-icon> Discount Type <span class="req">*</span>
+                </label>
+                <div class="ck-type-pills">
+                  <button type="button"
+                    class="ck-type-pill"
+                    [class.ck-type-pill--on]="couponForm.get('type')?.value === 'percent'"
+                    (click)="couponForm.get('type')?.setValue('percent')">
+                    <mat-icon>percent</mat-icon>
+                    <span>Percentage</span>
+                    <span class="ck-type-pill__sub">e.g. 20% OFF</span>
+                  </button>
+                  <button type="button"
+                    class="ck-type-pill"
+                    [class.ck-type-pill--on]="couponForm.get('type')?.value === 'flat'"
+                    (click)="couponForm.get('type')?.setValue('flat')">
+                    <mat-icon>currency_rupee</mat-icon>
+                    <span>Fixed Amount</span>
+                    <span class="ck-type-pill__sub">e.g. ₹200 OFF</span>
+                  </button>
+                  <button type="button"
+                    class="ck-type-pill"
+                    [class.ck-type-pill--on]="couponForm.get('type')?.value === 'bogo'"
+                    (click)="couponForm.get('type')?.setValue('bogo')">
+                    <mat-icon>shopping_bag</mat-icon>
+                    <span>Buy X Get Y</span>
+                    <span class="ck-type-pill__sub">BOGO offers</span>
+                  </button>
+                  <button type="button"
+                    class="ck-type-pill"
+                    [class.ck-type-pill--on]="couponForm.get('type')?.value === 'free_shipping'"
+                    (click)="couponForm.get('type')?.setValue('free_shipping')">
+                    <mat-icon>local_shipping</mat-icon>
+                    <span>Free Shipping</span>
+                    <span class="ck-type-pill__sub">No delivery fee</span>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Discount value -->
+              @if (couponForm.get('type')?.value === 'percent' || couponForm.get('type')?.value === 'flat') {
+                <div class="ck-field">
+                  <label class="ck-field__lbl" for="f-value">
+                    <mat-icon>analytics</mat-icon>
+                    {{ couponForm.get('type')?.value === 'flat' ? 'Amount (₹)' : 'Percentage (%)' }}
+                  </label>
+                  <div class="ck-field__prefixed">
+                    <span class="ck-field__prefix">
+                      {{ couponForm.get('type')?.value === 'flat' ? '₹' : '%' }}
+                    </span>
+                    <input
+                      id="f-value"
+                      type="number"
+                      formControlName="value"
+                      placeholder="0"
+                      class="ck-field__input ck-field__input--has-prefix"
+                      min="0">
+                  </div>
+                </div>
+              }
+
+              <!-- BOGO fields -->
+              @if (couponForm.get('type')?.value === 'bogo') {
+                <div class="ck-field">
+                  <label class="ck-field__lbl" for="f-buyx">
+                    <mat-icon>shopping_basket</mat-icon> Buy (X) Items
+                  </label>
+                  <input id="f-buyx" type="number" formControlName="buy_x" placeholder="e.g. 2" class="ck-field__input" min="1">
+                </div>
+                <div class="ck-field">
+                  <label class="ck-field__lbl" for="f-gety">
+                    <mat-icon>redeem</mat-icon> Get (Y) Items Free
+                  </label>
+                  <input id="f-gety" type="number" formControlName="get_y" placeholder="e.g. 1" class="ck-field__input" min="1">
+                </div>
+              }
+
+            </div>
+          </div>
+
+          <!-- ── Section: Limits & Validity ── -->
+          <div class="ck-section">
+            <div class="ck-section__head">
+              <mat-icon class="ck-section__icon">schedule</mat-icon>
+              Limits &amp; Validity
+            </div>
+            <div class="ck-section__grid">
+
+              <div class="ck-field">
+                <label class="ck-field__lbl" for="f-start">
+                  <mat-icon>event_available</mat-icon> Start Date
+                </label>
+                <mat-form-field appearance="outline" class="ck-date-field">
+                  <input matInput [matDatepicker]="startPicker" formControlName="start_date" placeholder="Select start date" id="f-start">
+                  <mat-datepicker-toggle matIconSuffix [for]="startPicker"></mat-datepicker-toggle>
+                  <mat-datepicker #startPicker></mat-datepicker>
+                </mat-form-field>
+              </div>
+
+              <div class="ck-field">
+                <label class="ck-field__lbl" for="f-expiry">
+                  <mat-icon>event_busy</mat-icon> Expiry Date
+                </label>
+                <mat-form-field appearance="outline" class="ck-date-field">
+                  <input matInput [matDatepicker]="expiryPicker" formControlName="expiry_date" placeholder="Select expiry date" id="f-expiry">
+                  <mat-datepicker-toggle matIconSuffix [for]="expiryPicker"></mat-datepicker-toggle>
+                  <mat-datepicker #expiryPicker></mat-datepicker>
+                </mat-form-field>
+              </div>
+
+              <div class="ck-field">
+                <label class="ck-field__lbl" for="f-usage">
+                  <mat-icon>people</mat-icon> Total Usage Limit
+                </label>
+                <input
+                  id="f-usage"
+                  type="number"
+                  formControlName="usage_limit"
+                  placeholder="Blank = unlimited"
+                  class="ck-field__input"
+                  min="0">
+              </div>
+
+              <div class="ck-field">
+                <label class="ck-field__lbl" for="f-peruser">
+                  <mat-icon>person</mat-icon> Per-User Limit
+                </label>
+                <input
+                  id="f-peruser"
+                  type="number"
+                  formControlName="per_user_limit"
+                  placeholder="Blank = unlimited"
+                  class="ck-field__input"
+                  min="0">
+              </div>
+
+            </div>
+          </div>
+
+          <!-- Form actions -->
+          <div class="ck-form-actions">
+            <button type="button" class="ck-btn-ghost" (click)="closeForm()">
+              <mat-icon>close</mat-icon> Cancel
+            </button>
+            <button
+              type="button"
+              class="ck-btn-primary"
+              [disabled]="couponForm.invalid"
+              (click)="saveCoupon()">
+              <span class="ck-btn-primary__shine"></span>
+              <mat-icon>{{ editingCoupon ? 'save' : 'rocket_launch' }}</mat-icon>
+              <span>{{ editingCoupon ? 'Save Changes' : 'Create Coupon' }}</span>
+            </button>
+          </div>
+
+        </form>
+      </div><!-- /form-inner -->
+    </div><!-- /form-wrap -->
+  }
+
+</div><!-- /ck-root -->

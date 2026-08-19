@@ -13,7 +13,9 @@ import { TokenService }   from '../Services/token.service';
 import { AuthService }    from '../Services/auth.service';
 import { RefreshService } from '../Services/refresh.service';
 
-// Module-level refresh state — effectively a singleton for the app lifetime
+// Module-level refresh state — effectively a singleton for the app lifetime.
+// BUG-7: isRefreshing is reset in the error branch so a failed refresh never
+// leaves the flag stuck at true for the remaining app session.
 let isRefreshing = false;
 const refreshSubject = new BehaviorSubject<string | null>(null);
 
@@ -28,12 +30,25 @@ const PUBLIC_URLS = [
   '/health'
 ];
 
+/** Non-mutating HTTP methods that don't require CSRF protection */
+const SAFE_METHODS = new Set(['GET', 'HEAD', 'OPTIONS', 'TRACE']);
+
 function isPublicUrl(url: string): boolean {
   return PUBLIC_URLS.some(u => url.includes(u));
 }
 
 function attachToken(req: HttpRequest<any>, token: string): HttpRequest<any> {
   return req.clone({ setHeaders: { Authorization: `Bearer ${token}` } });
+}
+
+/**
+ * SEC-6: Add X-Requested-With header to all state-mutating (non-safe) requests.
+ * This tells the server that the request came from an XHR/fetch (not a plain form POST).
+ * Combined with SameSite=Strict cookies on the server, this prevents classic CSRF attacks.
+ */
+function attachCsrfHeader(req: HttpRequest<any>): HttpRequest<any> {
+  if (SAFE_METHODS.has(req.method.toUpperCase())) return req;
+  return req.clone({ setHeaders: { 'X-Requested-With': 'XMLHttpRequest' } });
 }
 
 function handle401(
@@ -58,8 +73,10 @@ function handle401(
   const refreshToken = tokenService.getRefreshToken();
 
   if (!refreshToken) {
+    // BUG-7: Ensure flag is reset before logout so future sessions start clean
+    isRefreshing = false;
     authService.logout();
-    return throwError(() => new Error('Session expired'));
+    return throwError(() => new Error('Session expired — no refresh token'));
   }
 
   if (!isRefreshing) {
@@ -72,14 +89,16 @@ function handle401(
         const newToken = res.accessToken;
         tokenService.setToken(newToken);
         refreshSubject.next(newToken);
-        // Persist the rotated refresh token if the server returned one
+        // Persist the rotated refresh token if the server returned one (SEC-8)
         if ((res as any).refreshToken) {
           tokenService.setRefreshToken((res as any).refreshToken);
         }
         return next(attachToken(req, newToken));
       }),
       catchError((err) => {
+        // BUG-7: Always reset isRefreshing on failure — never leave it stuck at true
         isRefreshing = false;
+        refreshSubject.next(null);
         authService.logout();
         return throwError(() => err);
       })
@@ -99,9 +118,12 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const authService   = inject(AuthService);
   const refreshSvc    = inject(RefreshService);
 
-  // Attach token if present to ensure admin APIs receive Authorization header
+  // Attach Authorization Bearer token if present
   const token = tokenService.getToken();
-  const authReq = token ? attachToken(req, token) : req;
+  let authReq = token ? attachToken(req, token) : req;
+
+  // SEC-6: Attach CSRF prevention header for all state-mutating requests
+  authReq = attachCsrfHeader(authReq);
 
   return next(authReq).pipe(
     catchError((error: HttpErrorResponse) => {

@@ -5,6 +5,7 @@ import { FullComponent } from './layouts/full/full.component';
 
 import { AuthGuard } from './Securities/Guard/auth.guard';
 import { NonAuthGuard } from './Securities/Guard/nonauth.guard';
+import { RoleGuard } from './Securities/Guard/role.guard';
 import { UnauthorizedComponent } from './pages/unauthorized/unauthorized.component';
 
 import { HomeComponent } from './pages/home/home.component';
@@ -12,38 +13,37 @@ import { ContactComponent } from './pages/contact/contact.component';
 
 export const routes: Routes = [
 
-  // default landing page
+  // ─── Public landing pages (no auth required) ──────────────────────────────
   {
     path: '',
     component: HomeComponent,
     title: 'Enterprise ERP & Mobility OS',
     pathMatch: 'full'
   },
-
   {
     path: 'home',
     component: HomeComponent,
     title: 'Enterprise ERP & Mobility OS'
   },
-
   {
     path: 'contact',
     component: ContactComponent,
     title: 'Workspace Access & Support'
   },
 
-  // Public pages
+  // ─── Public authentication pages (non-auth guard prevents re-login) ────────
   {
     path: 'authentication',
     component: BlankComponent,
     canMatch: [NonAuthGuard],
-
     loadChildren: () =>
       import('./pages/authentication/authentication.routes')
         .then(m => m.AuthenticationRoutes)
   },
 
-  // Protected pages
+  // ─── Protected application shell ──────────────────────────────────────────
+  // AuthGuard: requires a valid access token (any authenticated user).
+  // RoleGuard: applied per-route inside children for permission-level checks.
   {
     path: '',
     component: FullComponent,
@@ -51,6 +51,8 @@ export const routes: Routes = [
 
     children: [
 
+      // Dashboard and nested pages (includes mobility dashboard sub-routes).
+      // All child routes have RoleGuard applied inside pages.routes.ts.
       {
         path: 'dashboard',
         loadChildren: () =>
@@ -58,62 +60,8 @@ export const routes: Routes = [
             .then(m => m.PagesRoutes)
       },
 
-      {
-        path: '',
-        loadChildren: () =>
-          import('./pages/pages.routes')
-            .then(m => m.PagesRoutes)
-      },
-
-      // ─── Subscription & Billing ─────────────────────────────────────────────
-      {
-        path: 'subscription-plans',
-        loadComponent: () => 
-          import('./pages/subscription-plans/subscription-plans.component')
-            .then(m => m.SubscriptionPlansComponent),
-        title: 'Subscription Plans'
-      },
-
-      {
-        path: 'billing-history',
-        loadComponent: () => 
-          import('./pages/billing-history/billing-history')
-            .then(m => m.BillingHistoryComponent),
-        title: 'Billing History'
-      },
-
-      {
-        path: 'subscription-coupons',
-        loadComponent: () => 
-          import('./pages/subscription-coupons/subscription-coupons')
-            .then(m => m.SubscriptionCouponsComponent),
-        title: 'Subscription Coupons'
-      },
-
-      {
-        path: 'checkout',
-        loadComponent: () => 
-          import('./components/standard-checkout/standard-checkout')
-            .then(m => m.StandardCheckoutComponent),
-        title: 'Checkout'
-      },
-
-      // ─── Lazy Feature Modules ───────────────────────────────────────────────
-      {
-        path: '',
-        loadChildren: () =>
-          import('./pages/ui-components/ui-components.routes')
-            .then(m => m.UiComponentsRoutes)
-      },
-
-      {
-        path: '',
-        loadChildren: () =>
-          import('./pages/extra/extra.routes')
-            .then(m => m.ExtraRoutes)
-      },
-
-      // ─── All component routes (mobility, fleet, HR, etc.) ──────────────────
+      // Root-level child routes — all feature modules.
+      // RoleGuard is applied per-route inside components.routes.ts.
       {
         path: '',
         loadChildren: () =>
@@ -121,19 +69,43 @@ export const routes: Routes = [
             .then(m => m.ComponentsRoutes)
       },
 
-    ]
+      // UI component demos (low-privilege pages, RoleGuard inside the module)
+      {
+        path: '',
+        loadChildren: () =>
+          import('./pages/ui-components/ui-components.routes')
+            .then(m => m.UiComponentsRoutes)
+      },
 
+      // Extra pages (error pages etc.)
+      {
+        path: '',
+        loadChildren: () =>
+          import('./pages/extra/extra.routes')
+            .then(m => m.ExtraRoutes)
+      },
+
+    ]
   },
 
+  // ─── Unauthorized / Forbidden page ────────────────────────────────────────
+  // Requires authentication to render (so the layout renders correctly),
+  // but the page itself is in UNIVERSAL_PATHS so RoleGuard always allows it.
   {
     path: 'unauthorized',
     component: FullComponent,
     canMatch: [AuthGuard],
     children: [
-      { path: '', component: UnauthorizedComponent }
+      {
+        path: '',
+        component: UnauthorizedComponent,
+        canActivate: [RoleGuard],
+        data: { title: 'Unauthorized' }
+      }
     ]
   },
 
+  // ─── Catch-all redirect ───────────────────────────────────────────────────
   {
     path: '**',
     redirectTo: 'authentication/login'

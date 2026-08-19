@@ -40,7 +40,11 @@ type AccessLevel = 'global' | 'admin' | 'branch' | 'employee';
 })
 export class RoleAccess implements OnInit {
 
-  readonly actions = ['READ', 'WRITE', 'UPDATE', 'DELETE', 'APPROVE'];
+  readonly actions = [
+    'READ', 'WRITE', 'UPDATE', 'DELETE', 'APPROVE',
+    'EXPORT', 'IMPORT', 'ASSIGN', 'REVOKE',
+    'ACTIVATE', 'DEACTIVATE', 'RESTORE', 'MANAGE', 'CONFIGURE'
+  ];
 
   readonly levels: { value: AccessLevel; label: string; hint: string }[] = [
     { value: 'global', label: 'Role (Global)', hint: 'Applies to the role everywhere' },

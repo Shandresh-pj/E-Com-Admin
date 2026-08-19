@@ -8,7 +8,7 @@ import { PermissionService } from 'src/app/Securities/Services/permissions.servi
 import { MatTable } from 'src/utils/mat-table/mat-table';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
-import { AppTranslatePipe } from 'src/app/pipes/app-translate.pipe';
+
 
 @Component({
   selector: 'app-payroll',

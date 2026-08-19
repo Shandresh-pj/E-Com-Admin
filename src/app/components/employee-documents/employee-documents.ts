@@ -72,7 +72,10 @@ export class EmployeeDocumentsComponent implements OnInit {
   ];
 
   get isHR() {
-    return this.authService.isSuperAdmin() || this.authService.getUserType() === 'Admin';
+    // Use DB permission check (manage or update on /employee-documents) instead of hardcoded 'Admin' role name.
+    // hasRoleAction returns true for Super Admin automatically.
+    return this.perm.hasRoleAction('canManage', '/employee-documents') ||
+           this.perm.hasRoleAction('canUpdate', '/employee-documents');
   }
 
   get filteredDocs(): EmployeeDoc[] {

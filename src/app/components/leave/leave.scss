@@ -1,31 +1,82 @@
-/* ═══ Leave Management — Component Styles ══════════════════════════════════
-   Supplements global glass-card utilities.
-   All spacing/typography uses the project's global utilities.
+/* ═══ LEAVE MANAGEMENT — Premium Component Architecture ═════════════════════
+   Supplements global glass-card and design system utilities.
    ═══════════════════════════════════════════════════════════════════════════ */
 
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@600;700;800;900&family=Inter:wght@400;500;600;700&display=swap');
+
 /* ── Border-left accent bars on balance cards ─────────────────────────── */
-.border-left-primary { border-left: 4px solid #4f46e5; }
-.border-left-warning  { border-left: 4px solid #f59e0b; }
-.border-left-success  { border-left: 4px solid #10b981; }
-.border-left-info     { border-left: 4px solid #06b6d4; }
+.border-left-primary { border-left: 4.5px solid #6366f1 !important; }
+.border-left-warning { border-left: 4.5px solid #f59e0b !important; }
+.border-left-success { border-left: 4.5px solid #10b981 !important; }
+.border-left-info    { border-left: 4.5px solid #06b6d4 !important; }
+
+/* ── Balance Card Enhancements ───────────────────────────────────────── */
+.glass-card {
+  background: rgba(255, 255, 255, 0.82) !important;
+  backdrop-filter: blur(24px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(24px) saturate(180%) !important;
+  border: 1.5px solid rgba(255, 255, 255, 0.9) !important;
+  border-radius: 20px !important;
+  box-shadow: 0 4px 18px rgba(15, 23, 42, 0.05), inset 0 1px 1px rgba(255, 255, 255, 1) !important;
+  transition: transform 0.32s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.32s ease !important;
+  position: relative;
+  overflow: hidden;
+
+  html.dark &, .dark-theme & {
+    background: rgba(15, 23, 42, 0.85) !important;
+    border-color: rgba(255, 255, 255, 0.12) !important;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.08) !important;
+  }
+
+  &:hover {
+    transform: translateY(-4px) !important;
+    box-shadow: 0 16px 42px rgba(99, 102, 241, 0.12), inset 0 1px 1px rgba(255, 255, 255, 1) !important;
+
+    .stats-icon {
+      transform: scale(1.15) rotate(-6deg);
+    }
+  }
+}
+
+.stats-icon {
+  width: 48px; height: 48px;
+  border-radius: 14px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+
+  mat-icon { font-size: 24px; width: 24px; height: 24px; }
+}
+
+.bg-light-primary { background: rgba(99, 102, 241, 0.12) !important; color: #6366f1 !important; }
+.bg-light-warning { background: rgba(245, 158, 11, 0.12) !important; color: #d97706 !important; }
+.bg-light-success { background: rgba(16, 185, 129, 0.12) !important; color: #059669 !important; }
+.bg-light-info    { background: rgba(6, 182, 212, 0.12)  !important; color: #0891b2 !important; }
 
 /* ── Leave Application Form Panel ────────────────────────────────────── */
 .leave-form-panel {
   padding: 24px;
-  background: rgba(99, 102, 241, 0.05);
-  border-radius: 16px;
-  border: 1px solid rgba(99, 102, 241, 0.15);
-  animation: lv-slide-down 0.3s cubic-bezier(0.34, 1.2, 0.64, 1) both;
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.05) 0%, rgba(139, 92, 246, 0.03) 100%);
+  border-radius: 20px;
+  border: 1.5px solid rgba(99, 102, 241, 0.2);
+  box-shadow: 0 8px 30px rgba(99, 102, 241, 0.08);
+  animation: lv-slide-down 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+
+  html.dark &, .dark-theme & {
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(15, 23, 42, 0.9) 100%);
+    border-color: rgba(99, 102, 241, 0.3);
+  }
 
   @media (max-width: 768px) {
     padding: 16px;
-    border-radius: 12px;
+    border-radius: 14px;
   }
 }
 
 @keyframes lv-slide-down {
-  from { opacity: 0; transform: translateY(-12px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from { opacity: 0; transform: translateY(-16px) scale(0.98); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
 }
 
 /* ── Date-range validation error banner ──────────────────────────────── */
@@ -34,23 +85,26 @@
   align-items: center;
   gap: 10px;
   padding: 12px 16px;
-  background: rgba(239, 68, 68, 0.08);
-  border: 1px solid rgba(239, 68, 68, 0.3);
-  border-radius: 10px;
-  color: #ef4444;
+  background: rgba(244, 63, 94, 0.1);
+  border: 1.5px solid rgba(244, 63, 94, 0.3);
+  border-radius: 12px;
+  color: #f43f5e;
   font-size: 13.5px;
-  font-weight: 600;
-  animation: lv-slide-down 0.2s ease-out both;
+  font-weight: 700;
+  font-family: 'Inter', system-ui;
+  animation: lv-slide-down 0.25s ease-out both;
 
-  mat-icon { font-size: 18px; width: 18px; height: 18px; flex-shrink: 0; }
+  mat-icon { font-size: 20px; width: 20px; height: 20px; flex-shrink: 0; }
 }
 
 /* ── Utility: small button variant ───────────────────────────────────── */
 .btn-sm {
-  height: 32px;
-  line-height: 32px;
-  padding: 0 12px;
-  font-size: 12px;
+  height: 34px !important;
+  line-height: 34px !important;
+  padding: 0 14px !important;
+  font-size: 12.5px !important;
+  font-weight: 700 !important;
+  border-radius: 10px !important;
 }
 
 /* ── Loading spinner alignment ───────────────────────────────────────── */

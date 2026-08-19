@@ -3,6 +3,8 @@
    Global Styles · Design Tokens · Component Overrides · Animations
    ═══════════════════════════════════════════════════════════════════════════ */
 
+@import 'premium-design-system';
+
 /* Clock Timepicker Dialog Overlay Override */
 .clock-picker-dialog-panel {
   .mat-mdc-dialog-container {

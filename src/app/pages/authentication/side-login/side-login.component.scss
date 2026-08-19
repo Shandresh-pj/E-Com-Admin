@@ -1,646 +1,525 @@
-// ═══════════════════════════════════════════════════════════════════
-// SVK E-Com Enterprise Console — Quantum Portal Login SCSS
-// Unique Holographic Animations | Single Centered Card | Responsive
-// ═══════════════════════════════════════════════════════════════════
+/* ╔══════════════════════════════════════════════════════════════════════════╗ */
+/* ║  SVK E-COM — PREMIUM QUANTUM LOGIN  v4.0                                 ║ */
+/* ║  Dark holographic · Animated particles · Mobile-first · Fully responsive ║ */
+/* ╚══════════════════════════════════════════════════════════════════════════╝ */
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Outfit:wght@500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800;900&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap');
 
+/* ─── TOKENS ────────────────────────────────────────────────────────────── */
+$p1: #6366f1;
+$p2: #8b5cf6;
+$p3: #06b6d4;
+$emerald: #10b981;
+$rose: #f43f5e;
+$amber: #f59e0b;
+$tx1: #f8fafc;
+$tx2: rgba(226,232,240,0.85);
+$tx3: rgba(148,163,184,0.9);
+$border: rgba(255,255,255,0.09);
+$border-h: rgba(99,102,241,0.4);
+$ff: 'Outfit', 'Inter', system-ui, sans-serif;
+$ff-mono: 'JetBrains Mono', monospace;
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   ANIMATIONS
+═══════════════════════════════════════════════════════════════════════════ */
+@keyframes loginOrbitSpin  { to { transform: rotate(360deg); } }
+@keyframes loginOrbitRev   { to { transform: rotate(-360deg); } }
+@keyframes loginPulse      { 0%,100%{opacity:.8;transform:scale(1);}50%{opacity:.4;transform:scale(1.3);} }
+@keyframes loginFloat      { 0%,100%{transform:translateY(0) rotate(0deg);}50%{transform:translateY(-12px) rotate(4deg);} }
+@keyframes loginFloatRev   { 0%,100%{transform:translateY(0) rotate(0deg);}50%{transform:translateY(-10px) rotate(-3deg);} }
+@keyframes loginBlobFloat  { 0%,100%{transform:scale(1) translate(0,0);}33%{transform:scale(1.08) translate(30px,-20px);}66%{transform:scale(0.95) translate(-20px,30px);} }
+@keyframes loginShimmer    { 0%{background-position:-300% 0;}100%{background-position:300% 0;} }
+@keyframes loginFadeUp     { from{opacity:0;transform:translateY(28px) scale(0.96);}to{opacity:1;transform:translateY(0) scale(1);} }
+@keyframes loginFadeDown   { from{opacity:0;transform:translateY(-12px);}to{opacity:1;transform:translateY(0);} }
+@keyframes loginBeam       { 0%,100%{left:-60%;opacity:.3;}50%{left:110%;opacity:.8;} }
+@keyframes loginGridFlow   { from{background-position:0 0;}to{background-position:60px 60px;} }
+@keyframes loginRadarSpin  { to{transform:rotate(360deg);} }
+@keyframes loginBlink      { 0%,100%{opacity:1;}50%{opacity:0;} }
+@keyframes loginRingPulse  { 0%,100%{transform:scale(1);opacity:.7;}50%{transform:scale(1.12);opacity:1;} }
+@keyframes loginCardEntrance {
+  0%   { opacity:0; transform:translateY(40px) scale(0.92); }
+  60%  { transform:translateY(-4px) scale(1.01); }
+  100% { opacity:1; transform:translateY(0) scale(1); }
+}
+@keyframes loginParticle {
+  0%   { transform:translateY(0) translateX(0) rotate(0deg) scale(1); opacity:.8; }
+  33%  { transform:translateY(-40px) translateX(20px) rotate(120deg) scale(1.2); opacity:.5; }
+  66%  { transform:translateY(-80px) translateX(-15px) rotate(240deg) scale(0.9); opacity:.3; }
+  100% { transform:translateY(-120px) translateX(5px) rotate(360deg) scale(0.7); opacity:0; }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   ROOT WRAPPER
+═══════════════════════════════════════════════════════════════════════════ */
 .auth-single-root {
-  position: relative;
   min-height: 100vh;
   width: 100%;
-  background: #050714 !important;
-  color: #f1f5f9;
-  font-family: 'Inter', system-ui, sans-serif;
   display: flex;
   align-items: center;
   justify-content: center;
-  overflow-x: hidden;
-  overflow-y: auto; // Bug fix: allow scroll when content overflows viewport height
-  padding: 30px 16px;
+  padding: 16px;
   box-sizing: border-box;
-
-  // Bug Fix: Prevent horizontal overflow on all screen sizes
-  @media (max-width: 400px) {
-    padding: 20px 12px;
-    align-items: flex-start; // Allow scroll on small screens
-    padding-top: 24px;
-  }
-
-  * {
-    box-sizing: border-box;
-  }
-}
-
-// ── Ambient Glowing Aurora & Cyber Particles Backdrop ──
-.auth-ambient-canvas {
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-  overflow: hidden;
-
-  .ambient-blob {
-    position: absolute;
-    border-radius: 50%;
-    filter: blur(140px);
-    opacity: 0.2;
-    mix-blend-mode: screen;
-    animation: authFloat 16s infinite alternate ease-in-out;
-  }
-
-  .blob-purple {
-    width: 600px;
-    height: 600px;
-    background: radial-gradient(circle, #7c5cfc 0%, transparent 70%);
-    top: -150px;
-    left: 20%;
-  }
-
-  .blob-blue {
-    width: 550px;
-    height: 550px;
-    background: radial-gradient(circle, #3b82f6 0%, transparent 70%);
-    bottom: -150px;
-    right: 20%;
-    animation-delay: -5s;
-  }
-
-  .blob-cyan {
-    width: 450px;
-    height: 450px;
-    background: radial-gradient(circle, #06b6d4 0%, transparent 70%);
-    top: 40%;
-    left: -100px;
-    animation-delay: -8s;
-  }
-
-  .ambient-grid {
-    position: absolute;
-    inset: 0;
-    background-image:
-      linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
-    background-size: 36px 36px;
-    mask-image: radial-gradient(circle at center, black 45%, transparent 88%);
-  }
-
-  // Animated Cyber Particles — bug fix: added x-axis drift
-  .cyber-particle {
-    position: absolute;
-    width: 4px;
-    height: 4px;
-    border-radius: 50%;
-    background: #6ee7b7;
-    box-shadow: 0 0 12px #6ee7b7;
-    animation: floatParticle 10s infinite ease-in-out;
-  }
-
-  .p1 { top: 20%; left: 15%; animation-delay: 0s; }
-  .p2 { top: 75%; left: 80%; background: #93c5fd; box-shadow: 0 0 12px #93c5fd; animation-delay: -3s; }
-  .p3 { top: 80%; left: 25%; background: #c4b5fd; box-shadow: 0 0 12px #c4b5fd; animation-delay: -6s; animation-name: floatParticle2; }
-  .p4 { top: 25%; left: 85%; background: #6ee7b7; box-shadow: 0 0 12px #6ee7b7; animation-delay: -2s; animation-name: floatParticle3; }
-}
-
-@keyframes floatParticle {
-  0%, 100% { transform: translateY(0) translateX(0) scale(1); opacity: 0.8; }
-  33% { transform: translateY(-30px) translateX(18px) scale(1.3); opacity: 1; }
-  66% { transform: translateY(-20px) translateX(-12px) scale(1.1); opacity: 0.9; }
-}
-
-@keyframes floatParticle2 {
-  0%, 100% { transform: translateY(0) translateX(0) scale(1); opacity: 0.8; }
-  40% { transform: translateY(-40px) translateX(-20px) scale(1.5); opacity: 1; }
-  70% { transform: translateY(-10px) translateX(15px) scale(0.9); opacity: 0.7; }
-}
-
-@keyframes floatParticle3 {
-  0%, 100% { transform: translateY(0) translateX(0) scale(1); opacity: 0.8; }
-  50% { transform: translateY(-24px) translateX(10px) scale(1.4); opacity: 1; }
-}
-
-@keyframes authFloat {
-  0%   { transform: translate(0, 0) scale(1); }
-  50%  { transform: translate(40px, -30px) scale(1.08); }
-  100% { transform: translate(-30px, 40px) scale(0.96); }
-}
-
-// ── Single Centered Container ──
-.auth-single-container {
+  background: radial-gradient(ellipse 100% 100% at 20% 0%, #0e0b2e 0%, #05050f 40%, #0a1628 100%);
   position: relative;
-  z-index: 2;
-  width: 100%;
-  max-width: 460px;
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-  // Bug Fix: prevent overflow on very small screens
-  padding: 0;
-  box-sizing: border-box;
+  overflow: hidden;
+  font-family: $ff;
 
-  @media (max-width: 400px) {
-    max-width: 100%;
-    gap: 16px;
-  }
-
-  animation: morphIn 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+  @media (min-width: 480px) { padding: 24px; }
+  @media (min-width: 768px) { padding: 32px; }
 }
 
-// Premium morphIn 3D perspective entrance (replaces authScaleUp)
-@keyframes authScaleUp {
-  from {
-    opacity: 0;
-    transform: translateY(18px) scale(0.97);
+/* ═══════════════════════════════════════════════════════════════════════════
+   AMBIENT CANVAS
+═══════════════════════════════════════════════════════════════════════════ */
+.auth-ambient-canvas {
+  position: absolute; inset: 0; pointer-events: none; overflow: hidden; z-index: 0;
+}
+
+.ambient-blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(90px);
+  will-change: transform;
+  animation: loginBlobFloat 20s ease-in-out infinite;
+
+  &.blob-purple {
+    width: 520px; height: 520px; top: -140px; left: -100px;
+    background: radial-gradient(circle, rgba(139,92,246,0.22), transparent 70%);
+    animation-delay: 0s;
+    @media (max-width: 480px) { width: 260px; height: 260px; top: -80px; left: -60px; }
   }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
+  &.blob-blue {
+    width: 440px; height: 440px; bottom: -120px; right: -80px;
+    background: radial-gradient(circle, rgba(99,102,241,0.18), transparent 70%);
+    animation-delay: -7s; animation-direction: alternate;
+    @media (max-width: 480px) { width: 220px; height: 220px; bottom: -60px; right: -40px; }
+  }
+  &.blob-cyan {
+    width: 360px; height: 360px; top: 50%; left: 50%; transform: translate(-50%,-50%);
+    background: radial-gradient(circle, rgba(6,182,212,0.1), transparent 70%);
+    animation-delay: -13s;
+    @media (max-width: 480px) { width: 180px; height: 180px; }
   }
 }
 
-@keyframes morphIn {
-  0% {
-    opacity: 0;
-    transform: perspective(800px) rotateX(6deg) translateY(28px) scale(0.96);
-    filter: blur(4px);
-  }
-  100% {
-    opacity: 1;
-    transform: perspective(800px) rotateX(0deg) translateY(0) scale(1);
-    filter: blur(0);
+.ambient-grid {
+  position: absolute; inset: 0;
+  background-image:
+    linear-gradient(rgba(99,102,241,0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(99,102,241,0.04) 1px, transparent 1px);
+  background-size: 60px 60px;
+  animation: loginGridFlow 20s linear infinite;
+  mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black, transparent);
+}
+
+.cyber-particle {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+
+  $pts: (
+    p1: (10%, 80%, 8px, $p1, 0s, 6s),
+    p2: (80%, 20%, 5px, $p2, -2s, 8s),
+    p3: (30%, 40%, 6px, $p3, -4s, 7s),
+    p4: (70%, 70%, 4px, $amber, -1s, 9s),
+  );
+
+  @each $name, $vals in $pts {
+    &.#{$name} {
+      left: nth($vals,1); top: nth($vals,2);
+      width: nth($vals,3); height: nth($vals,3);
+      background: nth($vals,4);
+      box-shadow: 0 0 12px nth($vals,4);
+      animation: loginParticle nth($vals,6) ease-in-out nth($vals,5) infinite;
+    }
   }
 }
 
-// ── Top Brand Bar ──
+/* ═══════════════════════════════════════════════════════════════════════════
+   CONTAINER
+═══════════════════════════════════════════════════════════════════════════ */
+.auth-single-container {
+  position: relative; z-index: 2;
+  width: 100%; max-width: 440px;
+  display: flex; flex-direction: column;
+  gap: 18px;
+  animation: loginFadeUp 0.65s cubic-bezier(0.34,1.56,0.64,1) both;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   BRAND HEAD
+═══════════════════════════════════════════════════════════════════════════ */
 .auth-brand-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 4px;
-
-  .auth-logo {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    text-decoration: none;
-
-    .logo-orb {
-      width: 38px;
-      height: 38px;
-      border-radius: 10px;
-      background: linear-gradient(135deg, #6366f1, #4f46e5);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      position: relative;
-      box-shadow: 0 0 20px rgba(99, 102, 241, 0.4);
-
-      .orb-icon {
-        font-size: 18px;
-        color: #fff;
-      }
-    }
-
-    .logo-text {
-      display: flex;
-      flex-direction: column;
-
-      .brand-name {
-        font-family: 'Outfit', sans-serif;
-        font-size: 19px;
-        font-weight: 800;
-        color: #fff;
-        letter-spacing: -0.02em;
-        line-height: 1.1;
-      }
-
-      .brand-sub {
-        font-size: 10.5px;
-        font-weight: 700;
-        color: #a5b4fc;
-        letter-spacing: 0.08em;
-      }
-    }
-  }
-
-  .security-badge {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 10.5px;
-    font-weight: 700;
-    color: #10b981;
-    background: rgba(16, 185, 129, 0.1);
-    border: 1px solid rgba(16, 185, 129, 0.3);
-    padding: 5px 12px;
-    border-radius: 100px;
-    letter-spacing: 0.04em;
-
-    .sec-dot {
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-      background: #10b981;
-      box-shadow: 0 0 8px #10b981;
-      animation: pulseSec 2s infinite ease-out;
-    }
-  }
+  display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; gap: 10px;
 }
 
-@keyframes pulseSec {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.5; transform: scale(1.4); }
+.auth-logo {
+  display: flex; align-items: center; gap: 10px;
+  text-decoration: none;
+  transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
+  &:hover { transform: scale(1.04); }
 }
 
-// ── Premium Glass Card with Cyber Scanner Beam ──
+.logo-orb {
+  position: relative; width: 40px; height: 40px; flex-shrink: 0;
+}
+.orb-ring {
+  position: absolute; inset: 0; border-radius: 50%;
+  border: 2px solid rgba(99,102,241,0.5);
+  animation: loginRingPulse 2.5s ease-in-out infinite;
+}
+.orb-icon {
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px;
+  background: linear-gradient(135deg, rgba(99,102,241,0.25), rgba(139,92,246,0.15));
+  border-radius: 50%;
+  border: 1px solid rgba(99,102,241,0.35);
+}
+
+.logo-text { display: flex; flex-direction: column; }
+.brand-name {
+  font-family: $ff; font-size: 17px; font-weight: 900; letter-spacing: -0.5px;
+  color: $tx1; line-height: 1;
+}
+.brand-sub {
+  font-size: 9px; font-weight: 700; letter-spacing: 2px;
+  color: $tx3; text-transform: uppercase;
+}
+
+.security-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 5px 12px; border-radius: 100px;
+  font-size: 9px; font-weight: 800; letter-spacing: 1.5px;
+  color: $emerald; background: rgba(16,185,129,0.1);
+  border: 1px solid rgba(16,185,129,0.28);
+  font-family: $ff-mono;
+  white-space: nowrap;
+}
+.sec-dot {
+  width: 6px; height: 6px; border-radius: 50%; background: $emerald;
+  box-shadow: 0 0 8px $emerald; animation: loginPulse 2s ease infinite;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   AUTH CARD
+═══════════════════════════════════════════════════════════════════════════ */
 .auth-single-card {
   position: relative;
-  background: rgba(17, 24, 39, 0.85) !important;
-  backdrop-filter: blur(24px) saturate(180%);
-  -webkit-backdrop-filter: blur(24px) saturate(180%);
-  border: 1px solid rgba(255, 255, 255, 0.12) !important;
-  border-radius: 22px;
-  padding: 34px 32px;
+  padding: 28px 24px;
+  border-radius: 24px;
+  background: rgba(14,11,46,0.72);
+  backdrop-filter: blur(40px) saturate(180%);
+  -webkit-backdrop-filter: blur(40px) saturate(180%);
+  border: 1.5px solid rgba(99,102,241,0.22);
   box-shadow:
-    0 24px 60px rgba(0, 0, 0, 0.6),
-    0 0 0 1px rgba(124, 92, 252, 0.18) !important;
+    0 32px 80px rgba(0,0,0,0.5),
+    0 8px 24px rgba(99,102,241,0.1),
+    inset 0 1px 0 rgba(255,255,255,0.06);
+  animation: loginCardEntrance 0.75s cubic-bezier(0.34,1.56,0.64,1) 0.1s both;
   overflow: hidden;
 
-  // Top Cyan Laser Scanner Beam
-  .card-scanner-beam {
-    position: absolute;
-    top: 0;
-    left: -100%;
-    // Bug fix: widened beam to cover full card width
-    width: 80%;
-    height: 2px;
-    background: linear-gradient(90deg, transparent, #06b6d4, #6ee7b7, #818cf8, transparent);
-    animation: scannerBeam 3.5s infinite cubic-bezier(0.4, 0, 0.2, 1);
-  }
+  @media (min-width: 480px) { padding: 32px 28px; }
+  @media (min-width: 768px) { padding: 36px 32px; }
 
-  @media (max-width: 480px) {
-    padding: 26px 18px;
-    border-radius: 18px;
-  }
-
-  @media (max-width: 360px) {
-    padding: 22px 14px;
-    border-radius: 14px;
+  /* Top highlight line */
+  &::before {
+    content: '';
+    position: absolute; top: 0; left: 10%; right: 10%; height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(99,102,241,0.6), rgba(6,182,212,0.4), transparent);
   }
 }
 
-@keyframes scannerBeam {
-  0%   { left: -60%; }
-  50%  { left: 100%; }
-  100% { left: 100%; }
+/* Scanner beam */
+.card-scanner-beam {
+  position: absolute; top: 0; left: 0; right: 0; height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(99,102,241,0.8), rgba(6,182,212,0.6), transparent);
+  animation: loginBeam 4s ease-in-out infinite;
+  z-index: 5; pointer-events: none;
 }
 
-// ── Quantum Hologram Header ──
+/* ═══════════════════════════════════════════════════════════════════════════
+   QUANTUM HEADER
+═══════════════════════════════════════════════════════════════════════════ */
 .quantum-header {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  text-align: center;
-  margin-bottom: 26px;
+  gap: 16px;
+  margin-bottom: 24px;
 
-  .quantum-orb-wrap {
-    position: relative;
-    width: 66px;
-    height: 66px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-bottom: 14px;
+  @media (max-width: 380px) { flex-direction: column; align-items: flex-start; gap: 12px; }
+}
 
-    .q-ring {
-      position: absolute;
-      border-radius: 50%;
-      border-style: dashed;
-    }
+.quantum-orb-wrap {
+  position: relative; width: 56px; height: 56px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
 
-    .q-ring-outer {
-      inset: 0;
-      border-width: 1.5px;
-      border-color: rgba(124, 92, 252, 0.6);
-      animation: spinRingOuter 10s linear infinite;
-    }
+  @media (min-width: 480px) { width: 64px; height: 64px; }
+}
 
-    .q-ring-inner {
-      inset: 8px;
-      border-width: 1px;
-      border-color: rgba(6, 182, 212, 0.6);
-      animation: spinRingInner 7s linear infinite reverse;
-    }
-
-    .q-core-icon {
-      font-size: 24px;
-      color: #fff;
-      filter: drop-shadow(0 0 10px rgba(124, 92, 252, 0.8));
-    }
+.q-ring {
+  position: absolute; border-radius: 50%; border-style: solid;
+  &.q-ring-outer {
+    inset: 0; border-width: 2px;
+    border-color: rgba(99,102,241,0.5) transparent rgba(99,102,241,0.3) transparent;
+    animation: loginOrbitSpin 4s linear infinite;
   }
-
-  .telemetry-pill {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 10.5px;
-    font-weight: 700;
-    color: #6ee7b7;
-    background: rgba(16, 185, 129, 0.12);
-    border: 1px solid rgba(16, 185, 129, 0.35);
-    padding: 4px 12px;
-    border-radius: 100px;
-    margin-bottom: 10px;
-    letter-spacing: 0.05em;
-
-    .radar-dot {
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-      background: #10b981;
-      box-shadow: 0 0 8px #10b981;
-      animation: pulseSec 1.5s infinite ease-out;
-    }
-  }
-
-  .card-title {
-    font-family: 'Outfit', sans-serif;
-    font-size: 26px;
-    font-weight: 800;
-    color: #fff;
-    margin: 0 0 6px;
-    letter-spacing: -0.02em;
-  }
-
-  .card-subtitle {
-    font-size: 13.5px;
-    color: #94a3b8;
-    margin: 0;
-    line-height: 1.5;
+  &.q-ring-inner {
+    inset: 8px; border-width: 1.5px;
+    border-color: transparent rgba(6,182,212,0.5) transparent rgba(6,182,212,0.3);
+    animation: loginOrbitRev 3s linear infinite;
   }
 }
 
-@keyframes spinRingOuter {
-  0%   { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+.q-core-icon {
+  width: 36px; height: 36px; border-radius: 11px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px; background: linear-gradient(135deg, rgba(99,102,241,0.3), rgba(139,92,246,0.2));
+  border: 1px solid rgba(99,102,241,0.4);
+  box-shadow: 0 0 20px rgba(99,102,241,0.3);
+  animation: loginFloat 5s ease-in-out infinite;
+  z-index: 1;
 }
 
-@keyframes spinRingInner {
-  0%   { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+.quantum-titles { flex: 1; min-width: 0; }
+
+.telemetry-pill {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 3px 10px; border-radius: 100px; font-size: 9px;
+  font-weight: 800; letter-spacing: 1.5px;
+  background: rgba(99,102,241,0.12); border: 1px solid rgba(99,102,241,0.3); color: #a5b4fc;
+  margin-bottom: 8px; font-family: $ff-mono;
+}
+.radar-dot {
+  width: 6px; height: 6px; border-radius: 50%; background: $p1;
+  box-shadow: 0 0 8px $p1; animation: loginPulse 1.8s ease infinite; flex-shrink: 0;
 }
 
-// ── Form Styling ──
-.auth-form {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
+.card-title {
+  font-family: $ff; font-size: clamp(20px, 5vw, 26px); font-weight: 900;
+  color: $tx1; margin: 0 0 4px; letter-spacing: -0.5px; line-height: 1.15;
+}
 
-  .form-field-group {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
+.card-subtitle {
+  font-size: 13px; color: $tx3; margin: 0; line-height: 1.5;
+}
 
-    .label-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
+/* ═══════════════════════════════════════════════════════════════════════════
+   FORM
+═══════════════════════════════════════════════════════════════════════════ */
+.auth-form { display: flex; flex-direction: column; gap: 14px; }
 
-    .field-label {
-      font-size: 13px;
-      font-weight: 600;
-      color: #e2e8f0;
-    }
+.form-field-group { display: flex; flex-direction: column; gap: 5px; }
 
-    .forgot-link {
-      font-size: 12.5px;
-      font-weight: 600;
-      color: #818cf8;
-      text-decoration: none;
-      transition: color 0.2s;
+.field-label {
+  font-size: 12px; font-weight: 700; color: $tx2; letter-spacing: 0.3px; font-family: $ff;
+}
 
-      &:hover {
-        color: #a5b4fc;
-        text-decoration: underline;
-      }
-    }
-  }
+.label-row {
+  display: flex; align-items: center; justify-content: space-between; gap: 8px;
+}
 
-  // Bug Fix: Material field focus color corrected to brand purple
-  .field-custom {
-    .mat-mdc-text-field-wrapper {
-      background: rgba(255, 255, 255, 0.05) !important;
-      border-radius: 10px !important;
-    }
+.forgot-link {
+  font-size: 11px; font-weight: 700; color: #a5b4fc; text-decoration: none;
+  transition: color 0.2s ease;
+  &:hover { color: $p3; }
+}
 
-    // Override Material's default blue focus ring with brand purple
-    &.mat-focused .mat-mdc-notched-outline .mat-mdc-notched-outline-thick {
-      border-color: #6366f1 !important;
-    }
-
-    .mat-mdc-form-field-focus-overlay {
-      background-color: rgba(99, 102, 241, 0.05) !important;
-    }
-
-    input {
-      color: #fff !important;
-      font-size: 14px !important;
-    }
-
-    .field-icon {
-      color: #94a3b8;
-      margin-right: 8px;
-    }
-  }
-
-  .form-options-row {
-    margin-top: -6px;
-
-    .mat-mdc-checkbox {
-      color: #cbd5e1 !important;
-    }
-  }
-
-  // Animated Shimmer Submit CTA Button
-  .submit-cta-btn {
-    position: relative;
-    width: 100%;
-    height: 52px;
-    min-height: 52px; // Bug fix: prevent collapse on small screens
+/* Form field dark override */
+.field-custom {
+  .mat-mdc-text-field-wrapper {
+    background: rgba(255,255,255,0.04) !important;
     border-radius: 12px !important;
-    font-size: 15px !important;
-    font-weight: 700 !important;
-    background: linear-gradient(135deg, #6366f1, #4f46e5) !important;
-    color: #fff !important;
-    border: 1px solid rgba(255, 255, 255, 0.25);
-    box-shadow: 0 8px 24px rgba(99, 102, 241, 0.4);
-    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-    overflow: hidden;
+    border: 1.5px solid rgba(255,255,255,0.1) !important;
+    transition: all 0.22s ease !important;
+  }
 
-    .cta-shimmer {
-      position: absolute;
-      top: 0;
-      left: -100%;
-      width: 50%;
-      height: 100%;
-      background: linear-gradient(
-        120deg,
-        transparent,
-        rgba(255, 255, 255, 0.35),
-        transparent
-      );
-      animation: shimmerBeam 3s infinite;
-    }
+  &.mat-focused .mat-mdc-text-field-wrapper {
+    background: rgba(99,102,241,0.06) !important;
+    border-color: rgba(99,102,241,0.6) !important;
+    box-shadow: 0 0 0 3px rgba(99,102,241,0.12) !important;
+  }
 
-    &:hover:not([disabled]) {
-      transform: translateY(-2px);
-      box-shadow: 0 12px 30px rgba(99, 102, 241, 0.55);
-    }
+  input.mat-mdc-input-element {
+    color: $tx1 !important;
+    font-family: $ff !important;
+    font-size: 14px !important;
+    caret-color: $p1 !important;
 
-    .cta-inner {
-      position: relative;
-      z-index: 1;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
+    &::placeholder { color: $tx3 !important; }
+  }
 
-      .cta-arrow {
-        font-size: 18px;
-        transition: transform 0.2s;
-      }
-    }
+  mat-icon.field-icon { color: $tx3 !important; }
 
-    &:hover:not([disabled]) .cta-arrow {
-      transform: translateX(4px);
-    }
+  /* Outline border fix */
+  .mdc-text-field--outlined .mdc-notched-outline__leading,
+  .mdc-text-field--outlined .mdc-notched-outline__notch,
+  .mdc-text-field--outlined .mdc-notched-outline__trailing {
+    border-color: transparent !important;
+  }
+}
 
-    .loading-state {
-      position: relative;
-      z-index: 1;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
+.eye-btn {
+  color: $tx3 !important; transition: color 0.2s ease !important;
+  &:hover { color: $tx1 !important; }
+}
+
+/* Form options row */
+.form-options-row {
+  .remember-chk {
+    font-size: 12px !important; color: $tx2 !important;
+    .mdc-checkbox .mdc-checkbox__background { border-color: rgba(255,255,255,0.25) !important; }
+    &.mat-mdc-checkbox-checked .mdc-checkbox__background {
+      background-color: $p1 !important; border-color: $p1 !important;
     }
   }
 }
 
-@keyframes shimmerBeam {
-  0%   { left: -100%; }
-  60%  { left: 150%; }
-  100% { left: 150%; }
+/* ═══════════════════════════════════════════════════════════════════════════
+   ALERTS (lockout / warning)
+═══════════════════════════════════════════════════════════════════════════ */
+.login-lockout-banner {
+  display: flex; align-items: center; gap: 10px; padding: 12px 14px; border-radius: 12px;
+  background: rgba(244,63,94,0.1); border: 1px solid rgba(244,63,94,0.3);
+  animation: loginFadeDown 0.3s ease both;
+
+  mat-icon { color: $rose; font-size: 20px !important; width: 20px !important; height: 20px !important; flex-shrink: 0; }
+  strong { font-size: 13px; font-weight: 700; color: #fca5a5; display: block; margin-bottom: 2px; }
+  p { font-size: 12px; color: rgba(252,165,165,0.8); margin: 0; }
 }
 
-// Footnote & Footer
+.login-warn-banner {
+  display: flex; align-items: center; gap: 8px; padding: 10px 14px; border-radius: 12px;
+  background: rgba(245,158,11,0.1); border: 1px solid rgba(245,158,11,0.28);
+  font-size: 12px; font-weight: 600; color: #fcd34d;
+  animation: loginFadeDown 0.3s ease both;
+
+  mat-icon { color: $amber; font-size: 16px !important; width: 16px !important; height: 16px !important; }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   SUBMIT BUTTON
+═══════════════════════════════════════════════════════════════════════════ */
+.submit-cta-btn {
+  width: 100% !important;
+  height: 52px !important;
+  border-radius: 14px !important;
+  border: none !important;
+  background: linear-gradient(135deg, $p1, $p2, #4338ca) !important;
+  background-size: 200% 200% !important;
+  color: #fff !important;
+  font-family: $ff !important;
+  font-size: 15px !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.2px !important;
+  position: relative !important;
+  overflow: hidden !important;
+  transition: all 0.28s cubic-bezier(0.34,1.56,0.64,1) !important;
+  box-shadow:
+    0 6px 22px rgba(99,102,241,0.38),
+    0 2px 6px rgba(99,102,241,0.2) !important;
+  animation: loginFadeUp 0.4s 0.5s both !important;
+  margin-top: 4px !important;
+
+  &:not(:disabled):hover {
+    transform: translateY(-3px) !important;
+    box-shadow:
+      0 12px 32px rgba(99,102,241,0.5),
+      0 4px 12px rgba(99,102,241,0.28) !important;
+  }
+
+  &:not(:disabled):active {
+    transform: translateY(0) !important;
+  }
+
+  &:disabled {
+    opacity: 0.55 !important;
+    background: linear-gradient(135deg, #4b5563, #374151) !important;
+    box-shadow: none !important;
+  }
+}
+
+.cta-shimmer {
+  position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(105deg, transparent 30%, rgba(255,255,255,0.15) 50%, transparent 70%);
+  background-size: 200% 100%;
+  animation: loginShimmer 3s ease-in-out infinite;
+}
+
+.cta-inner {
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  position: relative; z-index: 1;
+}
+
+.cta-arrow {
+  font-size: 18px; font-weight: 400;
+  transition: transform 0.25s cubic-bezier(0.34,1.56,0.64,1);
+  .submit-cta-btn:hover & { transform: translateX(5px); }
+}
+
+.loading-state {
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  position: relative; z-index: 1;
+  span { font-size: 14px; font-weight: 700; color: #fff; }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   FOOTNOTE / FOOTER
+═══════════════════════════════════════════════════════════════════════════ */
 .auth-card-footnote {
-  margin-top: 24px;
-  padding-top: 18px;
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 12px 0 0;
+  border-top: 1px solid $border;
+  margin-top: 4px;
+}
 
-  .info-line {
-    display: flex;
-    align-items: flex-start;
-    gap: 8px;
-    font-size: 12px;
-    color: #94a3b8;
-    line-height: 1.5;
+.info-line {
+  display: flex; align-items: flex-start; gap: 8px; font-size: 11px; color: $tx3; line-height: 1.5;
 
-    .info-icon {
-      font-size: 16px;
-      width: 16px;
-      height: 16px;
-      color: #818cf8;
-      flex-shrink: 0;
-      margin-top: 1px;
-    }
+  .info-icon {
+    font-size: 14px !important; width: 14px !important; height: 14px !important;
+    color: $emerald; margin-top: 1px; flex-shrink: 0;
   }
 }
 
 .auth-card-footer {
-  margin-top: 16px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 8px;
-  font-size: 13.5px;
-  color: #94a3b8;
+  text-align: center; font-size: 13px; color: $tx3; margin-top: 14px;
+  padding-top: 14px; border-top: 1px solid $border;
 
   .workspace-link {
-    color: #a5b4fc;
-    font-weight: 700;
-    text-decoration: none;
-
-    &:hover {
-      text-decoration: underline;
-    }
-  }
-}
-
-// ── Bottom Bar ──
-.auth-bottom-bar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 12px;
-  padding: 0 4px;
-  font-size: 12.5px;
-
-  // Bug fix: prevent overflow on very small screens
-  @media (max-width: 400px) {
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-    gap: 6px;
-  }
-
-  .back-home-link {
-    color: #94a3b8;
-    text-decoration: none;
-    font-weight: 600;
+    color: #a5b4fc; font-weight: 700; text-decoration: none; margin-left: 5px;
     transition: color 0.2s;
-
-    &:hover {
-      color: #fff;
-    }
-  }
-
-  .copyright-text {
-    color: #64748b;
+    &:hover { color: $p3; }
   }
 }
 
-// ─── SEC-10: Lockout & Warning Banners ─────────────────────────────────────
-.login-lockout-banner,
-.login-warn-banner {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 12px 16px;
-  border-radius: 12px;
-  margin-bottom: 16px;
-  font-size: 13.5px;
-  line-height: 1.4;
-  animation: fadeSlideUp 0.3s ease-out both;
-
-  mat-icon { font-size: 22px; width: 22px; height: 22px; flex-shrink: 0; }
-  strong { display: block; font-weight: 700; margin-bottom: 2px; }
-  p { margin: 0; font-size: 12.5px; opacity: 0.85; }
+/* ═══════════════════════════════════════════════════════════════════════════
+   BOTTOM BAR
+═══════════════════════════════════════════════════════════════════════════ */
+.auth-bottom-bar {
+  display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; gap: 8px; animation: loginFadeUp 0.4s 0.4s both;
 }
 
-.login-lockout-banner {
-  background: rgba(239, 68, 68, 0.1);
-  border: 1px solid rgba(239, 68, 68, 0.3);
-  color: #fca5a5;
-  mat-icon { color: #ef4444; }
+.back-home-link {
+  font-size: 12px; color: $tx3; text-decoration: none; font-weight: 600;
+  transition: color 0.2s ease; display: flex; align-items: center; gap: 4px;
+  &:hover { color: #a5b4fc; }
 }
 
-.login-warn-banner {
-  background: rgba(245, 158, 11, 0.08);
-  border: 1px solid rgba(245, 158, 11, 0.25);
-  color: #fbbf24;
-  mat-icon { color: #f59e0b; }
+.copyright-text {
+  font-size: 10px; color: rgba(100,116,139,0.7); text-align: right;
+  @media (max-width: 399px) { display: none; }
 }
 
+/* ═══════════════════════════════════════════════════════════════════════════
+   MOBILE POLISH
+═══════════════════════════════════════════════════════════════════════════ */
+@media (max-width: 399px) {
+  .auth-single-root { padding: 10px; align-items: flex-start; padding-top: 16px; }
+  .auth-single-card { padding: 22px 16px; border-radius: 18px; }
+  .quantum-header { margin-bottom: 18px; }
+  .card-title { font-size: 20px; }
+  .submit-cta-btn { height: 48px !important; font-size: 14px !important; }
+}

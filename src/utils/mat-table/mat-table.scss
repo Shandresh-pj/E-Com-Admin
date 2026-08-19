@@ -604,3 +604,113 @@ table.mat-mdc-table {
         }
     }
 }
+
+/* ══════════════════════════════════════════════════════════
+   PREMIUM ENHANCEMENTS v3.0
+══════════════════════════════════════════════════════════ */
+
+/* Staggered row entrance animation */
+@keyframes mtRowIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+.mat-mdc-row {
+    animation: mtRowIn 0.35s cubic-bezier(0.4, 0, 0.2, 1) both;
+
+    &:nth-child(1)  { animation-delay: 0.03s; }
+    &:nth-child(2)  { animation-delay: 0.06s; }
+    &:nth-child(3)  { animation-delay: 0.09s; }
+    &:nth-child(4)  { animation-delay: 0.12s; }
+    &:nth-child(5)  { animation-delay: 0.15s; }
+    &:nth-child(6)  { animation-delay: 0.18s; }
+    &:nth-child(7)  { animation-delay: 0.21s; }
+    &:nth-child(8)  { animation-delay: 0.24s; }
+    &:nth-child(9)  { animation-delay: 0.27s; }
+    &:nth-child(10) { animation-delay: 0.30s; }
+}
+
+/* Enhanced search focus */
+.search-box input:focus {
+    border-color: rgba(99, 102, 241, 0.55) !important;
+    box-shadow:
+        0 0 0 3px rgba(99, 102, 241, 0.12),
+        0 4px 16px rgba(99, 102, 241, 0.1) !important;
+    background: rgba(255, 255, 255, 0.95) !important;
+}
+
+/* Table container — force horizontal scroll on mobile, never clip */
+.liquid-glass-container {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+
+    &::-webkit-scrollbar { height: 4px; }
+    &::-webkit-scrollbar-thumb {
+        background: rgba(99, 102, 241, 0.3);
+        border-radius: 100px;
+    }
+}
+
+/* Action icon buttons — premium micro-interaction */
+.action-icon-btn,
+[matTooltip] button.mat-mdc-icon-button {
+    width: 32px !important; height: 32px !important;
+    border-radius: 9px !important;
+    transition: all 0.22s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+
+    &:hover {
+        transform: scale(1.15) !important;
+        background: rgba(99, 102, 241, 0.1) !important;
+    }
+
+    mat-icon {
+        font-size: 17px !important;
+        width: 17px !important;
+        height: 17px !important;
+    }
+}
+
+/* Paginator mobile — wrap and center */
+@media (max-width: 599px) {
+    .table-footer {
+        .mat-mdc-paginator-container {
+            flex-wrap: wrap !important;
+            justify-content: center !important;
+            padding: 8px 4px !important;
+            gap: 4px !important;
+        }
+
+        .mat-mdc-paginator-range-label {
+            font-size: 11px !important;
+            margin: 0 4px !important;
+        }
+
+        .mat-mdc-paginator-page-size {
+            margin: 4px 0 !important;
+        }
+    }
+
+    /* Toolbar on mobile — full column */
+    .table-toolbar {
+        flex-direction: column !important;
+        align-items: stretch !important;
+        padding: 0 4px !important;
+        gap: 10px !important;
+
+        .search-box {
+            max-width: 100% !important;
+            min-width: 0 !important;
+        }
+
+        .export-actions {
+            margin-left: 0 !important;
+            flex-wrap: wrap !important;
+            gap: 6px !important;
+
+            .export-btn {
+                padding: 7px 14px !important;
+                font-size: 11px !important;
+            }
+        }
+    }
+}

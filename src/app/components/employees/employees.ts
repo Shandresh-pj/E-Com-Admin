@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
+﻿import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { ReactiveFormsModule, FormsModule, FormGroup, FormBuilder, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
@@ -56,6 +56,10 @@ export class Employees implements OnInit {
   Companies: any[] = [];
   Branch:    any[] = [];
   Employees: any[] = [];
+  // Stat Chip Computed Properties
+  get activeEmployees():   number { return this.Employees.filter((e: any) => (e.status || "").toLowerCase() === "active").length; }
+  get inactiveEmployees(): number { return this.Employees.filter((e: any) => (e.status || "").toLowerCase() !== "active").length; }
+  get uniqueDepts():       number { return new Set(this.Employees.map((e: any) => e.department).filter(Boolean)).size || 0; }
 
   UpdateButton   = false;
   Employee_Forms = false;
@@ -307,3 +311,4 @@ export class Employees implements OnInit {
     }
   }
 }
+

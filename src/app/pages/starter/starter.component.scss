@@ -202,7 +202,7 @@ app-starter { display: block; width: 100%; font-family: $ff; }
   letter-spacing: 1.4px;
   background: rgba(16,185,129,0.1);
   border: 1px solid rgba(16,185,129,0.3);
-  color: darken($emerald, 6%);
+  color: #059669;
   font-family: $ff;
   white-space: nowrap;
 }
@@ -285,7 +285,7 @@ app-starter { display: block; width: 100%; font-family: $ff; }
   &.status-pill--green {
     background: rgba(16,185,129,0.1);
     border: 1px solid rgba(16,185,129,0.28);
-    color: darken($emerald, 8%);
+    color: #047857;
   }
   &.status-pill--indigo {
     background: rgba(99,102,241,0.1);
@@ -489,31 +489,31 @@ app-starter { display: block; width: 100%; font-family: $ff; }
 .glass-kpi-emerald {
   &::before { background:linear-gradient(90deg,transparent,rgba(16,185,129,0.5),transparent); }
   &::after  { background:linear-gradient(90deg,$emerald,#34d399); }
-  .kpi-value { color:darken($emerald,5%); }
+  .kpi-value { color:#059669; }
   &:hover { border-color:rgba(16,185,129,0.38) !important; }
 }
 .glass-kpi-amber {
   &::before { background:linear-gradient(90deg,transparent,rgba(245,158,11,0.5),transparent); }
   &::after  { background:linear-gradient(90deg,$amber,#fcd34d); }
-  .kpi-value { color:darken($amber,8%); }
+  .kpi-value { color:#d97706; }
   &:hover { border-color:rgba(245,158,11,0.38) !important; }
 }
 .glass-kpi-rose {
   &::before { background:linear-gradient(90deg,transparent,rgba(244,63,94,0.5),transparent); }
   &::after  { background:linear-gradient(90deg,$rose,#fb7185); }
-  .kpi-value { color:darken($rose,5%); }
+  .kpi-value { color:#e11d48; }
   &:hover { border-color:rgba(244,63,94,0.38) !important; }
 }
 .glass-kpi-sky {
   &::before { background:linear-gradient(90deg,transparent,rgba(56,189,248,0.5),transparent); }
   &::after  { background:linear-gradient(90deg,$sky,#7dd3fc); }
-  .kpi-value { color:darken($sky,12%); }
+  .kpi-value { color:#0284c7; }
   &:hover { border-color:rgba(56,189,248,0.38) !important; }
 }
 .glass-kpi-purple {
   &::before { background:linear-gradient(90deg,transparent,rgba(168,85,247,0.5),transparent); }
   &::after  { background:linear-gradient(90deg,$purple,#c084fc); }
-  .kpi-value { color:darken($purple,5%); }
+  .kpi-value { color:#9333ea; }
   &:hover { border-color:rgba(168,85,247,0.38) !important; }
 }
 
@@ -522,7 +522,7 @@ app-starter { display: block; width: 100%; font-family: $ff; }
 .icon-emerald { background:linear-gradient(135deg,rgba(16,185,129,.15),rgba(5,150,105,.1)); border:1px solid rgba(16,185,129,.22); mat-icon{color:$emerald;} }
 .icon-amber   { background:linear-gradient(135deg,rgba(245,158,11,.15),rgba(217,119,6,.1)); border:1px solid rgba(245,158,11,.22); mat-icon{color:$amber;} }
 .icon-rose    { background:linear-gradient(135deg,rgba(244,63,94,.12),rgba(225,29,72,.08)); border:1px solid rgba(244,63,94,.2); mat-icon{color:$rose;} }
-.icon-sky     { background:linear-gradient(135deg,rgba(56,189,248,.15),rgba(14,165,233,.1)); border:1px solid rgba(56,189,248,.22); mat-icon{color:darken($sky,10%);} }
+.icon-sky     { background:linear-gradient(135deg,rgba(56,189,248,.15),rgba(14,165,233,.1)); border:1px solid rgba(56,189,248,.22); mat-icon{color:#0369a1;} }
 .icon-purple  { background:linear-gradient(135deg,rgba(168,85,247,.15),rgba(139,92,246,.1)); border:1px solid rgba(168,85,247,.22); mat-icon{color:$purple;} }
 
 /* ═══════════════════════════════════════════════════════════════════════════════
@@ -553,7 +553,7 @@ app-starter { display: block; width: 100%; font-family: $ff; }
 .live-ping-badge {
   display: inline-flex; align-items: center; gap: 5px; padding: 3px 9px;
   border-radius: 100px; background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,.28);
-  font-size: 9px; font-weight: 800; letter-spacing: 1px; color: darken($emerald,5%); font-family: $ff;
+  font-size: 9px; font-weight: 800; letter-spacing: 1px; color: #059669; font-family: $ff;
 }
 
 .ping-dot {
@@ -589,8 +589,8 @@ app-starter { display: block; width: 100%; font-family: $ff; }
   margin-left: 5px; vertical-align: middle; font-family: $ff;
 }
 .bg-light-primary { background: rgba(99,102,241,.1); color: $indigo; }
-.bg-light-warning { background: rgba(245,158,11,.1); color: darken($amber,10%); }
-.bg-light-danger  { background: rgba(244,63,94,.08); color: darken($rose,5%); }
+.bg-light-warning { background: rgba(245,158,11,.1); color: #b45309; }
+.bg-light-danger  { background: rgba(244,63,94,.08); color: #e11d48; }
 
 /* ═══════════════════════════════════════════════════════════════════════════════
    QUICK LAUNCH NAV GRID

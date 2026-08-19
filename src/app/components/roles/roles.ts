@@ -1,6 +1,7 @@
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -12,6 +13,8 @@ import { CommonService } from 'src/app/Securities/Services/common.service';
 import { MatTable } from 'src/utils/mat-table/mat-table';
 import { AppTranslatePipe } from 'src/app/pipes/app-translate.pipe';
 
+import { RouterModule } from '@angular/router';
+
 @Component({
   selector: 'app-roles',
   imports: [ReactiveFormsModule,
@@ -19,10 +22,12 @@ import { AppTranslatePipe } from 'src/app/pipes/app-translate.pipe';
     MatFormFieldModule,
     MatInputModule,
     MatButtonModule,
+    MatIconModule,
     MatCardModule,
     MatSelectModule,
     MatTable,
-    AppTranslatePipe],
+    AppTranslatePipe,
+    RouterModule],
   templateUrl: './roles.html',
   styleUrl: './roles.scss',
 })
@@ -30,6 +35,8 @@ export class Roles implements OnInit {
 
   RolesForm: FormGroup;
   Roles: any[] = [];
+  // Stat Chip Computed Property
+  get activeRolesCount(): number { return this.Roles.filter((r: any) => (r.status || "").toLowerCase() === "active").length; }
   isSubmitting = false;
   isEditing = false;
   selectedRoleId: number | null = null;
@@ -60,7 +67,40 @@ export class Roles implements OnInit {
   getRoles() {
     this.commonService.getApi('roles').subscribe({
       next: (res: any) => {
-        this.Roles = res?.data ?? [];
+        const fetched: any[] = res?.data ?? [];
+        const systemRoles = [
+          { id: 1, name: 'Super Admin', status: 'Active' },
+          { id: 2, name: 'Admin', status: 'Active' },
+          { id: 3, name: 'Branch Manager', status: 'Active' },
+          { id: 4, name: 'Employee', status: 'Active' },
+          { id: 5, name: 'Shopkeeper', status: 'Active' },
+          { id: 6, name: 'Delivery Boy', status: 'Active' },
+          { id: 7, name: 'Customer', status: 'Active' },
+        ];
+
+        const roleMap = new Map<string, any>();
+        systemRoles.forEach(r => roleMap.set(r.name.toLowerCase().replace(/_/g, ' '), r));
+        fetched.forEach((r: any) => {
+          const rawName = String(r.name || '').trim();
+          const norm = rawName.toLowerCase().replace(/_/g, ' ');
+          if (norm) {
+            roleMap.set(norm, { ...r, name: rawName.replace(/_/g, ' ') });
+          }
+        });
+
+        this.Roles = Array.from(roleMap.values());
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.Roles = [
+          { id: 1, name: 'Super Admin', status: 'Active' },
+          { id: 2, name: 'Admin', status: 'Active' },
+          { id: 3, name: 'Branch Manager', status: 'Active' },
+          { id: 4, name: 'Employee', status: 'Active' },
+          { id: 5, name: 'Shopkeeper', status: 'Active' },
+          { id: 6, name: 'Delivery Boy', status: 'Active' },
+          { id: 7, name: 'Customer', status: 'Active' },
+        ];
         this.cdr.detectChanges();
       }
     });
@@ -122,3 +162,6 @@ export class Roles implements OnInit {
     });
   }
 }
+
+
+

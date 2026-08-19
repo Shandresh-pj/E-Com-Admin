@@ -1,153 +1,199 @@
 <!-- ══════════════════════════════════════════════════════════════════════
-  Subscription Plans — Premium Dashboard Section (Admin Only)
-  Fully Responsive Grid | Glassmorphism Cards | Razorpay Pay Button
+  Enterprise-Grade Pricing — Premium Redesign
+  Glassmorphism Cards · Animated Borders · Role-Gated · Fully Responsive
 ══════════════════════════════════════════════════════════════════════ -->
-<div class="plans-section">
+<div class="pricing-universe">
 
-  <!-- Section Header -->
-  <div class="plans-section__header">
-    <div class="plans-section__title-group">
-      <span class="plans-section__eyebrow">
-        <mat-icon class="plans-section__eyebrow-icon">diamond</mat-icon>
-        Subscription Plans
-      </span>
-      <h2 class="plans-section__title">
-        Enterprise-Grade <span class="plans-section__gradient-text">Pricing</span>
-      </h2>
-      <p class="plans-section__subtitle">
-        Transparent, scalable tiers — all plans include AI modules, multi-branch ERP & daily backups.
-      </p>
+  <!-- ── Ambient Orbs ── -->
+  <div class="pricing-orb pricing-orb--purple"></div>
+  <div class="pricing-orb pricing-orb--cyan"></div>
+  <div class="pricing-orb pricing-orb--rose"></div>
+
+  <!-- ── Section Header ── -->
+  <div class="pricing-header">
+    <div class="pricing-eyebrow">
+      <span class="eyebrow-icon">💎</span>
+      <span>SUBSCRIPTION PLANS</span>
     </div>
 
+    <h2 class="pricing-headline">
+      Enterprise-Grade
+      <span class="pricing-gradient-text"> Pricing</span>
+    </h2>
+
+    <p class="pricing-subline">
+      Transparent, scalable tiers — all plans include AI modules, multi-branch ERP &amp; daily backups.
+    </p>
+
     <!-- Billing Toggle -->
-    <div class="plans-section__toggle">
-      <button
-        class="plans-section__toggle-btn"
-        [class.active]="billingCycle === 'Monthly'"
-        (click)="setBillingCycle('Monthly')"
-      >Monthly</button>
-      <button
-        class="plans-section__toggle-btn"
-        [class.active]="billingCycle === 'Yearly'"
-        (click)="setBillingCycle('Yearly')"
-      >
-        Yearly
-        <span class="plans-section__save-chip">Save 20%</span>
-      </button>
+    <div class="billing-toggle-wrap">
+      <div class="billing-toggle">
+        <button
+          class="billing-btn"
+          [class.billing-btn--active]="billingCycle === 'Monthly'"
+          (click)="setBillingCycle('Monthly')"
+          id="billing-monthly">
+          Monthly
+        </button>
+        <button
+          class="billing-btn"
+          [class.billing-btn--active]="billingCycle === 'Yearly'"
+          (click)="setBillingCycle('Yearly')"
+          id="billing-yearly">
+          Yearly
+          <span class="billing-save-badge">Save 20%</span>
+        </button>
+        <!-- Sliding highlight pill -->
+        <div class="billing-slider" [class.billing-slider--yearly]="billingCycle === 'Yearly'"></div>
+      </div>
     </div>
   </div>
 
-  <!-- Free Trial Banner -->
-  <div class="plans-section__trial-banner">
-    <span class="plans-section__trial-emoji">🎁</span>
-    <div>
+  <!-- ── Free Trial Banner ── -->
+  <div class="trial-ribbon">
+    <div class="trial-ribbon__icon">🎁</div>
+    <div class="trial-ribbon__text">
       <strong>14-Day Free Trial</strong> available on all plans —
       <span>No credit card required. Instant access to all 18+ modules.</span>
     </div>
-    <span class="plans-section__trial-pill">INSTANT ACCESS</span>
+    <button class="trial-ribbon__cta" type="button">
+      INSTANT ACCESS
+    </button>
   </div>
 
-  <!-- Loading State -->
+  <!-- ── Loading Skeleton ── -->
   @if (loading) {
-    <div class="plans-section__grid">
+    <div class="pricing-grid">
       @for (_ of [1,2,3]; track $index) {
-        <div class="plan-card plan-card--skeleton">
-          <div class="sk-line w-30 h-16 mb-8"></div>
-          <div class="sk-line w-50 h-28 mb-4"></div>
-          <div class="sk-line w-80 h-12 mb-16"></div>
-          <div class="sk-line w-70 h-10 mb-8"></div>
-          <div class="sk-line w-60 h-10 mb-8"></div>
-          <div class="sk-line w-75 h-10 mb-8"></div>
-          <div class="sk-line w-100 h-40 mt-auto"></div>
+        <div class="pricing-card pricing-card--skeleton">
+          <div class="sk-block sk-block--badge"></div>
+          <div class="sk-block sk-block--title"></div>
+          <div class="sk-block sk-block--price"></div>
+          <div class="sk-block sk-block--line"></div>
+          <div class="sk-block sk-block--line w-short"></div>
+          <div class="sk-block sk-block--line"></div>
+          <div class="sk-block sk-block--line w-med"></div>
+          <div class="sk-block sk-block--btn"></div>
         </div>
       }
     </div>
   }
 
-  <!-- Plans Grid -->
+  <!-- ── Plans Grid ── -->
   @if (!loading) {
     @if (plans.length === 0) {
-      <div class="plans-section__empty">
-        <mat-icon>inventory</mat-icon>
-        <p>No subscription plans available. <a routerLink="/manage-subscription-plans">Configure plans</a> in admin settings.</p>
+      <!-- Premium Empty State -->
+      <div class="pricing-empty">
+        <div class="pricing-empty__icon-wrap">
+          <mat-icon class="pricing-empty__icon">rocket_launch</mat-icon>
+          <div class="pricing-empty__icon-glow"></div>
+        </div>
+        <h3 class="pricing-empty__title">No Plans Configured Yet</h3>
+        <p class="pricing-empty__desc">
+          Set up your subscription tiers to unlock monetisation for your enterprise.
+        </p>
+        <a routerLink="/manage-subscription-plans" class="pricing-empty__cta" id="configure-plans-link">
+          <mat-icon>add_circle</mat-icon>
+          Configure Plans
+        </a>
       </div>
     } @else {
-      <div class="plans-section__grid">
+      <div class="pricing-grid">
         @for (plan of plans; track plan.id; let i = $index) {
           <div
-            class="plan-card"
-            [class.plan-card--popular]="plan.recommended"
+            class="pricing-card"
+            [class.pricing-card--recommended]="plan.recommended"
+            [class.pricing-card--tier-1]="i === 0"
+            [class.pricing-card--tier-2]="i === 1"
+            [class.pricing-card--tier-3]="i === 2"
+            [id]="'plan-card-' + plan.id"
           >
-            <!-- Popular Badge -->
+            <!-- Animated Gradient Border -->
+            <div class="pricing-card__border-ring"></div>
+
+            <!-- Recommended Ribbon -->
             @if (plan.recommended) {
-              <div class="plan-card__popular-badge">
-                <mat-icon>bolt</mat-icon>
+              <div class="pricing-card__ribbon">
+                <mat-icon class="ribbon-icon">bolt</mat-icon>
                 Most Popular
               </div>
             }
 
-            <!-- Plan Name & Badge -->
-            <div class="plan-card__badge">{{ plan.badge || 'Standard' }}</div>
-            <h3 class="plan-card__name">{{ plan.name }}</h3>
-
-            <!-- Price -->
-            <div class="plan-card__price-row">
-              @if (plan.monthlyPrice === 0) {
-                <span class="plan-card__price">Custom</span>
-                <span class="plan-card__per">/ quote</span>
-              } @else {
-                <span class="plan-card__currency">₹</span>
-                <span class="plan-card__price">
-                  {{ billingCycle === 'Monthly'
-                    ? (plan.monthlyPrice | number)
-                    : (plan.yearlyPrice | number) }}
-                </span>
-                <span class="plan-card__per">/ mo</span>
-              }
-            </div>
-            @if (billingCycle === 'Yearly' && plan.yearlyPrice > 0) {
-              <div class="plan-card__billed-note">
-                Billed ₹{{ plan.yearlyPrice * 12 | number }} annually
-              </div>
+            <!-- Glow Orb (recommended cards only) -->
+            @if (plan.recommended) {
+              <div class="pricing-card__inner-glow"></div>
             }
 
-            <p class="plan-card__desc">{{ plan.description }}</p>
+            <!-- Plan Badge -->
+            <div class="pricing-card__badge">
+              {{ plan.badge || (i === 0 ? 'Starter' : i === 1 ? 'Growth' : 'Enterprise') }}
+            </div>
 
-            <!-- Divider -->
-            <div class="plan-card__divider"></div>
+            <!-- Plan Name -->
+            <h3 class="pricing-card__name">{{ plan.name }}</h3>
 
-            <!-- Features -->
-            <ul class="plan-card__features">
+            <!-- Price Block -->
+            <div class="pricing-card__price-wrap">
+              @if (plan.monthlyPrice === 0) {
+                <span class="pricing-card__price pricing-card__price--custom">Custom</span>
+                <span class="pricing-card__period">/ quote</span>
+              } @else {
+                <div class="pricing-card__price-row">
+                  <span class="pricing-card__currency">₹</span>
+                  <span class="pricing-card__price">
+                    {{ billingCycle === 'Monthly' ? (plan.monthlyPrice | number) : (plan.yearlyPrice | number) }}
+                  </span>
+                  <span class="pricing-card__period">/ mo</span>
+                </div>
+                @if (billingCycle === 'Yearly' && plan.yearlyPrice > 0) {
+                  <div class="pricing-card__annual-note">
+                    Billed ₹{{ plan.yearlyPrice * 12 | number }} annually
+                  </div>
+                }
+              }
+            </div>
+
+            <p class="pricing-card__desc">{{ plan.description }}</p>
+
+            <!-- Separator -->
+            <div class="pricing-card__sep">
+              <span>What's included</span>
+            </div>
+
+            <!-- Features List -->
+            <ul class="pricing-card__features">
               @for (feat of plan.features; track $index) {
-                <li class="plan-card__feature-item" [class.highlighted]="feat.highlight">
-                  <svg class="plan-card__check" viewBox="0 0 24 24" fill="none">
-                    <path d="M5 13L9 17L19 7" stroke="currentColor" stroke-width="2.5"
-                      stroke-linecap="round" stroke-linejoin="round"/>
-                  </svg>
+                <li class="pricing-card__feat-item" [class.feat-highlight]="feat.highlight">
+                  <div class="feat-check">
+                    <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M4 10.5L8 14.5L16 6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                  </div>
                   <span>{{ feat.text || feat }}</span>
                 </li>
               }
             </ul>
 
-            <!-- CTA Buttons -->
-            <div class="plan-card__cta-group">
+            <!-- CTA Actions -->
+            <div class="pricing-card__actions">
               @if (!hasActiveTrialOrSub && plan.hasFreeTrial) {
                 <button
                   type="button"
-                  class="plan-card__btn plan-card__btn--trial"
-                  (click)="openSubscriptionModal(plan, 'trial')"
-                >
+                  class="pricing-btn pricing-btn--trial"
+                  [id]="'trial-btn-' + plan.id"
+                  (click)="openSubscriptionModal(plan, 'trial')">
                   <mat-icon>card_giftcard</mat-icon>
                   Start Free Trial
                 </button>
               }
+
               <button
                 type="button"
-                class="plan-card__btn"
-                [class.plan-card__btn--pay]="!plan.recommended"
-                [class.plan-card__btn--pay-pop]="plan.recommended"
-                (click)="openSubscriptionModal(plan, 'pay')"
-              >
+                class="pricing-btn"
+                [class.pricing-btn--pay]="!plan.recommended"
+                [class.pricing-btn--pay-recommended]="plan.recommended"
+                [id]="'pay-btn-' + plan.id"
+                (click)="openSubscriptionModal(plan, 'pay')">
                 @if (plan.monthlyPrice === 0) {
                   <mat-icon>chat</mat-icon>
                   Request Quote
@@ -157,15 +203,17 @@
                 }
               </button>
             </div>
+
           </div>
         }
       </div>
     }
   }
 
-  <!-- Note -->
-  <p class="plans-section__note">
-    <mat-icon class="plans-section__note-icon">info</mat-icon>
-    Have a referral code or multi-branch discount? Apply it in the checkout popup.
-  </p>
+  <!-- ── Footer Note ── -->
+  <div class="pricing-footer-note">
+    <mat-icon class="note-icon">local_offer</mat-icon>
+    <span>Have a referral code or multi-branch discount? Apply it in the checkout popup.</span>
+  </div>
+
 </div>

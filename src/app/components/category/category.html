@@ -1,4 +1,19 @@
-<mat-card class="cardWithShadow theme-card">
+<div class="psh-root">
+  <div class="psh-bg" aria-hidden="true"><div class="psh-orb psh-orb--a"></div><div class="psh-orb psh-orb--b"></div><div class="psh-orb psh-orb--c"></div><div class="psh-grid"></div></div>
+  <header class="psh-hero">
+    <div>
+      <div class="psh-eyebrow"><span class="psh-eyebrow__dot"></span><span>CATEGORY MANAGEMENT</span><span class="psh-eyebrow__sep">·</span><span>{{ Categories?.length || 0 }} CATEGORIES</span></div>
+      <h1 class="psh-title">Product <span class="psh-title__accent">Categories</span></h1>
+      <p class="psh-sub">Organize your product hierarchy with parent and sub-category structures.</p>
+    </div>
+    <div class="psh-actions"><button class="psh-btn psh-btn--primary" (click)="AddNewUser()"><span class="psh-btn__shine"></span><mat-icon>add_circle</mat-icon> Add Category</button></div>
+  </header>
+  <div class="psh-chips">
+    <div class="psh-chip psh-chip--violet"><div class="psh-chip__orb"><mat-icon>category</mat-icon></div><div class="psh-chip__body"><span class="psh-chip__num">{{ Categories?.length || 0 }}</span><span class="psh-chip__lbl">Total</span></div></div>
+    <div class="psh-chip psh-chip--emerald"><div class="psh-chip__orb"><mat-icon>check_circle</mat-icon></div><div class="psh-chip__body"><span class="psh-chip__num">{{ activeCategoriesCount }}</span><span class="psh-chip__lbl">Active</span></div></div>
+    <div class="psh-chip psh-chip--amber"><div class="psh-chip__orb"><mat-icon>account_tree</mat-icon></div><div class="psh-chip__body"><span class="psh-chip__num">{{ parentCategoriesCount }}</span><span class="psh-chip__lbl">Parent</span></div></div>
+    <div class="psh-chip psh-chip--cyan"><div class="psh-chip__orb"><mat-icon>subdirectory_arrow_right</mat-icon></div><div class="psh-chip__body"><span class="psh-chip__num">{{ subCategoriesCount }}</span><span class="psh-chip__lbl">Sub</span></div></div>
+  </div><mat-card class="cardWithShadow theme-card">
 
     <mat-card-header>
 
@@ -7,12 +22,6 @@
             <mat-card-title class="m-b-0">
                 {{ 'category.title' | translate }}
             </mat-card-title>
-
-            @if (!Category_Forms && perm.hasRoleAction('canCreate')) {
-            <button mat-flat-button class="btn-rounded btn-gradient" (click)="AddNewUser()">
-                <mat-icon>add</mat-icon> {{ 'category.add_new' | translate }}
-            </button>
-            }
 
         </div>
 
@@ -130,3 +139,8 @@
     }
 
 </mat-card>
+
+
+
+
+

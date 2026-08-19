@@ -129,6 +129,21 @@ export class AuthService {
     );
   }
 
+  isAdmin(): boolean {
+    if (this.isSuperAdmin()) return true;
+    const user = this.sessionService.getUser();
+    if (!user) return false;
+    const type = String(user.userType || user.user_type || '').toLowerCase().trim();
+    const role = String(user.role || '').toLowerCase().trim();
+    const roles = this.getRoles() || [];
+    const roleNames = roles.map((r: any) => String(r.name || r.role || r).toLowerCase().trim());
+    return (
+      type === 'admin' ||
+      role === 'admin' ||
+      roleNames.includes('admin')
+    );
+  }
+
   getUserType(): string {
     const user = this.sessionService.getUser();
     return user?.userType || user?.user_type || '';

@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component } from '@angular/core';
+﻿import { ChangeDetectorRef, Component } from '@angular/core';
 import { ReactiveFormsModule, FormsModule, FormGroup, FormBuilder, Validators } from '@angular/forms';
 import { MatOption } from '@angular/material/autocomplete';
 import { MatButtonModule } from '@angular/material/button';
@@ -6,6 +6,7 @@ import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelect, MatSelectModule } from '@angular/material/select';
+import { MatIconModule } from '@angular/material/icon';
 import { AlertService } from 'src/app/Securities/Services/alert.service';
 import { AuthService } from 'src/app/Securities/Services/auth.service';
 import { CommonService } from 'src/app/Securities/Services/common.service';
@@ -25,6 +26,7 @@ import { AppTranslatePipe } from 'src/app/pipes/app-translate.pipe';
     MatButtonModule,
     MatCardModule,
     MatSelectModule,
+    MatIconModule,
     MatTable,
     AppTranslatePipe
   ],
@@ -60,6 +62,10 @@ export class Branch {
   View_Mode : boolean = false;
   Update_button : boolean = false;
   Branch: any;
+  // Stat Chip Computed Properties
+  get activeBranchCount(): number { return (this.Branch || []).filter((b: any) => b.status?.toLowerCase() === "active").length; }
+  get uniqueCityCount():   number { return new Set((this.Branch || []).map((b: any) => b.city).filter(Boolean)).size || 0; }
+  get companyCount():      number { return (this.Companies || []).length || 0; }
   Companies: any;
   SelectedBranchId: any;
   SelectedBranch: any = null;
@@ -217,3 +223,4 @@ export class Branch {
   }
 
 }
+

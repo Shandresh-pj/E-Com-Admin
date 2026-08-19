@@ -1,16 +1,26 @@
-<div class="iv-root">
+﻿﻿<div class="psh-root">
+  <div class="psh-bg" aria-hidden="true"><div class="psh-orb psh-orb--a"></div><div class="psh-orb psh-orb--b"></div><div class="psh-orb psh-orb--c"></div><div class="psh-grid"></div></div>
+  <header class="psh-hero">
+    <div>
+      <div class="psh-eyebrow"><span class="psh-eyebrow__dot"></span><span>INVOICE MANAGEMENT</span><span class="psh-eyebrow__sep">·</span><span>{{ ordersList.length }} INVOICES</span></div>
+      <h1 class="psh-title">Invoice <span class="psh-title__accent">Center</span></h1>
+      <p class="psh-sub">Generate, track and manage invoices across all clients and branches.</p>
+    </div>
+    <div class="psh-actions"></div>
+  </header>
+  <div class="psh-chips"><div class="psh-chip psh-chip--violet"><div class="psh-chip__orb"><mat-icon>receipt_long</mat-icon></div><div class="psh-chip__body"><span class="psh-chip__num">{{ ordersList.length }}</span><span class="psh-chip__lbl">Total</span></div></div><div class="psh-chip psh-chip--emerald"><div class="psh-chip__orb"><mat-icon>paid</mat-icon></div><div class="psh-chip__body"><span class="psh-chip__num">0</span><span class="psh-chip__lbl">Paid</span></div></div><div class="psh-chip psh-chip--amber"><div class="psh-chip__orb"><mat-icon>pending_actions</mat-icon></div><div class="psh-chip__body"><span class="psh-chip__num">0</span><span class="psh-chip__lbl">Pending</span></div></div><div class="psh-chip psh-chip--rose"><div class="psh-chip__orb"><mat-icon>money_off</mat-icon></div><div class="psh-chip__body"><span class="psh-chip__num">0</span><span class="psh-chip__lbl">Overdue</span></div></div></div><div class="iv-root">
 
-  <!-- ══════════════ HERO BANNER ══════════════ -->
+  <!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â• HERO BANNER â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
   <header class="iv-hero">
     <div class="iv-hero__glow"></div>
     <div class="iv-hero__inner">
       <div class="iv-hero__badge">
         <span class="iv-dot iv-dot--green"></span>
-        BIZCORE · DOCUMENT CENTER
+        BIZCORE Â· DOCUMENT CENTER
       </div>
       <h1 class="iv-hero__h1">Invoice <span class="iv-hero__accent">Studio</span></h1>
       <p class="iv-hero__sub">
-        Craft pixel-perfect tax invoices with live preview, dynamic themes, custom GSTIN,
+        Craft pixel-perfect tax {{ ordersList.length }} INVOICES with live preview, dynamic themes, custom GSTIN,
         branch details, embedded QR codes, and one-click PDF export.
       </p>
     </div>
@@ -31,10 +41,10 @@
     </div>
   </header>
 
-  <!-- ══════════════ WORKSPACE ══════════════ -->
+  <!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â• WORKSPACE â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
   <div class="iv-workspace">
 
-    <!-- ── LEFT: CUSTOMIZER PANEL ─────────────────── -->
+    <!-- â”€â”€ LEFT: CUSTOMIZER PANEL â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
     <aside class="iv-aside">
       <div class="iv-card">
         <div class="iv-card__topbar" [style.background]="theme().primary"></div>
@@ -63,7 +73,7 @@
             <select class="iv-input-select" [(ngModel)]="selectedOrder" name="order" (ngModelChange)="onOrderChange()">
               @for (o of ordersList; track o.id) {
               <option [ngValue]="o">
-                #{{ o.id }} — {{ o.invoice_no }} ({{ currencySymbol }}{{ o.total | number:'1.2-2' }})
+                #{{ o.id }} â€” {{ o.invoice_no }} ({{ currencySymbol }}{{ o.total | number:'1.2-2' }})
               </option>
               }
             </select>
@@ -123,7 +133,7 @@
             </div>
             <div class="iv-field-group">
               <label class="iv-label">Currency</label>
-              <input class="iv-input" [(ngModel)]="currencySymbol" placeholder="₹" maxlength="3" />
+              <input class="iv-input" [(ngModel)]="currencySymbol" placeholder="â‚¹" maxlength="3" />
             </div>
           </div>
 
@@ -155,7 +165,7 @@
               Customer Note / Terms
             </label>
             <textarea class="iv-textarea" rows="3" [(ngModel)]="customNotes"
-              placeholder="Payment guidelines, warranty info…"></textarea>
+              placeholder="Payment guidelines, warranty infoâ€¦"></textarea>
           </div>
 
           <!-- SEQUENCE SETTINGS -->
@@ -229,7 +239,7 @@
       </div>
     </aside>
 
-    <!-- ── RIGHT: LIVE INVOICE PREVIEW ───────────── -->
+    <!-- â”€â”€ RIGHT: LIVE INVOICE PREVIEW â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
     <main class="iv-preview">
       <div class="iv-preview__toolbar">
         <span class="iv-live-badge">
@@ -269,7 +279,7 @@
               </div>
               <div>
                 <div class="iv-doc__company-name">{{ currentCompany?.name || 'BizCore Enterprise' }}</div>
-                <div class="iv-doc__company-meta">{{ customGst }} · {{ currentCompany?.email ||
+                <div class="iv-doc__company-meta">{{ customGst }} Â· {{ currentCompany?.email ||
                   'admin@bizcore.io' }}</div>
               </div>
             </div>
@@ -375,7 +385,7 @@
               </div>
               <div class="iv-totals__row">
                 <span>Discount</span>
-                <span>− {{ currencySymbol }} {{ calcDiscount() | number:'1.2-2' }}</span>
+                <span>âˆ’ {{ currencySymbol }} {{ calcDiscount() | number:'1.2-2' }}</span>
               </div>
               <div class="iv-totals__row">
                 <span>Tax @ {{ taxRate }}%</span>
@@ -408,11 +418,11 @@
         <div class="iv-doc__footer" [style.background]="theme().primary">
           <div class="iv-doc__footer-accent" [style.background]="theme().accent"></div>
           <div class="iv-doc__footer-text">
-            {{ currentCompany?.name || 'BizCore Enterprise' }} · {{ currentCompany?.email || '' }} ·
+            {{ currentCompany?.name || 'BizCore Enterprise' }} Â· {{ currentCompany?.email || '' }} Â·
             GSTIN: {{ customGst }}
           </div>
           <div class="iv-doc__footer-sub">
-            Invoice {{ selectedOrder?.invoice_no || '' }} · Generated by Invoice Studio
+            Invoice {{ selectedOrder?.invoice_no || '' }} Â· Generated by Invoice Studio
           </div>
         </div>
       </div>
@@ -420,3 +430,5 @@
 
   </div>
 </div>
+
+

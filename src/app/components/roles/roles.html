@@ -1,4 +1,24 @@
-<mat-card class="cardWithShadow theme-card">
+﻿﻿<div class="psh-root">
+  <div class="psh-bg" aria-hidden="true"><div class="psh-orb psh-orb--a"></div><div class="psh-orb psh-orb--b"></div><div class="psh-orb psh-orb--c"></div><div class="psh-grid"></div></div>
+  <header class="psh-hero">
+    <div>
+      <div class="psh-eyebrow"><span class="psh-eyebrow__dot"></span><span>ROLE MANAGEMENT</span><span class="psh-eyebrow__sep">·</span><span>{{ Roles.length }} ROLES</span></div>
+      <h1 class="psh-title">Role <span class="psh-title__accent">Permissions</span></h1>
+      <p class="psh-sub">Define access control roles and assign granular permissions to team members.</p>
+    </div>
+    <div class="psh-actions">
+      <a routerLink="/role-access" class="psh-btn psh-btn--primary">
+        <span class="psh-btn__shine"></span>
+        <mat-icon>security</mat-icon> Permission Matrix
+      </a>
+    </div>
+  </header>
+  <div class="psh-chips">
+    <div class="psh-chip psh-chip--violet"><div class="psh-chip__orb"><mat-icon>admin_panel_settings</mat-icon></div><div class="psh-chip__body"><span class="psh-chip__num">{{ Roles.length }}</span><span class="psh-chip__lbl">Total</span></div></div>
+    <div class="psh-chip psh-chip--emerald"><div class="psh-chip__orb"><mat-icon>security</mat-icon></div><div class="psh-chip__body"><span class="psh-chip__num">{{ activeRolesCount }}</span><span class="psh-chip__lbl">Active</span></div></div>
+    <div class="psh-chip psh-chip--amber"><div class="psh-chip__orb"><mat-icon>people</mat-icon></div><div class="psh-chip__body"><span class="psh-chip__num">{{ Roles.length }}</span><span class="psh-chip__lbl">Assigned</span></div></div>
+    <div class="psh-chip psh-chip--sky"><div class="psh-chip__orb"><mat-icon>lock_open</mat-icon></div><div class="psh-chip__body"><span class="psh-chip__num">{{ Roles.length }}</span><span class="psh-chip__lbl">Public</span></div></div>
+  </div><mat-card class="cardWithShadow theme-card">
 
     <mat-card-header>
         <div class="header-container">
@@ -63,3 +83,7 @@
 
 
 </mat-card>
+
+
+
+

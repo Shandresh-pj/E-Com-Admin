@@ -1,11 +1,21 @@
-<!-- Payroll Stats Summary Header Row -->
+﻿<div class="psh-root">
+  <div class="psh-bg" aria-hidden="true"><div class="psh-orb psh-orb--a"></div><div class="psh-orb psh-orb--b"></div><div class="psh-orb psh-orb--c"></div><div class="psh-grid"></div></div>
+  <header class="psh-hero">
+    <div>
+      <div class="psh-eyebrow"><span class="psh-eyebrow__dot"></span><span>PAYROLL MANAGEMENT</span><span class="psh-eyebrow__sep">·</span><span>payrolls.length</span></div>
+      <h1 class="psh-title">Payroll <span class="psh-title__accent">Processing</span></h1>
+      <p class="psh-sub">Process monthly salaries, advances, deductions and generate payslips.</p>
+    </div>
+    <div class="psh-actions"><button class="psh-btn psh-btn--primary" (click)="toggleGenerateForm()"><span class="psh-btn__shine"></span><mat-icon>send</mat-icon> Run Payroll</button></div>
+  </header>
+  <div class="psh-chips"><div class="psh-chip psh-chip--violet"><div class="psh-chip__orb"><mat-icon>payments</mat-icon></div><div class="psh-chip__body"><span class="psh-chip__num">{{ payrolls.length }}</span><span class="psh-chip__lbl">Records</span></div></div><div class="psh-chip psh-chip--emerald"><div class="psh-chip__orb"><mat-icon>price_check</mat-icon></div><div class="psh-chip__body"><span class="psh-chip__num">{{ processedPayrollCount }}</span><span class="psh-chip__lbl">Processed</span></div></div><div class="psh-chip psh-chip--amber"><div class="psh-chip__orb"><mat-icon>schedule</mat-icon></div><div class="psh-chip__body"><span class="psh-chip__num">{{ pendingPayrollCount }}</span><span class="psh-chip__lbl">Pending</span></div></div><div class="psh-chip psh-chip--sky"><div class="psh-chip__orb"><mat-icon>currency_rupee</mat-icon></div><div class="psh-chip__body"><span class="psh-chip__num">{{ payrolls.length }}</span><span class="psh-chip__lbl">Total Payout</span></div></div></div><!-- Payroll Stats Summary Header Row -->
 <div class="row m-b-24">
   <div class="col-lg-3 col-sm-6 m-b-16">
     <div class="glass-card border-left-primary p-20">
       <div class="d-flex align-items-center justify-content-between">
         <div>
           <p class="f-s-12 text-muted text-uppercase f-w-700 m-b-4 letter-spacing-1">Monthly Gross Disbursal</p>
-          <h3 class="f-w-800 m-b-0 text-primary">₹{{ formatAmount(totalGrossPayout) }}</h3>
+          <h3 class="f-w-800 m-b-0 text-primary">â‚¹{{ formatAmount(totalGrossPayout) }}</h3>
         </div>
         <div class="stats-icon bg-light-primary rounded-12 p-12">
           <mat-icon class="text-primary icon-26">account_balance_wallet</mat-icon>
@@ -18,7 +28,7 @@
       <div class="d-flex align-items-center justify-content-between">
         <div>
           <p class="f-s-12 text-muted text-uppercase f-w-700 m-b-4 letter-spacing-1">Net Salary Disbursed</p>
-          <h3 class="f-w-800 m-b-0 text-success">₹{{ formatAmount(totalNetPayout) }}</h3>
+          <h3 class="f-w-800 m-b-0 text-success">â‚¹{{ formatAmount(totalNetPayout) }}</h3>
         </div>
         <div class="stats-icon bg-light-success rounded-12 p-12">
           <mat-icon class="text-success icon-26">payments</mat-icon>
@@ -31,7 +41,7 @@
       <div class="d-flex align-items-center justify-content-between">
         <div>
           <p class="f-s-12 text-muted text-uppercase f-w-700 m-b-4 letter-spacing-1">Statutory Deductions (PF/ESI/TDS)</p>
-          <h3 class="f-w-800 m-b-0 text-warning">₹{{ formatAmount(totalDeductionsSum) }}</h3>
+          <h3 class="f-w-800 m-b-0 text-warning">â‚¹{{ formatAmount(totalDeductionsSum) }}</h3>
         </div>
         <div class="stats-icon bg-light-warning rounded-12 p-12">
           <mat-icon class="text-warning icon-26">receipt_long</mat-icon>
@@ -44,7 +54,7 @@
       <div class="d-flex align-items-center justify-content-between">
         <div>
           <p class="f-s-12 text-muted text-uppercase f-w-700 m-b-4 letter-spacing-1">Payroll Records Processed</p>
-          <h3 class="f-w-800 m-b-0 text-info">{{ totalRecordsCount }} Slips</h3>
+          <h3 class="f-w-800 m-b-0 text-info">{{ processedPayrollCount }} Slips</h3>
         </div>
         <div class="stats-icon bg-light-info rounded-12 p-12">
           <mat-icon class="text-info icon-26">badge</mat-icon>
@@ -74,10 +84,6 @@
           @if (perm.canManagePayroll()) {
             <button mat-flat-button color="primary" (click)="openSalaryAssignmentModal()">
               <mat-icon>settings</mat-icon> Salary Structure Setup
-            </button>
-            
-            <button mat-flat-button color="accent" (click)="toggleGenerateForm()">
-              <mat-icon>play_arrow</mat-icon> Generate Monthly Payroll
             </button>
           }
         </div>
@@ -148,26 +154,26 @@
             <div class="col-md-6">
               <div class="p-16 bg-white rounded-12 shadow-sm">
                 <h6 class="f-w-700 text-success m-b-12">Earnings Breakdown</h6>
-                <div class="d-flex justify-content-between f-s-13 m-b-4"><span>Basic Salary:</span><strong>₹{{ formatAmount(payslipDetails.basic_salary) }}</strong></div>
-                <div class="d-flex justify-content-between f-s-13 m-b-4"><span>HRA:</span><strong>₹{{ formatAmount(payslipDetails.hra) }}</strong></div>
-                <div class="d-flex justify-content-between f-s-13 m-b-4"><span>DA:</span><strong>₹{{ formatAmount(payslipDetails.da) }}</strong></div>
-                <div class="d-flex justify-content-between f-s-13 m-b-4"><span>Allowances:</span><strong>₹{{ formatAmount(payslipDetails.allowances) }}</strong></div>
-                <div class="d-flex justify-content-between f-s-13 m-b-4"><span>Overtime Payout:</span><strong>₹{{ formatAmount(payslipDetails.overtime_amount) }}</strong></div>
+                <div class="d-flex justify-content-between f-s-13 m-b-4"><span>Basic Salary:</span><strong>â‚¹{{ formatAmount(payslipDetails.basic_salary) }}</strong></div>
+                <div class="d-flex justify-content-between f-s-13 m-b-4"><span>HRA:</span><strong>â‚¹{{ formatAmount(payslipDetails.hra) }}</strong></div>
+                <div class="d-flex justify-content-between f-s-13 m-b-4"><span>DA:</span><strong>â‚¹{{ formatAmount(payslipDetails.da) }}</strong></div>
+                <div class="d-flex justify-content-between f-s-13 m-b-4"><span>Allowances:</span><strong>â‚¹{{ formatAmount(payslipDetails.allowances) }}</strong></div>
+                <div class="d-flex justify-content-between f-s-13 m-b-4"><span>Overtime Payout:</span><strong>â‚¹{{ formatAmount(payslipDetails.overtime_amount) }}</strong></div>
                 <hr>
-                <div class="d-flex justify-content-between f-s-14 f-w-800 text-success"><span>GROSS EARNINGS:</span><span>₹{{ formatAmount(payslipDetails.gross_salary) }}</span></div>
+                <div class="d-flex justify-content-between f-s-14 f-w-800 text-success"><span>GROSS EARNINGS:</span><span>â‚¹{{ formatAmount(payslipDetails.gross_salary) }}</span></div>
               </div>
             </div>
 
             <div class="col-md-6">
               <div class="p-16 bg-white rounded-12 shadow-sm">
                 <h6 class="f-w-700 text-danger m-b-12">Deductions Breakdown</h6>
-                <div class="d-flex justify-content-between f-s-13 m-b-4"><span>PF (12%):</span><strong>₹{{ formatAmount(payslipDetails.pf_deduction) }}</strong></div>
-                <div class="d-flex justify-content-between f-s-13 m-b-4"><span>ESI (0.75%):</span><strong>₹{{ formatAmount(payslipDetails.esi_deduction) }}</strong></div>
-                <div class="d-flex justify-content-between f-s-13 m-b-4"><span>TDS Tax:</span><strong>₹{{ formatAmount(payslipDetails.tds_deduction) }}</strong></div>
-                <div class="d-flex justify-content-between f-s-13 m-b-4"><span>Professional Tax (PT):</span><strong>₹{{ formatAmount(payslipDetails.pt_deduction) }}</strong></div>
-                <div class="d-flex justify-content-between f-s-13 m-b-4"><span>LOP / Loan Deduction:</span><strong>₹{{ formatAmount((payslipDetails.lop_deduction || 0) + (payslipDetails.loan_deduction || 0)) }}</strong></div>
+                <div class="d-flex justify-content-between f-s-13 m-b-4"><span>PF (12%):</span><strong>â‚¹{{ formatAmount(payslipDetails.pf_deduction) }}</strong></div>
+                <div class="d-flex justify-content-between f-s-13 m-b-4"><span>ESI (0.75%):</span><strong>â‚¹{{ formatAmount(payslipDetails.esi_deduction) }}</strong></div>
+                <div class="d-flex justify-content-between f-s-13 m-b-4"><span>TDS Tax:</span><strong>â‚¹{{ formatAmount(payslipDetails.tds_deduction) }}</strong></div>
+                <div class="d-flex justify-content-between f-s-13 m-b-4"><span>Professional Tax (PT):</span><strong>â‚¹{{ formatAmount(payslipDetails.pt_deduction) }}</strong></div>
+                <div class="d-flex justify-content-between f-s-13 m-b-4"><span>LOP / Loan Deduction:</span><strong>â‚¹{{ formatAmount((payslipDetails.lop_deduction || 0) + (payslipDetails.loan_deduction || 0)) }}</strong></div>
                 <hr>
-                <div class="d-flex justify-content-between f-s-14 f-w-800 text-danger"><span>TOTAL DEDUCTIONS:</span><span>₹{{ formatAmount(payslipDetails.total_deductions) }}</span></div>
+                <div class="d-flex justify-content-between f-s-14 f-w-800 text-danger"><span>TOTAL DEDUCTIONS:</span><span>â‚¹{{ formatAmount(payslipDetails.total_deductions) }}</span></div>
               </div>
             </div>
           </div>
@@ -175,7 +181,7 @@
           <div class="d-flex justify-content-between align-items-center bg-primary text-white p-16 rounded-12">
             <div>
               <span class="f-s-12 text-uppercase text-white-75 letter-spacing-1">FINAL NET PAYABLE AMOUNT</span>
-              <h3 class="f-w-800 text-white m-b-0">₹{{ formatAmount(payslipDetails.net_salary) }}</h3>
+              <h3 class="f-w-800 text-white m-b-0">â‚¹{{ formatAmount(payslipDetails.net_salary) }}</h3>
             </div>
             <button mat-flat-button color="accent" (click)="downloadPayslipPDF(payslipDetails)">
               <mat-icon>picture_as_pdf</mat-icon> Export Payslip PDF
@@ -270,34 +276,34 @@
 
             @if (salaryAssignForm.get('salary_type')?.value === 'DAILY') {
             <div class="input-field-group">
-              <label>Daily Per-Day Rate (₹)</label>
+              <label>Daily Per-Day Rate (â‚¹)</label>
               <input type="number" formControlName="daily_rate" placeholder="1500" class="salary-num-input">
-              <span class="field-hint">26 Working Days = Est. ₹{{ (salaryAssignForm.get('daily_rate')?.value || 0) * 26 }} Base</span>
+              <span class="field-hint">26 Working Days = Est. â‚¹{{ (salaryAssignForm.get('daily_rate')?.value || 0) * 26 }} Base</span>
             </div>
             } @else {
             <div class="input-field-group">
-              <label>Monthly Basic Salary (₹)</label>
+              <label>Monthly Basic Salary (â‚¹)</label>
               <input type="number" formControlName="basic_salary" placeholder="50000" class="salary-num-input">
             </div>
             }
 
             <div class="input-field-group">
-              <label>HRA - House Rent Allowance (₹)</label>
+              <label>HRA - House Rent Allowance (â‚¹)</label>
               <input type="number" formControlName="hra" placeholder="20000" class="salary-num-input">
             </div>
 
             <div class="input-field-group">
-              <label>DA - Dearness Allowance (₹)</label>
+              <label>DA - Dearness Allowance (â‚¹)</label>
               <input type="number" formControlName="da" placeholder="4000" class="salary-num-input">
             </div>
 
             <div class="input-field-group">
-              <label>Other Special Allowances (₹)</label>
+              <label>Other Special Allowances (â‚¹)</label>
               <input type="number" formControlName="allowances" placeholder="5000" class="salary-num-input">
             </div>
 
             <div class="input-field-group">
-              <label>Overtime Per-Hour Rate (₹)</label>
+              <label>Overtime Per-Hour Rate (â‚¹)</label>
               <input type="number" formControlName="overtime_rate" placeholder="250" class="salary-num-input">
             </div>
           </div>
@@ -307,27 +313,27 @@
             <h4 class="card-subtitle text-danger"><mat-icon>trending_down</mat-icon> Statutory & Other Deductions</h4>
 
             <div class="input-field-group">
-              <label>PF - Provident Fund (12%) (₹)</label>
+              <label>PF - Provident Fund (12%) (â‚¹)</label>
               <input type="number" formControlName="pf" placeholder="6000" class="salary-num-input">
             </div>
 
             <div class="input-field-group">
-              <label>ESI - State Insurance (0.75%) (₹)</label>
+              <label>ESI - State Insurance (0.75%) (â‚¹)</label>
               <input type="number" formControlName="esi" placeholder="540" class="salary-num-input">
             </div>
 
             <div class="input-field-group">
-              <label>TDS Tax Deduction (₹)</label>
+              <label>TDS Tax Deduction (â‚¹)</label>
               <input type="number" formControlName="tds" placeholder="2000" class="salary-num-input">
             </div>
 
             <div class="input-field-group">
-              <label>PT - Professional Tax (₹)</label>
+              <label>PT - Professional Tax (â‚¹)</label>
               <input type="number" formControlName="pt" placeholder="200" class="salary-num-input">
             </div>
 
             <div class="input-field-group">
-              <label>Loan / Advance Repayment (₹)</label>
+              <label>Loan / Advance Repayment (â‚¹)</label>
               <input type="number" formControlName="loan_deduction" placeholder="0" class="salary-num-input">
             </div>
           </div>
@@ -338,17 +344,17 @@
         <div class="salary-summary-banner">
           <div class="summary-col">
             <span class="sum-lbl">Gross Earnings</span>
-            <span class="sum-val text-success">₹{{ formatAmount(computedGross) }}</span>
+            <span class="sum-val text-success">â‚¹{{ formatAmount(computedGross) }}</span>
           </div>
-          <div class="sum-sep">−</div>
+          <div class="sum-sep">âˆ’</div>
           <div class="summary-col">
             <span class="sum-lbl">Total Deductions</span>
-            <span class="sum-val text-danger">₹{{ formatAmount(computedDeductions) }}</span>
+            <span class="sum-val text-danger">â‚¹{{ formatAmount(computedDeductions) }}</span>
           </div>
           <div class="sum-sep">=</div>
           <div class="summary-col highlight">
             <span class="sum-lbl">Estimated Net Payout</span>
-            <span class="sum-val net-val">₹{{ formatAmount(computedNet) }}</span>
+            <span class="sum-val net-val">â‚¹{{ formatAmount(computedNet) }}</span>
           </div>
         </div>
 
@@ -365,4 +371,8 @@
   </div>
 </div>
 }
+
+
+
+
 

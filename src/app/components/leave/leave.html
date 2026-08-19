@@ -1,4 +1,19 @@
-<!-- ══ Leave Balance Summary Cards ══════════════════════════════════════════ -->
+<div class="psh-root">
+  <div class="psh-bg" aria-hidden="true"><div class="psh-orb psh-orb--a"></div><div class="psh-orb psh-orb--b"></div><div class="psh-orb psh-orb--c"></div><div class="psh-grid"></div></div>
+  <header class="psh-hero">
+    <div>
+      <div class="psh-eyebrow"><span class="psh-eyebrow__dot"></span><span>LEAVE MANAGEMENT</span><span class="psh-eyebrow__sep">·</span><span>{{ leaveRequests.length }}</span></div>
+      <h1 class="psh-title">Leave <span class="psh-title__accent">Management</span></h1>
+      <p class="psh-sub">Manage employee leave requests, approvals and annual entitlements.</p>
+    </div>
+    <div class="psh-actions"><button class="psh-btn psh-btn--primary" (click)="toggleForm()"><span class="psh-btn__shine"></span><mat-icon>add_circle</mat-icon> Apply Leave</button></div>
+  </header>
+  <div class="psh-chips">
+    <div class="psh-chip psh-chip--violet"><div class="psh-chip__orb"><mat-icon>beach_access</mat-icon></div><div class="psh-chip__body"><span class="psh-chip__num">{{ leaveRequests.length }}</span><span class="psh-chip__lbl">Total</span></div></div>
+    <div class="psh-chip psh-chip--amber"><div class="psh-chip__orb"><mat-icon>pending</mat-icon></div><div class="psh-chip__body"><span class="psh-chip__num">{{ pendingLeavesCount }}</span><span class="psh-chip__lbl">Pending</span></div></div>
+    <div class="psh-chip psh-chip--emerald"><div class="psh-chip__orb"><mat-icon>check_circle</mat-icon></div><div class="psh-chip__body"><span class="psh-chip__num">{{ approvedLeavesCount }}</span><span class="psh-chip__lbl">Approved</span></div></div>
+    <div class="psh-chip psh-chip--rose"><div class="psh-chip__orb"><mat-icon>cancel</mat-icon></div><div class="psh-chip__body"><span class="psh-chip__num">{{ rejectedLeavesCount }}</span><span class="psh-chip__lbl">Rejected</span></div></div>
+  </div>
 <div class="row m-b-24">
 
   <!-- Casual Leave -->
@@ -63,7 +78,7 @@
 
 </div>
 
-<!-- ══ Main Table Card ══════════════════════════════════════════════════════ -->
+<!-- â•â• Main Table Card â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
 <div class="row">
   <div class="col-12">
     <div class="glass-card p-24">
@@ -76,7 +91,7 @@
             Leave Application &amp; Approval Console
           </h4>
           <p class="f-s-13 text-muted m-b-0">
-            Employees submit leave applications. Admin &amp; Super Admin review, approve, or reject requests.
+            Employees submit leave applications. Admin &amp; Super Admin review, approve, or reject them.
           </p>
         </div>
 
@@ -87,21 +102,15 @@
                   aria-label="Refresh leave list">
             <mat-icon>refresh</mat-icon> Refresh
           </button>
-          <button mat-flat-button color="primary"
-                  (click)="toggleForm()"
-                  aria-label="Apply for leave">
-            <mat-icon>{{ showForm ? 'close' : 'add' }}</mat-icon>
-            {{ showForm ? 'Cancel' : 'Apply For Leave' }}
-          </button>
         </div>
       </div>
 
-      <!-- ── Leave Application Form ──────────────────────────────────────── -->
+      <!-- â”€â”€ Leave Application Form â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
       @if (showForm) {
         <div class="leave-form-panel m-b-24">
           <h5 class="f-w-700 text-primary m-b-16 d-flex align-items-center gap-8">
-            <mat-icon>assignment</mat-icon>
-            Submit New Leave Application
+            <mat-icon>{{ isEditMode ? 'edit_note' : 'assignment' }}</mat-icon>
+            {{ isEditMode ? 'Update Leave Application' : 'Submit New Leave Application' }}
           </h5>
 
           <!-- Date range error banner -->
@@ -119,7 +128,7 @@
               <div class="col-md-4 col-sm-6 col-12">
                 <mat-form-field appearance="outline" class="w-100">
                   <mat-label>Select Employee</mat-label>
-                  <mat-select formControlName="employee_id" id="lv-employee">
+                  <mat-select formControlName="employee_id" id="lv-employee" (selectionChange)="onEmployeeChange($event.value)">
                     @for (emp of employees; track emp.id) {
                       <mat-option [value]="emp.id">{{ emp.name }} ({{ emp.email }})</mat-option>
                     }
@@ -236,9 +245,9 @@
                 @if (loading) {
                   <mat-spinner diameter="18" color="accent"></mat-spinner>
                 } @else {
-                  <mat-icon>send</mat-icon>
+                  <mat-icon>{{ isEditMode ? 'save' : 'send' }}</mat-icon>
                 }
-                {{ loading ? 'Submitting…' : 'Submit Application' }}
+                {{ loading ? (isEditMode ? 'Updating…' : 'Submitting…') : (isEditMode ? 'Update Application' : 'Submit Application') }}
               </button>
             </div>
 
@@ -247,14 +256,14 @@
       }
       <!-- /Leave Form -->
 
-      <!-- ── Loading Indicator ─────────────────────────────────────────── -->
+      <!-- â”€â”€ Loading Indicator â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
       @if (loading && !showForm) {
         <div class="d-flex justify-content-center align-items-center p-24">
           <mat-spinner diameter="36"></mat-spinner>
         </div>
       }
 
-      <!-- ── Data Table ────────────────────────────────────────────────── -->
+      <!-- â”€â”€ Data Table â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
       <app-mat-table
         [columns]="tableColumns"
         [tableData]="leaveRequests"
@@ -265,13 +274,106 @@
         [showDelete]="canApprove"
         [showSearch]="true"
         [enableExport]="true"
-        title="Leave Requests"
+        title="Leave {{ leaveRequests.length }}"
         (ViewClick)="viewLeave($event)"
-        (editClick)="approveLeave($event)"
+        (editClick)="onEdit($event)"
         (deleteClick)="rejectLeave($event)"
       ></app-mat-table>
-      <!-- Tooltips: Edit button = Approve, Delete button = Reject -->
 
     </div>
   </div>
-</div>
+
+  <!-- ════ EXECUTIVE LEAVE DETAIL & DECISION MODAL DIALOG ════ -->
+  @if (viewModalMode && selectedLeaveRecord) {
+    <div class="lv-modal-backdrop" (click)="closeModal()">
+      <div class="lv-modal-card" (click)="$event.stopPropagation()">
+        
+        <!-- Header -->
+        <div class="lv-modal-header">
+          <div class="lv-modal-title-group">
+            <div class="lv-modal-icon" [ngClass]="viewModalMode === 'VIEW' ? 'lv-modal-icon--info' : 'lv-modal-icon--gavel'">
+              <mat-icon>{{ viewModalMode === 'VIEW' ? 'visibility' : 'gavel' }}</mat-icon>
+            </div>
+            <div>
+              <h4 class="lv-modal-title">
+                {{ viewModalMode === 'VIEW' ? 'Leave Application Details' : 'Leave Approval & Decision Console' }}
+              </h4>
+              <p class="lv-modal-sub">
+                {{ viewModalMode === 'VIEW' ? 'Review submitted leave request information' : 'Review details and approve or reject leave application' }}
+              </p>
+            </div>
+          </div>
+          <button class="lv-modal-close" (click)="closeModal()" aria-label="Close modal">
+            <mat-icon>close</mat-icon>
+          </button>
+        </div>
+
+        <!-- Body -->
+        <div class="lv-modal-body">
+          
+          <!-- Employee Profile & Status Header -->
+          <div class="lv-modal-profile-bar">
+            <div class="lv-modal-profile-info">
+              <div class="lv-modal-avatar">{{ (selectedLeaveRecord.employee_name || 'E')[0].toUpperCase() }}</div>
+              <div>
+                <h5 class="lv-modal-emp-name">{{ selectedLeaveRecord.employee_name || 'Employee' }}</h5>
+                <p class="lv-modal-emp-id">Employee ID #{{ selectedLeaveRecord.employee_id || selectedLeaveRecord.employeeId || '1' }}</p>
+              </div>
+            </div>
+
+            <div class="lv-modal-status-pill" [ngClass]="{
+              'lv-modal-status-pill--pending': (selectedLeaveRecord.status || '').toUpperCase() === 'PENDING',
+              'lv-modal-status-pill--approved': (selectedLeaveRecord.status || '').toUpperCase() === 'APPROVED',
+              'lv-modal-status-pill--rejected': (selectedLeaveRecord.status || '').toUpperCase() === 'REJECTED'
+            }">
+              <span class="lv-modal-status-dot"></span>
+              <span>{{ selectedLeaveRecord.status || 'PENDING' }}</span>
+            </div>
+          </div>
+
+          <!-- Grid details -->
+          <div class="lv-modal-grid">
+            <div class="lv-modal-info-card">
+              <span class="lv-modal-lbl">Leave Type</span>
+              <span class="lv-modal-val lv-modal-val--type">{{ selectedLeaveRecord.leave_type || 'CASUAL' }}</span>
+            </div>
+
+            <div class="lv-modal-info-card">
+              <span class="lv-modal-lbl">Leave Duration</span>
+              <span class="lv-modal-val lv-modal-val--days">{{ selectedLeaveRecord.total_days || selectedLeaveRecord.days || 1 }} Days</span>
+            </div>
+
+            <div class="lv-modal-info-card lv-modal-info-card--full">
+              <span class="lv-modal-lbl">Date Range</span>
+              <span class="lv-modal-val lv-modal-val--dates">
+                <mat-icon>event</mat-icon> {{ selectedLeaveRecord.date_range }}
+              </span>
+            </div>
+
+            <div class="lv-modal-info-card lv-modal-info-card--full">
+              <span class="lv-modal-lbl">Reason for Leave Application</span>
+              <p class="lv-modal-reason-box">{{ selectedLeaveRecord.reason || 'No detailed reason specified.' }}</p>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Footer -->
+        <div class="lv-modal-footer">
+          <button mat-stroked-button (click)="closeModal()">
+            <mat-icon>close</mat-icon> Close
+          </button>
+
+          @if (canApprove && (selectedLeaveRecord.status || '').toUpperCase() === 'PENDING') {
+            <button mat-flat-button color="warn" (click)="rejectLeaveFromModal()" [disabled]="loading">
+              <mat-icon>cancel</mat-icon> Reject Leave
+            </button>
+            <button mat-flat-button color="primary" (click)="approveLeaveFromModal()" [disabled]="loading">
+              <mat-icon>check_circle</mat-icon> Approve Leave
+            </button>
+          }
+        </div>
+
+      </div>
+    </div>
+  }

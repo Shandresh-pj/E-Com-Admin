@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+﻿import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormsModule, FormGroup, FormBuilder, Validators } from '@angular/forms';
 import { MaterialModule } from 'src/app/material.module';
@@ -28,14 +28,17 @@ export class Payroll implements OnInit {
     { columnDef: 'id', header: 'No' },
     { columnDef: 'employee_name', header: 'Employee' },
     { columnDef: 'month_year', header: 'Payroll Period' },
-    { columnDef: 'basic_salary', header: 'Basic Salary (₹)', type: 'currency', format: 'INR' },
-    { columnDef: 'gross_salary', header: 'Gross Salary (₹)', type: 'currency', format: 'INR' },
-    { columnDef: 'total_deductions', header: 'Deductions (₹)', type: 'currency', format: 'INR' },
-    { columnDef: 'final_salary', header: 'Net Payout (₹)', type: 'currency', format: 'INR' },
+    { columnDef: 'basic_salary', header: 'Basic Salary (â‚¹)', type: 'currency', format: 'INR' },
+    { columnDef: 'gross_salary', header: 'Gross Salary (â‚¹)', type: 'currency', format: 'INR' },
+    { columnDef: 'total_deductions', header: 'Deductions (â‚¹)', type: 'currency', format: 'INR' },
+    { columnDef: 'final_salary', header: 'Net Payout (â‚¹)', type: 'currency', format: 'INR' },
     { columnDef: 'payment_status', header: 'Status', type: 'badge' }
   ];
 
   payrolls: any[] = [];
+  // Stat Chip Computed Properties
+  get processedPayrollCount(): number { return this.payrolls.filter((p: any) => (p.status || "").toLowerCase() === "processed").length; }
+  get pendingPayrollCount():   number { return this.payrolls.filter((p: any) => (p.status || "").toLowerCase() !== "processed").length; }
   employees: any[] = [];
   months = [
     { value: 'January', label: 'January' },
@@ -415,14 +418,14 @@ export class Payroll implements OnInit {
 
     autoTable(doc, {
       startY: (doc as any).lastAutoTable.finalY + 8,
-      head: [['EARNINGS', 'AMOUNT (₹)', 'DEDUCTIONS', 'AMOUNT (₹)']],
+      head: [['EARNINGS', 'AMOUNT (â‚¹)', 'DEDUCTIONS', 'AMOUNT (â‚¹)']],
       body: [
-        ['Basic Salary', `₹${basic.toLocaleString('en-IN')}`, 'Provident Fund (PF 12%)', `₹${pf.toLocaleString('en-IN')}`],
-        ['House Rent Allowance (HRA)', `₹${hra.toLocaleString('en-IN')}`, 'ESI Contribution (0.75%)', `₹${esi.toLocaleString('en-IN')}`],
-        ['Dearness Allowance (DA)', `₹${da.toLocaleString('en-IN')}`, 'TDS Tax Deduction', `₹${tds.toLocaleString('en-IN')}`],
-        ['Special Allowances', `₹${allowances.toLocaleString('en-IN')}`, 'Professional Tax (PT)', `₹${pt.toLocaleString('en-IN')}`],
-        ['Overtime Earnings', `₹${ot.toLocaleString('en-IN')}`, 'Loss of Pay / Loan', `₹${(item.lop_deduction || 0) + (item.loan_deduction || 0)}`],
-        ['GROSS EARNINGS', `₹${gross.toLocaleString('en-IN')}`, 'TOTAL DEDUCTIONS', `₹${totalDeductions.toLocaleString('en-IN')}`]
+        ['Basic Salary', `â‚¹${basic.toLocaleString('en-IN')}`, 'Provident Fund (PF 12%)', `â‚¹${pf.toLocaleString('en-IN')}`],
+        ['House Rent Allowance (HRA)', `â‚¹${hra.toLocaleString('en-IN')}`, 'ESI Contribution (0.75%)', `â‚¹${esi.toLocaleString('en-IN')}`],
+        ['Dearness Allowance (DA)', `â‚¹${da.toLocaleString('en-IN')}`, 'TDS Tax Deduction', `â‚¹${tds.toLocaleString('en-IN')}`],
+        ['Special Allowances', `â‚¹${allowances.toLocaleString('en-IN')}`, 'Professional Tax (PT)', `â‚¹${pt.toLocaleString('en-IN')}`],
+        ['Overtime Earnings', `â‚¹${ot.toLocaleString('en-IN')}`, 'Loss of Pay / Loan', `â‚¹${(item.lop_deduction || 0) + (item.loan_deduction || 0)}`],
+        ['GROSS EARNINGS', `â‚¹${gross.toLocaleString('en-IN')}`, 'TOTAL DEDUCTIONS', `â‚¹${totalDeductions.toLocaleString('en-IN')}`]
       ],
       headStyles: { fillColor: [79, 70, 229], textColor: [255, 255, 255] },
       styles: { fontSize: 10, cellPadding: 4 }
@@ -435,7 +438,7 @@ export class Payroll implements OnInit {
     doc.rect(14, finalY, 182, 20, 'F');
     doc.setFontSize(12);
     doc.setTextColor(31, 41, 55);
-    doc.text(`NET PAYOUT: ₹${netPay.toLocaleString('en-IN')}`, 20, finalY + 13);
+    doc.text(`NET PAYOUT: â‚¹${netPay.toLocaleString('en-IN')}`, 20, finalY + 13);
 
     doc.setFontSize(9);
     doc.setTextColor(107, 114, 128);
@@ -454,3 +457,5 @@ export class Payroll implements OnInit {
     }
   }
 }
+
+

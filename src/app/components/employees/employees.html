@@ -1,20 +1,69 @@
-<div class="glass-card p-24">
+﻿<div class="psh-root">
 
-    <div class="d-flex align-items-center justify-content-between m-b-24 flex-wrap gap-16">
-        <div>
-            <h4 class="f-w-800 text-primary m-b-4 d-flex align-items-center gap-8">
-                <mat-icon class="text-primary">people</mat-icon> {{ 'employee.title' | translate }}
-            </h4>
-            <p class="f-s-13 text-muted m-b-0">Manage enterprise employee profiles, role assignments, company departments & designations.</p>
-        </div>
-        @if (!Employee_Forms && !View_Mode && perm.hasRoleAction('canCreate')) {
-            <button mat-flat-button color="primary" (click)="AddNewUser()">
-                <mat-icon>add</mat-icon> {{ 'employee.add_new' | translate }}
-            </button>
-        }
+  <!-- Ambient Background -->
+  <div class="psh-bg" aria-hidden="true">
+    <div class="psh-orb psh-orb--a"></div>
+    <div class="psh-orb psh-orb--b"></div>
+    <div class="psh-orb psh-orb--c"></div>
+    <div class="psh-grid"></div>
+  </div>
+
+  <!-- Page Hero -->
+  <header class="psh-hero">
+    <div>
+      <div class="psh-eyebrow">
+        <span class="psh-eyebrow__dot"></span>
+        <span>WORKFORCE MANAGEMENT</span>
+        <span class="psh-eyebrow__sep">·</span>
+        <span>{{ Employees.length }} EMPLOYEES</span>
+      </div>
+      <h1 class="psh-title">Employee <span class="psh-title__accent">Directory</span></h1>
+      <p class="psh-sub">Manage enterprise employee profiles, role assignments, departments &amp; designations.</p>
     </div>
+    @if (!Employee_Forms && !View_Mode && perm.hasRoleAction('canCreate')) {
+      <div class="psh-actions">
+        <button class="psh-btn psh-btn--primary" (click)="AddNewUser()">
+          <span class="psh-btn__shine"></span>
+          <mat-icon>person_add</mat-icon> {{ 'employee.add_new' | translate }}
+        </button>
+      </div>
+    }
+  </header>
 
-    @if (!Employee_Forms && !View_Mode) {
+  <!-- Stat Chips -->
+  @if (!Employee_Forms && !View_Mode) {
+    <div class="psh-chips">
+      <div class="psh-chip psh-chip--violet">
+        <div class="psh-chip__orb"><mat-icon>groups</mat-icon></div>
+        <div class="psh-chip__body">
+          <span class="psh-chip__num">{{ Employees.length }}</span>
+          <span class="psh-chip__lbl">Total Staff</span>
+        </div>
+      </div>
+      <div class="psh-chip psh-chip--emerald">
+        <div class="psh-chip__orb"><mat-icon>verified_user</mat-icon></div>
+        <div class="psh-chip__body">
+          <span class="psh-chip__num">{{ Employees.length }}</span>
+          <span class="psh-chip__lbl">Active</span>
+        </div>
+      </div>
+      <div class="psh-chip psh-chip--amber">
+        <div class="psh-chip__orb"><mat-icon>work</mat-icon></div>
+        <div class="psh-chip__body">
+          <span class="psh-chip__num">{{ uniqueDepts }}</span>
+          <span class="psh-chip__lbl">Departments</span>
+        </div>
+      </div>
+      <div class="psh-chip psh-chip--rose">
+        <div class="psh-chip__orb"><mat-icon>person_off</mat-icon></div>
+        <div class="psh-chip__body">
+          <span class="psh-chip__num">{{ inactiveEmployees }}</span>
+          <span class="psh-chip__lbl">Inactive</span>
+        </div>
+      </div>
+    </div>
+  }
+@if (!Employee_Forms && !View_Mode) {
 
     <mat-card-content class="b-t-1">
         <app-mat-table
@@ -63,7 +112,7 @@
 
             <div class="col-lg-4 col-sm-6 m-b-16">
                 <p class="f-w-600 m-b-4 text-muted">Base Salary</p>
-                <p class="f-s-16 text-success f-w-800">₹{{ (SelectedEmployee?.salary || 50000) | number }}</p>
+                <p class="f-s-16 text-success f-w-800">â‚¹{{ (SelectedEmployee?.salary || 50000) | number }}</p>
             </div>
 
             <div class="col-lg-4 col-sm-6 m-b-16">
@@ -239,3 +288,6 @@
     }
 
 </div>
+
+
+

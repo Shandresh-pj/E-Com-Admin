@@ -1,4 +1,14 @@
-<mat-card class="cardWithShadow theme-card">
+﻿<div class="psh-root">
+  <div class="psh-bg" aria-hidden="true"><div class="psh-orb psh-orb--a"></div><div class="psh-orb psh-orb--b"></div><div class="psh-orb psh-orb--c"></div><div class="psh-grid"></div></div>
+  <header class="psh-hero">
+    <div>
+      <div class="psh-eyebrow"><span class="psh-eyebrow__dot"></span><span>BRANCH MANAGEMENT</span><span class="psh-eyebrow__sep">·</span><span>{{ Branch?.length || 0 }} BRANCHES</span></div>
+      <h1 class="psh-title">Branch <span class="psh-title__accent">Network</span></h1>
+      <p class="psh-sub">Manage multi-location BRANCHES, addresses, managers and operational status.</p>
+    </div>
+    <div class="psh-actions"><button class="psh-btn psh-btn--primary" (click)="AddNewUser()"><span class="psh-btn__shine"></span><mat-icon>add_circle</mat-icon> Add Branch</button></div>
+  </header>
+  <div class="psh-chips"><div class="psh-chip psh-chip--violet"><div class="psh-chip__orb"><mat-icon>store</mat-icon></div><div class="psh-chip__body"><span class="psh-chip__num">{{ Branch?.length || 0 }}</span><span class="psh-chip__lbl">Total</span></div></div><div class="psh-chip psh-chip--emerald"><div class="psh-chip__orb"><mat-icon>check_circle</mat-icon></div><div class="psh-chip__body"><span class="psh-chip__num">{{ activeBranchCount }}</span><span class="psh-chip__lbl">Active</span></div></div><div class="psh-chip psh-chip--amber"><div class="psh-chip__orb"><mat-icon>location_on</mat-icon></div><div class="psh-chip__body"><span class="psh-chip__num">{{ uniqueCityCount }}</span><span class="psh-chip__lbl">Cities</span></div></div><div class="psh-chip psh-chip--sky"><div class="psh-chip__orb"><mat-icon>business</mat-icon></div><div class="psh-chip__body"><span class="psh-chip__num">{{ companyCount }}</span><span class="psh-chip__lbl">Companies</span></div></div></div><mat-card class="cardWithShadow theme-card">
 
     <mat-card-header>
 
@@ -7,14 +17,6 @@
             <mat-card-title class="m-b-0">
                 {{ 'branch.title' | translate }}
             </mat-card-title>
-
-            @if (!Branch_Forms && !View_Mode && perm.hasRoleAction('canCreate')) {
-
-            <button mat-flat-button color="primary" (click)="AddNewUser()">
-                {{ 'branch.add_new' | translate }}
-            </button>
-
-            }
 
         </div>
 
@@ -176,3 +178,4 @@
     }
 
 </mat-card>
+

@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+﻿import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormsModule, FormGroup, FormBuilder, Validators, FormArray } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
@@ -40,6 +40,10 @@ import { AppTranslatePipe } from 'src/app/pipes/app-translate.pipe';
 })
 export class Orders implements OnInit {
   ordersList: any[] = [];
+  // Stat Chip Computed Properties
+  get completedOrdersCount(): number { return this.ordersList.filter((o: any) => (o.status || "").toLowerCase() === "completed").length; }
+  get pendingOrdersCount():   number { return this.ordersList.filter((o: any) => (o.status || "").toLowerCase() === "pending").length; }
+  get cancelledOrdersCount(): number { return this.ordersList.filter((o: any) => (o.status || "").toLowerCase() === "cancelled").length; }
   products: any[] = [];
   companies: any[] = [];
   coupons: any[] = [];
@@ -110,7 +114,7 @@ export class Orders implements OnInit {
     return this.orderForm.get('items') as FormArray;
   }
 
-  // ─── Data Loading ───────────────────────────────────────────────────────────
+  // â”€â”€â”€ Data Loading â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   loadOrders() {
     this.loading = true;
@@ -145,7 +149,7 @@ export class Orders implements OnInit {
     });
   }
 
-  // ─── Order Form ─────────────────────────────────────────────────────────────
+  // â”€â”€â”€ Order Form â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   createItemFormGroup(): FormGroup {
     return this.fb.group({
@@ -247,7 +251,7 @@ export class Orders implements OnInit {
     });
   }
 
-  // ─── Order Actions ──────────────────────────────────────────────────────────
+  // â”€â”€â”€ Order Actions â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   viewOrderDetails(row: any) {
     // Reload full order details for QR code and items
@@ -278,7 +282,7 @@ export class Orders implements OnInit {
     window.open(`${this.apiUrl}/orders/invoice/${id}`, '_blank');
   }
 
-  /** Update delivery status — PATCH /orders/:id/delivery-status */
+  /** Update delivery status â€” PATCH /orders/:id/delivery-status */
   updateDeliveryStatus(order: any, newStatus: string) {
     this.alert.confirm(`Mark order as "${newStatus}"?`).then(result => {
       if (!result.isConfirmed) return;
@@ -298,7 +302,7 @@ export class Orders implements OnInit {
     });
   }
 
-  /** Cancel an order — PATCH /orders/:id/cancel */
+  /** Cancel an order â€” PATCH /orders/:id/cancel */
   cancelOrder(order: any) {
     this.alert.confirm('Are you sure you want to cancel this order? This action cannot be undone.').then(result => {
       if (!result.isConfirmed) return;
@@ -358,7 +362,7 @@ export class Orders implements OnInit {
     });
   }
 
-  // ─── Helpers ─────────────────────────────────────────────────────────────
+  // â”€â”€â”€ Helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   getProductName(productId: number): string {
     const prod = this.products.find(p => p.id === productId);
@@ -388,3 +392,4 @@ export class Orders implements OnInit {
     return order?.delivery_status === 'Delivered';
   }
 }
+

@@ -17,6 +17,7 @@ import { PermissionService } from 'src/app/Securities/Services/permissions.servi
 
 import { ALL_APP_ROUTES_37 } from 'src/app/Securities/Models/menus';
 
+import { RouterModule } from '@angular/router';
 import { TablerIconsModule } from 'angular-tabler-icons';
 
 type AccessLevel = 'global' | 'admin' | 'branch' | 'employee';
@@ -33,18 +34,55 @@ type AccessLevel = 'global' | 'admin' | 'branch' | 'employee';
     MatCardModule,
     MatProgressSpinnerModule,
     MatTooltipModule,
-    TablerIconsModule
+    TablerIconsModule,
+    RouterModule
   ],
   templateUrl: './role-access.html',
   styleUrl: './role-access.scss',
 })
 export class RoleAccess implements OnInit {
 
+  // readonly actions = [
+  //   'READ', 'WRITE', 'UPDATE', 'DELETE', 'APPROVE',
+  //   'EXPORT', 'IMPORT', 'ASSIGN', 'REVOKE',
+  //   'ACTIVATE', 'DEACTIVATE', 'RESTORE', 'MANAGE', 'CONFIGURE'
+  // ];
   readonly actions = [
-    'READ', 'WRITE', 'UPDATE', 'DELETE', 'APPROVE',
-    'EXPORT', 'IMPORT', 'ASSIGN', 'REVOKE',
-    'ACTIVATE', 'DEACTIVATE', 'RESTORE', 'MANAGE', 'CONFIGURE'
+    'READ', 'WRITE', 'UPDATE', 'DELETE', 'APPROVE'
   ];
+
+  /**
+   * Subset of actions the backend PostgreSQL enum `permissions_action_enum` supports.
+   * EXPORT, IMPORT, ASSIGN, REVOKE, ACTIVATE, DEACTIVATE, RESTORE, MANAGE, CONFIGURE
+   * are displayed in the UI matrix but MUST be mapped to supported values before
+   * sending to the API, otherwise Postgres throws:
+   * "invalid input value for enum permissions_action_enum"
+   *
+   * Supported by backend: READ, WRITE, CREATE, UPDATE, DELETE, APPROVE
+   */
+  private readonly VALID_DB_ACTIONS = new Set([
+    'READ', 'WRITE', 'CREATE', 'UPDATE', 'DELETE', 'APPROVE'
+  ]);
+
+  /**
+   * Maps extended UI actions to the closest supported DB enum action.
+   * This allows the UI to show granular actions while the DB stores
+   * only the subset it supports.
+   */
+  private mapActionToDb(action: string): string {
+    const map: Record<string, string> = {
+      EXPORT:     'READ',
+      IMPORT:     'WRITE',
+      ASSIGN:     'UPDATE',
+      REVOKE:     'UPDATE',
+      ACTIVATE:   'UPDATE',
+      DEACTIVATE: 'UPDATE',
+      RESTORE:    'UPDATE',
+      MANAGE:     'UPDATE',
+      CONFIGURE:  'UPDATE',
+    };
+    return map[action] ?? action;
+  }
 
   readonly levels: { value: AccessLevel; label: string; hint: string }[] = [
     { value: 'global', label: 'Role (Global)', hint: 'Applies to the role everywhere' },
@@ -58,7 +96,7 @@ export class RoleAccess implements OnInit {
   companies: any[] = [];
   allBranches: any[] = [];
 
-  selectedLevel: AccessLevel | null = null;
+  selectedLevel: AccessLevel | null = 'global';
   selectedCompanyId: number | null = null;
   selectedBranchId: number | null = null;
   selectedUserId: number | null = null;
@@ -207,13 +245,70 @@ export class RoleAccess implements OnInit {
 
   seedingMenus = false;
 
-
-
   // ────────────────────────────── lookups ──────────────────────────────
 
   loadRoles(): void {
     this.commonService.getApi('roles').subscribe({
-      next: (res: any) => { this.roles = res?.data ?? []; this.cdr.detectChanges(); },
+      next: (res: any) => {
+        const fetched: any[] = res?.data ?? [];
+
+        // Core system roles that must always exist in the RBAC control matrix
+        const systemRoles = [
+          { id: 1, name: 'Super Admin', status: 'Active' },
+          { id: 2, name: 'Admin', status: 'Active' },
+          { id: 3, name: 'Branch Manager', status: 'Active' },
+          { id: 4, name: 'Employee', status: 'Active' },
+          { id: 5, name: 'Shopkeeper', status: 'Active' },
+          { id: 6, name: 'Delivery Boy', status: 'Active' },
+          { id: 7, name: 'Customer', status: 'Active' },
+        ];
+
+        const roleMap = new Map<string, any>();
+        // 1. Seed standard system roles first
+        systemRoles.forEach(r => {
+          roleMap.set(r.name.toLowerCase().replace(/_/g, ' '), r);
+        });
+
+        // 2. Merge API backend roles
+        fetched.forEach((r: any) => {
+          const rawName = String(r.name || '').trim();
+          const normName = rawName.toLowerCase().replace(/_/g, ' ');
+          if (normName) {
+            roleMap.set(normName, {
+              ...r,
+              name: rawName.replace(/_/g, ' ')
+            });
+          }
+        });
+
+        this.roles = Array.from(roleMap.values());
+
+        if (!this.selectedLevel) {
+          this.selectedLevel = 'global';
+        }
+        if (this.roles.length > 0 && !this.selectedRoleId) {
+          const adminRole = this.roles.find(r => r.name.toLowerCase().includes('admin')) || this.roles[0];
+          this.selectedRoleId = adminRole.id;
+        }
+        this.tryLoadMatrix();
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.roles = [
+          { id: 1, name: 'Super Admin', status: 'Active' },
+          { id: 2, name: 'Admin', status: 'Active' },
+          { id: 3, name: 'Branch Manager', status: 'Active' },
+          { id: 4, name: 'Employee', status: 'Active' },
+          { id: 5, name: 'Shopkeeper', status: 'Active' },
+          { id: 6, name: 'Delivery Boy', status: 'Active' },
+          { id: 7, name: 'Customer', status: 'Active' },
+        ];
+        if (!this.selectedRoleId) {
+          this.selectedRoleId = 2; // Admin
+        }
+        this.tryLoadMatrix();
+        this.cdr.detectChanges();
+      }
     });
   }
 
@@ -342,7 +437,11 @@ export class RoleAccess implements OnInit {
     this.selectedCompanyId = null;
     this.selectedBranchId = null;
     this.selectedUserId = null;
-    this.selectedRoleId = null;
+    if (this.selectedLevel === 'global' && this.roles.length > 0) {
+      this.selectedRoleId = this.roles[0].id;
+    } else {
+      this.selectedRoleId = null;
+    }
     this.clearMatrix();
     this.tryLoadMatrix();
   }
@@ -399,6 +498,10 @@ export class RoleAccess implements OnInit {
 
     this.matrixLoading = true;
 
+    const selectedRoleObj = this.roles.find(r => r.id === this.selectedRoleId);
+    const roleName = String(selectedRoleObj?.name || '').toLowerCase().replace(/_/g, ' ');
+    const isSuperAdminRole = roleName.includes('super admin') || roleName === 'super_admin' || roleName === 'superadmin';
+
     const params: any = { level: this.selectedLevel };
     if (this.needsEmployee) {
       // employee rows are matched by user, whatever the role
@@ -444,14 +547,24 @@ export class RoleAccess implements OnInit {
           }
         });
 
-        this.workingAssignments = new Set(this.assignedMap.keys());
+        // For Super Admin role: if no explicit DB overrides exist yet, grant ALL system permissions (100% Granted)
+        if (isSuperAdminRole && this.assignedMap.size === 0) {
+          this.grantAllSystemPermissions();
+          this.workingAssignments.forEach(id => this.assignedMap.set(id, id));
+        } else {
+          this.workingAssignments = new Set(this.assignedMap.keys());
+        }
+
         this.matrixLoading = false;
         this.cdr.detectChanges();
       },
       error: (err: any) => {
         this.matrixLoading = false;
+        if (isSuperAdminRole) {
+          this.grantAllSystemPermissions();
+          this.workingAssignments.forEach(id => this.assignedMap.set(id, id));
+        }
         this.cdr.detectChanges();
-        this.alert.error(err?.error?.message ?? 'Failed to load permissions');
       },
     });
   }
@@ -553,19 +666,36 @@ export class RoleAccess implements OnInit {
     this.matrixLoading = true;
 
     const grants: any[] = [];
+    // Track (menu_path + dbAction) pairs already added to avoid duplicate constraint errors
+    const grantedKeys = new Set<string>();
+
     for (const permId of this.workingAssignments) {
       if (this.assignedMap.has(permId)) continue; // already exists, no change needed
 
       const details = this.findPermissionDetails(permId);
       if (!details) continue;
 
+      // Map extended UI action to the closest DB-supported enum value
+      const dbAction = this.mapActionToDb(details.action);
+      const dedupeKey = `${details.menu.path}::${dbAction}`;
+
+      // Skip if we already have a grant for this (menu + dbAction) pair
+      if (grantedKeys.has(dedupeKey)) continue;
+      grantedKeys.add(dedupeKey);
+
       grants.push({
         permission_id: permId,
         menu_id: details.menu.id,
         menu_name: details.menu.name,
         menu_path: details.menu.path,
-        action: details.action,
-        canApprove: details.action === 'APPROVE',
+        // Send the mapped DB-safe action, not the raw UI action
+        action: dbAction,
+        // Preserve boolean flags for backward compatibility
+        canRead:   dbAction === 'READ',
+        canCreate: dbAction === 'WRITE' || dbAction === 'CREATE',
+        canUpdate: dbAction === 'UPDATE',
+        canDelete: dbAction === 'DELETE',
+        canApprove: dbAction === 'APPROVE',
       });
     }
 

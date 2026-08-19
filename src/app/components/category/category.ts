@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component } from '@angular/core';
+﻿import { ChangeDetectorRef, Component } from '@angular/core';
 import { ReactiveFormsModule, FormsModule, FormGroup, FormBuilder, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
@@ -48,6 +48,10 @@ export class Category {
   Category_Forms: boolean = false;
   Update_button: boolean = false;
   Categories: any;
+  // Stat Chip Computed Properties
+  get activeCategoriesCount(): number { return (this.Categories || []).filter((c: any) => (c.status || "").toLowerCase() === "active").length; }
+  get parentCategoriesCount(): number { return (this.Categories || []).filter((c: any) => !c.parentId).length; }
+  get subCategoriesCount():    number { return (this.Categories || []).filter((c: any) => !!c.parentId).length; }
   Statuses: any;
   SelectedCategoryId: any;
   ImageFile: File | null = null;
@@ -253,3 +257,4 @@ export class Category {
     }
   }
 }
+

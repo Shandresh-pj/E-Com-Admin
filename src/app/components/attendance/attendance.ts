@@ -60,6 +60,10 @@ export class Attendance implements OnInit, OnDestroy {
   ];
 
   attendanceLogs: any[] = [];
+  // Stat Chip Computed Properties
+  get presentToday(): number { return this.attendanceLogs.filter((a: any) => (a.status || "").toLowerCase() === "present").length; }
+  get absentToday():  number { return this.attendanceLogs.filter((a: any) => (a.status || "").toLowerCase() === "absent").length; }
+  get lateToday():    number { return this.attendanceLogs.filter((a: any) => (a.status || "").toLowerCase() === "late").length; }
   employees: any[] = [];
   companies: any[] = [];
   branches: any[] = [];
@@ -130,11 +134,18 @@ export class Attendance implements OnInit, OnDestroy {
   filteredBranches: any[] = [];
 
   get isAdminUser(): boolean {
-    // Use auth service + DB permission check instead of inspecting raw user object properties.
-    // perm.hasRoleAction returns true for Super Admin automatically.
-    return this.auth.isSuperAdmin() ||
-           this.perm.hasRoleAction('canManage', '/attendance') ||
-           this.perm.hasRoleAction('canUpdate', '/attendance');
+    // Only Admin and Super Admin roles can access Terminal Logs & Overrides
+    return this.auth.isAdmin();
+  }
+
+  get shiftTimingsDisplay(): string {
+    if (this.activeShift?.timings) return this.activeShift.timings;
+    const start = this.activeShift?.start_time || this.activeShift?.startTime;
+    const end = this.activeShift?.end_time || this.activeShift?.endTime;
+    if (start && end) {
+      return `${start} - ${end}`;
+    }
+    return '09:00 AM - 06:00 PM';
   }
 
   constructor(
@@ -303,50 +314,65 @@ export class Attendance implements OnInit, OnDestroy {
   }
 
   calculateHaversineDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
-    const R = 6371e3; // metres
-    const φ1 = lat1 * Math.PI / 180;
-    const φ2 = lat2 * Math.PI / 180;
-    const Δφ = (lat2 - lat1) * Math.PI / 180;
-    const Δλ = (lon2 - lon1) * Math.PI / 180;
-
-    const a = Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
-              Math.cos(φ1) * Math.cos(φ2) *
-              Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
+    const R = 6371e3;
+    const phi1 = lat1 * Math.PI / 180;
+    const phi2 = lat2 * Math.PI / 180;
+    const dPhi = (lat2 - lat1) * Math.PI / 180;
+    const dLambda = (lon2 - lon1) * Math.PI / 180;
+    const a = Math.sin(dPhi / 2) * Math.sin(dPhi / 2) +
+              Math.cos(phi1) * Math.cos(phi2) *
+              Math.sin(dLambda / 2) * Math.sin(dLambda / 2);
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-
-    return R * c; // in meters
+    return R * c;
   }
 
   loadInitialData() {
     this.loading = true;
-    
-    this.commonService.getApi('companies').subscribe({
-      next: (res: any) => { this.companies = res?.data || []; }
-    });
 
-    this.commonService.getApi('branches').subscribe({
-      next: (res: any) => {
-        this.branches = res?.data || [];
-        this.filteredBranches = this.branches;
-        if (this.branches.length > 0 && this.branches[0].latitude) {
-          this.branchLatitude = Number(this.branches[0].latitude);
-          this.branchLongitude = Number(this.branches[0].longitude);
-          this.geofenceRadiusMeters = Number(this.branches[0].radius_meters) || 500;
-          if (this.latitude && this.longitude) {
-            this.validateGeofence(this.latitude, this.longitude);
+    if (this.isAdminUser) {
+      this.commonService.getApi('companies').subscribe({
+        next: (res: any) => { this.companies = res?.data || []; },
+        error: () => {}
+      });
+
+      this.commonService.getApi('branches').subscribe({
+        next: (res: any) => {
+          this.branches = res?.data || [];
+          this.filteredBranches = this.branches;
+          if (this.branches.length > 0 && this.branches[0].latitude) {
+            this.branchLatitude = Number(this.branches[0].latitude);
+            this.branchLongitude = Number(this.branches[0].longitude);
+            this.geofenceRadiusMeters = Number(this.branches[0].radius_meters) || 500;
+            if (this.latitude && this.longitude) {
+              this.validateGeofence(this.latitude, this.longitude);
+            }
           }
-        }
-      }
-    });
+        },
+        error: () => {}
+      });
 
-    this.commonService.getApi('employees').subscribe({
-      next: (res: any) => {
-        this.employees = res?.data || [];
-        this.detectEmployeeMapping();
-        this.loadAttendanceLogs();
-      },
-      error: () => { this.loading = false; }
-    });
+      this.commonService.getApi('employees').subscribe({
+        next: (res: any) => {
+          this.employees = res?.data || [];
+          this.detectEmployeeMapping();
+          this.loadAttendanceLogs();
+        },
+        error: () => { this.loading = false; }
+      });
+    } else {
+      // Non-admin: fetch employees so employee mapping succeeds
+      this.commonService.getApi('employees').subscribe({
+        next: (res: any) => {
+          this.employees = res?.data || [];
+          this.detectEmployeeMapping();
+          this.loadAttendanceLogs();
+        },
+        error: () => {
+          this.detectEmployeeMapping();
+          this.loadAttendanceLogs();
+        }
+      });
+    }
   }
 
   onCompanyFilterChange(companyId: any) {
@@ -441,29 +467,43 @@ export class Attendance implements OnInit, OnDestroy {
         const shifts = res?.data || [];
         this.activeShift = shifts[0] || null;
         this.cdr.detectChanges();
-      }
+      },
+      // Silently ignore 403 "” non-admin roles may not have READ on shifts
+      error: () => {}
     });
 
     this.commonService.getApi('break-policies/active').subscribe({
       next: (res: any) => {
         this.activeBreakPolicy = res?.data || null;
         this.cdr.detectChanges();
-      }
+      },
+      // Silently ignore 403 for break policies on restricted roles
+      error: () => {}
     });
   }
 
   loadAttendanceLogs() {
     this.loading = true;
+
     let queryParts: string[] = [];
-    if (this.selectedCompanyFilter && this.selectedCompanyFilter !== 'ALL') {
-      queryParts.push(`company_id=${this.selectedCompanyFilter}`);
+
+    if (this.isAdminUser) {
+      // Admin: apply all selected filters
+      if (this.selectedCompanyFilter && this.selectedCompanyFilter !== 'ALL') {
+        queryParts.push(`company_id=${this.selectedCompanyFilter}`);
+      }
+      if (this.selectedBranchFilter && this.selectedBranchFilter !== 'ALL') {
+        queryParts.push(`branch_id=${this.selectedBranchFilter}`);
+      }
+      if (this.selectedEmployeeFilter && this.selectedEmployeeFilter !== 'ALL') {
+        queryParts.push(`employee_id=${this.selectedEmployeeFilter}`);
+      }
+    } else {
+      // Non-admin: always restrict to own employee_id
+      const empId = Number(this.attendanceForm.value.employee_id) || 1;
+      queryParts.push(`employee_id=${empId}`);
     }
-    if (this.selectedBranchFilter && this.selectedBranchFilter !== 'ALL') {
-      queryParts.push(`branch_id=${this.selectedBranchFilter}`);
-    }
-    if (this.selectedEmployeeFilter && this.selectedEmployeeFilter !== 'ALL') {
-      queryParts.push(`employee_id=${this.selectedEmployeeFilter}`);
-    }
+
     if (this.selectedDateFilter) {
       queryParts.push(`date=${this.selectedDateFilter}`);
     }
@@ -627,6 +667,16 @@ export class Attendance implements OnInit, OnDestroy {
   }
 
   async executeCheckIn(authMethod: string) {
+    // Pre-check permission before making the API call to avoid a raw 403 error dialog
+    if (!this.perm.hasRoleAction('canCreate', '/attendance')) {
+      this.alert.warning(
+        'You do not have permission to check in. Please contact your administrator to grant CREATE access on the Attendance module.',
+        'Permission Required'
+      );
+      this.loading = false;
+      return;
+    }
+
     this.loading = true;
     await this.requestGeolocation();
 
@@ -650,7 +700,16 @@ export class Attendance implements OnInit, OnDestroy {
       },
       error: (err: any) => {
         console.error('Check-in failed:', err);
-        this.alert.error("Check-in failed: " + (err.error?.message || "Internal Error"));
+        const errMsg = err?.error?.message || err?.message || 'Internal Error';
+        // Show a user-friendly message for common permission errors
+        if (errMsg.toLowerCase().includes('permission') || errMsg.toLowerCase().includes('authorized') || err?.status === 403) {
+          this.alert.error(
+            'Check-in failed: You are not authorized to perform this action. Ask your admin to grant you CREATE permission on Attendance.',
+            'Permission Denied'
+          );
+        } else {
+          this.alert.error('Check-in failed: ' + errMsg);
+        }
         this.loading = false;
       }
     });
@@ -920,3 +979,4 @@ export class Attendance implements OnInit, OnDestroy {
     return timeStr;
   }
 }
+

@@ -1,59 +1,123 @@
-<mat-card class="cardWithShadow theme-card">
+﻿<div class="psh-root">
 
-    <mat-card-header>
+  <!-- Ambient Background -->
+  <div class="psh-bg" aria-hidden="true">
+    <div class="psh-orb psh-orb--a"></div>
+    <div class="psh-orb psh-orb--b"></div>
+    <div class="psh-orb psh-orb--c"></div>
+    <div class="psh-grid"></div>
+  </div>
 
-        <div class="header-container">
-
-            <mat-card-title class="m-b-0">
-                {{ 'product.title' | translate }}
-            </mat-card-title>
-
-            @if (!Product_Forms && perm.hasRoleAction('canCreate')) {
-            <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
-                <button mat-stroked-button color="primary" class="btn-rounded" (click)="triggerImport()" style="border: 1px solid var(--primary-color);">
-                    <mat-icon>upload</mat-icon> {{ 'product.import' | translate }}
-                </button>
-                <button mat-stroked-button color="accent" class="btn-rounded" (click)="exportProducts('csv')" style="border: 1px solid var(--accent-color);">
-                    <mat-icon>download</mat-icon> {{ 'product.export_csv' | translate }}
-                </button>
-                <button mat-flat-button class="btn-rounded btn-gradient" (click)="AddNewUser()">
-                    <mat-icon>add</mat-icon> {{ 'product.add_new' | translate }}
-                </button>
-            </div>
-            }
-
-        </div>
-
-    </mat-card-header>
-
-    @if (!Product_Forms) {
-    <mat-card-content class="b-t-1">
-
-        <div class="filter-bar m-b-16" style="background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border-subtle); border-radius: 12px; padding: 12px 16px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
-            <span class="f-w-600 m-r-16" style="color: var(--text-secondary);">{{ 'product.filter_status' | translate }}</span>
-            <button mat-stroked-button [color]="selectedStatusFilter === 'all' ? 'primary' : ''" (click)="filterByStatus('all')" [class.active-filter]="selectedStatusFilter === 'all'" style="border-radius: 20px;">{{ 'product.all' | translate }}</button>
-            <button mat-stroked-button [color]="selectedStatusFilter === 'Draft' ? 'primary' : ''" (click)="filterByStatus('Draft')" [class.active-filter]="selectedStatusFilter === 'Draft'" style="border-radius: 20px;">{{ 'product.draft' | translate }}</button>
-            <button mat-stroked-button [color]="selectedStatusFilter === 'Pending Approval' ? 'primary' : ''" (click)="filterByStatus('Pending Approval')" [class.active-filter]="selectedStatusFilter === 'Pending Approval'" style="border-radius: 20px;">{{ 'product.pending' | translate }}</button>
-            <button mat-stroked-button [color]="selectedStatusFilter === 'Approved' ? 'primary' : ''" (click)="filterByStatus('Approved')" [class.active-filter]="selectedStatusFilter === 'Approved'" style="border-radius: 20px;">{{ 'product.approved' | translate }}</button>
-            <button mat-stroked-button [color]="selectedStatusFilter === 'Published' ? 'primary' : ''" (click)="filterByStatus('Published')" [class.active-filter]="selectedStatusFilter === 'Published'" style="border-radius: 20px;">{{ 'product.published' | translate }}</button>
-            <button mat-stroked-button [color]="selectedStatusFilter === 'Rejected' ? 'primary' : ''" (click)="filterByStatus('Rejected')" [class.active-filter]="selectedStatusFilter === 'Rejected'" style="border-radius: 20px;">{{ 'product.rejected' | translate }}</button>
-            <button mat-stroked-button [color]="selectedStatusFilter === 'deleted' ? 'warn' : ''" (click)="filterByStatus('deleted')" [class.active-filter]="selectedStatusFilter === 'deleted'" style="border-radius: 20px;">
-                <mat-icon style="font-size: 16px; width: 16px; height: 16px; margin-right: 4px;">delete_outline</mat-icon> {{ 'product.trash' | translate }}
-            </button>
-        </div>
-
-        <app-mat-table [columns]="tableColumns" [tableData]="Products" [showAction]="true" [showView]="perm.hasRoleAction('canRead')"
-            [showSearch]="true" [enableExport]="true"
-            [Extra_Column]="false" [showEdit]="perm.hasRoleAction('canUpdate')" [showDelete]="perm.hasRoleAction('canDelete')"
-            (editClick)="editUser($event)" (deleteClick)="deleteUser($event)"
-            (ViewClick)="viewItem($event)">
-        </app-mat-table>
-
-    </mat-card-content>
+  <!-- Page Hero -->
+  <header class="psh-hero">
+    <div>
+      <div class="psh-eyebrow">
+        <span class="psh-eyebrow__dot"></span>
+        <span>PRODUCT MANAGEMENT</span>
+        <span class="psh-eyebrow__sep">Â·</span>
+        <span>{{ Products.length }} PRODUCTS</span>
+      </div>
+      <h1 class="psh-title">Product <span class="psh-title__accent">Catalogue</span></h1>
+      <p class="psh-sub">Manage your full product library â€” drafts, approvals, publishing and inventory in one place.</p>
+    </div>
+    @if (!Product_Forms && perm.hasRoleAction('canCreate')) {
+      <div class="psh-actions">
+        <button class="psh-btn psh-btn--ghost" (click)="triggerImport()">
+          <mat-icon>upload</mat-icon> Import
+        </button>
+        <button class="psh-btn psh-btn--ghost" (click)="exportProducts('csv')">
+          <mat-icon>download</mat-icon> Export CSV
+        </button>
+        <button class="psh-btn psh-btn--primary" (click)="AddNewUser()">
+          <span class="psh-btn__shine"></span>
+          <mat-icon>add_circle</mat-icon> Add Product
+        </button>
+      </div>
     }
-    @else {
-    <mat-card-content class="b-t-1">
+  </header>
+
+  <!-- Stat Chips -->
+  @if (!Product_Forms) {
+    <div class="psh-chips">
+      <div class="psh-chip psh-chip--violet">
+        <div class="psh-chip__orb"><mat-icon>inventory_2</mat-icon></div>
+        <div class="psh-chip__body">
+          <span class="psh-chip__num">{{ Products.length }}</span>
+          <span class="psh-chip__lbl">Total</span>
+        </div>
+      </div>
+      <div class="psh-chip psh-chip--emerald">
+        <div class="psh-chip__orb"><mat-icon>check_circle</mat-icon></div>
+        <div class="psh-chip__body">
+          <span class="psh-chip__num">{{ publishedCount }}</span>
+          <span class="psh-chip__lbl">Published</span>
+        </div>
+      </div>
+      <div class="psh-chip psh-chip--amber">
+        <div class="psh-chip__orb"><mat-icon>pending</mat-icon></div>
+        <div class="psh-chip__body">
+          <span class="psh-chip__num">{{ pendingCount }}</span>
+          <span class="psh-chip__lbl">Pending</span>
+        </div>
+      </div>
+      <div class="psh-chip psh-chip--sky">
+        <div class="psh-chip__orb"><mat-icon>edit_note</mat-icon></div>
+        <div class="psh-chip__body">
+          <span class="psh-chip__num">{{ draftCount }}</span>
+          <span class="psh-chip__lbl">Drafts</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Content Card -->
+    <div class="psh-card">
+      <div class="psh-card-header">
+        <div class="psh-card-header__left">
+          <div class="psh-card-header__icon"><mat-icon>view_list</mat-icon></div>
+          <div>
+            <p class="psh-card-header__title">Products</p>
+            <p class="psh-card-header__sub">{{ Products.length }} total products</p>
+          </div>
+        </div>
+      </div>
+      <div class="psh-filter">
+        <div class="psh-filter__chips">
+          <button class="psh-filter__chip" [class.active]="selectedStatusFilter === 'all'" (click)="filterByStatus('all')">All</button>
+          <button class="psh-filter__chip" [class.active]="selectedStatusFilter === 'Draft'" (click)="filterByStatus('Draft')">Draft</button>
+          <button class="psh-filter__chip" [class.active]="selectedStatusFilter === 'Pending Approval'" (click)="filterByStatus('Pending Approval')">Pending</button>
+          <button class="psh-filter__chip" [class.active]="selectedStatusFilter === 'Approved'" (click)="filterByStatus('Approved')">Approved</button>
+          <button class="psh-filter__chip" [class.active]="selectedStatusFilter === 'Published'" (click)="filterByStatus('Published')">Published</button>
+          <button class="psh-filter__chip" [class.active]="selectedStatusFilter === 'Rejected'" (click)="filterByStatus('Rejected')">Rejected</button>
+          <button class="psh-filter__chip" [class.active]="selectedStatusFilter === 'deleted'" (click)="filterByStatus('deleted')">Trash</button>
+        </div>
+      </div>
+      <app-mat-table [columns]="tableColumns" [tableData]="Products" [showAction]="true" [showView]="perm.hasRoleAction('canRead')"
+          [showSearch]="true" [enableExport]="true"
+          [Extra_Column]="false" [showEdit]="perm.hasRoleAction('canUpdate')" [showDelete]="perm.hasRoleAction('canDelete')"
+          (editClick)="editUser($event)" (deleteClick)="deleteUser($event)"
+          (ViewClick)="viewItem($event)">
+      </app-mat-table>
+    </div>
+  }
+@else {
+    <div class="psh-card" style="margin-top:0">
+        <div class="psh-card-header">
+          <div class="psh-card-header__left">
+            <div class="psh-card-header__icon"><mat-icon>edit</mat-icon></div>
+            <div>
+              <p class="psh-card-header__title">{{ Update_button ? 'Edit Product' : 'Add New Product' }}</p>
+              <p class="psh-card-header__sub">Fill in all required fields and save</p>
+            </div>
+          </div>
+          <div class="psh-card-header__right">
+            <button class="psh-btn psh-btn--ghost" (click)="Product_Forms = false; Update_button = false" style="font-size:13px;height:36px;padding:0 14px">
+              <mat-icon>arrow_back</mat-icon> Back
+            </button>
+          </div>
+        </div>
+        <mat-card-content class="b-t-1">
         <form [formGroup]="ProductForm" class="premium-form-grid p-t-24">
+
             
             <div class="divider">
                 <span>{{ 'product.general_info' | translate }}</span>
@@ -169,11 +233,11 @@
                 </div>
             </div>
 
-            <!-- ── Admin-only: Purchase Cost & Tiered Pricing ─────────────── -->
+            <!-- Ã¢â€â‚¬Ã¢â€â‚¬ Admin-only: Purchase Cost & Tiered Pricing Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ -->
             @if (perm.canViewPurchaseCost()) {
             <div class="purchase-cost-banner m-b-12">
                 <mat-icon style="color:#f59e0b;font-size:16px;vertical-align:middle;margin-right:6px">admin_panel_settings</mat-icon>
-                <span style="font-size:12px;color:var(--text-secondary);">Admin-only pricing fields — hidden from Branch / Employee roles</span>
+                <span style="font-size:12px;color:var(--text-secondary);">Admin-only pricing fields Ã¢â‚¬â€ hidden from Branch / Employee roles</span>
             </div>
             <div class="form-row">
                 <div class="field-container">
@@ -234,7 +298,7 @@
                     <mat-form-field appearance="outline" class="w-100">
                         <input matInput formControlName="barcode" placeholder="Enter Barcode (8-14 digits)">
                         @if (ProductForm.get('barcode')?.hasError('pattern')) {
-                            <mat-error>Barcode must be 8–14 digits</mat-error>
+                            <mat-error>Barcode must be 8Ã¢â‚¬â€œ14 digits</mat-error>
                         }
                     </mat-form-field>
                 </div>
@@ -712,6 +776,9 @@
         </form>
 
     </mat-card-content>
-    }
+    </div>
+  }
 
-</mat-card>
+</div>
+
+

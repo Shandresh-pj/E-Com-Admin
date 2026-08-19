@@ -125,68 +125,82 @@ export class StarterComponent implements OnInit {
 
   // ─── Admin Dashboard Data Loading ──────────────────────────────────────────
   loadAdminMetrics() {
-    // Load active branches count
-    this.common.getApi('branches').subscribe({
-      next: (res: any) => {
-        this.activeBranchesCount = res?.data?.length || 0;
-        this.cdr.detectChanges();
-      },
-      error: () => {}
-    });
+    // Load active branches count — only if user has read access to branches
+    if (this.perm.hasPagePermission('/branch') || this.isSuperAdmin) {
+      this.common.getApi('branches').subscribe({
+        next: (res: any) => {
+          this.activeBranchesCount = res?.data?.length || 0;
+          this.cdr.detectChanges();
+        },
+        error: () => {}
+      });
+    }
 
-    // Load employees count
-    this.common.getApi('employees').subscribe({
-      next: (res: any) => {
-        this.totalEmployees = res?.data?.length || 0;
-        this.cdr.detectChanges();
-      },
-      error: () => {}
-    });
+    // Load employees count — only if user has access to employees
+    if (this.perm.hasPagePermission('/employees') || this.isSuperAdmin) {
+      this.common.getApi('employees').subscribe({
+        next: (res: any) => {
+          this.totalEmployees = res?.data?.length || 0;
+          this.cdr.detectChanges();
+        },
+        error: () => {}
+      });
+    }
 
-    // Load daily attendance report for today
-    this.common.getApi('attendance/report/daily').subscribe({
-      next: (res: any) => {
-        this.presentTodayCount = res?.data?.present_count || 0;
-        this.cdr.detectChanges();
-      },
-      error: () => {}
-    });
+    // Load daily attendance report — only if user has read access to attendance
+    if (this.perm.hasPagePermission('/attendance') || this.isSuperAdmin) {
+      this.common.getApi('attendance/report/daily').subscribe({
+        next: (res: any) => {
+          this.presentTodayCount = res?.data?.present_count || 0;
+          this.cdr.detectChanges();
+        },
+        error: () => {}
+      });
+    }
 
-    // Load active shifts template count
-    this.common.getApi('shifts').subscribe({
-      next: (res: any) => {
-        this.activeShiftsCount = res?.data?.length || 0;
-        this.cdr.detectChanges();
-      },
-      error: () => {}
-    });
+    // Load active shifts — only if user has workforce or attendance access
+    if (this.perm.hasPagePermission('/workforce') || this.perm.hasPagePermission('/attendance') || this.isSuperAdmin) {
+      this.common.getApi('shifts').subscribe({
+        next: (res: any) => {
+          this.activeShiftsCount = res?.data?.length || 0;
+          this.cdr.detectChanges();
+        },
+        error: () => {}
+      });
+    }
 
-    // Load pending approvals from product controller
-    this.common.getApi('products', { status: 'Pending Approval' }).subscribe({
-      next: (res: any) => {
-        this.pendingApprovalsCount = res?.total || 0;
-        this.cdr.detectChanges();
-      },
-      error: () => {}
-    });
+    // Load pending approvals — only if user can approve products
+    if (this.perm.canApproveProducts() || this.isSuperAdmin) {
+      this.common.getApi('products', { status: 'Pending Approval' }).subscribe({
+        next: (res: any) => {
+          this.pendingApprovalsCount = res?.total || 0;
+          this.cdr.detectChanges();
+        },
+        error: () => {}
+      });
+    }
 
-    // Load low stock alerts count
-    this.common.getApi('alerts').subscribe({
-      next: (res: any) => {
-        this.lowStockAlertsCount = res?.data?.length || 0;
-        this.cdr.detectChanges();
-      },
-      error: () => {}
-    });
+    // Load low stock alerts — only if user has alerts access
+    if (this.perm.hasPagePermission('/alerts') || this.isSuperAdmin) {
+      this.common.getApi('alerts').subscribe({
+        next: (res: any) => {
+          this.lowStockAlertsCount = res?.data?.length || 0;
+          this.cdr.detectChanges();
+        },
+        error: () => {}
+      });
+    }
 
-    // Load recent Audit log logs
-    this.common.getApi('audit').subscribe({
-      next: (res: any) => {
-        this.recentAuditLogs = (res?.data || []).slice(0, 5);
-        this.cdr.detectChanges();
-      },
-      error: () => {}
-    });
+    // Load recent Audit log logs — only if user has audit log access
+    if (this.perm.hasPagePermission('/audit-logs') || this.isSuperAdmin) {
+      this.common.getApi('audit').subscribe({
+        next: (res: any) => {
+          this.recentAuditLogs = (res?.data || []).slice(0, 5);
+          this.cdr.detectChanges();
+        },
+        error: () => {}
+      });
+    }
   }
 
   // ─── Branch Manager Metrics Loading ──────────────────────────────────────────

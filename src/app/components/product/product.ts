@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component } from '@angular/core';
+﻿import { ChangeDetectorRef, Component } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 
 import { ReactiveFormsModule, FormsModule, FormGroup, FormArray, FormBuilder, Validators } from '@angular/forms';
@@ -61,6 +61,10 @@ export class Product {
   Product_Forms: boolean = false;
   Update_button: boolean = false;
   Products: any;
+  // Stat Chip Computed Properties
+  get publishedCount(): number { return this.Products.filter((p: any) => p.status === "Published").length; }
+  get pendingCount():   number { return this.Products.filter((p: any) => p.status === "Pending Approval").length; }
+  get draftCount():     number { return this.Products.filter((p: any) => p.status === "Draft").length; }
   Categories: any;
   ProductAttributes: any;
   AttributeValuesByAttr: { [attributeId: number]: any[] } = {};
@@ -123,7 +127,7 @@ export class Product {
       base_unit: ['Piece', Validators.required],
       // Base selling price (required for all roles)
       price: ['', [Validators.required, Validators.min(0)]],
-      // Purchase / cost price — visible only to Super_Admin and Admin
+      // Purchase / cost price â€” visible only to Super_Admin and Admin
       purchase_cost: [''],
       // Tiered pricing fields
       retail_price: [''],
@@ -223,7 +227,7 @@ export class Product {
     return user?.id;
   }
 
-  // ── Expiry Date Utilities ─────────────────────────────────────────────────
+  // â”€â”€ Expiry Date Utilities â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   /** Returns days until expiry (negative if already expired).
    *  Accepts both Date objects (from Material datepicker) and ISO strings (from API). */
@@ -247,7 +251,7 @@ export class Product {
     return String(date).split('T')[0];
   }
 
-  /** Returns 'expired', 'warning' (≤2 days), or 'ok' */
+  /** Returns 'expired', 'warning' (â‰¤2 days), or 'ok' */
   getExpiryStatus(product: any): 'expired' | 'warning' | 'ok' | 'none' {
     const days = this.daysUntilExpiry(product?.expiry_date);
     if (days === null) return 'none';
@@ -282,29 +286,29 @@ export class Product {
     };
 
     if (expired.length > 0) {
-      const htmlList = expired.map(p => `❌ <b>${p.name}</b> — expired ${Math.abs(p.days)} day(s) ago`).join('<br>');
+      const htmlList = expired.map(p => `âŒ <b>${p.name}</b> â€” expired ${Math.abs(p.days)} day(s) ago`).join('<br>');
       this.alert.fire({
         icon: 'error',
-        title: `🚨 ${expired.length} Expired Product${expired.length > 1 ? 's' : ''} Detected!`,
+        title: `ðŸš¨ ${expired.length} Expired Product${expired.length > 1 ? 's' : ''} Detected!`,
         html: `<div style="text-align:left;font-size:14px;"><b>Remove from sale immediately:</b><br><br>${htmlList}</div>`,
         confirmButtonText: 'Review Products',
         confirmButtonColor: '#ef4444'
       });
-      expired.forEach(p => sendPush('🚨 EXPIRED Product Alert', `${p.name} expired ${Math.abs(p.days)} day(s) ago. Remove from sale immediately!`));
+      expired.forEach(p => sendPush('ðŸš¨ EXPIRED Product Alert', `${p.name} expired ${Math.abs(p.days)} day(s) ago. Remove from sale immediately!`));
     }
 
     if (nearExpiry.length > 0) {
       const delayMs = expired.length > 0 ? 600 : 0;
       setTimeout(() => {
-        const htmlList = nearExpiry.map(p => `⚠️ <b>${p.name}</b> — expires ${p.days === 0 ? 'TODAY' : 'in ' + p.days + ' day(s)'}`).join('<br>');
+        const htmlList = nearExpiry.map(p => `âš ï¸ <b>${p.name}</b> â€” expires ${p.days === 0 ? 'TODAY' : 'in ' + p.days + ' day(s)'}`).join('<br>');
         this.alert.fire({
           icon: 'warning',
-          title: `⚠️ ${nearExpiry.length} Product${nearExpiry.length > 1 ? 's' : ''} Expiring Soon!`,
+          title: `âš ï¸ ${nearExpiry.length} Product${nearExpiry.length > 1 ? 's' : ''} Expiring Soon!`,
           html: `<div style="text-align:left;font-size:14px;"><b>These products expire within 2 days:</b><br><br>${htmlList}</div>`,
           confirmButtonText: "OK, I'll handle it",
           confirmButtonColor: '#f59e0b'
         });
-        nearExpiry.forEach(p => sendPush('⚠️ Expiry Warning', `${p.name} expires ${p.days === 0 ? 'TODAY' : 'in ' + p.days + ' day(s)'}. Take action now.`));
+        nearExpiry.forEach(p => sendPush('âš ï¸ Expiry Warning', `${p.name} expires ${p.days === 0 ? 'TODAY' : 'in ' + p.days + ' day(s)'}. Take action now.`));
       }, delayMs);
     }
   }
@@ -683,7 +687,7 @@ export class Product {
       category: product?.category,
       base_unit: product?.base_unit || 'Piece',
       price: product?.price,
-      // Pricing tiers — only patched if user can view purchase cost
+      // Pricing tiers â€” only patched if user can view purchase cost
       ...(this.perm.canViewPurchaseCost() ? {
         purchase_cost:   product?.purchase_cost   ?? '',
         retail_price:    product?.retail_price    ?? '',
@@ -1058,7 +1062,7 @@ export class Product {
     }));
     formData.append('unit_conversions', JSON.stringify(uConversions));
 
-    // Tiered pricing — only admins can set purchase cost / dealer pricing
+    // Tiered pricing â€” only admins can set purchase cost / dealer pricing
     if (this.perm.canViewPurchaseCost()) {
       if (value.purchase_cost !== null && value.purchase_cost !== '') {
         formData.append('purchase_cost', value.purchase_cost);
@@ -1086,7 +1090,7 @@ export class Product {
 
     formData.append('variants', JSON.stringify(value.product_type === 'variant' ? value.variants : []));
 
-    // Build attribute_values from FormArray — applies to both single and variant
+    // Build attribute_values from FormArray â€” applies to both single and variant
     const attrValuePairs: { ProductAttributeId: number; ProductAttributeValueId: number }[] = [];
     (value.attributeValues || []).forEach((av: any) => {
       if (av?.ProductAttributeId && av?.ProductAttributeValueId) {
@@ -1145,3 +1149,4 @@ export class Product {
     }
   }
 }
+

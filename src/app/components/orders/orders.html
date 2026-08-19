@@ -1,16 +1,54 @@
+﻿<div class="psh-root">
+  <div class="psh-bg" aria-hidden="true">
+    <div class="psh-orb psh-orb--a"></div>
+    <div class="psh-orb psh-orb--b"></div>
+    <div class="psh-orb psh-orb--c"></div>
+    <div class="psh-grid"></div>
+  </div>
+  <header class="psh-hero">
+    <div>
+      <div class="psh-eyebrow">
+        <span class="psh-eyebrow__dot"></span>
+        <span>ORDER MANAGEMENT</span>
+        <span class="psh-eyebrow__sep">·</span>
+        <span>{{ ordersList.length }} ORDERS</span>
+      </div>
+      <h1 class="psh-title">Order <span class="psh-title__accent">Management</span></h1>
+      <p class="psh-sub">Track, manage, and fulfill customer orders across all branches.</p>
+    </div>
+    <div class="psh-actions">
+      <button class="psh-btn psh-btn--primary" (click)="toggleCreateForm()">
+        <span class="psh-btn__shine"></span>
+        <mat-icon>shopping_cart</mat-icon> New Order
+      </button>
+    </div>
+  </header>
+  <div class="psh-chips">
+    <div class="psh-chip psh-chip--violet">
+      <div class="psh-chip__orb"><mat-icon>shopping_bag</mat-icon></div>
+      <div class="psh-chip__body"><span class="psh-chip__num">{{ ordersList.length }}</span><span class="psh-chip__lbl">Total Orders</span></div>
+    </div>
+    <div class="psh-chip psh-chip--emerald">
+      <div class="psh-chip__orb"><mat-icon>check_circle</mat-icon></div>
+      <div class="psh-chip__body"><span class="psh-chip__num">{{ completedOrdersCount }}</span><span class="psh-chip__lbl">Completed</span></div>
+    </div>
+    <div class="psh-chip psh-chip--amber">
+      <div class="psh-chip__orb"><mat-icon>hourglass_empty</mat-icon></div>
+      <div class="psh-chip__body"><span class="psh-chip__num">{{ pendingOrdersCount }}</span><span class="psh-chip__lbl">Pending</span></div>
+    </div>
+    <div class="psh-chip psh-chip--rose">
+      <div class="psh-chip__orb"><mat-icon>cancel</mat-icon></div>
+      <div class="psh-chip__body"><span class="psh-chip__num">{{ cancelledOrdersCount }}</span><span class="psh-chip__lbl">Cancelled</span></div>
+    </div>
+  </div>
 <mat-card class="cardWithShadow theme-card">
   <mat-card-header>
     <div class="header-container">
       <mat-card-title class="m-b-0">{{ 'orders.title' | translate }}</mat-card-title>
-      @if (!showCreateForm && !viewDetailsMode && perm.hasRoleAction('canCreate')) {
-        <button mat-flat-button class="btn-gradient btn-rounded" (click)="toggleCreateForm()">
-          <mat-icon class="icon-16 m-r-4">shopping_cart</mat-icon> {{ 'orders.place_new' | translate }}
-        </button>
-      }
     </div>
   </mat-card-header>
 
-  <!-- ── Create Order View ───────────────────────────────────────────────── -->
+  <!-- â”€â”€ Create Order View â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
   @if (showCreateForm) {
     <mat-card-content class="p-24 b-t-1">
       <form [formGroup]="orderForm">
@@ -54,7 +92,7 @@
                 <mat-form-field appearance="outline" class="w-100">
                   <mat-select formControlName="product_id" placeholder="Select Product">
                     @for(p of products; track p.id) {
-                      <mat-option [value]="p.id">{{ p.name }} (₹{{ p.price }})</mat-option>
+                      <mat-option [value]="p.id">{{ p.name }} (â‚¹{{ p.price }})</mat-option>
                     }
                   </mat-select>
                 </mat-form-field>
@@ -133,15 +171,15 @@
             <div class="order-summary-card">
               <div class="summary-line">
                 <span class="label">{{ 'orders.subtotal' | translate }}</span>
-                <span class="value">₹{{ calculateSubtotal() | number:'1.2-2' }}</span>
+                <span class="value">â‚¹{{ calculateSubtotal() | number:'1.2-2' }}</span>
               </div>
               <div class="summary-line">
                 <span class="label text-danger">{{ 'orders.promo_discount' | translate }}</span>
-                <span class="value text-danger">-₹{{ calculateDiscountValue() | number:'1.2-2' }}</span>
+                <span class="value text-danger">-â‚¹{{ calculateDiscountValue() | number:'1.2-2' }}</span>
               </div>
               <div class="summary-line total-line">
                 <span class="label">{{ 'orders.grand_total' | translate }}</span>
-                <span class="value grand-total">₹{{ calculateTotal() | number:'1.2-2' }}</span>
+                <span class="value grand-total">â‚¹{{ calculateTotal() | number:'1.2-2' }}</span>
               </div>
             </div>
           </div>
@@ -159,7 +197,7 @@
     </mat-card-content>
   }
 
-  <!-- ── Order Details (Receipt) View ──────────────────────────────────────── -->
+  <!-- â”€â”€ Order Details (Receipt) View â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
   @else if (viewDetailsMode) {
     <mat-card-content class="p-24 b-t-1">
       <div class="order-receipt">
@@ -227,9 +265,9 @@
                   @for(item of selectedOrder?.items; track item.id) {
                     <tr>
                       <td class="f-w-500">{{ item?.product?.name || getProductName(item.product_id) }}</td>
-                      <td>₹{{ item.price }}</td>
-                      <td>× {{ item.quantity }}</td>
-                      <td class="text-end f-w-600">₹{{ (item.price * item.quantity) | number:'1.2-2' }}</td>
+                      <td>â‚¹{{ item.price }}</td>
+                      <td>Ã— {{ item.quantity }}</td>
+                      <td class="text-end f-w-600">â‚¹{{ (item.price * item.quantity) | number:'1.2-2' }}</td>
                     </tr>
                   }
                 </tbody>
@@ -239,17 +277,17 @@
             <div class="order-summary-card compact">
               <div class="summary-line">
                 <span class="label">{{ 'orders.subtotal' | translate }}</span>
-                <span class="value">₹{{ selectedOrder?.subtotal | number:'1.2-2' }}</span>
+                <span class="value">â‚¹{{ selectedOrder?.subtotal | number:'1.2-2' }}</span>
               </div>
               @if (selectedOrder?.discount > 0) {
               <div class="summary-line">
                 <span class="label text-danger">{{ 'orders.discount_applied' | translate }}</span>
-                <span class="value text-danger">-₹{{ selectedOrder?.discount | number:'1.2-2' }}</span>
+                <span class="value text-danger">-â‚¹{{ selectedOrder?.discount | number:'1.2-2' }}</span>
               </div>
               }
               <div class="summary-line total-line">
                 <span class="label">{{ 'orders.total_paid' | translate }}</span>
-                <span class="value grand-total">₹{{ selectedOrder?.total | number:'1.2-2' }}</span>
+                <span class="value grand-total">â‚¹{{ selectedOrder?.total | number:'1.2-2' }}</span>
               </div>
             </div>
 
@@ -313,7 +351,7 @@
     </mat-card-content>
   }
 
-  <!-- ── Orders List Table ──────────────────────────────────────────────────── -->
+  <!-- â”€â”€ Orders List Table â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
   @else {
     <mat-card-content class="b-t-1">
       <app-mat-table
@@ -339,7 +377,7 @@
         </span>
       </ng-template>
 
-      <!-- delivery_status badge — FIXED: was using row.status incorrectly -->
+      <!-- delivery_status badge â€” FIXED: was using row.status incorrectly -->
       <ng-template #deliveryStatusTpl let-row>
         <span class="tbl-badge"
           [style.background]="getDeliveryStatusColor(row.delivery_status) + '20'"
@@ -354,3 +392,6 @@
     </mat-card-content>
   }
 </mat-card>
+
+
+

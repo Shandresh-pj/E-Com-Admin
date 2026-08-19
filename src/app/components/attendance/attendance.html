@@ -1,4 +1,18 @@
-<!-- Workforce Stats Summary Dashboard Row -->
+<div class="psh-root">
+  <div class="psh-bg" aria-hidden="true"><div class="psh-orb psh-orb--a"></div><div class="psh-orb psh-orb--b"></div><div class="psh-orb psh-orb--c"></div><div class="psh-grid"></div></div>
+  <header class="psh-hero">
+    <div>
+      <div class="psh-eyebrow"><span class="psh-eyebrow__dot"></span><span>ATTENDANCE SYSTEM</span><span class="psh-eyebrow__sep">·</span><span>Today</span></div>
+      <h1 class="psh-title">Attendance <span class="psh-title__accent">Tracker</span></h1>
+      <p class="psh-sub">Real-time employee attendance, check-in/out and work-hour monitoring.</p>
+    </div>
+    @if (isAdminUser) {
+      <div class="psh-actions">
+        <button class="psh-btn psh-btn--primary" (click)="AddNewLog()"><span class="psh-btn__shine"></span><mat-icon>add_circle</mat-icon> Mark Attendance</button>
+      </div>
+    }
+  </header>
+  <div class="psh-chips"><div class="psh-chip psh-chip--violet"><div class="psh-chip__orb"><mat-icon>fingerprint</mat-icon></div><div class="psh-chip__body"><span class="psh-chip__num">{{ attendanceLogs.length }}</span><span class="psh-chip__lbl">Records</span></div></div><div class="psh-chip psh-chip--emerald"><div class="psh-chip__orb"><mat-icon>login</mat-icon></div><div class="psh-chip__body"><span class="psh-chip__num">{{ presentToday }}</span><span class="psh-chip__lbl">Present</span></div></div><div class="psh-chip psh-chip--rose"><div class="psh-chip__orb"><mat-icon>logout</mat-icon></div><div class="psh-chip__body"><span class="psh-chip__num">{{ absentToday }}</span><span class="psh-chip__lbl">Absent</span></div></div><div class="psh-chip psh-chip--amber"><div class="psh-chip__orb"><mat-icon>schedule</mat-icon></div><div class="psh-chip__body"><span class="psh-chip__num">{{ lateToday }}</span><span class="psh-chip__lbl">Late</span></div></div></div><!-- Workforce Stats Summary Dashboard Row -->
 <div class="row m-b-24">
   <div class="col-lg-3 col-sm-6 m-b-16">
     <div class="glass-card stats-card border-left-primary p-20">
@@ -54,219 +68,210 @@
   </div>
 </div>
 
-<!-- Main Terminal Controls & Futuristic Digital Clock Row -->
-<div class="row m-b-24">
-  <div class="col-lg-8 m-b-16">
-    <div class="glass-card overflow-hidden h-100">
-      <div class="bg-light-primary p-x-24 p-y-16 b-b-1 d-flex justify-content-between align-items-center flex-wrap gap-12">
-        <h4 class="m-b-0 text-primary f-w-700 d-flex align-items-center gap-8">
-          <mat-icon class="icon-24">sensors</mat-icon> Workforce Attendance Terminal
-        </h4>
-        <span 
-          class="badge-geo d-flex align-items-center gap-6 f-s-12 p-x-12 p-y-6 rounded-16 f-w-600"
-          [ngClass]="geofenceVerified ? 'bg-light-success text-success b-1 b-success' : 'bg-light-warning text-warning b-1 b-warning'"
-        >
-          <mat-icon class="icon-16">my_location</mat-icon> {{ geoStatus }}
-        </span>
+<!-- == Workforce Attendance Terminal ======================================= -->
+<div class="at-terminal-row">
+
+  <!-- -- LEFT: Main Attendance Terminal ----------------------------------- -->
+  <div class="at-terminal">
+
+    <!-- Ambient glow blobs -->
+    <div class="at-terminal__glow at-terminal__glow--a" aria-hidden="true"></div>
+    <div class="at-terminal__glow at-terminal__glow--b" aria-hidden="true"></div>
+
+    <!-- Header bar -->
+    <div class="at-terminal__header">
+      <div class="at-terminal__header-left">
+        <div class="at-terminal__icon-wrap">
+          <mat-icon>sensors</mat-icon>
+          <span class="at-terminal__icon-ring"></span>
+        </div>
+        <div>
+          <h4 class="at-terminal__title">Workforce Attendance Terminal</h4>
+          <p class="at-terminal__subtitle">Biometric · GPS · Real-time Sync</p>
+        </div>
       </div>
+      <div class="at-terminal__geo-badge"
+        [ngClass]="geofenceVerified ? 'at-terminal__geo-badge--ok' : 'at-terminal__geo-badge--warn'"
+      >
+        <mat-icon>my_location</mat-icon>
+        <span>{{ geoStatus }}</span>
+      </div>
+    </div>
 
-      <div class="p-24">
-        <div class="d-flex flex-wrap align-items-center justify-content-between gap-24 m-b-20">
-          <!-- Live session status indicator -->
-          <div class="d-flex align-items-center gap-16">
-            <span 
-              class="pulse-indicator" 
-              [ngClass]="isOnBreak ? 'bg-warning' : (isCheckedIn ? 'bg-success' : 'bg-danger')"
-            ></span>
-            <div>
-              <p class="f-s-11 text-muted m-b-2 text-uppercase letter-spacing-1 f-w-600">{{ 'attendance.current_status' | translate }}</p>
-              <h2 
-                class="f-w-800 m-b-0 font-status" 
-                [ngClass]="isOnBreak ? 'text-warning' : (isCheckedIn ? 'text-success' : 'text-danger')"
-              >
-                {{ isOnBreak ? ('attendance.on_break' | translate) : (isCheckedIn ? ('attendance.signed_on' | translate) : ('attendance.out_of_office' | translate)) }}
-              </h2>
-            </div>
-          </div>
+    <!-- Status + sensor + action area -->
+    <div class="at-terminal__body">
 
-          <!-- Auth Sensor Chips Selector -->
-          @if (!isCheckedIn) {
-            <div class="d-flex align-items-center gap-8 flex-wrap">
-              <span class="f-s-12 text-muted f-w-700">Verification Sensor:</span>
-              <mat-chip-listbox [(ngModel)]="selectedAuthMethod">
-                <mat-chip-option value="GPS_LIVE" selected>
-                  <mat-icon class="icon-16">my_location</mat-icon> GPS
-                </mat-chip-option>
-                <mat-chip-option value="FACE_RECOGNITION">
-                  <mat-icon class="icon-16">face</mat-icon> Face AI
-                </mat-chip-option>
-                <mat-chip-option value="FINGERPRINT">
-                  <mat-icon class="icon-16">fingerprint</mat-icon> Bio Touch
-                </mat-chip-option>
-                <mat-chip-option value="QR_CODE">
-                  <mat-icon class="icon-16">qr_code_scanner</mat-icon> QR Code
-                </mat-chip-option>
-                <mat-chip-option value="RFID">
-                  <mat-icon class="icon-16">nfc</mat-icon> RFID Tap
-                </mat-chip-option>
-              </mat-chip-listbox>
-            </div>
-          }
-
-          <!-- Terminal Action Buttons -->
-          <div class="action-buttons-box d-flex align-items-center gap-12">
-            @if (!isCheckedIn) {
-              <button 
-                mat-flat-button 
-                color="primary" 
-                class="btn-terminal shadow-primary" 
-                (click)="checkIn()" 
-                [disabled]="loading"
-              >
-                <ng-container *ngIf="loading">
-                  <mat-icon class="m-r-6 spin-icon">sync</mat-icon> Processing...
-                </ng-container>
-                <ng-container *ngIf="!loading">
-                  <mat-icon class="m-r-6">login</mat-icon> {{ 'attendance.punch_in' | translate }}
-                </ng-container>
-              </button>
-            } @else {
-              <!-- Break controls -->
-              @if (!isOnBreak) {
-                <button 
-                  mat-flat-button 
-                  class="btn-terminal shadow-accent-glow d-flex align-items-center gap-8" 
-                  (click)="startBreak()" 
-                  [disabled]="loading || breakLoading"
-                >
-                  <mat-icon class="icon-20">coffee</mat-icon> {{ 'attendance.enter_break' | translate }}
-                </button>
-              } @else {
-                <button 
-                  mat-flat-button 
-                  class="btn-terminal btn-success-glow d-flex align-items-center gap-8" 
-                  (click)="endBreak()" 
-                  [disabled]="loading || breakLoading"
-                >
-                  <mat-icon class="icon-20 spin-icon-fast">play_arrow</mat-icon> {{ 'attendance.exit_break' | translate }}
-                </button>
-              }
-
-              <!-- Punch out control -->
-              <button 
-                mat-flat-button 
-                class="btn-terminal shadow-warn-glow d-flex align-items-center gap-8" 
-                (click)="checkOut()" 
-                [disabled]="loading || isOnBreak"
-              >
-                <mat-icon class="icon-20">logout</mat-icon> {{ 'attendance.punch_out' | translate }}
-              </button>
-            }
+      <!-- Status Ring + Info -->
+      <div class="at-status-block">
+        <div class="at-status-ring"
+          [ngClass]="isOnBreak ? 'at-status-ring--break' : (isCheckedIn ? 'at-status-ring--in' : 'at-status-ring--out')"
+        >
+          <div class="at-status-ring__inner">
+            <mat-icon class="at-status-ring__icon">
+              {{ isOnBreak ? 'coffee' : (isCheckedIn ? 'person' : 'person_off') }}
+            </mat-icon>
           </div>
         </div>
+        <div class="at-status-info">
+          <p class="at-status-info__label">{{ 'attendance.current_status' | translate }}</p>
+          <h2 class="at-status-info__value"
+            [ngClass]="isOnBreak ? 'at-status-info__value--break' : (isCheckedIn ? 'at-status-info__value--in' : 'at-status-info__value--out')"
+          >
+            {{ isOnBreak ? ('attendance.on_break' | translate) : (isCheckedIn ? ('attendance.signed_on' | translate) : ('attendance.out_of_office' | translate)) }}
+          </h2>
+        </div>
+      </div>
 
-        <!-- Ultra-Premium Liquid Glass Break Timer Banner -->
-        @if (isOnBreak) {
-          <div class="liquid-glass-break-card p-24 rounded-24 m-b-24 position-relative overflow-hidden animate-pulse-border">
-            <div class="d-flex align-items-center justify-content-between flex-wrap gap-20 position-relative z-index-2">
-              <div class="d-flex align-items-center gap-16">
-                <div class="break-icon-wrap-glass shadow-amber-glow-soft d-flex align-items-center justify-content-center">
-                  <mat-icon class="icon-32 text-amber-dark glow-icon-static">local_cafe</mat-icon>
-                </div>
-                <div>
-                  <h4 class="f-w-800 text-amber-deep m-b-4 d-flex align-items-center gap-8 flex-wrap">
-                    Break In Progress — Timer Active
-                    <span class="live-pulse-badge-light d-flex align-items-center gap-6 f-s-11 font-bold p-x-10 p-y-3 rounded-16">
-                      <span class="live-dot-amber"></span> LIVE TIMER
-                    </span>
-                  </h4>
-                  <p class="f-s-13 text-amber-muted m-b-0">Auto-deduction policy active • Max Limit: {{ activeBreakPolicy?.max_duration_minutes || 30 }} Minutes</p>
-                </div>
-              </div>
+      <!-- Divider -->
+      <div class="at-terminal__divider"></div>
 
-              <div class="d-flex align-items-center gap-16 flex-wrap">
-                <div class="glass-timer-box text-center p-x-20 p-y-12 rounded-16">
-                  <p class="f-s-11 text-amber-muted-cap text-uppercase f-w-700 m-b-4 letter-spacing-1">Elapsed Time</p>
-                  <h2 class="f-w-900 font-mono m-b-0 text-amber-num">{{ formattedBreakElapsed }}</h2>
-                </div>
-                <div class="glass-timer-box text-center p-x-20 p-y-12 rounded-16" [ngClass]="breakRemainingSeconds < 300 ? 'border-danger-glow-light' : ''">
-                  <p class="f-s-11 text-amber-muted-cap text-uppercase f-w-700 m-b-4 letter-spacing-1">Time Remaining</p>
-                  <h2 class="f-w-900 font-mono m-b-0" [ngClass]="breakRemainingSeconds < 300 ? 'text-danger animate-bounce' : 'text-cyan-deep'">{{ formattedBreakRemaining }}</h2>
-                </div>
-              </div>
-            </div>
-
-            <!-- Glowing progress bar -->
-            <div class="m-t-20 position-relative z-index-2">
-              <mat-progress-bar mode="indeterminate" class="liquid-progress-bar rounded-8"></mat-progress-bar>
-            </div>
+      <!-- Sensor selector (only before check-in) -->
+      @if (!isCheckedIn) {
+        <div class="at-sensors">
+          <p class="at-sensors__label">Verification Sensor</p>
+          <div class="at-sensors__chips">
+            <button type="button" class="at-sensor-btn" [class.active]="selectedAuthMethod === 'GPS_LIVE'" (click)="selectedAuthMethod = 'GPS_LIVE'">
+              <mat-icon>my_location</mat-icon> GPS
+            </button>
+            <button type="button" class="at-sensor-btn" [class.active]="selectedAuthMethod === 'FACE_RECOGNITION'" (click)="selectedAuthMethod = 'FACE_RECOGNITION'">
+              <mat-icon>face</mat-icon> Face AI
+            </button>
+            <button type="button" class="at-sensor-btn" [class.active]="selectedAuthMethod === 'FINGERPRINT'" (click)="selectedAuthMethod = 'FINGERPRINT'">
+              <mat-icon>fingerprint</mat-icon> Bio Touch
+            </button>
+            <button type="button" class="at-sensor-btn" [class.active]="selectedAuthMethod === 'QR_CODE'" (click)="selectedAuthMethod = 'QR_CODE'">
+              <mat-icon>qr_code_scanner</mat-icon> QR Code
+            </button>
+            <button type="button" class="at-sensor-btn" [class.active]="selectedAuthMethod === 'RFID'" (click)="selectedAuthMethod = 'RFID'">
+              <mat-icon>nfc</mat-icon> RFID Tap
+            </button>
           </div>
-        }
+        </div>
+      }
 
-        <!-- Employee Profile Info Bar -->
-        @if (detectedEmployee) {
-          <div class="employee-details-bar p-16 rounded-16 d-flex align-items-center justify-content-between flex-wrap gap-12">
-            <div class="d-flex align-items-center gap-8 flex-wrap min-w-0" style="max-width: 100%;">
-              <div class="d-flex align-items-center gap-6 flex-shrink-0">
-                <mat-icon class="text-primary icon-22">verified_user</mat-icon>
-                <span class="f-w-700 f-s-13 text-primary">{{ 'attendance.secured_profile' | translate }}:</span>
-              </div>
-              <span class="badge bg-primary text-white font-mono p-x-10 p-y-6 rounded-8 f-s-12 text-truncate" style="max-width: 100%; word-break: break-all; white-space: normal;">
-                {{ detectedEmployee.name }} ({{ detectedEmployee.email }})
-              </span>
-            </div>
-            <div class="d-flex align-items-center gap-16 f-s-12 flex-wrap">
-              <span class="text-muted">Assigned Shift: <strong class="text-dark">{{ activeShift?.name || 'General Shift' }}</strong></span>
-              <span class="text-muted">Geofence Bound: <strong class="text-dark">{{ geofenceRadiusMeters }}m</strong></span>
-              <button mat-icon-button color="primary" matTooltip="Refresh Location GPS" (click)="requestGeolocation()">
-                <mat-icon class="icon-18">refresh</mat-icon>
-              </button>
-            </div>
-          </div>
+      <!-- Action Buttons -->
+      <div class="at-actions">
+        @if (!isCheckedIn) {
+          <button class="at-btn at-btn--primary" (click)="checkIn()" [disabled]="loading">
+            <span class="at-btn__shine"></span>
+            @if (loading) {
+              <mat-icon class="at-btn__spin">sync</mat-icon> Processing...
+            } @else {
+              <mat-icon>login</mat-icon> {{ 'attendance.punch_in' | translate }}
+            }
+          </button>
+        } @else {
+          @if (!isOnBreak) {
+            <button class="at-btn at-btn--break" (click)="startBreak()" [disabled]="loading || breakLoading">
+              <mat-icon>coffee</mat-icon> {{ 'attendance.enter_break' | translate }}
+            </button>
+          } @else {
+            <button class="at-btn at-btn--resume" (click)="endBreak()" [disabled]="loading || breakLoading">
+              <mat-icon class="at-btn__spin-fast">play_arrow</mat-icon> {{ 'attendance.exit_break' | translate }}
+            </button>
+          }
+          <button class="at-btn at-btn--out" (click)="checkOut()" [disabled]="loading || isOnBreak">
+            <span class="at-btn__shine"></span>
+            <mat-icon>logout</mat-icon> {{ 'attendance.punch_out' | translate }}
+          </button>
         }
       </div>
+
+      <!-- Break Timer Banner -->
+      @if (isOnBreak) {
+        <div class="at-break-banner">
+          <div class="at-break-banner__glow"></div>
+          <div class="at-break-banner__content">
+            <div class="at-break-banner__left">
+              <div class="at-break-banner__icon">
+                <mat-icon>local_cafe</mat-icon>
+              </div>
+              <div>
+                <h5 class="at-break-banner__title">
+                  Break In Progress — Timer Active
+                  <span class="at-live-badge"><span class="at-live-dot"></span> LIVE</span>
+                </h5>
+                <p class="at-break-banner__sub">Auto-deduction policy active · Max: {{ activeBreakPolicy?.max_duration_minutes || 30 }} min</p>
+              </div>
+            </div>
+            <div class="at-break-banner__timers">
+              <div class="at-timer-box">
+                <p class="at-timer-box__lbl">Elapsed</p>
+                <span class="at-timer-box__val">{{ formattedBreakElapsed }}</span>
+              </div>
+              <div class="at-timer-box" [ngClass]="breakRemainingSeconds < 300 ? 'at-timer-box--danger' : ''">
+                <p class="at-timer-box__lbl">Remaining</p>
+                <span class="at-timer-box__val" [ngClass]="breakRemainingSeconds < 300 ? 'at-timer-box__val--danger' : ''">{{ formattedBreakRemaining }}</span>
+              </div>
+            </div>
+          </div>
+          <mat-progress-bar mode="indeterminate" class="at-break-progress"></mat-progress-bar>
+        </div>
+      }
+
+      <!-- Employee Profile Bar -->
+      @if (detectedEmployee) {
+        <div class="at-employee-bar">
+          <div class="at-employee-bar__left">
+            <mat-icon>verified_user</mat-icon>
+            <span class="at-employee-bar__label">{{ 'attendance.secured_profile' | translate }}</span>
+            <span class="at-employee-bar__badge">{{ detectedEmployee.name }} ({{ detectedEmployee.email }})</span>
+          </div>
+          <div class="at-employee-bar__right">
+            <span>Shift: <strong>{{ activeShift?.name || 'General Shift' }}</strong></span>
+            <span>Geofence: <strong>{{ geofenceRadiusMeters }}m</strong></span>
+            <button mat-icon-button color="primary" matTooltip="Refresh GPS" (click)="requestGeolocation()">
+              <mat-icon>refresh</mat-icon>
+            </button>
+          </div>
+        </div>
+      }
     </div>
   </div>
 
-  <!-- Unique Cyber Liquid Glass Terminal Clock Card -->
-  <div class="col-lg-4 m-b-16">
-    <div class="glass-card cyber-clock-card text-white p-24 text-center h-100 d-flex flex-column justify-content-between">
-      <div>
-        <p class="f-s-12 text-uppercase text-white-50 letter-spacing-2 m-b-12 f-w-700">{{ 'attendance.digital_time' | translate }}</p>
-        
-        <div class="d-flex align-items-center justify-content-center gap-10 m-b-8">
-          <div class="digital-time-display">
-            {{ currentTimeString }}
-          </div>
-          <span class="ampm-badge">{{ currentAmPm }}</span>
-        </div>
-        
-        <p class="f-s-14 f-w-600 text-info m-b-20 d-flex align-items-center justify-content-center gap-6">
-          <mat-icon class="icon-16">today</mat-icon> {{ currentDateString }}
-        </p>
-      </div>
+  <!-- -- RIGHT: Premium Digital Clock Panel ------------------------------- -->
+  <div class="at-clock-panel">
+    <div class="at-clock-panel__glow"></div>
 
-      <!-- Shift Details Sub-Panel -->
-      <div class="bg-white-10 p-16 rounded-16 text-start b-1 b-white-10">
-        <p class="f-s-12 f-w-700 text-uppercase text-warning m-b-12 d-flex align-items-center gap-6">
-          <mat-icon class="icon-18">schedule</mat-icon> {{ 'attendance.shift_details' | translate }}
-        </p>
-        <div class="d-flex justify-content-between f-s-12 m-b-6">
-          <span class="text-white-75">{{ 'attendance.shift_name' | translate }}</span>
-          <span class="f-w-700 text-white">{{ activeShift?.name || 'Standard General' }}</span>
-        </div>
-        <div class="d-flex justify-content-between f-s-12 m-b-6">
-          <span class="text-white-75">{{ 'attendance.timings' | translate }}</span>
-          <span class="f-w-700 text-cyan">{{ activeShift?.timings || (activeShift?.start_time + ' - ' + activeShift?.end_time) || '09:00 - 18:00' }}</span>
-        </div>
-        <div class="d-flex justify-content-between f-s-12 m-b-6">
-          <span class="text-white-75">{{ 'attendance.grace_period' | translate }}</span>
-          <span class="f-w-700 text-success">{{ activeShift?.grace_period_minutes || 15 }} mins</span>
-        </div>
-        <div class="d-flex justify-content-between f-s-12">
-          <span class="text-white-75">{{ 'attendance.min_work' | translate }}</span>
-          <span class="f-w-700 text-white">{{ (activeShift?.min_work_minutes ? (activeShift.min_work_minutes / 60) : 8) }} Hours</span>
-        </div>
+    <!-- Live badge -->
+    <div class="at-clock-panel__live">
+      <span class="at-live-dot at-live-dot--cyan"></span>
+      <span>{{ 'attendance.digital_time' | translate }}</span>
+    </div>
+
+    <!-- Time display -->
+    <div class="at-clock-panel__time-wrap">
+      <div class="at-clock-display">{{ currentTimeString }}</div>
+      <span class="at-ampm">{{ currentAmPm }}</span>
+    </div>
+
+    <!-- Date -->
+    <div class="at-clock-panel__date">
+      <mat-icon>today</mat-icon>
+      <span>{{ currentDateString }}</span>
+    </div>
+
+    <!-- Shift details -->
+    <div class="at-shift-panel">
+      <div class="at-shift-panel__header">
+        <mat-icon>schedule</mat-icon>
+        <span>{{ 'attendance.shift_details' | translate }}</span>
+      </div>
+      <div class="at-shift-row">
+        <span class="at-shift-row__key">{{ 'attendance.shift_name' | translate }}</span>
+        <span class="at-shift-row__val">{{ activeShift?.name || 'Standard General' }}</span>
+      </div>
+      <div class="at-shift-row">
+        <span class="at-shift-row__key">{{ 'attendance.timings' | translate }}</span>
+        <span class="at-shift-row__val at-shift-row__val--cyan">{{ shiftTimingsDisplay }}</span>
+      </div>
+      <div class="at-shift-row">
+        <span class="at-shift-row__key">{{ 'attendance.grace_period' | translate }}</span>
+        <span class="at-shift-row__val at-shift-row__val--green">{{ activeShift?.grace_period_minutes || 15 }} mins</span>
+      </div>
+      <div class="at-shift-row">
+        <span class="at-shift-row__key">{{ 'attendance.min_work' | translate }}</span>
+        <span class="at-shift-row__val">{{ (activeShift?.min_work_minutes ? (activeShift.min_work_minutes / 60) : 8) }} Hours</span>
       </div>
     </div>
   </div>
@@ -303,7 +308,7 @@
   </div>
 }
 
-<!-- Logs Table & Admin Controls Header -->
+<!-- Logs Table & Admin Controls -->
 <div class="row">
   <div class="col-12">
     <div class="glass-card p-24">
@@ -330,12 +335,6 @@
           <button mat-stroked-button color="primary" class="white-space-nowrap btn-terminal-sm d-inline-flex align-items-center" (click)="loadAttendanceLogs()" [disabled]="loading">
             <mat-icon class="m-r-4 icon-18">refresh</mat-icon> {{ 'attendance.sync_db' | translate }}
           </button>
-
-          @if (perm.hasRoleAction('canCreate')) {
-            <button mat-flat-button color="primary" class="white-space-nowrap btn-terminal-sm shadow-primary d-inline-flex align-items-center" (click)="AddNewLog()">
-              <mat-icon class="m-r-4 icon-18">add</mat-icon> {{ 'attendance.create_manual' | translate }}
-            </button>
-          }
         </div>
       </div>
 
@@ -489,6 +488,8 @@
         [tableData]="attendanceLogs"
         [showAction]="true"
         [showView]="true"
+        [showEdit]="isAdminUser || perm.hasRoleAction('canUpdate', '/attendance')"
+        [showDelete]="isAdminUser || perm.hasRoleAction('canDelete', '/attendance')"
         (editClick)="editLog($event)"
         (ViewClick)="viewLog($event)"
         (deleteClick)="deleteLog($event)"
@@ -496,3 +497,4 @@
     </div>
   </div>
 </div>
+

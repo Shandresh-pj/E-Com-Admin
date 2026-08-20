@@ -83,7 +83,7 @@ export class ProductAttribute {
   }
 
   getProductAttributes() {
-    this.commonService.getApi(`ProductAttribute/All`).subscribe({
+    this.commonService.getApi(`product-attributes`).subscribe({
       next: (res: any) => {
         this.ProductAttributes = res?.data?.data;
         this.cdr.detectChanges();
@@ -106,7 +106,7 @@ export class ProductAttribute {
   }
 
   viewItem(attribute: any) {
-    this.commonService.getApi(`ProductAttribute/Detail/${attribute?.Id}`).subscribe({
+    this.commonService.getApi(`product-attributes/${attribute?.Id}`).subscribe({
       next: (res: any) => {
         const data = res?.data;
         this.dialog.open(ViewDetailsDialog, {
@@ -129,7 +129,7 @@ export class ProductAttribute {
   deleteUser(attribute: any) {
     this.alert.confirm("Are you sure you want to delete this product attribute?").then((result) => {
       if (result.isConfirmed) {
-        this.commonService.deleteApi(`ProductAttribute/${attribute?.Id}`).subscribe({
+        this.commonService.deleteApi(`product-attributes/${attribute?.Id}`).subscribe({
           next: (res: any) => {
             this.alert.success("Product Attribute deleted successfully");
             this.getProductAttributes();
@@ -159,7 +159,7 @@ export class ProductAttribute {
     };
 
     if (!this.Update_button) {
-      this.commonService.postApi(`ProductAttribute/Add`, payload).subscribe({
+      this.commonService.postApi(`product-attributes`, payload).subscribe({
         next: (res: any) => {
           this.alert.success("Product Attribute Created Successfully");
           this.refreshAndClose();
@@ -169,7 +169,7 @@ export class ProductAttribute {
         }
       });
     } else {
-      this.commonService.postApi(`ProductAttribute/Update/${this.SelectedProductAttributeId}`, payload).subscribe({
+      this.commonService.postApi(`product-attributes/${this.SelectedProductAttributeId}`, payload).subscribe({
         next: (res: any) => {
           this.alert.success("Product Attribute Updated Successfully");
           this.refreshAndClose();
@@ -182,7 +182,7 @@ export class ProductAttribute {
   }
 
   private refreshAndClose() {
-    this.commonService.getApi(`ProductAttribute/All`).subscribe({
+    this.commonService.getApi(`product-attributes`).subscribe({
       next: (res: any) => {
         this.ProductAttributes = res?.data?.data;
         this.cancelProductAttribute();

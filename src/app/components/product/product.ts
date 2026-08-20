@@ -348,7 +348,7 @@ export class Product {
   }
 
   getProductAttributes() {
-    this.commonService.getApi(`ProductAttribute/All`).subscribe({
+    this.commonService.getApi(`product-attributes`).subscribe({
       next: (res: any) => {
         this.ProductAttributes = res?.data?.data;
         this.cdr.detectChanges();

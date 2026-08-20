@@ -83,7 +83,7 @@ export class AttributeValue {
   }
 
   getAttributeValues(onLoaded?: () => void) {
-    this.commonService.getApi(`ProductAttributeValue/All`).subscribe({
+    this.commonService.getApi(`product-attribute-values`).subscribe({
       next: (res: any) => {
         const values = res?.data?.data || [];
         this.AttributeValues = values.map((value: any) => ({
@@ -112,7 +112,7 @@ export class AttributeValue {
   }
 
   viewItem(value: any) {
-    this.commonService.getApi(`ProductAttributeValue/Detail/${value?.Id}`).subscribe({
+    this.commonService.getApi(`product-attribute-values/${value?.Id}`).subscribe({
       next: (res: any) => {
         const data = res?.data;
         const attributeName = this.ProductAttributes?.find((attr: any) => attr.Id === data?.ProductAttributeId)?.Name;
@@ -137,7 +137,7 @@ export class AttributeValue {
   deleteUser(value: any) {
     this.alert.confirm("Are you sure you want to delete this attribute value?").then((result) => {
       if (result.isConfirmed) {
-        this.commonService.deleteApi(`ProductAttributeValue/${value?.Id}`).subscribe({
+        this.commonService.deleteApi(`product-attribute-values/${value?.Id}`).subscribe({
           next: (res: any) => {
             this.alert.success("Attribute Value deleted successfully");
             this.getAttributeValues();
@@ -167,7 +167,7 @@ export class AttributeValue {
     };
 
     if (!this.Update_button) {
-      this.commonService.postApi(`ProductAttributeValue/Add`, payload).subscribe({
+      this.commonService.postApi(`product-attribute-values`, payload).subscribe({
         next: (res: any) => {
           this.alert.success("Attribute Value Created Successfully");
           this.getAttributeValues(() => this.cancelAttributeValue());
@@ -177,7 +177,7 @@ export class AttributeValue {
         }
       });
     } else {
-      this.commonService.postApi(`ProductAttributeValue/Update/${this.SelectedAttributeValueId}`, payload).subscribe({
+      this.commonService.postApi(`product-attribute-values/${this.SelectedAttributeValueId}`, payload).subscribe({
         next: (res: any) => {
           this.alert.success("Attribute Value Updated Successfully");
           this.getAttributeValues(() => this.cancelAttributeValue());

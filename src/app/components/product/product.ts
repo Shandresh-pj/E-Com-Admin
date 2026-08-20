@@ -361,7 +361,7 @@ export class Product {
     if (!this.ProductAttributes?.length) return;
     this.ProductAttributes.forEach((attr: any) => {
       if (this.AttributeValuesByAttr[attr.Id]) return;
-      this.commonService.getApi(`ProductAttributeValue/All`, { ProductAttributeId: attr.Id }).subscribe({
+      this.commonService.getApi(`product-attribute-values`, { ProductAttributeId: attr.Id }).subscribe({
         next: (res: any) => {
           this.AttributeValuesByAttr[attr.Id] = res?.data?.data || [];
           this.cdr.detectChanges();
@@ -414,7 +414,7 @@ export class Product {
     row?.get('ProductAttributeValueId')?.setValue(null);
     this.SingleAttrValuesByRow[rowIndex] = [];
     if (!attrId) return;
-    this.commonService.getApi(`ProductAttributeValue/All`, { ProductAttributeId: attrId }).subscribe({
+    this.commonService.getApi(`product-attribute-values`, { ProductAttributeId: attrId }).subscribe({
       next: (res: any) => {
         this.SingleAttrValuesByRow[rowIndex] = res?.data?.data || [];
         this.cdr.detectChanges();
@@ -515,7 +515,7 @@ export class Product {
     this.SelectedVariantAttributeIds = selectedAttrIds;
     selectedAttrIds.forEach(attrId => {
       if (!this.AttributeValuesByAttr[attrId]) {
-        this.commonService.getApi(`ProductAttributeValue/All`, { ProductAttributeId: attrId }).subscribe({
+        this.commonService.getApi(`product-attribute-values`, { ProductAttributeId: attrId }).subscribe({
           next: (res: any) => {
             this.AttributeValuesByAttr[attrId] = res?.data?.data || [];
             this.cdr.detectChanges();

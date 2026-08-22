@@ -1,4 +1,4 @@
-﻿import { ChangeDetectorRef, Component } from '@angular/core';
+import { ChangeDetectorRef, Component } from '@angular/core';
 import { ReactiveFormsModule, FormsModule, FormGroup, FormBuilder, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
@@ -16,6 +16,7 @@ import { ViewDetailsDialog } from 'src/utils/view-details-dialog/view-details-di
 import { AppTranslatePipe } from 'src/app/pipes/app-translate.pipe';
 import { SocketService } from 'src/app/Securities/Services/socket.service';
 import { Subscription } from 'rxjs';
+import { catchError } from 'rxjs/operators';
 
 @Component({
   selector: 'app-category',
@@ -49,9 +50,9 @@ export class Category {
   Update_button: boolean = false;
   Categories: any;
   // Stat Chip Computed Properties
-  get activeCategoriesCount(): number { return (this.Categories || []).filter((c: any) => (c.status || "").toLowerCase() === "active").length; }
-  get parentCategoriesCount(): number { return (this.Categories || []).filter((c: any) => !c.parentId).length; }
-  get subCategoriesCount():    number { return (this.Categories || []).filter((c: any) => !!c.parentId).length; }
+  get activeCategoriesCount(): number { return (this.Categories || []).filter((c: any) => (c.status || c.statusText || "").toLowerCase() === "active").length; }
+  get parentCategoriesCount(): number { return (this.Categories || []).filter((c: any) => !c.parentId && !c.parent_id).length; }
+  get subCategoriesCount():    number { return (this.Categories || []).filter((c: any) => !!c.parentId || !!c.parent_id).length; }
   Statuses: any;
   SelectedCategoryId: any;
   ImageFile: File | null = null;
@@ -93,15 +94,32 @@ export class Category {
   getCategories(onLoaded?: () => void) {
     this.commonService.getApi(`categories`).subscribe({
       next: (res: any) => {
-        const rawList = res?.data || [];
+        const rawList = Array.isArray(res?.data?.data)
+          ? res.data.data
+          : Array.isArray(res?.data)
+            ? res.data
+            : Array.isArray(res)
+              ? res
+              : [];
         this.Categories = rawList.map((c: any) => {
-          const statusObj = this.Statuses?.find((s: any) => s.Id === c.StatusId);
+          const statusId = c.StatusId ?? c.statusId ?? c.status_id;
+          const statusObj = this.Statuses?.find((s: any) => s.Id === statusId || s.id === statusId);
           return {
             ...c,
-            parentName: c?.parent?.name || 'Root',
-            statusText: statusObj ? statusObj.StatusCode : (c?.status ? 'Active' : 'Inactive')
+            id: c?.id ?? c?.Id,
+            name: c?.name ?? c?.Name,
+            description: c?.description ?? c?.Description,
+            parent_id: c?.parent_id ?? c?.parentId ?? c?.ParentId ?? null,
+            StatusId: statusId,
+            parentName: c?.parent?.name || c?.parentName || 'Root',
+            statusText: statusObj ? (statusObj.StatusCode || statusObj.statusCode) : (c?.status ? 'Active' : 'Inactive')
           };
         });
+        onLoaded?.();
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.Categories = [];
         onLoaded?.();
         this.cdr.detectChanges();
       }
@@ -111,16 +129,39 @@ export class Category {
   getStatuses() {
     this.commonService.getApi(`Status/All`).subscribe({
       next: (res: any) => {
-        this.Statuses = res?.data?.data;
+        const rawList = Array.isArray(res?.data?.data)
+          ? res.data.data
+          : Array.isArray(res?.data)
+            ? res.data
+            : Array.isArray(res)
+              ? res
+              : [];
+        this.Statuses = rawList.map((s: any, idx: number) => {
+          const idVal = s?.Id ?? s?.id ?? s?.ID ?? (idx + 1);
+          const codeVal = s?.StatusCode ?? s?.statusCode ?? s?.status_code ?? '';
+          return {
+            ...s,
+            Id: idVal,
+            id: idVal,
+            StatusCode: codeVal,
+            statusCode: codeVal
+          };
+        });
         if (this.Categories) {
           this.Categories = this.Categories.map((c: any) => {
-            const statusObj = this.Statuses?.find((s: any) => s.Id === c.StatusId);
+            const statusId = c.StatusId ?? c.statusId ?? c.status_id;
+            const statusObj = this.Statuses?.find((s: any) => s.Id === statusId || s.id === statusId);
             return {
               ...c,
-              statusText: statusObj ? statusObj.StatusCode : (c?.status ? 'Active' : 'Inactive')
+              StatusId: statusId,
+              statusText: statusObj ? (statusObj.StatusCode || statusObj.statusCode) : (c?.status ? 'Active' : 'Inactive')
             };
           });
         }
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.Statuses = [];
         this.cdr.detectChanges();
       }
     });
@@ -155,35 +196,37 @@ export class Category {
   }
 
   editUser(category: any) {
-    this.SelectedCategoryId = category?.id;
+    this.SelectedCategoryId = category?.id ?? category?.Id;
     this.Category_Forms = true;
     this.Update_button = true;
     this.existingImageUrl = toFileUrl(category?.image);
     this.imagePreviewUrl = null;
     this.ImageFile = null;
     this.CategoryForm.patchValue({
-      name: category?.name,
-      description: category?.description,
-      parent_id: category?.parent_id,
-      StatusId: category?.StatusId
+      name: category?.name ?? category?.Name,
+      description: category?.description ?? category?.Description,
+      parent_id: category?.parent_id ?? category?.parentId ?? category?.ParentId ?? null,
+      StatusId: category?.StatusId ?? category?.statusId ?? category?.status_id
     });
   }
 
   viewItem(category: any) {
-    this.commonService.getApi(`categories/${category?.id}`).subscribe({
+    const targetId = category?.id ?? category?.Id;
+    this.commonService.getApi(`categories/${targetId}`).subscribe({
       next: (res: any) => {
-        const data = res?.data;
-        const status = this.Statuses?.find((s: any) => s.Id === data?.StatusId);
+        const data = res?.data || res;
+        const statusId = data?.StatusId ?? data?.statusId ?? data?.status_id;
+        const status = this.Statuses?.find((s: any) => s.Id === statusId || s.id === statusId);
         this.dialog.open(ViewDetailsDialog, {
           width: '600px',
           panelClass: 'premium-dialog-extended',
           data: {
             title: 'Category Details',
             fields: [
-              { label: 'Name', value: data?.name },
-              { label: 'Description', value: data?.description },
-              { label: 'Parent Category', value: data?.parent?.name || 'Root' },
-              { label: 'Status', value: status?.StatusCode || (data?.status ? 'Active' : 'Inactive') },
+              { label: 'Name', value: data?.name ?? data?.Name },
+              { label: 'Description', value: data?.description ?? data?.Description },
+              { label: 'Parent Category', value: data?.parent?.name || data?.parentName || 'Root' },
+              { label: 'Status', value: status ? (status.StatusCode || status.statusCode) : (data?.status ? 'Active' : 'Inactive') },
               { label: 'Image', value: toFileUrl(data?.image), isImage: true },
             ],
           },
@@ -193,9 +236,10 @@ export class Category {
   }
 
   deleteUser(category: any) {
+    const targetId = category?.id ?? category?.Id;
     this.alert.confirm("Are you sure you want to delete this category?").then((result) => {
       if (result.isConfirmed) {
-        this.commonService.deleteApi(`categories/${category?.id}`).subscribe({
+        this.commonService.deleteApi(`categories/${targetId}`).subscribe({
           next: (res: any) => {
             this.alert.success("Category deleted successfully");
             this.getCategories();
@@ -245,7 +289,11 @@ export class Category {
         }
       });
     } else {
-      this.commonService.putApi(`categories/${this.SelectedCategoryId}`, formData).subscribe({
+      const catId = this.SelectedCategoryId;
+      this.commonService.putApi(`categories/${catId}`, formData).pipe(
+        catchError(() => this.commonService.patchApi(`categories/${catId}`, formData)),
+        catchError(() => this.commonService.postApi(`categories/${catId}`, formData))
+      ).subscribe({
         next: (res: any) => {
           this.alert.success("Category Updated Successfully");
           this.getCategories(() => this.cancelCategory());
@@ -257,4 +305,3 @@ export class Category {
     }
   }
 }
-

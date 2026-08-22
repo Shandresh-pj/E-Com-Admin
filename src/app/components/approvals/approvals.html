@@ -1,3 +1,55 @@
+<div class="psh-root">
+  <div class="psh-bg" aria-hidden="true">
+    <div class="psh-orb psh-orb--a"></div>
+    <div class="psh-orb psh-orb--b"></div>
+    <div class="psh-orb psh-orb--c"></div>
+    <div class="psh-grid"></div>
+  </div>
+
+  <header class="psh-hero">
+    <div>
+      <div class="psh-eyebrow">
+        <span class="psh-eyebrow__dot"></span>
+        <span>GOVERNANCE & WORKFLOW</span>
+        <span class="psh-eyebrow__sep">·</span>
+        <span>{{ totalRequests || requests.length }} REQUESTS</span>
+      </div>
+      <h1 class="psh-title">Workflow <span class="psh-title__accent">Approvals</span></h1>
+      <p class="psh-sub">Review multi-stage product modifications, inventory level adjustments, and administrative publishing permissions.</p>
+    </div>
+  </header>
+
+  <div class="psh-chips">
+    <div class="psh-chip psh-chip--amber">
+      <div class="psh-chip__orb"><mat-icon>hourglass_top</mat-icon></div>
+      <div class="psh-chip__body">
+        <span class="psh-chip__num">{{ pendingCount }}</span>
+        <span class="psh-chip__lbl">Pending</span>
+      </div>
+    </div>
+    <div class="psh-chip psh-chip--emerald">
+      <div class="psh-chip__orb"><mat-icon>check_circle</mat-icon></div>
+      <div class="psh-chip__body">
+        <span class="psh-chip__num">{{ approvedCount }}</span>
+        <span class="psh-chip__lbl">Approved</span>
+      </div>
+    </div>
+    <div class="psh-chip psh-chip--cyan">
+      <div class="psh-chip__orb"><mat-icon>edit_note</mat-icon></div>
+      <div class="psh-chip__body">
+        <span class="psh-chip__num">{{ changesRequestedCount }}</span>
+        <span class="psh-chip__lbl">Changes Req</span>
+      </div>
+    </div>
+    <div class="psh-chip psh-chip--rose">
+      <div class="psh-chip__orb"><mat-icon>cancel</mat-icon></div>
+      <div class="psh-chip__body">
+        <span class="psh-chip__num">{{ rejectedCount }}</span>
+        <span class="psh-chip__lbl">Rejected</span>
+      </div>
+    </div>
+  </div>
+
 <mat-card class="cardWithShadow theme-card">
   <mat-card-header class="d-flex justify-content-between align-items-center">
     <mat-card-title class="m-b-0">{{ 'approvals.title' | translate }}</mat-card-title>
@@ -389,3 +441,5 @@
     </mat-card-content>
   }
 </mat-card>
+</div>
+

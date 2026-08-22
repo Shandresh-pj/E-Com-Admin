@@ -46,6 +46,9 @@ export class AttributeValue {
   ProductAttributes: any;
   SelectedAttributeValueId: any;
 
+  get activeValuesCount(): number { return (this.AttributeValues || []).length; }
+  get parentAttributesCount(): number { return (this.ProductAttributes || []).length; }
+
   constructor(
     private fb: FormBuilder,
     private authService: AuthService,

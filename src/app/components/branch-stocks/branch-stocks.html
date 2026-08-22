@@ -1,214 +1,289 @@
-<mat-card class="cardWithShadow theme-card">
-  <mat-card-header>
-    <div class="header-container flex-column flex-sm-row gap-12 justify-content-between align-items-center w-100 p-24 bg-light-primary">
-      <mat-card-title class="m-b-0">Branch Stock Management</mat-card-title>
+<div class="psh-root">
+  <div class="psh-bg" aria-hidden="true">
+    <div class="psh-orb psh-orb--a"></div>
+    <div class="psh-orb psh-orb--b"></div>
+    <div class="psh-orb psh-orb--c"></div>
+    <div class="psh-grid"></div>
+  </div>
 
-      <!-- Tab Controls and Action Buttons -->
-      <div class="d-flex align-items-center gap-12 flex-wrap">
-        <button mat-stroked-button [color]="viewMode === 'inventory' ? 'primary' : ''" (click)="changeView('inventory')" [disabled]="showForm || showTransferForm">
-          Branch Inventory
+  <header class="psh-hero">
+    <div>
+      <div class="psh-eyebrow">
+        <span class="psh-eyebrow__dot"></span>
+        <span>WAREHOUSE & LOGISTICS</span>
+        <span class="psh-eyebrow__sep">·</span>
+        <span>{{ totalBranchStocksCount }} BRANCH ITEMS</span>
+      </div>
+      <h1 class="psh-title">Branch <span class="psh-title__accent">Inventory</span></h1>
+      <p class="psh-sub">Monitor branch-specific inventory allocations, manage inter-branch stock transfer requests, and audit warehouse levels.</p>
+    </div>
+    <div class="psh-actions">
+      @if (viewMode === 'inventory' && !showForm && !showTransferForm && perm.hasRoleAction('canCreate')) {
+        <button class="psh-btn psh-btn--primary" (click)="toggleForm()">
+          <span class="psh-btn__shine"></span>
+          <mat-icon>add_circle</mat-icon> Adjust Stock Level
         </button>
-        <button mat-stroked-button [color]="viewMode === 'transfers' ? 'primary' : ''" (click)="changeView('transfers')" [disabled]="showForm || showTransferForm">
-          Stock Transfer
+      }
+      @if (viewMode === 'transfers' && !showForm && !showTransferForm && perm.hasRoleAction('canCreate')) {
+        <button class="psh-btn psh-btn--primary" (click)="toggleTransferForm()">
+          <span class="psh-btn__shine"></span>
+          <mat-icon>swap_horiz</mat-icon> Request Transfer
         </button>
-        @if (viewMode === 'inventory' && !showForm && !showTransferForm && perm.hasRoleAction('canCreate')) {
-          <button mat-flat-button color="primary" (click)="toggleForm()">
-            <mat-icon class="icon-16 m-r-4">edit</mat-icon> Adjust Stock Level
-          </button>
-        }
-        @if (viewMode === 'transfers' && !showForm && !showTransferForm && perm.hasRoleAction('canCreate')) {
-          <button mat-flat-button color="primary" (click)="toggleTransferForm()">
-            <mat-icon class="icon-16 m-r-4">swap_horiz</mat-icon> Request Transfer
-          </button>
-        }
+      }
+    </div>
+  </header>
+
+  <div class="psh-chips">
+    <div class="psh-chip psh-chip--violet">
+      <div class="psh-chip__orb"><mat-icon>store</mat-icon></div>
+      <div class="psh-chip__body">
+        <span class="psh-chip__num">{{ activeBranchesCount }}</span>
+        <span class="psh-chip__lbl">Branches</span>
       </div>
     </div>
-  </mat-card-header>
+    <div class="psh-chip psh-chip--emerald">
+      <div class="psh-chip__orb"><mat-icon>inventory</mat-icon></div>
+      <div class="psh-chip__body">
+        <span class="psh-chip__num">{{ totalBranchStocksCount }}</span>
+        <span class="psh-chip__lbl">Allocated</span>
+      </div>
+    </div>
+    <div class="psh-chip psh-chip--amber">
+      <div class="psh-chip__orb"><mat-icon>swap_horiz</mat-icon></div>
+      <div class="psh-chip__body">
+        <span class="psh-chip__num">{{ pendingTransfersCount }}</span>
+        <span class="psh-chip__lbl">Transfers Pending</span>
+      </div>
+    </div>
+    <div class="psh-chip psh-chip--cyan">
+      <div class="psh-chip__orb"><mat-icon>local_shipping</mat-icon></div>
+      <div class="psh-chip__body">
+        <span class="psh-chip__num">{{ approvedTransfersCount }}</span>
+        <span class="psh-chip__lbl">Transferred</span>
+      </div>
+    </div>
+  </div>
 
-  @if (showForm) {
-    <mat-card-content class="p-24 b-t-1">
-      <form [formGroup]="stockForm">
-        <div class="row">
-          <!-- Select Company -->
-          <div class="col-lg-4 col-md-6 col-sm-12 m-b-16">
-            <mat-label class="f-w-600 m-b-8 d-block">Company <span class="text-danger">*</span></mat-label>
-            <mat-form-field appearance="outline" class="w-100">
-              <mat-select formControlName="company_id" placeholder="Select Company">
-                @for (c of companies; track c.id) {
-                  <mat-option [value]="c.id">{{ c.name }}</mat-option>
-                }
-              </mat-select>
-            </mat-form-field>
-          </div>
+  <mat-card class="cardWithShadow theme-card">
+    <mat-card-header>
+      <div class="header-container flex-column flex-sm-row gap-12 justify-content-between align-items-center w-100 p-24">
+        <mat-card-title class="m-b-0">Branch Stock Management</mat-card-title>
 
-          <!-- Select Branch Name -->
-          <div class="col-lg-4 col-md-6 col-sm-12 m-b-16">
-            <mat-label class="f-w-600 m-b-8 d-block">Branch <span class="text-danger">*</span></mat-label>
-            <mat-form-field appearance="outline" class="w-100">
-              <mat-select formControlName="branch_name" placeholder="Select Branch">
-                @for (b of branches; track b.id) {
-                  <mat-option [value]="b.name">{{ b.name }}</mat-option>
-                }
-              </mat-select>
-            </mat-form-field>
-          </div>
-
-          <!-- Select Product -->
-          <div class="col-lg-4 col-md-6 col-sm-12 m-b-16">
-            <mat-label class="f-w-600 m-b-8 d-block">Product <span class="text-danger">*</span></mat-label>
-            <mat-form-field appearance="outline" class="w-100">
-              <mat-select formControlName="product_id" placeholder="Select Product">
-                @for (p of products; track p.id) {
-                  <mat-option [value]="p.id">{{ p.name }}</mat-option>
-                }
-              </mat-select>
-            </mat-form-field>
-          </div>
-
-          <!-- Quantity Input -->
-          <div class="col-lg-4 col-md-6 col-sm-12 m-b-16">
-            <mat-label class="f-w-600 m-b-8 d-block">Quantity <span class="text-danger">*</span></mat-label>
-            <mat-form-field appearance="outline" class="w-100">
-              <input matInput type="number" formControlName="quantity" placeholder="Enter quantity Adjust amount">
-            </mat-form-field>
-          </div>
-
-          <!-- Action Select -->
-          <div class="col-lg-4 col-md-6 col-sm-12 m-b-16">
-            <mat-label class="f-w-600 m-b-8 d-block">Adjustment Action <span class="text-danger">*</span></mat-label>
-            <mat-form-field appearance="outline" class="w-100">
-              <mat-select formControlName="action">
-                <mat-option value="ADD">ADD Stock</mat-option>
-                <mat-option value="REMOVE">REMOVE Stock</mat-option>
-              </mat-select>
-            </mat-form-field>
-          </div>
-        </div>
-
-        <div class="m-t-16">
-          <button mat-stroked-button class="me-3" (click)="toggleForm()" [disabled]="loading">Cancel</button>
-          <button mat-flat-button color="primary" (click)="submitStockUpdate()" [disabled]="loading || stockForm.invalid">
-            Submit
+        <!-- Tab Controls -->
+        <div class="d-flex align-items-center gap-12 flex-wrap">
+          <button mat-stroked-button [color]="viewMode === 'inventory' ? 'primary' : ''" (click)="changeView('inventory')" [disabled]="showForm || showTransferForm">
+            Branch Inventory
+          </button>
+          <button mat-stroked-button [color]="viewMode === 'transfers' ? 'primary' : ''" (click)="changeView('transfers')" [disabled]="showForm || showTransferForm">
+            Stock Transfer
           </button>
         </div>
-      </form>
-    </mat-card-content>
-  } @else if (showTransferForm) {
-    <mat-card-content class="p-24 b-t-1">
-      <form [formGroup]="transferForm">
-        <div class="row">
-          <!-- From Branch -->
-          <div class="col-lg-3 col-md-6 col-sm-12 m-b-16">
-            <mat-label class="f-w-600 m-b-8 d-block">From Branch <span class="text-danger">*</span></mat-label>
-            <mat-form-field appearance="outline" class="w-100">
-              <mat-select formControlName="from_branch" placeholder="Select Source Branch">
-                @for (b of branches; track b.id) {
-                  <mat-option [value]="b.name">{{ b.name }}</mat-option>
-                }
-              </mat-select>
-            </mat-form-field>
+      </div>
+    </mat-card-header>
+
+    @if (showForm) {
+      <mat-card-content class="p-24 b-t-1">
+        <form [formGroup]="stockForm" class="premium-form-grid p-t-24">
+          <div class="divider">
+            <span>Branch Adjustment Details</span>
           </div>
 
-          <!-- To Branch -->
-          <div class="col-lg-3 col-md-6 col-sm-12 m-b-16">
-            <mat-label class="f-w-600 m-b-8 d-block">To Branch <span class="text-danger">*</span></mat-label>
-            <mat-form-field appearance="outline" class="w-100">
-              <mat-select formControlName="to_branch" placeholder="Select Destination Branch">
-                @for (b of branches; track b.id) {
-                  <mat-option [value]="b.name">{{ b.name }}</mat-option>
-                }
-              </mat-select>
-            </mat-form-field>
+          <div class="form-row">
+            <!-- Select Company -->
+            <div class="field-container">
+              <mat-label class="f-w-600 m-b-8 d-block">Company <span class="text-danger">*</span></mat-label>
+              <mat-form-field appearance="outline" class="w-100">
+                <mat-select formControlName="company_id" placeholder="Select Company">
+                  @for (c of companies; track c.id) {
+                    <mat-option [value]="c.id">{{ c.name }}</mat-option>
+                  }
+                </mat-select>
+              </mat-form-field>
+            </div>
+
+            <!-- Select Branch Name -->
+            <div class="field-container">
+              <mat-label class="f-w-600 m-b-8 d-block">Branch <span class="text-danger">*</span></mat-label>
+              <mat-form-field appearance="outline" class="w-100">
+                <mat-select formControlName="branch_name" placeholder="Select Branch">
+                  @for (b of branches; track b.id) {
+                    <mat-option [value]="b.name">{{ b.name }}</mat-option>
+                  }
+                </mat-select>
+              </mat-form-field>
+            </div>
+
+            <!-- Select Product -->
+            <div class="field-container">
+              <mat-label class="f-w-600 m-b-8 d-block">Product <span class="text-danger">*</span></mat-label>
+              <mat-form-field appearance="outline" class="w-100">
+                <mat-select formControlName="product_id" placeholder="Select Product">
+                  @for (p of products; track p.id) {
+                    <mat-option [value]="p.id">{{ p.name }}</mat-option>
+                  }
+                </mat-select>
+              </mat-form-field>
+            </div>
           </div>
 
-          <!-- Select Product -->
-          <div class="col-lg-3 col-md-6 col-sm-12 m-b-16">
-            <mat-label class="f-w-600 m-b-8 d-block">Product <span class="text-danger">*</span></mat-label>
-            <mat-form-field appearance="outline" class="w-100">
-              <mat-select formControlName="product_id" placeholder="Select Product">
-                @for (p of products; track p.id) {
-                  <mat-option [value]="p.id">{{ p.name }}</mat-option>
-                }
-              </mat-select>
-            </mat-form-field>
+          <div class="form-row">
+            <!-- Quantity Input -->
+            <div class="field-container">
+              <mat-label class="f-w-600 m-b-8 d-block">Quantity <span class="text-danger">*</span></mat-label>
+              <mat-form-field appearance="outline" class="w-100">
+                <input matInput type="number" formControlName="quantity" placeholder="Enter quantity Adjust amount">
+              </mat-form-field>
+            </div>
+
+            <!-- Action Select -->
+            <div class="field-container">
+              <mat-label class="f-w-600 m-b-8 d-block">Adjustment Action <span class="text-danger">*</span></mat-label>
+              <mat-form-field appearance="outline" class="w-100">
+                <mat-select formControlName="action">
+                  <mat-option value="ADD">ADD Stock (+)</mat-option>
+                  <mat-option value="REMOVE">REMOVE Stock (-)</mat-option>
+                  <mat-option value="SET">SET Stock (=)</mat-option>
+                </mat-select>
+              </mat-form-field>
+            </div>
           </div>
 
-          <!-- Quantity Input -->
-          <div class="col-lg-3 col-md-6 col-sm-12 m-b-16">
-            <mat-label class="f-w-600 m-b-8 d-block">Quantity <span class="text-danger">*</span></mat-label>
-            <mat-form-field appearance="outline" class="w-100">
-              <input matInput type="number" formControlName="quantity" placeholder="Enter quantity" min="1">
-            </mat-form-field>
+          <div class="flex m-t-16" style="justify-content: flex-end; gap: 16px;">
+            <button mat-stroked-button class="btn-rounded Cancel_Button" type="button" (click)="toggleForm()" [disabled]="loading">
+              <mat-icon>close</mat-icon> Cancel
+            </button>
+            <button mat-flat-button class="btn-rounded btn-gradient" type="button" (click)="submitStockUpdate()" [disabled]="loading || stockForm.invalid">
+              <mat-icon>check_circle</mat-icon> Submit Adjustment
+            </button>
           </div>
-        </div>
+        </form>
+      </mat-card-content>
+    } @else if (showTransferForm) {
+      <mat-card-content class="p-24 b-t-1">
+        <form [formGroup]="transferForm" class="premium-form-grid p-t-24">
+          <div class="divider">
+            <span>Stock Transfer Request</span>
+          </div>
 
-        <div class="m-t-16">
-          <button mat-stroked-button class="me-3" (click)="toggleTransferForm()" [disabled]="loading">Cancel</button>
-          <button mat-flat-button color="primary" (click)="submitTransferRequest()" [disabled]="loading || transferForm.invalid">
-            Submit Transfer Request
-          </button>
-        </div>
-      </form>
-    </mat-card-content>
-  } @else {
-    <mat-card-content class="b-t-1">
+          <div class="form-row">
+            <!-- From Branch -->
+            <div class="field-container">
+              <mat-label class="f-w-600 m-b-8 d-block">From Branch <span class="text-danger">*</span></mat-label>
+              <mat-form-field appearance="outline" class="w-100">
+                <mat-select formControlName="from_branch" placeholder="Select Source Branch">
+                  @for (b of branches; track b.id) {
+                    <mat-option [value]="b.name">{{ b.name }}</mat-option>
+                  }
+                </mat-select>
+              </mat-form-field>
+            </div>
 
-      <!-- Branch Inventory Table -->
-      @if (viewMode === 'inventory') {
-        <app-mat-table
-          [columns]="inventoryColumns"
-          [tableData]="branchStocks"
-          [showAction]="false"
-          [showView]="false"
-          [showSearch]="true"
-          [isLoading]="loading">
-        </app-mat-table>
-      }
+            <!-- To Branch -->
+            <div class="field-container">
+              <mat-label class="f-w-600 m-b-8 d-block">To Branch <span class="text-danger">*</span></mat-label>
+              <mat-form-field appearance="outline" class="w-100">
+                <mat-select formControlName="to_branch" placeholder="Select Destination Branch">
+                  @for (b of branches; track b.id) {
+                    <mat-option [value]="b.name">{{ b.name }}</mat-option>
+                  }
+                </mat-select>
+              </mat-form-field>
+            </div>
 
-      <!-- Stock Transfer Requests Table -->
-      @if (viewMode === 'transfers') {
-        <app-mat-table
-          [columns]="transferColumns"
-          [tableData]="transfers"
-          [showAction]="false"
-          [showView]="false"
-          [showSearch]="true"
-          [isLoading]="loading"
-          [customTemplates]="{ status: statusTpl, created_at: createdAtTpl, actions: actionsTpl }">
-        </app-mat-table>
+            <!-- Select Product -->
+            <div class="field-container">
+              <mat-label class="f-w-600 m-b-8 d-block">Product <span class="text-danger">*</span></mat-label>
+              <mat-form-field appearance="outline" class="w-100">
+                <mat-select formControlName="product_id" placeholder="Select Product">
+                  @for (p of products; track p.id) {
+                    <mat-option [value]="p.id">{{ p.name }}</mat-option>
+                  }
+                </mat-select>
+              </mat-form-field>
+            </div>
 
-        <ng-template #statusTpl let-element>
-          <span class="badge font-weight-bold"
-                [ngClass]="{
-                  'bg-light-warning text-warning': element.status === 'Pending Approval',
-                  'bg-light-success text-success': element.status === 'Approved',
-                  'bg-light-error text-error': element.status === 'Rejected'
-                }">
-            {{ element.status }}
-          </span>
-          @if (element.status === 'Rejected') {
-            <span class="d-block text-muted f-s-12 m-t-4" style="max-width: 200px; white-space: normal;">
-              Reason: {{ element.rejection_reason }}
+            <!-- Quantity Input -->
+            <div class="field-container">
+              <mat-label class="f-w-600 m-b-8 d-block">Quantity <span class="text-danger">*</span></mat-label>
+              <mat-form-field appearance="outline" class="w-100">
+                <input matInput type="number" formControlName="quantity" placeholder="Enter quantity" min="1">
+              </mat-form-field>
+            </div>
+          </div>
+
+          <div class="flex m-t-16" style="justify-content: flex-end; gap: 16px;">
+            <button mat-stroked-button class="btn-rounded Cancel_Button" type="button" (click)="toggleTransferForm()" [disabled]="loading">
+              <mat-icon>close</mat-icon> Cancel
+            </button>
+            <button mat-flat-button class="btn-rounded btn-gradient" type="button" (click)="submitTransferRequest()" [disabled]="loading || transferForm.invalid">
+              <mat-icon>swap_horiz</mat-icon> Submit Transfer Request
+            </button>
+          </div>
+        </form>
+      </mat-card-content>
+    } @else {
+      <mat-card-content class="b-t-1">
+
+        <!-- Branch Inventory Table -->
+        @if (viewMode === 'inventory') {
+          <app-mat-table
+            [columns]="inventoryColumns"
+            [tableData]="branchStocks"
+            [showAction]="false"
+            [showView]="false"
+            [showSearch]="true"
+            [enableExport]="true"
+            [isLoading]="loading">
+          </app-mat-table>
+        }
+
+        <!-- Stock Transfer Requests Table -->
+        @if (viewMode === 'transfers') {
+          <app-mat-table
+            [columns]="transferColumns"
+            [tableData]="transfers"
+            [showAction]="false"
+            [showView]="false"
+            [showSearch]="true"
+            [enableExport]="true"
+            [isLoading]="loading"
+            [customTemplates]="{ status: statusTpl, created_at: createdAtTpl, actions: actionsTpl }">
+          </app-mat-table>
+
+          <ng-template #statusTpl let-element>
+            <span class="badge font-weight-bold"
+                  [ngClass]="{
+                    'bg-light-warning text-warning': element.status === 'Pending Approval',
+                    'bg-light-success text-success': element.status === 'Approved',
+                    'bg-light-error text-error': element.status === 'Rejected'
+                  }">
+              {{ element.status }}
             </span>
-          }
-        </ng-template>
+            @if (element.status === 'Rejected') {
+              <span class="d-block text-muted f-s-12 m-t-4" style="max-width: 200px; white-space: normal;">
+                Reason: {{ element.rejection_reason }}
+              </span>
+            }
+          </ng-template>
 
-        <ng-template #createdAtTpl let-element>
-          {{ element.created_at | date:'medium' }}
-        </ng-template>
+          <ng-template #createdAtTpl let-element>
+            {{ element.created_at | date:'medium' }}
+          </ng-template>
 
-        <ng-template #actionsTpl let-element>
-          @if (element.status === 'Pending Approval' && isAdmin) {
-            <button mat-icon-button color="primary" (click)="approveTransfer(element.id, 'APPROVE')" title="Approve">
-              <mat-icon>done</mat-icon>
-            </button>
-            <button mat-icon-button color="warn" (click)="rejectTransfer(element.id)" title="Reject">
-              <mat-icon>close</mat-icon>
-            </button>
-          }
-        </ng-template>
-      }
+          <ng-template #actionsTpl let-element>
+            @if (element.status === 'Pending Approval' && isAdmin) {
+              <button mat-icon-button color="primary" (click)="approveTransfer(element.id, 'APPROVE')" title="Approve">
+                <mat-icon>done</mat-icon>
+              </button>
+              <button mat-icon-button color="warn" (click)="rejectTransfer(element.id)" title="Reject">
+                <mat-icon>close</mat-icon>
+              </button>
+            }
+          </ng-template>
+        }
 
-    </mat-card-content>
-  }
-</mat-card>
+      </mat-card-content>
+    }
+  </mat-card>
+</div>
+

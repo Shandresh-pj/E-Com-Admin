@@ -38,6 +38,11 @@ export class Stocks implements OnInit, OnDestroy {
   products: any[] = [];
   stockLogs: any[] = [];
 
+  get totalProductsCount(): number { return (this.products || []).length; }
+  get inStockCount(): number { return (this.products || []).filter(p => (p.stock ?? p.stock_in_hand ?? 0) > (p.low_stock_threshold || 5)).length; }
+  get lowStockCount(): number { return (this.products || []).filter(p => { const s = p.stock ?? p.stock_in_hand ?? 0; return s > (p.critical_stock_threshold || 2) && s <= (p.low_stock_threshold || 5); }).length; }
+  get outOfStockCount(): number { return (this.products || []).filter(p => (p.stock ?? p.stock_in_hand ?? 0) <= (p.critical_stock_threshold || 2)).length; }
+
   productColumns = [
     { columnDef: 'name', header: 'Product Name' },
     { columnDef: 'stock', header: 'Current Stock', type: 'custom' },

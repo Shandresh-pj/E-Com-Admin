@@ -1,4 +1,4 @@
-﻿import { ChangeDetectorRef, Component } from '@angular/core';
+import { ChangeDetectorRef, Component } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 
 import { ReactiveFormsModule, FormsModule, FormGroup, FormArray, FormBuilder, Validators } from '@angular/forms';
@@ -60,13 +60,14 @@ export class Product {
   ProductForm: FormGroup;
   Product_Forms: boolean = false;
   Update_button: boolean = false;
-  Products: any;
+  Products: any[] = [];
+  Categories: any[] = [];
+  ProductAttributes: any[] = [];
+
   // Stat Chip Computed Properties
-  get publishedCount(): number { return this.Products.filter((p: any) => p.status === "Published").length; }
-  get pendingCount():   number { return this.Products.filter((p: any) => p.status === "Pending Approval").length; }
-  get draftCount():     number { return this.Products.filter((p: any) => p.status === "Draft").length; }
-  Categories: any;
-  ProductAttributes: any;
+  get publishedCount(): number { return (this.Products || []).filter((p: any) => p?.status === "Published" || p?.approval_status === "Published" || p?.status === "Approved").length; }
+  get pendingCount():   number { return (this.Products || []).filter((p: any) => p?.status === "Pending Approval" || p?.approval_status === "Pending Approval").length; }
+  get draftCount():     number { return (this.Products || []).filter((p: any) => p?.status === "Draft" || p?.approval_status === "Draft").length; }
   AttributeValuesByAttr: { [attributeId: number]: any[] } = {};
   SelectedAttrValues: { [attributeId: number]: number[] } = {};
   SavedVariantDataMap: { [key: string]: any } = {};
@@ -325,9 +326,15 @@ export class Product {
     }
     this.commonService.getApi(`products`, params).subscribe({
       next: (res: any) => {
-        this.Products = res?.data || [];
+        const rawList = res?.data?.data ?? res?.data ?? res;
+        this.Products = Array.isArray(rawList) ? rawList : [];
         onLoaded?.();
         this.checkAndShowExpiryNotifications(this.Products);
+        this.cdr.detectChanges();
+      },
+      error: (err: any) => {
+        console.error('Failed to load products:', err);
+        this.Products = [];
         this.cdr.detectChanges();
       }
     });
@@ -341,7 +348,13 @@ export class Product {
   getCategories() {
     this.commonService.getApi(`categories`).subscribe({
       next: (res: any) => {
-        this.Categories = res?.data;
+        const rawList = res?.data?.data ?? res?.data ?? res;
+        this.Categories = Array.isArray(rawList) ? rawList : [];
+        this.cdr.detectChanges();
+      },
+      error: (err: any) => {
+        console.error('Failed to load categories:', err);
+        this.Categories = [];
         this.cdr.detectChanges();
       }
     });
@@ -350,7 +363,13 @@ export class Product {
   getProductAttributes() {
     this.commonService.getApi(`product-attributes`).subscribe({
       next: (res: any) => {
-        this.ProductAttributes = res?.data?.data;
+        const rawList = res?.data?.data ?? res?.data ?? res;
+        this.ProductAttributes = Array.isArray(rawList) ? rawList : [];
+        this.cdr.detectChanges();
+      },
+      error: (err: any) => {
+        console.error('Failed to load product attributes:', err);
+        this.ProductAttributes = [];
         this.cdr.detectChanges();
       }
     });

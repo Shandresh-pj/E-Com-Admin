@@ -83,11 +83,11 @@
                     <mat-label class="f-w-600 m-b-8 d-block">{{ 'common.status' | translate }} <span class="text-danger">*</span></mat-label>
                     <mat-form-field appearance="outline" class="w-100">
                         <mat-select formControlName="StatusId" [placeholder]="'common.select_status' | translate">
-                            @for(option of Statuses; track option.Id) {
-                            <mat-option [value]="option.Id">
+                            @for(option of Statuses; track (option.Id ?? option.id)) {
+                            <mat-option [value]="option.Id ?? option.id">
                                 <div class="flex items-center gap-8">
-                                    <span class="status-dot" [class.bg-success]="option.StatusCode === 'Active'" [class.bg-warn]="option.StatusCode !== 'Active'"></span>
-                                    {{option.StatusCode}}
+                                    <span class="status-dot" [class.bg-success]="(option.StatusCode ?? option.statusCode ?? '').toLowerCase() === 'active'" [class.bg-warn]="(option.StatusCode ?? option.statusCode ?? '').toLowerCase() !== 'active'"></span>
+                                    {{option.StatusCode ?? option.statusCode}}
                                 </div>
                             </mat-option>
                             }

@@ -12,6 +12,7 @@ import { CommonService } from 'src/app/Securities/Services/common.service';
 import { AlertService } from 'src/app/Securities/Services/alert.service';
 import { PermissionService } from 'src/app/Securities/Services/permissions.service';
 import { AuthService } from 'src/app/Securities/Services/auth.service';
+import { SessionService } from 'src/app/Securities/Services/session.service';
 import { SocketService } from 'src/app/Securities/Services/socket.service';
 import { Subscription } from 'rxjs';
 import { MatTable, TableColumn } from 'src/utils/mat-table/mat-table';
@@ -57,6 +58,11 @@ export class BranchStocks implements OnInit, OnDestroy {
   companies: any[] = [];
   branches: any[] = [];
   products: any[] = [];
+
+  get totalBranchStocksCount(): number { return (this.branchStocks || []).length; }
+  get activeBranchesCount(): number { return (this.branches || []).length; }
+  get pendingTransfersCount(): number { return (this.transfers || []).filter(t => t.status === 'Pending Approval').length; }
+  get approvedTransfersCount(): number { return (this.transfers || []).filter(t => t.status === 'Approved').length; }
   
   stockForm: FormGroup;
   transferForm: FormGroup;
@@ -71,6 +77,7 @@ export class BranchStocks implements OnInit, OnDestroy {
     private commonService: CommonService,
     private alert: AlertService,
     private authService: AuthService,
+    private sessionService: SessionService,
     private socketService: SocketService,
     public perm: PermissionService,
     private route: ActivatedRoute,
@@ -93,10 +100,10 @@ export class BranchStocks implements OnInit, OnDestroy {
   }
 
   get isAdmin(): boolean {
-    // Use DB permission check instead of hardcoded role name.
-    // hasRoleAction returns true for Super Admin automatically.
-    return this.perm.hasRoleAction('canManage', '/branch-stocks') ||
-           this.perm.hasRoleAction('canUpdate', '/branch-stocks');
+    return this.authService.isSuperAdmin() ||
+           this.perm.hasRoleAction('canManage', '/branch-stocks') ||
+           this.perm.hasRoleAction('canUpdate', '/branch-stocks') ||
+           this.perm.hasRoleAction('canApprove', '/branch-stocks');
   }
 
   ngOnInit() {
@@ -118,9 +125,6 @@ export class BranchStocks implements OnInit, OnDestroy {
       })
     );
 
-    // Sidebar submenu items (Branch Inventory / Stock Transfer) both route
-    // here and distinguish themselves via the "view" query param since they
-    // share one page.
     this.socketSub.add(
       this.route.queryParamMap.subscribe((params) => {
         const view = params.get('view');
@@ -140,16 +144,20 @@ export class BranchStocks implements OnInit, OnDestroy {
     this.loading = true;
     this.commonService.getApi('branch-stock').subscribe({
       next: (res: any) => {
-        this.branchStocks = (res?.data || []).map((item: any) => ({
+        const rawList = res?.data?.data ?? res?.data ?? res;
+        this.branchStocks = (Array.isArray(rawList) ? rawList : []).map((item: any) => ({
           ...item,
           product_name: item.product?.name || `Product ID: ${item.product_id}`,
           updated_at: item.updated_at ? new Date(item.updated_at).toLocaleString() : '-'
         }));
         this.loading = false;
+        this.cdr.detectChanges();
       },
       error: (err) => {
         console.error('Failed to load branch stocks:', err);
+        this.branchStocks = [];
         this.loading = false;
+        this.cdr.detectChanges();
       }
     });
   }
@@ -157,28 +165,52 @@ export class BranchStocks implements OnInit, OnDestroy {
   loadTransfers() {
     this.commonService.getApi('branch-stock/transfers').subscribe({
       next: (res: any) => {
-        this.transfers = (res?.data || []).map((t: any) => ({
+        const rawList = res?.data?.data ?? res?.data ?? res;
+        this.transfers = (Array.isArray(rawList) ? rawList : []).map((t: any) => ({
           ...t,
           product_name: t.product?.name || `Product ID: ${t.product_id}`
         }));
+        this.cdr.detectChanges();
       },
       error: (err) => {
         console.error('Failed to load transfers:', err);
+        this.transfers = [];
+        this.cdr.detectChanges();
       }
     });
   }
 
   loadLookups() {
+    const userCompanyId = this.sessionService.getUser()?.company_id || this.sessionService.getUser()?.companyId;
+
     this.commonService.getApi('companies').subscribe({
-      next: (res: any) => { this.companies = res?.data || []; }
+      next: (res: any) => {
+        const rawList = res?.data?.data ?? res?.data ?? res;
+        this.companies = Array.isArray(rawList) ? rawList : [];
+        if (this.companies.length > 0 && !this.stockForm.get('company_id')?.value) {
+          const matchedCompany = this.companies.find(c => Number(c.id) === Number(userCompanyId)) || this.companies[0];
+          if (matchedCompany) {
+            this.stockForm.patchValue({ company_id: matchedCompany.id });
+          }
+        }
+        this.cdr.detectChanges();
+      }
     });
 
     this.commonService.getApi('branches').subscribe({
-      next: (res: any) => { this.branches = res?.data || []; }
+      next: (res: any) => {
+        const rawList = res?.data?.data ?? res?.data ?? res;
+        this.branches = Array.isArray(rawList) ? rawList : [];
+        this.cdr.detectChanges();
+      }
     });
 
     this.commonService.getApi('products').subscribe({
-      next: (res: any) => { this.products = res?.data || []; }
+      next: (res: any) => {
+        const rawList = res?.data?.data ?? res?.data ?? res;
+        this.products = Array.isArray(rawList) ? rawList : [];
+        this.cdr.detectChanges();
+      }
     });
   }
 
@@ -186,6 +218,8 @@ export class BranchStocks implements OnInit, OnDestroy {
     this.showForm = !this.showForm;
     if (this.showForm) {
       this.showTransferForm = false;
+      const userCompanyId = this.sessionService.getUser()?.company_id || this.sessionService.getUser()?.companyId || (this.companies[0]?.id || 1);
+      this.stockForm.patchValue({ company_id: Number(userCompanyId), action: 'ADD' });
     } else {
       this.stockForm.reset({ action: 'ADD' });
     }
@@ -216,18 +250,27 @@ export class BranchStocks implements OnInit, OnDestroy {
     }
 
     this.loading = true;
-    const payload = this.stockForm.value;
+    const formVal = this.stockForm.value;
+    const payload = {
+      company_id: Number(formVal.company_id),
+      branch_name: String(formVal.branch_name),
+      product_id: Number(formVal.product_id),
+      quantity: Number(formVal.quantity),
+      action: formVal.action || 'ADD'
+    };
 
     this.commonService.postApi('branch-stock/update', payload).subscribe({
-      next: () => {
-        this.alert.success("Branch stock level adjustment submitted");
+      next: (res: any) => {
+        this.alert.success(res?.message || "Branch stock level adjustment submitted");
         this.toggleForm();
         this.loadBranchStocks();
+        this.cdr.detectChanges();
       },
       error: (err) => {
         console.error('Stock update failed:', err);
         this.alert.error("Adjustment failed: " + (err.error?.message || "Internal error"));
         this.loading = false;
+        this.cdr.detectChanges();
       }
     });
   }
@@ -238,19 +281,32 @@ export class BranchStocks implements OnInit, OnDestroy {
       return;
     }
 
+    const formVal = this.transferForm.value;
+    if (formVal.from_branch === formVal.to_branch) {
+      this.alert.error("Source (From) and Destination (To) branch cannot be the same!");
+      return;
+    }
+
     this.loading = true;
-    const payload = this.transferForm.value;
+    const payload = {
+      from_branch: String(formVal.from_branch),
+      to_branch: String(formVal.to_branch),
+      product_id: Number(formVal.product_id),
+      quantity: Number(formVal.quantity)
+    };
 
     this.commonService.postApi('branch-stock/transfer', payload).subscribe({
-      next: () => {
-        this.alert.success("Inter-branch stock transfer requested");
+      next: (res: any) => {
+        this.alert.success(res?.message || "Inter-branch stock transfer requested");
         this.toggleTransferForm();
         this.loadTransfers();
+        this.cdr.detectChanges();
       },
       error: (err) => {
         console.error('Transfer request failed:', err);
         this.alert.error("Transfer failed: " + (err.error?.message || "Internal error"));
         this.loading = false;
+        this.cdr.detectChanges();
       }
     });
   }
@@ -258,15 +314,17 @@ export class BranchStocks implements OnInit, OnDestroy {
   approveTransfer(id: number, action: 'APPROVE' | 'REJECT', reason?: string) {
     this.loading = true;
     this.commonService.putApi(`branch-stock/transfers/${id}/approve`, { action, rejection_reason: reason }).subscribe({
-      next: () => {
-        this.alert.success(`Transfer ${action.toLowerCase()}d successfully`);
+      next: (res: any) => {
+        this.alert.success(res?.message || `Transfer ${action.toLowerCase()}d successfully`);
         this.loadTransfers();
         this.loadBranchStocks();
         this.loading = false;
+        this.cdr.detectChanges();
       },
       error: (err) => {
         this.alert.error(err.error?.message || "Action failed");
         this.loading = false;
+        this.cdr.detectChanges();
       }
     });
   }

@@ -1,80 +1,407 @@
-<mat-card class="cardWithShadow theme-card">
+<div class="psh-root">
 
-    <mat-card-header>
+  <!-- Ambient Glowing Background Orbs -->
+  <div class="psh-bg" aria-hidden="true">
+    <div class="psh-orb psh-orb--a"></div>
+    <div class="psh-orb psh-orb--b"></div>
+    <div class="psh-orb psh-orb--c"></div>
+    <div class="psh-grid"></div>
+  </div>
 
-        <div class="header-container">
+  <!-- Executive Header Hero Banner -->
+  <header class="psh-hero">
+    <div>
+      <div class="psh-eyebrow">
+        <span class="psh-eyebrow__dot"></span>
+        <span>CATALOG SPECIFICATIONS</span>
+        <span class="psh-eyebrow__sep">·</span>
+        <span>ATTRIBUTE & OPTIONS STUDIO</span>
+      </div>
+      <h1 class="psh-title">Attribute &amp; <span class="psh-title__accent">Options Studio</span></h1>
+      <p class="psh-sub">Configure master product attributes and their variant options in one unified, real-time workspace.</p>
+    </div>
 
-            <mat-card-title class="m-b-0">
-                Product Attributes
-            </mat-card-title>
+    <div class="psh-actions" style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+      <div class="live-chip">
+        <span class="live-dot"></span>
+        <span>LIVE STUDIO SYNC</span>
+      </div>
+      @if (perm.hasRoleAction('canCreate')) {
+      <button class="psh-btn psh-btn--primary" (click)="openAddAttributeForm()">
+        <span class="psh-btn__shine"></span>
+        <mat-icon>add_circle</mat-icon> Add Master Attribute
+      </button>
+      <button class="psh-btn psh-btn--emerald" (click)="openAddValueForm()" [disabled]="!selectedAttribute" [matTooltip]="!selectedAttribute ? 'Select a Master Attribute first' : 'Add Option Value for ' + (selectedAttribute?.Name || '')">
+        <span class="psh-btn__shine"></span>
+        <mat-icon>add_box</mat-icon> Add Option Value
+      </button>
+      }
+    </div>
+  </header>
 
-            @if (!ProductAttribute_Forms && perm.hasRoleAction('canCreate')) {
-            <button mat-flat-button class="btn-rounded btn-gradient" (click)="AddNewUser()">
-                <mat-icon>add</mat-icon> Add New Attribute
-            </button>
+  <!-- Executive Metric Stat Chips -->
+  <div class="psh-chips m-b-24">
+    <div class="psh-chip psh-chip--violet">
+      <div class="psh-chip__orb"><mat-icon>tune</mat-icon></div>
+      <div class="psh-chip__body">
+        <span class="psh-chip__num">{{ totalAttributesCount }}</span>
+        <span class="psh-chip__lbl">Master Attributes</span>
+      </div>
+    </div>
+    <div class="psh-chip psh-chip--emerald">
+      <div class="psh-chip__orb"><mat-icon>style</mat-icon></div>
+      <div class="psh-chip__body">
+        <span class="psh-chip__num">{{ totalValuesCount }}</span>
+        <span class="psh-chip__lbl">Total Option Values</span>
+      </div>
+    </div>
+    <div class="psh-chip psh-chip--amber">
+      <div class="psh-chip__orb"><mat-icon>label</mat-icon></div>
+      <div class="psh-chip__body">
+        <span class="psh-chip__num">{{ selectedAttribute ? selectedAttribute.Name : 'None' }}</span>
+        <span class="psh-chip__lbl">Active Selection</span>
+      </div>
+    </div>
+    <div class="psh-chip psh-chip--cyan">
+      <div class="psh-chip__orb"><mat-icon>dns</mat-icon></div>
+      <div class="psh-chip__body">
+        <span class="psh-chip__num">{{ selectedAttributeValues.length }}</span>
+        <span class="psh-chip__lbl">Category Options</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Master Attribute Form Drawer / Card -->
+  @if (showAttributeForm) {
+  <div class="value-form-card animate-slide-down m-b-24">
+    <div class="vf-header">
+      <h4>{{ isAttributeEdit ? 'Edit Master Attribute' : 'Create New Master Attribute' }}</h4>
+      <button class="close-vf-btn" (click)="cancelAttributeForm()">✕</button>
+    </div>
+
+    <form [formGroup]="ProductAttributeForm" (ngSubmit)="submitAttribute()" class="vf-form">
+      @if (!isAttributeEdit) {
+      <div class="preset-chips-wrap m-b-16">
+        <span class="preset-lbl">Quick Presets:</span>
+        @for (preset of attributePresets; track preset.code) {
+          <button type="button" class="preset-chip-btn" (click)="applyAttributePreset(preset)">
+            + {{ preset.name }}
+          </button>
+        }
+      </div>
+      }
+
+      <div class="form-grid">
+        <div class="field-container">
+          <mat-label class="f-w-600 m-b-8 d-block">Attribute Code <span class="text-danger">*</span></mat-label>
+          <mat-form-field appearance="outline" class="w-100">
+            <input matInput formControlName="AttributeNameCode" placeholder="e.g. COLOR, SHOE_SIZE, STORAGE">
+            @if (ProductAttributeForm.get('AttributeNameCode')?.hasError('required')) {
+              <mat-error>Attribute code is required</mat-error>
             }
-
+          </mat-form-field>
         </div>
 
-    </mat-card-header>
+        <div class="field-container">
+          <mat-label class="f-w-600 m-b-8 d-block">Display Name <span class="text-danger">*</span></mat-label>
+          <mat-form-field appearance="outline" class="w-100">
+            <input matInput formControlName="Name" placeholder="e.g. Color, Shoe Size, Storage Capacity">
+            @if (ProductAttributeForm.get('Name')?.hasError('required')) {
+              <mat-error>Display name is required</mat-error>
+            }
+          </mat-form-field>
+        </div>
+      </div>
 
-    @if (!ProductAttribute_Forms) {
-    <mat-card-content class="b-t-1">
+      <div class="flex m-t-16" style="justify-content: flex-end; gap: 12px;">
+        <button mat-stroked-button type="button" (click)="cancelAttributeForm()">Cancel</button>
+        <button mat-flat-button class="btn-gradient" type="submit">
+          <mat-icon>{{ isAttributeEdit ? 'save' : 'add' }}</mat-icon>
+          {{ isAttributeEdit ? 'Update Attribute' : 'Create Attribute' }}
+        </button>
+      </div>
+    </form>
+  </div>
+  }
 
-        <app-mat-table [columns]="tableColumns" [tableData]="ProductAttributes" [showAction]="true" [showView]="perm.hasRoleAction('canRead')" [Extra_Column]="false"
-            [showSearch]="true" [enableExport]="true" [showEdit]="perm.hasRoleAction('canUpdate')" [showDelete]="perm.hasRoleAction('canDelete')"
-            (editClick)="editUser($event)" (deleteClick)="deleteUser($event)" (ViewClick)="viewItem($event)">
-        </app-mat-table>
+  <!-- Child Attribute Option Value Form Drawer / Card (Top-Aligned) -->
+  @if (showValueForm && selectedAttribute) {
+  <div class="value-form-card animate-slide-down m-b-24">
+    <div class="vf-header">
+      <h4>{{ isValueEdit ? 'Edit Option Value' : 'Add New Option Value to "' + selectedAttribute.Name + '"' }}</h4>
+      <button class="close-vf-btn" (click)="cancelValueForm()">✕</button>
+    </div>
 
-    </mat-card-content>
-    }
-    @else {
-    <mat-card-content class="b-t-1">
+    <form [formGroup]="AttributeValueForm" (ngSubmit)="submitValue()" class="vf-form">
+      @if (!isValueEdit) {
+      <div class="preset-chips-wrap m-b-14">
+        <span class="preset-lbl">Quick Presets for {{ selectedAttribute.Name }}:</span>
+        @if ((selectedAttribute.Name || '').toLowerCase().includes('color') || (selectedAttribute.AttributeNameCode || '').toLowerCase().includes('color')) {
+          @for (preset of colorPresets; track preset.name) {
+            <button type="button" class="preset-chip-btn" (click)="applyValuePreset(preset)">
+              + {{ preset.name }}
+            </button>
+          }
+        } @else if ((selectedAttribute.Name || '').toLowerCase().includes('size') || (selectedAttribute.AttributeNameCode || '').toLowerCase().includes('size')) {
+          @for (preset of sizePresets; track preset.code) {
+            <button type="button" class="preset-chip-btn" (click)="applyValuePreset(preset)">
+              + {{ preset.name }}
+            </button>
+          }
+        } @else {
+          @for (preset of storagePresets; track preset.code) {
+            <button type="button" class="preset-chip-btn" (click)="applyValuePreset(preset)">
+              + {{ preset.name }}
+            </button>
+          }
+        }
+      </div>
+      }
 
-        <form [formGroup]="ProductAttributeForm" class="premium-form-grid p-t-24">
-            
-            <div class="divider">
-                <span>Attribute Details</span>
-            </div>
+      <div class="form-grid">
+        <div class="field-container">
+          <mat-label class="f-w-600 m-b-6 d-block">Value Code <span class="text-danger">*</span></mat-label>
+          <mat-form-field appearance="outline" class="w-100">
+            <input matInput formControlName="AttributeValueCode" placeholder="e.g. RED, XL, 128GB">
+            @if (AttributeValueForm.get('AttributeValueCode')?.hasError('required')) {
+              <mat-error>Value code is required</mat-error>
+            }
+          </mat-form-field>
+        </div>
 
-            <div class="form-row">
-                <div class="field-container">
-                    <mat-label class="f-w-600 m-b-8 d-block">Attribute Code <span class="text-danger">*</span></mat-label>
-                    <mat-form-field appearance="outline" class="w-100">
-                        <input matInput formControlName="AttributeNameCode" placeholder="Enter Attribute Code">
-                        @if (ProductAttributeForm.get('AttributeNameCode')?.hasError('required')) {
-                          <mat-error>Attribute code is required</mat-error>
-                        } @else if (ProductAttributeForm.get('AttributeNameCode')?.hasError('maxlength')) {
-                          <mat-error>Attribute code cannot exceed 50 characters</mat-error>
-                        }
-                    </mat-form-field>
+        <div class="field-container">
+          <mat-label class="f-w-600 m-b-6 d-block">Display Name <span class="text-danger">*</span></mat-label>
+          <mat-form-field appearance="outline" class="w-100">
+            <input matInput formControlName="Name" placeholder="e.g. Red, Extra Large, 128 GB Storage">
+            @if (AttributeValueForm.get('Name')?.hasError('required')) {
+              <mat-error>Display name is required</mat-error>
+            }
+          </mat-form-field>
+        </div>
+      </div>
+
+      <div class="flex m-t-12" style="justify-content: flex-end; gap: 12px;">
+        <button mat-stroked-button type="button" (click)="cancelValueForm()">Cancel</button>
+        <button mat-flat-button class="btn-gradient" type="submit">
+          <mat-icon>{{ isValueEdit ? 'save' : 'check' }}</mat-icon>
+          {{ isValueEdit ? 'Update Option' : 'Save Option' }}
+        </button>
+      </div>
+    </form>
+  </div>
+  }
+
+  <!-- Mobile Segmented View Switcher -->
+  <div class="mobile-segmented-switcher m-b-16">
+    <button class="seg-btn" [class.active]="activeMobileView === 'LEFT'" (click)="activeMobileView = 'LEFT'">
+      <mat-icon>category</mat-icon> Master Attributes ({{ filteredAttributes.length }})
+    </button>
+    <button class="seg-btn" [class.active]="activeMobileView === 'RIGHT'" (click)="activeMobileView = 'RIGHT'">
+      <mat-icon>tune</mat-icon> Options ({{ selectedAttributeValues.length }})
+    </button>
+  </div>
+
+  <!-- Master-Detail Split Workspace -->
+  <div class="studio-grid">
+
+    <!-- LEFT PANEL: Master Attributes List -->
+    <div class="studio-panel left-panel" [class.mobile-hidden]="activeMobileView === 'RIGHT'">
+      <div class="panel-header">
+        <div class="panel-title-wrap">
+          <mat-icon class="panel-icon">category</mat-icon>
+          <div>
+            <h3 class="panel-title">Master Attributes</h3>
+            <span class="panel-sub">ATTRIBUTE CATEGORIES</span>
+          </div>
+        </div>
+        <span class="count-badge">{{ filteredAttributes.length }}</span>
+      </div>
+
+      <!-- Filter Tabs Bar -->
+      <div class="filter-tabs-bar m-b-16">
+        <button class="tab-chip" [class.active]="activeAttrTab === 'ALL'" (click)="activeAttrTab = 'ALL'">
+          ALL ({{ totalAttributesCount }})
+        </button>
+        <button class="tab-chip" [class.active]="activeAttrTab === 'WITH_VALS'" (click)="activeAttrTab = 'WITH_VALS'">
+          WITH OPTIONS
+        </button>
+        <button class="tab-chip" [class.active]="activeAttrTab === 'EMPTY'" (click)="activeAttrTab = 'EMPTY'">
+          EMPTY
+        </button>
+      </div>
+
+      <!-- Search Input -->
+      <div class="panel-search-box">
+        <mat-icon class="search-icon">search</mat-icon>
+        <input type="text" [(ngModel)]="searchAttributeQuery" placeholder="Filter attributes..." class="search-input">
+        @if (searchAttributeQuery) {
+          <button class="clear-btn" (click)="searchAttributeQuery=''">✕</button>
+        }
+      </div>
+
+      <!-- Attributes Cards List -->
+      <div class="attributes-scroll-list">
+        @if (loadingAttributes) {
+          <div class="loading-wrap p-24 text-center">
+            <mat-spinner diameter="36" color="primary"></mat-spinner>
+            <p class="m-t-12 f-s-13 text-muted">Loading attributes...</p>
+          </div>
+        } @else if (filteredAttributes.length === 0) {
+          <div class="empty-wrap p-24 text-center">
+            <mat-icon class="empty-icon text-muted">inbox</mat-icon>
+            <p class="m-t-8 f-s-13 text-muted">No attributes found</p>
+          </div>
+        } @else {
+          @for (attr of filteredAttributes; track attr.Id) {
+            <div class="attribute-card"
+                 [class.active-attr]="selectedAttribute?.Id === attr.Id"
+                 (click)="selectAttribute(attr); activeMobileView = 'RIGHT'">
+              
+              <div class="attr-card-header">
+                <div class="attr-main">
+                  <span class="attr-dot"></span>
+                  <div class="attr-text">
+                    <span class="attr-name">{{ attr.Name }}</span>
+                    <span class="attr-code">{{ attr.AttributeNameCode }}</span>
+                  </div>
                 </div>
 
-                <div class="field-container">
-                    <mat-label class="f-w-600 m-b-8 d-block">Name <span class="text-danger">*</span></mat-label>
-                    <mat-form-field appearance="outline" class="w-100">
-                        <input matInput formControlName="Name" placeholder="Enter Attribute Name">
-                        @if (ProductAttributeForm.get('Name')?.hasError('required')) {
-                          <mat-error>Attribute name is required</mat-error>
-                        } @else if (ProductAttributeForm.get('Name')?.hasError('maxlength')) {
-                          <mat-error>Attribute name cannot exceed 100 characters</mat-error>
-                        }
-                    </mat-form-field>
+                <div class="attr-actions" (click)="$event.stopPropagation()">
+                  @if (perm.hasRoleAction('canRead')) {
+                    <button class="icon-action-btn view-btn" (click)="viewAttribute(attr, $event)" matTooltip="View Details">
+                      <mat-icon>visibility</mat-icon>
+                    </button>
+                  }
+                  @if (perm.hasRoleAction('canUpdate')) {
+                    <button class="icon-action-btn edit-btn" (click)="editAttribute(attr, $event)" matTooltip="Edit Attribute">
+                      <mat-icon>edit</mat-icon>
+                    </button>
+                  }
+                  @if (perm.hasRoleAction('canDelete')) {
+                    <button class="icon-action-btn delete-btn" (click)="deleteAttribute(attr, $event)" matTooltip="Delete Attribute">
+                      <mat-icon>delete</mat-icon>
+                    </button>
+                  }
                 </div>
+              </div>
+
+              <!-- Value Preview Pills -->
+              <div class="attr-values-preview">
+                @let vals = getAttributeValuesList(attr.Id);
+                @if (vals.length === 0) {
+                  <span class="no-vals-tag">No values added yet</span>
+                } @else {
+                  @for (val of vals.slice(0, 4); track val.Id) {
+                    <span class="val-preview-pill">{{ val.Name }}</span>
+                  }
+                  @if (vals.length > 4) {
+                    <span class="val-more-pill">+{{ vals.length - 4 }} more</span>
+                  }
+                }
+              </div>
+
             </div>
+          }
+        }
+      </div>
+    </div>
 
-            <div class="flex m-t-12" style="justify-content: flex-end; gap: 16px;">
-                <button mat-stroked-button class="btn-rounded Cancel_Button" type="button" (click)="cancelProductAttribute()">
-                    <mat-icon>close</mat-icon> Cancel
-                </button>
-                <button mat-flat-button class="btn-rounded btn-gradient" type="submit" (click)="submit(ProductAttributeForm)">
-                    <mat-icon>{{Update_button ? 'save' : 'add'}}</mat-icon>
-                    {{Update_button ? 'Update Attribute' : 'Save Attribute'}}
-                </button>
+    <!-- RIGHT PANEL: Attribute Values Studio for Selected Parent -->
+    <div class="studio-panel right-panel" [class.mobile-hidden]="activeMobileView === 'LEFT'">
+      @if (!selectedAttribute) {
+        <div class="empty-selection-placeholder">
+          <mat-icon class="placeholder-icon">touch_app</mat-icon>
+          <h3>Select a Master Attribute</h3>
+          <p>Choose an attribute from the left list to manage its option values.</p>
+        </div>
+      } @else {
+        
+        <!-- Panel Header -->
+        <div class="panel-header detail-header">
+          <div class="panel-title-wrap">
+            <mat-icon class="panel-icon accent-icon">tune</mat-icon>
+            <div>
+              <h3 class="panel-title">Options for <strong>"{{ selectedAttribute.Name }}"</strong></h3>
+              <span class="panel-sub">CODE: {{ selectedAttribute.AttributeNameCode }}</span>
             </div>
-        </form>
+          </div>
+        </div>
 
-    </mat-card-content>
-    }
+        <!-- Values Toolbar & Search -->
+        <div class="values-toolbar">
+          <div class="panel-search-box">
+            <mat-icon class="search-icon">search</mat-icon>
+            <input type="text" [(ngModel)]="searchValueQuery" placeholder="Filter options for {{ selectedAttribute.Name }}..." class="search-input">
+            @if (searchValueQuery) {
+              <button class="clear-btn" (click)="searchValueQuery=''">✕</button>
+            }
+          </div>
+          <span class="values-count-chip">{{ filteredValues.length }} Option(s)</span>
+        </div>
 
-</mat-card>
+        <!-- Attribute Values Table Grid -->
+        <div class="values-table-wrap">
+          @if (filteredValues.length === 0) {
+            <div class="empty-wrap p-32 text-center">
+              <mat-icon class="empty-icon text-muted">label_off</mat-icon>
+              <h4>No Option Values Added Yet</h4>
+              <p class="text-muted f-s-13">Click "Add Option Value" above to add values like Red, Blue, Small, Large under {{ selectedAttribute.Name }}.</p>
+            </div>
+          } @else {
+            <table class="studio-values-table">
+              <thead>
+                <tr>
+                  <th># ID</th>
+                  <th>VALUE CODE</th>
+                  <th>DISPLAY NAME</th>
+                  <th>PREVIEW</th>
+                  <th class="text-end">ACTIONS</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (val of filteredValues; track val.Id; let i = $index) {
+                  <tr>
+                    <td class="td-id">#{{ val.Id }}</td>
+                    <td>
+                      <span class="val-code-badge">{{ val.AttributeValueCode }}</span>
+                    </td>
+                    <td class="td-name font-semibold">{{ val.Name }}</td>
+                    <td>
+                      @if ((selectedAttribute.Name || '').toLowerCase().includes('color') || (selectedAttribute.AttributeNameCode || '').toLowerCase().includes('color')) {
+                        <div class="color-swatch-badge" [style.background-color]="val.AttributeValueCode">
+                          <span class="swatch-dot" [style.background-color]="val.Name.toLowerCase()"></span>
+                          <span>{{ val.Name }}</span>
+                        </div>
+                      } @else {
+                        <span class="generic-chip">{{ val.Name }}</span>
+                      }
+                    </td>
+                    <td class="text-end">
+                      <div class="row-action-buttons">
+                        @if (perm.hasRoleAction('canUpdate')) {
+                          <button class="icon-action-btn edit-btn" (click)="editValue(val)" matTooltip="Edit Option">
+                            <mat-icon>edit</mat-icon>
+                          </button>
+                        }
+                        @if (perm.hasRoleAction('canDelete')) {
+                          <button class="icon-action-btn delete-btn" (click)="deleteValue(val)" matTooltip="Delete Option">
+                            <mat-icon>delete</mat-icon>
+                          </button>
+                        }
+                      </div>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          }
+        </div>
+
+      }
+    </div>
+
+  </div>
+
+</div>
+
+

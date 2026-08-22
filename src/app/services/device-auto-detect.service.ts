@@ -269,11 +269,14 @@ export class DeviceAutoDetectService {
    * Fetch stored devices dynamically from backend API (Database-backed)
    */
   fetchDevicesFromApi(): void {
-    this.http.get<{ success: boolean; data: HardwareDevice[] }>(`${environment.apiUrl}/devices`)
+    this.http.get<any>(`${environment.apiUrl}/devices`)
       .pipe(catchError(() => of(null)))
       .subscribe(res => {
-        if (res && res.success && Array.isArray(res.data) && res.data.length > 0) {
-          this.devicesSignal.set(res.data);
+        if (res) {
+          const list = Array.isArray(res) ? res : (res?.data?.data ?? res?.data ?? []);
+          if (Array.isArray(list)) {
+            this.devicesSignal.set(list);
+          }
         }
       });
   }

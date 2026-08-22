@@ -22,6 +22,8 @@ import { TablerIconsModule } from 'angular-tabler-icons';
 
 type AccessLevel = 'global' | 'admin' | 'branch' | 'employee';
 
+import { MatIconModule } from '@angular/material/icon';
+
 @Component({
   selector: 'app-role-access',
   standalone: true,
@@ -34,6 +36,7 @@ type AccessLevel = 'global' | 'admin' | 'branch' | 'employee';
     MatCardModule,
     MatProgressSpinnerModule,
     MatTooltipModule,
+    MatIconModule,
     TablerIconsModule,
     RouterModule
   ],
@@ -608,6 +611,17 @@ export class RoleAccess implements OnInit {
       if (!this.assignedMap.has(key)) return true;
     }
     return false;
+  }
+
+  get unsavedChangesCount(): number {
+    let diff = 0;
+    for (const key of this.workingAssignments) {
+      if (!this.assignedMap.has(key)) diff++;
+    }
+    for (const key of this.assignedMap.keys()) {
+      if (!this.workingAssignments.has(key)) diff++;
+    }
+    return diff;
   }
 
   toggle(menu: any, action: string): void {

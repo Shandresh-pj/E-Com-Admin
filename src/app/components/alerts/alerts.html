@@ -1,57 +1,82 @@
-<div class="row m-b-24">
-  <!-- Metric Card 1: Total Alerts -->
-  <div class="col-lg-6 col-md-6 col-sm-12 m-b-16">
-    <mat-card class="cardWithShadow info-card bg-light-warning">
-      <mat-card-content class="p-24 d-flex align-items-center justify-content-between">
-        <div>
-          <h4 class="f-w-600 m-b-4 text-warning">Total Low Stock Alerts</h4>
-          <h2 class="f-s-32 f-w-700 m-b-0">{{ totalAlerts }}</h2>
-        </div>
-        <div class="icon-round bg-warning-dim text-warning">
-          <i-tabler name="bell" class="icon-28"></i-tabler>
-        </div>
-      </mat-card-content>
-    </mat-card>
+<div class="psh-root">
+  <div class="psh-bg" aria-hidden="true">
+    <div class="psh-orb psh-orb--a"></div>
+    <div class="psh-orb psh-orb--b"></div>
+    <div class="psh-orb psh-orb--c"></div>
+    <div class="psh-grid"></div>
   </div>
 
-  <!-- Metric Card 2: Out of Stock -->
-  <div class="col-lg-6 col-md-6 col-sm-12 m-b-16">
-    <mat-card class="cardWithShadow info-card bg-light-danger">
-      <mat-card-content class="p-24 d-flex align-items-center justify-content-between">
-        <div>
-          <h4 class="f-w-600 m-b-4 text-danger">Critical (Out of Stock)</h4>
-          <h2 class="f-s-32 f-w-700 m-b-0">{{ criticalAlertsCount }}</h2>
-        </div>
-        <div class="icon-round bg-danger-dim text-danger">
-          <i-tabler name="alert-triangle" class="icon-28"></i-tabler>
-        </div>
-      </mat-card-content>
-    </mat-card>
-  </div>
-</div>
-
-<mat-card class="cardWithShadow theme-card">
-  <mat-card-header>
-    <div class="header-container">
-      <mat-card-title class="m-b-0">Low Stock Product Alerts</mat-card-title>
-      <button mat-flat-button color="primary" (click)="loadAlerts()" [disabled]="loading">
-        <i-tabler name="refresh" class="icon-16 m-r-4"></i-tabler> Refresh
+  <header class="psh-hero">
+    <div>
+      <div class="psh-eyebrow">
+        <span class="psh-eyebrow__dot"></span>
+        <span>INVENTORY MONITORING</span>
+        <span class="psh-eyebrow__sep">·</span>
+        <span>{{ alerts.length }} ALERTS ACTIVE</span>
+      </div>
+      <h1 class="psh-title">Stock <span class="psh-title__accent">Alerts</span></h1>
+      <p class="psh-sub">Real-time inventory threshold monitoring, low stock warnings, and out-of-stock emergency notifications.</p>
+    </div>
+    <div class="psh-actions">
+      <button class="psh-btn psh-btn--primary" (click)="loadAlerts()" [disabled]="loading">
+        <span class="psh-btn__shine"></span>
+        <mat-icon>refresh</mat-icon> Refresh Alerts
       </button>
     </div>
-  </mat-card-header>
+  </header>
 
-  <mat-card-content class="b-t-1">
-    <div class="table-responsive">
+  <div class="psh-chips">
+    <div class="psh-chip psh-chip--violet">
+      <div class="psh-chip__orb"><mat-icon>notifications_active</mat-icon></div>
+      <div class="psh-chip__body">
+        <span class="psh-chip__num">{{ totalAlerts }}</span>
+        <span class="psh-chip__lbl">Total Alerts</span>
+      </div>
+    </div>
+    <div class="psh-chip psh-chip--rose">
+      <div class="psh-chip__orb"><mat-icon>warning</mat-icon></div>
+      <div class="psh-chip__body">
+        <span class="psh-chip__num">{{ criticalAlertsCount }}</span>
+        <span class="psh-chip__lbl">Critical</span>
+      </div>
+    </div>
+    <div class="psh-chip psh-chip--amber">
+      <div class="psh-chip__orb"><mat-icon>inventory_2</mat-icon></div>
+      <div class="psh-chip__body">
+        <span class="psh-chip__num">{{ warningAlertsCount }}</span>
+        <span class="psh-chip__lbl">Low Stock</span>
+      </div>
+    </div>
+    <div class="psh-chip psh-chip--emerald">
+      <div class="psh-chip__orb"><mat-icon>check_circle</mat-icon></div>
+      <div class="psh-chip__body">
+        <span class="psh-chip__num">{{ alerts.length }}</span>
+        <span class="psh-chip__lbl">Tracked</span>
+      </div>
+    </div>
+  </div>
+
+  <mat-card class="cardWithShadow theme-card">
+    <mat-card-header>
+      <div class="header-container">
+        <mat-card-title class="m-b-0">Low Stock Product Alerts</mat-card-title>
+      </div>
+    </mat-card-header>
+
+    <mat-card-content class="b-t-1">
       <app-mat-table 
         [columns]="tableColumns" 
         [tableData]="alerts" 
         [showAction]="true" 
+        [showSearch]="true"
+        [enableExport]="true"
         [showView]="false"
         [Extra_Column]="false"
         [showEdit]="false" 
         [showDelete]="perm.hasRoleAction('canDelete')" 
         (deleteClick)="deleteAlert($event)">
       </app-mat-table>
-    </div>
-  </mat-card-content>
-</mat-card>
+    </mat-card-content>
+  </mat-card>
+</div>
+

@@ -37,6 +37,11 @@ export class AuditLogs implements OnInit {
 
   logs: any[] = [];
 
+  get totalLogsCount(): number { return (this.logs || []).length; }
+  get securityEventsCount(): number { return (this.logs || []).filter((l: any) => (l.actionType || l.action || '').toUpperCase().includes('AUTH') || (l.module || '').toUpperCase().includes('SEC')).length; }
+  get modificationsCount(): number { return (this.logs || []).filter((l: any) => (l.actionType || l.action || '').toUpperCase().includes('UPDATE') || (l.actionType || l.action || '').toUpperCase().includes('CREATE')).length; }
+  get deletionsCount(): number { return (this.logs || []).filter((l: any) => (l.actionType || l.action || '').toUpperCase().includes('DELETE')).length; }
+
   constructor(
     private commonService: CommonService,
     private alert: AlertService,

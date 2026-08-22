@@ -1,161 +1,226 @@
-<mat-card class="cardWithShadow theme-card">
-  <mat-card-header>
-    <div class="header-container flex-column flex-sm-row gap-12 justify-content-between align-items-center w-100 p-24 bg-light-primary">
-      <mat-card-title class="m-b-0">Inventory &amp; Stock Ledger</mat-card-title>
+<div class="psh-root">
+  <div class="psh-bg" aria-hidden="true">
+    <div class="psh-orb psh-orb--a"></div>
+    <div class="psh-orb psh-orb--b"></div>
+    <div class="psh-orb psh-orb--c"></div>
+    <div class="psh-grid"></div>
+  </div>
 
-      <!-- Tab Controls and Action Button -->
-      <div class="d-flex align-items-center gap-12 flex-wrap">
-        <button mat-stroked-button [color]="viewMode === 'products' ? 'primary' : ''" (click)="changeView('products')" [disabled]="showForm">
-          Current Inventory
-        </button>
-        <button mat-stroked-button [color]="viewMode === 'logs' ? 'primary' : ''" (click)="changeView('logs')" [disabled]="showForm">
-          Transaction Logs
-        </button>
-        @if (!showForm && perm.hasRoleAction('canCreate')) {
-          <button mat-flat-button color="primary" (click)="toggleForm()">
-            <mat-icon class="icon-16 m-r-4">add</mat-icon> Adjust Stock
-          </button>
-        }
+  <header class="psh-hero">
+    <div>
+      <div class="psh-eyebrow">
+        <span class="psh-eyebrow__dot"></span>
+        <span>INVENTORY MANAGEMENT</span>
+        <span class="psh-eyebrow__sep">·</span>
+        <span>{{ totalProductsCount }} PRODUCTS</span>
+      </div>
+      <h1 class="psh-title">Stock <span class="psh-title__accent">Control</span></h1>
+      <p class="psh-sub">Track global product inventory levels, audit stock ledger movements, and manage adjustment requests.</p>
+    </div>
+    @if (!showForm && perm.hasRoleAction('canCreate')) {
+    <div class="psh-actions">
+      <button class="psh-btn psh-btn--primary" (click)="toggleForm()">
+        <span class="psh-btn__shine"></span>
+        <mat-icon>add_circle</mat-icon> Adjust Stock
+      </button>
+    </div>
+    }
+  </header>
+
+  <div class="psh-chips">
+    <div class="psh-chip psh-chip--violet">
+      <div class="psh-chip__orb"><mat-icon>inventory_2</mat-icon></div>
+      <div class="psh-chip__body">
+        <span class="psh-chip__num">{{ totalProductsCount }}</span>
+        <span class="psh-chip__lbl">Total Products</span>
       </div>
     </div>
-  </mat-card-header>
+    <div class="psh-chip psh-chip--emerald">
+      <div class="psh-chip__orb"><mat-icon>check_circle</mat-icon></div>
+      <div class="psh-chip__body">
+        <span class="psh-chip__num">{{ inStockCount }}</span>
+        <span class="psh-chip__lbl">In Stock</span>
+      </div>
+    </div>
+    <div class="psh-chip psh-chip--amber">
+      <div class="psh-chip__orb"><mat-icon>warning</mat-icon></div>
+      <div class="psh-chip__body">
+        <span class="psh-chip__num">{{ lowStockCount }}</span>
+        <span class="psh-chip__lbl">Low Stock</span>
+      </div>
+    </div>
+    <div class="psh-chip psh-chip--rose">
+      <div class="psh-chip__orb"><mat-icon>error_outline</mat-icon></div>
+      <div class="psh-chip__body">
+        <span class="psh-chip__num">{{ outOfStockCount }}</span>
+        <span class="psh-chip__lbl">Out of Stock</span>
+      </div>
+    </div>
+  </div>
 
-  @if (showForm) {
-    <mat-card-content class="p-24 b-t-1">
-      <form [formGroup]="stockForm">
-        <div class="row">
-          <!-- Select Product -->
-          <div class="col-lg-4 col-md-6 col-sm-12 m-b-16">
-            <mat-label class="f-w-600 m-b-8 d-block">Product <span class="text-danger">*</span></mat-label>
-            <mat-form-field appearance="outline" class="w-100">
-              <mat-select formControlName="product_id" placeholder="Select Product">
-                @for (p of products; track p.id) {
-                  <mat-option [value]="p.id">{{ p.name }} (Stock: {{ p.stock }})</mat-option>
-                }
-              </mat-select>
-            </mat-form-field>
-          </div>
+  <mat-card class="cardWithShadow theme-card">
+    <mat-card-header>
+      <div class="header-container flex-column flex-sm-row gap-12 justify-content-between align-items-center w-100 p-24">
+        <mat-card-title class="m-b-0">Inventory &amp; Stock Ledger</mat-card-title>
 
-          <!-- Quantity Input -->
-          <div class="col-lg-4 col-md-6 col-sm-12 m-b-16">
-            <mat-label class="f-w-600 m-b-8 d-block">Adjustment Amount <span class="text-danger">*</span></mat-label>
-            <mat-form-field appearance="outline" class="w-100">
-              <input matInput type="number" formControlName="quantity" placeholder="Enter count to adjust" min="1">
-            </mat-form-field>
-          </div>
-
-          <!-- Action Select -->
-          <div class="col-lg-4 col-md-6 col-sm-12 m-b-16">
-            <mat-label class="f-w-600 m-b-8 d-block">Action Type <span class="text-danger">*</span></mat-label>
-            <mat-form-field appearance="outline" class="w-100">
-              <mat-select formControlName="action">
-                <mat-option value="ADD">ADD Stock</mat-option>
-                <mat-option value="REMOVE">REMOVE Stock</mat-option>
-              </mat-select>
-            </mat-form-field>
-          </div>
-        </div>
-
-        <div class="m-t-16">
-          <button mat-stroked-button class="me-3" (click)="toggleForm()" [disabled]="loading">Cancel</button>
-          <button mat-flat-button color="primary" (click)="submitStockUpdate()" [disabled]="loading || stockForm.invalid">
-            Submit Stock Adjustment
+        <!-- Tab Controls -->
+        <div class="d-flex align-items-center gap-12 flex-wrap">
+          <button mat-stroked-button [color]="viewMode === 'products' ? 'primary' : ''" (click)="changeView('products')" [disabled]="showForm">
+            Current Inventory
+          </button>
+          <button mat-stroked-button [color]="viewMode === 'logs' ? 'primary' : ''" (click)="changeView('logs')" [disabled]="showForm">
+            Transaction Logs
           </button>
         </div>
-      </form>
-    </mat-card-content>
-  } @else {
-    <mat-card-content class="b-t-1">
+      </div>
+    </mat-card-header>
 
-      <!-- Current Inventory Table -->
-      @if (viewMode === 'products') {
-        <app-mat-table
-          [columns]="productColumns"
-          [tableData]="products"
-          [showAction]="false"
-          [showSearch]="true"
-          [isLoading]="loading"
-          [customTemplates]="{ stock: stockTpl, low_threshold: lowThresholdTpl, critical_threshold: criticalThresholdTpl }">
-        </app-mat-table>
+    @if (showForm) {
+      <mat-card-content class="p-24 b-t-1">
+        <form [formGroup]="stockForm" class="premium-form-grid p-t-24">
+          <div class="divider">
+            <span>Stock Adjustment Specification</span>
+          </div>
 
-        <ng-template #stockTpl let-element>
-          @let currentStock = (element.stock !== undefined && element.stock !== null) ? element.stock : (element.stock_in_hand ?? 0);
-          <span [class.text-error]="currentStock <= (element.critical_stock_threshold || 2)"
-                [class.text-warning]="currentStock > (element.critical_stock_threshold || 2) && currentStock <= (element.low_stock_threshold || 5)"
-                class="f-w-600">
-            {{ currentStock }}
-          </span>
-          @if (currentStock <= 0) {
-            <span class="badge bg-light-error text-error m-l-8 font-weight-bold">Out of Stock</span>
-          }
-          @if (currentStock > 0 && currentStock <= (element.critical_stock_threshold || 2)) {
-            <span class="badge bg-light-error text-error m-l-8">Critical Stock</span>
-          }
-          @if (currentStock > (element.critical_stock_threshold || 2) && currentStock <= (element.low_stock_threshold || 5)) {
-            <span class="badge bg-light-warning text-warning m-l-8">Low Stock</span>
-          }
-        </ng-template>
+          <div class="form-row">
+            <!-- Select Product -->
+            <div class="field-container">
+              <mat-label class="f-w-600 m-b-8 d-block">Product <span class="text-danger">*</span></mat-label>
+              <mat-form-field appearance="outline" class="w-100">
+                <mat-select formControlName="product_id" placeholder="Select Product">
+                  @for (p of products; track p.id) {
+                    <mat-option [value]="p.id">{{ p.name }} (Stock: {{ p.stock }})</mat-option>
+                  }
+                </mat-select>
+              </mat-form-field>
+            </div>
 
-        <ng-template #lowThresholdTpl let-element>
-          {{ element.low_stock_threshold ?? 5 }}
-        </ng-template>
+            <!-- Quantity Input -->
+            <div class="field-container">
+              <mat-label class="f-w-600 m-b-8 d-block">Adjustment Amount <span class="text-danger">*</span></mat-label>
+              <mat-form-field appearance="outline" class="w-100">
+                <input matInput type="number" formControlName="quantity" placeholder="Enter count to adjust" min="1">
+              </mat-form-field>
+            </div>
 
-        <ng-template #criticalThresholdTpl let-element>
-          {{ element.critical_stock_threshold ?? 2 }}
-        </ng-template>
-      }
+            <!-- Action Select -->
+            <div class="field-container">
+              <mat-label class="f-w-600 m-b-8 d-block">Action Type <span class="text-danger">*</span></mat-label>
+              <mat-form-field appearance="outline" class="w-100">
+                <mat-select formControlName="action">
+                  <mat-option value="ADD">ADD Stock (+)</mat-option>
+                  <mat-option value="REMOVE">REMOVE Stock (-)</mat-option>
+                </mat-select>
+              </mat-form-field>
+            </div>
+          </div>
 
-      <!-- Transaction Logs Table -->
-      @if (viewMode === 'logs') {
-        <app-mat-table
-          [columns]="logColumns"
-          [tableData]="stockLogs"
-          [showAction]="false"
-          [showSearch]="true"
-          [isLoading]="loading"
-          [customTemplates]="{ added_stock: addedStockTpl, action: actionTpl, status: statusTpl, actions: actionsTpl }">
-        </app-mat-table>
+          <div class="flex m-t-16" style="justify-content: flex-end; gap: 16px;">
+            <button mat-stroked-button class="btn-rounded Cancel_Button" type="button" (click)="toggleForm()" [disabled]="loading">
+              <mat-icon>close</mat-icon> Cancel
+            </button>
+            <button mat-flat-button class="btn-rounded btn-gradient" type="button" (click)="submitStockUpdate()" [disabled]="loading || stockForm.invalid">
+              <mat-icon>check_circle</mat-icon> Submit Stock Adjustment
+            </button>
+          </div>
+        </form>
+      </mat-card-content>
+    } @else {
+      <mat-card-content class="b-t-1">
 
-        <ng-template #addedStockTpl let-element>
-          <span [class.text-success]="element.action === 'ADD'" [class.text-error]="element.action === 'REMOVE'" class="f-w-600">
-            {{ element.action === 'ADD' ? '+' : '-' }}{{ abs(element.added_stock) }}
-          </span>
-        </ng-template>
+        <!-- Current Inventory Table -->
+        @if (viewMode === 'products') {
+          <app-mat-table
+            [columns]="productColumns"
+            [tableData]="products"
+            [showAction]="false"
+            [showSearch]="true"
+            [enableExport]="true"
+            [isLoading]="loading"
+            [customTemplates]="{ stock: stockTpl, low_threshold: lowThresholdTpl, critical_threshold: criticalThresholdTpl }">
+          </app-mat-table>
 
-        <ng-template #actionTpl let-element>
-          <span class="badge" [ngClass]="element.action === 'ADD' ? 'bg-light-success text-success' : 'bg-light-error text-error'">
-            {{ element.action }}
-          </span>
-        </ng-template>
-
-        <ng-template #statusTpl let-element>
-          <span class="badge font-weight-bold"
-                [ngClass]="{
-                  'bg-light-warning text-warning': element.status === 'Pending Approval',
-                  'bg-light-success text-success': element.status === 'Approved' || element.status === 'Published',
-                  'bg-light-error text-error': element.status === 'Rejected'
-                }">
-            {{ element.status }}
-          </span>
-          @if (element.status === 'Rejected') {
-            <span class="d-block text-muted f-s-12 m-t-4" style="max-width: 200px; white-space: normal;">
-              Reason: {{ element.rejection_reason }}
+          <ng-template #stockTpl let-element>
+            @let currentStock = (element.stock !== undefined && element.stock !== null) ? element.stock : (element.stock_in_hand ?? 0);
+            <span [class.text-error]="currentStock <= (element.critical_stock_threshold || 2)"
+                  [class.text-warning]="currentStock > (element.critical_stock_threshold || 2) && currentStock <= (element.low_stock_threshold || 5)"
+                  class="f-w-600">
+              {{ currentStock }}
             </span>
-          }
-        </ng-template>
+            @if (currentStock <= 0) {
+              <span class="badge bg-light-error text-error m-l-8 font-weight-bold">Out of Stock</span>
+            }
+            @if (currentStock > 0 && currentStock <= (element.critical_stock_threshold || 2)) {
+              <span class="badge bg-light-error text-error m-l-8">Critical Stock</span>
+            }
+            @if (currentStock > (element.critical_stock_threshold || 2) && currentStock <= (element.low_stock_threshold || 5)) {
+              <span class="badge bg-light-warning text-warning m-l-8">Low Stock</span>
+            }
+          </ng-template>
 
-        <ng-template #actionsTpl let-element>
-          @if (element.status === 'Pending Approval' && isAdmin) {
-            <button mat-icon-button color="primary" (click)="approveAdjustment(element.id, 'APPROVE')" title="Approve">
-              <mat-icon>done</mat-icon>
-            </button>
-            <button mat-icon-button color="warn" (click)="rejectAdjustment(element.id)" title="Reject">
-              <mat-icon>close</mat-icon>
-            </button>
-          }
-        </ng-template>
-      }
+          <ng-template #lowThresholdTpl let-element>
+            {{ element.low_stock_threshold ?? 5 }}
+          </ng-template>
 
-    </mat-card-content>
-  }
-</mat-card>
+          <ng-template #criticalThresholdTpl let-element>
+            {{ element.critical_stock_threshold ?? 2 }}
+          </ng-template>
+        }
+
+        <!-- Transaction Logs Table -->
+        @if (viewMode === 'logs') {
+          <app-mat-table
+            [columns]="logColumns"
+            [tableData]="stockLogs"
+            [showAction]="false"
+            [showSearch]="true"
+            [enableExport]="true"
+            [isLoading]="loading"
+            [customTemplates]="{ added_stock: addedStockTpl, action: actionTpl, status: statusTpl, actions: actionsTpl }">
+          </app-mat-table>
+
+          <ng-template #addedStockTpl let-element>
+            <span [class.text-success]="element.action === 'ADD'" [class.text-error]="element.action === 'REMOVE'" class="f-w-600">
+              {{ element.action === 'ADD' ? '+' : '-' }}{{ abs(element.added_stock) }}
+            </span>
+          </ng-template>
+
+          <ng-template #actionTpl let-element>
+            <span class="badge" [ngClass]="element.action === 'ADD' ? 'bg-light-success text-success' : 'bg-light-error text-error'">
+              {{ element.action }}
+            </span>
+          </ng-template>
+
+          <ng-template #statusTpl let-element>
+            <span class="badge font-weight-bold"
+                  [ngClass]="{
+                    'bg-light-warning text-warning': element.status === 'Pending Approval',
+                    'bg-light-success text-success': element.status === 'Approved' || element.status === 'Published',
+                    'bg-light-error text-error': element.status === 'Rejected'
+                  }">
+              {{ element.status }}
+            </span>
+            @if (element.status === 'Rejected') {
+              <span class="d-block text-muted f-s-12 m-t-4" style="max-width: 200px; white-space: normal;">
+                Reason: {{ element.rejection_reason }}
+              </span>
+            }
+          </ng-template>
+
+          <ng-template #actionsTpl let-element>
+            @if (element.status === 'Pending Approval' && isAdmin) {
+              <button mat-icon-button color="primary" (click)="approveAdjustment(element.id, 'APPROVE')" title="Approve">
+                <mat-icon>done</mat-icon>
+              </button>
+              <button mat-icon-button color="warn" (click)="rejectAdjustment(element.id)" title="Reject">
+                <mat-icon>close</mat-icon>
+              </button>
+            }
+          </ng-template>
+        }
+
+      </mat-card-content>
+    }
+  </mat-card>
+</div>
+

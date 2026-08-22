@@ -1,76 +1,135 @@
-<mat-card class="cardWithShadow theme-card">
+<div class="psh-root">
+  <div class="psh-bg" aria-hidden="true">
+    <div class="psh-orb psh-orb--a"></div>
+    <div class="psh-orb psh-orb--b"></div>
+    <div class="psh-orb psh-orb--c"></div>
+    <div class="psh-grid"></div>
+  </div>
 
+  <header class="psh-hero">
+    <div>
+      <div class="psh-eyebrow">
+        <span class="psh-eyebrow__dot"></span>
+        <span>SYSTEM CONFIGURATION</span>
+        <span class="psh-eyebrow__sep">·</span>
+        <span>{{ Statuses?.length || 0 }} STATUSES</span>
+      </div>
+      <h1 class="psh-title">Status <span class="psh-title__accent">Master</span></h1>
+      <p class="psh-sub">Configure global lifecycle status codes for orders, catalog, workforce, and common modules.</p>
+    </div>
+    @if (!Status_Forms && perm.hasRoleAction('canCreate')) {
+    <div class="psh-actions">
+      <button class="psh-btn psh-btn--primary" (click)="AddNewUser()">
+        <span class="psh-btn__shine"></span>
+        <mat-icon>add_circle</mat-icon> Add New Status
+      </button>
+    </div>
+    }
+  </header>
+
+  <div class="psh-chips">
+    <div class="psh-chip psh-chip--violet">
+      <div class="psh-chip__orb"><mat-icon>toggle_on</mat-icon></div>
+      <div class="psh-chip__body">
+        <span class="psh-chip__num">{{ Statuses?.length || 0 }}</span>
+        <span class="psh-chip__lbl">Total</span>
+      </div>
+    </div>
+    <div class="psh-chip psh-chip--emerald">
+      <div class="psh-chip__orb"><mat-icon>verified</mat-icon></div>
+      <div class="psh-chip__body">
+        <span class="psh-chip__num">{{ commonStatusesCount }}</span>
+        <span class="psh-chip__lbl">Common</span>
+      </div>
+    </div>
+    <div class="psh-chip psh-chip--amber">
+      <div class="psh-chip__orb"><mat-icon>shopping_bag</mat-icon></div>
+      <div class="psh-chip__body">
+        <span class="psh-chip__num">{{ orderStatusesCount }}</span>
+        <span class="psh-chip__lbl">Orders</span>
+      </div>
+    </div>
+    <div class="psh-chip psh-chip--cyan">
+      <div class="psh-chip__orb"><mat-icon>inventory_2</mat-icon></div>
+      <div class="psh-chip__body">
+        <span class="psh-chip__num">{{ productStatusesCount }}</span>
+        <span class="psh-chip__lbl">Products</span>
+      </div>
+    </div>
+  </div>
+
+  <mat-card class="cardWithShadow theme-card">
     <mat-card-header>
-
-        <div class="header-container">
-
-            <mat-card-title class="m-b-0">
-                Status Master
-            </mat-card-title>
-
-            @if (!Status_Forms && perm.hasRoleAction('canCreate')) {
-            <button mat-flat-button color="primary" (click)="AddNewUser()">
-                Add New Status
-            </button>
-            }
-
-        </div>
-
+      <div class="header-container">
+        <mat-card-title class="m-b-0">
+          Status Registry
+        </mat-card-title>
+      </div>
     </mat-card-header>
 
     @if (!Status_Forms) {
     <mat-card-content class="b-t-1">
-
-        <app-mat-table [columns]="tableColumns" [tableData]="Statuses" [showAction]="true" [Extra_Column]="false"
-            [showEdit]="perm.hasRoleAction('canUpdate')" [showDelete]="perm.hasRoleAction('canDelete')"
-            (editClick)="editUser($event)" (deleteClick)="deleteUser($event)">
-        </app-mat-table>
-
+      <app-mat-table 
+        [columns]="tableColumns" 
+        [tableData]="Statuses" 
+        [showAction]="true" 
+        [showSearch]="true"
+        [enableExport]="true"
+        [Extra_Column]="false"
+        [showEdit]="perm.hasRoleAction('canUpdate')" 
+        [showDelete]="perm.hasRoleAction('canDelete')"
+        (editClick)="editUser($event)" 
+        (deleteClick)="deleteUser($event)">
+      </app-mat-table>
     </mat-card-content>
     }
     @else {
     <mat-card-content class="b-t-1">
+      <form [formGroup]="StatusForm" class="premium-form-grid p-t-24">
+        <div class="divider">
+          <span>Status Specification</span>
+        </div>
 
-        <form [formGroup]="StatusForm">
-            <div class="row">
-                <div class="col-lg-4">
-                    <mat-label class="f-w-600 m-b-8 d-block">Status Code <span class="text-danger">*</span></mat-label>
-                    <mat-form-field appearance="outline" class="w-100">
-                        <input matInput formControlName="StatusCode" placeholder="Enter Status Code (e.g. ACTIVE)">
-                        @if (StatusForm.get('StatusCode')?.hasError('required')) {
-                          <mat-error>Status code is required</mat-error>
-                        } @else if (StatusForm.get('StatusCode')?.hasError('maxlength')) {
-                          <mat-error>Status code cannot exceed 50 characters</mat-error>
-                        } @else if (StatusForm.get('StatusCode')?.hasError('pattern')) {
-                          <mat-error>Use uppercase letters, digits, and underscores only (e.g. ACTIVE, IN_STOCK)</mat-error>
-                        }
-                    </mat-form-field>
-                </div>
+        <div class="form-row">
+          <div class="field-container">
+            <mat-label class="f-w-600 m-b-8 d-block">Status Code <span class="text-danger">*</span></mat-label>
+            <mat-form-field appearance="outline" class="w-100">
+              <input matInput formControlName="StatusCode" placeholder="e.g. ACTIVE, PENDING_APPROVAL">
+              @if (StatusForm.get('StatusCode')?.hasError('required')) {
+                <mat-error>Status code is required</mat-error>
+              } @else if (StatusForm.get('StatusCode')?.hasError('maxlength')) {
+                <mat-error>Status code cannot exceed 50 characters</mat-error>
+              } @else if (StatusForm.get('StatusCode')?.hasError('pattern')) {
+                <mat-error>Use uppercase letters, digits, and underscores only (e.g. ACTIVE, IN_STOCK)</mat-error>
+              }
+            </mat-form-field>
+          </div>
 
-                <div class="col-lg-4">
-                    <mat-label class="f-w-600 m-b-8 d-block">Status For <span class="text-danger">*</span></mat-label>
-                    <mat-form-field appearance="outline" class="w-100">
-                        <input matInput formControlName="StatusFor" placeholder="e.g. COMMON, ORDER, PRODUCT">
-                        @if (StatusForm.get('StatusFor')?.hasError('required')) {
-                          <mat-error>Status for is required</mat-error>
-                        } @else if (StatusForm.get('StatusFor')?.hasError('maxlength')) {
-                          <mat-error>Status for cannot exceed 50 characters</mat-error>
-                        }
-                    </mat-form-field>
-                </div>
-            </div>
+          <div class="field-container">
+            <mat-label class="f-w-600 m-b-8 d-block">Status For <span class="text-danger">*</span></mat-label>
+            <mat-form-field appearance="outline" class="w-100">
+              <input matInput formControlName="StatusFor" placeholder="e.g. COMMON, ORDER, PRODUCT">
+              @if (StatusForm.get('StatusFor')?.hasError('required')) {
+                <mat-error>Status for is required</mat-error>
+              } @else if (StatusForm.get('StatusFor')?.hasError('maxlength')) {
+                <mat-error>Status for cannot exceed 50 characters</mat-error>
+              }
+            </mat-form-field>
+          </div>
+        </div>
 
-            <div class="m-t-12">
-                <button mat-stroked-button class="me-3 Cancel_Button" (click)="cancelStatus()">
-                    Cancel
-                </button>
-                <button mat-flat-button color="primary" (click)="submit(StatusForm)">
-                    {{Update_button ? 'Update' : 'Submit'}}
-                </button>
-            </div>
-        </form>
-
+        <div class="flex m-t-12" style="justify-content: flex-end; gap: 16px;">
+          <button mat-stroked-button class="btn-rounded Cancel_Button" type="button" (click)="cancelStatus()">
+            <mat-icon>close</mat-icon> Cancel
+          </button>
+          <button mat-flat-button class="btn-rounded btn-gradient" type="submit" (click)="submit(StatusForm)">
+            <mat-icon>{{Update_button ? 'save' : 'add'}}</mat-icon>
+            {{Update_button ? 'Update Status' : 'Save Status'}}
+          </button>
+        </div>
+      </form>
     </mat-card-content>
     }
+  </mat-card>
+</div>
 
-</mat-card>

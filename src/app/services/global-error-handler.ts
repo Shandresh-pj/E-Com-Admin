@@ -19,52 +19,65 @@ import { environment } from 'src/environment/environment';
   providedIn: 'root'
 })
 export class GlobalErrorHandler implements ErrorHandler {
+  private isHandlingError = false;
+
   constructor(private injector: Injector) {}
 
   handleError(error: any): void {
-    // Unwrap promise/zone rejections that wrap the original error
-    const actualError = error?.rejection || error?.originalError || error;
-
-    // SEC-15: Only log to console in development
-    if (!environment.production) {
-      console.error('[GlobalErrorHandler] Unhandled runtime exception:', actualError);
-    }
-
-    // HTTP errors are fully handled by auth.interceptor + error.interceptor.
-    // Check by instance or by duck-typing the HttpErrorResponse shape.
-    if (
-      actualError instanceof HttpErrorResponse ||
-      (actualError?.status !== undefined && actualError?.headers !== undefined)
-    ) {
+    if (this.isHandlingError) {
       return;
     }
+    this.isHandlingError = true;
 
-    const message: string = actualError?.message || actualError?.toString() || '';
+    try {
+      // Unwrap promise/zone rejections that wrap the original error
+      const actualError = error?.rejection || error?.originalError || error;
 
-    // BUG-8: Suppress only well-known Angular lifecycle/browser noise messages —
-    // NOT by substring matches on HTTP status codes ("404", "500").
-    // Use startsWith/exact-match checks, NOT .includes() on numeric strings.
-    const isBenignNoise =
-      message.startsWith('ExpressionChangedAfterItHasBeenCheckedError') ||
-      message.includes('ResizeObserver loop limit exceeded') ||
-      message.includes('ResizeObserver loop completed with undelivered notifications') ||
-      message.includes('NavigationCancelled') ||
-      message.includes('Cannot match any routes') ||
-      // These are known-handled errors re-thrown from error.interceptor — suppress here
-      // to prevent a second user-visible toast for the same API failure.
-      message.includes('Http failure response');
+      // SEC-15: Only log to console in development
+      if (!environment.production) {
+        console.error('[GlobalErrorHandler] Unhandled runtime exception:', actualError);
+      }
 
-    if (isBenignNoise) return;
+      // HTTP errors are fully handled by auth.interceptor + error.interceptor.
+      // Check by instance or by duck-typing the HttpErrorResponse shape.
+      if (
+        actualError instanceof HttpErrorResponse ||
+        (actualError?.status !== undefined && actualError?.headers !== undefined)
+      ) {
+        return;
+      }
 
-    // Only notify the user for actual unhandled JS runtime crashes
-    const zone = this.injector.get(NgZone);
-    const alertService = this.injector.get(AlertService);
+      const message: string = actualError?.message || actualError?.toString() || '';
 
-    zone.run(() => {
-      alertService.error(
-        'An unexpected error occurred. Please reload the page if the issue persists.',
-        'Application Error'
-      );
-    });
+      // BUG-8: Suppress only well-known Angular lifecycle/browser noise messages —
+      // NOT by substring matches on HTTP status codes ("404", "500").
+      // Use startsWith/exact-match checks, NOT .includes() on numeric strings.
+      const isBenignNoise =
+        message.startsWith('ExpressionChangedAfterItHasBeenCheckedError') ||
+        message.includes('ResizeObserver loop limit exceeded') ||
+        message.includes('ResizeObserver loop completed with undelivered notifications') ||
+        message.includes('NavigationCancelled') ||
+        message.includes('Cannot match any routes') ||
+        // These are known-handled errors re-thrown from error.interceptor — suppress here
+        // to prevent a second user-visible toast for the same API failure.
+        message.includes('Http failure response');
+
+      if (isBenignNoise) return;
+
+      // Only notify the user for actual unhandled JS runtime crashes
+      const zone = this.injector.get(NgZone);
+      const alertService = this.injector.get(AlertService);
+
+      zone.run(() => {
+        alertService.error(
+          'An unexpected error occurred. Please reload the page if the issue persists.',
+          'Application Error'
+        );
+      });
+    } finally {
+      setTimeout(() => {
+        this.isHandlingError = false;
+      }, 1000);
+    }
   }
 }

@@ -54,6 +54,11 @@ export class Approvals implements OnInit, OnDestroy {
   statusFilter = '';
   typeFilter = '';
 
+  get pendingCount(): number { return (this.requests || []).filter(r => r.status === 'Pending').length; }
+  get approvedCount(): number { return (this.requests || []).filter(r => r.status === 'Approved').length; }
+  get rejectedCount(): number { return (this.requests || []).filter(r => r.status === 'Rejected' || r.status === 'Cancelled').length; }
+  get changesRequestedCount(): number { return (this.requests || []).filter(r => r.status === 'Changes Requested').length; }
+
   // Bulk Operations Selection
   selection = new SelectionModel<any>(true, []);
   bulkComment = '';

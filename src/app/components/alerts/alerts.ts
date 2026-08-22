@@ -7,7 +7,6 @@ import { CommonService } from 'src/app/Securities/Services/common.service';
 import { AlertService } from 'src/app/Securities/Services/alert.service';
 import { PermissionService } from 'src/app/Securities/Services/permissions.service';
 import { MatTable } from 'src/utils/mat-table/mat-table';
-import { TablerIconComponent } from "angular-tabler-icons";
 
 @Component({
   selector: 'app-alerts',
@@ -16,9 +15,8 @@ import { TablerIconComponent } from "angular-tabler-icons";
     MatCardModule,
     MatButtonModule,
     MatIconModule,
-    MatTable,
-    TablerIconComponent
-],
+    MatTable
+  ],
   templateUrl: './alerts.html',
   styleUrl: './alerts.scss',
 })
@@ -35,6 +33,8 @@ export class Alerts implements OnInit {
   loading = false;
   totalAlerts = 0;
   criticalAlertsCount = 0;
+
+  get warningAlertsCount(): number { return (this.alerts || []).filter(x => x.current_stock > 0).length; }
 
   constructor(
     private commonService: CommonService,

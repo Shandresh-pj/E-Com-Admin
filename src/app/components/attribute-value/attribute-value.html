@@ -1,96 +1,151 @@
-<mat-card class="cardWithShadow theme-card">
+<div class="psh-root">
+  <div class="psh-bg" aria-hidden="true">
+    <div class="psh-orb psh-orb--a"></div>
+    <div class="psh-orb psh-orb--b"></div>
+    <div class="psh-orb psh-orb--c"></div>
+    <div class="psh-grid"></div>
+  </div>
 
+  <header class="psh-hero">
+    <div>
+      <div class="psh-eyebrow">
+        <span class="psh-eyebrow__dot"></span>
+        <span>CATALOG SPECIFICATION</span>
+        <span class="psh-eyebrow__sep">·</span>
+        <span>{{ AttributeValues?.length || 0 }} VALUES</span>
+      </div>
+      <h1 class="psh-title">Attribute <span class="psh-title__accent">Values</span></h1>
+      <p class="psh-sub">Define exact option values for product attributes (e.g. Red, Blue, XL, XXL, 100g, 1kg).</p>
+    </div>
+    @if (!AttributeValue_Forms && perm.hasRoleAction('canCreate')) {
+    <div class="psh-actions">
+      <button class="psh-btn psh-btn--primary" (click)="AddNewUser()">
+        <span class="psh-btn__shine"></span>
+        <mat-icon>add_circle</mat-icon> Add New Value
+      </button>
+    </div>
+    }
+  </header>
+
+  <div class="psh-chips">
+    <div class="psh-chip psh-chip--violet">
+      <div class="psh-chip__orb"><mat-icon>category</mat-icon></div>
+      <div class="psh-chip__body">
+        <span class="psh-chip__num">{{ AttributeValues?.length || 0 }}</span>
+        <span class="psh-chip__lbl">Total Values</span>
+      </div>
+    </div>
+    <div class="psh-chip psh-chip--emerald">
+      <div class="psh-chip__orb"><mat-icon>verified</mat-icon></div>
+      <div class="psh-chip__body">
+        <span class="psh-chip__num">{{ activeValuesCount }}</span>
+        <span class="psh-chip__lbl">Active</span>
+      </div>
+    </div>
+    <div class="psh-chip psh-chip--amber">
+      <div class="psh-chip__orb"><mat-icon>tune</mat-icon></div>
+      <div class="psh-chip__body">
+        <span class="psh-chip__num">{{ parentAttributesCount }}</span>
+        <span class="psh-chip__lbl">Attributes</span>
+      </div>
+    </div>
+    <div class="psh-chip psh-chip--cyan">
+      <div class="psh-chip__orb"><mat-icon>palette</mat-icon></div>
+      <div class="psh-chip__body">
+        <span class="psh-chip__num">{{ AttributeValues?.length || 0 }}</span>
+        <span class="psh-chip__lbl">Options</span>
+      </div>
+    </div>
+  </div>
+
+  <mat-card class="cardWithShadow theme-card">
     <mat-card-header>
-
-        <div class="header-container">
-
-            <mat-card-title class="m-b-0">
-                Attribute Values
-            </mat-card-title>
-
-            @if (!AttributeValue_Forms && perm.hasRoleAction('canCreate')) {
-            <button mat-flat-button class="btn-rounded btn-gradient" (click)="AddNewUser()">
-                <mat-icon>add</mat-icon> Add New Value
-            </button>
-            }
-
-        </div>
-
+      <div class="header-container">
+        <mat-card-title class="m-b-0">
+          Attribute Value Registry
+        </mat-card-title>
+      </div>
     </mat-card-header>
 
     @if (!AttributeValue_Forms) {
     <mat-card-content class="b-t-1">
-
-        <app-mat-table [columns]="tableColumns" [tableData]="AttributeValues" [showAction]="true" [showView]="perm.hasRoleAction('canRead')" [Extra_Column]="false"
-            [showSearch]="true" [enableExport]="true" [showEdit]="perm.hasRoleAction('canUpdate')" [showDelete]="perm.hasRoleAction('canDelete')"
-            (editClick)="editUser($event)" (deleteClick)="deleteUser($event)" (ViewClick)="viewItem($event)">
-        </app-mat-table>
-
+      <app-mat-table 
+        [columns]="tableColumns" 
+        [tableData]="AttributeValues" 
+        [showAction]="true" 
+        [showView]="perm.hasRoleAction('canRead')" 
+        [Extra_Column]="false"
+        [showSearch]="true" 
+        [enableExport]="true" 
+        [showEdit]="perm.hasRoleAction('canUpdate')" 
+        [showDelete]="perm.hasRoleAction('canDelete')"
+        (editClick)="editUser($event)" 
+        (deleteClick)="deleteUser($event)" 
+        (ViewClick)="viewItem($event)">
+      </app-mat-table>
     </mat-card-content>
     }
     @else {
     <mat-card-content class="b-t-1">
+      <form [formGroup]="AttributeValueForm" class="premium-form-grid p-t-24">
+        <div class="divider">
+          <span>Value Specification</span>
+        </div>
 
-        <form [formGroup]="AttributeValueForm" class="premium-form-grid p-t-24">
-            
-            <div class="divider">
-                <span>Value Details</span>
-            </div>
+        <div class="form-row">
+          <div class="field-container">
+            <mat-label class="f-w-600 m-b-8 d-block">Parent Attribute <span class="text-danger">*</span></mat-label>
+            <mat-form-field appearance="outline" class="w-100">
+              <mat-select formControlName="ProductAttributeId" placeholder="Select Attribute">
+                @for(option of ProductAttributes; track (option.Id ?? option.id)) {
+                <mat-option [value]="option.Id ?? option.id">{{option.Name ?? option.name}}</mat-option>
+                }
+              </mat-select>
+              @if (AttributeValueForm.get('ProductAttributeId')?.hasError('required')) {
+                <mat-error>Attribute is required</mat-error>
+              }
+            </mat-form-field>
+          </div>
 
-            <div class="form-row">
-                <div class="field-container">
-                    <mat-label class="f-w-600 m-b-8 d-block">Attribute <span class="text-danger">*</span></mat-label>
-                    <mat-form-field appearance="outline" class="w-100">
-                        <mat-select formControlName="ProductAttributeId" placeholder="Select Attribute">
-                            @for(option of ProductAttributes; track option.Id) {
-                            <mat-option [value]="option.Id">{{option.Name}}</mat-option>
-                            }
-                        </mat-select>
-                        @if (AttributeValueForm.get('ProductAttributeId')?.hasError('required')) {
-                          <mat-error>Attribute is required</mat-error>
-                        }
-                    </mat-form-field>
-                </div>
+          <div class="field-container">
+            <mat-label class="f-w-600 m-b-8 d-block">Value Code <span class="text-danger">*</span></mat-label>
+            <mat-form-field appearance="outline" class="w-100">
+              <input matInput formControlName="AttributeValueCode" placeholder="e.g. RED, XL, 100G">
+              @if (AttributeValueForm.get('AttributeValueCode')?.hasError('required')) {
+                <mat-error>Value code is required</mat-error>
+              } @else if (AttributeValueForm.get('AttributeValueCode')?.hasError('maxlength')) {
+                <mat-error>Value code cannot exceed 50 characters</mat-error>
+              }
+            </mat-form-field>
+          </div>
+        </div>
 
-                <div class="field-container">
-                    <mat-label class="f-w-600 m-b-8 d-block">Value Code <span class="text-danger">*</span></mat-label>
-                    <mat-form-field appearance="outline" class="w-100">
-                        <input matInput formControlName="AttributeValueCode" placeholder="Enter Value Code">
-                        @if (AttributeValueForm.get('AttributeValueCode')?.hasError('required')) {
-                          <mat-error>Value code is required</mat-error>
-                        } @else if (AttributeValueForm.get('AttributeValueCode')?.hasError('maxlength')) {
-                          <mat-error>Value code cannot exceed 50 characters</mat-error>
-                        }
-                    </mat-form-field>
-                </div>
-            </div>
+        <div class="form-row single-col">
+          <div class="field-container">
+            <mat-label class="f-w-600 m-b-8 d-block">Display Name <span class="text-danger">*</span></mat-label>
+            <mat-form-field appearance="outline" class="w-100">
+              <input matInput formControlName="Name" placeholder="e.g. Crimson Red, Extra Large (XL)">
+              @if (AttributeValueForm.get('Name')?.hasError('required')) {
+                <mat-error>Name is required</mat-error>
+              } @else if (AttributeValueForm.get('Name')?.hasError('maxlength')) {
+                <mat-error>Name cannot exceed 100 characters</mat-error>
+              }
+            </mat-form-field>
+          </div>
+        </div>
 
-            <div class="form-row single-col">
-                <div class="field-container">
-                    <mat-label class="f-w-600 m-b-8 d-block">Name <span class="text-danger">*</span></mat-label>
-                    <mat-form-field appearance="outline" class="w-100">
-                        <input matInput formControlName="Name" placeholder="Enter Value Name">
-                        @if (AttributeValueForm.get('Name')?.hasError('required')) {
-                          <mat-error>Name is required</mat-error>
-                        } @else if (AttributeValueForm.get('Name')?.hasError('maxlength')) {
-                          <mat-error>Name cannot exceed 100 characters</mat-error>
-                        }
-                    </mat-form-field>
-                </div>
-            </div>
-
-            <div class="flex m-t-12" style="justify-content: flex-end; gap: 16px;">
-                <button mat-stroked-button class="btn-rounded Cancel_Button" type="button" (click)="cancelAttributeValue()">
-                    <mat-icon>close</mat-icon> Cancel
-                </button>
-                <button mat-flat-button class="btn-rounded btn-gradient" type="submit" (click)="submit(AttributeValueForm)">
-                    <mat-icon>{{Update_button ? 'save' : 'add'}}</mat-icon>
-                    {{Update_button ? 'Update Value' : 'Save Value'}}
-                </button>
-            </div>
-        </form>
-
+        <div class="flex m-t-12" style="justify-content: flex-end; gap: 16px;">
+          <button mat-stroked-button class="btn-rounded Cancel_Button" type="button" (click)="cancelAttributeValue()">
+            <mat-icon>close</mat-icon> Cancel
+          </button>
+          <button mat-flat-button class="btn-rounded btn-gradient" type="submit" (click)="submit(AttributeValueForm)">
+            <mat-icon>{{Update_button ? 'save' : 'add'}}</mat-icon>
+            {{Update_button ? 'Update Value' : 'Save Value'}}
+          </button>
+        </div>
+      </form>
     </mat-card-content>
     }
+  </mat-card>
+</div>
 
-</mat-card>

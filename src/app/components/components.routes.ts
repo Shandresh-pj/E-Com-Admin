@@ -143,15 +143,16 @@ export const ComponentsRoutes: Routes = [
       urls: [{ title: 'Attributes', url: '/product-attribute' }]
     }
   },
-  {
-    path: 'attribute-value',
-    loadComponent: () => import('./attribute-value/attribute-value').then(m => m.AttributeValue),
-    canActivate: [RoleGuard],
-    data: {
-      title: 'Attribute Values',
-      urls: [{ title: 'Attribute Values', url: '/attribute-value' }]
-    }
-  },
+  // {
+  //   path: 'attribute-value',
+  //   loadComponent: () => import('./attribute-value/attribute-value').then(m => m.AttributeValue),
+  //   // loadComponent: () => import('./product-attribute/product-attribute').then(m => m.ProductAttribute),
+  //   canActivate: [RoleGuard],
+  //   data: {
+  //     title: 'Attribute Values',
+  //     urls: [{ title: 'Attribute Values', url: '/attribute-value' }]
+  //   }
+  // },
   {
     path: 'category',
     loadComponent: () => import('./category/category').then(m => m.Category),

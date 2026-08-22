@@ -1,132 +1,193 @@
-<mat-card class="cardWithShadow theme-card menu-management-card">
+<div class="psh-root">
+  <div class="psh-bg" aria-hidden="true">
+    <div class="psh-orb psh-orb--a"></div>
+    <div class="psh-orb psh-orb--b"></div>
+    <div class="psh-orb psh-orb--c"></div>
+    <div class="psh-grid"></div>
+  </div>
+
+  <header class="psh-hero">
+    <div>
+      <div class="psh-eyebrow">
+        <span class="psh-eyebrow__dot"></span>
+        <span>NAVIGATION REGISTRY</span>
+        <span class="psh-eyebrow__sep">·</span>
+        <span>{{ menus?.length || 0 }} ROUTE ENTRIES</span>
+      </div>
+      <h1 class="psh-title">Menu <span class="psh-title__accent">Management</span></h1>
+      <p class="psh-sub">Configure global sidebar navigation items, route permission linkages, dynamic icons, and visibility statuses.</p>
+    </div>
+    @if (!Menu_Forms && !View_Mode && perm.hasRoleAction('canCreate')) {
+    <div class="psh-actions">
+      <button class="psh-btn psh-btn--secondary me-2" (click)="seedDefaultRoutes()">
+        <mat-icon>auto_fix_high</mat-icon> Seed Defaults
+      </button>
+      <button class="psh-btn psh-btn--primary" (click)="AddNewMenu()">
+        <span class="psh-btn__shine"></span>
+        <mat-icon>add_circle</mat-icon> Add New Menu
+      </button>
+    </div>
+    }
+  </header>
+
+  <div class="psh-chips">
+    <div class="psh-chip psh-chip--violet">
+      <div class="psh-chip__orb"><mat-icon>menu_open</mat-icon></div>
+      <div class="psh-chip__body">
+        <span class="psh-chip__num">{{ menus?.length || 0 }}</span>
+        <span class="psh-chip__lbl">Total Menus</span>
+      </div>
+    </div>
+    <div class="psh-chip psh-chip--emerald">
+      <div class="psh-chip__orb"><mat-icon>check_circle</mat-icon></div>
+      <div class="psh-chip__body">
+        <span class="psh-chip__num">{{ activeCount }}</span>
+        <span class="psh-chip__lbl">Active</span>
+      </div>
+    </div>
+    <div class="psh-chip psh-chip--rose">
+      <div class="psh-chip__orb"><mat-icon>block</mat-icon></div>
+      <div class="psh-chip__body">
+        <span class="psh-chip__num">{{ inactiveCount }}</span>
+        <span class="psh-chip__lbl">Inactive</span>
+      </div>
+    </div>
+    <div class="psh-chip psh-chip--cyan">
+      <div class="psh-chip__orb"><mat-icon>alt_route</mat-icon></div>
+      <div class="psh-chip__body">
+        <span class="psh-chip__num">{{ systemRoutesCount }}</span>
+        <span class="psh-chip__lbl">Preset Routes</span>
+      </div>
+    </div>
+  </div>
+
+  <mat-card class="cardWithShadow theme-card menu-management-card">
     <mat-card-header>
-        <div class="header-container w-100 d-flex align-items-center justify-content-between flex-wrap gap-2">
-            <div class="d-flex align-items-center gap-3">
-                <mat-card-title class="m-b-0 f-s-20 f-w-700">
-                    Menu Management
-                </mat-card-title>
-                <div class="menu-metrics-badges d-flex gap-2">
-                    <span class="badge bg-light-primary text-primary px-3 py-2 rounded-pill f-s-12">Total: {{ menus.length }}</span>
-                    <span class="badge bg-light-success text-success px-3 py-2 rounded-pill f-s-12">Active: {{ activeCount }}</span>
-                    <span class="badge bg-light-danger text-danger px-3 py-2 rounded-pill f-s-12">Inactive: {{ inactiveCount }}</span>
-                </div>
-            </div>
-            @if (!Menu_Forms && !View_Mode && perm.hasRoleAction('canCreate')) {
-            <div class="d-flex gap-2">
-                <button mat-stroked-button color="accent" (click)="seedDefaultRoutes()">
-                    Seed Default Menus
-                </button>
-                <button mat-flat-button color="primary" (click)="AddNewMenu()">
-                    Add New Menu
-                </button>
-            </div>
-            }
-        </div>
+      <div class="header-container w-100 d-flex align-items-center justify-content-between flex-wrap gap-2">
+        <mat-card-title class="m-b-0 f-s-20 f-w-700">
+          Sidebar Routes Registry
+        </mat-card-title>
+      </div>
     </mat-card-header>
 
     @if (!Menu_Forms && !View_Mode) {
     <mat-card-content class="b-t-1 p-t-16">
-        <div class="row m-b-16">
-            <div class="col-md-6 col-lg-4">
-                <mat-form-field appearance="outline" class="w-100 density-compact">
-                    <mat-label>Search Menus</mat-label>
-                    <input matInput [(ngModel)]="searchQuery" placeholder="Search by name, path, icon...">
-                </mat-form-field>
-            </div>
-        </div>
-        <app-mat-table [columns]="tableColumns" [tableData]="filteredMenus" [showAction]="true" [showView]="perm.hasRoleAction('canRead')" [Extra_Column]="false"
-            [showEdit]="perm.hasRoleAction('canUpdate')" [showDelete]="perm.hasRoleAction('canDelete')"
-            (editClick)="editMenu($event)" (deleteClick)="deleteMenu($event)" (ViewClick)="viewMenu($event)">
-        </app-mat-table>
+      <app-mat-table 
+        [columns]="tableColumns" 
+        [tableData]="filteredMenus" 
+        [showAction]="true" 
+        [showView]="perm.hasRoleAction('canRead')" 
+        [Extra_Column]="false"
+        [showSearch]="true"
+        [enableExport]="true"
+        [showEdit]="perm.hasRoleAction('canUpdate')" 
+        [showDelete]="perm.hasRoleAction('canDelete')"
+        (editClick)="editMenu($event)" 
+        (deleteClick)="deleteMenu($event)" 
+        (ViewClick)="viewMenu($event)">
+      </app-mat-table>
     </mat-card-content>
     } @else if (View_Mode) {
     <mat-card-content class="b-t-1 p-t-20">
-        <div class="row p-t-16">
-            <div class="col-lg-3 col-md-6 m-b-16">
-                <p class="f-w-600 m-b-4 text-muted">Menu Name</p>
-                <p class="f-s-16 f-w-600">{{ SelectedMenu?.name || '-' }}</p>
-            </div>
-            <div class="col-lg-3 col-md-6 m-b-16">
-                <p class="f-w-600 m-b-4 text-muted">Path</p>
-                <p class="f-s-16"><code>{{ SelectedMenu?.path || '-' }}</code></p>
-            </div>
-            <div class="col-lg-3 col-md-6 m-b-16">
-                <p class="f-w-600 m-b-4 text-muted">Icon</p>
-                <p class="f-s-16 d-flex align-items-center gap-2">
-                    @if (SelectedMenu?.icon) {
-                        <i [class]="'bi ' + SelectedMenu.icon + ' f-s-18 text-primary'"></i>
-                    }
-                    <span>{{ SelectedMenu?.icon || '-' }}</span>
-                </p>
-            </div>
-            <div class="col-lg-3 col-md-6 m-b-16">
-                <p class="f-w-600 m-b-4 text-muted">Status</p>
-                <span [class]="'badge ' + (SelectedMenu?.isActive ? 'bg-light-success text-success' : 'bg-light-danger text-danger') + ' px-3 py-2 rounded-pill'">
-                    {{ SelectedMenu?.status || (SelectedMenu?.isActive ? 'Active' : 'Inactive') }}
-                </span>
-            </div>
+      <div class="row p-t-16">
+        <div class="col-lg-3 col-md-6 m-b-16">
+          <p class="f-w-600 m-b-4 text-muted">Menu Name</p>
+          <p class="f-s-16 f-w-600">{{ SelectedMenu?.name || '-' }}</p>
         </div>
-        <div class="m-t-12 d-flex gap-2">
-            <button mat-stroked-button (click)="closeView()">Back to List</button>
-            @if (perm.hasRoleAction('canDelete')) {
-            <button mat-flat-button color="warn" (click)="deleteMenu(SelectedMenu)">Delete Menu</button>
+        <div class="col-lg-3 col-md-6 m-b-16">
+          <p class="f-w-600 m-b-4 text-muted">Path</p>
+          <p class="f-s-16"><code>{{ SelectedMenu?.path || '-' }}</code></p>
+        </div>
+        <div class="col-lg-3 col-md-6 m-b-16">
+          <p class="f-w-600 m-b-4 text-muted">Icon</p>
+          <p class="f-s-16 d-flex align-items-center gap-2">
+            @if (SelectedMenu?.icon) {
+              <i [class]="'bi ' + SelectedMenu.icon + ' f-s-18 text-primary'"></i>
             }
+            <span>{{ SelectedMenu?.icon || '-' }}</span>
+          </p>
         </div>
+        <div class="col-lg-3 col-md-6 m-b-16">
+          <p class="f-w-600 m-b-4 text-muted">Status</p>
+          <span [class]="'badge ' + (SelectedMenu?.isActive ? 'bg-light-success text-success' : 'bg-light-danger text-danger') + ' px-3 py-2 rounded-pill'">
+            {{ SelectedMenu?.status || (SelectedMenu?.isActive ? 'Active' : 'Inactive') }}
+          </span>
+        </div>
+      </div>
+      <div class="m-t-12 d-flex gap-2">
+        <button mat-stroked-button class="btn-rounded Cancel_Button" (click)="closeView()">
+          <mat-icon>arrow_back</mat-icon> Back to List
+        </button>
+        @if (perm.hasRoleAction('canDelete')) {
+        <button mat-flat-button color="warn" class="btn-rounded" (click)="deleteMenu(SelectedMenu)">
+          <mat-icon>delete</mat-icon> Delete Menu
+        </button>
+        }
+      </div>
     </mat-card-content>
     } @else {
     <mat-card-content class="b-t-1 p-t-20">
-        <form [formGroup]="MenuForm">
-            <div class="row">
-                <div class="col-lg-4">
-                    <mat-label class="f-w-600 m-b-8 d-block">Menu Name <span class="text-danger">*</span></mat-label>
-                    <mat-form-field appearance="outline" class="w-100">
-                        <input matInput formControlName="name" placeholder="e.g. Products">
-                        @if (MenuForm.get('name')?.hasError('required')) {
-                          <mat-error>Menu name is required</mat-error>
-                        }
-                    </mat-form-field>
-                </div>
+      <form [formGroup]="MenuForm" class="premium-form-grid p-t-24">
+        <div class="divider">
+          <span>Route Specification</span>
+        </div>
 
-                <div class="col-lg-4">
-                    <mat-label class="f-w-600 m-b-8 d-block">Path <span class="text-danger">*</span></mat-label>
-                    <mat-form-field appearance="outline" class="w-100">
-                        <input matInput formControlName="path" placeholder="e.g. /product">
-                        @if (MenuForm.get('path')?.hasError('required')) {
-                          <mat-error>Path is required</mat-error>
-                        }
-                    </mat-form-field>
-                </div>
+        <div class="form-row">
+          <div class="field-container">
+            <mat-label class="f-w-600 m-b-8 d-block">Menu Name <span class="text-danger">*</span></mat-label>
+            <mat-form-field appearance="outline" class="w-100">
+              <input matInput formControlName="name" placeholder="e.g. Products, Dashboard">
+              @if (MenuForm.get('name')?.hasError('required')) {
+                <mat-error>Menu name is required</mat-error>
+              }
+            </mat-form-field>
+          </div>
 
-                <div class="col-lg-4">
-                    <mat-label class="f-w-600 m-b-8 d-block">Icon (Bootstrap Class)</mat-label>
-                    <div class="d-flex align-items-center gap-2">
-                        <mat-form-field appearance="outline" class="w-100">
-                            <input matInput formControlName="icon" placeholder="e.g. bi-box-seam-fill">
-                        </mat-form-field>
-                        @if (MenuForm.get('icon')?.value) {
-                            <div class="icon-preview-box p-2 rounded bg-light border d-flex align-items-center justify-content-center m-b-16" style="width: 44px; height: 44px;">
-                                <i [class]="'bi ' + MenuForm.get('icon')?.value + ' f-s-20 text-primary'"></i>
-                            </div>
-                        }
-                    </div>
-                </div>
+          <div class="field-container">
+            <mat-label class="f-w-600 m-b-8 d-block">Path <span class="text-danger">*</span></mat-label>
+            <mat-form-field appearance="outline" class="w-100">
+              <input matInput formControlName="path" placeholder="e.g. /product">
+              @if (MenuForm.get('path')?.hasError('required')) {
+                <mat-error>Path is required</mat-error>
+              }
+            </mat-form-field>
+          </div>
 
-                @if (Update_button) {
-                <div class="col-lg-4 d-flex align-items-center m-b-16">
-                    <mat-checkbox formControlName="isActive">Active</mat-checkbox>
+          <div class="field-container">
+            <mat-label class="f-w-600 m-b-8 d-block">Icon (Bootstrap Class)</mat-label>
+            <div class="d-flex align-items-center gap-2">
+              <mat-form-field appearance="outline" class="w-100">
+                <input matInput formControlName="icon" placeholder="e.g. bi-box-seam-fill">
+              </mat-form-field>
+              @if (MenuForm.get('icon')?.value) {
+                <div class="icon-preview-box p-2 rounded bg-light border d-flex align-items-center justify-content-center m-b-16" style="width: 44px; height: 44px;">
+                  <i [class]="'bi ' + MenuForm.get('icon')?.value + ' f-s-20 text-primary'"></i>
                 </div>
-                }
+              }
             </div>
+          </div>
+        </div>
 
-            <div class="m-t-12 d-flex gap-2">
-                <button mat-stroked-button (click)="cancelMenu()">
-                    Cancel
-                </button>
-                <button mat-flat-button color="primary" (click)="submit(MenuForm)">
-                    {{Update_button ? 'Update Menu' : 'Save Menu'}}
-                </button>
-            </div>
-        </form>
+        @if (Update_button) {
+        <div class="form-row single-col">
+          <div class="field-container">
+            <mat-checkbox formControlName="isActive">Active Status</mat-checkbox>
+          </div>
+        </div>
+        }
+
+        <div class="flex m-t-12" style="justify-content: flex-end; gap: 16px;">
+          <button mat-stroked-button class="btn-rounded Cancel_Button" type="button" (click)="cancelMenu()">
+            <mat-icon>close</mat-icon> Cancel
+          </button>
+          <button mat-flat-button class="btn-rounded btn-gradient" type="submit" (click)="submit(MenuForm)">
+            <mat-icon>{{Update_button ? 'save' : 'add'}}</mat-icon>
+            {{Update_button ? 'Update Menu' : 'Save Menu'}}
+          </button>
+        </div>
+      </form>
     </mat-card-content>
     }
-</mat-card>
+  </mat-card>
+</div>
+

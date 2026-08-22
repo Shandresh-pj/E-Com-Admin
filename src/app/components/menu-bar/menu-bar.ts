@@ -7,6 +7,7 @@ import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatIconModule } from '@angular/material/icon';
 import { AlertService } from 'src/app/Securities/Services/alert.service';
 import { CommonService } from 'src/app/Securities/Services/common.service';
 import { PermissionService } from 'src/app/Securities/Services/permissions.service';
@@ -24,6 +25,7 @@ import { MatTable } from 'src/utils/mat-table/mat-table';
     MatButtonModule,
     MatCardModule,
     MatCheckboxModule,
+    MatIconModule,
     MatTable
   ],
   templateUrl: './menu-bar.html',
@@ -62,6 +64,9 @@ export class MenuBar implements OnInit {
   SelectedMenuId: any = null;
   SelectedMenu: any = null;
 
+  get activeMenusCount(): number { return (this.menus || []).filter(m => m.isActive || m.status === 'Active' || m.statusText === 'Active').length; }
+  get systemRoutesCount(): number { return this.defaultRoutes.length; }
+
   defaultRoutes = [
     { name: 'Admin', path: '/admin', icon: 'bi-shield-lock-fill', isActive: true },
     { name: 'Branches', path: '/branch', icon: 'bi-building-fill', isActive: true },
@@ -69,7 +74,7 @@ export class MenuBar implements OnInit {
     { name: 'Role Access', path: '/role-access', icon: 'bi-shield-check', isActive: true },
     { name: 'Roles', path: '/roles', icon: 'bi-key-fill', isActive: true },
     { name: 'Attributes', path: '/product-attribute', icon: 'bi-sliders', isActive: true },
-    { name: 'Attribute Values', path: '/attribute-value', icon: 'bi-tags-fill', isActive: true },
+    // { name: 'Attribute Values', path: '/attribute-value', icon: 'bi-tags-fill', isActive: true },
     { name: 'Categories', path: '/category', icon: 'bi-folder-fill', isActive: true },
     { name: 'Products', path: '/product', icon: 'bi-box-seam-fill', isActive: true },
     { name: 'Orders', path: '/orders', icon: 'bi-bag-check-fill', isActive: true },

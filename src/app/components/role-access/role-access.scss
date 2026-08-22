@@ -807,15 +807,94 @@ $danger: #ef4444;
   }
 }
 
+// ── Sticky Column Support ──────────────────────────────────────────────
+.sticky-col {
+  position: sticky;
+  left: 0;
+  z-index: 4;
+  background: #ffffff;
+  box-shadow: 4px 0 12px rgba(0, 0, 0, 0.05);
+
+  html.dark &, html .dark-theme & {
+    background: #0f172a;
+    box-shadow: 4px 0 12px rgba(0, 0, 0, 0.25);
+  }
+}
+
+// ── Keyframe Animations ────────────────────────────────────────────────
+.animate-slide-in {
+  animation: slideInRight 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-slide-up {
+  animation: slideUpFade 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes slideInRight {
+  from { opacity: 0; transform: translateX(16px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes slideUpFade {
+  from { opacity: 0; transform: translateY(18px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.ab-warn-orb {
+  width: 38px;
+  height: 38px;
+  min-width: 38px;
+  border-radius: 12px;
+  background: rgba(245, 158, 11, 0.15);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #d97706;
+
+  mat-icon { font-size: 20px; width: 20px; height: 20px; }
+}
+
+.ab-text-group {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.ab-sub {
+  font-size: 11px;
+  font-weight: 500;
+}
+
 // ── Responsive Rules ───────────────────────────────────────────────────
+@media (max-width: 992px) {
+  .perm-root { padding: 16px; }
+  .scope-selectors { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
+  .matrix-top-bar { flex-direction: column; align-items: flex-start; }
+  .mtb-right { width: 100%; justify-content: space-between; flex-wrap: wrap; }
+}
+
 @media (max-width: 768px) {
-  .perm-root { padding: 14px; }
+  .perm-root { padding: 12px; }
   .perm-header { flex-direction: column; align-items: flex-start; }
-  .matrix-table { min-width: 580px; }
+  .header-right { width: 100%; justify-content: space-between; margin-top: 12px; }
+  .matrix-table { min-width: 620px; }
   .toggle-switch {
     .ts-track { width: 46px; height: 24px; .ts-thumb { width: 18px; height: 18px; } }
     &.ts-on .ts-track .ts-thumb { transform: translateX(21px); }
   }
+  .action-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    border-radius: 20px 20px 0 0;
+    box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.15);
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .ab-right { width: 100%; justify-content: flex-end; }
 }
 
 // ── Category Filter Tabs & Badges System ──────────────────────────────────

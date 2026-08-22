@@ -1,22 +1,76 @@
-<mat-card class="cardWithShadow theme-card">
+<div class="psh-root">
+  <div class="psh-bg" aria-hidden="true">
+    <div class="psh-orb psh-orb--a"></div>
+    <div class="psh-orb psh-orb--b"></div>
+    <div class="psh-orb psh-orb--c"></div>
+    <div class="psh-grid"></div>
+  </div>
 
-  <mat-card-header>
-    <div class="header-container">
-      <mat-card-title class="m-b-0">Audit Logs</mat-card-title>
+  <header class="psh-hero">
+    <div>
+      <div class="psh-eyebrow">
+        <span class="psh-eyebrow__dot"></span>
+        <span>SECURITY & COMPLIANCE</span>
+        <span class="psh-eyebrow__sep">·</span>
+        <span>{{ logs.length }} EVENTS LOGGED</span>
+      </div>
+      <h1 class="psh-title">Audit <span class="psh-title__accent">Logs</span></h1>
+      <p class="psh-sub">Track system modifications, administrative actions, security authentications, and user data mutations.</p>
     </div>
-  </mat-card-header>
+  </header>
 
-  <mat-card-content class="b-t-1">
-    <app-mat-table
-      [columns]="tableColumns"
-      [tableData]="logs"
-      [showAction]="true"
-      [showEdit]="false"
-      [showView]="false"
-      [showDelete]="perm.hasRoleAction('canDelete')"
-      [Extra_Column]="false"
-      (deleteClick)="deleteLog($event)">
-    </app-mat-table>
-  </mat-card-content>
+  <div class="psh-chips">
+    <div class="psh-chip psh-chip--violet">
+      <div class="psh-chip__orb"><mat-icon>history</mat-icon></div>
+      <div class="psh-chip__body">
+        <span class="psh-chip__num">{{ totalLogsCount }}</span>
+        <span class="psh-chip__lbl">Total Events</span>
+      </div>
+    </div>
+    <div class="psh-chip psh-chip--emerald">
+      <div class="psh-chip__orb"><mat-icon>shield</mat-icon></div>
+      <div class="psh-chip__body">
+        <span class="psh-chip__num">{{ securityEventsCount }}</span>
+        <span class="psh-chip__lbl">Security</span>
+      </div>
+    </div>
+    <div class="psh-chip psh-chip--amber">
+      <div class="psh-chip__orb"><mat-icon>edit_note</mat-icon></div>
+      <div class="psh-chip__body">
+        <span class="psh-chip__num">{{ modificationsCount }}</span>
+        <span class="psh-chip__lbl">Modified</span>
+      </div>
+    </div>
+    <div class="psh-chip psh-chip--rose">
+      <div class="psh-chip__orb"><mat-icon>delete_forever</mat-icon></div>
+      <div class="psh-chip__body">
+        <span class="psh-chip__num">{{ deletionsCount }}</span>
+        <span class="psh-chip__lbl">Deletes</span>
+      </div>
+    </div>
+  </div>
 
-</mat-card>
+  <mat-card class="cardWithShadow theme-card">
+    <mat-card-header>
+      <div class="header-container">
+        <mat-card-title class="m-b-0">System Activity Trail</mat-card-title>
+      </div>
+    </mat-card-header>
+
+    <mat-card-content class="b-t-1">
+      <app-mat-table
+        [columns]="tableColumns"
+        [tableData]="logs"
+        [showAction]="true"
+        [showSearch]="true"
+        [enableExport]="true"
+        [showEdit]="false"
+        [showView]="false"
+        [showDelete]="perm.hasRoleAction('canDelete')"
+        [Extra_Column]="false"
+        (deleteClick)="deleteLog($event)">
+      </app-mat-table>
+    </mat-card-content>
+  </mat-card>
+</div>
+

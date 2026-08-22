@@ -9,10 +9,10 @@ export const PagesRoutes: Routes = [
     path: '',
     component: StarterComponent,
     canActivate: [RoleGuard],
-    title: 'Dashboard Cockpit',
+    title: 'Dashboard',
     data: {
-      title: 'Dashboard Cockpit',
-      urls: [{ title: 'Dashboard' }, { title: 'Starter' }]
+      title: 'Dashboard',
+      urls: [{ title: 'Dashboard' }]
     }
   },
 
@@ -21,20 +21,20 @@ export const PagesRoutes: Routes = [
     path: 'mobility-dashboard',
     loadComponent: () => import('../components/mobility-dashboard/mobility-dashboard.component').then(m => m.MobilityDashboardComponent),
     canActivate: [RoleGuard],
-    title: 'Mobility Cockpit',
+    title: 'Mobility Hub',
     data: {
-      title: 'Mobility Cockpit',
-      urls: [{ title: 'Dashboard', url: '/dashboard' }, { title: 'Mobility' }]
+      title: 'Mobility Hub',
+      urls: [{ title: 'Dashboard', url: '/dashboard' }, { title: 'Mobility Hub' }]
     }
   },
   {
     path: 'ride-booking',
     loadComponent: () => import('../components/ride-booking/ride-booking.component').then(m => m.RideBookingComponent),
     canActivate: [RoleGuard],
-    title: 'Ride Booking',
+    title: 'Rides',
     data: {
-      title: 'Ride Booking',
-      urls: [{ title: 'Dashboard', url: '/dashboard' }, { title: 'Ride Booking' }]
+      title: 'Rides',
+      urls: [{ title: 'Dashboard', url: '/dashboard' }, { title: 'Rides' }]
     }
   },
   {
@@ -51,9 +51,9 @@ export const PagesRoutes: Routes = [
     path: 'parcel-logistics',
     loadComponent: () => import('../components/parcel-logistics/parcel-logistics.component').then(m => m.ParcelLogisticsComponent),
     canActivate: [RoleGuard],
-    title: 'Parcel Logistics',
+    title: 'Logistics',
     data: {
-      title: 'Parcel Logistics',
+      title: 'Logistics',
       urls: [{ title: 'Dashboard', url: '/dashboard' }, { title: 'Logistics' }]
     }
   },
@@ -61,9 +61,9 @@ export const PagesRoutes: Routes = [
     path: 'fleet-management',
     loadComponent: () => import('../components/fleet-management/fleet-management.component').then(m => m.FleetManagementComponent),
     canActivate: [RoleGuard],
-    title: 'Fleet Management',
+    title: 'Fleet',
     data: {
-      title: 'Fleet Management',
+      title: 'Fleet',
       urls: [{ title: 'Dashboard', url: '/dashboard' }, { title: 'Fleet' }]
     }
   },
@@ -71,10 +71,10 @@ export const PagesRoutes: Routes = [
     path: 'corporate-transport',
     loadComponent: () => import('../components/corporate-transport/corporate-transport.component').then(m => m.CorporateTransportComponent),
     canActivate: [RoleGuard],
-    title: 'Corporate Transit',
+    title: 'Transit',
     data: {
-      title: 'Corporate Transit',
-      urls: [{ title: 'Dashboard', url: '/dashboard' }, { title: 'Corporate Transit' }]
+      title: 'Transit',
+      urls: [{ title: 'Dashboard', url: '/dashboard' }, { title: 'Transit' }]
     }
   },
   {
@@ -103,19 +103,19 @@ export const PagesRoutes: Routes = [
     path: 'subscription-coupons',
     loadComponent: () => import('./subscription-coupons/subscription-coupons').then(m => m.SubscriptionCouponsComponent),
     canActivate: [RoleGuard],
-    title: 'Subscription Coupons',
+    title: 'Plan Coupons',
     data: {
-      title: 'Subscription Coupons',
-      urls: [{ title: 'Dashboard', url: '/dashboard' }, { title: 'Coupons' }]
+      title: 'Plan Coupons',
+      urls: [{ title: 'Dashboard', url: '/dashboard' }, { title: 'Plan Coupons' }]
     }
   },
   {
     path: 'billing-history',
     loadComponent: () => import('./billing-history/billing-history').then(m => m.BillingHistoryComponent),
     canActivate: [RoleGuard],
-    title: 'Billing History',
+    title: 'Billing',
     data: {
-      title: 'Billing History',
+      title: 'Billing',
       urls: [{ title: 'Dashboard', url: '/dashboard' }, { title: 'Billing' }]
     }
   },

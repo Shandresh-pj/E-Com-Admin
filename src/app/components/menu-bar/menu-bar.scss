@@ -1,0 +1,32 @@
+.menu-management-card {
+  .header-container {
+    min-height: 48px;
+  }
+
+  .menu-metrics-badges {
+    span.badge {
+      font-weight: 600;
+      letter-spacing: 0.2px;
+    }
+  }
+
+  .density-compact {
+    .mat-mdc-text-field-wrapper {
+      padding-top: 0;
+      padding-bottom: 0;
+    }
+  }
+
+  .icon-preview-box {
+    background: rgba(99, 102, 241, 0.08) !important;
+    border: 1px solid rgba(99, 102, 241, 0.2) !important;
+  }
+
+  code {
+    background: rgba(0, 0, 0, 0.05);
+    padding: 2px 8px;
+    border-radius: 4px;
+    color: #6366f1;
+    font-family: var(--ff-mono, monospace);
+  }
+}

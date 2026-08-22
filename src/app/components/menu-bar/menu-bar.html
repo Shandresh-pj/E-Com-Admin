@@ -1,9 +1,16 @@
-<mat-card class="cardWithShadow theme-card">
+<mat-card class="cardWithShadow theme-card menu-management-card">
     <mat-card-header>
-        <div class="header-container">
-            <mat-card-title class="m-b-0">
-                Menu Management
-            </mat-card-title>
+        <div class="header-container w-100 d-flex align-items-center justify-content-between flex-wrap gap-2">
+            <div class="d-flex align-items-center gap-3">
+                <mat-card-title class="m-b-0 f-s-20 f-w-700">
+                    Menu Management
+                </mat-card-title>
+                <div class="menu-metrics-badges d-flex gap-2">
+                    <span class="badge bg-light-primary text-primary px-3 py-2 rounded-pill f-s-12">Total: {{ menus.length }}</span>
+                    <span class="badge bg-light-success text-success px-3 py-2 rounded-pill f-s-12">Active: {{ activeCount }}</span>
+                    <span class="badge bg-light-danger text-danger px-3 py-2 rounded-pill f-s-12">Inactive: {{ inactiveCount }}</span>
+                </div>
+            </div>
             @if (!Menu_Forms && !View_Mode && perm.hasRoleAction('canCreate')) {
             <div class="d-flex gap-2">
                 <button mat-stroked-button color="accent" (click)="seedDefaultRoutes()">
@@ -18,30 +25,45 @@
     </mat-card-header>
 
     @if (!Menu_Forms && !View_Mode) {
-    <mat-card-content class="b-t-1">
-        <app-mat-table [columns]="tableColumns" [tableData]="menus" [showAction]="true" [showView]="perm.hasRoleAction('canRead')" [Extra_Column]="false"
+    <mat-card-content class="b-t-1 p-t-16">
+        <div class="row m-b-16">
+            <div class="col-md-6 col-lg-4">
+                <mat-form-field appearance="outline" class="w-100 density-compact">
+                    <mat-label>Search Menus</mat-label>
+                    <input matInput [(ngModel)]="searchQuery" placeholder="Search by name, path, icon...">
+                </mat-form-field>
+            </div>
+        </div>
+        <app-mat-table [columns]="tableColumns" [tableData]="filteredMenus" [showAction]="true" [showView]="perm.hasRoleAction('canRead')" [Extra_Column]="false"
             [showEdit]="perm.hasRoleAction('canUpdate')" [showDelete]="perm.hasRoleAction('canDelete')"
             (editClick)="editMenu($event)" (deleteClick)="deleteMenu($event)" (ViewClick)="viewMenu($event)">
         </app-mat-table>
     </mat-card-content>
     } @else if (View_Mode) {
-    <mat-card-content class="b-t-1">
+    <mat-card-content class="b-t-1 p-t-20">
         <div class="row p-t-16">
-            <div class="col-lg-4 m-b-16">
+            <div class="col-lg-3 col-md-6 m-b-16">
                 <p class="f-w-600 m-b-4 text-muted">Menu Name</p>
-                <p class="f-s-16">{{ SelectedMenu?.name || '-' }}</p>
+                <p class="f-s-16 f-w-600">{{ SelectedMenu?.name || '-' }}</p>
             </div>
-            <div class="col-lg-4 m-b-16">
+            <div class="col-lg-3 col-md-6 m-b-16">
                 <p class="f-w-600 m-b-4 text-muted">Path</p>
-                <p class="f-s-16">{{ SelectedMenu?.path || '-' }}</p>
+                <p class="f-s-16"><code>{{ SelectedMenu?.path || '-' }}</code></p>
             </div>
-            <div class="col-lg-4 m-b-16">
+            <div class="col-lg-3 col-md-6 m-b-16">
                 <p class="f-w-600 m-b-4 text-muted">Icon</p>
-                <p class="f-s-16">{{ SelectedMenu?.icon || '-' }}</p>
+                <p class="f-s-16 d-flex align-items-center gap-2">
+                    @if (SelectedMenu?.icon) {
+                        <i [class]="'bi ' + SelectedMenu.icon + ' f-s-18 text-primary'"></i>
+                    }
+                    <span>{{ SelectedMenu?.icon || '-' }}</span>
+                </p>
             </div>
-            <div class="col-lg-4 m-b-16">
+            <div class="col-lg-3 col-md-6 m-b-16">
                 <p class="f-w-600 m-b-4 text-muted">Status</p>
-                <p class="f-s-16">{{ SelectedMenu?.status || '-' }}</p>
+                <span [class]="'badge ' + (SelectedMenu?.isActive ? 'bg-light-success text-success' : 'bg-light-danger text-danger') + ' px-3 py-2 rounded-pill'">
+                    {{ SelectedMenu?.status || (SelectedMenu?.isActive ? 'Active' : 'Inactive') }}
+                </span>
             </div>
         </div>
         <div class="m-t-12 d-flex gap-2">
@@ -52,13 +74,13 @@
         </div>
     </mat-card-content>
     } @else {
-    <mat-card-content class="b-t-1">
+    <mat-card-content class="b-t-1 p-t-20">
         <form [formGroup]="MenuForm">
             <div class="row">
                 <div class="col-lg-4">
                     <mat-label class="f-w-600 m-b-8 d-block">Menu Name <span class="text-danger">*</span></mat-label>
                     <mat-form-field appearance="outline" class="w-100">
-                        <input matInput formControlName="name" placeholder="Enter Menu Name">
+                        <input matInput formControlName="name" placeholder="e.g. Products">
                         @if (MenuForm.get('name')?.hasError('required')) {
                           <mat-error>Menu name is required</mat-error>
                         }
@@ -68,7 +90,7 @@
                 <div class="col-lg-4">
                     <mat-label class="f-w-600 m-b-8 d-block">Path <span class="text-danger">*</span></mat-label>
                     <mat-form-field appearance="outline" class="w-100">
-                        <input matInput formControlName="path" placeholder="Enter Path (e.g. /example)">
+                        <input matInput formControlName="path" placeholder="e.g. /product">
                         @if (MenuForm.get('path')?.hasError('required')) {
                           <mat-error>Path is required</mat-error>
                         }
@@ -76,10 +98,17 @@
                 </div>
 
                 <div class="col-lg-4">
-                    <mat-label class="f-w-600 m-b-8 d-block">Icon</mat-label>
-                    <mat-form-field appearance="outline" class="w-100">
-                        <input matInput formControlName="icon" placeholder="Enter Icon (e.g. bi-tags-fill)">
-                    </mat-form-field>
+                    <mat-label class="f-w-600 m-b-8 d-block">Icon (Bootstrap Class)</mat-label>
+                    <div class="d-flex align-items-center gap-2">
+                        <mat-form-field appearance="outline" class="w-100">
+                            <input matInput formControlName="icon" placeholder="e.g. bi-box-seam-fill">
+                        </mat-form-field>
+                        @if (MenuForm.get('icon')?.value) {
+                            <div class="icon-preview-box p-2 rounded bg-light border d-flex align-items-center justify-content-center m-b-16" style="width: 44px; height: 44px;">
+                                <i [class]="'bi ' + MenuForm.get('icon')?.value + ' f-s-20 text-primary'"></i>
+                            </div>
+                        }
+                    </div>
                 </div>
 
                 @if (Update_button) {
@@ -89,12 +118,12 @@
                 }
             </div>
 
-            <div class="m-t-12">
-                <button mat-stroked-button class="me-3" (click)="cancelMenu()">
+            <div class="m-t-12 d-flex gap-2">
+                <button mat-stroked-button (click)="cancelMenu()">
                     Cancel
                 </button>
                 <button mat-flat-button color="primary" (click)="submit(MenuForm)">
-                    {{Update_button ? 'Update' : 'Submit'}}
+                    {{Update_button ? 'Update Menu' : 'Save Menu'}}
                 </button>
             </div>
         </form>

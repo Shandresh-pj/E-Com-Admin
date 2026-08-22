@@ -14,8 +14,8 @@ export const ComponentsRoutes: Routes = [
     loadComponent: () => import('./pos-billing/pos-billing').then(m => m.PosBillingComponent),
     canActivate: [RoleGuard],
     data: {
-      title: 'POS Billing Terminal',
-      urls: [{ title: 'POS Billing', url: '/pos-billing' }]
+      title: 'POS Terminal',
+      urls: [{ title: 'POS Terminal', url: '/pos-billing' }]
     }
   },
   {
@@ -23,8 +23,8 @@ export const ComponentsRoutes: Routes = [
     loadComponent: () => import('./devices/devices').then(m => m.DevicesComponent),
     canActivate: [RoleGuard],
     data: {
-      title: 'Hardware & Devices Auto-Detect',
-      urls: [{ title: 'Hardware & Devices', url: '/devices' }]
+      title: 'Devices',
+      urls: [{ title: 'Devices', url: '/devices' }]
     }
   },
 
@@ -45,8 +45,8 @@ export const ComponentsRoutes: Routes = [
     loadComponent: () => import('./app-admin/app-admin').then(m => m.AppAdmin),
     canActivate: [RoleGuard],
     data: {
-      title: 'App Admin',
-      urls: [{ title: 'App Admin', url: '/admin' }]
+      title: 'Admin',
+      urls: [{ title: 'Admin', url: '/admin' }]
     }
   },
   {
@@ -54,8 +54,8 @@ export const ComponentsRoutes: Routes = [
     loadComponent: () => import('./branch/branch').then(m => m.Branch),
     canActivate: [RoleGuard],
     data: {
-      title: 'Branch',
-      urls: [{ title: 'Branch', url: '/branch' }]
+      title: 'Branches',
+      urls: [{ title: 'Branches', url: '/branch' }]
     }
   },
   {
@@ -119,8 +119,8 @@ export const ComponentsRoutes: Routes = [
     loadComponent: () => import('./menu-bar/menu-bar').then(m => m.MenuBar),
     canActivate: [RoleGuard],
     data: {
-      title: 'Menu Bar',
-      urls: [{ title: 'Menu Bar', url: '/menubar' }]
+      title: 'Menu Management',
+      urls: [{ title: 'Menu Management', url: '/menubar' }]
     }
   },
   {
@@ -128,8 +128,8 @@ export const ComponentsRoutes: Routes = [
     loadComponent: () => import('./status/status').then(m => m.Status),
     canActivate: [RoleGuard],
     data: {
-      title: 'Status',
-      urls: [{ title: 'Status', url: '/status' }]
+      title: 'Statuses',
+      urls: [{ title: 'Statuses', url: '/status' }]
     }
   },
 
@@ -139,8 +139,8 @@ export const ComponentsRoutes: Routes = [
     loadComponent: () => import('./product-attribute/product-attribute').then(m => m.ProductAttribute),
     canActivate: [RoleGuard],
     data: {
-      title: 'Product Attribute',
-      urls: [{ title: 'Product Attribute', url: '/product-attribute' }]
+      title: 'Attributes',
+      urls: [{ title: 'Attributes', url: '/product-attribute' }]
     }
   },
   {
@@ -148,8 +148,8 @@ export const ComponentsRoutes: Routes = [
     loadComponent: () => import('./attribute-value/attribute-value').then(m => m.AttributeValue),
     canActivate: [RoleGuard],
     data: {
-      title: 'Attribute Value',
-      urls: [{ title: 'Attribute Value', url: '/attribute-value' }]
+      title: 'Attribute Values',
+      urls: [{ title: 'Attribute Values', url: '/attribute-value' }]
     }
   },
   {
@@ -157,8 +157,8 @@ export const ComponentsRoutes: Routes = [
     loadComponent: () => import('./category/category').then(m => m.Category),
     canActivate: [RoleGuard],
     data: {
-      title: 'Category',
-      urls: [{ title: 'Category', url: '/category' }]
+      title: 'Categories',
+      urls: [{ title: 'Categories', url: '/category' }]
     }
   },
   {
@@ -166,8 +166,8 @@ export const ComponentsRoutes: Routes = [
     loadComponent: () => import('./product/product').then(m => m.Product),
     canActivate: [RoleGuard],
     data: {
-      title: 'Product',
-      urls: [{ title: 'Product', url: '/product' }]
+      title: 'Products',
+      urls: [{ title: 'Products', url: '/product' }]
     }
   },
 
@@ -186,7 +186,7 @@ export const ComponentsRoutes: Routes = [
     loadComponent: () => import('./coupons/coupons').then(m => m.Coupons),
     canActivate: [RoleGuard],
     data: {
-      title: 'Coupons Management',
+      title: 'Coupons',
       urls: [{ title: 'Coupons', url: '/coupons' }]
     }
   },
@@ -195,8 +195,8 @@ export const ComponentsRoutes: Routes = [
     loadComponent: () => import('./invoices/invoices').then(m => m.Invoices),
     canActivate: [RoleGuard],
     data: {
-      title: 'Invoice Generator',
-      urls: [{ title: 'Invoice Generator', url: '/invoices' }]
+      title: 'Invoices',
+      urls: [{ title: 'Invoices', url: '/invoices' }]
     }
   },
   {
@@ -204,8 +204,8 @@ export const ComponentsRoutes: Routes = [
     loadComponent: () => import('./subscription-plans/subscription-plans').then(m => m.SubscriptionPlansComponent),
     canActivate: [RoleGuard],
     data: {
-      title: 'Subscription Plans Management',
-      urls: [{ title: 'Manage Plans', url: '/manage-subscription-plans' }]
+      title: 'Plan Admin',
+      urls: [{ title: 'Plan Admin', url: '/manage-subscription-plans' }]
     }
   },
   {
@@ -213,8 +213,8 @@ export const ComponentsRoutes: Routes = [
     loadComponent: () => import('../pages/billing-history/billing-history').then(m => m.BillingHistoryComponent),
     canActivate: [RoleGuard],
     data: {
-      title: 'Billing & Invoice History',
-      urls: [{ title: 'Billing & Invoices', url: '/billing-history' }]
+      title: 'Billing',
+      urls: [{ title: 'Billing', url: '/billing-history' }]
     }
   },
   {
@@ -222,8 +222,8 @@ export const ComponentsRoutes: Routes = [
     loadComponent: () => import('../pages/subscription-coupons/subscription-coupons').then(m => m.SubscriptionCouponsComponent),
     canActivate: [RoleGuard],
     data: {
-      title: 'Subscription Coupons',
-      urls: [{ title: 'Coupons', url: '/subscription-coupons' }]
+      title: 'Plan Coupons',
+      urls: [{ title: 'Plan Coupons', url: '/subscription-coupons' }]
     }
   },
   {
@@ -231,7 +231,7 @@ export const ComponentsRoutes: Routes = [
     loadComponent: () => import('./standard-checkout/standard-checkout').then(m => m.StandardCheckoutComponent),
     canActivate: [RoleGuard],
     data: {
-      title: 'Standard Payment Checkout',
+      title: 'Checkout',
       urls: [{ title: 'Checkout', url: '/checkout' }]
     }
   },
@@ -262,8 +262,8 @@ export const ComponentsRoutes: Routes = [
     loadComponent: () => import('./approvals/approvals').then(m => m.Approvals),
     canActivate: [RoleGuard],
     data: {
-      title: 'Workflow Approvals',
-      urls: [{ title: 'Workflow Approvals', url: '/approvals' }]
+      title: 'Approvals',
+      urls: [{ title: 'Approvals', url: '/approvals' }]
     }
   },
 
@@ -273,8 +273,8 @@ export const ComponentsRoutes: Routes = [
     loadComponent: () => import('./stocks/stocks').then(m => m.Stocks),
     canActivate: [RoleGuard],
     data: {
-      title: 'Stocks',
-      urls: [{ title: 'Stocks', url: '/stocks' }]
+      title: 'Stock Control',
+      urls: [{ title: 'Stock Control', url: '/stocks' }]
     }
   },
   {
@@ -282,8 +282,8 @@ export const ComponentsRoutes: Routes = [
     loadComponent: () => import('./branch-stocks/branch-stocks').then(m => m.BranchStocks),
     canActivate: [RoleGuard],
     data: {
-      title: 'Branch Stocks',
-      urls: [{ title: 'Branch Stocks', url: '/branch-stocks' }]
+      title: 'Branch Inventory',
+      urls: [{ title: 'Branch Inventory', url: '/branch-stocks' }]
     }
   },
 
@@ -293,8 +293,8 @@ export const ComponentsRoutes: Routes = [
     loadComponent: () => import('./delivery-tracking/delivery-tracking').then(m => m.DeliveryTracking),
     canActivate: [RoleGuard],
     data: {
-      title: 'Delivery Tracking',
-      urls: [{ title: 'Delivery Tracking', url: '/delivery-tracking' }]
+      title: 'Deliveries',
+      urls: [{ title: 'Deliveries', url: '/delivery-tracking' }]
     }
   },
   {
@@ -331,8 +331,8 @@ export const ComponentsRoutes: Routes = [
     loadComponent: () => import('./leave/leave').then(m => m.Leave),
     canActivate: [RoleGuard],
     data: {
-      title: 'Leave',
-      urls: [{ title: 'Leave', url: '/leave' }]
+      title: 'Leave Management',
+      urls: [{ title: 'Leave Management', url: '/leave' }]
     }
   },
   {
@@ -340,8 +340,8 @@ export const ComponentsRoutes: Routes = [
     loadComponent: () => import('./workforce/workforce').then(m => m.Workforce),
     canActivate: [RoleGuard],
     data: {
-      title: 'Workforce Console',
-      urls: [{ title: 'Workforce Console', url: '/workforce' }]
+      title: 'Workforce',
+      urls: [{ title: 'Workforce', url: '/workforce' }]
     }
   },
   {
@@ -349,8 +349,8 @@ export const ComponentsRoutes: Routes = [
     loadComponent: () => import('./workforce/workforce').then(m => m.Workforce),
     canActivate: [RoleGuard],
     data: {
-      title: 'Shifts & Schedules',
-      urls: [{ title: 'Shifts & Schedules', url: '/shifts' }]
+      title: 'Shifts & Rosters',
+      urls: [{ title: 'Shifts & Rosters', url: '/shifts' }]
     }
   },
   {
@@ -358,8 +358,8 @@ export const ComponentsRoutes: Routes = [
     loadComponent: () => import('./workforce/workforce').then(m => m.Workforce),
     canActivate: [RoleGuard],
     data: {
-      title: 'Break Deduction Rules',
-      urls: [{ title: 'Break Deduction Rules', url: '/break-policies' }]
+      title: 'Break Rules',
+      urls: [{ title: 'Break Rules', url: '/break-policies' }]
     }
   },
   {
@@ -367,8 +367,8 @@ export const ComponentsRoutes: Routes = [
     loadComponent: () => import('./workforce/workforce').then(m => m.Workforce),
     canActivate: [RoleGuard],
     data: {
-      title: 'Biometric Sensors & Terminals',
-      urls: [{ title: 'Biometric Sensors', url: '/biometric' }]
+      title: 'Biometrics',
+      urls: [{ title: 'Biometrics', url: '/biometric' }]
     }
   },
   {
@@ -376,8 +376,8 @@ export const ComponentsRoutes: Routes = [
     loadComponent: () => import('./workforce/workforce').then(m => m.Workforce),
     canActivate: [RoleGuard],
     data: {
-      title: 'GPS Geofencing Boundaries',
-      urls: [{ title: 'GPS Geofencing', url: '/geofencing' }]
+      title: 'Geofencing',
+      urls: [{ title: 'Geofencing', url: '/geofencing' }]
     }
   },
   {
@@ -385,8 +385,8 @@ export const ComponentsRoutes: Routes = [
     loadComponent: () => import('./calendar/calendar').then(m => m.CompanyCalendarComponent),
     canActivate: [RoleGuard],
     data: {
-      title: 'Company Calendar',
-      urls: [{ title: 'Company Calendar', url: '/calendar' }]
+      title: 'Calendar',
+      urls: [{ title: 'Calendar', url: '/calendar' }]
     }
   },
   {
@@ -394,8 +394,8 @@ export const ComponentsRoutes: Routes = [
     loadComponent: () => import('./employee-documents/employee-documents').then(m => m.EmployeeDocumentsComponent),
     canActivate: [RoleGuard],
     data: {
-      title: 'KYC Document Vault',
-      urls: [{ title: 'KYC Document Vault', url: '/employee-documents' }]
+      title: 'Documents',
+      urls: [{ title: 'Documents', url: '/employee-documents' }]
     }
   },
   {
@@ -425,8 +425,8 @@ export const ComponentsRoutes: Routes = [
     loadComponent: () => import('./translation-management/translation-management').then(m => m.TranslationManagementComponent),
     canActivate: [RoleGuard],
     data: {
-      title: 'Translation & Localization Console',
-      urls: [{ title: 'Translation Console', url: '/translations' }]
+      title: 'Translations',
+      urls: [{ title: 'Translations', url: '/translations' }]
     }
   },
   {
@@ -434,7 +434,7 @@ export const ComponentsRoutes: Routes = [
     loadComponent: () => import('./translation-management/translation-management').then(m => m.TranslationManagementComponent),
     canActivate: [RoleGuard],
     data: {
-      title: 'Translation & Localization Console',
+      title: 'Translations',
       urls: [{ title: 'Settings', url: '/settings' }, { title: 'Translations', url: '/settings/translations' }]
     }
   },
@@ -445,8 +445,8 @@ export const ComponentsRoutes: Routes = [
     loadComponent: () => import('./secure-chat/secure-chat').then(m => m.SecureChatComponent),
     canActivate: [RoleGuard],
     data: {
-      title: 'Secure Communications Platform',
-      urls: [{ title: 'Communication', url: '/communication' }]
+      title: 'Chat',
+      urls: [{ title: 'Chat', url: '/communication' }]
     }
   },
   {
@@ -454,8 +454,8 @@ export const ComponentsRoutes: Routes = [
     loadComponent: () => import('./team-meetings/team-meetings').then(m => m.TeamMeetingsComponent),
     canActivate: [RoleGuard],
     data: {
-      title: 'Team Meetings & Screen Sharing',
-      urls: [{ title: 'Team Meetings', url: '/communication/meetings' }]
+      title: 'Meetings',
+      urls: [{ title: 'Meetings', url: '/communication/meetings' }]
     }
   },
 
@@ -465,8 +465,8 @@ export const ComponentsRoutes: Routes = [
     loadComponent: () => import('./ride-booking/ride-booking.component').then(m => m.RideBookingComponent),
     canActivate: [RoleGuard],
     data: {
-      title: 'Ride & Taxi Booking',
-      urls: [{ title: 'Ride Booking', url: '/ride-booking' }]
+      title: 'Rides',
+      urls: [{ title: 'Rides', url: '/ride-booking' }]
     }
   },
   {
@@ -474,8 +474,8 @@ export const ComponentsRoutes: Routes = [
     loadComponent: () => import('./car-rental/car-rental.component').then(m => m.CarRentalComponent),
     canActivate: [RoleGuard],
     data: {
-      title: 'Car Rental & Subscriptions',
-      urls: [{ title: 'Car Rental', url: '/car-rental' }]
+      title: 'Car Rentals',
+      urls: [{ title: 'Car Rentals', url: '/car-rental' }]
     }
   },
   {
@@ -483,8 +483,8 @@ export const ComponentsRoutes: Routes = [
     loadComponent: () => import('./parcel-logistics/parcel-logistics.component').then(m => m.ParcelLogisticsComponent),
     canActivate: [RoleGuard],
     data: {
-      title: 'Express Parcel & Freight Logistics',
-      urls: [{ title: 'Parcel Logistics', url: '/parcel-logistics' }]
+      title: 'Logistics',
+      urls: [{ title: 'Logistics', url: '/parcel-logistics' }]
     }
   },
   {
@@ -492,8 +492,8 @@ export const ComponentsRoutes: Routes = [
     loadComponent: () => import('./fleet-management/fleet-management.component').then(m => m.FleetManagementComponent),
     canActivate: [RoleGuard],
     data: {
-      title: 'Fleet Management',
-      urls: [{ title: 'Fleet Management', url: '/fleet-management' }]
+      title: 'Fleet',
+      urls: [{ title: 'Fleet', url: '/fleet-management' }]
     }
   },
   {
@@ -501,8 +501,8 @@ export const ComponentsRoutes: Routes = [
     loadComponent: () => import('./corporate-transport/corporate-transport.component').then(m => m.CorporateTransportComponent),
     canActivate: [RoleGuard],
     data: {
-      title: 'Corporate & School Transit',
-      urls: [{ title: 'Corporate Transport', url: '/corporate-transport' }]
+      title: 'Transit',
+      urls: [{ title: 'Transit', url: '/corporate-transport' }]
     }
   },
   {
@@ -510,7 +510,7 @@ export const ComponentsRoutes: Routes = [
     loadComponent: () => import('./live-tracking/live-tracking.component').then(m => m.LiveTrackingComponent),
     canActivate: [RoleGuard],
     data: {
-      title: 'Live GPS Telemetry',
+      title: 'Live Tracking',
       urls: [{ title: 'Live Tracking', url: '/live-tracking' }]
     }
   },
@@ -519,8 +519,8 @@ export const ComponentsRoutes: Routes = [
     loadComponent: () => import('./mobility-dashboard/mobility-dashboard.component').then(m => m.MobilityDashboardComponent),
     canActivate: [RoleGuard],
     data: {
-      title: 'Mobility Executive Cockpit',
-      urls: [{ title: 'Mobility Dashboard', url: '/mobility-dashboard' }]
+      title: 'Mobility Hub',
+      urls: [{ title: 'Mobility Hub', url: '/mobility-dashboard' }]
     }
   },
   {
@@ -528,8 +528,8 @@ export const ComponentsRoutes: Routes = [
     loadComponent: () => import('./vehicle-driver-verification/vehicle-driver-verification.component').then(m => m.VehicleDriverVerificationComponent),
     canActivate: [RoleGuard],
     data: {
-      title: 'Vehicle & Driver Verification KYC',
-      urls: [{ title: 'Verification', url: '/vehicle-driver-verification' }]
+      title: 'Driver Verification',
+      urls: [{ title: 'Driver Verification', url: '/vehicle-driver-verification' }]
     }
   },
 ];

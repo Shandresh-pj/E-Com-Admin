@@ -64,17 +64,15 @@ export class SocketService {
       });
 
       this.socket.onAny((event: string, data: any) => {
-        this.eventSubject.next({ event, data });
+        this.ngZone.run(() => {
+          this.eventSubject.next({ event, data });
 
-        if (event === 'permissions-updated') {
-          this.ngZone.run(() => {
+          if (event === 'permissions-updated') {
             this.sessionRefreshSubject.next({ permissions: data });
-          });
-        } else if (event === 'logout') {
-          this.ngZone.run(() => {
+          } else if (event === 'logout') {
             this.sessionExpiredSubject.next();
-          });
-        }
+          }
+        });
       });
 
       this.socket.on('disconnect', (reason) => {

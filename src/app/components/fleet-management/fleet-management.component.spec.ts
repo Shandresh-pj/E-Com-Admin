@@ -1,4 +1,4 @@
-import { ComponentFixture, TestBed } from '@angular/core';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { FleetManagementComponent } from './fleet-management.component';
 import { provideHttpClient } from '@angular/common/http';
 

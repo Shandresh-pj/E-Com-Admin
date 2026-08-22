@@ -21,6 +21,7 @@
     "useDefineForClassFields": false,
     "strictPropertyInitialization": false,
     "skipLibCheck": true,
+    "types": ["jasmine", "node"],
     "ignoreDeprecations": "6.0"
   },
   "angularCompilerOptions": {

@@ -1,4 +1,4 @@
-import { ComponentFixture, TestBed } from '@angular/core';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { VehicleDriverVerificationComponent } from './vehicle-driver-verification.component';
 import { provideHttpClient } from '@angular/common/http';
 

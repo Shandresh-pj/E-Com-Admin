@@ -110,8 +110,15 @@ export class CommonService {
       return;
     }
 
+    const rootName = resourcePrefix.replace(/-?s$/, '');
+
     for (const key of this.cache.keys()) {
-      if (key.startsWith(resourcePrefix + '|') || key.startsWith(resourcePrefix + '/')) {
+      const lowerKey = key.toLowerCase();
+      if (
+        lowerKey.startsWith(resourcePrefix + '|') ||
+        lowerKey.startsWith(resourcePrefix + '/') ||
+        (rootName.length >= 4 && lowerKey.startsWith(rootName))
+      ) {
         this.cache.delete(key);
       }
     }

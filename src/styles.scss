@@ -2,8 +2,9 @@
    SVK E-Com Admin — Premium Liquid Glass SaaS Design System
    Global Styles · Design Tokens · Component Overrides · Animations
    ═══════════════════════════════════════════════════════════════════════════ */
-
-@import 'premium-design-system';
+@use 'premium-design-system';
+@use 'enterprise-design-system';
+@use 'page-shell';
 
 /* Clock Timepicker Dialog Overlay Override */
 .clock-picker-dialog-panel {
@@ -3458,9 +3459,3 @@ html.dark {
   display: flex; align-items: center; justify-content: center;
   gap: 6px; font-size: 0.72rem; color: var(--text-subtle);
 }
-
-/* Enterprise-Grade Global Design System — imported */
-@import 'enterprise-design-system';
-
-/* Universal Page Shell Design Pattern — Coupons design applied globally */
-@import 'page-shell';

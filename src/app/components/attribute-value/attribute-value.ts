@@ -85,7 +85,13 @@ export class AttributeValue {
   getAttributeValues(onLoaded?: () => void) {
     this.commonService.getApi(`product-attribute-values`).subscribe({
       next: (res: any) => {
-        const values = res?.data?.data || [];
+        const values = Array.isArray(res?.data?.data)
+          ? res.data.data
+          : Array.isArray(res?.data)
+            ? res.data
+            : Array.isArray(res)
+              ? res
+              : [];
         this.AttributeValues = values.map((value: any) => ({
           ...value,
           AttributeName: this.ProductAttributes?.find((attr: any) => attr.Id === value.ProductAttributeId)?.Name
@@ -177,7 +183,7 @@ export class AttributeValue {
         }
       });
     } else {
-      this.commonService.postApi(`product-attribute-values/${this.SelectedAttributeValueId}`, payload).subscribe({
+      this.commonService.putApi(`product-attribute-values/${this.SelectedAttributeValueId}`, payload).subscribe({
         next: (res: any) => {
           this.alert.success("Attribute Value Updated Successfully");
           this.getAttributeValues(() => this.cancelAttributeValue());

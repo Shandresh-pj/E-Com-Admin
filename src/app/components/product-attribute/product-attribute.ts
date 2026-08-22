@@ -85,7 +85,13 @@ export class ProductAttribute {
   getProductAttributes() {
     this.commonService.getApi(`product-attributes`).subscribe({
       next: (res: any) => {
-        this.ProductAttributes = res?.data?.data;
+        this.ProductAttributes = Array.isArray(res?.data?.data)
+          ? res.data.data
+          : Array.isArray(res?.data)
+            ? res.data
+            : Array.isArray(res)
+              ? res
+              : [];
         this.cdr.detectChanges();
       }
     });
@@ -169,7 +175,7 @@ export class ProductAttribute {
         }
       });
     } else {
-      this.commonService.postApi(`product-attributes/${this.SelectedProductAttributeId}`, payload).subscribe({
+      this.commonService.putApi(`product-attributes/${this.SelectedProductAttributeId}`, payload).subscribe({
         next: (res: any) => {
           this.alert.success("Product Attribute Updated Successfully");
           this.refreshAndClose();

@@ -217,14 +217,15 @@ html .dark-theme :host {
   gap: 24px;
   align-items: start;
 
-  @media (min-width: 1080px) {
-    grid-template-columns: 400px 1fr;
+  @media (min-width: 1180px) {
+    grid-template-columns: 370px 1fr;
   }
 
-  @media (min-width: 1360px) {
-    grid-template-columns: 440px 1fr;
+  @media (min-width: 1440px) {
+    grid-template-columns: 400px 1fr;
   }
 }
+
 
 // ── ASIDE / CARD ────────────────────────────────────────────────────────────
 .iv-card {
@@ -615,73 +616,66 @@ html .dark-theme :host {
   display: flex;
   flex-direction: column;
   gap: 14px;
-  overflow-x: hidden;
+  min-width: 0;
+  width: 100%;
 
   &__toolbar {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
     padding: 12px 18px;
     background: var(--iv-surface-2);
     border: 1px solid var(--iv-border);
     border-radius: $radius-sm;
+
+    @media (max-width: 640px) {
+      flex-direction: column;
+      align-items: stretch;
+    }
   }
 }
 
-.iv-live-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-  font-size: 10.5px;
-  font-weight: 700;
-  letter-spacing: 1.2px;
-  color: #10b981;
-}
-
-.iv-toolbar-actions {
+.iv-doc-container {
+  width: 100%;
+  overflow-x: auto;
+  padding-bottom: 12px;
   display: flex;
-  gap: 8px;
-}
+  justify-content: flex-start;
+  align-items: flex-start;
 
-.iv-icon-btn {
-  background: var(--iv-input-bg);
-  border: 1px solid var(--iv-border);
-  color: var(--iv-text-muted);
-  width: 34px;
-  height: 34px;
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: all .18s;
-
-  &:hover {
-    background: var(--iv-surface-2);
-    color: var(--iv-text-primary);
-    border-color: var(--iv-border-light);
+  &--thermal {
+    justify-content: center;
   }
 
-  mat-icon {
-    font-size: 17px;
-    width: 17px;
-    height: 17px;
+  &::-webkit-scrollbar {
+    height: 6px;
+  }
+  &::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.05);
+    border-radius: 4px;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 4px;
   }
 }
 
-// ══════════════════════════════════════════════════════════════════════════════
-// DOCUMENT PREVIEW  (A4 proportioned)
-// ══════════════════════════════════════════════════════════════════════════════
 .iv-doc {
   background: #fff;
   border-radius: 14px;
   overflow: hidden;
-  box-shadow: 0 24px 72px rgba(0, 0, 0, .5);
+  box-shadow: 0 24px 72px rgba(0, 0, 0, .18);
   animation: iv-doc-in .35s ease-out;
+  width: 100%;
+  min-width: 600px;
+  position: relative;
 
-  @media (max-width: 768px) {
-    border-radius: 8px;
+  @media (max-width: 680px) {
+    min-width: 560px;
   }
+
 
   @keyframes iv-doc-in {
     from {
@@ -849,16 +843,14 @@ html .dark-theme :host {
 
   // ── BOTTOM SECTION ────────────────────────────────────────────────────
   &__bottom {
-    display: grid;
-    grid-template-columns: 1fr auto auto;
-    gap: 24px;
-    align-items: start;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 16px;
     margin-top: 20px;
-
-    @media (max-width: 700px) {
-      grid-template-columns: 1fr;
-    }
   }
+
 
   // Notes block
   &__notes {
@@ -1224,4 +1216,514 @@ html .dark-theme :host {
     page-break-inside: avoid !important;
     break-inside: avoid !important;
   }
-}
+}
+
+// ── MODAL STYLES ─────────────────────────────────────────────────────────────
+.iv-modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(15, 23, 42, 0.65);
+  backdrop-filter: blur(4px);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  animation: iv-fade-in 0.25s ease-out;
+}
+
+.iv-modal-content {
+  background: var(--iv-surface, #ffffff);
+  border: 1px solid var(--iv-border, #e2e8f0);
+  border-radius: 16px;
+  width: 100%;
+  max-width: 520px;
+  overflow: hidden;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+  animation: iv-scale-up 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  color: var(--iv-text-primary);
+}
+
+.iv-modal-header {
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.iv-modal-close {
+  background: transparent;
+  border: none;
+  color: #ffffff;
+  font-size: 24px;
+  cursor: pointer;
+  line-height: 1;
+  opacity: 0.8;
+
+  &:hover {
+    opacity: 1;
+  }
+}
+
+@keyframes iv-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes iv-scale-up {
+  from { transform: scale(0.92); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+// ── TOOLBAR MODE TOGGLES ───────────────────────────────────────────────────
+.iv-toolbar-modes {
+  display: flex;
+  gap: 6px;
+  background: var(--iv-surface);
+  padding: 4px;
+  border-radius: 10px;
+  border: 1px solid var(--iv-border);
+}
+
+.iv-view-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border: none;
+  background: transparent;
+  border-radius: 7px;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--iv-text-muted);
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  mat-icon {
+    font-size: 15px;
+    width: 15px;
+    height: 15px;
+  }
+
+  &:hover {
+    color: var(--iv-text-primary);
+    background: var(--iv-surface-2);
+  }
+
+  &.active {
+    background: var(--iv-hero-text, #1e293b);
+    color: #ffffff;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  }
+}
+
+// ── DIGITAL VERIFICATION STAMP OVERLAY ──────────────────────────────────────
+.iv-stamp {
+  position: absolute;
+  top: 120px;
+  right: 40px;
+  z-index: 10;
+  pointer-events: none;
+  transform: rotate(-14deg) scale(0.95);
+  opacity: 0.88;
+  animation: iv-stamp-bounce 0.45s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+
+  &__border {
+    border: 3px dashed currentColor;
+    border-radius: 12px;
+    padding: 8px 18px;
+    text-align: center;
+    backdrop-filter: blur(2px);
+  }
+
+  &__text {
+    display: block;
+    font-size: 20px;
+    font-weight: 900;
+    letter-spacing: 2px;
+    line-height: 1.1;
+  }
+
+  &__sub {
+    display: block;
+    font-size: 8px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    opacity: 0.85;
+    margin-top: 2px;
+  }
+
+  &--paid {
+    color: #059669;
+    .iv-stamp__border { background: rgba(16, 185, 129, 0.08); }
+  }
+
+  &--pending {
+    color: #d97706;
+    .iv-stamp__border { background: rgba(217, 119, 6, 0.08); }
+  }
+
+  &--failed {
+    color: #dc2626;
+    .iv-stamp__border { background: rgba(220, 38, 38, 0.08); }
+  }
+}
+
+@keyframes iv-stamp-bounce {
+  0% { transform: rotate(-14deg) scale(2); opacity: 0; }
+  100% { transform: rotate(-14deg) scale(0.95); opacity: 0.88; }
+}
+
+// ── THERMAL POS RECEIPT VIEW MODE ──────────────────────────────────────────
+.iv-doc-container--thermal {
+  display: flex;
+  justify-content: center;
+}
+
+.iv-doc--thermal {
+  max-width: 380px !important;
+  font-family: 'Courier New', Courier, monospace !important;
+  border-radius: 0 !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2) !important;
+
+  .iv-doc__hero {
+    padding: 16px !important;
+    text-align: center;
+
+    .iv-doc__hero-content {
+      flex-direction: column !important;
+      align-items: center !important;
+      gap: 10px;
+    }
+  }
+
+  .iv-doc__parties {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 12px !important;
+  }
+
+  .iv-stamp {
+    top: 80px;
+    right: 15px;
+    transform: rotate(-10deg) scale(0.75);
+  }
+}
+
+// ── COMPACT PACKING SLIP VIEW MODE ──────────────────────────────────────────
+.iv-doc--compact {
+  .iv-doc__hero {
+    padding: 18px 24px !important;
+  }
+  .iv-doc__parties {
+    grid-template-columns: 1fr 1fr 1fr !important;
+  }
+  .iv-doc__notes {
+    display: none;
+  }
+}
+
+// ── METALLIC SECURITY HOLOGRAM BADGE ─────────────────────────────────────────
+.iv-hologram {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 6px;
+  padding: 3px 8px;
+  font-size: 8.5px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  color: #ffffff;
+  position: relative;
+  overflow: hidden;
+  margin-bottom: 6px;
+  backdrop-filter: blur(4px);
+
+  mat-icon {
+    font-size: 12px;
+    width: 12px;
+    height: 12px;
+  }
+
+  &__shine {
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 50%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.45), transparent);
+    transform: skewX(-20deg);
+    animation: iv-hologram-shine 3.5s infinite;
+  }
+}
+
+@keyframes iv-hologram-shine {
+  0% { left: -100%; }
+  35% { left: 200%; }
+  100% { left: 200%; }
+}
+
+// ── COMPLETION PERCENTAGE BAR & STEPPER WIZARD ──────────────────────────────
+.iv-progress-badge {
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.iv-progress-track {
+  width: 100%;
+  height: 6px;
+  background: var(--iv-surface-2, #e2e8f0);
+  border-radius: 100px;
+  overflow: hidden;
+}
+
+.iv-progress-fill {
+  height: 100%;
+  border-radius: 100px;
+  transition: width 0.35s ease-out;
+}
+
+.iv-stepper-nav {
+  display: flex;
+  gap: 6px;
+  padding: 12px 20px 0;
+  border-bottom: 1px solid var(--iv-border, #e2e8f0);
+  overflow-x: auto;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+.iv-step-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--iv-text-muted);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+
+  &:hover {
+    color: var(--iv-text-primary);
+  }
+
+  &.active {
+    color: var(--iv-text-primary);
+    border-bottom-color: var(--iv-text-primary);
+  }
+
+  &.done .iv-step-badge {
+    background: #10b981;
+    color: #ffffff;
+  }
+}
+
+.iv-step-badge {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--iv-surface-2, #e2e8f0);
+  color: var(--iv-text-muted);
+  font-size: 10px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.iv-step-pane {
+  animation: iv-fade-in 0.25s ease-out;
+}
+
+.iv-step-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 16px;
+  padding-top: 12px;
+  border-top: 1px solid var(--iv-border, #e2e8f0);
+}
+
+.iv-step-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: all 0.2s ease;
+
+  &--back {
+    background: var(--iv-surface-2, #f1f5f9);
+    color: var(--iv-text-primary);
+    border: 1px solid var(--iv-border);
+
+    &:hover {
+      background: var(--iv-border);
+    }
+  }
+
+  &--next {
+    color: #ffffff;
+    margin-left: auto;
+
+    &:hover {
+      opacity: 0.9;
+      transform: translateX(2px);
+    }
+  }
+
+  mat-icon {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+  }
+}
+
+// Clean Toolbar Actions Container
+.iv-toolbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--iv-surface);
+  padding: 4px;
+  border-radius: 10px;
+  border: 1px solid var(--iv-border);
+}
+
+.iv-icon-btn {
+  background: transparent;
+  border: none;
+  color: var(--iv-text-muted);
+  width: 32px;
+  height: 32px;
+  border-radius: 7px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover:not(:disabled) {
+    background: var(--iv-surface-2);
+    color: var(--iv-text-primary);
+  }
+
+  &:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+  }
+
+  mat-icon {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+  }
+}
+
+// ── THERMAL RECEIPT SPECIFIC STYLES ─────────────────────────────────────────
+.iv-thermal-body {
+  padding: 24px;
+  background: #ffffff;
+  color: #000000;
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.iv-thermal-title {
+  font-size: 16px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  text-align: center;
+}
+
+.iv-thermal-sub {
+  font-size: 11px;
+  text-align: center;
+  color: #333;
+}
+
+.iv-thermal-line {
+  color: #777;
+  letter-spacing: -1px;
+  overflow: hidden;
+  white-space: nowrap;
+  margin: 6px 0;
+  font-weight: bold;
+}
+
+.iv-thermal-meta {
+  font-size: 11px;
+}
+
+.iv-thermal-tbl {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 8px 0;
+  font-size: 11px;
+
+  th, td {
+    padding: 4px 0;
+  }
+
+  th {
+    border-bottom: 1px dashed #000;
+  }
+}
+
+.iv-barcode-box {
+  margin-top: 16px;
+  text-align: center;
+}
+
+.iv-barcode-lines {
+  height: 42px;
+  width: 80%;
+  margin: 0 auto;
+  background: repeating-linear-gradient(
+    90deg,
+    #000 0px,
+    #000 2px,
+    #fff 2px,
+    #fff 4px,
+    #000 4px,
+    #000 7px,
+    #fff 7px,
+    #fff 9px
+  );
+}
+
+.iv-barcode-num {
+  font-size: 11px;
+  letter-spacing: 2px;
+  margin-top: 4px;
+  font-weight: bold;
+}
+
+.iv-thermal-thanks {
+  font-size: 10px;
+  margin-top: 8px;
+  letter-spacing: 1px;
+  color: #444;
+}
+
+
+
+
+

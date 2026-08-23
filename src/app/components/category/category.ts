@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component } from '@angular/core';
+import { ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
 import { ReactiveFormsModule, FormsModule, FormGroup, FormBuilder, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
@@ -36,7 +36,7 @@ import { catchError } from 'rxjs/operators';
   templateUrl: './category.html',
   styleUrl: './category.scss',
 })
-export class Category {
+export class Category implements OnInit, OnDestroy {
   tableColumns = [
     { columnDef: 'id', header: 'No' },
     { columnDef: 'name', header: 'Name' },
@@ -48,13 +48,29 @@ export class Category {
   CategoryForm: FormGroup;
   Category_Forms: boolean = false;
   Update_button: boolean = false;
-  Categories: any;
-  // Stat Chip Computed Properties
-  get activeCategoriesCount(): number { return (this.Categories || []).filter((c: any) => (c.status || c.statusText || "").toLowerCase() === "active").length; }
-  get parentCategoriesCount(): number { return (this.Categories || []).filter((c: any) => !c.parentId && !c.parent_id).length; }
-  get subCategoriesCount():    number { return (this.Categories || []).filter((c: any) => !!c.parentId || !!c.parent_id).length; }
-  Statuses: any;
-  SelectedCategoryId: any;
+  Categories: any[] = [];
+  Statuses: any[] = [];
+
+  // Stat Chip Computed Properties - safely handle null/undefined/booleans/numbers
+  get activeCategoriesCount(): number {
+    if (!Array.isArray(this.Categories)) return 0;
+    return this.Categories.filter((c: any) => {
+      const st = String(c?.statusText || c?.status || '').toLowerCase();
+      return st === 'active' || c?.status === true || c?.status === 1;
+    }).length;
+  }
+
+  get parentCategoriesCount(): number {
+    if (!Array.isArray(this.Categories)) return 0;
+    return this.Categories.filter((c: any) => !c?.parentId && !c?.parent_id).length;
+  }
+
+  get subCategoriesCount(): number {
+    if (!Array.isArray(this.Categories)) return 0;
+    return this.Categories.filter((c: any) => !!c?.parentId || !!c?.parent_id).length;
+  }
+
+  SelectedCategoryId: any = null;
   ImageFile: File | null = null;
   imagePreviewUrl: string | null = null;
   existingImageUrl: string | null = null;
@@ -70,7 +86,7 @@ export class Category {
     public perm: PermissionService,
     private socketService: SocketService
   ) {
-    this.CategoryForm = fb.group({
+    this.CategoryForm = this.fb.group({
       name: ['', [Validators.required, Validators.maxLength(100)]],
       description: ['', [Validators.maxLength(500)]],
       parent_id: [null],
@@ -102,17 +118,36 @@ export class Category {
               ? res
               : [];
         this.Categories = rawList.map((c: any) => {
-          const statusId = c.StatusId ?? c.statusId ?? c.status_id;
-          const statusObj = this.Statuses?.find((s: any) => s.Id === statusId || s.id === statusId);
+          const statusId = c?.StatusId ?? c?.statusId ?? c?.status_id;
+          const statusObj = Array.isArray(this.Statuses)
+            ? this.Statuses.find((s: any) => s.Id === statusId || s.id === statusId || String(s.Id) === String(statusId))
+            : null;
+          
+          let parentName = 'Root';
+          if (typeof c?.parent === 'object' && c?.parent?.name) {
+            parentName = c.parent.name;
+          } else if (typeof c?.parent === 'string' && c.parent.trim()) {
+            parentName = c.parent;
+          } else if (c?.parentName) {
+            parentName = c.parentName;
+          }
+
+          let statusText = 'Inactive';
+          if (statusObj) {
+            statusText = statusObj.StatusCode || statusObj.statusCode || 'Active';
+          } else if (c?.status === true || c?.status === 1 || String(c?.status).toLowerCase() === 'active') {
+            statusText = 'Active';
+          }
+
           return {
             ...c,
             id: c?.id ?? c?.Id,
-            name: c?.name ?? c?.Name,
-            description: c?.description ?? c?.Description,
+            name: c?.name ?? c?.Name ?? 'Unnamed Category',
+            description: c?.description ?? c?.Description ?? '',
             parent_id: c?.parent_id ?? c?.parentId ?? c?.ParentId ?? null,
             StatusId: statusId,
-            parentName: c?.parent?.name || c?.parentName || 'Root',
-            statusText: statusObj ? (statusObj.StatusCode || statusObj.statusCode) : (c?.status ? 'Active' : 'Inactive')
+            parentName,
+            statusText
           };
         });
         onLoaded?.();
@@ -147,14 +182,18 @@ export class Category {
             statusCode: codeVal
           };
         });
-        if (this.Categories) {
+        if (Array.isArray(this.Categories) && this.Categories.length > 0) {
           this.Categories = this.Categories.map((c: any) => {
             const statusId = c.StatusId ?? c.statusId ?? c.status_id;
-            const statusObj = this.Statuses?.find((s: any) => s.Id === statusId || s.id === statusId);
+            const statusObj = this.Statuses.find((s: any) => s.Id === statusId || s.id === statusId || String(s.Id) === String(statusId));
+            let statusText = c.statusText || 'Active';
+            if (statusObj) {
+              statusText = statusObj.StatusCode || statusObj.statusCode;
+            }
             return {
               ...c,
               StatusId: statusId,
-              statusText: statusObj ? (statusObj.StatusCode || statusObj.statusCode) : (c?.status ? 'Active' : 'Inactive')
+              statusText
             };
           });
         }
@@ -192,7 +231,13 @@ export class Category {
   }
 
   AddNewUser() {
+    this.SelectedCategoryId = null;
     this.Category_Forms = true;
+    this.Update_button = false;
+    this.ImageFile = null;
+    this.imagePreviewUrl = null;
+    this.existingImageUrl = null;
+    this.CategoryForm.reset();
   }
 
   editUser(category: any) {
@@ -203,10 +248,10 @@ export class Category {
     this.imagePreviewUrl = null;
     this.ImageFile = null;
     this.CategoryForm.patchValue({
-      name: category?.name ?? category?.Name,
-      description: category?.description ?? category?.Description,
+      name: category?.name ?? category?.Name ?? '',
+      description: category?.description ?? category?.Description ?? '',
       parent_id: category?.parent_id ?? category?.parentId ?? category?.ParentId ?? null,
-      StatusId: category?.StatusId ?? category?.statusId ?? category?.status_id
+      StatusId: category?.StatusId ?? category?.statusId ?? category?.status_id ?? ''
     });
   }
 
@@ -216,21 +261,36 @@ export class Category {
       next: (res: any) => {
         const data = res?.data || res;
         const statusId = data?.StatusId ?? data?.statusId ?? data?.status_id;
-        const status = this.Statuses?.find((s: any) => s.Id === statusId || s.id === statusId);
+        const status = Array.isArray(this.Statuses)
+          ? this.Statuses.find((s: any) => s.Id === statusId || s.id === statusId || String(s.Id) === String(statusId))
+          : null;
+
+        let parentName = 'Root';
+        if (typeof data?.parent === 'object' && data?.parent?.name) {
+          parentName = data.parent.name;
+        } else if (typeof data?.parent === 'string' && data.parent.trim()) {
+          parentName = data.parent;
+        } else if (data?.parentName) {
+          parentName = data.parentName;
+        }
+
         this.dialog.open(ViewDetailsDialog, {
           width: '600px',
           panelClass: 'premium-dialog-extended',
           data: {
             title: 'Category Details',
             fields: [
-              { label: 'Name', value: data?.name ?? data?.Name },
-              { label: 'Description', value: data?.description ?? data?.Description },
-              { label: 'Parent Category', value: data?.parent?.name || data?.parentName || 'Root' },
+              { label: 'Name', value: data?.name ?? data?.Name ?? 'Unnamed' },
+              { label: 'Description', value: data?.description ?? data?.Description ?? '-' },
+              { label: 'Parent Category', value: parentName },
               { label: 'Status', value: status ? (status.StatusCode || status.statusCode) : (data?.status ? 'Active' : 'Inactive') },
               { label: 'Image', value: toFileUrl(data?.image), isImage: true },
             ],
           },
         });
+      },
+      error: (err: any) => {
+        this.alert.error(err?.error?.message || "Failed to fetch category details");
       }
     });
   }
@@ -240,7 +300,7 @@ export class Category {
     this.alert.confirm("Are you sure you want to delete this category?").then((result) => {
       if (result.isConfirmed) {
         this.commonService.deleteApi(`categories/${targetId}`).subscribe({
-          next: (res: any) => {
+          next: () => {
             this.alert.success("Category deleted successfully");
             this.getCategories();
           },
@@ -258,6 +318,7 @@ export class Category {
     this.ImageFile = null;
     this.imagePreviewUrl = null;
     this.existingImageUrl = null;
+    this.SelectedCategoryId = null;
     this.CategoryForm.reset();
   }
 
@@ -280,7 +341,7 @@ export class Category {
 
     if (!this.Update_button) {
       this.commonService.postApi(`categories/create`, formData).subscribe({
-        next: (res: any) => {
+        next: () => {
           this.alert.success("Category Created Successfully");
           this.getCategories(() => this.cancelCategory());
         },
@@ -294,7 +355,7 @@ export class Category {
         catchError(() => this.commonService.patchApi(`categories/${catId}`, formData)),
         catchError(() => this.commonService.postApi(`categories/${catId}`, formData))
       ).subscribe({
-        next: (res: any) => {
+        next: () => {
           this.alert.success("Category Updated Successfully");
           this.getCategories(() => this.cancelCategory());
         },
@@ -305,3 +366,4 @@ export class Category {
     }
   }
 }
+

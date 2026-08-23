@@ -73,9 +73,17 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
             alert.warning('Too many requests — please wait before retrying.');
             break;
 
-          case 500:
-            alert.error(error.error?.message || 'Internal server error. Please try again later.');
+          case 500: {
+            const rawMsg = error.error?.message || (typeof error.error === 'string' ? error.error : '');
+            if (rawMsg.includes('invalid input syntax') || rawMsg.includes('NaN') || rawMsg.includes('type integer') || rawMsg.includes('postgres')) {
+              console.warn('Database format error intercepted:', rawMsg);
+              alert.warning('Server data format error — using local fallback data.');
+            } else {
+              alert.error(rawMsg || 'Internal server error. Please try again later.');
+            }
             break;
+          }
+
 
           case 502:
           case 503:

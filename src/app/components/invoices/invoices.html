@@ -1,4 +1,4 @@
-﻿﻿<div class="psh-root">
+<div class="psh-root">
   <div class="psh-bg" aria-hidden="true"><div class="psh-orb psh-orb--a"></div><div class="psh-orb psh-orb--b"></div><div class="psh-orb psh-orb--c"></div><div class="psh-grid"></div></div>
   <header class="psh-hero">
     <div>
@@ -8,427 +8,740 @@
     </div>
     <div class="psh-actions"></div>
   </header>
-  <div class="psh-chips"><div class="psh-chip psh-chip--violet"><div class="psh-chip__orb"><mat-icon>receipt_long</mat-icon></div><div class="psh-chip__body"><span class="psh-chip__num">{{ ordersList.length }}</span><span class="psh-chip__lbl">Total</span></div></div><div class="psh-chip psh-chip--emerald"><div class="psh-chip__orb"><mat-icon>paid</mat-icon></div><div class="psh-chip__body"><span class="psh-chip__num">0</span><span class="psh-chip__lbl">Paid</span></div></div><div class="psh-chip psh-chip--amber"><div class="psh-chip__orb"><mat-icon>pending_actions</mat-icon></div><div class="psh-chip__body"><span class="psh-chip__num">0</span><span class="psh-chip__lbl">Pending</span></div></div><div class="psh-chip psh-chip--rose"><div class="psh-chip__orb"><mat-icon>money_off</mat-icon></div><div class="psh-chip__body"><span class="psh-chip__num">0</span><span class="psh-chip__lbl">Overdue</span></div></div></div><div class="iv-root">
+  <div class="psh-chips">
+    <div class="psh-chip psh-chip--violet"><div class="psh-chip__orb"><mat-icon>receipt_long</mat-icon></div><div class="psh-chip__body"><span class="psh-chip__num">{{ ordersList.length }}</span><span class="psh-chip__lbl">Total</span></div></div>
+    <div class="psh-chip psh-chip--emerald"><div class="psh-chip__orb"><mat-icon>paid</mat-icon></div><div class="psh-chip__body"><span class="psh-chip__num">{{ paidCount }}</span><span class="psh-chip__lbl">Paid</span></div></div>
+    <div class="psh-chip psh-chip--amber"><div class="psh-chip__orb"><mat-icon>pending_actions</mat-icon></div><div class="psh-chip__body"><span class="psh-chip__num">{{ pendingCount }}</span><span class="psh-chip__lbl">Pending</span></div></div>
+    <div class="psh-chip psh-chip--rose"><div class="psh-chip__orb"><mat-icon>money_off</mat-icon></div><div class="psh-chip__body"><span class="psh-chip__num">{{ overdueCount }}</span><span class="psh-chip__lbl">Overdue</span></div></div>
+  </div>
 
-  <!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â• HERO BANNER â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
-  <header class="iv-hero">
-    <div class="iv-hero__glow"></div>
-    <div class="iv-hero__inner">
-      <div class="iv-hero__badge">
-        <span class="iv-dot iv-dot--green"></span>
-        BIZCORE Â· DOCUMENT CENTER
-      </div>
-      <h1 class="iv-hero__h1">Invoice <span class="iv-hero__accent">Studio</span></h1>
-      <p class="iv-hero__sub">
-        Craft pixel-perfect tax {{ ordersList.length }} INVOICES with live preview, dynamic themes, custom GSTIN,
-        branch details, embedded QR codes, and one-click PDF export.
-      </p>
-    </div>
-    <!-- Floating stats -->
-    <div class="iv-hero__stats">
-      <div class="iv-stat">
-        <span class="iv-stat__num">{{ ordersList.length }}</span>
-        <span class="iv-stat__lbl">Orders</span>
-      </div>
-      <div class="iv-stat">
-        <span class="iv-stat__num">5</span>
-        <span class="iv-stat__lbl">Themes</span>
-      </div>
-      <div class="iv-stat">
-        <span class="iv-stat__num">A4</span>
-        <span class="iv-stat__lbl">Format</span>
-      </div>
-    </div>
-  </header>
+  <div class="iv-root">
 
-  <!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â• WORKSPACE â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
-  <div class="iv-workspace">
-
-    <!-- â”€â”€ LEFT: CUSTOMIZER PANEL â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
-    <aside class="iv-aside">
-      <div class="iv-card">
-        <div class="iv-card__topbar" [style.background]="theme().primary"></div>
-
-        <div class="iv-card__head">
-          <div class="iv-card__icon" [style.background]="theme().primary + '22'"
-            [style.border-color]="theme().primary + '55'">
-            <mat-icon [style.color]="theme().primary">tune</mat-icon>
-          </div>
-          <div>
-            <h3 class="iv-card__title">Invoice Parameters</h3>
-            <p class="iv-card__sub">Configure every detail below</p>
-          </div>
+    <!-- HERO BANNER -->
+    <header class="iv-hero">
+      <div class="iv-hero__glow"></div>
+      <div class="iv-hero__inner">
+        <div class="iv-hero__badge">
+          <span class="iv-dot iv-dot--green"></span>
+          BIZCORE · DOCUMENT CENTER
         </div>
+        <h1 class="iv-hero__h1">Invoice <span class="iv-hero__accent">Studio</span></h1>
+        <p class="iv-hero__sub">
+          Craft pixel-perfect tax invoices with live preview, dynamic themes, custom GSTIN,
+          branch details, embedded QR codes, and one-click PDF export &amp; email dispatch.
+        </p>
+      </div>
+      <!-- Floating stats -->
+      <div class="iv-hero__stats">
+        <div class="iv-stat">
+          <span class="iv-stat__num">{{ ordersList.length }}</span>
+          <span class="iv-stat__lbl">Orders</span>
+        </div>
+        <div class="iv-stat">
+          <span class="iv-stat__num">5</span>
+          <span class="iv-stat__lbl">Themes</span>
+        </div>
+        <div class="iv-stat">
+          <span class="iv-stat__num">A4</span>
+          <span class="iv-stat__lbl">Format</span>
+        </div>
+      </div>
+    </header>
 
-        <div class="iv-card__body">
-          <!-- ORDER SELECT -->
-          <div class="iv-field-group">
-            <label class="iv-label">
-              <mat-icon class="iv-label__icon">receipt_long</mat-icon>
-              Target Order
-            </label>
-            @if (loading) {
-            <div class="iv-skeleton"></div>
-            } @else {
-            <select class="iv-input-select" [(ngModel)]="selectedOrder" name="order" (ngModelChange)="onOrderChange()">
-              @for (o of ordersList; track o.id) {
-              <option [ngValue]="o">
-                #{{ o.id }} â€” {{ o.invoice_no }} ({{ currencySymbol }}{{ o.total | number:'1.2-2' }})
-              </option>
-              }
-            </select>
-            }
+    <!-- WORKSPACE -->
+    <div class="iv-workspace">
+
+      <!-- LEFT: CUSTOMIZER PANEL WITH STEPPER WIZARD -->
+      <aside class="iv-aside">
+        <div class="iv-card">
+          <div class="iv-card__topbar" [style.background]="theme().primary"></div>
+
+          <!-- CARD HEADER & COMPLETION PERCENTAGE BAR -->
+          <div class="iv-card__head">
+            <div class="iv-card__icon" [style.background]="theme().primary + '22'"
+              [style.border-color]="theme().primary + '55'">
+              <mat-icon [style.color]="theme().primary">tune</mat-icon>
+            </div>
+            <div style="flex: 1;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                <h3 class="iv-card__title">Invoice Parameters</h3>
+                <span class="iv-progress-badge" [style.color]="theme().primary">{{ completionPercentage }}% Filled</span>
+              </div>
+              <div class="iv-progress-track">
+                <div class="iv-progress-fill" [style.width.%]="completionPercentage" [style.background]="theme().primary"></div>
+              </div>
+            </div>
           </div>
 
-          <!-- INVOICE NUMBER & SUGGESTIONS -->
-          @if (selectedOrder) {
-          <div class="iv-field-group">
-            <label class="iv-label">
-              <mat-icon class="iv-label__icon">tag</mat-icon>
-              Invoice Number
-            </label>
-            <input class="iv-input" [(ngModel)]="selectedOrder.invoice_no" (ngModelChange)="refreshQr()" placeholder="Invoice number" />
-            
-            <!-- Suggestions List -->
-            @if (suggestionsList.length > 0) {
-              <div class="iv-suggestions">
-                <span class="iv-suggestions__title">Suggestions:</span>
-                <div class="iv-suggestions__list">
-                  @for (suggestion of suggestionsList; track suggestion) {
-                    <button class="iv-suggestion-pill" (click)="selectSuggestion(suggestion)">
-                      {{ suggestion }}
-                    </button>
+          <!-- STEPPER NAV TABS -->
+          <div class="iv-stepper-nav">
+            <button type="button" class="iv-step-pill" [class.active]="currentStep === 1" [class.done]="completionPercentage >= 40" (click)="setStep(1)">
+              <span class="iv-step-badge">1</span>
+              <span>Order &amp; Theme</span>
+            </button>
+            <button type="button" class="iv-step-pill" [class.active]="currentStep === 2" [class.done]="completionPercentage >= 70" (click)="setStep(2)">
+              <span class="iv-step-badge">2</span>
+              <span>Company &amp; Tax</span>
+            </button>
+            <button type="button" class="iv-step-pill" [class.active]="currentStep === 3" [class.done]="completionPercentage >= 100" (click)="setStep(3)">
+              <span class="iv-step-badge">3</span>
+              <span>Pattern &amp; Terms</span>
+            </button>
+          </div>
+
+          <div class="iv-card__body">
+            <!-- STEP 1: ORDER & THEME -->
+            @if (currentStep === 1) {
+            <div class="iv-step-pane">
+              <!-- ORDER SELECT -->
+              <div class="iv-field-group">
+                <label class="iv-label">
+                  <mat-icon class="iv-label__icon">receipt_long</mat-icon>
+                  Target Order
+                </label>
+                @if (loading) {
+                <div class="iv-skeleton"></div>
+                } @else {
+                <select class="iv-input-select" [(ngModel)]="selectedOrder" name="order" (ngModelChange)="onOrderChange()">
+                  @if (ordersList.length === 0) {
+                    <option [ngValue]="null" disabled selected>No orders returned from API</option>
+                  }
+                  @for (o of ordersList; track (o.id || $index)) {
+                  <option [ngValue]="o">
+                    #{{ o.id }} — {{ o.invoice_no }} ({{ currencySymbol }}{{ (o.total || o.total_amount || 0) | number:'1.2-2' }})
+                  </option>
+                  }
+                </select>
+                }
+              </div>
+
+              <!-- INVOICE NUMBER & SUGGESTIONS -->
+              @if (selectedOrder) {
+              <div class="iv-field-group">
+                <label class="iv-label">
+                  <mat-icon class="iv-label__icon">tag</mat-icon>
+                  Invoice Number
+                </label>
+                <input class="iv-input" [(ngModel)]="selectedOrder.invoice_no" (ngModelChange)="refreshQr()" placeholder="Invoice number" />
+                
+                @if (suggestionsList.length > 0) {
+                  <div class="iv-suggestions">
+                    <span class="iv-suggestions__title">Suggestions:</span>
+                    <div class="iv-suggestions__list">
+                      @for (suggestion of suggestionsList; track suggestion) {
+                        <button class="iv-suggestion-pill" (click)="selectSuggestion(suggestion)">
+                          {{ suggestion }}
+                        </button>
+                      }
+                    </div>
+                  </div>
+                }
+              </div>
+              }
+
+              <!-- THEMES -->
+              <div class="iv-field-group">
+                <label class="iv-label">
+                  <mat-icon class="iv-label__icon">palette</mat-icon>
+                  Premium Theme
+                </label>
+                <div class="iv-themes">
+                  @for (th of themes; track th.id) {
+                  <button class="iv-theme-btn" [class.active]="selectedThemeId === th.id" [style.--th-color]="th.primary"
+                    (click)="selectTheme(th.id)" [matTooltip]="th.name">
+                    <span class="iv-theme-dot" [style.background]="th.primary"></span>
+                    <span class="iv-theme-label">{{ th.name }}</span>
+                    @if (selectedThemeId === th.id) {
+                    <mat-icon class="iv-theme-check">check_circle</mat-icon>
+                    }
+                  </button>
                   }
                 </div>
               </div>
-            }
-          </div>
-          }
 
-          <!-- THEMES -->
-          <div class="iv-field-group">
-            <label class="iv-label">
-              <mat-icon class="iv-label__icon">palette</mat-icon>
-              Premium Theme
-            </label>
-            <div class="iv-themes">
-              @for (th of themes; track th.id) {
-              <button class="iv-theme-btn" [class.active]="selectedThemeId === th.id" [style.--th-color]="th.primary"
-                (click)="selectTheme(th.id)" [matTooltip]="th.name">
-                <span class="iv-theme-dot" [style.background]="th.primary"></span>
-                <span class="iv-theme-label">{{ th.name }}</span>
-                @if (selectedThemeId === th.id) {
-                <mat-icon class="iv-theme-check">check_circle</mat-icon>
-                }
-              </button>
+              <!-- HEADING + CURRENCY -->
+              <div class="iv-row-2">
+                <div class="iv-field-group">
+                  <label class="iv-label">Heading Title</label>
+                  <input class="iv-input" [(ngModel)]="invoiceTitle" placeholder="TAX INVOICE" />
+                </div>
+                <div class="iv-field-group">
+                  <label class="iv-label">Currency</label>
+                  <input class="iv-input" [(ngModel)]="currencySymbol" placeholder="₹" maxlength="3" />
+                </div>
+              </div>
+            </div>
+            }
+
+            <!-- STEP 2: COMPANY & TAX -->
+            @if (currentStep === 2) {
+            <div class="iv-step-pane">
+              <!-- BRANCH + GST -->
+              <div class="iv-row-2">
+                <div class="iv-field-group">
+                  <label class="iv-label">Branch Name</label>
+                  <input class="iv-input" [(ngModel)]="customBranch" placeholder="Main Branch" />
+                </div>
+                <div class="iv-field-group">
+                  <label class="iv-label">GSTIN / Tax ID</label>
+                  <input class="iv-input" [(ngModel)]="customGst" placeholder="Tax Identification Number" />
+                </div>
+              </div>
+
+              <!-- TAX RATE -->
+              <div class="iv-field-group">
+                <label class="iv-label">Tax Rate (%)</label>
+                <div class="iv-input-wrapper">
+                  <input class="iv-input" type="number" [(ngModel)]="taxRate" min="0" max="100" (ngModelChange)="refreshQr()" />
+                  <span class="iv-input-suffix">%</span>
+                </div>
+              </div>
+            </div>
+            }
+
+            <!-- STEP 3: PATTERN & TERMS -->
+            @if (currentStep === 3) {
+            <div class="iv-step-pane">
+              <!-- NOTES -->
+              <div class="iv-field-group">
+                <label class="iv-label">
+                  <mat-icon class="iv-label__icon">notes</mat-icon>
+                  Customer Note / Terms
+                </label>
+                <textarea class="iv-textarea" rows="3" [(ngModel)]="customNotes"
+                  placeholder="Payment guidelines, warranty info..."></textarea>
+              </div>
+
+              <!-- SEQUENCE SETTINGS -->
+              <h4 class="iv-section-title">Pattern Settings</h4>
+              
+              <div class="iv-row-2">
+                <div class="iv-field-group">
+                  <label class="iv-label">Prefix</label>
+                  <input class="iv-input" [(ngModel)]="prefix" (ngModelChange)="onSettingsChange()" placeholder="INV" />
+                </div>
+                <div class="iv-field-group">
+                  <label class="iv-label">Company Code</label>
+                  <input class="iv-input" [(ngModel)]="companyCode" (ngModelChange)="onSettingsChange()" placeholder="ABC" />
+                </div>
+              </div>
+
+              <div class="iv-row-3">
+                <div class="iv-field-group">
+                  <label class="iv-label">Length</label>
+                  <input class="iv-input" type="number" [(ngModel)]="sequenceLength" (ngModelChange)="onSettingsChange()" min="2" max="10" />
+                </div>
+                <div class="iv-field-group">
+                  <label class="iv-label">Separator</label>
+                  <input class="iv-input" [(ngModel)]="separator" (ngModelChange)="onSettingsChange()" placeholder="-" maxlength="1" />
+                </div>
+                <div class="iv-field-group">
+                  <label class="iv-label">Start Seq</label>
+                  <input class="iv-input" type="number" [(ngModel)]="startingNumber" (ngModelChange)="onSettingsChange()" min="1" />
+                </div>
+              </div>
+
+              <div class="iv-checkbox-group">
+                <label class="iv-checkbox-label">
+                  <input type="checkbox" [(ngModel)]="includeYear" (ngModelChange)="onSettingsChange()" />
+                  Include Year
+                </label>
+                <label class="iv-checkbox-label">
+                  <input type="checkbox" [(ngModel)]="includeMonth" (ngModelChange)="onSettingsChange()" />
+                  Include Month
+                </label>
+                <label class="iv-checkbox-label">
+                  <input type="checkbox" [(ngModel)]="includeDate" (ngModelChange)="onSettingsChange()" />
+                  Include Date
+                </label>
+              </div>
+            </div>
+            }
+
+            <!-- STEP NAVIGATION FOOTER BUTTONS -->
+            <div class="iv-step-controls">
+              @if (currentStep > 1) {
+                <button type="button" class="iv-step-btn iv-step-btn--back" (click)="prevStep()">
+                  <mat-icon>chevron_left</mat-icon> Back
+                </button>
+              }
+              @if (currentStep < 3) {
+                <button type="button" class="iv-step-btn iv-step-btn--next" [style.background]="theme().primary" (click)="nextStep()">
+                  Next Step <mat-icon>chevron_right</mat-icon>
+                </button>
               }
             </div>
           </div>
 
-          <!-- HEADING + CURRENCY -->
-          <div class="iv-row-2">
-            <div class="iv-field-group">
-              <label class="iv-label">Heading Title</label>
-              <input class="iv-input" [(ngModel)]="invoiceTitle" placeholder="TAX INVOICE" />
-            </div>
-            <div class="iv-field-group">
-              <label class="iv-label">Currency</label>
-              <input class="iv-input" [(ngModel)]="currencySymbol" placeholder="â‚¹" maxlength="3" />
-            </div>
+          <!-- ACTIONS -->
+          <div class="iv-card__actions" style="display: flex; flex-direction: column; gap: 10px;">
+            <button class="iv-btn iv-btn--primary" [style.background]="theme().primary" [disabled]="!selectedOrder || isDownloading || isSaving" (click)="downloadCustomInvoice()">
+              @if (isDownloading) {
+                <span class="iv-btn-spinner"></span>
+                <span>Downloading ({{ downloadProgress }}%)</span>
+              } @else {
+                <mat-icon>cloud_download</mat-icon>
+                <span>Generate &amp; Download PDF</span>
+              }
+            </button>
+
+            <button class="iv-btn" style="background: #0ea5e9; color: #fff;" [disabled]="!selectedOrder || isSendingEmail" (click)="openEmailModal()">
+              <mat-icon>email</mat-icon>
+              <span>Send Invoice via Email</span>
+            </button>
+            
+            <button class="iv-btn iv-btn--success" [disabled]="!selectedOrder || isSaving || isDownloading" (click)="createInvoice()">
+              @if (isSaving) {
+                <span class="iv-btn-spinner"></span>
+                <span>Finalizing...</span>
+              } @else {
+                <mat-icon>save</mat-icon>
+                <span>Save &amp; Finalize Invoice</span>
+              }
+            </button>
+          </div>
+        </div>
+      </aside>
+
+
+      <!-- RIGHT: LIVE INVOICE PREVIEW -->
+      <main class="iv-preview">
+        <div class="iv-preview__toolbar">
+          <div class="iv-toolbar-modes">
+            <button type="button" class="iv-view-btn" [class.active]="viewMode === 'a4'" (click)="setViewMode('a4')">
+              <mat-icon>description</mat-icon>
+              <span>Standard A4</span>
+            </button>
+            <button type="button" class="iv-view-btn" [class.active]="viewMode === 'thermal'" (click)="setViewMode('thermal')">
+              <mat-icon>receipt</mat-icon>
+              <span>Thermal POS</span>
+            </button>
+            <button type="button" class="iv-view-btn" [class.active]="viewMode === 'compact'" (click)="setViewMode('compact')">
+              <mat-icon>inventory_2</mat-icon>
+              <span>Packing Slip</span>
+            </button>
           </div>
 
-          <!-- BRANCH + GST -->
-          <div class="iv-row-2">
-            <div class="iv-field-group">
-              <label class="iv-label">Branch Name</label>
-              <input class="iv-input" [(ngModel)]="customBranch" placeholder="Mumbai Hub" />
-            </div>
-            <div class="iv-field-group">
-              <label class="iv-label">GSTIN / Tax ID</label>
-              <input class="iv-input" [(ngModel)]="customGst" placeholder="27AAAC1234A1Z1" />
-            </div>
-          </div>
-
-          <!-- TAX RATE -->
-          <div class="iv-field-group">
-            <label class="iv-label">Tax Rate (%)</label>
-            <div class="iv-input-wrapper">
-              <input class="iv-input" type="number" [(ngModel)]="taxRate" min="0" max="100" (ngModelChange)="refreshQr()" />
-              <span class="iv-input-suffix">%</span>
-            </div>
-          </div>
-
-          <!-- NOTES -->
-          <div class="iv-field-group">
-            <label class="iv-label">
-              <mat-icon class="iv-label__icon">notes</mat-icon>
-              Customer Note / Terms
-            </label>
-            <textarea class="iv-textarea" rows="3" [(ngModel)]="customNotes"
-              placeholder="Payment guidelines, warranty infoâ€¦"></textarea>
-          </div>
-
-          <!-- SEQUENCE SETTINGS -->
-          <div class="iv-card__divider"></div>
-          <h4 class="iv-section-title">Pattern Settings</h4>
-          
-          <div class="iv-row-2">
-            <div class="iv-field-group">
-              <label class="iv-label">Prefix</label>
-              <input class="iv-input" [(ngModel)]="prefix" (ngModelChange)="onSettingsChange()" placeholder="INV" />
-            </div>
-            <div class="iv-field-group">
-              <label class="iv-label">Company Code</label>
-              <input class="iv-input" [(ngModel)]="companyCode" (ngModelChange)="onSettingsChange()" placeholder="ABC" />
-            </div>
-          </div>
-
-          <div class="iv-row-3">
-            <div class="iv-field-group">
-              <label class="iv-label">Length</label>
-              <input class="iv-input" type="number" [(ngModel)]="sequenceLength" (ngModelChange)="onSettingsChange()" min="2" max="10" />
-            </div>
-            <div class="iv-field-group">
-              <label class="iv-label">Separator</label>
-              <input class="iv-input" [(ngModel)]="separator" (ngModelChange)="onSettingsChange()" placeholder="-" maxlength="1" />
-            </div>
-            <div class="iv-field-group">
-              <label class="iv-label">Start Seq</label>
-              <input class="iv-input" type="number" [(ngModel)]="startingNumber" (ngModelChange)="onSettingsChange()" min="1" />
-            </div>
-          </div>
-
-          <div class="iv-checkbox-group">
-            <label class="iv-checkbox-label">
-              <input type="checkbox" [(ngModel)]="includeYear" (ngModelChange)="onSettingsChange()" />
-              Include Year
-            </label>
-            <label class="iv-checkbox-label">
-              <input type="checkbox" [(ngModel)]="includeMonth" (ngModelChange)="onSettingsChange()" />
-              Include Month
-            </label>
-            <label class="iv-checkbox-label">
-              <input type="checkbox" [(ngModel)]="includeDate" (ngModelChange)="onSettingsChange()" />
-              Include Date
-            </label>
+          <div class="iv-toolbar-actions">
+            <button class="iv-icon-btn" matTooltip="Copy Invoice #" [disabled]="!selectedOrder" (click)="copyInvoiceNo()">
+              <mat-icon>content_copy</mat-icon>
+            </button>
+            <button class="iv-icon-btn" matTooltip="Share Link" [disabled]="!selectedOrder" (click)="copyShareLink()">
+              <mat-icon>share</mat-icon>
+            </button>
+            <button class="iv-icon-btn" matTooltip="Send Email" [disabled]="!selectedOrder || isSendingEmail" (click)="openEmailModal()">
+              <mat-icon>email</mat-icon>
+            </button>
+            <button class="iv-icon-btn" matTooltip="Download PDF" [disabled]="!selectedOrder || isDownloading" (click)="downloadCustomInvoice()">
+              @if (isDownloading) {
+                <span class="iv-btn-spinner"></span>
+              } @else {
+                <mat-icon>file_download</mat-icon>
+              }
+            </button>
+            <button class="iv-icon-btn" matTooltip="Print" [disabled]="!selectedOrder || isPrinting" (click)="printInvoice()">
+              @if (isPrinting) {
+                <span class="iv-btn-spinner"></span>
+              } @else {
+                <mat-icon>print</mat-icon>
+              }
+            </button>
           </div>
         </div>
 
-        <!-- ACTIONS -->
-        <div class="iv-card__actions" style="display: flex; flex-direction: column; gap: 10px;">
-          <button class="iv-btn iv-btn--primary" [style.background]="theme().primary" [disabled]="isDownloading || isSaving" (click)="downloadCustomInvoice()">
-            @if (isDownloading) {
-              <span class="iv-btn-spinner"></span>
-              <span>Downloading ({{ downloadProgress }}%)</span>
-            } @else {
-              <mat-icon>cloud_download</mat-icon>
-              <span>Generate &amp; Download PDF</span>
-            }
-          </button>
-          
-          <button class="iv-btn iv-btn--success" [disabled]="isSaving || isDownloading" (click)="createInvoice()">
-            @if (isSaving) {
-              <span class="iv-btn-spinner"></span>
-              <span>Finalizing...</span>
-            } @else {
-              <mat-icon>save</mat-icon>
-              <span>Save &amp; Finalize Invoice</span>
-            }
-          </button>
-        </div>
-      </div>
-    </aside>
+        <!-- Document Preview Container -->
+        <div class="iv-doc-container" [class.iv-doc-container--thermal]="viewMode === 'thermal'">
+          <div class="iv-doc" [class.iv-doc--thermal]="viewMode === 'thermal'" [class.iv-doc--compact]="viewMode === 'compact'"
+            [style.--doc-primary]="theme().primary" [style.--doc-secondary]="theme().secondary"
+            [style.--doc-accent]="theme().accent" [style.--doc-bg]="theme().bg" [style.--doc-alt]="theme().altRow"
+            [style.--doc-text]="theme().textColor">
 
-    <!-- â”€â”€ RIGHT: LIVE INVOICE PREVIEW â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
-    <main class="iv-preview">
-      <div class="iv-preview__toolbar">
-        <span class="iv-live-badge">
-          <span class="iv-dot iv-dot--green iv-dot--pulse"></span>
-          LIVE PREVIEW
-        </span>
-        <div class="iv-toolbar-actions">
-          <button class="iv-icon-btn" matTooltip="Download PDF" [disabled]="isDownloading" (click)="downloadCustomInvoice()">
-            @if (isDownloading) {
-              <span class="iv-btn-spinner"></span>
-            } @else {
-              <mat-icon>file_download</mat-icon>
-            }
-          </button>
-          <button class="iv-icon-btn" matTooltip="Print" [disabled]="isPrinting" (click)="printInvoice()">
-            @if (isPrinting) {
-              <span class="iv-btn-spinner"></span>
-            } @else {
-              <mat-icon>print</mat-icon>
-            }
-          </button>
-        </div>
-      </div>
-
-      <!-- A4-proportioned document preview -->
-      <div class="iv-doc" [style.--doc-primary]="theme().primary" [style.--doc-secondary]="theme().secondary"
-        [style.--doc-accent]="theme().accent" [style.--doc-bg]="theme().bg" [style.--doc-alt]="theme().altRow"
-        [style.--doc-text]="theme().textColor">
-
-        <!-- HERO BAND -->
-        <div class="iv-doc__hero" [style.background]="theme().primary">
-          <div class="iv-doc__accent-stripe" [style.background]="theme().accent"></div>
-          <div class="iv-doc__hero-content">
-            <div class="iv-doc__hero-left">
-              <div class="iv-doc__logo-ring" [style.border-color]="theme().accent">
-                <mat-icon [style.color]="theme().accent">layers</mat-icon>
-              </div>
-              <div>
-                <div class="iv-doc__company-name">{{ currentCompany?.name || 'BizCore Enterprise' }}</div>
-                <div class="iv-doc__company-meta">{{ customGst }} Â· {{ currentCompany?.email ||
-                  'admin@bizcore.io' }}</div>
-              </div>
-            </div>
-            <div class="iv-doc__hero-right">
-              <div class="iv-doc__title-pill">{{ invoiceTitle }}</div>
-              <div class="iv-doc__inv-no">{{ selectedOrder?.invoice_no || 'INV-2026-0001' }}</div>
-              <div class="iv-doc__inv-date">
-                {{ selectedOrder?.created_at ? (selectedOrder.created_at | date:'dd MMM yyyy') : ('' | date:'dd MMM
-                yyyy') }}
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- BODY -->
-        <div class="iv-doc__body" [style.background]="theme().bg">
-
-          <!-- PARTIES ROW -->
-          <div class="iv-doc__parties">
-            <div class="iv-doc__party">
-              <div class="iv-doc__party-hd" [style.color]="theme().primary">ISSUED BY</div>
-              <div class="iv-doc__party-name">{{ currentCompany?.name || 'BizCore Merchant' }}</div>
-              <div class="iv-doc__party-line">GSTIN: {{ customGst }}</div>
-              <div class="iv-doc__party-line">{{ currentCompany?.address || 'N/A' }}</div>
-            </div>
-            <div class="iv-doc__party">
-              <div class="iv-doc__party-hd" [style.color]="theme().primary">BRANCH</div>
-              <div class="iv-doc__party-name">{{ customBranch }}</div>
-              <div class="iv-doc__party-line">Corporate Distribution</div>
-              <div class="iv-doc__party-line">BR-{{ currentCompany?.id || '01' }}</div>
-            </div>
-            <div class="iv-doc__party">
-              <div class="iv-doc__party-hd" [style.color]="theme().primary">BILL TO</div>
-              <div class="iv-doc__party-name">{{ selectedOrder?.user?.name || 'Walk-in Customer' }}</div>
-              <div class="iv-doc__party-line">{{ selectedOrder?.user?.email || 'N/A' }}</div>
-              <div class="iv-doc__party-line">{{ selectedOrder?.user?.mobilenumber || 'N/A' }}</div>
-            </div>
-            <div class="iv-doc__party">
-              <div class="iv-doc__party-hd" [style.color]="theme().primary">PAYMENT</div>
-              <div class="iv-doc__party-name">{{ selectedOrder?.payment_method || 'CASH' }}</div>
-              <div class="iv-doc__party-line">TXN: {{ selectedOrder?.transaction_id || 'N/A' }}</div>
-              <div class="iv-status-pill" [class]="'iv-status-pill--' + statusClass()">{{ statusLabel() }}</div>
-            </div>
-          </div>
-
-          <div class="iv-doc__rule" [style.background]="theme().accent"></div>
-
-          <!-- ITEMS TABLE (Wrapped for Mobile Responsiveness) -->
-          <div class="iv-tbl-wrapper">
-            <table class="iv-tbl">
-              <thead>
-                <tr [style.background]="theme().primary">
-                  <th style="text-align:center;width:32px">#</th>
-                  <th>Item / Description</th>
-                  <th style="text-align:center;width:44px">Qty</th>
-                  <th style="text-align:right;width:80px">Unit ({{ currencySymbol }})</th>
-                  <th style="text-align:right;width:70px">Tax ({{ taxRate }}%)</th>
-                  <th style="text-align:right;width:84px">Amount ({{ currencySymbol }})</th>
-                </tr>
-              </thead>
-              <tbody>
-                @if (selectedOrder?.items?.length) {
-                @for (item of selectedOrder.items; track item.id; let i = $index) {
-                <tr [class.iv-tbl__alt]="i % 2 !== 0" [style.--alt-bg]="theme().altRow">
-                  <td style="text-align:center" class="iv-tbl__num">{{ i + 1 }}</td>
-                  <td class="iv-tbl__desc">
-                    <strong>{{ item.product?.name || 'Product #' + item.product_id }}</strong>
-                  </td>
-                  <td style="text-align:center">{{ item.quantity }}</td>
-                  <td style="text-align:right">{{ item.price | number:'1.2-2' }}</td>
-                  <td style="text-align:right" class="iv-tbl__muted">
-                    {{ (item.price * item.quantity * taxRate / 100) | number:'1.2-2' }}
-                  </td>
-                  <td style="text-align:right" class="iv-tbl__amount">
-                    {{ (item.price * item.quantity) | number:'1.2-2' }}
-                  </td>
-                </tr>
-                }
-                } @else {
-                <tr>
-                  <td colspan="6" class="iv-tbl__empty">No items found for this order.</td>
-                </tr>
-                }
-              </tbody>
-            </table>
-          </div>
-
-          <!-- TOTALS + QR SIDE-BY-SIDE -->
-          <div class="iv-doc__bottom">
-            <!-- Notes -->
-            <div class="iv-doc__notes">
-              <div class="iv-doc__notes-hd" [style.color]="theme().primary">CUSTOMER NOTE</div>
-              <p class="iv-doc__notes-body">{{ customNotes }}</p>
-              <div class="iv-doc__sig-line"></div>
-              <div class="iv-doc__sig-lbl">Authorised Signatory</div>
-            </div>
-
-            <!-- Totals card -->
-            <div class="iv-doc__totals" [style.border-color]="theme().primary + '33'">
-              <div class="iv-totals__row">
-                <span>Subtotal</span>
-                <span>{{ currencySymbol }} {{ calcSubtotal() | number:'1.2-2' }}</span>
-              </div>
-              <div class="iv-totals__row">
-                <span>Discount</span>
-                <span>âˆ’ {{ currencySymbol }} {{ calcDiscount() | number:'1.2-2' }}</span>
-              </div>
-              <div class="iv-totals__row">
-                <span>Tax @ {{ taxRate }}%</span>
-                <span>{{ currencySymbol }} {{ calcTax() | number:'1.2-2' }}</span>
-              </div>
-              <div class="iv-totals__grand" [style.background]="theme().primary">
-                <span>GRAND TOTAL</span>
-                <span>{{ currencySymbol }} {{ calculatePreviewTotal() | number:'1.2-2' }}</span>
-              </div>
-            </div>
-
-            <!-- QR Block -->
-            <div class="iv-doc__qr">
-              <div class="iv-qr__frame" [style.border-color]="theme().primary + '22'" [style.--doc-primary]="theme().primary">
-                <div class="iv-qr__corners"></div>
-                @if (liveQrUrl) {
-                <img [src]="liveQrUrl" alt="Invoice QR Code" class="iv-qr__img" />
-                } @else {
-                <div class="iv-qr__placeholder">
-                  <mat-icon [style.color]="theme().accent">qr_code_2</mat-icon>
+            <!-- DIGITAL VERIFICATION STAMP OVERLAY -->
+            @if (selectedOrder) {
+              <div class="iv-stamp" [class]="'iv-stamp--' + statusClass()">
+                <div class="iv-stamp__border">
+                  <span class="iv-stamp__text">{{ statusLabel() }}</span>
+                  <span class="iv-stamp__sub">OFFICIAL STAMP</span>
                 </div>
-                }
               </div>
-              <div class="iv-qr__label">Scan to verify invoice</div>
-            </div>
+            }
+
+                      <!-- TEMPLATE FORMAT 1: STANDARD A4 INVOICE LAYOUT -->
+            @if (viewMode === 'a4') {
+              <!-- HERO BAND -->
+              <div class="iv-doc__hero" [style.background]="theme().primary">
+                <div class="iv-doc__accent-stripe" [style.background]="theme().accent"></div>
+                <div class="iv-doc__hero-content">
+                  <div class="iv-doc__hero-left">
+                    <div class="iv-doc__logo-ring" [style.border-color]="theme().accent">
+                      <mat-icon [style.color]="theme().accent">layers</mat-icon>
+                    </div>
+                    <div>
+                      <div class="iv-doc__company-name">{{ currentCompany?.name || '' }}</div>
+                      <div class="iv-doc__company-meta">
+                        @if (customGst) { <span>{{ customGst }}</span> }
+                        @if (customGst && currentCompany?.email) { <span> · </span> }
+                        @if (currentCompany?.email) { <span>{{ currentCompany.email }}</span> }
+                      </div>
+                    </div>
+                  </div>
+                  <div class="iv-doc__hero-right">
+                    <div class="iv-hologram" [style.border-color]="theme().accent">
+                      <span class="iv-hologram__shine"></span>
+                      <mat-icon [style.color]="theme().accent">verified_user</mat-icon>
+                      <span>CERTIFIED DOCUMENT</span>
+                    </div>
+                    <div class="iv-doc__title-pill">{{ invoiceTitle }}</div>
+                    <div class="iv-doc__inv-no">{{ selectedOrder?.invoice_no || '' }}</div>
+                    <div class="iv-doc__inv-date">
+                      @if (selectedOrder?.created_at) {
+                        {{ selectedOrder.created_at | date:'dd MMM yyyy' }}
+                      }
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- BODY -->
+              <div class="iv-doc__body" [style.background]="theme().bg">
+                <!-- PARTIES ROW -->
+                <div class="iv-doc__parties">
+                  <div class="iv-doc__party">
+                    <div class="iv-doc__party-hd" [style.color]="theme().primary">ISSUED BY</div>
+                    <div class="iv-doc__party-name">{{ currentCompany?.name || '' }}</div>
+                    @if (customGst) {
+                      <div class="iv-doc__party-line">GSTIN: {{ customGst }}</div>
+                    }
+                    @if (currentCompany?.address) {
+                      <div class="iv-doc__party-line">{{ currentCompany.address }}</div>
+                    }
+                  </div>
+                  <div class="iv-doc__party">
+                    <div class="iv-doc__party-hd" [style.color]="theme().primary">BRANCH</div>
+                    <div class="iv-doc__party-name">{{ customBranch || '' }}</div>
+                    @if (currentCompany?.id) {
+                      <div class="iv-doc__party-line">BR-{{ currentCompany.id }}</div>
+                    }
+                  </div>
+
+                  <div class="iv-doc__party">
+                    <div class="iv-doc__party-hd" [style.color]="theme().primary">BILL TO</div>
+                    <div class="iv-doc__party-name">{{ getCustomerName() }}</div>
+                    @if (getCustomerEmail()) {
+                      <div class="iv-doc__party-line">{{ getCustomerEmail() }}</div>
+                    }
+                    @if (getCustomerPhone()) {
+                      <div class="iv-doc__party-line">{{ getCustomerPhone() }}</div>
+                    }
+                  </div>
+                  <div class="iv-doc__party">
+                    <div class="iv-doc__party-hd" [style.color]="theme().primary">PAYMENT</div>
+                    <div class="iv-doc__party-name">{{ selectedOrder?.payment_method || selectedOrder?.payment_mode || '' }}</div>
+                    @if (selectedOrder?.transaction_id || selectedOrder?.payment_id) {
+                      <div class="iv-doc__party-line">TXN: {{ selectedOrder?.transaction_id || selectedOrder?.payment_id }}</div>
+                    }
+                    @if (selectedOrder) {
+                      <div class="iv-status-pill" [class]="'iv-status-pill--' + statusClass()">{{ statusLabel() }}</div>
+                    }
+                  </div>
+                </div>
+
+                <div class="iv-doc__rule" [style.background]="theme().accent"></div>
+
+                <!-- ITEMS TABLE -->
+                <div class="iv-tbl-wrapper">
+                  <table class="iv-tbl">
+                    <thead>
+                      <tr [style.background]="theme().primary">
+                        <th style="text-align:center;width:32px">#</th>
+                        <th>Item / Description</th>
+                        <th style="text-align:center;width:44px">Qty</th>
+                        <th style="text-align:right;width:80px">Unit ({{ currencySymbol }})</th>
+                        <th style="text-align:right;width:70px">Tax ({{ taxRate }}%)</th>
+                        <th style="text-align:right;width:84px">Amount ({{ currencySymbol }})</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      @if (orderItems.length > 0) {
+                      @for (item of orderItems; track (item.id ?? item.product_id ?? $index); let i = $index) {
+                      <tr [class.iv-tbl__alt]="i % 2 !== 0" [style.--alt-bg]="theme().altRow">
+                        <td style="text-align:center" class="iv-tbl__num">{{ i + 1 }}</td>
+                        <td class="iv-tbl__desc">
+                          <strong>{{ item.name }}</strong>
+                        </td>
+                        <td style="text-align:center">{{ item.quantity }}</td>
+                        <td style="text-align:right">{{ item.price | number:'1.2-2' }}</td>
+                        <td style="text-align:right" class="iv-tbl__muted">
+                          {{ (item.price * item.quantity * taxRate / 100) | number:'1.2-2' }}
+                        </td>
+                        <td style="text-align:right" class="iv-tbl__amount">
+                          {{ (item.price * item.quantity) | number:'1.2-2' }}
+                        </td>
+                      </tr>
+                      }
+                      } @else {
+                      <tr>
+                        <td colspan="6" class="iv-tbl__empty">
+                          @if (!selectedOrder) {
+                            No order selected. Please select an order from the list.
+                          } @else {
+                            No items found for this order.
+                          }
+                        </td>
+                      </tr>
+                      }
+                    </tbody>
+                  </table>
+                </div>
+
+                <!-- TOTALS + QR SIDE-BY-SIDE -->
+                <div class="iv-doc__bottom">
+                  <!-- Notes -->
+                  <div class="iv-doc__notes">
+                    <div class="iv-doc__notes-hd" [style.color]="theme().primary">CUSTOMER NOTE</div>
+                    <p class="iv-doc__notes-body">{{ customNotes }}</p>
+                    <div class="iv-doc__sig-line"></div>
+                    <div class="iv-doc__sig-lbl">Authorised Signatory</div>
+                  </div>
+
+                  <!-- Totals card -->
+                  <div class="iv-doc__totals" [style.border-color]="theme().primary + '33'">
+                    <div class="iv-totals__row">
+                      <span>Subtotal</span>
+                      <span>{{ currencySymbol }} {{ calcSubtotal() | number:'1.2-2' }}</span>
+                    </div>
+                    <div class="iv-totals__row">
+                      <span>Discount</span>
+                      <span>− {{ currencySymbol }} {{ calcDiscount() | number:'1.2-2' }}</span>
+                    </div>
+                    <div class="iv-totals__row">
+                      <span>Tax @ {{ taxRate }}%</span>
+                      <span>{{ currencySymbol }} {{ calcTax() | number:'1.2-2' }}</span>
+                    </div>
+                    <div class="iv-totals__grand" [style.background]="theme().primary">
+                      <span>GRAND TOTAL</span>
+                      <span>{{ currencySymbol }} {{ calculatePreviewTotal() | number:'1.2-2' }}</span>
+                    </div>
+                  </div>
+
+                  <!-- QR Block -->
+                  <div class="iv-doc__qr">
+                    <div class="iv-qr__frame" [style.border-color]="theme().primary + '22'" [style.--doc-primary]="theme().primary">
+                      <div class="iv-qr__corners"></div>
+                      @if (liveQrUrl) {
+                      <img [src]="liveQrUrl" alt="Invoice QR Code" class="iv-qr__img" />
+                      } @else {
+                      <div class="iv-qr__placeholder">
+                        <mat-icon [style.color]="theme().accent">qr_code_2</mat-icon>
+                      </div>
+                      }
+                    </div>
+                    <div class="iv-qr__label">Scan to verify invoice</div>
+                  </div>
+                </div>
+
+                <!-- FOOTER BAND -->
+                <div class="iv-doc__footer" [style.background]="theme().primary">
+                  <div class="iv-doc__footer-accent" [style.background]="theme().accent"></div>
+                  <div class="iv-doc__footer-text">
+                    @if (currentCompany?.name) { <span>{{ currentCompany.name }}</span> }
+                    @if (currentCompany?.email) { <span> · {{ currentCompany.email }}</span> }
+                    @if (customGst) { <span> · GSTIN: {{ customGst }}</span> }
+                  </div>
+
+                  <div class="iv-doc__footer-sub">
+                    Invoice {{ selectedOrder?.invoice_no || '' }} · Generated by Invoice Studio
+                  </div>
+                </div>
+              </div>
+            }
+
+            <!-- TEMPLATE FORMAT 2: THERMAL POS RECEIPT LAYOUT -->
+            @if (viewMode === 'thermal') {
+              <div class="iv-thermal-body">
+                <div class="iv-thermal-header">
+                  <div class="iv-thermal-title">{{ currentCompany?.name || 'STORE RECEIPT' }}</div>
+                  @if (customBranch) { <div class="iv-thermal-sub">{{ customBranch }}</div> }
+                  @if (customGst) { <div class="iv-thermal-sub">GSTIN: {{ customGst }}</div> }
+                  <div class="iv-thermal-line">----------------------------------------</div>
+                  <div class="iv-thermal-meta">
+                    <div>REC NO: {{ selectedOrder?.invoice_no || 'REC-0001' }}</div>
+                    <div>DATE: {{ (selectedOrder?.created_at || todayDate) | date:'dd/MM/yyyy HH:mm' }}</div>
+                    <div>CUST: {{ getCustomerName() }}</div>
+                  </div>
+                  <div class="iv-thermal-line">----------------------------------------</div>
+                </div>
+
+                <table class="iv-thermal-tbl">
+                  <thead>
+                    <tr>
+                      <th style="text-align:left;">ITEM</th>
+                      <th style="text-align:center;">QTY</th>
+                      <th style="text-align:right;">PRICE</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @if (orderItems.length > 0) {
+                      @for (item of orderItems; track (item.id ?? $index)) {
+                        <tr>
+                          <td style="text-align:left;">{{ item.name }}</td>
+                          <td style="text-align:center;">{{ item.quantity }}</td>
+                          <td style="text-align:right;">{{ (item.price * item.quantity) | number:'1.2-2' }}</td>
+                        </tr>
+                      }
+                    } @else {
+                      <tr><td colspan="3" style="text-align:center;">No Items</td></tr>
+                    }
+                  </tbody>
+                </table>
+
+                <div class="iv-thermal-line">----------------------------------------</div>
+
+                <div class="iv-thermal-totals">
+                  <div class="d-flex justify-content-between"><span>SUBTOTAL</span><span>{{ currencySymbol }} {{ calcSubtotal() | number:'1.2-2' }}</span></div>
+                  <div class="d-flex justify-content-between"><span>TAX ({{ taxRate }}%)</span><span>{{ currencySymbol }} {{ calcTax() | number:'1.2-2' }}</span></div>
+                  <div class="d-flex justify-content-between font-weight-bold" style="font-size:14px; margin-top:4px;">
+                    <span>TOTAL</span><span>{{ currencySymbol }} {{ calculatePreviewTotal() | number:'1.2-2' }}</span>
+                  </div>
+                </div>
+
+                <div class="iv-thermal-line">----------------------------------------</div>
+
+                <!-- BARCODE STRIP -->
+                <div class="iv-barcode-box">
+                  <div class="iv-barcode-lines"></div>
+                  <div class="iv-barcode-num">*{{ selectedOrder?.invoice_no || 'REC-0001' }}*</div>
+                  <div class="iv-thermal-thanks">THANK YOU FOR YOUR VISIT!</div>
+                </div>
+              </div>
+            }
+
+            <!-- TEMPLATE FORMAT 3: WAREHOUSE PACKING SLIP LAYOUT -->
+            @if (viewMode === 'compact') {
+              <div class="iv-compact-body p-4">
+                <div class="d-flex justify-content-between align-items-center border-bottom pb-3 mb-3">
+                  <div>
+                    <h3 class="m-0 font-weight-bold" [style.color]="theme().primary">PACKING SLIP &amp; MANIFEST</h3>
+                    <span class="text-muted" style="font-size:12px;">Order #{{ selectedOrder?.id }} · {{ selectedOrder?.invoice_no }}</span>
+                  </div>
+                  <div class="text-right">
+                    <span class="badge badge-dark" style="font-size:12px; padding:6px 12px;">DISPATCH READY</span>
+                  </div>
+                </div>
+
+                <!-- SHIPPING DETAILS CARDS -->
+                <div class="row mb-3">
+                  <div class="col-md-6 mb-2">
+                    <div class="p-3 border rounded bg-light">
+                      <strong class="d-block text-uppercase text-muted mb-1" style="font-size:10px;">SHIP TO RECIPIENT</strong>
+                      <div class="font-weight-bold">{{ getCustomerName() }}</div>
+                      <div>{{ getCustomerEmail() }}</div>
+                      <div>{{ getCustomerPhone() }}</div>
+                    </div>
+                  </div>
+                  <div class="col-md-6 mb-2">
+                    <div class="p-3 border rounded bg-light">
+                      <strong class="d-block text-uppercase text-muted mb-1" style="font-size:10px;">DISPATCH WAREHOUSE</strong>
+                      <div class="font-weight-bold">{{ currentCompany?.name || 'Central Hub' }}</div>
+                      <div>Branch: {{ customBranch || 'Main' }}</div>
+                      <div>Carrier: Express Logistics</div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- CHECKLIST TABLE -->
+                <table class="table table-bordered table-sm" style="font-size:12px;">
+                  <thead [style.background]="theme().primary" class="text-white">
+                    <tr>
+                      <th style="width:40px; text-align:center;">[ ✓ ]</th>
+                      <th>PRODUCT / ITEM DESCRIPTION</th>
+                      <th style="width:70px; text-align:center;">QTY</th>
+                      <th style="width:100px; text-align:center;">STATUS</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @if (orderItems.length > 0) {
+                      @for (item of orderItems; track (item.id ?? $index)) {
+                        <tr>
+                          <td style="text-align:center;"><input type="checkbox" checked /></td>
+                          <td><strong>{{ item.name }}</strong></td>
+                          <td style="text-align:center;">{{ item.quantity }}</td>
+                          <td style="text-align:center;"><span class="badge badge-success">PACKED</span></td>
+                        </tr>
+                      }
+                    } @else {
+                      <tr><td colspan="4" class="text-center text-muted">No line items</td></tr>
+                    }
+                  </tbody>
+                </table>
+
+                <div class="d-flex justify-content-between align-items-end mt-4 pt-3 border-top">
+                  <div>
+                    <div style="width:180px; border-bottom:1px solid #999; height:30px;"></div>
+                    <small class="text-muted">Warehouse Picker Signature</small>
+                  </div>
+                  <div>
+                    <div style="width:180px; border-bottom:1px solid #999; height:30px;"></div>
+                    <small class="text-muted">QC Inspector Signature</small>
+                  </div>
+                </div>
+              </div>
+            }
           </div>
         </div>
+      </main>
 
-        <!-- FOOTER BAND -->
-        <div class="iv-doc__footer" [style.background]="theme().primary">
-          <div class="iv-doc__footer-accent" [style.background]="theme().accent"></div>
-          <div class="iv-doc__footer-text">
-            {{ currentCompany?.name || 'BizCore Enterprise' }} Â· {{ currentCompany?.email || '' }} Â·
-            GSTIN: {{ customGst }}
-          </div>
-          <div class="iv-doc__footer-sub">
-            Invoice {{ selectedOrder?.invoice_no || '' }} Â· Generated by Invoice Studio
-          </div>
-        </div>
-      </div>
-    </main>
-
+    </div>
   </div>
 </div>
 
 
+<!-- EMAIL DISPATCH MODAL -->
+@if (showEmailModal) {
+<div class="iv-modal-backdrop" (click)="closeEmailModal()">
+  <div class="iv-modal-content" (click)="$event.stopPropagation()">
+    <div class="iv-modal-header" [style.background]="theme().primary">
+      <div class="d-flex align-items-center gap-2">
+        <mat-icon style="color: #fff;">email</mat-icon>
+        <h3 class="m-0 text-white" style="font-size: 1.1rem; font-weight: 600;">Dispatch Invoice via Email</h3>
+      </div>
+      <button type="button" class="iv-modal-close" (click)="closeEmailModal()">&times;</button>
+    </div>
+
+    <div class="iv-modal-body p-4">
+      <div class="mb-3">
+        <label class="form-label font-weight-bold">Recipient Email Address <span class="text-danger">*</span></label>
+        <input type="email" class="form-control iv-input" [(ngModel)]="emailRecipient" placeholder="customer@domain.com">
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label font-weight-bold">Subject Line</label>
+        <input type="text" class="form-control iv-input" [(ngModel)]="emailSubject" placeholder="Tax Invoice details">
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label font-weight-bold">Email Body Message</label>
+        <textarea class="form-control iv-textarea" rows="4" [(ngModel)]="emailMessage" placeholder="Enter personalized message..."></textarea>
+      </div>
+
+      <div class="form-check mb-3">
+        <input class="form-check-input" type="checkbox" id="attachPdfCheck" [(ngModel)]="attachPdf">
+        <label class="form-check-label" for="attachPdfCheck">
+          Attach High-Resolution Invoice PDF (Theme: {{ theme().name }})
+        </label>
+      </div>
+    </div>
+
+    <div class="iv-modal-footer p-3 d-flex justify-content-end gap-2 border-top">
+      <button type="button" class="btn btn-secondary" (click)="closeEmailModal()">Cancel</button>
+      <button type="button" class="btn btn-primary" [style.background]="theme().primary" [disabled]="isSendingEmail" (click)="sendInvoiceEmail()">
+        @if (isSendingEmail) {
+          <span class="iv-btn-spinner me-1"></span> Sending...
+        } @else {
+          <mat-icon class="me-1">send</mat-icon> Send Email
+        }
+      </button>
+    </div>
+  </div>
+</div>
+}

@@ -152,6 +152,7 @@ export class Product {
     this.getProducts();
     this.getCategories();
     this.getProductAttributes();
+    this.loadUnitOptions();
 
     this.socketSub.add(
       this.socketService.on('product-created').subscribe(() => this.getProducts())
@@ -216,6 +217,41 @@ export class Product {
   removeUnitConversionRow(index: number) {
     this.unitConversions.removeAt(index);
     this.cdr.detectChanges();
+  }
+
+  onUnitConversionSelect(index: number, selectedUnitName: string) {
+    const row = this.unitConversions.at(index);
+    if (!row) return;
+    const match = this.unitOptions.find(
+      u => u.name.toLowerCase() === (selectedUnitName || '').toLowerCase()
+    );
+    if (match) {
+      row.patchValue({
+        unit_name: match.name,
+        unit_symbol: match.symbol
+      });
+    }
+  }
+
+  loadUnitOptions() {
+    this.commonService.getApi('unit-options').subscribe({
+      next: (res: any) => {
+        const list = Array.isArray(res?.data) ? res.data : Array.isArray(res) ? res : [];
+        if (list.length > 0) {
+          this.unitOptions = list
+            .filter((u: any) => u.status === true || u.status === 'Active' || u.status === undefined)
+            .map((u: any) => ({
+              name: u.name,
+              symbol: u.symbol,
+              category: u.category || 'COUNT'
+            }));
+        }
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        // Keeps initial fallback unitOptions list
+      }
+    });
   }
 
 

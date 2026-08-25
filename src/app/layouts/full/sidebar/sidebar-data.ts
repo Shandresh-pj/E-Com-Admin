@@ -159,6 +159,13 @@ export const navItems: NavItem[] = [
     bgcolor: 'error',
     roles: [SA, A, BR, BM, SK, EM],
   },
+  {
+    displayName: 'Units Master',
+    iconName: 'ruler-2',
+    route: '/units',
+    bgcolor: 'info',
+    roles: [SA, A, BR, BM, SK],
+  },
 
   { navCap: 'Sales & Billing', roles: [SA, A, BR, BM, SK] },
   {

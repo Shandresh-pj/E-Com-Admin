@@ -1,0 +1,172 @@
+<div class="psh-root">
+  <div class="psh-bg" aria-hidden="true">
+    <div class="psh-orb psh-orb--a"></div>
+    <div class="psh-orb psh-orb--b"></div>
+    <div class="psh-orb psh-orb--c"></div>
+    <div class="psh-grid"></div>
+  </div>
+
+  <!-- Hero Header -->
+  <header class="psh-hero">
+    <div>
+      <div class="psh-eyebrow">
+        <span class="psh-eyebrow__dot"></span>
+        <span>CATALOG & MASTER DATA</span>
+        <span class="psh-eyebrow__sep">·</span>
+        <span>{{ totalUnitsCount }} UNITS REGISTERED</span>
+      </div>
+      <h1 class="psh-title">Unit Options <span class="psh-title__accent">Master</span></h1>
+      <p class="psh-sub">Configure dynamic measurement unit options (Piece, Kg, Gram, Ton, Liter, Box, Meter) across inventory and sales modules.</p>
+    </div>
+    @if (!showForm && perm.hasRoleAction('canCreate')) {
+    <div class="psh-actions d-flex gap-12 align-items-center">
+      <button type="button" mat-stroked-button class="btn-rounded" (click)="syncDefaultUnits()" title="Sync / Restore Missing Default Units" style="height: 42px; border-radius: 20px; font-weight: 600;">
+        <mat-icon>sync</mat-icon> Restore Defaults
+      </button>
+      <button class="psh-btn psh-btn--primary" (click)="openAddForm()">
+        <span class="psh-btn__shine"></span>
+        <mat-icon>add_circle</mat-icon> Add Unit Option
+      </button>
+    </div>
+    }
+  </header>
+
+  <!-- Metric Stat Chips -->
+  <div class="psh-chips">
+    <div class="psh-chip psh-chip--violet" [class.active]="selectedCategoryFilter === 'ALL'" (click)="onFilterCategoryChange('ALL')">
+      <div class="psh-chip__orb"><mat-icon>square_foot</mat-icon></div>
+      <div class="psh-chip__body">
+        <span class="psh-chip__num">{{ totalUnitsCount }}</span>
+        <span class="psh-chip__lbl">All Units</span>
+      </div>
+    </div>
+    <div class="psh-chip psh-chip--emerald" [class.active]="selectedCategoryFilter === 'COUNT'" (click)="onFilterCategoryChange('COUNT')">
+      <div class="psh-chip__orb"><mat-icon>tag</mat-icon></div>
+      <div class="psh-chip__body">
+        <span class="psh-chip__num">{{ countCategoryCount }}</span>
+        <span class="psh-chip__lbl">Count (pc, box, pkt)</span>
+      </div>
+    </div>
+    <div class="psh-chip psh-chip--amber" [class.active]="selectedCategoryFilter === 'WEIGHT'" (click)="onFilterCategoryChange('WEIGHT')">
+      <div class="psh-chip__orb"><mat-icon>scale</mat-icon></div>
+      <div class="psh-chip__body">
+        <span class="psh-chip__num">{{ weightCategoryCount }}</span>
+        <span class="psh-chip__lbl">Weight (kg, g, t)</span>
+      </div>
+    </div>
+    <div class="psh-chip psh-chip--cyan" [class.active]="selectedCategoryFilter === 'VOLUME'" (click)="onFilterCategoryChange('VOLUME')">
+      <div class="psh-chip__orb"><mat-icon>local_drink</mat-icon></div>
+      <div class="psh-chip__body">
+        <span class="psh-chip__num">{{ volumeCategoryCount }}</span>
+        <span class="psh-chip__lbl">Volume (l, ml)</span>
+      </div>
+    </div>
+    <div class="psh-chip psh-chip--pink" [class.active]="selectedCategoryFilter === 'LENGTH'" (click)="onFilterCategoryChange('LENGTH')">
+      <div class="psh-chip__orb"><mat-icon>straighten</mat-icon></div>
+      <div class="psh-chip__body">
+        <span class="psh-chip__num">{{ lengthCategoryCount }}</span>
+        <span class="psh-chip__lbl">Length (m, ft)</span>
+      </div>
+    </div>
+  </div>
+
+  <mat-card class="cardWithShadow theme-card">
+    <mat-card-header>
+      <div class="header-container d-flex align-items-center justify-content-between w-100">
+        <mat-card-title class="m-b-0">
+          {{ showForm ? (isEditMode ? 'Edit Measurement Unit' : 'Create New Unit') : 'Measurement Units Registry' }}
+        </mat-card-title>
+        @if (showForm) {
+          <button mat-icon-button (click)="cancelForm()" title="Close Form">
+            <mat-icon>close</mat-icon>
+          </button>
+        }
+      </div>
+    </mat-card-header>
+
+    @if (!showForm) {
+    <mat-card-content class="b-t-1">
+      <app-mat-table 
+        [columns]="tableColumns" 
+        [tableData]="filteredUnitsList" 
+        [showAction]="true" 
+        [showSearch]="true"
+        [enableExport]="true"
+        [Extra_Column]="false"
+        [showEdit]="perm.hasRoleAction('canUpdate')" 
+        [showDelete]="perm.hasRoleAction('canDelete')"
+        (editClick)="openEditForm($event)" 
+        (deleteClick)="deleteUnit($event)">
+      </app-mat-table>
+    </mat-card-content>
+    } @else {
+    <mat-card-content class="b-t-1">
+      <form [formGroup]="UnitForm" (ngSubmit)="saveUnit()" class="unit-form-grid p-t-24">
+        <div class="form-section-title">
+          <span>Unit Details & Classification</span>
+        </div>
+
+        <div class="form-row">
+          <div class="field-container">
+            <mat-label class="f-w-600 m-b-8 d-block">Unit Name <span class="text-danger">*</span></mat-label>
+            <mat-form-field appearance="outline" class="w-100">
+              <mat-icon matPrefix style="color:var(--brand-primary);margin-right:8px">branding_watermark</mat-icon>
+              <input matInput formControlName="name" placeholder="e.g. Kilogram, Piece, Liter">
+              @if (UnitForm.get('name')?.hasError('required')) {
+                <mat-error>Unit name is required</mat-error>
+              } @else if (UnitForm.get('name')?.hasError('maxlength')) {
+                <mat-error>Max 100 characters allowed</mat-error>
+              }
+            </mat-form-field>
+          </div>
+
+          <div class="field-container">
+            <mat-label class="f-w-600 m-b-8 d-block">Symbol / Abbreviation <span class="text-danger">*</span></mat-label>
+            <mat-form-field appearance="outline" class="w-100">
+              <mat-icon matPrefix style="color:var(--brand-primary);margin-right:8px">font_download</mat-icon>
+              <input matInput formControlName="symbol" placeholder="e.g. kg, pc, l, pkt, doz">
+              @if (UnitForm.get('symbol')?.hasError('required')) {
+                <mat-error>Unit symbol is required</mat-error>
+              } @else if (UnitForm.get('symbol')?.hasError('maxlength')) {
+                <mat-error>Max 20 characters allowed</mat-error>
+              }
+            </mat-form-field>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="field-container">
+            <mat-label class="f-w-600 m-b-8 d-block">Category <span class="text-danger">*</span></mat-label>
+            <mat-form-field appearance="outline" class="w-100">
+              <mat-select formControlName="category" placeholder="Select Measurement Category">
+                @for (cat of categoryOptions; track cat.value) {
+                  <mat-option [value]="cat.value">{{ cat.label }}</mat-option>
+                }
+              </mat-select>
+              @if (UnitForm.get('category')?.hasError('required')) {
+                <mat-error>Category selection is required</mat-error>
+              }
+            </mat-form-field>
+          </div>
+
+          <div class="field-container d-flex align-items-center" style="margin-top: 24px;">
+            <mat-slide-toggle formControlName="status" color="primary">
+              <span class="f-w-600" style="margin-left: 8px;">Active Unit Option</span>
+            </mat-slide-toggle>
+          </div>
+        </div>
+
+        <div class="form-actions d-flex justify-content-end gap-16 m-t-24">
+          <button type="button" mat-stroked-button class="btn-rounded" (click)="cancelForm()">
+            <mat-icon>close</mat-icon> Cancel
+          </button>
+          <button type="submit" mat-flat-button class="btn-rounded btn-gradient">
+            <mat-icon>{{ isEditMode ? 'save' : 'add' }}</mat-icon>
+            {{ isEditMode ? 'Update Unit Option' : 'Save Unit Option' }}
+          </button>
+        </div>
+      </form>
+    </mat-card-content>
+    }
+  </mat-card>
+</div>

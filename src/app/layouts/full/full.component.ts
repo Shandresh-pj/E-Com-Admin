@@ -316,57 +316,57 @@ export class FullComponent implements OnInit {
 
     let allowedMenus: any[] = [];
     const allStandardMenus = [
-      { id: 1, name: 'Admin', path: '/admin', icon: 'bi-shield-lock-fill', isActive: true },
-      { id: 2, name: 'Branches', path: '/branch', icon: 'bi-building-fill', isActive: true },
-      { id: 3, name: 'Employees', path: '/employees', icon: 'bi-people-fill', isActive: true },
-      { id: 4, name: 'Roles', path: '/roles', icon: 'bi-key-fill', isActive: true },
-      { id: 5, name: 'Role Access', path: '/role-access', icon: 'bi-shield-check', isActive: true },
-      { id: 6, name: 'Profile', path: '/profile', icon: 'bi-person-badge-fill', isActive: true },
-      { id: 7, name: 'Menu Management', path: '/menubar', icon: 'bi-list-stars', isActive: true },
-      { id: 8, name: 'Statuses', path: '/status', icon: 'bi-check2-square', isActive: true },
-      { id: 9, name: 'Attributes', path: '/product-attribute', icon: 'bi-sliders', isActive: true },
-      // { id: 52, name: 'Attribute Values', path: '/attribute-value', icon: 'bi-tags-fill', isActive: true },
-      { id: 10, name: 'Categories', path: '/category', icon: 'bi-folder-fill', isActive: true },
-      { id: 11, name: 'Products', path: '/product', icon: 'bi-box-seam-fill', isActive: true },
-      { id: 12, name: 'Orders', path: '/orders', icon: 'bi-bag-check-fill', isActive: true },
-      { id: 13, name: 'Coupons', path: '/coupons', icon: 'bi-ticket-perforated-fill', isActive: true },
-      { id: 14, name: 'Change Password', path: '/change-password', icon: 'bi-lock-fill', isActive: true },
-      { id: 15, name: 'Audit Logs', path: '/audit-logs', icon: 'bi-clock-history', isActive: true },
-      { id: 16, name: 'Alerts', path: '/alerts', icon: 'bi-exclamation-triangle-fill', isActive: true },
-      { id: 17, name: 'Attendance', path: '/attendance', icon: 'bi-calendar-check-fill', isActive: true },
-      { id: 18, name: 'Branch Inventory', path: '/branch-stocks', icon: 'bi-houses-fill', isActive: true },
-      { id: 19, name: 'Stock Control', path: '/stocks', icon: 'bi-boxes', isActive: true },
-      { id: 20, name: 'Payroll', path: '/payroll', icon: 'bi-cash-coin', isActive: true },
-      { id: 21, name: 'Leave Management', path: '/leave', icon: 'bi-airplane-fill', isActive: true },
-      { id: 22, name: 'Deliveries', path: '/delivery-tracking', icon: 'bi-truck', isActive: true },
-      { id: 23, name: 'Payments', path: '/payments', icon: 'bi-credit-card-2-front-fill', isActive: true },
-      { id: 24, name: 'Notifications', path: '/notifications', icon: 'bi-bell-fill', isActive: true },
-      { id: 25, name: 'Workforce', path: '/workforce', icon: 'bi-gear-wide-connected', isActive: true },
-      { id: 26, name: 'Invoices', path: '/invoices', icon: 'bi-file-earmark-text-fill', isActive: true },
-      { id: 27, name: 'Approvals', path: '/approvals', icon: 'bi-patch-check-fill', isActive: true },
-      { id: 28, name: 'Workforce Requests', path: '/workforce-requests', icon: 'bi-briefcase-fill', isActive: true },
-      { id: 29, name: 'CRM Contacts', path: '/crm-contacts', icon: 'bi-person-rolodex', isActive: true },
-      { id: 30, name: 'Profit & Loss', path: '/profit-loss', icon: 'bi-pie-chart-fill', isActive: true },
-      { id: 31, name: 'Plan Admin', path: '/manage-subscription-plans', icon: 'bi-gem', isActive: true },
-      { id: 32, name: 'Subscription', path: '/subscription-plans', icon: 'bi-star-fill', isActive: true },
-      { id: 33, name: 'Billing', path: '/billing-history', icon: 'bi-receipt', isActive: true },
-      { id: 34, name: 'Plan Coupons', path: '/subscription-coupons', icon: 'bi-ticket-detailed-fill', isActive: true },
-      { id: 36, name: 'Checkout', path: '/checkout', icon: 'bi-credit-card-fill', isActive: true },
-      { id: 37, name: 'Calendar', path: '/calendar', icon: 'bi-calendar-event-fill', isActive: true },
-      { id: 38, name: 'Documents', path: '/employee-documents', icon: 'bi-file-earmark-check-fill', isActive: true },
-      { id: 39, name: 'Translations', path: '/translations', icon: 'bi-translate', isActive: true },
-      { id: 40, name: 'POS Terminal', path: '/pos-billing', icon: 'bi-calculator-fill', isActive: true },
-      { id: 41, name: 'Devices', path: '/devices', icon: 'bi-cpu-fill', isActive: true },
-      { id: 42, name: 'Chat', path: '/communication', icon: 'bi-chat-dots-fill', isActive: true },
-      { id: 43, name: 'Meetings', path: '/communication/meetings', icon: 'bi-camera-video-fill', isActive: true },
-      { id: 44, name: 'Mobility Hub', path: '/mobility-dashboard', icon: 'bi-car-front-fill', isActive: true },
-      { id: 45, name: 'Rides', path: '/ride-booking', icon: 'bi-steering-wheel', isActive: true },
-      { id: 46, name: 'Car Rentals', path: '/car-rental', icon: 'bi-key-fill', isActive: true },
-      { id: 47, name: 'Logistics', path: '/parcel-logistics', icon: 'bi-truck-front-fill', isActive: true },
-      { id: 48, name: 'Fleet', path: '/fleet-management', icon: 'bi-radar', isActive: true },
-      { id: 49, name: 'Transit', path: '/corporate-transport', icon: 'bi-building-fill-gear', isActive: true },
-      { id: 50, name: 'Live Tracking', path: '/live-tracking', icon: 'bi-geo-alt-fill', isActive: true },
-      { id: 51, name: 'Driver Verification', path: '/vehicle-driver-verification', icon: 'bi-person-check-fill', isActive: true }
+      { id: 1, name: 'Admin', path: '/admin', icon: 'bi-shield-lock-fill', webIcon: 'bi-shield-lock-fill', appIcon: 'admin_panel_settings', isActive: true },
+      { id: 2, name: 'Branches', path: '/branch', icon: 'bi-building-fill', webIcon: 'bi-building-fill', appIcon: 'account_tree', isActive: true },
+      { id: 3, name: 'Employees', path: '/employees', icon: 'bi-people-fill', webIcon: 'bi-people-fill', appIcon: 'badge', isActive: true },
+      { id: 4, name: 'Roles', path: '/roles', icon: 'bi-key-fill', webIcon: 'bi-key-fill', appIcon: 'security', isActive: true },
+      { id: 5, name: 'Role Access', path: '/role-access', icon: 'bi-shield-check', webIcon: 'bi-shield-check', appIcon: 'lock_person', isActive: true },
+      { id: 6, name: 'Profile', path: '/profile', icon: 'bi-person-badge-fill', webIcon: 'bi-person-badge-fill', appIcon: 'person', isActive: true },
+      { id: 7, name: 'Menu Management', path: '/menubar', icon: 'bi-list-stars', webIcon: 'bi-list-stars', appIcon: 'menu', isActive: true },
+      { id: 8, name: 'Statuses', path: '/status', icon: 'bi-check2-square', webIcon: 'bi-check2-square', appIcon: 'toggle_on', isActive: true },
+      { id: 9, name: 'Attributes', path: '/product-attribute', icon: 'bi-sliders', webIcon: 'bi-sliders', appIcon: 'sell', isActive: true },
+      { id: 10, name: 'Categories', path: '/category', icon: 'bi-folder-fill', webIcon: 'bi-folder-fill', appIcon: 'category', isActive: true },
+      { id: 11, name: 'Products', path: '/product', icon: 'bi-box-seam-fill', webIcon: 'bi-box-seam-fill', appIcon: 'inventory_2', isActive: true },
+      { id: 53, name: 'Units Master', path: '/units', icon: 'bi-rulers', webIcon: 'bi-rulers', appIcon: 'square_foot', isActive: true },
+      { id: 12, name: 'Orders', path: '/orders', icon: 'bi-bag-check-fill', webIcon: 'bi-bag-check-fill', appIcon: 'shopping_cart', isActive: true },
+      { id: 13, name: 'Coupons', path: '/coupons', icon: 'bi-ticket-perforated-fill', webIcon: 'bi-ticket-perforated-fill', appIcon: 'confirmation_number', isActive: true },
+      { id: 14, name: 'Change Password', path: '/change-password', icon: 'bi-lock-fill', webIcon: 'bi-lock-fill', appIcon: 'key', isActive: true },
+      { id: 15, name: 'Audit Logs', path: '/audit-logs', icon: 'bi-clock-history', webIcon: 'bi-clock-history', appIcon: 'receipt_long', isActive: true },
+      { id: 16, name: 'Alerts', path: '/alerts', icon: 'bi-exclamation-triangle-fill', webIcon: 'bi-exclamation-triangle-fill', appIcon: 'notifications_active', isActive: true },
+      { id: 17, name: 'Attendance', path: '/attendance', icon: 'bi-calendar-check-fill', webIcon: 'bi-calendar-check-fill', appIcon: 'history', isActive: true },
+      { id: 18, name: 'Branch Inventory', path: '/branch-stocks', icon: 'bi-houses-fill', webIcon: 'bi-houses-fill', appIcon: 'store', isActive: true },
+      { id: 19, name: 'Stock Control', path: '/stocks', icon: 'bi-boxes', webIcon: 'bi-boxes', appIcon: 'warehouse', isActive: true },
+      { id: 20, name: 'Payroll', path: '/payroll', icon: 'bi-cash-coin', webIcon: 'bi-cash-coin', appIcon: 'payments', isActive: true },
+      { id: 21, name: 'Leave Management', path: '/leave', icon: 'bi-airplane-fill', webIcon: 'bi-airplane-fill', appIcon: 'event_busy', isActive: true },
+      { id: 22, name: 'Deliveries', path: '/delivery-tracking', icon: 'bi-truck', webIcon: 'bi-truck', appIcon: 'local_shipping', isActive: true },
+      { id: 23, name: 'Payments', path: '/payments', icon: 'bi-credit-card-2-front-fill', webIcon: 'bi-credit-card-2-front-fill', appIcon: 'account_balance_wallet', isActive: true },
+      { id: 24, name: 'Notifications', path: '/notifications', icon: 'bi-bell-fill', webIcon: 'bi-bell-fill', appIcon: 'notifications', isActive: true },
+      { id: 25, name: 'Workforce', path: '/workforce', icon: 'bi-gear-wide-connected', webIcon: 'bi-gear-wide-connected', appIcon: 'tune', isActive: true },
+      { id: 26, name: 'Invoices', path: '/invoices', icon: 'bi-file-earmark-text-fill', webIcon: 'bi-file-earmark-text-fill', appIcon: 'description', isActive: true },
+      { id: 27, name: 'Approvals', path: '/approvals', icon: 'bi-patch-check-fill', webIcon: 'bi-patch-check-fill', appIcon: 'approval', isActive: true },
+      { id: 28, name: 'Workforce Requests', path: '/workforce-requests', icon: 'bi-briefcase-fill', webIcon: 'bi-briefcase-fill', appIcon: 'assignment', isActive: true },
+      { id: 29, name: 'CRM Contacts', path: '/crm-contacts', icon: 'bi-person-rolodex', webIcon: 'bi-person-rolodex', appIcon: 'contacts', isActive: true },
+      { id: 30, name: 'Profit & Loss', path: '/profit-loss', icon: 'bi-pie-chart-fill', webIcon: 'bi-pie-chart-fill', appIcon: 'monetization_on', isActive: true },
+      { id: 31, name: 'Plan Admin', path: '/manage-subscription-plans', icon: 'bi-gem', webIcon: 'bi-gem', appIcon: 'diamond', isActive: true },
+      { id: 32, name: 'Subscription', path: '/subscription-plans', icon: 'bi-star-fill', webIcon: 'bi-star-fill', appIcon: 'star', isActive: true },
+      { id: 33, name: 'Billing', path: '/billing-history', icon: 'bi-receipt', webIcon: 'bi-receipt', appIcon: 'receipt', isActive: true },
+      { id: 34, name: 'Plan Coupons', path: '/subscription-coupons', icon: 'bi-ticket-detailed-fill', webIcon: 'bi-ticket-detailed-fill', appIcon: 'card_giftcard', isActive: true },
+      { id: 36, name: 'Checkout', path: '/checkout', icon: 'bi-credit-card-fill', webIcon: 'bi-credit-card-fill', appIcon: 'payment', isActive: true },
+      { id: 37, name: 'Calendar', path: '/calendar', icon: 'bi-calendar-event-fill', webIcon: 'bi-calendar-event-fill', appIcon: 'calendar_month', isActive: true },
+      { id: 38, name: 'Documents', path: '/employee-documents', icon: 'bi-file-earmark-check-fill', webIcon: 'bi-file-earmark-check-fill', appIcon: 'folder_shared', isActive: true },
+      { id: 39, name: 'Translations', path: '/translations', icon: 'bi-translate', webIcon: 'bi-translate', appIcon: 'translate', isActive: true },
+      { id: 40, name: 'POS Terminal', path: '/pos-billing', icon: 'bi-calculator-fill', webIcon: 'bi-calculator-fill', appIcon: 'point_of_sale', isActive: true },
+      { id: 41, name: 'Devices', path: '/devices', icon: 'bi-cpu-fill', webIcon: 'bi-cpu-fill', appIcon: 'devices', isActive: true },
+      { id: 42, name: 'Chat', path: '/communication', icon: 'bi-chat-dots-fill', webIcon: 'bi-chat-dots-fill', appIcon: 'forum', isActive: true },
+      { id: 43, name: 'Meetings', path: '/communication/meetings', icon: 'bi-camera-video-fill', webIcon: 'bi-camera-video-fill', appIcon: 'videocam', isActive: true },
+      { id: 44, name: 'Mobility Hub', path: '/mobility-dashboard', icon: 'bi-car-front-fill', webIcon: 'bi-car-front-fill', appIcon: 'directions_car', isActive: true },
+      { id: 45, name: 'Rides', path: '/ride-booking', icon: 'bi-steering-wheel', webIcon: 'bi-steering-wheel', appIcon: 'local_taxi', isActive: true },
+      { id: 46, name: 'Car Rentals', path: '/car-rental', icon: 'bi-key-fill', webIcon: 'bi-key-fill', appIcon: 'car_rental', isActive: true },
+      { id: 47, name: 'Logistics', path: '/parcel-logistics', icon: 'bi-truck-front-fill', webIcon: 'bi-truck-front-fill', appIcon: 'local_shipping', isActive: true },
+      { id: 48, name: 'Fleet', path: '/fleet-management', icon: 'bi-radar', webIcon: 'bi-radar', appIcon: 'radar', isActive: true },
+      { id: 49, name: 'Transit', path: '/corporate-transport', icon: 'bi-building-fill-gear', webIcon: 'bi-building-fill-gear', appIcon: 'directions_bus', isActive: true },
+      { id: 50, name: 'Live Tracking', path: '/live-tracking', icon: 'bi-geo-alt-fill', webIcon: 'bi-geo-alt-fill', appIcon: 'location_searching', isActive: true },
+      { id: 51, name: 'Driver Verification', path: '/vehicle-driver-verification', icon: 'bi-person-check-fill', webIcon: 'bi-person-check-fill', appIcon: 'verified_user', isActive: true }
     ];
 
     if (isSuperAdmin) {
@@ -404,13 +404,9 @@ export class FullComponent implements OnInit {
         navCap: 'Administration & Roles',
         paths: ['/admin', '/crm-contacts', '/branch', '/employees', '/role-access', '/roles', '/audit-logs']
       },
-      // {
-      //   navCap: 'Catalog & Products',
-      //   paths: ['/product-attribute', '/attribute-value', '/category', '/product', '/coupons']
-      // },
       {
         navCap: 'Catalog & Products',
-        paths: ['/product-attribute',  '/category', '/product', '/coupons']
+        paths: ['/product-attribute',  '/category', '/product', '/units', '/coupons']
       },
       {
         navCap: 'POS Billing & Hardware',
@@ -467,7 +463,7 @@ export class FullComponent implements OnInit {
           const item: NavItem = {
             displayName: m.name,
             route: m.path,
-            iconName: this.mapIcon(m.icon),
+            iconName: this.mapIcon(m.webIcon || m.icon || m.appIcon),
             bgcolor: bgcolor
           };
 
@@ -502,7 +498,7 @@ export class FullComponent implements OnInit {
         return {
           displayName: m.name,
           route: m.path,
-          iconName: this.mapIcon(m.icon),
+          iconName: this.mapIcon(m.webIcon || m.icon || m.appIcon),
           bgcolor: bgcolor
         };
       });
@@ -608,7 +604,8 @@ export class FullComponent implements OnInit {
     diamond: 'gem',
     star: 'star-fill',
     receipt: 'receipt',
-    language: 'translate'
+    language: 'translate',
+    'ruler-2': 'rulers'
   };
 
   private mapIcon(icon?: string): string {

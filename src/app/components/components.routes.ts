@@ -170,6 +170,15 @@ export const ComponentsRoutes: Routes = [
       urls: [{ title: 'Products', url: '/product' }]
     }
   },
+  {
+    path: 'units',
+    loadComponent: () => import('./unit-options/unit-options').then(m => m.UnitOptionsComponent),
+    canActivate: [RoleGuard],
+    data: {
+      title: 'Unit Options Master',
+      urls: [{ title: 'Units', url: '/units' }]
+    }
+  },
 
   // ─── Sales & Billing ──────────────────────────────────────────────────────
   {

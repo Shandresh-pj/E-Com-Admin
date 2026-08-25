@@ -1,4 +1,4 @@
-﻿<div class="psh-root">
+<div class="psh-root">
 
   <!-- Ambient Background -->
   <div class="psh-bg" aria-hidden="true">
@@ -210,7 +210,11 @@
                         <div style="flex:1;min-width:140px">
                             <mat-form-field appearance="outline" class="w-100" style="margin-bottom:0">
                                 <mat-label>Unit Name</mat-label>
-                                <input matInput formControlName="unit_name" placeholder="e.g. Box, Ton, Gram">
+                                <mat-select formControlName="unit_name" placeholder="Select Unit" (selectionChange)="onUnitConversionSelect($index, $event.value)">
+                                    @for(u of unitOptions; track u.name) {
+                                    <mat-option [value]="u.name">{{u.name}} ({{u.symbol}})</mat-option>
+                                    }
+                                </mat-select>
                             </mat-form-field>
                         </div>
                         <div style="flex:1;min-width:100px">

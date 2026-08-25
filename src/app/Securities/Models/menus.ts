@@ -3,6 +3,8 @@ export interface AppMenuRoute {
   name: string;
   path: string;
   icon: string;
+  webIcon?: string;
+  appIcon?: string;
   category?: string;
   permissions?: any[];
 }

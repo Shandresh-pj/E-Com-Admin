@@ -1,0 +1,321 @@
+.psh-root {
+  position: relative;
+  width: 100%;
+  min-height: 100vh;
+  padding: 24px;
+  box-sizing: border-box;
+}
+
+/* Background gradient & mesh */
+.psh-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
+
+  .psh-orb {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(80px);
+    opacity: 0.15;
+  }
+
+  .psh-orb--a {
+    width: 400px;
+    height: 400px;
+    background: #6366f1;
+    top: -100px;
+    left: -100px;
+  }
+
+  .psh-orb--b {
+    width: 350px;
+    height: 350px;
+    background: #06b6d4;
+    top: 200px;
+    right: -50px;
+  }
+
+  .psh-orb--c {
+    width: 300px;
+    height: 300px;
+    background: #ec4899;
+    bottom: -50px;
+    left: 30%;
+  }
+
+  .psh-grid {
+    position: absolute;
+    inset: 0;
+    background-size: 32px 32px;
+    background-image: 
+      linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+  }
+}
+
+/* Hero Section */
+.psh-hero {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 24px;
+
+  .psh-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    color: #818cf8;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+
+    .psh-eyebrow__dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #818cf8;
+      box-shadow: 0 0 8px #818cf8;
+    }
+
+    .psh-eyebrow__sep {
+      opacity: 0.5;
+    }
+  }
+
+  .psh-title {
+    font-size: 2.2rem;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    margin: 0 0 8px 0;
+    color: var(--text-primary, #ffffff);
+
+    .psh-title__accent {
+      background: linear-gradient(135deg, #818cf8 0%, #38bdf8 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+  }
+
+  .psh-sub {
+    font-size: 0.95rem;
+    color: var(--text-secondary, #94a3b8);
+    margin: 0;
+    max-width: 680px;
+    line-height: 1.5;
+  }
+
+  .psh-actions {
+    margin-top: 8px;
+  }
+}
+
+/* Action Button */
+.psh-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 24px;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  border: none;
+  cursor: pointer;
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+  &.psh-btn--primary {
+    background: linear-gradient(135deg, #4f46e5 0%, #0284c7 100%);
+    color: #ffffff;
+    box-shadow: 0 4px 20px rgba(79, 70, 229, 0.35);
+
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(79, 70, 229, 0.5);
+    }
+  }
+
+  .psh-btn__shine {
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 50%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.6s ease;
+  }
+
+  &:hover .psh-btn__shine {
+    left: 150%;
+  }
+}
+
+/* Stat Chips Grid */
+.psh-chips {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+
+  .psh-chip {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 16px 20px;
+    border-radius: 16px;
+    background: rgba(15, 23, 42, 0.6);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+    &:hover, &.active {
+      transform: translateY(-3px);
+      background: rgba(30, 41, 59, 0.8);
+      border-color: rgba(99, 102, 241, 0.4);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+    }
+
+    .psh-chip__orb {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      mat-icon {
+        font-size: 22px;
+        width: 22px;
+        height: 22px;
+      }
+    }
+
+    .psh-chip__body {
+      display: flex;
+      flex-direction: column;
+
+      .psh-chip__num {
+        font-size: 1.4rem;
+        font-weight: 800;
+        line-height: 1.2;
+        color: #ffffff;
+      }
+
+      .psh-chip__lbl {
+        font-size: 0.78rem;
+        font-weight: 500;
+        color: #94a3b8;
+      }
+    }
+
+    &.psh-chip--violet .psh-chip__orb {
+      background: rgba(99, 102, 241, 0.15);
+      color: #818cf8;
+    }
+    &.psh-chip--emerald .psh-chip__orb {
+      background: rgba(16, 185, 129, 0.15);
+      color: #34d399;
+    }
+    &.psh-chip--amber .psh-chip__orb {
+      background: rgba(245, 158, 11, 0.15);
+      color: #fbbf24;
+    }
+    &.psh-chip--cyan .psh-chip__orb {
+      background: rgba(6, 182, 212, 0.15);
+      color: #22d3ee;
+    }
+    &.psh-chip--pink .psh-chip__orb {
+      background: rgba(236, 72, 153, 0.15);
+      color: #f472b6;
+    }
+  }
+}
+
+/* Card & Form Container */
+.theme-card {
+  position: relative;
+  z-index: 1;
+  border-radius: 20px;
+  overflow: hidden;
+  background: rgba(15, 23, 42, 0.7);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+
+  mat-card-header {
+    padding: 20px 24px;
+
+    mat-card-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #ffffff;
+    }
+  }
+
+  mat-card-content {
+    padding: 24px;
+  }
+}
+
+.unit-form-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+
+  .form-section-title {
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    color: #818cf8;
+    padding-bottom: 8px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  .form-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+  }
+
+  .field-container {
+    display: flex;
+    flex-direction: column;
+  }
+}
+
+.btn-rounded {
+  border-radius: 10px !important;
+  padding: 8px 20px !important;
+}
+
+.btn-gradient {
+  background: linear-gradient(135deg, #4f46e5 0%, #0284c7 100%) !important;
+  color: #ffffff !important;
+}
+
+@media (max-width: 768px) {
+  .psh-hero {
+    flex-direction: column;
+    gap: 16px;
+
+    .psh-actions {
+      width: 100%;
+      .psh-btn {
+        width: 100%;
+        justify-content: center;
+      }
+    }
+  }
+}

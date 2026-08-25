@@ -99,12 +99,21 @@
           <p class="f-s-16"><code>{{ SelectedMenu?.path || '-' }}</code></p>
         </div>
         <div class="col-lg-3 col-md-6 m-b-16">
-          <p class="f-w-600 m-b-4 text-muted">Icon</p>
+          <p class="f-w-600 m-b-4 text-muted">Web Icon (Bootstrap)</p>
           <p class="f-s-16 d-flex align-items-center gap-2">
-            @if (SelectedMenu?.icon) {
-              <i [class]="'bi ' + SelectedMenu.icon + ' f-s-18 text-primary'"></i>
+            @if (SelectedMenu?.webIcon || SelectedMenu?.icon) {
+              <i [class]="'bi ' + (SelectedMenu.webIcon || SelectedMenu.icon) + ' f-s-18 text-primary'"></i>
             }
-            <span>{{ SelectedMenu?.icon || '-' }}</span>
+            <span>{{ SelectedMenu?.webIcon || SelectedMenu?.icon || '-' }}</span>
+          </p>
+        </div>
+        <div class="col-lg-3 col-md-6 m-b-16">
+          <p class="f-w-600 m-b-4 text-muted">App Icon (Material)</p>
+          <p class="f-s-16 d-flex align-items-center gap-2">
+            @if (SelectedMenu?.appIcon || SelectedMenu?.icon) {
+              <mat-icon class="text-success f-s-20">{{ SelectedMenu.appIcon || SelectedMenu.icon }}</mat-icon>
+            }
+            <span>{{ SelectedMenu?.appIcon || SelectedMenu?.icon || '-' }}</span>
           </p>
         </div>
         <div class="col-lg-3 col-md-6 m-b-16">
@@ -129,7 +138,7 @@
     <mat-card-content class="b-t-1 p-t-20">
       <form [formGroup]="MenuForm" class="premium-form-grid p-t-24">
         <div class="divider">
-          <span>Route Specification</span>
+          <span>Route & Icon Specification</span>
         </div>
 
         <div class="form-row">
@@ -152,16 +161,32 @@
               }
             </mat-form-field>
           </div>
+        </div>
 
+        <div class="form-row">
           <div class="field-container">
-            <mat-label class="f-w-600 m-b-8 d-block">Icon (Bootstrap Class)</mat-label>
+            <mat-label class="f-w-600 m-b-8 d-block">Web Icon (Bootstrap Class)</mat-label>
             <div class="d-flex align-items-center gap-2">
               <mat-form-field appearance="outline" class="w-100">
-                <input matInput formControlName="icon" placeholder="e.g. bi-box-seam-fill">
+                <input matInput formControlName="webIcon" placeholder="e.g. bi-box-seam-fill">
               </mat-form-field>
-              @if (MenuForm.get('icon')?.value) {
-                <div class="icon-preview-box p-2 rounded bg-light border d-flex align-items-center justify-content-center m-b-16" style="width: 44px; height: 44px;">
-                  <i [class]="'bi ' + MenuForm.get('icon')?.value + ' f-s-20 text-primary'"></i>
+              @if (MenuForm.get('webIcon')?.value || MenuForm.get('icon')?.value) {
+                <div class="icon-preview-box p-2 rounded bg-light border d-flex align-items-center justify-content-center m-b-16" style="width: 44px; height: 44px;" title="Web Icon Preview">
+                  <i [class]="'bi ' + (MenuForm.get('webIcon')?.value || MenuForm.get('icon')?.value) + ' f-s-20 text-primary'"></i>
+                </div>
+              }
+            </div>
+          </div>
+
+          <div class="field-container">
+            <mat-label class="f-w-600 m-b-8 d-block">App Icon (Material / Mobile Key)</mat-label>
+            <div class="d-flex align-items-center gap-2">
+              <mat-form-field appearance="outline" class="w-100">
+                <input matInput formControlName="appIcon" placeholder="e.g. inventory_2, shopping_cart">
+              </mat-form-field>
+              @if (MenuForm.get('appIcon')?.value || MenuForm.get('icon')?.value) {
+                <div class="icon-preview-box p-2 rounded bg-light border d-flex align-items-center justify-content-center m-b-16" style="width: 44px; height: 44px;" title="App Icon Preview">
+                  <mat-icon class="text-success f-s-20">{{ MenuForm.get('appIcon')?.value || MenuForm.get('icon')?.value }}</mat-icon>
                 </div>
               }
             </div>

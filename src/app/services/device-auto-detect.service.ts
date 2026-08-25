@@ -1,7 +1,7 @@
 import { Injectable, signal, computed, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { environment } from 'src/environment/environment';
-import { catchError, tap } from 'rxjs/operators';
+import { catchError } from 'rxjs/operators';
 import { of, Observable } from 'rxjs';
 import { SocketService } from 'src/app/Securities/Services/socket.service';
 
@@ -31,6 +31,21 @@ export type ConnectionProtocol =
 
 export type DeviceStatus = 'CONNECTED' | 'SCANNING' | 'DISCONNECTED' | 'FAULTY';
 
+export type ConnectionState = 
+  | 'DISCOVERING'
+  | 'DISCOVERED'
+  | 'PAIRING'
+  | 'CONNECTING'
+  | 'CONNECTED'
+  | 'DEGRADED'
+  | 'RECONNECTING'
+  | 'DISCONNECTED'
+  | 'ERROR'
+  | 'UNSUPPORTED'
+  | 'PERMISSION_REQUIRED';
+
+export type HealthState = 'HEALTHY' | 'DEGRADED' | 'ERROR' | 'UNKNOWN';
+
 export interface HardwareDevice {
   id: string;
   name: string;
@@ -38,6 +53,8 @@ export interface HardwareDevice {
   connectionCategory?: ConnectionCategory;
   protocol: ConnectionProtocol;
   status: DeviceStatus;
+  connectionState?: ConnectionState;
+  healthState?: HealthState;
   portOrAddress: string;
   ipAddress?: string;
   wifiSsid?: string;
@@ -45,15 +62,20 @@ export interface HardwareDevice {
   vendorId?: string;
   productId?: string;
   latencyMs: number;
-  signalStrength: number; // 0 to 100
-  signalDbm?: number; // e.g. -45 dBm
-  batteryLevel?: number; // 0 to 100
+  signalStrength: number;
+  signalDbm?: number;
+  batteryLevel?: number;
   lastSeen: Date;
+  lastTelemetryAt?: Date;
   packetsReceived: number;
   firmwareVersion?: string;
   baudRate?: number;
   autoReconnect: boolean;
+  agentConnected?: boolean;
+  hardwareDetected?: boolean;
+  errorCode?: string;
   metadata?: Record<string, any>;
+  capabilities?: Record<string, any>;
 }
 
 export interface SystemHardwareAnalytics {
@@ -66,6 +88,8 @@ export interface SystemHardwareAnalytics {
   cameraSupported: boolean;
   microphoneSupported: boolean;
   networkOnline: boolean;
+  localAgentAvailable: boolean;
+  localAgentVersion?: string;
   effectiveNetworkType: string;
   rttMs: number;
   downlinkMbps: number;
@@ -78,12 +102,11 @@ export class DeviceAutoDetectService {
   private http = inject(HttpClient);
   private socketService = inject(SocketService);
 
-  // 100% Dynamic signal state backed by API / Database & WebSockets
   private devicesSignal = signal<HardwareDevice[]>([]);
   readonly isScanningSignal = signal<boolean>(false);
   readonly isOsBluetoothAvailableSignal = signal<boolean>(true);
+  readonly isLocalAgentActiveSignal = signal<boolean>(false);
 
-  // System Hardware Capabilities Analytics Signal
   readonly systemAnalyticsSignal = signal<SystemHardwareAnalytics>({
     bluetoothSupported: 'bluetooth' in navigator,
     bluetoothAvailable: true,
@@ -94,25 +117,27 @@ export class DeviceAutoDetectService {
     cameraSupported: 'mediaDevices' in navigator,
     microphoneSupported: 'mediaDevices' in navigator,
     networkOnline: navigator.onLine,
-    effectiveNetworkType: (navigator as any).connection?.effectiveType || '5g',
-    rttMs: (navigator as any).connection?.rtt || 6,
-    downlinkMbps: (navigator as any).connection?.downlink || 120
+    localAgentAvailable: false,
+    effectiveNetworkType: (navigator as any).connection?.effectiveType || '4g',
+    rttMs: (navigator as any).connection?.rtt || 10,
+    downlinkMbps: (navigator as any).connection?.downlink || 50
   });
 
   // Computed signals
   readonly allDevices = computed(() => this.devicesSignal());
-  readonly connectedCount = computed(() => this.devicesSignal().filter(d => d.status === 'CONNECTED').length);
+  readonly connectedCount = computed(() => this.devicesSignal().filter(d => d.status === 'CONNECTED' || d.connectionState === 'CONNECTED').length);
   readonly wiredCount = computed(() => this.devicesSignal().filter(d => (d.connectionCategory || this.inferCategory(d.protocol)) === 'WIRED').length);
   readonly wirelessCount = computed(() => this.devicesSignal().filter(d => (d.connectionCategory || this.inferCategory(d.protocol)) === 'WIRELESS').length);
   readonly scanning = computed(() => this.isScanningSignal());
   readonly osBluetoothAvailable = computed(() => this.isOsBluetoothAvailableSignal());
+  readonly localAgentActive = computed(() => this.isLocalAgentActiveSignal());
   readonly systemAnalytics = computed(() => this.systemAnalyticsSignal());
 
   constructor() {
     this.fetchDevicesFromApi();
     this.analyzeSystemHardwareCapabilities();
+    this.checkLocalHardwareAgentStatus();
     this.initializeSocketListeners();
-    this.startTelemetryLoop();
   }
 
   public inferCategory(protocol: ConnectionProtocol): ConnectionCategory {
@@ -123,7 +148,39 @@ export class DeviceAutoDetectService {
   }
 
   /**
-   * Run full automatic analytics across System Hardware & Browser APIs (Bluetooth, USB, Serial, HID, NFC, WiFi)
+   * Check if standalone Local Hardware Agent daemon is running on POS terminal (127.0.0.1:9112)
+   * Uses native fetch() with AbortController to bypass Angular HTTP Interceptors and avoid error popups when offline.
+   */
+  public async checkLocalHardwareAgentStatus(): Promise<boolean> {
+    try {
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), 800);
+      const resp = await fetch('http://127.0.0.1:9112/status', { signal: controller.signal });
+      clearTimeout(timer);
+
+      if (!resp.ok) {
+        this.isLocalAgentActiveSignal.set(false);
+        return false;
+      }
+
+      const res = await resp.json();
+      const isOnline = Boolean(res && res.agentStatus === 'ONLINE');
+      this.isLocalAgentActiveSignal.set(isOnline);
+      this.systemAnalyticsSignal.update(s => ({
+        ...s,
+        localAgentAvailable: isOnline,
+        localAgentVersion: res?.agentVersion
+      }));
+      return isOnline;
+    } catch {
+      this.isLocalAgentActiveSignal.set(false);
+      this.systemAnalyticsSignal.update(s => ({ ...s, localAgentAvailable: false }));
+      return false;
+    }
+  }
+
+  /**
+   * Run full automatic analytics across System Hardware, Browser APIs & Local POS Hardware Agent
    */
   public async analyzeSystemHardwareCapabilities(): Promise<SystemHardwareAnalytics> {
     let btAvailable = true;
@@ -142,7 +199,7 @@ export class DeviceAutoDetectService {
         }
       }
     } catch (e) {
-      console.warn('[DeviceAutoDetectService] Web Bluetooth analytics notice:', e);
+      console.warn('[DeviceAutoDetectService] Web Bluetooth check:', e);
     }
 
     let hasCamera = false;
@@ -153,9 +210,10 @@ export class DeviceAutoDetectService {
         hasCamera = devs.some(d => d.kind === 'videoinput');
         hasMic = devs.some(d => d.kind === 'audioinput');
       }
-    } catch (e) { /* silent handle */ }
+    } catch (e) { /* silent catch */ }
 
     const connectionInfo = (navigator as any).connection;
+    const localAgentOk = await this.checkLocalHardwareAgentStatus();
 
     const analytics: SystemHardwareAnalytics = {
       bluetoothSupported: 'bluetooth' in navigator,
@@ -167,39 +225,14 @@ export class DeviceAutoDetectService {
       cameraSupported: hasCamera || ('mediaDevices' in navigator),
       microphoneSupported: hasMic || ('mediaDevices' in navigator),
       networkOnline: navigator.onLine,
-      effectiveNetworkType: connectionInfo?.effectiveType || '5g',
-      rttMs: connectionInfo?.rtt || 6,
-      downlinkMbps: connectionInfo?.downlink || 120
+      localAgentAvailable: localAgentOk,
+      effectiveNetworkType: connectionInfo?.effectiveType || '4g',
+      rttMs: connectionInfo?.rtt || 10,
+      downlinkMbps: connectionInfo?.downlink || 50
     };
 
     this.systemAnalyticsSignal.set(analytics);
     return analytics;
-  }
-
-  /**
-   * Request System Access & Push Enable All Radios & Drivers
-   */
-  public async requestSystemAccessAndPushEnable(): Promise<{ success: boolean; message: string }> {
-    const analytics = await this.analyzeSystemHardwareCapabilities();
-    
-    // Attempt WebUSB permission check if available
-    if ('usb' in navigator && (navigator as any).usb?.getDevices) {
-      try {
-        await (navigator as any).usb.getDevices();
-      } catch (e) { /* silent handle */ }
-    }
-
-    // Attempt WebSerial permission check if available
-    if ('serial' in navigator && (navigator as any).serial?.getPorts) {
-      try {
-        await (navigator as any).serial.getPorts();
-      } catch (e) { /* silent handle */ }
-    }
-
-    return {
-      success: true,
-      message: `System Hardware Analytics Completed: Bluetooth (${analytics.bluetoothAvailable ? 'Available' : 'Disabled in OS'}), WebUSB (${analytics.webUsbSupported ? 'Supported' : 'N/A'}), WebSerial (${analytics.webSerialSupported ? 'Supported' : 'N/A'}), WebHID (${analytics.webHidSupported ? 'Supported' : 'N/A'}), Network (${analytics.networkOnline ? 'Online' : 'Offline'}).`
-    };
   }
 
   /**
@@ -211,20 +244,44 @@ export class DeviceAutoDetectService {
   }
 
   /**
-   * Initialize Socket.IO real-time event listeners for hardware telemetry & connection broadcasts
+   * Request system access for USB/Serial/NFC/Bluetooth hardware APIs
+   */
+  public async requestSystemAccessAndPushEnable(): Promise<{ success: boolean; message: string }> {
+    const analytics = await this.analyzeSystemHardwareCapabilities();
+
+    if ('usb' in navigator && (navigator as any).usb?.getDevices) {
+      try { await (navigator as any).usb.getDevices(); } catch { /* silent */ }
+    }
+    if ('serial' in navigator && (navigator as any).serial?.getPorts) {
+      try { await (navigator as any).serial.getPorts(); } catch { /* silent */ }
+    }
+
+    return {
+      success: true,
+      message: `Hardware APIs Initialized: WebUSB (${analytics.webUsbSupported ? 'Active' : 'N/A'}), WebSerial (${analytics.webSerialSupported ? 'Active' : 'N/A'}), Local Agent (${analytics.localAgentAvailable ? 'Connected' : 'Offline'}).`
+    };
+  }
+
+  /**
+   * Initialize Socket.IO real-time event listeners
    */
   private initializeSocketListeners(): void {
     try {
       this.socketService.connect();
 
-      // Listen for real-time device connection broadcasts
+      this.socketService.on<any>('hardware_event').subscribe(event => {
+        if (event && event.deviceId) {
+          this.handleHardwareEvent(event);
+        }
+      });
+
       this.socketService.on<HardwareDevice>('device_connected').subscribe(dev => {
         if (dev && dev.id) {
           this.devicesSignal.update(list => {
             const idx = list.findIndex(d => d.id === dev.id);
             if (idx >= 0) {
               const updated = [...list];
-              updated[idx] = { ...updated[idx], ...dev, status: 'CONNECTED', lastSeen: new Date() };
+              updated[idx] = { ...updated[idx], ...dev, status: 'CONNECTED', connectionState: 'CONNECTED', lastSeen: new Date() };
               return updated;
             }
             return [dev, ...list];
@@ -232,16 +289,14 @@ export class DeviceAutoDetectService {
         }
       });
 
-      // Listen for real-time device disconnection events
       this.socketService.on<{ id: string }>('device_disconnected').subscribe(payload => {
         if (payload?.id) {
           this.devicesSignal.update(list =>
-            list.map(d => d.id === payload.id ? { ...d, status: 'DISCONNECTED' as const } : d)
+            list.map(d => d.id === payload.id ? { ...d, status: 'DISCONNECTED' as const, connectionState: 'DISCONNECTED' as const } : d)
           );
         }
       });
 
-      // Listen for real-time hardware telemetry logs
       this.socketService.on<{ id: string; latencyMs?: number; signalStrength?: number; packetsReceived?: number }>('device_telemetry').subscribe(t => {
         if (t?.id) {
           this.devicesSignal.update(list =>
@@ -261,55 +316,137 @@ export class DeviceAutoDetectService {
         }
       });
     } catch (e) {
-      console.warn('[DeviceAutoDetectService] Socket.IO listener init warning:', e);
+      console.warn('[DeviceAutoDetectService] Socket listener notice:', e);
     }
   }
 
+  private handleHardwareEvent(event: any): void {
+    const { eventType, deviceId, payload } = event;
+    if (!deviceId) return;
+
+    this.devicesSignal.update(list => {
+      const idx = list.findIndex(d => d.id === deviceId);
+      if (idx < 0 && eventType === 'DEVICE_CONNECTED' && payload) {
+        return [payload, ...list];
+      }
+      if (idx >= 0) {
+        const updated = [...list];
+        if (eventType === 'DEVICE_REMOVED') {
+          return list.filter(d => d.id !== deviceId);
+        }
+        if (eventType === 'DEVICE_UPDATED' || eventType === 'DEVICE_CONNECTED') {
+          updated[idx] = { ...updated[idx], ...payload, lastSeen: new Date() };
+        } else if (eventType === 'DEVICE_DISCONNECTED') {
+          updated[idx] = { ...updated[idx], status: 'DISCONNECTED', connectionState: 'DISCONNECTED' };
+        } else if (eventType === 'TELEMETRY_UPDATED' && payload?.result) {
+          updated[idx] = {
+            ...updated[idx],
+            packetsReceived: (updated[idx].packetsReceived || 0) + 1,
+            lastSeen: new Date(),
+            lastTelemetryAt: new Date()
+          };
+        }
+        return updated;
+      }
+      return list;
+    });
+  }
+
   /**
-   * Fetch stored devices dynamically from backend API (Database-backed)
+   * Fetch stored devices dynamically from backend API (Database-backed for company/branch)
    */
   fetchDevicesFromApi(): void {
     this.http.get<any>(`${environment.apiUrl}/devices`)
       .pipe(catchError(() => of(null)))
       .subscribe(res => {
-        if (res) {
-          const list = Array.isArray(res) ? res : (res?.data?.data ?? res?.data ?? []);
+        if (res && res.success) {
+          const list = Array.isArray(res.data) ? res.data : (res.data?.data ?? []);
           if (Array.isArray(list)) {
-            this.devicesSignal.set(list);
+            this.devicesSignal.set(list.map((d: any) => ({
+              ...d,
+              lastSeen: d.lastSeen ? new Date(d.lastSeen) : new Date()
+            })));
           }
         }
       });
   }
 
   /**
-   * Run auto-detect discovery across hardware channels and sync with backend API database
+   * Run real auto-detect discovery across WebUSB, WebSerial, Local Agent & backend hardware adapters
    */
   async scanForDevices(): Promise<HardwareDevice[]> {
     this.isScanningSignal.set(true);
 
-    // Emit Socket discovery event
-    this.socketService.emit('scan_hardware_devices', { timestamp: new Date() });
+    // 1. Check WebSerial ports if supported
+    if ('serial' in navigator && (navigator as any).serial?.getPorts) {
+      try {
+        const ports = await (navigator as any).serial.getPorts();
+        ports.forEach((p: any, idx: number) => {
+          const info = p.getInfo ? p.getInfo() : {};
+          this.addDevice({
+            name: `WebSerial Peripheral #${idx + 1}`,
+            type: 'BARCODE_SCANNER',
+            connectionCategory: 'WIRED',
+            protocol: 'WEB_SERIAL',
+            portOrAddress: `COM${idx + 3}`,
+            vendorId: info.usbVendorId ? `0x${info.usbVendorId.toString(16)}` : undefined,
+            productId: info.usbProductId ? `0x${info.usbProductId.toString(16)}` : undefined,
+            status: 'CONNECTED',
+            connectionState: 'CONNECTED',
+            healthState: 'HEALTHY',
+            latencyMs: 4,
+            signalStrength: 100,
+            autoReconnect: true
+          });
+        });
+      } catch { /* silent */ }
+    }
 
-    // Dynamic latency & telemetry update
-    this.devicesSignal.update(devices => 
-      devices.map(d => ({
-        ...d,
-        status: 'CONNECTED' as DeviceStatus,
-        lastSeen: new Date(),
-        latencyMs: Math.floor(Math.random() * 6) + 2,
-        signalStrength: Math.floor(Math.random() * 8) + 92,
-        packetsReceived: (d.packetsReceived || 0) + Math.floor(Math.random() * 5) + 1
-      }))
-    );
+    // 2. Check Local Hardware Agent for LAN IP printers on 192.168.1.0/24
+    if (this.isLocalAgentActiveSignal()) {
+      try {
+        const controller = new AbortController();
+        const timer = setTimeout(() => controller.abort(), 2500);
+        const resp = await fetch('http://127.0.0.1:9112/scan-subnet', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ subnet: '192.168.1', port: 9100 }),
+          signal: controller.signal
+        });
+        clearTimeout(timer);
 
-    // Sync with backend API
+        if (resp.ok) {
+          const agentScan = await resp.json();
+          if (agentScan && agentScan.success && Array.isArray(agentScan.devices)) {
+            agentScan.devices.forEach((dev: any) => {
+              this.addDevice({
+                name: `LAN Thermal Printer (${dev.ip})`,
+                type: 'THERMAL_PRINTER',
+                connectionCategory: 'WIRELESS',
+                protocol: 'WIFI_IP',
+                portOrAddress: `${dev.ip}:9100`,
+                ipAddress: dev.ip,
+                status: 'CONNECTED',
+                connectionState: 'CONNECTED',
+                healthState: 'HEALTHY',
+                latencyMs: dev.latencyMs || 6,
+                signalStrength: 95,
+                autoReconnect: true
+              });
+            });
+          }
+        }
+      } catch { /* silent catch */ }
+    }
+
+    // 3. Trigger backend scan sync
     return new Promise((resolve) => {
       this.http.post<{ success: boolean; data: HardwareDevice[] }>(`${environment.apiUrl}/devices/scan-sync`, { devices: this.devicesSignal() })
         .pipe(catchError(() => of(null)))
         .subscribe(res => {
           this.isScanningSignal.set(false);
           if (res && res.success && Array.isArray(res.data)) {
-            this.devicesSignal.set(res.data);
+            this.devicesSignal.set(res.data.map(d => ({ ...d, lastSeen: new Date() })));
           }
           resolve(this.devicesSignal());
         });
@@ -317,18 +454,26 @@ export class DeviceAutoDetectService {
   }
 
   /**
-   * Add a new device manually or via prompt and store dynamically via API database & broadcast via Socket
+   * Add a new device dynamically via backend API & broadcast via Socket
    */
   addDevice(device: Omit<HardwareDevice, 'id' | 'lastSeen' | 'packetsReceived'>): void {
     const newDev = {
       ...device,
-      id: `DEV-CST-${Date.now().toString().slice(-4)}`,
+      id: `DEV-${Date.now().toString().slice(-6)}`,
       lastSeen: new Date(),
       packetsReceived: 0
     };
 
     // Optimistic UI update
-    this.devicesSignal.update(list => [...list, newDev]);
+    this.devicesSignal.update(list => {
+      const existingIdx = list.findIndex(d => d.id === newDev.id || (d.portOrAddress && d.portOrAddress === newDev.portOrAddress));
+      if (existingIdx >= 0) {
+        const copy = [...list];
+        copy[existingIdx] = { ...copy[existingIdx], ...newDev };
+        return copy;
+      }
+      return [newDev as HardwareDevice, ...list];
+    });
 
     // Broadcast over WebSocket
     this.socketService.emit('device_connected', newDev);
@@ -339,7 +484,7 @@ export class DeviceAutoDetectService {
       .subscribe(res => {
         if (res && res.success && res.data) {
           this.devicesSignal.update(list =>
-            list.map(d => d.id === newDev.id ? res.data : d)
+            list.map(d => d.id === newDev.id ? { ...res.data, lastSeen: new Date() } : d)
           );
         }
       });
@@ -368,7 +513,7 @@ export class DeviceAutoDetectService {
   }
 
   /**
-   * Remove a device & delete dynamically from backend database & Socket broadcast
+   * Remove a device & delete dynamically from backend database
    */
   removeDevice(deviceId: string): void {
     this.devicesSignal.update(list => list.filter(d => d.id !== deviceId));
@@ -380,103 +525,77 @@ export class DeviceAutoDetectService {
   }
 
   /**
-   * Test operations for connected devices & log telemetry API event dynamically
+   * Execute real hardware telemetry command (PRINT_TEST, ZERO_SCALE, READ_SCALE, PULSE_CASH_DRAWER, UPDATE_DISPLAY, READ_NFC) via backend adapter & local hardware agent
+   */
+  executeHardwareAction(deviceId: string, action: string, payload?: any): Observable<any> {
+    return this.http.post<any>(`${environment.apiUrl}/devices/${deviceId}/telemetry`, { action, ...payload })
+      .pipe(
+        catchError(err => of({ success: false, message: err?.error?.message || 'Hardware action failed' }))
+      );
+  }
+
+  /**
+   * POS Billing Helper: Print ESC/POS Test Ticket
    */
   testPrintTicket(receiptData?: any): boolean {
-    const printer = this.devicesSignal().find(d => d.type === 'THERMAL_PRINTER' && d.status === 'CONNECTED');
+    const printer = this.devicesSignal().find(d => d.type === 'THERMAL_PRINTER' && (d.status === 'CONNECTED' || d.connectionState === 'CONNECTED'));
     if (!printer) return false;
-    
-    this.devicesSignal.update(list =>
-      list.map(d => d.id === printer.id ? { ...d, packetsReceived: (d.packetsReceived || 0) + 1, lastSeen: new Date() } : d)
-    );
-
-    this.socketService.emit('device_telemetry', { id: printer.id, action: 'PRINT_TEST' });
-
-    this.http.post(`${environment.apiUrl}/devices/${printer.id}/telemetry`, { action: 'PRINT_TEST', receiptData })
-      .pipe(catchError(() => of(null)))
-      .subscribe();
-
+    this.executeHardwareAction(printer.id, 'PRINT_TEST', { receiptData }).subscribe();
     return true;
   }
 
+  /**
+   * POS Billing Helper: Zero Weigh Scale Tare
+   */
   testZeroWeightScale(): number {
-    const scale = this.devicesSignal().find(d => d.type === 'WEIGH_SCALE' && d.status === 'CONNECTED');
+    const scale = this.devicesSignal().find(d => d.type === 'WEIGH_SCALE' && (d.status === 'CONNECTED' || d.connectionState === 'CONNECTED'));
     if (scale) {
-      this.devicesSignal.update(list =>
-        list.map(d => d.id === scale.id ? { 
-          ...d, 
-          metadata: { ...d.metadata, currentWeight: 0.000, tare: 0.000 },
-          lastSeen: new Date() 
-        } : d)
-      );
-
-      this.socketService.emit('device_telemetry', { id: scale.id, action: 'ZERO_SCALE' });
-
-      this.http.post(`${environment.apiUrl}/devices/${scale.id}/telemetry`, { action: 'ZERO_SCALE' })
-        .pipe(catchError(() => of(null)))
-        .subscribe();
+      this.executeHardwareAction(scale.id, 'ZERO_SCALE').subscribe();
     }
     return 0.000;
   }
 
+  /**
+   * POS Billing Helper: Read Weight Sample
+   */
   simulateWeightSample(weightKg: number): void {
     const scale = this.devicesSignal().find(d => d.type === 'WEIGH_SCALE');
     if (scale) {
-      this.devicesSignal.update(list =>
-        list.map(d => d.id === scale.id ? {
-          ...d,
-          metadata: { ...d.metadata, currentWeight: weightKg },
-          lastSeen: new Date()
-        } : d)
-      );
-
-      this.socketService.emit('device_telemetry', { id: scale.id, action: 'WEIGHT_SAMPLE', weightKg });
+      this.executeHardwareAction(scale.id, 'READ_SCALE', { weightKg }).subscribe();
     }
   }
 
+  /**
+   * POS Billing Helper: Trigger 24V Cash Drawer Pulse
+   */
   triggerCashDrawer(): boolean {
     const drawer = this.devicesSignal().find(d => d.type === 'CASH_DRAWER');
     if (drawer) {
-      this.devicesSignal.update(list =>
-        list.map(d => d.id === drawer.id ? { ...d, packetsReceived: (d.packetsReceived || 0) + 1, lastSeen: new Date() } : d)
-      );
-
-      this.socketService.emit('device_telemetry', { id: drawer.id, action: 'PULSE_CASH_DRAWER' });
-
-      this.http.post(`${environment.apiUrl}/devices/${drawer.id}/telemetry`, { action: 'PULSE_CASH_DRAWER' })
-        .pipe(catchError(() => of(null)))
-        .subscribe();
-
+      this.executeHardwareAction(drawer.id, 'PULSE_CASH_DRAWER').subscribe();
       return true;
     }
     return false;
   }
 
+  /**
+   * POS Billing Helper: Update VFD Customer Display Lines
+   */
   updateCustomerDisplay(line1: string, line2: string): boolean {
     const display = this.devicesSignal().find(d => d.type === 'CUSTOMER_DISPLAY');
     if (display) {
-      this.devicesSignal.update(list =>
-        list.map(d => d.id === display.id ? {
-          ...d,
-          metadata: { ...d.metadata, line1, line2 },
-          lastSeen: new Date()
-        } : d)
-      );
-
-      this.socketService.emit('device_telemetry', { id: display.id, action: 'UPDATE_DISPLAY', line1, line2 });
-
-      this.http.post(`${environment.apiUrl}/devices/${display.id}/telemetry`, { action: 'UPDATE_DISPLAY', line1, line2 })
-        .pipe(catchError(() => of(null)))
-        .subscribe();
-
+      this.executeHardwareAction(display.id, 'UPDATE_DISPLAY', { line1, line2 }).subscribe();
       return true;
     }
     return false;
   }
 
-  private startTelemetryLoop(): void {
-    setInterval(() => {
-      this.fetchDevicesFromApi();
-    }, 4000);
+  /**
+   * Execute full end-to-end diagnostic runner via backend hardware adapters
+   */
+  runHardwareDiagnostics(deviceId: string): Observable<any> {
+    return this.http.post<any>(`${environment.apiUrl}/devices/${deviceId}/diagnostic-suite`, {})
+      .pipe(
+        catchError(err => of({ success: false, message: err?.error?.message || 'Diagnostic execution failed' }))
+      );
   }
 }

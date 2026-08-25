@@ -44,6 +44,42 @@
         <mat-icon [class.spin]="deviceService.scanning()">sync</mat-icon>
         <span>{{ deviceService.scanning() ? 'Scanning Hardware...' : 'Auto-Detect Devices' }}</span>
       </button>
+  <!-- Executive Metrics Hero Stats Grid -->
+  <div class="metrics-hero-grid">
+    <div class="metric-card-glass glow-indigo">
+      <div class="m-icon-orb bg-indigo"><mat-icon>devices_other</mat-icon></div>
+      <div class="m-content">
+        <span class="m-val">{{ deviceService.allDevices().length }}</span>
+        <span class="m-lbl">Total Endpoints</span>
+      </div>
+      <div class="m-sparkline"><span class="m-badge bg-indigo-soft">100% Dynamic</span></div>
+    </div>
+
+    <div class="metric-card-glass glow-emerald">
+      <div class="m-icon-orb bg-emerald"><mat-icon>power</mat-icon></div>
+      <div class="m-content">
+        <span class="m-val">{{ deviceService.connectedCount() }}</span>
+        <span class="m-lbl">Active &amp; Online</span>
+      </div>
+      <div class="m-sparkline"><span class="m-badge bg-emerald-soft">Healthy State</span></div>
+    </div>
+
+    <div class="metric-card-glass glow-amber">
+      <div class="m-icon-orb bg-amber"><mat-icon>cable</mat-icon></div>
+      <div class="m-content">
+        <span class="m-val">{{ deviceService.wiredCount() }}</span>
+        <span class="m-lbl">Wired Peripherals</span>
+      </div>
+      <div class="m-sparkline"><span class="m-badge bg-amber-soft">COM / USB Direct</span></div>
+    </div>
+
+    <div class="metric-card-glass glow-cyan">
+      <div class="m-icon-orb bg-cyan"><mat-icon>sensors</mat-icon></div>
+      <div class="m-content">
+        <span class="m-val">{{ deviceService.wirelessCount() }}</span>
+        <span class="m-lbl">Wireless Air Devices</span>
+      </div>
+      <div class="m-sparkline"><span class="m-badge bg-cyan-soft">WiFi &amp; BLE Air</span></div>
     </div>
   </div>
 
@@ -83,6 +119,11 @@
       <div class="analytics-chip" [class.active]="deviceService.systemAnalytics().nfcSupported">
         <mat-icon>nfc</mat-icon>
         <span>WebNFC: {{ deviceService.systemAnalytics().nfcSupported ? 'Supported' : 'N/A' }}</span>
+      </div>
+
+      <div class="analytics-chip" [class.active]="deviceService.systemAnalytics().localAgentAvailable" [class.warn]="!deviceService.systemAnalytics().localAgentAvailable">
+        <mat-icon>dns</mat-icon>
+        <span>POS Local Agent: {{ deviceService.systemAnalytics().localAgentAvailable ? 'Active (' + (deviceService.systemAnalytics().localAgentVersion || 'v1.0.0') + ')' : 'Offline' }}</span>
       </div>
 
       <div class="analytics-chip" [class.active]="deviceService.systemAnalytics().cameraSupported">

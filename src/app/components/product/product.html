@@ -300,9 +300,16 @@
                 <div class="field-container">
                     <mat-label class="f-w-600 m-b-8 d-block">Barcode</mat-label>
                     <mat-form-field appearance="outline" class="w-100">
-                        <input matInput formControlName="barcode" placeholder="Enter Barcode (8-14 digits)">
+                        <mat-icon matPrefix style="color:var(--brand-primary);margin-right:6px">qr_code_scanner</mat-icon>
+                        <input matInput formControlName="barcode" placeholder="Enter or Scan Barcode (8-14 digits)">
+                        <button type="button" mat-icon-button matSuffix color="primary" (click)="generateRandomBarcode()" matTooltip="Auto-Generate Barcode">
+                            <mat-icon>autorenew</mat-icon>
+                        </button>
+                        <button type="button" mat-icon-button matSuffix color="accent" (click)="openBarcodeScannerModal('main')" matTooltip="Open Camera & Scanner">
+                            <mat-icon>center_focus_strong</mat-icon>
+                        </button>
                         @if (ProductForm.get('barcode')?.hasError('pattern')) {
-                            <mat-error>Barcode must be 8Ã¢â‚¬â€œ14 digits</mat-error>
+                            <mat-error>Barcode must be 8–14 digits</mat-error>
                         }
                     </mat-form-field>
                 </div>
@@ -784,5 +791,60 @@
   }
 
 </div>
+
+<!-- Barcode & Device Scanner Modal -->
+@if (showScannerModal) {
+<div class="scanner-modal-backdrop d-flex align-items-center justify-content-center"
+  style="position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.85);z-index:9999;padding:16px">
+  <div class="scanner-modal-card p-24" style="background:#1e1e2d;border-radius:16px;max-width:520px;width:100%;color:#fff;box-shadow:0 20px 50px rgba(0,0,0,0.5);border:1px solid rgba(255,255,255,0.1)">
+    <div class="d-flex align-items-center justify-content-between m-b-16">
+      <h3 class="m-0 f-w-700 d-flex align-items-center gap-8" style="font-size:18px">
+        <mat-icon style="color:var(--brand-primary)">qr_code_scanner</mat-icon>
+        Barcode & Device Scanner
+      </h3>
+      <button type="button" mat-icon-button (click)="closeBarcodeScannerModal()">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+
+    <!-- Live Video Feed -->
+    <div class="video-container m-b-16" style="position:relative;width:100%;height:200px;background:#000;border-radius:12px;overflow:hidden;border:2px solid var(--brand-primary)">
+      <video #scannerVideo autoplay playsinline style="width:100%;height:100%;object-fit:cover"></video>
+      <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:70%;height:45%;border:2px dashed #10b981;border-radius:8px;pointer-events:none;box-shadow:0 0 0 9999px rgba(0,0,0,0.4)"></div>
+      <div style="position:absolute;bottom:8px;left:0;right:0;text-align:center;font-size:11px;color:#a1a1aa">
+        Position barcode inside green box
+      </div>
+    </div>
+
+    <!-- Hardware / Manual Scanner Input -->
+    <form (submit)="onHardwareScanSubmit($event)" class="m-b-16">
+      <mat-label class="f-w-600 m-b-8 d-block" style="font-size:12px;color:#cbd5e1">
+        Hardware Scanner (USB / Bluetooth) or Manual Code
+      </mat-label>
+      <mat-form-field appearance="outline" class="w-100">
+        <mat-icon matPrefix style="margin-right:6px">barcode_reader</mat-icon>
+        <input #hardwareScanInput matInput [(ngModel)]="scannedCode" name="scannedCode" placeholder="Scan with USB gun or enter barcode number" autocomplete="off">
+        <button type="button" mat-button matSuffix color="primary" (click)="applyScannedBarcode()">
+          Apply
+        </button>
+      </mat-form-field>
+    </form>
+
+    <div class="p-12 m-b-16" style="background:rgba(255,255,255,0.05);border-radius:8px;font-size:12px;color:#94a3b8">
+      <mat-icon style="font-size:14px;vertical-align:middle;margin-right:4px">info</mat-icon>
+      {{ scannerStatus }}
+    </div>
+
+    <div class="d-flex align-items-center justify-content-end gap-12">
+      <button type="button" mat-stroked-button (click)="closeBarcodeScannerModal()">
+        Cancel
+      </button>
+      <button type="button" mat-raised-button color="primary" (click)="applyScannedBarcode()">
+        <mat-icon>check</mat-icon> Use Scanned Barcode
+      </button>
+    </div>
+  </div>
+</div>
+}
 
 

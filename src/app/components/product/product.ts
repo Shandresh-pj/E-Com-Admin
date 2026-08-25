@@ -23,6 +23,9 @@ import { Subscription } from 'rxjs';
 import { GeminiAiService } from 'src/app/services/gemini-ai.service';
 import { AppTranslatePipe } from 'src/app/pipes/app-translate.pipe';
 
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { ViewChild, ElementRef } from '@angular/core';
+
 @Component({
   selector: 'app-product',
   standalone: true,
@@ -35,6 +38,7 @@ import { AppTranslatePipe } from 'src/app/pipes/app-translate.pipe';
     MatCardModule,
     MatSelectModule,
     MatIconModule,
+    MatTooltipModule,
     MatDatepickerModule,
     MatNativeDateModule,
     MatTable,
@@ -254,6 +258,102 @@ export class Product {
     });
   }
 
+
+  // ── Barcode Scanner & Auto-Generator ──────────────────────────────────────────
+  showScannerModal: boolean = false;
+  mediaStream: MediaStream | null = null;
+  scannedCode: string = '';
+  scannerStatus: string = 'Initializing scanner...';
+  activeBarcodeTarget: 'main' | number = 'main';
+
+  @ViewChild('scannerVideo') scannerVideo!: ElementRef<HTMLVideoElement>;
+  @ViewChild('hardwareScanInput') hardwareScanInput!: ElementRef<HTMLInputElement>;
+
+  generateRandomBarcode(variantIndex?: number): void {
+    const prefix = '890';
+    const randomDigits = Math.floor(100000000 + Math.random() * 900000000).toString();
+    const generated = `${prefix}${randomDigits}`;
+
+    if (variantIndex !== undefined && variantIndex >= 0) {
+      const vArray = this.ProductForm.get('variants') as FormArray;
+      if (vArray && vArray.at(variantIndex)) {
+        vArray.at(variantIndex).patchValue({ barcode: generated });
+        this.alert.success(`Generated variant barcode ${generated}`);
+      }
+    } else {
+      this.ProductForm.patchValue({ barcode: generated });
+      this.alert.success(`Generated barcode ${generated}`);
+    }
+    this.cdr.detectChanges();
+  }
+
+  openBarcodeScannerModal(target: 'main' | number = 'main'): void {
+    this.activeBarcodeTarget = target;
+    this.showScannerModal = true;
+    this.scannedCode = '';
+    this.scannerStatus = 'Camera & Hardware Scanner Ready';
+    this.cdr.detectChanges();
+
+    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+      navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
+        .then((stream) => {
+          this.mediaStream = stream;
+          if (this.scannerVideo && this.scannerVideo.nativeElement) {
+            this.scannerVideo.nativeElement.srcObject = stream;
+          }
+          this.scannerStatus = 'Camera active. Scan any barcode tag or use a USB/Bluetooth scanner.';
+          this.cdr.detectChanges();
+        })
+        .catch((err) => {
+          console.warn('Camera access error:', err);
+          this.scannerStatus = 'Hardware Scanner Mode Active (Camera unavailable or permission denied).';
+          this.cdr.detectChanges();
+        });
+    }
+
+    setTimeout(() => {
+      if (this.hardwareScanInput && this.hardwareScanInput.nativeElement) {
+        this.hardwareScanInput.nativeElement.focus();
+      }
+    }, 300);
+  }
+
+  closeBarcodeScannerModal(): void {
+    if (this.mediaStream) {
+      this.mediaStream.getTracks().forEach(track => track.stop());
+      this.mediaStream = null;
+    }
+    this.showScannerModal = false;
+    this.scannedCode = '';
+    this.cdr.detectChanges();
+  }
+
+  applyScannedBarcode(code?: string): void {
+    const codeToApply = (code || this.scannedCode || '').trim();
+    if (!codeToApply) {
+      this.alert.error('Please scan or enter a barcode first');
+      return;
+    }
+
+    if (this.activeBarcodeTarget === 'main') {
+      this.ProductForm.patchValue({ barcode: codeToApply });
+    } else if (typeof this.activeBarcodeTarget === 'number') {
+      const vArray = this.ProductForm.get('variants') as FormArray;
+      if (vArray && vArray.at(this.activeBarcodeTarget)) {
+        vArray.at(this.activeBarcodeTarget).patchValue({ barcode: codeToApply });
+      }
+    }
+
+    this.alert.success(`Applied barcode ${codeToApply}`);
+    this.closeBarcodeScannerModal();
+  }
+
+  onHardwareScanSubmit(event: Event): void {
+    event.preventDefault();
+    if (this.scannedCode.trim()) {
+      this.applyScannedBarcode(this.scannedCode.trim());
+    }
+  }
 
   toFileUrl(path: string | null | undefined): string | null {
     return toFileUrl(path);

@@ -1,18 +1,89 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   UNIT OPTIONS MASTER — LIGHT & DARK THEME RESPONSIVE SCSS
+   Liquid Glass · Animated Orbs · Micro-Interactions · Theme Aware
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+:host {
+  display: block;
+  width: 100%;
+}
+
+/* ── Keyframe Animations ────────────────────────────────────────────────── */
+@keyframes pshFadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes pshFloatOrb {
+  0%, 100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-15px) rotate(180deg);
+  }
+}
+
+@keyframes pshShine {
+  0% {
+    left: -100%;
+  }
+  100% {
+    left: 200%;
+  }
+}
+
+@keyframes pshPulseGlow {
+  0%, 100% {
+    box-shadow: 0 0 15px rgba(99, 102, 241, 0.2);
+  }
+  50% {
+    box-shadow: 0 0 28px rgba(99, 102, 241, 0.45);
+  }
+}
+
+/* ── Root Layout & Theme Variable Adaptors ────────────────────────────── */
 .psh-root {
   position: relative;
   width: 100%;
   min-height: 100vh;
   padding: 24px;
   box-sizing: border-box;
+  overflow: hidden;
+  animation: pshFadeUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+
+  /* Theme-aware fallbacks */
+  --psh-card-bg: var(--bg-card, rgba(15, 23, 42, 0.75));
+  --psh-text-primary: var(--text-primary, #f8fafc);
+  --psh-text-secondary: var(--text-secondary, #94a3b8);
+  --psh-border: var(--border, rgba(255, 255, 255, 0.08));
+  --psh-input-bg: var(--bg-input, rgba(15, 23, 42, 0.8));
+  --psh-chip-bg: rgba(15, 23, 42, 0.6);
+  --psh-shadow: 0 12px 32px rgba(0, 0, 0, 0.25);
 }
 
-/* Background gradient & mesh */
+/* Light Theme Overrides */
+:host-context(.light-theme) .psh-root,
+.light-theme .psh-root,
+[data-theme="light"] .psh-root {
+  --psh-card-bg: #ffffff;
+  --psh-text-primary: #0f172a;
+  --psh-text-secondary: #475569;
+  --psh-border: rgba(226, 232, 240, 0.9);
+  --psh-input-bg: #f8fafc;
+  --psh-chip-bg: #ffffff;
+  --psh-shadow: 0 10px 25px rgba(0, 0, 0, 0.06);
+}
+
+/* ── Animated Background Mesh & Orbs ────────────────────────────────────── */
 .psh-bg {
   position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
+  inset: 0;
   overflow: hidden;
   pointer-events: none;
   z-index: 0;
@@ -20,52 +91,64 @@
   .psh-orb {
     position: absolute;
     border-radius: 50%;
-    filter: blur(80px);
-    opacity: 0.15;
+    filter: blur(90px);
+    opacity: 0.18;
+    animation: pshFloatOrb 12s ease-in-out infinite;
   }
 
   .psh-orb--a {
-    width: 400px;
-    height: 400px;
-    background: #6366f1;
-    top: -100px;
+    width: 450px;
+    height: 450px;
+    background: radial-gradient(circle, #6366f1 0%, #4f46e5 100%);
+    top: -120px;
     left: -100px;
+    animation-delay: 0s;
   }
 
   .psh-orb--b {
-    width: 350px;
-    height: 350px;
-    background: #06b6d4;
-    top: 200px;
-    right: -50px;
+    width: 380px;
+    height: 380px;
+    background: radial-gradient(circle, #06b6d4 0%, #0284c7 100%);
+    top: 180px;
+    right: -80px;
+    animation-delay: -4s;
   }
 
   .psh-orb--c {
-    width: 300px;
-    height: 300px;
-    background: #ec4899;
-    bottom: -50px;
-    left: 30%;
+    width: 320px;
+    height: 320px;
+    background: radial-gradient(circle, #ec4899 0%, #d946ef 100%);
+    bottom: -60px;
+    left: 25%;
+    animation-delay: -8s;
   }
 
   .psh-grid {
     position: absolute;
     inset: 0;
-    background-size: 32px 32px;
+    background-size: 36px 36px;
     background-image: 
-      linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
-      linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+      linear-gradient(to right, rgba(99, 102, 241, 0.04) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(99, 102, 241, 0.04) 1px, transparent 1px);
   }
 }
 
-/* Hero Section */
+/* Light mode orb opacity adjustments */
+:host-context(.light-theme) .psh-bg .psh-orb,
+.light-theme .psh-bg .psh-orb {
+  opacity: 0.08;
+}
+
+/* ── Hero Header ────────────────────────────────────────────────────────── */
 .psh-hero {
   position: relative;
-  z-index: 1;
+  z-index: 2;
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
+  gap: 20px;
   margin-bottom: 24px;
+  animation: pshFadeUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
 
   .psh-eyebrow {
     display: inline-flex;
@@ -73,21 +156,22 @@
     gap: 8px;
     font-size: 0.75rem;
     font-weight: 700;
-    letter-spacing: 1px;
-    color: #818cf8;
+    letter-spacing: 1.2px;
+    color: #6366f1;
     text-transform: uppercase;
     margin-bottom: 8px;
 
     .psh-eyebrow__dot {
-      width: 6px;
-      height: 6px;
+      width: 7px;
+      height: 7px;
       border-radius: 50%;
-      background: #818cf8;
-      box-shadow: 0 0 8px #818cf8;
+      background: #6366f1;
+      box-shadow: 0 0 10px #6366f1;
+      animation: pshPulseGlow 2s infinite;
     }
 
     .psh-eyebrow__sep {
-      opacity: 0.5;
+      opacity: 0.4;
     }
   }
 
@@ -96,10 +180,11 @@
     font-weight: 800;
     letter-spacing: -0.5px;
     margin: 0 0 8px 0;
-    color: var(--text-primary, #ffffff);
+    color: var(--psh-text-primary);
+    font-family: 'Outfit', 'Inter', sans-serif;
 
     .psh-title__accent {
-      background: linear-gradient(135deg, #818cf8 0%, #38bdf8 100%);
+      background: linear-gradient(135deg, #6366f1 0%, #06b6d4 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
     }
@@ -107,31 +192,31 @@
 
   .psh-sub {
     font-size: 0.95rem;
-    color: var(--text-secondary, #94a3b8);
+    color: var(--psh-text-secondary);
     margin: 0;
     max-width: 680px;
     line-height: 1.5;
   }
 
   .psh-actions {
-    margin-top: 8px;
+    margin-top: 4px;
   }
 }
 
-/* Action Button */
+/* ── Primary & Secondary Buttons ────────────────────────────────────────── */
 .psh-btn {
   position: relative;
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 12px 24px;
-  border-radius: 12px;
-  font-weight: 600;
-  font-size: 0.9rem;
+  padding: 11px 22px;
+  border-radius: 14px;
+  font-weight: 700;
+  font-size: 0.88rem;
   border: none;
   cursor: pointer;
   overflow: hidden;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 
   &.psh-btn--primary {
     background: linear-gradient(135deg, #4f46e5 0%, #0284c7 100%);
@@ -139,8 +224,8 @@
     box-shadow: 0 4px 20px rgba(79, 70, 229, 0.35);
 
     &:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 25px rgba(79, 70, 229, 0.5);
+      transform: translateY(-2px) scale(1.02);
+      box-shadow: 0 8px 28px rgba(79, 70, 229, 0.5);
     }
   }
 
@@ -148,23 +233,23 @@
     position: absolute;
     top: 0;
     left: -100%;
-    width: 50%;
+    width: 60%;
     height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.25), transparent);
     transition: left 0.6s ease;
   }
 
   &:hover .psh-btn__shine {
-    left: 150%;
+    animation: pshShine 0.8s ease-in-out;
   }
 }
 
-/* Stat Chips Grid */
+/* ── Stat Metric Chips Grid ──────────────────────────────────────────────── */
 .psh-chips {
   position: relative;
-  z-index: 1;
+  z-index: 2;
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
   gap: 16px;
   margin-bottom: 24px;
 
@@ -173,27 +258,39 @@
     align-items: center;
     gap: 14px;
     padding: 16px 20px;
-    border-radius: 16px;
-    background: rgba(15, 23, 42, 0.6);
-    backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 18px;
+    background: var(--psh-chip-bg);
+    backdrop-filter: blur(16px);
+    border: 1px solid var(--psh-border);
+    box-shadow: var(--psh-shadow);
     cursor: pointer;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+    animation: pshFadeUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+
+    &:nth-child(1) { animation-delay: 0.05s; }
+    &:nth-child(2) { animation-delay: 0.10s; }
+    &:nth-child(3) { animation-delay: 0.15s; }
+    &:nth-child(4) { animation-delay: 0.20s; }
+    &:nth-child(5) { animation-delay: 0.25s; }
 
     &:hover, &.active {
-      transform: translateY(-3px);
-      background: rgba(30, 41, 59, 0.8);
-      border-color: rgba(99, 102, 241, 0.4);
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+      transform: translateY(-4px);
+      border-color: rgba(99, 102, 241, 0.5);
+      box-shadow: 0 12px 30px rgba(99, 102, 241, 0.2);
+    }
+
+    &.active {
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(6, 182, 212, 0.1) 100%);
     }
 
     .psh-chip__orb {
-      width: 44px;
-      height: 44px;
-      border-radius: 12px;
+      width: 46px;
+      height: 46px;
+      border-radius: 14px;
       display: flex;
       align-items: center;
       justify-content: center;
+      transition: transform 0.3s ease;
 
       mat-icon {
         font-size: 22px;
@@ -202,120 +299,183 @@
       }
     }
 
+    &:hover .psh-chip__orb {
+      transform: scale(1.1) rotate(5deg);
+    }
+
     .psh-chip__body {
       display: flex;
       flex-direction: column;
 
       .psh-chip__num {
-        font-size: 1.4rem;
+        font-size: 1.45rem;
         font-weight: 800;
         line-height: 1.2;
-        color: #ffffff;
+        color: var(--psh-text-primary);
+        font-family: 'Outfit', sans-serif;
       }
 
       .psh-chip__lbl {
         font-size: 0.78rem;
-        font-weight: 500;
-        color: #94a3b8;
+        font-weight: 600;
+        color: var(--psh-text-secondary);
       }
     }
 
     &.psh-chip--violet .psh-chip__orb {
       background: rgba(99, 102, 241, 0.15);
-      color: #818cf8;
+      color: #6366f1;
     }
     &.psh-chip--emerald .psh-chip__orb {
       background: rgba(16, 185, 129, 0.15);
-      color: #34d399;
+      color: #10b981;
     }
     &.psh-chip--amber .psh-chip__orb {
       background: rgba(245, 158, 11, 0.15);
-      color: #fbbf24;
+      color: #f59e0b;
     }
     &.psh-chip--cyan .psh-chip__orb {
       background: rgba(6, 182, 212, 0.15);
-      color: #22d3ee;
+      color: #06b6d4;
     }
     &.psh-chip--pink .psh-chip__orb {
       background: rgba(236, 72, 153, 0.15);
-      color: #f472b6;
+      color: #ec4899;
     }
   }
 }
 
-/* Card & Form Container */
+/* ── Main Theme Container & Form Card ───────────────────────────────────── */
 .theme-card {
   position: relative;
-  z-index: 1;
-  border-radius: 20px;
+  z-index: 2;
+  border-radius: 22px;
   overflow: hidden;
-  background: rgba(15, 23, 42, 0.7);
-  backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: var(--psh-card-bg) !important;
+  backdrop-filter: blur(20px);
+  border: 1px solid var(--psh-border) !important;
+  box-shadow: var(--psh-shadow) !important;
+  animation: pshFadeUp 0.55s cubic-bezier(0.16, 1, 0.3, 1) both;
 
   mat-card-header {
-    padding: 20px 24px;
+    padding: 22px 28px;
+    border-bottom: 1px solid var(--psh-border);
 
     mat-card-title {
-      font-size: 1.25rem;
-      font-weight: 700;
-      color: #ffffff;
+      font-size: 1.3rem;
+      font-weight: 800;
+      color: var(--psh-text-primary);
+      font-family: 'Outfit', sans-serif;
     }
   }
 
   mat-card-content {
-    padding: 24px;
+    padding: 28px;
   }
 }
 
+/* ── Form Layout & Controls ─────────────────────────────────────────────── */
 .unit-form-grid {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 22px;
 
   .form-section-title {
     font-size: 0.85rem;
-    font-weight: 700;
-    letter-spacing: 0.8px;
+    font-weight: 800;
+    letter-spacing: 1px;
     text-transform: uppercase;
-    color: #818cf8;
-    padding-bottom: 8px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    color: #6366f1;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--psh-border);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    &::before {
+      content: '';
+      width: 4px;
+      height: 14px;
+      background: #6366f1;
+      border-radius: 4px;
+    }
   }
 
   .form-row {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 20px;
+    gap: 24px;
   }
 
   .field-container {
     display: flex;
     flex-direction: column;
+
+    mat-label {
+      color: var(--psh-text-primary);
+    }
   }
 }
 
 .btn-rounded {
-  border-radius: 10px !important;
-  padding: 8px 20px !important;
+  border-radius: 12px !important;
+  padding: 8px 22px !important;
+  font-weight: 600 !important;
 }
 
 .btn-gradient {
   background: linear-gradient(135deg, #4f46e5 0%, #0284c7 100%) !important;
   color: #ffffff !important;
+  box-shadow: 0 4px 16px rgba(79, 70, 229, 0.3) !important;
+
+  &:hover {
+    box-shadow: 0 8px 24px rgba(79, 70, 229, 0.45) !important;
+  }
 }
 
+/* ── Mobile & Responsive Breakpoints ───────────────────────────────────── */
 @media (max-width: 768px) {
+  .psh-root {
+    padding: 16px;
+  }
+
   .psh-hero {
     flex-direction: column;
     gap: 16px;
 
     .psh-actions {
       width: 100%;
-      .psh-btn {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+
+      .psh-btn, button {
         width: 100%;
         justify-content: center;
       }
     }
+  }
+
+  .psh-chips {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+
+  .theme-card mat-card-header {
+    padding: 16px 20px;
+  }
+
+  .theme-card mat-card-content {
+    padding: 16px 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .psh-chips {
+    grid-template-columns: 1fr;
+  }
+
+  .psh-hero .psh-title {
+    font-size: 1.75rem;
   }
 }

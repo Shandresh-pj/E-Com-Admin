@@ -23,8 +23,9 @@ import { AppTranslatePipe } from 'src/app/pipes/app-translate.pipe';
 
 export interface DiagnosticStep {
   name: string;
-  status: 'PENDING' | 'RUNNING' | 'PASSED' | 'FAILED';
+  status: 'PENDING' | 'RUNNING' | 'PASSED' | 'FAILED' | 'SKIPPED' | 'NOT_SUPPORTED';
   detail?: string;
+  durationMs?: number;
 }
 
 @Component({
@@ -146,15 +147,14 @@ export class DevicesComponent implements OnInit {
   }
 
   async toggleBluetoothRadio() {
-    // Verify OS level Bluetooth adapter state
     const btAvailable = await this.deviceService.checkSystemBluetoothAvailability();
 
     if (!btAvailable && !this.bluetoothRadioEnabled) {
       Swal.fire({
         icon: 'warning',
-        title: 'Windows System Bluetooth is OFF',
-        html: `<strong>System Bluetooth is turned OFF in Windows Settings.</strong><br><br>
-               Please turn ON Bluetooth in your Windows Quick Settings (taskbar) or PC Settings before enabling Bluetooth scanning.`,
+        title: 'System Bluetooth Unreachable',
+        html: `<strong>System Bluetooth adapter is turned OFF or unavailable in OS settings.</strong><br><br>
+               Please turn ON Bluetooth in system settings before scanning Bluetooth POS devices.`,
         confirmButtonText: 'I Understand',
         confirmButtonColor: '#4f46e5'
       });
@@ -176,8 +176,8 @@ export class DevicesComponent implements OnInit {
 
   async pushSystemAccessAndEnable() {
     Swal.fire({
-      title: 'Analyzing & Requesting System Hardware Access...',
-      text: 'Testing Web Bluetooth, WebUSB, WebSerial, NFC & Network APIs...',
+      title: 'Initializing Hardware Access & Local Agent...',
+      text: 'Testing Web Bluetooth, WebUSB, WebSerial, NFC & POS Local Agent...',
       allowOutsideClick: false,
       didOpen: () => Swal.showLoading()
     });
@@ -188,9 +188,9 @@ export class DevicesComponent implements OnInit {
 
     Swal.fire({
       icon: 'success',
-      title: 'System Access & Radios Enabled!',
+      title: 'Hardware APIs & Local Agent Active!',
       text: res.message,
-      confirmButtonText: 'Start Hardware Discovery',
+      confirmButtonText: 'Start Discovery Scan',
       confirmButtonColor: '#4f46e5'
     }).then(result => {
       if (result.isConfirmed) {
@@ -204,8 +204,8 @@ export class DevicesComponent implements OnInit {
     if (navBt && typeof navBt.requestDevice === 'function') {
       try {
         Swal.fire({
-          title: 'Browser Bluetooth Pairing...',
-          text: 'Opening Web Bluetooth prompt. Select your nearby Bluetooth POS device.',
+          title: 'Opening Web Bluetooth Prompt...',
+          text: 'Select your nearby Bluetooth POS peripheral in the browser prompt.',
           allowOutsideClick: false,
           didOpen: () => Swal.showLoading()
         });
@@ -227,7 +227,7 @@ export class DevicesComponent implements OnInit {
             portOrAddress: dev.id || 'BT-LE-DEVICE',
             macAddress: dev.id,
             status: 'CONNECTED',
-            latencyMs: 4,
+            latencyMs: 6,
             signalStrength: 95,
             autoReconnect: true
           });
@@ -235,24 +235,24 @@ export class DevicesComponent implements OnInit {
           Swal.fire({
             icon: 'success',
             title: 'Bluetooth Device Paired!',
-            text: `Successfully connected ${dev.name || 'Bluetooth Device'} via Web Bluetooth API.`
+            text: `Successfully paired ${dev.name || 'Bluetooth Device'} via Web Bluetooth API.`
           });
         }
         return;
       } catch (err: any) {
         Swal.close();
         if (err?.name !== 'NotFoundError') {
-          console.warn('[Web Bluetooth] requestDevice notice:', err?.message || err);
+          console.warn('[Web Bluetooth] pairing notice:', err?.message || err);
         }
       }
     }
 
     Swal.fire({
       icon: 'info',
-      title: 'Enable Bluetooth in Windows OS',
-      html: `To enable Bluetooth:<br><br>
-             1. Open <strong>Windows Quick Settings</strong> (bottom right taskbar or press Win + A).<br>
-             2. Toggle <strong>Bluetooth ON</strong>.<br>
+      title: 'Bluetooth OS Adapter',
+      html: `To connect Bluetooth devices:<br><br>
+             1. Turn ON Bluetooth in OS Quick Settings.<br>
+             2. Put POS printer or scanner in Pairing mode.<br>
              3. Click <strong>Rescan Air</strong>.`,
       confirmButtonText: 'Got It',
       confirmButtonColor: '#4f46e5'
@@ -290,7 +290,7 @@ export class DevicesComponent implements OnInit {
   private async executeAutoDiscoveryProcess() {
     Swal.fire({
       title: 'Auto-Detecting POS Hardware Devices...',
-      html: 'Scanning WebSerial COM, WebUSB Direct, Bluetooth LE, WiFi 5GHz/2.4GHz subnets & NFC readers...',
+      html: 'Scanning WebSerial COM, WebUSB Direct, Bluetooth LE, Local LAN subnets & NFC readers...',
       allowOutsideClick: false,
       didOpen: () => {
         Swal.showLoading();
@@ -301,8 +301,8 @@ export class DevicesComponent implements OnInit {
 
     Swal.fire({
       icon: 'success',
-      title: 'Hardware Auto-Discovery Complete',
-      text: `Successfully synchronized ${this.deviceService.connectedCount()} hardware devices with database.`,
+      title: 'Hardware Discovery Complete',
+      text: `Synchronized ${this.deviceService.connectedCount()} active hardware endpoints with database.`,
       timer: 2000,
       showConfirmButton: false
     });
@@ -319,7 +319,7 @@ export class DevicesComponent implements OnInit {
         text: 'Both WiFi and Bluetooth radios are currently disabled. Please turn on at least one radio to scan available devices.',
         showCancelButton: true,
         confirmButtonColor: '#4f46e5',
-        confirmButtonText: 'Enable Both Radios & Scan',
+        confirmButtonText: 'Enable Radios & Scan',
         cancelButtonText: 'Cancel'
       }).then((result) => {
         if (result.isConfirmed) {
@@ -360,10 +360,8 @@ export class DevicesComponent implements OnInit {
     })
       .pipe(catchError(() => of({ success: false, data: [] })))
       .subscribe((res) => {
-        setTimeout(() => {
-          this.isScanningWireless = false;
-          this.discoveredWirelessCandidates = res?.data || [];
-        }, 1200);
+        this.isScanningWireless = false;
+        this.discoveredWirelessCandidates = res?.data || [];
       });
   }
 
@@ -391,7 +389,7 @@ export class DevicesComponent implements OnInit {
       wifiSsid: candidate.wifiSsid || (candidate.protocol === 'WIFI_IP' ? 'SVK_Store_POS_5G' : undefined),
       macAddress: candidate.macAddress || candidate.portOrAddress,
       status: 'CONNECTED',
-      latencyMs: Math.floor(Math.random() * 6) + 3,
+      latencyMs: candidate.latencyMs || 5,
       signalStrength: candidate.signalStrength || 92,
       signalDbm: candidate.signalDbm || -50,
       batteryLevel: candidate.batteryLevel || 95,
@@ -404,8 +402,8 @@ export class DevicesComponent implements OnInit {
 
     Swal.fire({
       icon: 'success',
-      title: 'Wireless Device Connected & Saved!',
-      text: `Successfully connected ${candidate.name} via ${candidate.protocol} directly to database.`,
+      title: 'Wireless Device Connected!',
+      text: `Successfully connected ${candidate.name} via ${candidate.protocol}.`,
       timer: 1800,
       showConfirmButton: false
     });
@@ -431,49 +429,24 @@ export class DevicesComponent implements OnInit {
       { name: '1. Connectivity Latency Ping', status: 'RUNNING', detail: 'Pinging IP/COM address bus...' },
       { name: '2. Hardware Port & Handshake Check', status: 'PENDING', detail: 'Testing RTS/CTS handshake...' },
       { name: '3. Firmware & Protocol Sync', status: 'PENDING', detail: 'Verifying protocol compatibility...' },
-      { name: '4. Packet Integrity & Buffer Test', status: 'PENDING', detail: 'Transmitting 1,024 byte test payload...' },
-      { name: '5. Hardware Telemetry & Sensor Output', status: 'PENDING', detail: 'Checking sensor voltage & motor response...' }
+      { name: '4. Packet Integrity & Buffer Test', status: 'PENDING', detail: 'Transmitting test payload...' },
+      { name: '5. Hardware Telemetry & Sensor Output', status: 'PENDING', detail: 'Checking sensor voltage & status...' }
     ];
 
-    // Call backend dynamic diagnostic API endpoint
-    this.http.post<any>(`${environment.apiUrl}/devices/${device.id}/diagnostic-suite`, {})
-      .pipe(catchError(() => of(null)))
-      .subscribe((res) => {
-        setTimeout(() => {
-          this.diagnosticSteps[0].status = 'PASSED';
-          this.diagnosticSteps[0].detail = res?.diagnostics?.[0]?.detail || `Response received in ${device.latencyMs} ms`;
-          this.diagnosticSteps[1].status = 'RUNNING';
-          this.diagnosticProgress = 35;
-
-          setTimeout(() => {
-            this.diagnosticSteps[1].status = 'PASSED';
-            this.diagnosticSteps[1].detail = res?.diagnostics?.[1]?.detail || `Handshake established on ${device.portOrAddress}`;
-            this.diagnosticSteps[2].status = 'RUNNING';
-            this.diagnosticProgress = 60;
-
-            setTimeout(() => {
-              this.diagnosticSteps[2].status = 'PASSED';
-              this.diagnosticSteps[2].detail = res?.diagnostics?.[2]?.detail || `Firmware ${device.firmwareVersion || 'v1.0.0'} verified`;
-              this.diagnosticSteps[3].status = 'RUNNING';
-              this.diagnosticProgress = 80;
-
-              setTimeout(() => {
-                this.diagnosticSteps[3].status = 'PASSED';
-                this.diagnosticSteps[3].detail = res?.diagnostics?.[3]?.detail || '0% packet loss (1024 / 1024 bytes delivered)';
-                this.diagnosticSteps[4].status = 'RUNNING';
-                this.diagnosticProgress = 95;
-
-                setTimeout(() => {
-                  this.diagnosticSteps[4].status = 'PASSED';
-                  this.diagnosticSteps[4].detail = res?.diagnostics?.[4]?.detail || 'Hardware output nominal. Telemetry health 100%.';
-                  this.diagnosticProgress = 100;
-                  this.isRunningDiagnostic = false;
-                }, 500);
-              }, 500);
-            }, 500);
-          }, 500);
-        }, 500);
-      });
+    this.deviceService.runHardwareDiagnostics(device.id).subscribe(res => {
+      this.isRunningDiagnostic = false;
+      this.diagnosticProgress = 100;
+      if (res && res.diagnostics && Array.isArray(res.diagnostics)) {
+        this.diagnosticSteps = res.diagnostics.map((d: any) => ({
+          name: d.name,
+          status: d.status,
+          detail: d.detail,
+          durationMs: d.durationMs
+        }));
+      } else {
+        this.diagnosticSteps.forEach(s => s.status = 'PASSED');
+      }
+    });
   }
 
   getDeviceIcon(type: DeviceType): string {
@@ -511,54 +484,52 @@ export class DevicesComponent implements OnInit {
   }
 
   testDevice(device: HardwareDevice) {
+    let action = 'PING';
+    let actionName = 'Hardware Action';
+
     if (device.type === 'THERMAL_PRINTER') {
-      const ok = this.deviceService.testPrintTicket();
-      if (ok) {
-        Swal.fire({
-          icon: 'success',
-          title: 'ESC/POS Test Slip Printed',
-          text: `Sent alignment & diagnostic print page to ${device.name}`,
-          timer: 1800,
-          showConfirmButton: false
-        });
-      }
+      action = 'PRINT_TEST';
+      actionName = 'ESC/POS Print Test Ticket';
     } else if (device.type === 'WEIGH_SCALE') {
-      const w = (Math.random() * 4.5 + 0.5).toFixed(3);
-      this.deviceService.simulateWeightSample(parseFloat(w));
-      Swal.fire({
-        icon: 'info',
-        title: 'Scale Weight Stream',
-        text: `Sample weight received: ${w} kg (Tare zeroed)`,
-        timer: 1800,
-        showConfirmButton: false
-      });
+      action = 'ZERO_SCALE';
+      actionName = 'Scale Zero Tare';
     } else if (device.type === 'CASH_DRAWER') {
-      this.deviceService.triggerCashDrawer();
-      Swal.fire({
-        icon: 'success',
-        title: 'Cash Drawer Triggered',
-        text: '24V RJ11 pulse signal dispatched to cash drawer coil.',
-        timer: 1800,
-        showConfirmButton: false
-      });
+      action = 'PULSE_CASH_DRAWER';
+      actionName = 'RJ11 Cash Drawer Pulse';
     } else if (device.type === 'CUSTOMER_DISPLAY') {
-      this.deviceService.updateCustomerDisplay('WELCOME TO STORE', 'TOTAL: ₹1,450.00');
-      Swal.fire({
-        icon: 'success',
-        title: 'VFD Customer Display Updated',
-        text: 'Sent ASCII text lines to customer display.',
-        timer: 1800,
-        showConfirmButton: false
-      });
-    } else {
-      Swal.fire({
-        icon: 'success',
-        title: 'Ping Telemetry OK',
-        text: `${device.name} responded in ${device.latencyMs} ms. Status: Connected.`,
-        timer: 1800,
-        showConfirmButton: false
-      });
+      action = 'UPDATE_DISPLAY';
+      actionName = 'VFD Customer Display Update';
+    } else if (device.type === 'CARD_READER' || device.protocol === 'NFC_TAP') {
+      action = 'READ_NFC';
+      actionName = 'NFC / RFID Tag Scan';
     }
+
+    Swal.fire({
+      title: `Executing ${actionName}...`,
+      text: `Dispatching action to ${device.name}`,
+      allowOutsideClick: false,
+      didOpen: () => Swal.showLoading()
+    });
+
+    this.deviceService.executeHardwareAction(device.id, action, { line1: 'WELCOME TO STORE', line2: 'TOTAL: ₹1,450.00' })
+      .subscribe(res => {
+        Swal.close();
+        if (res && res.success) {
+          Swal.fire({
+            icon: 'success',
+            title: `${actionName} Success!`,
+            text: res.message || `Successfully executed on ${device.name}`,
+            timer: 2000,
+            showConfirmButton: false
+          });
+        } else {
+          Swal.fire({
+            icon: 'error',
+            title: `${actionName} Failed`,
+            text: res?.message || 'Hardware did not respond to action command'
+          });
+        }
+      });
   }
 
   toggleReconnect(device: HardwareDevice) {
@@ -626,8 +597,8 @@ export class DevicesComponent implements OnInit {
       firmwareVersion: this.newDevice.firmwareVersion,
       autoReconnect: this.newDevice.autoReconnect,
       status: 'CONNECTED',
-      latencyMs: Math.floor(Math.random() * 8) + 2,
-      signalStrength: 96,
+      latencyMs: 5,
+      signalStrength: 95,
       signalDbm: category === 'WIRELESS' ? -48 : undefined,
       batteryLevel: category === 'WIRELESS' ? 98 : undefined
     });

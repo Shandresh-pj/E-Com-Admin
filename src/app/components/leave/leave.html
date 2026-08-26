@@ -177,7 +177,7 @@
                          [matDatepicker]="fromPicker"
                          formControlName="from_date"
                          id="lv-from"
-                         placeholder="Select start date"
+                         placeholder="DD-MM-YYYY"
                          [min]="today"
                          (focus)="fromPicker.open()"
                          readonly>
@@ -197,7 +197,7 @@
                          [matDatepicker]="toPicker"
                          formControlName="to_date"
                          id="lv-to"
-                         placeholder="Select end date"
+                         placeholder="DD-MM-YYYY"
                          [min]="minToDate || today"
                          (focus)="toPicker.open()"
                          readonly>

@@ -323,7 +323,7 @@
                     <mat-form-field appearance="outline" class="w-100">
                         <mat-icon matPrefix style="margin-right: 8px; color: var(--brand-primary);">event_available</mat-icon>
                         <input matInput [matDatepicker]="mfgPicker" formControlName="manufacture_date"
-                            placeholder="Select manufacture date">
+                            placeholder="DD-MM-YYYY">
                         <mat-datepicker-toggle matIconSuffix [for]="mfgPicker"></mat-datepicker-toggle>
                         <mat-datepicker #mfgPicker></mat-datepicker>
                         @if (ProductForm.get('manufacture_date')?.invalid && ProductForm.get('manufacture_date')?.touched) {
@@ -346,7 +346,7 @@
                     <mat-form-field appearance="outline" class="w-100">
                         <mat-icon matPrefix style="margin-right: 8px; color: #ef4444;">event_busy</mat-icon>
                         <input matInput [matDatepicker]="expiryPicker" formControlName="expiry_date"
-                            placeholder="Select expiry date">
+                            placeholder="DD-MM-YYYY">
                         <mat-datepicker-toggle matIconSuffix [for]="expiryPicker"></mat-datepicker-toggle>
                         <mat-datepicker #expiryPicker></mat-datepicker>
                         @if (ProductForm.get('expiry_date')?.invalid && ProductForm.get('expiry_date')?.touched) {

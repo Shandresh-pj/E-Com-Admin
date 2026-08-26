@@ -10,12 +10,12 @@
 
   <!-- Page Hero Header -->
   <header class="psh-hero">
-    <div>
+    <div class="psh-hero__text">
       <div class="psh-eyebrow">
         <span class="psh-eyebrow__dot"></span>
         <span>HEALTHCARE ERP</span>
         <span class="psh-eyebrow__sep">·</span>
-        <span>{{ consultations().length }} CLINICAL RECORDS</span>
+        <span>{{ consultations().length }} CLINICAL CONSULTATIONS</span>
       </div>
       <h1 class="psh-title">Clinical <span class="psh-title__accent">Consultations</span></h1>
       <p class="psh-sub">Record patient chief complaints, clinical diagnoses, doctor notes, and follow-up schedules.</p>
@@ -25,210 +25,474 @@
         <button class="psh-btn psh-btn--primary" (click)="openForm()">
           <span class="psh-btn__shine"></span>
           <i-tabler name="notes-medical" style="width:20px;height:20px;"></i-tabler>
-          New Consultation
+          <span>New Consultation</span>
         </button>
       }
     </div>
   </header>
 
-  <!-- Stat Chips Row -->
+  <!-- Stat Chips Row (4 KPI Orbs) -->
   <div class="psh-chips">
-    <div class="psh-chip psh-chip--violet">
+    <div class="psh-chip psh-chip--violet" (click)="setSearchQuery('')" style="cursor:pointer;">
       <div class="psh-chip__orb"><i-tabler name="clipboard-heart"></i-tabler></div>
       <div class="psh-chip__body">
         <span class="psh-chip__num">{{ consultations().length }}</span>
-        <span class="psh-chip__lbl">Total Records</span>
+        <span class="psh-chip__lbl">Total Consults</span>
       </div>
     </div>
+
     <div class="psh-chip psh-chip--emerald">
-      <div class="psh-chip__orb"><i-tabler name="prescription"></i-tabler></div>
+      <div class="psh-chip__orb"><i-tabler name="activity"></i-tabler></div>
       <div class="psh-chip__body">
-        <span class="psh-chip__num">{{ prescriptionCount }}</span>
-        <span class="psh-chip__lbl">Rx Issued</span>
+        <span class="psh-chip__num">{{ diagnosisCount() }}</span>
+        <span class="psh-chip__lbl">Diagnoses Recorded</span>
       </div>
     </div>
+
     <div class="psh-chip psh-chip--amber">
       <div class="psh-chip__orb"><i-tabler name="calendar-event"></i-tabler></div>
       <div class="psh-chip__body">
-        <span class="psh-chip__num">{{ followUpCount }}</span>
-        <span class="psh-chip__lbl">Follow-ups</span>
+        <span class="psh-chip__num">{{ followUpCount() }}</span>
+        <span class="psh-chip__lbl">Follow-ups Scheduled</span>
+      </div>
+    </div>
+
+    <div class="psh-chip psh-chip--sky">
+      <div class="psh-chip__orb"><i-tabler name="prescription"></i-tabler></div>
+      <div class="psh-chip__body">
+        <span class="psh-chip__num">{{ prescriptionCount() }}</span>
+        <span class="psh-chip__lbl">Prescriptions Issued</span>
       </div>
     </div>
   </div>
 
-  <!-- Content Container -->
+  <!-- Main Consultation Roster -->
   @if (!showForm()) {
-    <mat-card class="cardWithShadow theme-card">
-      <mat-card-header>
-        <div class="header-container" style="display:flex;align-items:center;justify-content:space-between;width:100%;">
-          <mat-card-title class="m-b-0">Consultation Records</mat-card-title>
-          <div class="hc-search-wrap">
-            <i-tabler name="search" class="hc-search-icon"></i-tabler>
-            <input class="hc-search-input" placeholder="Search patient, doctor, diagnosis..."
-                   [(ngModel)]="searchQuery" (ngModelChange)="cdr.markForCheck()" />
+    <div class="hc-roster-container">
+
+      <!-- Controls & Filter Bar -->
+      <div class="hc-controls-bar">
+
+        <!-- Search Bar -->
+        <div class="hc-search-wrap">
+          <i-tabler name="search" class="hc-search-icon"></i-tabler>
+          <input class="hc-search-input"
+                 placeholder="Search patient, doctor, diagnosis, complaint..."
+                 [ngModel]="searchQuery()"
+                 (ngModelChange)="setSearchQuery($event)" />
+          @if (searchQuery()) {
+            <button class="hc-search-clear" (click)="setSearchQuery('')" matTooltip="Clear search">
+              <i-tabler name="x" style="width:14px;height:14px;"></i-tabler>
+            </button>
+          }
+          <span class="hc-search-count">{{ filteredConsultations().length }} found</span>
+        </div>
+
+        <!-- View Mode Switcher -->
+        <div class="hc-view-toggle">
+          <button class="hc-view-btn"
+                  [class.active]="viewMode() === 'grid'"
+                  (click)="viewMode.set('grid')"
+                  matTooltip="Grid View">
+            <i-tabler name="layout-grid"></i-tabler>
+          </button>
+          <button class="hc-view-btn"
+                  [class.active]="viewMode() === 'list'"
+                  (click)="viewMode.set('list')"
+                  matTooltip="Table View">
+            <i-tabler name="list"></i-tabler>
+          </button>
+        </div>
+
+      </div>
+
+      <!-- Loading State -->
+      @if (loading()) {
+        <div class="hc-loading-wrap">
+          <mat-progress-spinner mode="indeterminate" diameter="48"></mat-progress-spinner>
+          <p class="hc-loading-text">Loading clinical consultation records...</p>
+        </div>
+      }
+
+      <!-- Empty State -->
+      @if (!loading() && filteredConsultations().length === 0) {
+        <div class="hc-empty-state">
+          <div class="hc-empty-icon-wrap">
+            <i-tabler name="clipboard-off" class="hc-empty-icon"></i-tabler>
+          </div>
+          <h3>No Consultation Records Found</h3>
+          <p>{{ searchQuery() ? 'Try adjusting your search terms.' : 'Click "New Consultation" above to record patient notes.' }}</p>
+          @if (searchQuery()) {
+            <button class="psh-btn psh-btn--secondary m-t-16" (click)="setSearchQuery('')">
+              Clear Search
+            </button>
+          }
+        </div>
+      }
+
+      <!-- GRID VIEW -->
+      @if (!loading() && filteredConsultations().length > 0 && viewMode() === 'grid') {
+        <div class="hc-consult-grid">
+          @for (c of filteredConsultations(); track c.id; let i = $index) {
+            <div class="hc-consult-card" [style.--delay]="(i % 12) * 60 + 'ms'">
+
+              <!-- Accent Top Bar -->
+              <div class="hc-consult-card__accent"></div>
+
+              <!-- Header -->
+              <div class="hc-consult-card__header">
+                <div class="hc-pat-avatar">
+                  {{ getInitials(c.patient_name || '') }}
+                </div>
+                <div class="hc-pat-info">
+                  <h3 class="hc-pat-name" (click)="viewConsultDetails(c)">
+                    {{ c.patient_name || 'Patient #' + c.patient_id }}
+                  </h3>
+                  <div class="hc-doc-sub">
+                    <i-tabler name="stethoscope" class="hc-doc-icon"></i-tabler>
+                    <span>Dr. {{ c.doctor_name || 'Assigned Specialist' }}</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Body Info -->
+              <div class="hc-consult-card__body">
+
+                <!-- Chief Complaint Banner -->
+                <div class="hc-complaint-banner">
+                  <span class="lbl">Chief Complaint</span>
+                  <p class="val">{{ c.chief_complaint }}</p>
+                </div>
+
+                <!-- Diagnosis Badge -->
+                @if (c.diagnosis) {
+                  <div class="hc-diag-box">
+                    <i-tabler name="activity" class="icon"></i-tabler>
+                    <div>
+                      <span class="lbl">Diagnosis</span>
+                      <span class="val">{{ c.diagnosis }}</span>
+                    </div>
+                  </div>
+                }
+
+                <!-- Notes Snippet -->
+                @if (c.notes) {
+                  <div class="hc-notes-box">
+                    <i-tabler name="notes" class="icon"></i-tabler>
+                    <p class="text">{{ c.notes }}</p>
+                  </div>
+                }
+
+                <!-- Meta Pills Row -->
+                <div class="hc-meta-pills">
+                  @if (c.follow_up_date) {
+                    <span class="hc-meta-pill hc-meta-pill--amber">
+                      <i-tabler name="calendar-event" style="width:13px;height:13px;"></i-tabler>
+                      Follow-up: {{ c.follow_up_date }}
+                    </span>
+                  }
+                  @if (c.prescription_id) {
+                    <span class="hc-meta-pill hc-meta-pill--sky">
+                      <i-tabler name="prescription" style="width:13px;height:13px;"></i-tabler>
+                      Rx #{{ c.prescription_id }}
+                    </span>
+                  }
+                </div>
+
+              </div>
+
+              <!-- Actions Footer -->
+              <div class="hc-consult-card__actions">
+                <button class="hc-act-btn hc-act-btn--view" (click)="viewConsultDetails(c, $event)">
+                  <i-tabler name="eye" style="width:15px;height:15px;"></i-tabler>
+                  <span>Summary</span>
+                </button>
+
+                @if (perm.hasRoleAction('canUpdate', '/consultations')) {
+                  <button class="hc-act-btn hc-act-btn--edit" (click)="openForm(c)">
+                    <i-tabler name="edit" style="width:15px;height:15px;"></i-tabler>
+                    <span>Edit</span>
+                  </button>
+                }
+              </div>
+
+            </div>
+          }
+        </div>
+      }
+
+      <!-- LIST VIEW TABLE -->
+      @if (!loading() && filteredConsultations().length > 0 && viewMode() === 'list') {
+        <div class="hc-table-card">
+          <div class="hc-table-scroll">
+            <table class="hc-table">
+              <thead>
+                <tr>
+                  <th>Patient</th>
+                  <th>Doctor</th>
+                  <th>Chief Complaint</th>
+                  <th>Diagnosis</th>
+                  <th>Follow-Up Date</th>
+                  <th style="text-align:right;">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (c of filteredConsultations(); track c.id) {
+                  <tr (click)="viewConsultDetails(c)">
+                    <td>
+                      <div class="hc-cell-patient">
+                        <div class="hc-list-avatar">{{ getInitials(c.patient_name || '') }}</div>
+                        <div class="hc-cell-name">{{ c.patient_name }}</div>
+                      </div>
+                    </td>
+                    <td><span class="hc-cell-name">Dr. {{ c.doctor_name }}</span></td>
+                    <td><span class="hc-complaint-text">{{ c.chief_complaint }}</span></td>
+                    <td>
+                      @if (c.diagnosis) {
+                        <span class="hc-diag-pill">{{ c.diagnosis }}</span>
+                      } @else {
+                        <span class="text-muted">—</span>
+                      }
+                    </td>
+                    <td>{{ c.follow_up_date || '—' }}</td>
+                    <td>
+                      <div class="hc-row-actions" (click)="$event.stopPropagation()">
+                        <button class="hc-icon-btn" (click)="viewConsultDetails(c)" matTooltip="View Summary">
+                          <i-tabler name="eye"></i-tabler>
+                        </button>
+                        @if (perm.hasRoleAction('canUpdate', '/consultations')) {
+                          <button class="hc-icon-btn" (click)="openForm(c)" matTooltip="Edit Record">
+                            <i-tabler name="edit"></i-tabler>
+                          </button>
+                        }
+                      </div>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
           </div>
         </div>
-      </mat-card-header>
+      }
 
-      <mat-card-content class="b-t-1">
-        <!-- Loading -->
-        @if (loading()) {
-          <div class="hc-loading-wrap">
-            <mat-progress-spinner mode="indeterminate" diameter="40"></mat-progress-spinner>
-            <p>Loading consultations…</p>
-          </div>
-        }
+    </div>
+  }
 
-        <!-- Empty -->
-        @if (!loading() && filteredConsultations().length === 0) {
-          <div class="hc-empty-state">
-            <i-tabler name="clipboard-off" class="hc-empty-icon"></i-tabler>
-            <h3>No consultations found</h3>
-            <p>{{ searchQuery ? 'Try adjusting your search query.' : 'Record your first patient consultation.' }}</p>
-          </div>
-        }
+  <!-- FORM MODE (Split View with Live Preview) -->
+  @if (showForm()) {
+    <div class="hc-form-container">
+      <div class="hc-form-header">
+        <button class="psh-btn psh-btn--secondary" (click)="closeForm()">
+          <i-tabler name="arrow-left" style="width:18px;height:18px;"></i-tabler>
+          Back to Consultations
+        </button>
+        <h2 class="hc-form-title">
+          {{ editingId() ? 'Edit Clinical Consultation' : 'New Consultation Entry' }}
+        </h2>
+      </div>
 
-        <!-- Consultation Cards -->
-        @if (!loading() && filteredConsultations().length > 0) {
-          <div class="hc-consult-list">
-            @for (c of filteredConsultations(); track c.id) {
-              <div class="hc-consult-card">
-                <div class="hc-consult-header">
-                  <div>
-                    <div class="hc-consult-patient">{{ c.patient_name }}</div>
-                    <div class="hc-consult-doctor">Dr. {{ c.doctor_name }}</div>
-                  </div>
-                  @if (c.follow_up_date) {
-                    <div class="hc-follow-up">
-                      <i-tabler name="calendar-event"></i-tabler>
-                      Follow-up: {{ c.follow_up_date | date:'mediumDate' }}
-                    </div>
-                  }
-                  <div class="hc-row-actions" style="margin-left:auto;">
-                    @if (perm.hasRoleAction('canUpdate', '/consultations')) {
-                      <button mat-icon-button (click)="openForm(c)" matTooltip="Edit"><i-tabler name="edit"></i-tabler></button>
-                    }
-                  </div>
+      <div class="hc-form-grid-layout">
+        <!-- Form Controls -->
+        <div class="hc-form-card">
+          <form [formGroup]="form" (ngSubmit)="save()" autocomplete="off">
+
+            <div class="hc-form-section">
+              <h3 class="hc-section-title">
+                <i-tabler name="user-check" class="hc-sec-icon"></i-tabler>
+                Patient & Attending Doctor
+              </h3>
+              <div class="row">
+                <div class="col-md-6 m-b-16">
+                  <label class="hc-field-label">Patient <span class="req">*</span></label>
+                  <mat-form-field appearance="outline" class="w-100">
+                    <mat-select formControlName="patient_id" placeholder="Choose patient">
+                      @for (p of patients; track p.id) {
+                        <mat-option [value]="p.id">{{ p.name }} ({{ p.patient_code }})</mat-option>
+                      }
+                    </mat-select>
+                  </mat-form-field>
                 </div>
 
-                <div class="hc-consult-body">
-                  <div class="hc-consult-field">
-                    <span class="hc-consult-label">Chief Complaint</span>
-                    <span>{{ c.chief_complaint }}</span>
-                  </div>
+                <div class="col-md-6 m-b-16">
+                  <label class="hc-field-label">Attending Doctor <span class="req">*</span></label>
+                  <mat-form-field appearance="outline" class="w-100">
+                    <mat-select formControlName="doctor_id" placeholder="Choose doctor">
+                      @for (d of doctors; track d.id) {
+                        <mat-option [value]="d.id">Dr. {{ d.name }}</mat-option>
+                      }
+                    </mat-select>
+                  </mat-form-field>
+                </div>
+              </div>
+            </div>
 
-                  @if (c.diagnosis) {
-                    <div class="hc-consult-field">
-                      <span class="hc-consult-label">Diagnosis</span>
-                      <span style="font-weight:600;color:hsl(196,80%,32%);">{{ c.diagnosis }}</span>
-                    </div>
-                  }
-
-                  @if (c.notes) {
-                    <div class="hc-consult-field">
-                      <span class="hc-consult-label">Clinical Notes</span>
-                      <span>{{ c.notes }}</span>
-                    </div>
-                  }
+            <div class="hc-form-section">
+              <h3 class="hc-section-title">
+                <i-tabler name="notes-medical" class="hc-sec-icon"></i-tabler>
+                Clinical Findings & Diagnosis
+              </h3>
+              <div class="row">
+                <div class="col-md-12 m-b-16">
+                  <label class="hc-field-label">Chief Complaint <span class="req">*</span></label>
+                  <mat-form-field appearance="outline" class="w-100">
+                    <textarea matInput formControlName="chief_complaint" rows="2" placeholder="Primary symptoms or reasons for visit..."></textarea>
+                  </mat-form-field>
                 </div>
 
-                @if (c.prescription_id) {
-                  <div class="hc-consult-footer">
-                    <a mat-stroked-button color="primary" [routerLink]="['/prescriptions']" style="font-size:12px;">
-                      <i-tabler name="prescription" style="width:14px;height:14px;margin-right:4px;"></i-tabler>
-                      View Prescription #{{ c.prescription_id }}
-                    </a>
+                <div class="col-md-12 m-b-16">
+                  <label class="hc-field-label">Clinical Diagnosis</label>
+                  <mat-form-field appearance="outline" class="w-100">
+                    <input matInput formControlName="diagnosis" placeholder="ICD diagnosis or condition name">
+                  </mat-form-field>
+                </div>
+
+                <div class="col-md-12 m-b-16">
+                  <label class="hc-field-label">Clinical Notes & Observations</label>
+                  <mat-form-field appearance="outline" class="w-100">
+                    <textarea matInput formControlName="notes" rows="3" placeholder="Doctor notes, examination results..."></textarea>
+                  </mat-form-field>
+                </div>
+
+                <div class="col-md-6 m-b-16">
+                  <label class="hc-field-label">Follow-Up Date</label>
+                  <mat-form-field appearance="outline" class="w-100">
+                    <input matInput [matDatepicker]="followUpPicker" formControlName="follow_up_date" placeholder="DD-MM-YYYY">
+                    <mat-datepicker-toggle matIconSuffix [for]="followUpPicker"></mat-datepicker-toggle>
+                    <mat-datepicker #followUpPicker></mat-datepicker>
+                  </mat-form-field>
+                </div>
+              </div>
+            </div>
+
+            <div class="hc-form-actions">
+              <button type="button" class="psh-btn psh-btn--secondary" (click)="closeForm()">Cancel</button>
+              <button type="submit" class="psh-btn psh-btn--primary" [disabled]="saving()">
+                @if (saving()) {
+                  <mat-spinner diameter="18" style="margin-right:8px;display:inline-block;"></mat-spinner>
+                }
+                <span>{{ saving() ? 'Saving...' : (editingId() ? 'Update Consultation' : 'Save Consultation Record') }}</span>
+              </button>
+            </div>
+
+          </form>
+        </div>
+
+        <!-- Sticky Live Preview -->
+        <div class="hc-preview-col">
+          <div class="hc-preview-sticky">
+            <div class="hc-preview-header">
+              <i-tabler name="sparkles" class="hc-preview-icon"></i-tabler>
+              <span>Live Consultation Preview</span>
+            </div>
+
+            <div class="hc-consult-card hc-consult-card--preview">
+              <div class="hc-consult-card__accent"></div>
+
+              <div class="hc-consult-card__header">
+                <div class="hc-pat-avatar">{{ getInitials(formValues().patient_name) }}</div>
+                <div class="hc-pat-info">
+                  <h3 class="hc-pat-name">{{ formValues().patient_name || 'Patient Name' }}</h3>
+                  <div class="hc-doc-sub">
+                    <i-tabler name="stethoscope" class="hc-doc-icon"></i-tabler>
+                    <span>Dr. {{ formValues().doctor_name || 'Doctor Name' }}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="hc-consult-card__body">
+                <div class="hc-complaint-banner">
+                  <span class="lbl">Chief Complaint</span>
+                  <p class="val">{{ formValues().chief_complaint || 'Enter chief complaint...' }}</p>
+                </div>
+
+                @if (formValues().diagnosis) {
+                  <div class="hc-diag-box">
+                    <i-tabler name="activity" class="icon"></i-tabler>
+                    <div>
+                      <span class="lbl">Diagnosis</span>
+                      <span class="val">{{ formValues().diagnosis }}</span>
+                    </div>
+                  </div>
+                }
+
+                @if (formValues().notes) {
+                  <div class="hc-notes-box">
+                    <i-tabler name="notes" class="icon"></i-tabler>
+                    <p class="text">{{ formValues().notes }}</p>
                   </div>
                 }
               </div>
-            }
+            </div>
+
           </div>
-        }
-      </mat-card-content>
-    </mat-card>
-  } @else {
-    <!-- Form Card View (exact /admin form design) -->
-    <mat-card class="cardWithShadow theme-card">
-      <mat-card-header>
-        <div class="header-container" style="display:flex;align-items:center;justify-content:space-between;width:100%;">
-          <mat-card-title class="m-b-0">
-            {{ editingId() ? 'Edit Consultation' : 'New Consultation' }}
-          </mat-card-title>
-          <button mat-stroked-button (click)="closeForm()">Back to List</button>
         </div>
-      </mat-card-header>
 
-      <mat-card-content class="b-t-1">
-        <form [formGroup]="form" (ngSubmit)="save()" class="p-t-16" autocomplete="off">
-          <div class="row">
-            <div class="col-lg-6 m-b-16">
-              <mat-label class="f-w-600 m-b-8 d-block">Select Patient <span class="text-danger">*</span></mat-label>
-              <mat-form-field appearance="outline" class="w-100">
-                <mat-select formControlName="patient_id" placeholder="Select Patient">
-                  @for (p of patients; track p.id) { <mat-option [value]="p.id">{{ p.name }}</mat-option> }
-                </mat-select>
-                @if (form.get('patient_id')?.hasError('required')) {
-                  <mat-error>Patient selection is required</mat-error>
-                }
-              </mat-form-field>
-            </div>
+      </div>
+    </div>
+  }
 
-            <div class="col-lg-6 m-b-16">
-              <mat-label class="f-w-600 m-b-8 d-block">Select Doctor <span class="text-danger">*</span></mat-label>
-              <mat-form-field appearance="outline" class="w-100">
-                <mat-select formControlName="doctor_id" placeholder="Select Doctor">
-                  @for (d of doctors; track d.id) { <mat-option [value]="d.id">Dr. {{ d.name }}</mat-option> }
-                </mat-select>
-                @if (form.get('doctor_id')?.hasError('required')) {
-                  <mat-error>Doctor selection is required</mat-error>
-                }
-              </mat-form-field>
-            </div>
+  <!-- MEDICAL SUMMARY SIDE DRAWER -->
+  @if (selectedConsultation(); as c) {
+    <div class="hc-drawer-backdrop" (click)="closeConsultDetails()">
+      <div class="hc-drawer-panel" (click)="$event.stopPropagation()">
 
-            <div class="col-lg-12 m-b-16">
-              <mat-label class="f-w-600 m-b-8 d-block">Chief Complaint <span class="text-danger">*</span></mat-label>
-              <mat-form-field appearance="outline" class="w-100">
-                <textarea matInput formControlName="chief_complaint" rows="2" placeholder="Enter patient chief complaint"></textarea>
-                @if (form.get('chief_complaint')?.hasError('required')) {
-                  <mat-error>Chief complaint is required</mat-error>
-                }
-              </mat-form-field>
-            </div>
+        <div class="hc-drawer-hero">
+          <button class="hc-drawer-close" (click)="closeConsultDetails()" matTooltip="Close Summary">
+            <i-tabler name="x"></i-tabler>
+          </button>
+          <div class="hc-drawer-avatar-box">
+            <div class="hc-drawer-avatar">{{ getInitials(c.patient_name || '') }}</div>
+          </div>
+          <h2 class="hc-drawer-name">{{ c.patient_name }}</h2>
+          <div class="hc-drawer-sub">
+            <span>Attending: Dr. {{ c.doctor_name }}</span>
+          </div>
+        </div>
 
-            <div class="col-lg-6 m-b-16">
-              <mat-label class="f-w-600 m-b-8 d-block">Diagnosis</mat-label>
-              <mat-form-field appearance="outline" class="w-100">
-                <textarea matInput formControlName="diagnosis" rows="2" placeholder="Enter diagnostic findings"></textarea>
-              </mat-form-field>
-            </div>
-
-            <div class="col-lg-6 m-b-16">
-              <mat-label class="f-w-600 m-b-8 d-block">Clinical Notes</mat-label>
-              <mat-form-field appearance="outline" class="w-100">
-                <textarea matInput formControlName="notes" rows="2" placeholder="Additional treatment & doctor notes"></textarea>
-              </mat-form-field>
-            </div>
-
-            <div class="col-lg-4 m-b-16">
-              <mat-label class="f-w-600 m-b-8 d-block">Follow-up Date</mat-label>
-              <mat-form-field appearance="outline" class="w-100">
-                <input matInput type="date" formControlName="follow_up_date">
-              </mat-form-field>
-            </div>
+        <div class="hc-drawer-body">
+          <div class="hc-drawer-section">
+            <h3 class="hc-drawer-sec-title">Chief Complaint</h3>
+            <div class="hc-drawer-text">{{ c.chief_complaint }}</div>
           </div>
 
-          <div class="m-t-12">
-            <button mat-stroked-button type="button" class="me-3 Cancel_Button" (click)="closeForm()">
-              Cancel
+          @if (c.diagnosis) {
+            <div class="hc-drawer-section">
+              <h3 class="hc-drawer-sec-title">Diagnosis</h3>
+              <div class="hc-drawer-item">
+                <span class="val" style="color:var(--psh-indigo);">{{ c.diagnosis }}</span>
+              </div>
+            </div>
+          }
+
+          @if (c.notes) {
+            <div class="hc-drawer-section">
+              <h3 class="hc-drawer-sec-title">Clinical Observations</h3>
+              <div class="hc-drawer-text">{{ c.notes }}</div>
+            </div>
+          }
+
+          @if (c.follow_up_date) {
+            <div class="hc-drawer-section">
+              <h3 class="hc-drawer-sec-title">Scheduled Follow-Up</h3>
+              <div class="hc-drawer-item">
+                <span class="val">{{ c.follow_up_date }}</span>
+              </div>
+            </div>
+          }
+        </div>
+
+        <div class="hc-drawer-footer">
+          <button class="psh-btn psh-btn--secondary" (click)="closeConsultDetails()">Close</button>
+          @if (perm.hasRoleAction('canUpdate', '/consultations')) {
+            <button class="psh-btn psh-btn--primary" (click)="closeConsultDetails(); openForm(c)">
+              <i-tabler name="edit" style="width:16px;height:16px;margin-right:6px;"></i-tabler>
+              Edit Consultation
             </button>
-            <button mat-flat-button color="primary" type="submit" [disabled]="saving()">
-              @if (saving()) { <mat-spinner diameter="18" style="margin-right:8px;display:inline-block;"></mat-spinner> }
-              {{ saving() ? 'Saving…' : 'Submit' }}
-            </button>
-          </div>
-        </form>
-      </mat-card-content>
-    </mat-card>
+          }
+        </div>
+
+      </div>
+    </div>
   }
 
 </div>

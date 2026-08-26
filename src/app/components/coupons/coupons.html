@@ -394,7 +394,7 @@
                   <mat-icon>event_available</mat-icon> Start Date
                 </label>
                 <mat-form-field appearance="outline" class="ck-date-field">
-                  <input matInput [matDatepicker]="startPicker" formControlName="start_date" placeholder="Select start date" id="f-start">
+                  <input matInput [matDatepicker]="startPicker" formControlName="start_date" placeholder="DD-MM-YYYY" id="f-start">
                   <mat-datepicker-toggle matIconSuffix [for]="startPicker"></mat-datepicker-toggle>
                   <mat-datepicker #startPicker></mat-datepicker>
                 </mat-form-field>
@@ -405,7 +405,7 @@
                   <mat-icon>event_busy</mat-icon> Expiry Date
                 </label>
                 <mat-form-field appearance="outline" class="ck-date-field">
-                  <input matInput [matDatepicker]="expiryPicker" formControlName="expiry_date" placeholder="Select expiry date" id="f-expiry">
+                  <input matInput [matDatepicker]="expiryPicker" formControlName="expiry_date" placeholder="DD-MM-YYYY" id="f-expiry">
                   <mat-datepicker-toggle matIconSuffix [for]="expiryPicker"></mat-datepicker-toggle>
                   <mat-datepicker #expiryPicker></mat-datepicker>
                 </mat-form-field>

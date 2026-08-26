@@ -1,5 +1,5 @@
 import {
-  Component, OnInit, OnDestroy, ChangeDetectorRef, ChangeDetectionStrategy, signal
+  Component, OnInit, OnDestroy, ChangeDetectorRef, ChangeDetectionStrategy, signal, computed
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormsModule, FormBuilder, FormGroup, FormArray, Validators } from '@angular/forms';
@@ -13,6 +13,8 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatNativeDateModule } from '@angular/material/core';
 import { TablerIconsModule } from 'angular-tabler-icons';
 import { Subscription } from 'rxjs';
 
@@ -24,6 +26,7 @@ import {
   Prescription, PrescriptionItem, TimeOfDay,
   TIME_OF_DAY_META, HcEventType, MedicationScheduleItem
 } from 'src/app/models/healthcare.models';
+import { formatDateDDMMYYYY, parseDateFromDDMMYYYY } from 'src/app/utils/date-utils';
 
 @Component({
   selector: 'app-prescriptions',
@@ -33,40 +36,40 @@ import {
     CommonModule, ReactiveFormsModule, FormsModule, RouterModule,
     MatCardModule, MatButtonModule, MatFormFieldModule, MatInputModule,
     MatSelectModule, MatIconModule, MatSlideToggleModule, MatTooltipModule,
-    MatProgressSpinnerModule, TablerIconsModule,
+    MatProgressSpinnerModule, MatDatepickerModule, MatNativeDateModule, TablerIconsModule
   ],
   templateUrl: './prescriptions.html',
   styleUrl: './prescriptions.scss',
 })
 export class PrescriptionsComponent implements OnInit, OnDestroy {
-  prescriptions = signal<Prescription[]>([]);
-  loading       = signal(false);
-  saving        = signal(false);
-  showForm      = signal(false);
-  editingId     = signal<number | null>(null);
-  searchQuery   = '';
+  prescriptions        = signal<Prescription[]>([]);
+  loading              = signal(false);
+  saving               = signal(false);
+  showForm             = signal(false);
+  editingId            = signal<number | null>(null);
+  searchQuery          = signal('');
+  viewMode             = signal<'grid' | 'list'>('grid');
+  selectedPrescription = signal<Prescription | null>(null);
+  formValues           = signal<any>({});
 
   doctors:    any[] = [];
   patients:   any[] = [];
   medicines:  any[] = [];
 
-  filteredPrescriptions = () => {
-    const q = this.searchQuery.toLowerCase();
+  filteredPrescriptions = computed(() => {
+    const q = this.searchQuery().toLowerCase().trim();
     return this.prescriptions().filter(p =>
       !q ||
       (p.patient_name || '').toLowerCase().includes(q) ||
       (p.doctor_name  || '').toLowerCase().includes(q) ||
-      p.prescription_code.toLowerCase().includes(q)
+      (p.prescription_code || '').toLowerCase().includes(q) ||
+      (p.notes || '').toLowerCase().includes(q)
     );
-  };
+  });
 
-  get dispensedCount(): number {
-    return this.prescriptions().filter(p => p.is_dispensed).length;
-  }
-
-  get pendingDispenseCount(): number {
-    return this.prescriptions().filter(p => !p.is_dispensed).length;
-  }
+  totalRxCount         = computed(() => this.prescriptions().length);
+  dispensedCount       = computed(() => this.prescriptions().filter(p => p.is_dispensed).length);
+  pendingDispenseCount = computed(() => this.prescriptions().filter(p => !p.is_dispensed).length);
 
   readonly timeOfDayList = Object.values(TimeOfDay);
   readonly todMeta = TIME_OF_DAY_META;
@@ -97,11 +100,51 @@ export class PrescriptionsComponent implements OnInit, OnDestroy {
     this.form = this.fb.group({
       patient_id:         ['', Validators.required],
       doctor_id:          ['', Validators.required],
-      prescription_date:  [new Date().toISOString().split('T')[0], Validators.required],
+      prescription_date:  [new Date(), Validators.required],
       notes:              [''],
       items:              this.fb.array([]),
     });
-    this.addItem(); // Start with one empty item
+    this.addItem();
+
+    this.form.valueChanges.subscribe(val => {
+      this.formValues.set({
+        ...val,
+        patient_name: this.getPatientName(val.patient_id),
+        doctor_name: this.getDoctorName(val.doctor_id)
+      });
+      this.cdr.markForCheck();
+    });
+  }
+
+  getPatientName(id: any): string {
+    const p = this.patients.find(x => String(x.id) === String(id));
+    return p ? p.name : '';
+  }
+
+  getDoctorName(id: any): string {
+    const d = this.doctors.find(x => String(x.id) === String(id));
+    return d ? d.name : '';
+  }
+
+  getInitials(name: string): string {
+    if (!name) return 'RX';
+    return name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
+  }
+
+  setSearchQuery(q: string): void {
+    this.searchQuery.set(q);
+    this.cdr.markForCheck();
+  }
+
+  viewRxDetails(rx: Prescription, event?: Event): void {
+    if (event) event.stopPropagation();
+    this.selectedPrescription.set(rx);
+    this.cdr.markForCheck();
+  }
+
+  closeRxDetails(): void {
+    this.selectedPrescription.set(null);
+    this.cdr.markForCheck();
   }
 
   get items(): FormArray { return this.form.get('items') as FormArray; }
@@ -156,20 +199,18 @@ export class PrescriptionsComponent implements OnInit, OnDestroy {
   openForm(rx?: Prescription): void {
     if (rx) {
       this.editingId.set(rx.id);
-      // Patch base fields
       this.form.patchValue({
         patient_id:        rx.patient_id,
         doctor_id:         rx.doctor_id,
-        prescription_date: rx.prescription_date,
+        prescription_date: parseDateFromDDMMYYYY(rx.prescription_date),
         notes:             rx.notes,
       });
-      // Rebuild items
       while (this.items.length > 0) this.items.removeAt(0);
       rx.items.forEach(() => this.addItem());
       this.items.patchValue(rx.items);
     } else {
       this.editingId.set(null);
-      this.form.reset({ prescription_date: new Date().toISOString().split('T')[0] });
+      this.form.reset({ prescription_date: new Date() });
       while (this.items.length > 0) this.items.removeAt(0);
       this.addItem();
     }
@@ -181,8 +222,10 @@ export class PrescriptionsComponent implements OnInit, OnDestroy {
   save(): void {
     if (this.form.invalid) { this.form.markAllAsTouched(); return; }
     this.saving.set(true);
-    const payload = this.form.value;
-    // Filter schedule: only include selected time-of-day entries
+    const payload = {
+      ...this.form.value,
+      prescription_date: formatDateDDMMYYYY(this.form.value.prescription_date)
+    };
     payload.items = payload.items.map((item: any) => ({
       ...item,
       schedule: item.schedule.filter((s: any) => s.selected && s.quantity > 0),

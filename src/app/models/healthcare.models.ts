@@ -208,6 +208,7 @@ export interface Appointment {
   patient_name?:    string;
   doctor_id:        number;
   doctor_name?:     string;
+  specialty?:       string;
   appointment_date: string;      // ISO date
   appointment_time: string;      // HH:mm
   status:           AppointmentStatus;

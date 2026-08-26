@@ -1,5 +1,5 @@
 import {
-  Component, OnInit, OnDestroy, ChangeDetectorRef, ChangeDetectionStrategy, signal
+  Component, OnInit, OnDestroy, ChangeDetectorRef, ChangeDetectionStrategy, signal, computed
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
@@ -50,108 +50,38 @@ interface CartItem {
   styleUrl: './pharmacy-pos.scss',
 })
 export class PharmacyPosComponent implements OnInit, OnDestroy {
-  // ── Search ─────────────────────────────────────────────────────────────────
-  searchQuery     = '';
+  // ── Signals ────────────────────────────────────────────────────────────────
+  searchQuery     = signal('');
   searchResults   = signal<any[]>([]);
   searching       = signal(false);
   private search$ = new Subject<string>();
 
-  // ── Patient (optional) ─────────────────────────────────────────────────────
-  patientQuery    = '';
-  patients:       any[] = [];
+  patientQuery    = signal('');
+  patients        = signal<any[]>([]);
   selectedPatient = signal<any | null>(null);
 
-  // ── Cart ───────────────────────────────────────────────────────────────────
   cart            = signal<CartItem[]>([]);
 
-  // ── Financials ─────────────────────────────────────────────────────────────
-  discountAmount  = 0;
-  paymentMethod   = PaymentMethod.CASH;
-  paidAmount      = 0;
-
-  get subtotal(): number { return this.cart().reduce((s, i) => s + i.amount, 0); }
-  get grandTotal(): number { return Math.max(0, this.subtotal - this.discountAmount); }
-  get balance(): number { return this.grandTotal - this.paidAmount; }
-  get totalCartQty(): number { return this.cart().reduce((acc, c) => acc + c.quantity, 0); }
-  get avgPrice(): number { return this.cart().length ? this.subtotal / this.cart().length : 0; }
-  get cartEmpty(): boolean { return this.cart().length === 0; }
-
-
-  // ── Payment ────────────────────────────────────────────────────────────────
-  readonly paymentMethods = Object.values(PaymentMethod);
-  processing = signal(false);
-
-  /** Expose Math to template */
-  readonly Math = Math;
-
-  // ── Template Compatibility Aliases & Helpers ──────────────────────────────
-  get cartItems() { return this.cart(); }
-  get submitting() { return this.processing(); }
-  get balanceAmount(): number { return this.balance; }
-  get showBatchModal() { return this.showBatchPicker; }
-  get selectedMedicineForBatch() { return this.batchPickerMed; }
-
-  get patientSearchQuery(): string { return this.patientQuery; }
-  set patientSearchQuery(val: string) { this.patientQuery = val; }
-
-  patientResults: any[] = [];
-
-  get selectedPaymentMethod(): PaymentMethod { return this.paymentMethod; }
-  set selectedPaymentMethod(pm: PaymentMethod) { this.paymentMethod = pm; }
-
-  updateQuantity(idx: number, qty: number): void {
-    this.updateQty(idx, qty);
-  }
-
-  onQtyInputChange(idx: number, event: any): void {
-    const val = parseInt(event.target.value, 10);
-    if (!isNaN(val)) this.updateQty(idx, val);
-  }
-
-  onPatientSearch(event: any): void {
-    const q = (event?.target?.value || '').trim();
-    if (!q) { this.patientResults = []; this.cdr.markForCheck(); return; }
-    this.common.getApi(`patients?q=${encodeURIComponent(q)}`).subscribe({
-      next: (r: any) => { this.patientResults = r?.data || []; this.cdr.markForCheck(); },
-      error: () => { this.patientResults = []; this.cdr.markForCheck(); }
-    });
-  }
-
-  selectPatient(p: any): void {
-    this.selectedPatient.set(p);
-    this.patientResults = [];
-    this.cdr.markForCheck();
-  }
-
-  removePatient(): void {
-    this.selectedPatient.set(null);
-    this.patientQuery = '';
-    this.patientResults = [];
-    this.cdr.markForCheck();
-  }
-
-  recalculate(): void {
-    this.cdr.markForCheck();
-  }
-
-  submitSale(): void {
-    this.processPayment();
-  }
-
-  closeBatchModal(): void {
-    this.showBatchPicker.set(false);
-    this.batchPickerMed = null;
-  }
-
-  addBatchToCart(batch: any): void {
-    this.selectBatch(batch);
-  }
+  discountAmount  = signal(0);
+  paymentMethod   = signal<PaymentMethod>(PaymentMethod.CASH);
+  paidAmount      = signal(0);
+  processing      = signal(false);
 
   // ── Batch picker ───────────────────────────────────────────────────────────
   showBatchPicker   = signal(false);
   batchPickerMed:   any = null;
   availableBatches: any[] = [];
+  patientResults:   any[] = [];
 
+  // ── Computed Properties ────────────────────────────────────────────────────
+  subtotal     = computed(() => this.cart().reduce((s, i) => s + i.amount, 0));
+  grandTotal   = computed(() => Math.max(0, this.subtotal() - this.discountAmount()));
+  balance      = computed(() => this.grandTotal() - this.paidAmount());
+  totalCartQty = computed(() => this.cart().reduce((acc, c) => acc + c.quantity, 0));
+  cartEmpty    = computed(() => this.cart().length === 0);
+
+  readonly paymentMethods = Object.values(PaymentMethod);
+  readonly Math = Math;
   private subs = new Subscription();
 
   constructor(
@@ -183,9 +113,50 @@ export class PharmacyPosComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void { this.subs.unsubscribe(); }
 
-  // ── Search ─────────────────────────────────────────────────────────────────
+  // ── Compatibility Getters & Aliases ───────────────────────────────────────
+  get cartItems() { return this.cart(); }
+  get submitting() { return this.processing(); }
+  get balanceAmount(): number { return this.balance(); }
+  get showBatchModal() { return this.showBatchPicker; }
+  get selectedMedicineForBatch() { return this.batchPickerMed; }
+
+  get patientSearchQuery(): string { return this.patientQuery(); }
+  set patientSearchQuery(val: string) { this.patientQuery.set(val); }
+
+  get selectedPaymentMethod(): PaymentMethod { return this.paymentMethod(); }
+  set selectedPaymentMethod(pm: PaymentMethod) { this.paymentMethod.set(pm); }
+
+  removePatient(): void {
+    this.selectedPatient.set(null);
+    this.patientQuery.set('');
+    this.patientResults = [];
+    this.cdr.markForCheck();
+  }
+
+  onPatientSearch(event: any): void {
+    const q = typeof event === 'string' ? event : (event?.target?.value || '');
+    this.patientQuery.set(q);
+    if (!q.trim()) { this.patientResults = []; return; }
+    this.common.getApi(`patients?search=${encodeURIComponent(q.trim())}`).subscribe({
+      next: (r: any) => { this.patientResults = r?.data || []; this.cdr.markForCheck(); },
+      error: () => {},
+    });
+  }
+
+  selectPatient(p: any): void {
+    this.selectedPatient.set(p);
+    this.patientQuery.set('');
+    this.patientResults = [];
+    this.cdr.markForCheck();
+  }
+
+  submitSale(): void {
+    this.processPayment();
+  }
+
+  // ── Search & Batch Methods ─────────────────────────────────────────────────
   onSearchChange(query: string): void {
-    this.searchQuery = query;
+    this.searchQuery.set(query);
     if (!query.trim()) { this.searchResults.set([]); return; }
     this.search$.next(query.trim());
   }
@@ -199,7 +170,7 @@ export class PharmacyPosComponent implements OnInit, OnDestroy {
   }
 
   selectMedicine(med: any): void {
-    this.searchQuery = '';
+    this.searchQuery.set('');
     this.searchResults.set([]);
     // Load batches for FEFO selection
     this.common.getApi(`medicines/${med.id}/batches?available=true`).subscribe({
@@ -224,6 +195,15 @@ export class PharmacyPosComponent implements OnInit, OnDestroy {
     this.addToCart(this.batchPickerMed, batch);
     this.showBatchPicker.set(false);
     this.batchPickerMed = null;
+  }
+
+  closeBatchModal(): void {
+    this.showBatchPicker.set(false);
+    this.batchPickerMed = null;
+  }
+
+  addBatchToCart(batch: any): void {
+    this.selectBatch(batch);
   }
 
   private addToCart(med: any, batch: any): void {
@@ -253,6 +233,10 @@ export class PharmacyPosComponent implements OnInit, OnDestroy {
     this.cdr.markForCheck();
   }
 
+  updateQuantity(idx: number, qty: number): void {
+    this.updateQty(idx, qty);
+  }
+
   updateQty(idx: number, qty: number): void {
     const updated = [...this.cart()];
     const item = updated[idx];
@@ -267,6 +251,11 @@ export class PharmacyPosComponent implements OnInit, OnDestroy {
     this.cdr.markForCheck();
   }
 
+  onQtyInputChange(idx: number, event: any): void {
+    const val = parseInt(event.target.value, 10);
+    if (!isNaN(val)) this.updateQty(idx, val);
+  }
+
   removeItem(idx: number): void {
     this.cart.set(this.cart().filter((_, i) => i !== idx));
     this.cdr.markForCheck();
@@ -274,7 +263,12 @@ export class PharmacyPosComponent implements OnInit, OnDestroy {
 
   clearCart(): void {
     this.alert.confirm('All items will be removed.', 'Clear cart?').then((r: any) => {
-      if (r.isConfirmed) { this.cart.set([]); this.discountAmount = 0; this.paidAmount = 0; this.cdr.markForCheck(); }
+      if (r.isConfirmed) {
+        this.cart.set([]);
+        this.discountAmount.set(0);
+        this.paidAmount.set(0);
+        this.cdr.markForCheck();
+      }
     });
   }
 
@@ -285,8 +279,8 @@ export class PharmacyPosComponent implements OnInit, OnDestroy {
 
   // ── Checkout ───────────────────────────────────────────────────────────────
   processPayment(): void {
-    if (this.cartEmpty) { this.alert.warning('Cart is empty'); return; }
-    if (this.paidAmount < this.grandTotal) {
+    if (this.cartEmpty()) { this.alert.warning('Cart is empty'); return; }
+    if (this.paidAmount() < this.grandTotal()) {
       this.alert.warning('Paid amount is less than grand total');
       return;
     }
@@ -302,13 +296,13 @@ export class PharmacyPosComponent implements OnInit, OnDestroy {
         discount_pct: c.discount_pct,
         amount:       c.amount,
       })),
-      subtotal:        this.subtotal,
-      discount_amount: this.discountAmount,
-      grand_total:     this.grandTotal,
-      paid_amount:     this.paidAmount,
-      balance_amount:  this.balance,
-      payment_method:  this.paymentMethod,
-      payment_status:  this.balance <= 0 ? PaymentStatus.PAID : PaymentStatus.PARTIAL,
+      subtotal:        this.subtotal(),
+      discount_amount: this.discountAmount(),
+      grand_total:     this.grandTotal(),
+      paid_amount:     this.paidAmount(),
+      balance_amount:  this.balance(),
+      payment_method:  this.paymentMethod(),
+      payment_status:  this.balance() <= 0 ? PaymentStatus.PAID : PaymentStatus.PARTIAL,
     };
 
     this.common.postApi('pharmacy/sale', payload).subscribe({
@@ -328,11 +322,11 @@ export class PharmacyPosComponent implements OnInit, OnDestroy {
 
   private resetPos(): void {
     this.cart.set([]);
-    this.discountAmount = 0;
-    this.paidAmount = 0;
-    this.paymentMethod = PaymentMethod.CASH;
+    this.discountAmount.set(0);
+    this.paidAmount.set(0);
+    this.paymentMethod.set(PaymentMethod.CASH);
     this.selectedPatient.set(null);
-    this.patientQuery = '';
+    this.patientQuery.set('');
   }
 
   formatPrice(n: number): string {

@@ -1,5 +1,5 @@
 import {
-  Component, OnInit, ChangeDetectorRef, ChangeDetectionStrategy, signal
+  Component, OnInit, ChangeDetectorRef, ChangeDetectionStrategy, signal, computed
 } from '@angular/core';
 
 import { CommonModule } from '@angular/common';
@@ -9,6 +9,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
 import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { TablerIconsModule } from 'angular-tabler-icons';
 
 import { CommonService } from 'src/app/Securities/Services/common.service';
@@ -33,54 +34,78 @@ interface ExpiryBatch {
   imports: [
     CommonModule, FormsModule,
     MatCardModule, MatButtonModule, MatProgressSpinnerModule,
-    MatSelectModule, MatFormFieldModule, TablerIconsModule,
+    MatSelectModule, MatFormFieldModule, MatTooltipModule, TablerIconsModule,
   ],
   templateUrl: './medicine-expiry.html',
   styleUrl: './medicine-expiry.scss',
 })
 export class MedicineExpiryComponent implements OnInit {
-  batches        = signal<ExpiryBatch[]>([]);
-  loading        = signal(false);
-  statusFilter   = '';
-  warningWindow  = 90; // configurable warning window (days)
+  batches       = signal<ExpiryBatch[]>([]);
+  loading       = signal(false);
+  searchQuery   = signal('');
+  statusFilter  = signal('');
+  warningWindow = signal(90);
+  viewMode      = signal<'grid' | 'list'>('grid');
+  selectedBatch = signal<ExpiryBatch | null>(null);
 
-  /** Expose Math to template */
   readonly Math = Math;
-
   readonly statusOptions = Object.values(ExpiryStatus);
   readonly statusMeta    = EXPIRY_STATUS_META;
   readonly warningWindows = [30, 60, 90, 180];
 
-  filteredBatches = () => {
-    const sf = this.statusFilter;
-    return this.batches().filter(b => !sf || b.expiry_status === sf);
-  };
+  filteredBatches = computed(() => {
+    const q = this.searchQuery().toLowerCase().trim();
+    const sf = this.statusFilter();
+    return this.batches().filter(b =>
+      (!sf || b.expiry_status === sf) &&
+      (!q  ||
+        (b.medicine_name || '').toLowerCase().includes(q) ||
+        (b.batch_number || '').toLowerCase().includes(q)
+      )
+    );
+  });
 
-  get kpis() {
-    const all = this.batches();
-    return {
-      safe:         all.filter(b => b.expiry_status === ExpiryStatus.SAFE).length,
-      expiring:     all.filter(b => b.expiry_status === ExpiryStatus.EXPIRING_SOON).length,
-      critical:     all.filter(b => b.expiry_status === ExpiryStatus.CRITICAL).length,
-      expired:      all.filter(b => b.expiry_status === ExpiryStatus.EXPIRED).length,
-    };
-  }
+  safeCount     = computed(() => this.batches().filter(b => b.expiry_status === ExpiryStatus.SAFE).length);
+  expiringCount = computed(() => this.batches().filter(b => b.expiry_status === ExpiryStatus.EXPIRING_SOON).length);
+  criticalCount = computed(() => this.batches().filter(b => b.expiry_status === ExpiryStatus.CRITICAL).length);
+  expiredCount  = computed(() => this.batches().filter(b => b.expiry_status === ExpiryStatus.EXPIRED).length);
+
+  summary = { expired: 0, critical: 0, expiring_soon: 0 };
 
   constructor(
     private common: CommonService,
     public  cdr:    ChangeDetectorRef,
   ) {}
 
-  summary = { expired: 0, critical: 0, expiring_soon: 0 };
-
   ngOnInit(): void {
     this.load();
     this.loadSummary();
   }
 
+  setSearchQuery(q: string): void {
+    this.searchQuery.set(q);
+    this.cdr.markForCheck();
+  }
+
+  selectStatusFilter(sf: string): void {
+    this.statusFilter.set(sf);
+    this.cdr.markForCheck();
+  }
+
+  viewBatchDetails(b: ExpiryBatch, event?: Event): void {
+    if (event) event.stopPropagation();
+    this.selectedBatch.set(b);
+    this.cdr.markForCheck();
+  }
+
+  closeBatchDetails(): void {
+    this.selectedBatch.set(null);
+    this.cdr.markForCheck();
+  }
+
   load(): void {
     this.loading.set(true);
-    this.common.getApi(`medicine-expiry?days=${this.warningWindow}`).subscribe({
+    this.common.getApi(`medicine-expiry?days=${this.warningWindow()}`).subscribe({
       next:  (r: any) => { this.batches.set(r?.data || []); this.loading.set(false); this.cdr.markForCheck(); },
       error: ()       => { this.loading.set(false); this.cdr.markForCheck(); },
     });
@@ -94,7 +119,7 @@ export class MedicineExpiryComponent implements OnInit {
   }
 
   changeWindow(days: number): void {
-    this.warningWindow = days;
+    this.warningWindow.set(days);
     this.load();
   }
 

@@ -24,6 +24,7 @@ import { AppTranslatePipe } from 'src/app/pipes/app-translate.pipe';
 import { AuthService } from 'src/app/Securities/Services/auth.service';
 import { CommonService } from 'src/app/Securities/Services/common.service';
 import { PermissionService } from 'src/app/Securities/Services/permissions.service';
+import { formatDateDDMMYYYY, parseDateFromDDMMYYYY } from 'src/app/utils/date-utils';
 
 export interface Branch {
   id: number;
@@ -265,15 +266,7 @@ export class ProfitLossComponent implements OnInit {
   }
 
   formatDateForBackend(dateVal: any): string {
-    if (!dateVal) return '';
-    if (typeof dateVal === 'string') return dateVal.split('T')[0];
-    if (dateVal instanceof Date && !isNaN(dateVal.getTime())) {
-      const year = dateVal.getFullYear();
-      const month = String(dateVal.getMonth() + 1).padStart(2, '0');
-      const day = String(dateVal.getDate()).padStart(2, '0');
-      return `${year}-${month}-${day}`;
-    }
-    return String(dateVal);
+    return formatDateDDMMYYYY(dateVal);
   }
 
   submitManualEntry() {

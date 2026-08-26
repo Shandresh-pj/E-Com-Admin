@@ -1,97 +1,190 @@
-// medicines.scss — local styles only; global HC classes from healthcare-shared.scss
+// ═════════════════════════════════════════════════════════════════════════════
+// MEDICINE MASTER DIRECTORY — HIGH-TECH FORMULARY GLASS DESIGN & ANIMATIONS
+// SVK Healthcare ERP — Responsive & Animated Theme
+// ═════════════════════════════════════════════════════════════════════════════
 
-// ── KPI Ribbon ─────────────────────────────────────────────────────────────────
-.hc-stock-kpi-row {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 12px;
+.hc-roster-container { display: flex; flex-direction: column; gap: 24px; }
 
-  @media (max-width: 768px) { grid-template-columns: repeat(2, 1fr); }
-  @media (max-width: 400px) { grid-template-columns: repeat(2, 1fr); }
+.hc-controls-bar {
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px;
+  background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(16px); border: 1px solid var(--psh-border);
+  padding: 14px 20px; border-radius: var(--psh-r-lg); box-shadow: var(--psh-shadow-sm);
+  @media (max-width: 900px) { flex-direction: column; align-items: stretch; }
 }
 
-// ── Medicine Table — extend global hc-table with extra coloring ───────────────
-.hc-med-row {
-  &--low-stock td:first-child { border-left: 3px solid #f59e0b; }
-  &--critical  td:first-child { border-left: 3px solid #f97316; }
-  &--out       td:first-child { border-left: 3px solid #ef4444; }
+.hc-search-wrap { position: relative; display: flex; align-items: center; min-width: 280px; @media (max-width: 900px) { width: 100%; min-width: unset; } }
+.hc-search-icon { position: absolute; left: 14px; color: var(--psh-tx-muted); width: 18px; height: 18px; pointer-events: none; }
+
+.hc-search-input {
+  width: 100%; height: 42px; padding: 0 85px 0 42px; border-radius: 22px;
+  border: 1px solid rgba(99, 102, 241, 0.2); background: rgba(248, 250, 252, 0.9);
+  color: var(--psh-tx); font-size: 13px; font-weight: 500; outline: none; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  &:focus { border-color: var(--psh-indigo); background: #ffffff; box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.12); }
+  &::placeholder { color: var(--psh-tx-muted); }
 }
 
-// ── Stock badge ───────────────────────────────────────────────────────────────
-.hc-stock-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  padding: 3px 10px;
-  border-radius: 20px;
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.4px;
-  white-space: nowrap;
+.hc-search-clear {
+  position: absolute; right: 64px; background: rgba(0,0,0,0.06); border: none; width: 20px; height: 20px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--psh-tx-muted);
+  &:hover { background: rgba(239, 68, 68, 0.15); color: #ef4444; }
+}
 
-  &--NORMAL         { background: hsl(142,71%,95%); color: hsl(142,71%,26%); }
-  &--LOW_STOCK      { background: hsl(38,92%,95%);  color: hsl(38,92%,30%); }
-  &--CRITICAL_STOCK { background: hsl(25,95%,95%);  color: hsl(25,95%,35%); }
-  &--OUT_OF_STOCK   { background: hsl(0,84%,97%);   color: hsl(0,84%,40%); }
+.hc-search-count { position: absolute; right: 12px; font-size: 11px; font-weight: 600; color: var(--psh-tx-muted); pointer-events: none; }
 
-  .stock-dot {
-    width: 6px; height: 6px;
-    border-radius: 50%;
-    background: currentColor;
-    opacity: 0.7;
+.hc-filter-group { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+
+.hc-chip-btn {
+  padding: 6px 14px; border-radius: 20px; font-size: 12px; font-weight: 600; border: 1px solid rgba(0,0,0,0.06);
+  background: rgba(248, 250, 252, 0.9); color: var(--psh-tx-sec); cursor: pointer; transition: all 0.2s ease;
+  &:hover { background: rgba(99, 102, 241, 0.08); color: var(--psh-indigo); }
+  &.active { background: var(--psh-indigo); color: #ffffff; border-color: var(--psh-indigo); box-shadow: 0 4px 12px rgba(99, 102, 241, 0.25); }
+}
+
+.hc-view-toggle {
+  display: flex; align-items: center; gap: 4px; background: rgba(241, 245, 249, 0.9); padding: 3px; border-radius: 12px; border: 1px solid rgba(0,0,0,0.06);
+  @media (max-width: 900px) { align-self: flex-end; }
+}
+
+.hc-view-btn {
+  width: 34px; height: 34px; border-radius: 8px; border: none; background: transparent; color: var(--psh-tx-muted);
+  display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s ease;
+  i-tabler { width: 17px; height: 17px; }
+  &.active { background: #ffffff; color: var(--psh-indigo); box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08); }
+}
+
+// ── Medicines Grid Cards ─────────────────────────────────────────────────────
+.hc-med-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(min(330px, 100%), 1fr)); gap: 22px;
+}
+
+.hc-med-card {
+  position: relative; background: rgba(255, 255, 255, 0.92); backdrop-filter: blur(20px); border: 1px solid var(--psh-border);
+  border-radius: 22px; box-shadow: var(--psh-shadow-sm); display: flex; flex-direction: column; overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); animation: hcFadeInUp 450ms cubic-bezier(0.16, 1, 0.3, 1) both; animation-delay: var(--delay, 0ms);
+
+  &:hover {
+    transform: translateY(-6px) scale(1.008); border-color: var(--psh-border-h); box-shadow: 0 16px 40px rgba(99, 102, 241, 0.16);
+    .hc-med-avatar { transform: scale(1.08); }
   }
-}
 
-// ── Stock count cell ─────────────────────────────────────────────────────────
-.hc-stock-count {
-  font-weight: 700;
-  font-variant-numeric: tabular-nums;
-
-  &--low    { color: hsl(38,92%,38%); }
-  &--critical { color: hsl(25,95%,40%); }
-  &--out    { color: hsl(0,84%,50%); }
-  &--normal { color: hsl(142,71%,30%); }
-}
-
-// ── Toolbar pill filters ──────────────────────────────────────────────────────
-.hc-filter-pills { display: flex; gap: 6px; flex-wrap: wrap; }
-
-.hc-filter-pill {
-  padding: 5px 14px;
-  border: 1px solid rgba(0,0,0,0.10);
-  border-radius: 20px;
-  font-size: 12px;
-  font-weight: 600;
-  color: hsl(220,9%,50%);
-  background: #fff;
-  cursor: pointer;
-  transition: all 150ms;
-  white-space: nowrap;
-
-  &:hover { border-color: hsl(196,80%,32%); color: hsl(196,80%,32%); }
-
-  &.active-normal   { background: hsl(142,71%,42%); border-color: hsl(142,71%,42%); color: #fff; }
-  &.active-low      { background: hsl(38,92%,50%);  border-color: hsl(38,92%,50%);  color: #fff; }
-  &.active-critical { background: hsl(25,95%,55%);  border-color: hsl(25,95%,55%);  color: #fff; }
-  &.active-out      { background: hsl(0,84%,58%);   border-color: hsl(0,84%,58%);   color: #fff; }
-  &.active          { background: hsl(196,80%,32%); border-color: hsl(196,80%,32%); color: #fff; }
-}
-
-// ── Price cell formatting ─────────────────────────────────────────────────────
-.hc-price { font-weight: 600; font-variant-numeric: tabular-nums; }
-.hc-price--muted { color: hsl(220,9%,55%); font-size: 12px; }
-
-// Dark mode overrides
-html.dark {
-  .hc-filter-pill {
-    background: rgba(255,255,255,0.05);
-    border-color: rgba(255,255,255,0.10);
-    color: #94a3b8;
+  &__accent {
+    height: 6px; width: 100%;
+    &--NORMAL { background: linear-gradient(90deg, #10b981, #34d399); }
+    &--LOW_STOCK { background: linear-gradient(90deg, #f59e0b, #fbbf24); }
+    &--CRITICAL_STOCK { background: linear-gradient(90deg, #f97316, #fb923c); }
+    &--OUT_OF_STOCK { background: linear-gradient(90deg, #ef4444, #f87171); }
   }
+
+  &__header { display: flex; align-items: center; gap: 14px; padding: 18px 20px 12px; }
+
+  .hc-med-avatar {
+    width: 48px; height: 48px; border-radius: 16px; background: linear-gradient(135deg, var(--psh-indigo), var(--psh-violet));
+    color: #ffffff; font-size: 22px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: transform 0.3s ease;
+    box-shadow: 0 4px 14px rgba(99, 102, 241, 0.25);
+  }
+
+  .hc-med-info { flex: 1; min-width: 0; }
+  .hc-med-name { font-size: 16px; font-weight: 800; color: var(--psh-tx); margin: 0 0 4px; cursor: pointer; &:hover { color: var(--psh-indigo); } }
+  .hc-med-sub { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+
+  .hc-dosage-chip { font-size: 11px; font-weight: 700; color: var(--psh-tx-sec); background: rgba(0,0,0,0.05); padding: 2px 8px; border-radius: 8px; }
+  .hc-rx-tag { font-size: 10px; font-weight: 800; color: #ef4444; background: rgba(239, 68, 68, 0.12); padding: 2px 6px; border-radius: 6px; text-transform: uppercase; }
+
+  &__body { padding: 0 20px 16px; display: flex; flex-direction: column; gap: 12px; }
+
+  .hc-generic-banner {
+    background: rgba(248, 250, 252, 0.9); border: 1px solid rgba(0,0,0,0.04); padding: 10px 14px; border-radius: 14px;
+    .lbl { display: block; font-size: 10px; font-weight: 700; text-transform: uppercase; color: var(--psh-tx-muted); margin-bottom: 2px; }
+    .val { font-size: 13px; font-weight: 600; color: var(--psh-indigo); margin: 0; }
+  }
+
+  .hc-price-row {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 10px; background: rgba(99, 102, 241, 0.04); padding: 10px 14px; border-radius: 14px;
+  }
+  .hc-price-cell {
+    .lbl { display: block; font-size: 10px; font-weight: 700; text-transform: uppercase; color: var(--psh-tx-muted); }
+    .val { font-size: 14px; font-weight: 800; color: var(--psh-tx); }
+    .highlight-price { color: #10b981; }
+  }
+
+  .hc-stock-section { display: flex; flex-direction: column; gap: 6px; }
+  .hc-stock-header { display: flex; align-items: center; justify-content: space-between; }
   .hc-stock-badge {
-    &--NORMAL         { background: rgba(hsl(142,71%,42%), 0.15); }
-    &--LOW_STOCK      { background: rgba(hsl(38,92%,50%), 0.15); }
-    &--CRITICAL_STOCK { background: rgba(hsl(25,95%,55%), 0.15); }
-    &--OUT_OF_STOCK   { background: rgba(hsl(0,84%,58%), 0.15); }
+    font-size: 11px; font-weight: 800; padding: 3px 9px; border-radius: 10px; text-transform: uppercase;
+    &--NORMAL { background: rgba(16, 185, 129, 0.12); color: #059669; }
+    &--LOW_STOCK { background: rgba(245, 158, 11, 0.14); color: #d97706; }
+    &--CRITICAL_STOCK { background: rgba(249, 115, 22, 0.14); color: #ea580c; }
+    &--OUT_OF_STOCK { background: rgba(239, 68, 68, 0.14); color: #dc2626; }
   }
+
+  .hc-stock-track { height: 6px; width: 100%; background: rgba(0,0,0,0.06); border-radius: 10px; overflow: hidden; }
+  .hc-stock-bar {
+    height: 100%; border-radius: 10px; transition: width 0.4s ease;
+    &--NORMAL { background: linear-gradient(90deg, #10b981, #34d399); }
+    &--LOW_STOCK { background: linear-gradient(90deg, #f59e0b, #fbbf24); }
+    &--CRITICAL_STOCK { background: linear-gradient(90deg, #f97316, #fb923c); }
+    &--OUT_OF_STOCK { background: linear-gradient(90deg, #ef4444, #f87171); }
+  }
+
+  &__actions {
+    display: flex; align-items: center; gap: 8px; padding: 12px 20px; border-top: 1px solid rgba(0, 0, 0, 0.05); background: rgba(250, 250, 250, 0.7); margin-top: auto;
+  }
+
+  .hc-act-btn {
+    flex: 1; display: inline-flex; align-items: center; justify-content: center; gap: 6px; height: 34px; border-radius: 10px; font-size: 12px; font-weight: 700; border: 1px solid transparent; cursor: pointer; transition: all 0.2s ease;
+    &--view { background: rgba(99, 102, 241, 0.08); color: var(--psh-indigo); border-color: rgba(99, 102, 241, 0.15); &:hover { background: var(--psh-indigo); color: #ffffff; } }
+    &--edit { background: rgba(241, 245, 249, 0.9); color: var(--psh-tx-sec); border-color: rgba(0, 0, 0, 0.08); &:hover { background: rgba(15, 23, 42, 0.9); color: #ffffff; } }
+  }
+}
+
+// ── Table View ───────────────────────────────────────────────────────────────
+.hc-table-card { background: rgba(255, 255, 255, 0.92); backdrop-filter: blur(20px); border: 1px solid var(--psh-border); border-radius: var(--psh-r-lg); box-shadow: var(--psh-shadow-sm); overflow: hidden; }
+.hc-table-scroll { overflow-x: auto; }
+.hc-table {
+  width: 100%; border-collapse: collapse;
+  th { padding: 16px 20px; font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--psh-tx-muted); background: rgba(248, 250, 252, 0.9); border-bottom: 1px solid rgba(0, 0, 0, 0.06); }
+  td { padding: 16px 20px; border-bottom: 1px solid rgba(0, 0, 0, 0.04); font-size: 13px; color: var(--psh-tx); vertical-align: middle; }
+  tr { cursor: pointer; &:hover td { background: rgba(99, 102, 241, 0.03); } }
+}
+.hc-cell-patient { display: flex; align-items: center; gap: 12px; }
+.hc-list-avatar { width: 36px; height: 36px; border-radius: 10px; background: linear-gradient(135deg, var(--psh-indigo), var(--psh-violet)); color: #ffffff; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.hc-cell-name { font-weight: 700; color: var(--psh-tx); }
+.hc-cell-sub { font-size: 11px; color: var(--psh-tx-muted); }
+.hc-price { font-weight: 700; &.highlight-price { color: #10b981; } }
+.hc-row-actions { display: flex; align-items: center; justify-content: flex-end; gap: 6px; }
+.hc-icon-btn { width: 32px; height: 32px; border-radius: 10px; border: none; background: rgba(0,0,0,0.04); color: var(--psh-tx-sec); display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s ease; i-tabler { width: 16px; height: 16px; } &:hover { background: var(--psh-indigo); color: #ffffff; } }
+
+// ── Drawer & Form ────────────────────────────────────────────────────────────
+.hc-drawer-backdrop { position: fixed; inset: 0; z-index: 9999; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(6px); display: flex; justify-content: flex-end; }
+.hc-drawer-panel { width: min(500px, 100vw); height: 100vh; background: #ffffff; box-shadow: -8px 0 60px rgba(0, 0, 0, 0.2); display: flex; flex-direction: column; overflow: hidden; }
+.hc-drawer-hero { position: relative; padding: 32px 24px 24px; background: linear-gradient(135deg, var(--psh-indigo), var(--psh-violet)); color: #ffffff; text-align: center; }
+.hc-drawer-close { position: absolute; top: 16px; right: 16px; width: 34px; height: 34px; border-radius: 50%; border: none; background: rgba(0, 0, 0, 0.2); color: #ffffff; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+.hc-drawer-avatar-box { display: flex; justify-content: center; margin-bottom: 12px; }
+.hc-drawer-avatar { width: 72px; height: 72px; border-radius: 22px; background: #ffffff; color: var(--psh-indigo); font-size: 32px; font-weight: 800; display: flex; align-items: center; justify-content: center; }
+.hc-drawer-name { font-size: 22px; font-weight: 800; margin: 0 0 6px; }
+.hc-drawer-sub { font-size: 13px; opacity: 0.9; }
+.hc-drawer-body { padding: 24px; overflow-y: auto; flex: 1; display: flex; flex-direction: column; gap: 20px; }
+.hc-drawer-section { display: flex; flex-direction: column; gap: 10px; }
+.hc-drawer-sec-title { font-size: 12px; font-weight: 700; text-transform: uppercase; color: var(--psh-tx-muted); margin: 0; }
+.hc-drawer-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.hc-drawer-item { background: rgba(248, 250, 252, 0.9); padding: 12px; border-radius: 12px; display: flex; flex-direction: column; gap: 4px; .lbl { font-size: 10px; font-weight: 700; text-transform: uppercase; color: var(--psh-tx-muted); } .val { font-size: 14px; font-weight: 800; color: var(--psh-tx); } .highlight-price { color: #10b981; } }
+.hc-drawer-footer { display: flex; align-items: center; justify-content: flex-end; gap: 12px; padding: 16px 24px; border-top: 1px solid rgba(0, 0, 0, 0.06); }
+
+.hc-form-container { display: flex; flex-direction: column; gap: 20px; }
+.hc-form-header { display: flex; align-items: center; gap: 16px; }
+.hc-form-title { font-size: 22px; font-weight: 800; color: var(--psh-tx); margin: 0; }
+.hc-form-card { background: rgba(255, 255, 255, 0.92); backdrop-filter: blur(20px); border: 1px solid var(--psh-border); border-radius: var(--psh-r-lg); padding: 28px; box-shadow: var(--psh-shadow-sm); }
+.hc-form-section { margin-bottom: 24px; padding-bottom: 20px; border-bottom: 1px dashed rgba(0, 0, 0, 0.08); &:last-of-type { border-bottom: none; margin-bottom: 12px; } }
+.hc-section-title { display: flex; align-items: center; gap: 8px; font-size: 15px; font-weight: 700; color: var(--psh-tx); margin: 0 0 16px; .hc-sec-icon { width: 20px; height: 20px; color: var(--psh-indigo); } }
+.hc-field-label { display: block; font-size: 12px; font-weight: 600; color: var(--psh-tx-sec); margin-bottom: 6px; .req { color: #ef4444; } }
+.hc-form-actions { display: flex; align-items: center; justify-content: flex-end; gap: 12px; padding-top: 16px; border-top: 1px solid rgba(0, 0, 0, 0.06); }
+
+html.dark {
+  .hc-controls-bar, .hc-med-card, .hc-table-card, .hc-form-card, .hc-drawer-panel { background: rgba(15, 23, 42, 0.85); border-color: rgba(255, 255, 255, 0.08); }
+  .hc-search-input { background: rgba(30, 41, 59, 0.9); border-color: rgba(255, 255, 255, 0.1); color: #f8fafc; }
+  .hc-view-toggle { background: rgba(30, 41, 59, 0.9); }
+  .hc-view-btn.active { background: #1e293b; color: var(--psh-indigo); }
+  .hc-med-card { .hc-med-name { color: #f8fafc; } .hc-generic-banner, .hc-price-row { background: rgba(30, 41, 59, 0.6); } &__actions { background: rgba(15, 23, 42, 0.9); border-top-color: rgba(255, 255, 255, 0.06); } }
+  .hc-table { th { background: rgba(30, 41, 59, 0.9); color: #94a3b8; } td { border-bottom-color: rgba(255, 255, 255, 0.06); color: #f8fafc; } tr:hover td { background: rgba(99, 102, 241, 0.1); } }
+  .hc-drawer-item { background: rgba(30, 41, 59, 0.6); color: #f8fafc; }
 }

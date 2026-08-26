@@ -10,6 +10,7 @@ import { SocketService } from 'src/app/Securities/Services/socket.service';
 import { MatTable, TableColumn } from 'src/utils/mat-table/mat-table';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
+import { formatDateDDMMYYYY, parseDateFromDDMMYYYY } from 'src/app/utils/date-utils';
 
 // Custom validator: to_date must be >= from_date
 function dateRangeValidator(group: AbstractControl): ValidationErrors | null {
@@ -335,16 +336,9 @@ export class Leave implements OnInit, OnDestroy {
     }
   }
 
-  /** Convert form date (Date object from datepicker) â†’ ISO string for API */
+  /** Convert form date (Date object from datepicker) -> DD-MM-YYYY string for API */
   private toIsoDateString(value: any): string {
-    if (!value) return '';
-    try {
-      const d = value instanceof Date ? value : new Date(value);
-      if (isNaN(d.getTime())) return '';
-      return this.datePipe.transform(d, 'yyyy-MM-dd') || '';
-    } catch {
-      return '';
-    }
+    return formatDateDDMMYYYY(value);
   }
 
   setupDateListeners(): void {

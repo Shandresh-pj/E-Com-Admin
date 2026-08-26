@@ -20,6 +20,7 @@ import { AuthService } from 'src/app/Securities/Services/auth.service';
 import { MatTable } from 'src/utils/mat-table/mat-table';
 import { AppTranslatePipe } from 'src/app/pipes/app-translate.pipe';
 import { NotificationSoundService } from 'src/app/Securities/Services/notification-sound.service';
+import { formatDateDDMMYYYY, parseDateFromDDMMYYYY } from 'src/app/utils/date-utils';
 
 @Component({
   selector: 'app-attendance',
@@ -399,15 +400,8 @@ export class Attendance implements OnInit, OnDestroy {
   onDateFilterChange(val: any) {
     if (!val) {
       this.selectedDateFilter = '';
-    } else if (val instanceof Date) {
-      const yyyy = val.getFullYear();
-      const mm = String(val.getMonth() + 1).padStart(2, '0');
-      const dd = String(val.getDate()).padStart(2, '0');
-      this.selectedDateFilter = `${yyyy}-${mm}-${dd}`;
-    } else if (typeof val === 'string') {
-      this.selectedDateFilter = val;
-    } else if (val && typeof val === 'object' && val.format) {
-      this.selectedDateFilter = val.format('YYYY-MM-DD');
+    } else {
+      this.selectedDateFilter = formatDateDDMMYYYY(val);
     }
     this.loadAttendanceLogs();
   }

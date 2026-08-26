@@ -22,6 +22,7 @@ import { SocketService } from 'src/app/Securities/Services/socket.service';
 import { Subscription } from 'rxjs';
 import { GeminiAiService } from 'src/app/services/gemini-ai.service';
 import { AppTranslatePipe } from 'src/app/pipes/app-translate.pipe';
+import { formatDateDDMMYYYY, parseDateFromDDMMYYYY } from 'src/app/utils/date-utils';
 
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { ViewChild, ElementRef } from '@angular/core';
@@ -378,14 +379,9 @@ export class Product {
     return Math.floor((expiry.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
   }
 
-  /** Convert a Date object or ISO string to YYYY-MM-DD format for API */
+  /** Convert a Date object or ISO string to DD-MM-YYYY format for API */
   toISODateString(date: Date | string | null | undefined): string {
-    if (!date) return '';
-    if (date instanceof Date) {
-      if (isNaN(date.getTime())) return '';
-      return date.toISOString().split('T')[0];
-    }
-    return String(date).split('T')[0];
+    return formatDateDDMMYYYY(date);
   }
 
   /** Returns 'expired', 'warning' (â‰¤2 days), or 'ok' */
@@ -855,8 +851,8 @@ export class Product {
       status: product?.status || 'Draft',
       low_stock_threshold: product?.low_stock_threshold || 5,
       critical_stock_threshold: product?.critical_stock_threshold || 2,
-      manufacture_date: product?.manufacture_date ? new Date(product.manufacture_date) : null,
-      expiry_date: product?.expiry_date ? new Date(product.expiry_date) : null
+      manufacture_date: parseDateFromDDMMYYYY(product?.manufacture_date),
+      expiry_date: parseDateFromDDMMYYYY(product?.expiry_date)
     });
 
     this.unitConversions.clear();

@@ -6,8 +6,9 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
 import { CouponService, Coupon } from '../../services/coupon.service';
+import { formatDateDDMMYYYY, parseDateFromDDMMYYYY } from 'src/app/utils/date-utils';
+import { MatInputModule } from '@angular/material/input';
 
 @Component({
   selector: 'app-coupons',
@@ -60,8 +61,8 @@ export class Coupons implements OnInit {
       value:           [coupon?.value ?? null],
       buy_x:           [coupon?.buy_x ?? null],
       get_y:           [coupon?.get_y ?? null],
-      start_date:      [coupon?.start_date ?? null],
-      expiry_date:     [coupon?.expiry_date ?? null],
+      start_date:      [parseDateFromDDMMYYYY(coupon?.start_date)],
+      expiry_date:     [parseDateFromDDMMYYYY(coupon?.expiry_date)],
       usage_limit:     [coupon?.usage_limit ?? null],
       per_user_limit:  [coupon?.per_user_limit ?? null],
       is_active:       [coupon !== null ? coupon.is_active : true]
@@ -90,6 +91,8 @@ export class Coupons implements OnInit {
     const payload = { ...this.couponForm.value };
     if (!payload.id) delete payload.id;
     if (payload.type === 'bogo' || payload.type === 'free_shipping') payload.value = 0;
+    if (payload.start_date) payload.start_date = formatDateDDMMYYYY(payload.start_date);
+    if (payload.expiry_date) payload.expiry_date = formatDateDDMMYYYY(payload.expiry_date);
 
     const obs = this.editingCoupon?.id
       ? this.couponService.updateCoupon(this.editingCoupon.id, payload)

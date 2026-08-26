@@ -10,12 +10,12 @@
 
   <!-- Page Hero Header -->
   <header class="psh-hero">
-    <div>
+    <div class="psh-hero__text">
       <div class="psh-eyebrow">
         <span class="psh-eyebrow__dot"></span>
         <span>HEALTHCARE ERP</span>
         <span class="psh-eyebrow__sep">·</span>
-        <span>{{ approvals().length }} APPROVAL REQUESTS</span>
+        <span>{{ approvals().length }} INVENTORY APPROVALS</span>
       </div>
       <h1 class="psh-title">Stock <span class="psh-title__accent">Approvals</span></h1>
       <p class="psh-sub">6-stage inventory approval workflow (Draft → Submitted → Pending → Approved → Posted → Rejected).</p>
@@ -25,234 +25,478 @@
         <button class="psh-btn psh-btn--primary" (click)="openForm()">
           <span class="psh-btn__shine"></span>
           <i-tabler name="plus" style="width:20px;height:20px;"></i-tabler>
-          New Stock Request
+          <span>New Stock Inward</span>
         </button>
       }
     </div>
   </header>
 
-  <!-- Stat Chips Row -->
+  <!-- Stat Chips Row (4 KPI Orbs) -->
   <div class="psh-chips">
-    @for (status of statuses; track status) {
-      <div class="psh-chip psh-chip--violet" style="cursor:pointer;"
-           [class.active]="statusFilter === status"
-           (click)="statusFilter = (statusFilter === status ? '' : status); cdr.markForCheck()">
-        <div class="psh-chip__orb"><i-tabler name="checkup-list"></i-tabler></div>
-        <div class="psh-chip__body">
-          <span class="psh-chip__num">{{ getKpiCount(status) }}</span>
-          <span class="psh-chip__lbl">{{ status }}</span>
-        </div>
+    <div class="psh-chip psh-chip--amber" (click)="selectStatusFilter('PENDING')" style="cursor:pointer;">
+      <div class="psh-chip__orb"><i-tabler name="clock-hour-4"></i-tabler></div>
+      <div class="psh-chip__body">
+        <span class="psh-chip__num">{{ pendingCount() }}</span>
+        <span class="psh-chip__lbl">Pending Review</span>
       </div>
-    }
+    </div>
+
+    <div class="psh-chip psh-chip--emerald" (click)="selectStatusFilter('APPROVED')" style="cursor:pointer;">
+      <div class="psh-chip__orb"><i-tabler name="circle-check"></i-tabler></div>
+      <div class="psh-chip__body">
+        <span class="psh-chip__num">{{ approvedCount() }}</span>
+        <span class="psh-chip__lbl">Approved</span>
+      </div>
+    </div>
+
+    <div class="psh-chip psh-chip--sky" (click)="selectStatusFilter('POSTED')" style="cursor:pointer;">
+      <div class="psh-chip__orb"><i-tabler name="package-export"></i-tabler></div>
+      <div class="psh-chip__body">
+        <span class="psh-chip__num">{{ postedCount() }}</span>
+        <span class="psh-chip__lbl">Posted Inventory</span>
+      </div>
+    </div>
+
+    <div class="psh-chip psh-chip--rose" (click)="selectStatusFilter('REJECTED')" style="cursor:pointer;">
+      <div class="psh-chip__orb"><i-tabler name="circle-x"></i-tabler></div>
+      <div class="psh-chip__body">
+        <span class="psh-chip__num">{{ rejectedCount() }}</span>
+        <span class="psh-chip__lbl">Rejected</span>
+      </div>
+    </div>
   </div>
 
-  <!-- Content Container -->
+  <!-- Main Roster Container -->
   @if (!showForm()) {
-    <mat-card class="cardWithShadow theme-card">
-      <mat-card-header>
-        <div class="header-container" style="display:flex;align-items:center;justify-content:space-between;width:100%;">
-          <mat-card-title class="m-b-0">Approval Register</mat-card-title>
+    <div class="hc-roster-container">
+
+      <!-- Controls & Filter Bar -->
+      <div class="hc-controls-bar">
+
+        <!-- Search Bar -->
+        <div class="hc-search-wrap">
+          <i-tabler name="search" class="hc-search-icon"></i-tabler>
+          <input class="hc-search-input"
+                 placeholder="Search reference #, supplier, notes..."
+                 [ngModel]="searchQuery()"
+                 (ngModelChange)="setSearchQuery($event)" />
+          @if (searchQuery()) {
+            <button class="hc-search-clear" (click)="setSearchQuery('')" matTooltip="Clear search">
+              <i-tabler name="x" style="width:14px;height:14px;"></i-tabler>
+            </button>
+          }
+          <span class="hc-search-count">{{ filteredApprovals().length }} found</span>
         </div>
-      </mat-card-header>
 
-      <mat-card-content class="b-t-1">
-        <!-- Filter Chips -->
-        <div class="psh-filter" style="margin-bottom:16px;">
-          <div class="psh-filter__chips">
-            <button class="psh-filter__chip" [class.active]="statusFilter === ''" (click)="statusFilter = ''; cdr.markForCheck()">All</button>
-            @for (status of statuses; track status) {
-              <button class="psh-filter__chip" [class.active]="statusFilter === status" (click)="statusFilter = status; cdr.markForCheck()">
-                {{ status }} ({{ getKpiCount(status) }})
-              </button>
-            }
-          </div>
+        <!-- Stage Filter Chips -->
+        <div class="hc-filter-group">
+          <button class="hc-chip-btn" [class.active]="statusFilter() === ''" (click)="selectStatusFilter('')">All</button>
+          @for (s of statuses; track s) {
+            <button class="hc-chip-btn" [class.active]="statusFilter() === s" (click)="selectStatusFilter(s)">
+              {{ s }}
+            </button>
+          }
         </div>
 
-        <!-- Loading -->
-        @if (loading()) {
-          <div class="hc-loading-wrap">
-            <mat-progress-spinner mode="indeterminate" diameter="40"></mat-progress-spinner>
-            <p>Loading stock approval requests…</p>
-          </div>
-        }
+        <!-- View Mode Switcher -->
+        <div class="hc-view-toggle">
+          <button class="hc-view-btn" [class.active]="viewMode() === 'grid'" (click)="viewMode.set('grid')" matTooltip="Grid View">
+            <i-tabler name="layout-grid"></i-tabler>
+          </button>
+          <button class="hc-view-btn" [class.active]="viewMode() === 'list'" (click)="viewMode.set('list')" matTooltip="Table View">
+            <i-tabler name="list"></i-tabler>
+          </button>
+        </div>
 
-        <!-- Empty -->
-        @if (!loading() && filteredApprovals().length === 0) {
-          <div class="hc-empty-state">
+      </div>
+
+      <!-- Loading State -->
+      @if (loading()) {
+        <div class="hc-loading-wrap">
+          <mat-progress-spinner mode="indeterminate" diameter="48"></mat-progress-spinner>
+          <p class="hc-loading-text">Loading stock approval workflow requests...</p>
+        </div>
+      }
+
+      <!-- Empty State -->
+      @if (!loading() && filteredApprovals().length === 0) {
+        <div class="hc-empty-state">
+          <div class="hc-empty-icon-wrap">
             <i-tabler name="clipboard-x" class="hc-empty-icon"></i-tabler>
-            <h3>No stock approvals found</h3>
-            <p>{{ statusFilter ? 'No approvals match this stage filter.' : 'Create a new stock inward request to begin.' }}</p>
           </div>
-        }
+          <h3>No Stock Approval Requests</h3>
+          <p>{{ searchQuery() || statusFilter() ? 'Try adjusting your search or stage filters.' : 'Click "New Stock Inward" above to create an inventory request.' }}</p>
+          @if (searchQuery() || statusFilter()) {
+            <button class="psh-btn psh-btn--secondary m-t-16" (click)="setSearchQuery(''); selectStatusFilter('')">
+              Reset Filters
+            </button>
+          }
+        </div>
+      }
 
-        <!-- Approval List Cards -->
-        @if (!loading() && filteredApprovals().length > 0) {
-          <div class="hc-approval-list">
-            @for (appr of filteredApprovals(); track appr.id) {
-              <div class="hc-approval-card hc-approval-card--{{ getStatusClass(appr.status) }}">
-                <div class="hc-approval-header">
-                  <div>
-                    <div class="hc-approval-ref">{{ appr.reference_number }}</div>
-                    @if (appr.supplier_name) { <div class="hc-approval-supplier">Supplier: {{ appr.supplier_name }}</div> }
-                  </div>
-                  <div class="hc-approval-header-right">
-                    <span class="hc-status-badge hc-status-badge--{{ getStatusClass(appr.status) }}">{{ appr.status }}</span>
-                    <div class="hc-approval-meta">{{ appr.created_at | date:'dd MMM yyyy' }} · {{ appr.submitted_by_name }}</div>
+      <!-- GRID VIEW -->
+      @if (!loading() && filteredApprovals().length > 0 && viewMode() === 'grid') {
+        <div class="hc-appr-grid">
+          @for (appr of filteredApprovals(); track appr.id; let i = $index) {
+            <div class="hc-appr-card" [style.--delay]="(i % 12) * 60 + 'ms'">
+
+              <!-- Top Stage Line -->
+              <div class="hc-appr-card__accent hc-appr-card__accent--{{ getStatusClass(appr.status) }}"></div>
+
+              <!-- Header -->
+              <div class="hc-appr-card__header">
+                <div class="hc-appr-avatar">
+                  <i-tabler name="package-import"></i-tabler>
+                </div>
+                <div class="hc-appr-info">
+                  <h3 class="hc-appr-ref" (click)="viewApprovalDetails(appr)">{{ appr.reference_number }}</h3>
+                  <div class="hc-appr-sub">
+                    <span>Supplier: <strong>{{ appr.supplier_name || 'Direct Procurement' }}</strong></span>
                   </div>
                 </div>
+                <span class="hc-stage-badge hc-stage-badge--{{ getStatusClass(appr.status) }}">
+                  {{ appr.status }}
+                </span>
+              </div>
 
-                <div class="hc-approval-items">
-                  @for (item of appr.items; track item.id) {
-                    <div class="hc-approval-item">
-                      <span style="font-weight:700;">{{ item.medicine_name }}</span>
-                      <span class="hc-approval-item-batch">Batch: <code>{{ item.batch_number }}</code></span>
-                      <span class="hc-approval-item-qty">Qty: {{ item.quantity }}</span>
-                      <span class="hc-approval-item-exp">Exp: {{ item.expiry_date }}</span>
-                      <span class="hc-approval-item-amt">{{ formatAmount(item.unit_cost * item.quantity) }}</span>
-                    </div>
-                  }
-                </div>
+              <!-- Body Info -->
+              <div class="hc-appr-card__body">
 
-                <div class="hc-approval-footer">
-                  <div class="hc-approval-total">Total Amount: <strong>{{ formatAmount(appr.total_amount) }}</strong></div>
-                  <div class="hc-approval-actions">
-                    @if (appr.status === StockApprovalStatus.DRAFT) {
-                      <button mat-stroked-button color="primary" (click)="updateStatus(appr, StockApprovalStatus.SUBMITTED)">Submit</button>
-                    }
-                    @if (appr.status === StockApprovalStatus.SUBMITTED) {
-                      <button mat-stroked-button color="accent" (click)="updateStatus(appr, StockApprovalStatus.PENDING)">Review</button>
-                    }
-                    @if (appr.status === StockApprovalStatus.PENDING) {
-                      <button mat-flat-button color="primary" (click)="updateStatus(appr, StockApprovalStatus.APPROVED)">Approve</button>
-                      <button mat-stroked-button color="warn" (click)="openRejectDialog(appr)">Reject</button>
-                    }
-                    @if (appr.status === StockApprovalStatus.APPROVED) {
-                      <button mat-flat-button color="accent" (click)="updateStatus(appr, StockApprovalStatus.POSTED)">Post to Inventory</button>
+                <!-- Batches List -->
+                <div class="hc-items-box">
+                  <div class="hc-items-header">
+                    <span class="lbl">Inward Drug Batches</span>
+                    <span class="badge">{{ (appr.items || []).length }} batch(es)</span>
+                  </div>
+
+                  <div class="hc-batches-list">
+                    @for (item of (appr.items || []); track item.id) {
+                      <div class="hc-batch-row-item">
+                        <div class="flex align-center justify-between">
+                          <span class="med-name">{{ item.medicine_name || 'Drug #' + item.medicine_id }}</span>
+                          <span class="cost">{{ formatAmount(item.unit_cost * item.quantity) }}</span>
+                        </div>
+                        <div class="flex align-center justify-between m-t-2">
+                          <span class="batch-num">Batch: <code>{{ item.batch_number }}</code></span>
+                          <span class="batch-meta">Qty: {{ item.quantity }} · Exp: {{ item.expiry_date }}</span>
+                        </div>
+                      </div>
                     }
                   </div>
                 </div>
 
                 @if (appr.rejection_reason) {
-                  <div class="hc-rejection-reason" style="margin:0 20px 14px;">
-                    <i-tabler name="alert-triangle"></i-tabler> Rejection Reason: {{ appr.rejection_reason }}
+                  <div class="hc-rejection-banner">
+                    <i-tabler name="alert-triangle" class="icon"></i-tabler>
+                    <span class="text">Reason: {{ appr.rejection_reason }}</span>
                   </div>
                 }
+
+                <div class="hc-appr-total-row">
+                  <span class="lbl">Total Valuation</span>
+                  <span class="val">{{ formatAmount(appr.total_amount) }}</span>
+                </div>
+
               </div>
-            }
-          </div>
-        }
-      </mat-card-content>
-    </mat-card>
-  } @else {
-    <!-- Form Card View (exact /admin form design) -->
-    <mat-card class="cardWithShadow theme-card">
-      <mat-card-header>
-        <div class="header-container" style="display:flex;align-items:center;justify-content:space-between;width:100%;">
-          <mat-card-title class="m-b-0">
-            New Stock Inward Request
-          </mat-card-title>
-          <button mat-stroked-button (click)="closeForm()">Back to Register</button>
+
+              <!-- Actions Footer -->
+              <div class="hc-appr-card__actions">
+                <button class="hc-act-btn hc-act-btn--view" (click)="viewApprovalDetails(appr, $event)">
+                  <i-tabler name="eye" style="width:15px;height:15px;"></i-tabler>
+                  <span>Details</span>
+                </button>
+
+                <!-- Workflow Transitions -->
+                @if (appr.status === StockApprovalStatus.DRAFT) {
+                  <button class="hc-act-btn hc-act-btn--action" (click)="updateStatus(appr, StockApprovalStatus.SUBMITTED)">
+                    Submit Request
+                  </button>
+                }
+                @if (appr.status === StockApprovalStatus.SUBMITTED) {
+                  <button class="hc-act-btn hc-act-btn--action" (click)="updateStatus(appr, StockApprovalStatus.PENDING)">
+                    Review
+                  </button>
+                }
+                @if (appr.status === StockApprovalStatus.PENDING) {
+                  <button class="hc-act-btn hc-act-btn--approve" (click)="updateStatus(appr, StockApprovalStatus.APPROVED)">
+                    Approve
+                  </button>
+                  <button class="hc-act-btn hc-act-btn--reject" (click)="openRejectDialog(appr)">
+                    Reject
+                  </button>
+                }
+                @if (appr.status === StockApprovalStatus.APPROVED) {
+                  <button class="hc-act-btn hc-act-btn--post" (click)="updateStatus(appr, StockApprovalStatus.POSTED)">
+                    Post to Inventory
+                  </button>
+                }
+              </div>
+
+            </div>
+          }
         </div>
-      </mat-card-header>
+      }
 
-      <mat-card-content class="b-t-1">
-        <form [formGroup]="form" (ngSubmit)="save()" class="p-t-16" autocomplete="off">
-          <div class="row">
-            <div class="col-lg-6 m-b-16">
-              <mat-label class="f-w-600 m-b-8 d-block">Supplier Name</mat-label>
-              <mat-form-field appearance="outline" class="w-100">
-                <input matInput formControlName="supplier_name" placeholder="Enter Supplier Name (e.g. Medico Pharma Labs)">
-              </mat-form-field>
-            </div>
+      <!-- LIST VIEW TABLE -->
+      @if (!loading() && filteredApprovals().length > 0 && viewMode() === 'list') {
+        <div class="hc-table-card">
+          <div class="hc-table-scroll">
+            <table class="hc-table">
+              <thead>
+                <tr>
+                  <th>Reference Code</th>
+                  <th>Supplier</th>
+                  <th>Submitted By</th>
+                  <th>Batches</th>
+                  <th>Status</th>
+                  <th>Total Cost</th>
+                  <th style="text-align:right;">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (appr of filteredApprovals(); track appr.id) {
+                  <tr (click)="viewApprovalDetails(appr)">
+                    <td><code>{{ appr.reference_number }}</code></td>
+                    <td><span class="hc-cell-name">{{ appr.supplier_name || 'Direct Procurement' }}</span></td>
+                    <td>{{ appr.submitted_by_name || 'System Admin' }}</td>
+                    <td><span class="hc-badge-count">{{ (appr.items || []).length }} batch(es)</span></td>
+                    <td>
+                      <span class="hc-stage-badge hc-stage-badge--{{ getStatusClass(appr.status) }}">
+                        {{ appr.status }}
+                      </span>
+                    </td>
+                    <td><span class="hc-price highlight-price">{{ formatAmount(appr.total_amount) }}</span></td>
+                    <td>
+                      <div class="hc-row-actions" (click)="$event.stopPropagation()">
+                        <button class="hc-icon-btn" (click)="viewApprovalDetails(appr)" matTooltip="View Request Details">
+                          <i-tabler name="eye"></i-tabler>
+                        </button>
+                        @if (appr.status === StockApprovalStatus.PENDING) {
+                          <button class="hc-icon-btn" (click)="approve(appr)" matTooltip="Approve Request" style="color:#10b981;">
+                            <i-tabler name="circle-check"></i-tabler>
+                          </button>
+                          <button class="hc-icon-btn" (click)="reject(appr)" matTooltip="Reject Request" style="color:#ef4444;">
+                            <i-tabler name="circle-x"></i-tabler>
+                          </button>
+                        }
+                      </div>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </div>
+      }
 
-            <div class="col-lg-6 m-b-16">
-              <mat-label class="f-w-600 m-b-8 d-block">Notes / Remarks</mat-label>
-              <mat-form-field appearance="outline" class="w-100">
-                <input matInput formControlName="notes" placeholder="Enter notes or reference comments">
-              </mat-form-field>
+    </div>
+  }
+
+  <!-- FORM MODE -->
+  @if (showForm()) {
+    <div class="hc-form-container">
+      <div class="hc-form-header">
+        <button class="psh-btn psh-btn--secondary" (click)="closeForm()">
+          <i-tabler name="arrow-left" style="width:18px;height:18px;"></i-tabler>
+          Back to Approvals
+        </button>
+        <h2 class="hc-form-title">Create New Stock Inward Entry</h2>
+      </div>
+
+      <div class="hc-form-card">
+        <form [formGroup]="form" (ngSubmit)="submit()" autocomplete="off">
+
+          <div class="hc-form-section">
+            <h3 class="hc-section-title">
+              <i-tabler name="building-warehouse" class="hc-sec-icon"></i-tabler>
+              Supplier & Header Information
+            </h3>
+            <div class="row">
+              <div class="col-md-6 m-b-16">
+                <label class="hc-field-label">Supplier / Distributor Name</label>
+                <mat-form-field appearance="outline" class="w-100">
+                  <input matInput formControlName="supplier_name" placeholder="e.g. Medico Pharma Distributors">
+                </mat-form-field>
+              </div>
+
+              <div class="col-md-6 m-b-16">
+                <label class="hc-field-label">Inward Remarks / Notes</label>
+                <mat-form-field appearance="outline" class="w-100">
+                  <input matInput formControlName="notes" placeholder="Invoice # or consignment notes">
+                </mat-form-field>
+              </div>
             </div>
           </div>
 
-          <!-- Stock Items Section -->
-          <div class="m-t-16 m-b-16" style="border-top:1px solid rgba(0,0,0,0.08);padding-top:16px;">
-            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
-              <h4 style="margin:0;font-weight:700;">Stock Items ({{ items.length }})</h4>
-              <button mat-stroked-button type="button" (click)="addItem()" style="font-size:12px;">
-                <i-tabler name="plus" style="width:14px;height:14px;margin-right:4px;"></i-tabler>
-                Add Item
+          <!-- Items Array -->
+          <div class="hc-form-section">
+            <div class="flex align-center justify-between m-b-16">
+              <h3 class="hc-section-title m-b-0">
+                <i-tabler name="package-import" class="hc-sec-icon"></i-tabler>
+                Inward Batch Line Items ({{ items.length }})
+              </h3>
+              <button type="button" class="psh-btn psh-btn--secondary btn-sm" (click)="addItem()">
+                <i-tabler name="plus" style="width:14px;height:14px;"></i-tabler>
+                Add Batch Item
               </button>
             </div>
 
             <div formArrayName="items">
               @for (_ of items.controls; track $index; let i = $index) {
-                <div class="row m-b-16" [formGroupName]="i" style="background:rgba(0,0,0,0.02);padding:16px 8px 0;border-radius:12px;border:1px solid rgba(0,0,0,0.06);">
-                  <div class="col-lg-3 m-b-16">
-                    <mat-label class="f-w-600 m-b-8 d-block">Medicine <span class="text-danger">*</span></mat-label>
-                    <mat-form-field appearance="outline" class="w-100">
-                      <mat-select formControlName="medicine_id" placeholder="Select Medicine">
-                        @for (m of medicines; track m.id) { <mat-option [value]="m.id">{{ m.name }}</mat-option> }
-                      </mat-select>
-                    </mat-form-field>
+                <div class="hc-rx-form-item" [formGroupName]="i">
+                  <div class="hc-rx-form-item-header">
+                    <span class="title">BATCH ITEM #{{ i + 1 }}</span>
+                    @if (items.length > 1) {
+                      <button type="button" class="hc-del-btn" (click)="removeItem(i)" matTooltip="Remove Item">
+                        <i-tabler name="trash"></i-tabler>
+                      </button>
+                    }
                   </div>
 
-                  <div class="col-lg-2 m-b-16">
-                    <mat-label class="f-w-600 m-b-8 d-block">Batch No. <span class="text-danger">*</span></mat-label>
-                    <mat-form-field appearance="outline" class="w-100">
-                      <input matInput formControlName="batch_number" placeholder="Batch No.">
-                    </mat-form-field>
-                  </div>
+                  <div class="row">
+                    <div class="col-md-4 m-b-16">
+                      <label class="hc-field-label">Select Drug <span class="req">*</span></label>
+                      <mat-form-field appearance="outline" class="w-100">
+                        <mat-select formControlName="medicine_id" placeholder="Choose drug">
+                          @for (m of medicines; track m.id) {
+                            <mat-option [value]="m.id">{{ m.name }}</mat-option>
+                          }
+                        </mat-select>
+                      </mat-form-field>
+                    </div>
 
-                  <div class="col-lg-2 m-b-16">
-                    <mat-label class="f-w-600 m-b-8 d-block">Mfg Date</mat-label>
-                    <mat-form-field appearance="outline" class="w-100">
-                      <input matInput type="date" formControlName="manufacture_date">
-                    </mat-form-field>
-                  </div>
+                    <div class="col-md-4 m-b-16">
+                      <label class="hc-field-label">Batch Number <span class="req">*</span></label>
+                      <mat-form-field appearance="outline" class="w-100">
+                        <input matInput formControlName="batch_number" placeholder="e.g. BATCH-882">
+                      </mat-form-field>
+                    </div>
 
-                  <div class="col-lg-2 m-b-16">
-                    <mat-label class="f-w-600 m-b-8 d-block">Expiry Date <span class="text-danger">*</span></mat-label>
-                    <mat-form-field appearance="outline" class="w-100">
-                      <input matInput type="date" formControlName="expiry_date">
-                    </mat-form-field>
-                  </div>
+                    <div class="col-md-4 m-b-16">
+                      <label class="hc-field-label">Quantity Inward <span class="req">*</span></label>
+                      <mat-form-field appearance="outline" class="w-100">
+                        <input matInput type="number" formControlName="quantity" min="1">
+                      </mat-form-field>
+                    </div>
 
-                  <div class="col-lg-1 m-b-16">
-                    <mat-label class="f-w-600 m-b-8 d-block">Qty <span class="text-danger">*</span></mat-label>
-                    <mat-form-field appearance="outline" class="w-100">
-                      <input matInput type="number" formControlName="quantity" min="1">
-                    </mat-form-field>
-                  </div>
+                    <div class="col-md-3 m-b-16">
+                      <label class="hc-field-label">Mfg Date <span class="req">*</span></label>
+                      <mat-form-field appearance="outline" class="w-100">
+                        <input matInput [matDatepicker]="mfgPicker" formControlName="manufacture_date" placeholder="DD-MM-YYYY">
+                        <mat-datepicker-toggle matIconSuffix [for]="mfgPicker"></mat-datepicker-toggle>
+                        <mat-datepicker #mfgPicker></mat-datepicker>
+                      </mat-form-field>
+                    </div>
 
-                  <div class="col-lg-2 m-b-16" style="display:flex;align-items:center;gap:8px;">
-                    <div style="flex:1;">
-                      <mat-label class="f-w-600 m-b-8 d-block">Cost Price (₹)</mat-label>
+                    <div class="col-md-3 m-b-16">
+                      <label class="hc-field-label">Expiry Date <span class="req">*</span></label>
+                      <mat-form-field appearance="outline" class="w-100">
+                        <input matInput [matDatepicker]="expPicker" formControlName="expiry_date" placeholder="DD-MM-YYYY">
+                        <mat-datepicker-toggle matIconSuffix [for]="expPicker"></mat-datepicker-toggle>
+                        <mat-datepicker #expPicker></mat-datepicker>
+                      </mat-form-field>
+                    </div>
+
+                    <div class="col-md-3 m-b-16">
+                      <label class="hc-field-label">Unit Cost Price (₹) <span class="req">*</span></label>
                       <mat-form-field appearance="outline" class="w-100">
                         <input matInput type="number" formControlName="unit_cost" min="0">
                       </mat-form-field>
                     </div>
-                    @if (items.length > 1) {
-                      <button mat-icon-button type="button" (click)="removeItem(i)" style="color:#ef4444;margin-top:20px;">
-                        <i-tabler name="trash"></i-tabler>
-                      </button>
-                    }
+
+                    <div class="col-md-3 m-b-16">
+                      <label class="hc-field-label">Selling Price (₹) <span class="req">*</span></label>
+                      <mat-form-field appearance="outline" class="w-100">
+                        <input matInput type="number" formControlName="selling_price" min="0">
+                      </mat-form-field>
+                    </div>
                   </div>
                 </div>
               }
             </div>
           </div>
 
-          <div class="m-t-12">
-            <button mat-stroked-button type="button" class="me-3 Cancel_Button" (click)="closeForm()">
-              Cancel
-            </button>
-            <button mat-flat-button color="primary" type="submit" [disabled]="saving()">
-              @if (saving()) { <mat-spinner diameter="18" style="margin-right:8px;display:inline-block;"></mat-spinner> }
-              {{ saving() ? 'Saving…' : 'Submit Draft Request' }}
+          <div class="hc-form-actions">
+            <button type="button" class="psh-btn psh-btn--secondary" (click)="closeForm()">Cancel</button>
+            <button type="submit" class="psh-btn psh-btn--primary" [disabled]="saving()">
+              @if (saving()) {
+                <mat-spinner diameter="18" style="margin-right:8px;display:inline-block;"></mat-spinner>
+              }
+              <span>{{ saving() ? 'Saving...' : 'Submit Draft Approval' }}</span>
             </button>
           </div>
+
         </form>
-      </mat-card-content>
-    </mat-card>
+      </div>
+    </div>
+  }
+
+  <!-- APPROVAL DETAILS SIDE DRAWER -->
+  @if (selectedApproval(); as appr) {
+    <div class="hc-drawer-backdrop" (click)="closeApprovalDetails()">
+      <div class="hc-drawer-panel" (click)="$event.stopPropagation()">
+
+        <div class="hc-drawer-hero">
+          <button class="hc-drawer-close" (click)="closeApprovalDetails()" matTooltip="Close Details">
+            <i-tabler name="x"></i-tabler>
+          </button>
+          <div class="hc-drawer-avatar-box">
+            <div class="hc-drawer-avatar"><i-tabler name="package-import"></i-tabler></div>
+          </div>
+          <h2 class="hc-drawer-name">{{ appr.reference_number }}</h2>
+          <div class="hc-drawer-sub">
+            <span>Supplier: {{ appr.supplier_name || 'Direct' }}</span>
+            <span>·</span>
+            <span class="hc-stage-badge hc-stage-badge--{{ getStatusClass(appr.status) }}">{{ appr.status }}</span>
+          </div>
+        </div>
+
+        <div class="hc-drawer-body">
+          <div class="hc-drawer-section">
+            <h3 class="hc-drawer-sec-title">Batch Breakdown</h3>
+            <div class="flex flex-column gap-12">
+              @for (item of (appr.items || []); track item.id) {
+                <div class="hc-drawer-item">
+                  <div class="flex align-center justify-between m-b-4">
+                    <span class="val">{{ item.medicine_name }}</span>
+                    <span class="lbl">Qty: {{ item.quantity }}</span>
+                  </div>
+                  <div class="flex align-center justify-between text-xs text-muted">
+                    <span>Batch: <code>{{ item.batch_number }}</code> · Exp: {{ item.expiry_date }}</span>
+                    <span class="font-bold text-emerald">{{ formatAmount(item.unit_cost * item.quantity) }}</span>
+                  </div>
+                </div>
+              }
+            </div>
+          </div>
+
+          <div class="hc-drawer-section">
+            <h3 class="hc-drawer-sec-title">Financial Summary</h3>
+            <div class="hc-drawer-grid">
+              <div class="hc-drawer-item">
+                <span class="lbl">Total Items</span>
+                <span class="val">{{ (appr.items || []).length }} batch(es)</span>
+              </div>
+              <div class="hc-drawer-item">
+                <span class="lbl">Total Valuation</span>
+                <span class="val highlight-fee">{{ formatAmount(appr.total_amount) }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="hc-drawer-footer">
+          <button class="psh-btn psh-btn--secondary" (click)="closeApprovalDetails()">Close</button>
+          @if (appr.status === StockApprovalStatus.PENDING) {
+            <button class="psh-btn psh-btn--primary" (click)="approve(appr); closeApprovalDetails()">
+              Approve Request
+            </button>
+          }
+        </div>
+
+      </div>
+    </div>
   }
 
 </div>
+

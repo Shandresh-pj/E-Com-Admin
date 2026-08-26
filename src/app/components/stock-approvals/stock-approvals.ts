@@ -1,5 +1,5 @@
 import {
-  Component, OnInit, OnDestroy, ChangeDetectorRef, ChangeDetectionStrategy, signal
+  Component, OnInit, OnDestroy, ChangeDetectorRef, ChangeDetectionStrategy, signal, computed
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormsModule, FormBuilder, FormGroup, FormArray, Validators } from '@angular/forms';
@@ -10,6 +10,8 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatNativeDateModule } from '@angular/material/core';
 import { TablerIconsModule } from 'angular-tabler-icons';
 import { Subscription } from 'rxjs';
 
@@ -18,6 +20,7 @@ import { AlertService } from 'src/app/Securities/Services/alert.service';
 import { PermissionService } from 'src/app/Securities/Services/permissions.service';
 import { SocketService } from 'src/app/Securities/Services/socket.service';
 import { StockApproval, StockApprovalStatus, HcEventType } from 'src/app/models/healthcare.models';
+import { formatDateDDMMYYYY, parseDateFromDDMMYYYY } from 'src/app/utils/date-utils';
 
 @Component({
   selector: 'app-stock-approvals',
@@ -26,24 +29,42 @@ import { StockApproval, StockApprovalStatus, HcEventType } from 'src/app/models/
   imports: [
     CommonModule, ReactiveFormsModule, FormsModule,
     MatCardModule, MatButtonModule, MatFormFieldModule, MatInputModule,
-    MatSelectModule, MatProgressSpinnerModule, MatTooltipModule, TablerIconsModule,
+    MatSelectModule, MatProgressSpinnerModule, MatTooltipModule,
+    MatDatepickerModule, MatNativeDateModule, TablerIconsModule,
   ],
   templateUrl: './stock-approvals.html',
   styleUrl: './stock-approvals.scss',
 })
 export class StockApprovalsComponent implements OnInit, OnDestroy {
-  approvals     = signal<StockApproval[]>([]);
-  loading       = signal(false);
-  saving        = signal(false);
-  showForm      = signal(false);
-  editingId     = signal<number | null>(null);
-  statusFilter  = '';
-  medicines:    any[] = [];
+  approvals        = signal<StockApproval[]>([]);
+  loading          = signal(false);
+  saving           = signal(false);
+  showForm         = signal(false);
+  editingId        = signal<number | null>(null);
+  searchQuery      = signal('');
+  statusFilter     = signal('');
+  viewMode         = signal<'grid' | 'list'>('grid');
+  selectedApproval = signal<StockApproval | null>(null);
+  formValues       = signal<any>({});
+  medicines:       any[] = [];
 
-  filteredApprovals = () => {
-    const sf = this.statusFilter;
-    return this.approvals().filter(a => !sf || a.status === sf);
-  };
+  filteredApprovals = computed(() => {
+    const q = this.searchQuery().toLowerCase().trim();
+    const sf = this.statusFilter();
+    return this.approvals().filter(a =>
+      (!sf || a.status === sf) &&
+      (!q  ||
+        (a.reference_number || '').toLowerCase().includes(q) ||
+        (a.supplier_name || '').toLowerCase().includes(q) ||
+        (a.notes || '').toLowerCase().includes(q)
+      )
+    );
+  });
+
+  pendingCount  = computed(() => this.approvals().filter(a => a.status === StockApprovalStatus.PENDING || a.status === StockApprovalStatus.SUBMITTED).length);
+  approvedCount = computed(() => this.approvals().filter(a => a.status === StockApprovalStatus.APPROVED).length);
+  postedCount   = computed(() => this.approvals().filter(a => a.status === StockApprovalStatus.POSTED).length);
+  rejectedCount = computed(() => this.approvals().filter(a => a.status === StockApprovalStatus.REJECTED).length);
 
   readonly statuses = Object.values(StockApprovalStatus);
   readonly StockApprovalStatus = StockApprovalStatus;
@@ -58,7 +79,6 @@ export class StockApprovalsComponent implements OnInit, OnDestroy {
     private socket: SocketService,
     public  cdr:    ChangeDetectorRef,
   ) {}
-
 
   ngOnInit(): void {
     this.buildForm();
@@ -77,6 +97,32 @@ export class StockApprovalsComponent implements OnInit, OnDestroy {
       items:         this.fb.array([]),
     });
     this.addItem();
+
+    this.form.valueChanges.subscribe(val => {
+      this.formValues.set(val);
+      this.cdr.markForCheck();
+    });
+  }
+
+  setSearchQuery(q: string): void {
+    this.searchQuery.set(q);
+    this.cdr.markForCheck();
+  }
+
+  selectStatusFilter(s: string): void {
+    this.statusFilter.set(s);
+    this.cdr.markForCheck();
+  }
+
+  viewApprovalDetails(appr: StockApproval, event?: Event): void {
+    if (event) event.stopPropagation();
+    this.selectedApproval.set(appr);
+    this.cdr.markForCheck();
+  }
+
+  closeApprovalDetails(): void {
+    this.selectedApproval.set(null);
+    this.cdr.markForCheck();
   }
 
   get items(): FormArray { return this.form.get('items') as FormArray; }
@@ -114,7 +160,16 @@ export class StockApprovalsComponent implements OnInit, OnDestroy {
   submit(): void {
     if (this.form.invalid) { this.form.markAllAsTouched(); return; }
     this.saving.set(true);
-    this.common.postApi('stock-approvals', this.form.value).subscribe({
+    const val = this.form.value;
+    const payload = {
+      ...val,
+      items: (val.items || []).map((item: any) => ({
+        ...item,
+        manufacture_date: formatDateDDMMYYYY(item.manufacture_date),
+        expiry_date: formatDateDDMMYYYY(item.expiry_date)
+      }))
+    };
+    this.common.postApi('stock-approvals', payload).subscribe({
       next: () => { this.alert.success('Stock approval submitted'); this.saving.set(false); this.closeForm(); this.load(); },
       error: (e: any) => { this.alert.error(e?.error?.message || 'Failed'); this.saving.set(false); this.cdr.markForCheck(); },
     });
@@ -153,7 +208,7 @@ export class StockApprovalsComponent implements OnInit, OnDestroy {
   }
 
   getTotalAmount(items: any[]): number {
-    return items.reduce((s, i) => s + (i.quantity * i.unit_cost), 0);
+    return (items || []).reduce((s, i) => s + (i.quantity * i.unit_cost), 0);
   }
 
   save(): void { this.submit(); }

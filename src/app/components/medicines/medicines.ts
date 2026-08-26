@@ -1,5 +1,5 @@
 import {
-  Component, OnInit, ChangeDetectorRef, ChangeDetectionStrategy, signal
+  Component, OnInit, ChangeDetectorRef, ChangeDetectionStrategy, signal, computed
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
@@ -36,17 +36,20 @@ import {
   styleUrl: './medicines.scss',
 })
 export class MedicinesComponent implements OnInit {
-  medicines   = signal<Medicine[]>([]);
-  loading     = signal(false);
-  saving      = signal(false);
-  showForm    = signal(false);
-  editingId   = signal<number | null>(null);
-  searchQuery = '';
-  stockFilter = '';
+  medicines        = signal<Medicine[]>([]);
+  loading          = signal(false);
+  saving           = signal(false);
+  showForm         = signal(false);
+  editingId        = signal<number | null>(null);
+  searchQuery      = signal('');
+  stockFilter      = signal('');
+  viewMode         = signal<'grid' | 'list'>('grid');
+  selectedMedicine = signal<Medicine | null>(null);
+  formValues       = signal<any>({});
 
-  filteredMedicines = () => {
-    const q = this.searchQuery.toLowerCase();
-    const sf = this.stockFilter;
+  filteredMedicines = computed(() => {
+    const q = this.searchQuery().toLowerCase().trim();
+    const sf = this.stockFilter();
     return this.medicines().filter(m => {
       const stockStatus = this.getComputedStockStatus(m);
       return (
@@ -54,11 +57,17 @@ export class MedicinesComponent implements OnInit {
         (!q ||
           (m.name || '').toLowerCase().includes(q) ||
           (m.generic_name || '').toLowerCase().includes(q) ||
-          (m.brand || '').toLowerCase().includes(q)
+          (m.brand || '').toLowerCase().includes(q) ||
+          (m.manufacturer || '').toLowerCase().includes(q)
         )
       );
     });
-  };
+  });
+
+  normalCount        = computed(() => this.medicines().filter(m => this.getComputedStockStatus(m) === StockStatus.NORMAL).length);
+  lowStockCount      = computed(() => this.medicines().filter(m => this.getComputedStockStatus(m) === StockStatus.LOW_STOCK).length);
+  criticalStockCount = computed(() => this.medicines().filter(m => this.getComputedStockStatus(m) === StockStatus.CRITICAL_STOCK).length);
+  outOfStockCount    = computed(() => this.medicines().filter(m => this.getComputedStockStatus(m) === StockStatus.OUT_OF_STOCK).length);
 
   readonly dosageForms = Object.values(DosageForm);
   readonly stockStatuses = Object.values(StockStatus);
@@ -75,7 +84,6 @@ export class MedicinesComponent implements OnInit {
     public  cdr:    ChangeDetectorRef,
   ) {}
 
-  /** Expose Math to template for min/max calculations */
   readonly Math = Math;
 
   ngOnInit(): void {
@@ -104,6 +112,32 @@ export class MedicinesComponent implements OnInit {
       is_active:                [true],
       description:              [''],
     });
+
+    this.form.valueChanges.subscribe(val => {
+      this.formValues.set(val);
+      this.cdr.markForCheck();
+    });
+  }
+
+  setSearchQuery(q: string): void {
+    this.searchQuery.set(q);
+    this.cdr.markForCheck();
+  }
+
+  selectStockFilter(f: string): void {
+    this.stockFilter.set(f);
+    this.cdr.markForCheck();
+  }
+
+  viewMedDetails(m: Medicine, event?: Event): void {
+    if (event) event.stopPropagation();
+    this.selectedMedicine.set(m);
+    this.cdr.markForCheck();
+  }
+
+  closeMedDetails(): void {
+    this.selectedMedicine.set(null);
+    this.cdr.markForCheck();
   }
 
   load(): void {
@@ -145,7 +179,6 @@ export class MedicinesComponent implements OnInit {
     });
   }
 
-
   getComputedStockStatus(med: any): StockStatus {
     const stock = med.current_stock ?? 0;
     const reorder = med.reorder_level ?? 10;
@@ -168,10 +201,6 @@ export class MedicinesComponent implements OnInit {
   getStockColor(med: any): string {
     const status = this.getComputedStockStatus(med);
     return this.stockStatusMeta[status]?.color || '#666';
-  }
-
-  getKpiCount(status: StockStatus): number {
-    return this.medicines().filter(m => this.getComputedStockStatus(m) === status).length;
   }
 
   getKpiCountByStatus(statusStr: string): number {

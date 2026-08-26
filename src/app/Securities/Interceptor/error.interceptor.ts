@@ -55,7 +55,7 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
             break;
 
           case 404:
-            alert.warning(error.error?.message || 'Resource not found.');
+            // 404 errors are silently passed to component handlers — no global popup is displayed.
             break;
 
           case 409:

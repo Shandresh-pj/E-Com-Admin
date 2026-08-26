@@ -1,5 +1,5 @@
 import {
-  Component, OnInit, OnDestroy, ChangeDetectorRef, ChangeDetectionStrategy, signal
+  Component, OnInit, OnDestroy, ChangeDetectorRef, ChangeDetectionStrategy, signal, computed
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
@@ -13,6 +13,8 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTabsModule } from '@angular/material/tabs';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatNativeDateModule } from '@angular/material/core';
 import { TablerIconsModule } from 'angular-tabler-icons';
 import { Subscription } from 'rxjs';
 
@@ -21,6 +23,7 @@ import { AlertService } from 'src/app/Securities/Services/alert.service';
 import { PermissionService } from 'src/app/Securities/Services/permissions.service';
 import { SocketService } from 'src/app/Securities/Services/socket.service';
 import { Patient } from 'src/app/models/healthcare.models';
+import { formatDateDDMMYYYY, parseDateFromDDMMYYYY } from 'src/app/utils/date-utils';
 
 @Component({
   selector: 'app-patients',
@@ -29,57 +32,77 @@ import { Patient } from 'src/app/models/healthcare.models';
   imports: [
     CommonModule, ReactiveFormsModule, FormsModule, RouterModule,
     MatCardModule, MatButtonModule, MatFormFieldModule, MatInputModule,
-    MatSelectModule, MatIconModule, MatTooltipModule,
-    MatProgressSpinnerModule, MatTabsModule, TablerIconsModule,
+    MatSelectModule, MatIconModule, MatTooltipModule, MatProgressSpinnerModule,
+    MatTabsModule, MatDatepickerModule, MatNativeDateModule, TablerIconsModule
   ],
   templateUrl: './patients.html',
   styleUrl: './patients.scss',
 })
 export class PatientsComponent implements OnInit, OnDestroy {
-  patients    = signal<Patient[]>([]);
-  loading     = signal(false);
-  saving      = signal(false);
-  showForm    = signal(false);
-  editingId   = signal<number | null>(null);
-  searchQuery = '';
-  selectedPatient = signal<Patient | null>(null);
+  patients             = signal<Patient[]>([]);
+  loading              = signal(false);
+  saving               = signal(false);
+  showForm             = signal(false);
+  editingId            = signal<number | null>(null);
+  searchQuery          = signal<string>('');
+  selectedGender       = signal<string>('ALL');
+  selectedBloodGroup   = signal<string>('ALL');
+  viewMode             = signal<'grid' | 'list'>('grid');
+  selectedPatient      = signal<Patient | null>(null);
+  formValues           = signal<Partial<Patient>>({});
+  copiedCode           = signal<string | null>(null);
 
   // History tabs data
   appointmentHistory:  any[] = [];
   prescriptionHistory: any[] = [];
   paymentHistory:      any[] = [];
-
-  filteredPatients = () => {
-    const q = this.searchQuery.toLowerCase();
-    return this.patients().filter(p =>
-      !q ||
-      p.name.toLowerCase().includes(q) ||
-      p.patient_code.toLowerCase().includes(q) ||
-      (p.phone || '').toLowerCase().includes(q)
-    );
-  };
-
-  get maleCount(): number {
-    return this.patients().filter(p => p.gender === 'Male').length;
-  }
-
-  get femaleCount(): number {
-    return this.patients().filter(p => p.gender === 'Female').length;
-  }
-
-  get viewingPatient() {
-    return this.selectedPatient;
-  }
-
-  closeView(): void {
-    this.closeProfile();
-  }
+  historyLoading       = signal(false);
 
   form!: FormGroup;
   private subs = new Subscription();
 
   readonly genderOptions = ['Male', 'Female', 'Other'];
   readonly bloodGroups   = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'];
+
+  // Computed filtered list
+  filteredPatients = computed(() => {
+    const q = this.searchQuery().toLowerCase().trim();
+    const gender = this.selectedGender();
+    const bg = this.selectedBloodGroup();
+
+    return this.patients().filter(p => {
+      const matchesSearch = !q ||
+        p.name.toLowerCase().includes(q) ||
+        p.patient_code.toLowerCase().includes(q) ||
+        (p.phone || '').toLowerCase().includes(q) ||
+        (p.email || '').toLowerCase().includes(q) ||
+        (p.blood_group || '').toLowerCase().includes(q);
+
+      const matchesGender = gender === 'ALL' || p.gender === gender;
+      const matchesBG = bg === 'ALL' || p.blood_group === bg;
+
+      return matchesSearch && matchesGender && matchesBG;
+    });
+  });
+
+  // Computed metrics
+  maleCount = computed(() => this.patients().filter(p => p.gender === 'Male').length);
+  femaleCount = computed(() => this.patients().filter(p => p.gender === 'Female').length);
+  otherGenderCount = computed(() => this.patients().filter(p => p.gender === 'Other').length);
+
+  patientsWithAllergiesCount = computed(() => {
+    return this.patients().filter(p => p.allergies && p.allergies.trim().length > 0).length;
+  });
+
+  bloodGroupCounts = computed(() => {
+    const counts: Record<string, number> = {};
+    for (const p of this.patients()) {
+      if (p.blood_group) {
+        counts[p.blood_group] = (counts[p.blood_group] || 0) + 1;
+      }
+    }
+    return counts;
+  });
 
   constructor(
     private fb:     FormBuilder,
@@ -95,7 +118,9 @@ export class PatientsComponent implements OnInit, OnDestroy {
     this.loadPatients();
   }
 
-  ngOnDestroy(): void { this.subs.unsubscribe(); }
+  ngOnDestroy(): void {
+    this.subs.unsubscribe();
+  }
 
   private buildForm(): void {
     this.form = this.fb.group({
@@ -109,34 +134,80 @@ export class PatientsComponent implements OnInit, OnDestroy {
       allergies:     [''],
       notes:         [''],
     });
+
+    // Real-time listener for form live preview
+    this.subs.add(
+      this.form.valueChanges.subscribe(val => {
+        this.formValues.set(val);
+        this.cdr.markForCheck();
+      })
+    );
   }
 
   loadPatients(): void {
     this.loading.set(true);
     this.common.getApi('patients').subscribe({
-      next:  (res: any) => { this.patients.set(res?.data || []); this.loading.set(false); this.cdr.markForCheck(); },
-      error: ()         => { this.loading.set(false); this.cdr.markForCheck(); },
+      next: (res: any) => {
+        this.patients.set(res?.data || []);
+        this.loading.set(false);
+        this.cdr.markForCheck();
+      },
+      error: () => {
+        this.loading.set(false);
+        this.cdr.markForCheck();
+      },
     });
+  }
+
+  setSearchQuery(q: string): void {
+    this.searchQuery.set(q);
+    this.cdr.markForCheck();
+  }
+
+  selectGenderFilter(gender: string): void {
+    this.selectedGender.set(gender);
+    this.cdr.markForCheck();
+  }
+
+  selectBloodGroupFilter(bg: string): void {
+    this.selectedBloodGroup.set(bg);
+    this.cdr.markForCheck();
   }
 
   openForm(patient?: Patient): void {
     if (patient) {
       this.editingId.set(patient.id);
-      this.form.patchValue(patient);
+      this.form.patchValue({
+        ...patient,
+        date_of_birth: parseDateFromDDMMYYYY(patient.date_of_birth)
+      });
+      this.formValues.set(patient);
     } else {
       this.editingId.set(null);
-      this.form.reset({ gender: 'Male' });
+      const defaultVal: Partial<Patient> = { gender: 'Male' };
+      this.form.reset(defaultVal);
+      this.formValues.set(defaultVal);
     }
     this.showForm.set(true);
     this.selectedPatient.set(null);
+    this.cdr.markForCheck();
   }
 
-  closeForm(): void { this.showForm.set(false); }
+  closeForm(): void {
+    this.showForm.set(false);
+    this.cdr.markForCheck();
+  }
 
   savePatient(): void {
-    if (this.form.invalid) { this.form.markAllAsTouched(); return; }
+    if (this.form.invalid) {
+      this.form.markAllAsTouched();
+      return;
+    }
     this.saving.set(true);
-    const payload = this.form.value;
+    const payload = {
+      ...this.form.value,
+      date_of_birth: formatDateDDMMYYYY(this.form.value.date_of_birth)
+    };
     const id = this.editingId();
     const req$ = id
       ? this.common.putApi(`patients/${id}`, payload)
@@ -144,7 +215,7 @@ export class PatientsComponent implements OnInit, OnDestroy {
 
     req$.subscribe({
       next: () => {
-        this.alert.success(id ? 'Patient updated' : 'Patient registered successfully');
+        this.alert.success(id ? 'Patient details updated' : 'Patient registered successfully');
         this.saving.set(false);
         this.closeForm();
         this.loadPatients();
@@ -157,29 +228,79 @@ export class PatientsComponent implements OnInit, OnDestroy {
     });
   }
 
-  viewPatient(patient: Patient): void {
+  viewPatient(patient: Patient, event?: Event): void {
+    if (event) event.stopPropagation();
     this.selectedPatient.set(patient);
     this.showForm.set(false);
     this.loadPatientHistory(patient.id);
+    this.cdr.markForCheck();
   }
 
-  closeProfile(): void { this.selectedPatient.set(null); }
+  closeProfile(): void {
+    this.selectedPatient.set(null);
+    this.cdr.markForCheck();
+  }
 
   private loadPatientHistory(id: number): void {
-    // Backend provides consultation history via /patients/:id/history
+    this.historyLoading.set(true);
     this.common.getApi(`patients/${id}/history`).subscribe({
-      next: (r: any) => { this.appointmentHistory = r?.data || []; this.cdr.markForCheck(); },
-      error: () => { this.appointmentHistory = []; this.cdr.markForCheck(); }
+      next: (r: any) => {
+        this.appointmentHistory = r?.data || [];
+        this.historyLoading.set(false);
+        this.cdr.markForCheck();
+      },
+      error: () => {
+        this.appointmentHistory = [];
+        this.historyLoading.set(false);
+        this.cdr.markForCheck();
+      }
     });
   }
 
-  getInitials(name: string): string {
-    return name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
+  copyPatientCode(code?: string, event?: Event): void {
+    if (event) event.stopPropagation();
+    if (!code) return;
+    navigator.clipboard.writeText(code).then(() => {
+      this.copiedCode.set(code);
+      this.alert.success(`Patient code ${code} copied to clipboard`);
+      setTimeout(() => {
+        if (this.copiedCode() === code) this.copiedCode.set(null);
+        this.cdr.markForCheck();
+      }, 2500);
+      this.cdr.markForCheck();
+    });
   }
 
-  getAge(dob: string | undefined): string {
+  getInitials(name?: string): string {
+    if (!name) return 'PT';
+    return name
+      .split(' ')
+      .filter(n => n.length > 0)
+      .map(n => n[0])
+      .join('')
+      .slice(0, 2)
+      .toUpperCase();
+  }
+
+  getAge(dob?: string): string {
     if (!dob) return '—';
-    const years = Math.floor((Date.now() - new Date(dob).getTime()) / (365.25 * 24 * 3600 * 1000));
+    const birth = new Date(dob);
+    if (isNaN(birth.getTime())) return '—';
+    const years = Math.floor((Date.now() - birth.getTime()) / (365.25 * 24 * 3600 * 1000));
     return `${years} yrs`;
   }
+
+  getGenderGradient(gender?: string): string {
+    if (!gender) return 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)';
+    const g = gender.toLowerCase();
+    if (g === 'female') return 'linear-gradient(135deg, #ec4899 0%, #be185d 100%)';
+    if (g === 'other') return 'linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%)';
+    return 'linear-gradient(135deg, #0284c7 0%, #0369a1 100%)'; // Male blue default
+  }
+
+  getGenderBadgeClass(gender?: string): string {
+    if (!gender) return 'hc-gender-badge--Male';
+    return `hc-gender-badge--${gender}`;
+  }
 }
+

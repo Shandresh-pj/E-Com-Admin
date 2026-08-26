@@ -10,7 +10,7 @@
 
   <!-- Page Hero Header -->
   <header class="psh-hero">
-    <div>
+    <div class="psh-hero__text">
       <div class="psh-eyebrow">
         <span class="psh-eyebrow__dot"></span>
         <span>HEALTHCARE ERP</span>
@@ -18,25 +18,26 @@
         <span>POS DISPENSING TERMINAL</span>
       </div>
       <h1 class="psh-title">Pharmacy <span class="psh-title__accent">Checkout</span></h1>
-      <p class="psh-sub">Point of sale billing, pessimistic batch stock deduction, split payments, and instant invoice generation.</p>
+      <p class="psh-sub">Point of sale billing, FEFO batch stock deduction, split payments, and instant invoice generation.</p>
     </div>
     <div class="psh-actions">
-      @if (!cartEmpty) {
+      @if (!cartEmpty()) {
         <button class="psh-btn psh-btn--ghost" (click)="clearCart()">
           <i-tabler name="trash"></i-tabler>
-          Clear Cart
+          <span>Clear Cart</span>
         </button>
       }
     </div>
   </header>
 
   <!-- POS Split Interface -->
-  <div class="hc-pos" style="padding:0;">
-    <!-- Left Panel: Search + Cart -->
+  <div class="hc-pos-wrapper">
+
+    <!-- Left Panel: Medicine Search + Cart -->
     <div class="hc-pos-left">
 
       <!-- Search Section -->
-      <div class="hc-pos-search-section">
+      <div class="hc-pos-search-card">
         <div class="hc-pos-search-wrap">
           @if (searching()) {
             <mat-spinner diameter="18" class="hc-pos-search-spinner"></mat-spinner>
@@ -46,8 +47,8 @@
           <input
             id="pos-medicine-search"
             class="hc-pos-search-input"
-            placeholder="Search medicine by brand, generic name, composition..."
-            [(ngModel)]="searchQuery"
+            placeholder="Type brand name, generic composition, barcode..."
+            [ngModel]="searchQuery()"
             (ngModelChange)="onSearchChange($event)"
             autocomplete="off"
           />
@@ -76,68 +77,76 @@
         }
       </div>
 
-      <!-- Cart Card Container -->
-      <div class="hc-pos-cart">
-        @if (cartEmpty) {
+      <!-- Cart Table Card -->
+      <div class="hc-pos-cart-card">
+        @if (cartEmpty()) {
           <div class="hc-pos-cart-empty">
-            <i-tabler name="shopping-cart-off" class="hc-pos-empty-icon"></i-tabler>
-            <p>Cart is empty. Search for medicines above to begin checkout.</p>
+            <div class="hc-pos-empty-icon-wrap">
+              <i-tabler name="shopping-cart-off" class="hc-pos-empty-icon"></i-tabler>
+            </div>
+            <h3>POS Cart is Empty</h3>
+            <p>Search for medicines in the search bar above to begin customer checkout.</p>
           </div>
         } @else {
-          <table class="hc-pos-cart-table">
-            <thead>
-              <tr>
-                <th class="hc-cart-num">#</th>
-                <th>Medicine / Batch</th>
-                <th>Price</th>
-                <th>Qty</th>
-                <th class="hc-col-amount">Amount</th>
-                <th></th>
-              </tr>
-            </thead>
-            <tbody>
-              @for (item of cart(); track item.medicine_id + '-' + item.batch_id; let idx = $index) {
+          <div class="hc-cart-table-scroll">
+            <table class="hc-cart-table">
+              <thead>
                 <tr>
-                  <td class="hc-cart-num">{{ idx + 1 }}</td>
-                  <td>
-                    <div class="hc-cart-med-name">{{ item.medicine_name }}</div>
-                    <div class="hc-cart-med-sub">Batch: <code>{{ item.batch_number }}</code> · Exp: {{ item.expiry_date }}</div>
-                  </td>
-                  <td>{{ formatPrice(item.unit_price) }}</td>
-                  <td>
-                    <div class="hc-cart-qty-wrap">
-                      <button mat-icon-button class="hc-qty-btn" (click)="updateQuantity(idx, item.quantity - 1)">
-                        <i-tabler name="minus"></i-tabler>
-                      </button>
-                      <input type="number" class="hc-qty-input" [value]="item.quantity"
-                             (change)="onQtyInputChange(idx, $event)" min="1" [max]="item.available_qty" />
-                      <button mat-icon-button class="hc-qty-btn" (click)="updateQuantity(idx, item.quantity + 1)">
-                        <i-tabler name="plus"></i-tabler>
-                      </button>
-                    </div>
-                  </td>
-                  <td class="hc-cart-amount">{{ formatPrice(item.amount) }}</td>
-                  <td>
-                    <button mat-icon-button (click)="removeItem(idx)" class="hc-remove-btn" matTooltip="Remove">
-                      <i-tabler name="trash"></i-tabler>
-                    </button>
-                  </td>
+                  <th class="hc-cart-num">#</th>
+                  <th>Formulary Drug / FEFO Batch</th>
+                  <th>Unit Price</th>
+                  <th style="text-align:center;">Qty</th>
+                  <th class="hc-col-amount" style="text-align:right;">Subtotal</th>
+                  <th style="text-align:right;">Action</th>
                 </tr>
-              }
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                @for (item of cart(); track item.medicine_id + '-' + item.batch_id; let idx = $index) {
+                  <tr>
+                    <td class="hc-cart-num">{{ idx + 1 }}</td>
+                    <td>
+                      <div class="hc-cart-med-name">{{ item.medicine_name }}</div>
+                      <div class="hc-cart-med-sub">Batch: <code>{{ item.batch_number }}</code> · Exp: {{ item.expiry_date }}</div>
+                    </td>
+                    <td><span class="hc-cart-price">{{ formatPrice(item.unit_price) }}</span></td>
+                    <td>
+                      <div class="hc-cart-qty-wrap">
+                        <button class="hc-qty-btn" (click)="updateQuantity(idx, item.quantity - 1)">
+                          <i-tabler name="minus" style="width:14px;height:14px;"></i-tabler>
+                        </button>
+                        <input type="number" class="hc-qty-input" [value]="item.quantity"
+                               (change)="onQtyInputChange(idx, $event)" min="1" [max]="item.available_qty" />
+                        <button class="hc-qty-btn" (click)="updateQuantity(idx, item.quantity + 1)">
+                          <i-tabler name="plus" style="width:14px;height:14px;"></i-tabler>
+                        </button>
+                      </div>
+                    </td>
+                    <td class="hc-cart-amount" style="text-align:right;">
+                      <span class="hc-amount-val">{{ formatPrice(item.amount) }}</span>
+                    </td>
+                    <td style="text-align:right;">
+                      <button class="hc-remove-btn" (click)="removeItem(idx)" matTooltip="Remove Item">
+                        <i-tabler name="trash"></i-tabler>
+                      </button>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
         }
       </div>
 
     </div>
 
-    <!-- Right Panel: Checkout Register -->
+    <!-- Right Panel: Patient + Billing Register -->
     <div class="hc-pos-right">
-      <!-- Patient Panel -->
-      <div class="hc-pos-panel">
+
+      <!-- Patient Information -->
+      <div class="hc-pos-panel-card">
         <div class="hc-pos-panel-title">
-          <i-tabler name="user"></i-tabler>
-          Patient Information
+          <i-tabler name="user" class="icon"></i-tabler>
+          <span>Patient Account (Optional)</span>
         </div>
         @if (selectedPatient()) {
           <div class="hc-pos-patient-selected">
@@ -145,104 +154,121 @@
               <div class="hc-pos-patient-name">{{ selectedPatient()?.name }}</div>
               <div class="hc-pos-patient-code">{{ selectedPatient()?.patient_code }} · {{ selectedPatient()?.phone }}</div>
             </div>
-            <button mat-icon-button (click)="removePatient()"><i-tabler name="x"></i-tabler></button>
+            <button class="hc-remove-patient-btn" (click)="removePatient()"><i-tabler name="x"></i-tabler></button>
           </div>
         } @else {
-          <input class="hc-pos-patient-input" placeholder="Patient name or phone (Walk-in)..."
-                 [(ngModel)]="patientSearchQuery" (input)="onPatientSearch($event)" />
-          @if (patientResults.length > 0) {
-            <div class="hc-pos-results" style="position:relative;top:4px;">
-              @for (p of patientResults; track p.id) {
-                <div class="hc-pos-result-item" (click)="selectPatient(p)">
-                  <div>
-                    <div class="hc-pos-result-name">{{ p.name }}</div>
-                    <div class="hc-pos-result-sub">{{ p.patient_code }} · {{ p.phone }}</div>
+          <div style="position:relative;">
+            <input class="hc-pos-patient-input" placeholder="Search patient by name or phone (Walk-in)..."
+                   [ngModel]="patientSearchQuery" (input)="onPatientSearch($event)" />
+            @if (patientResults.length > 0) {
+              <div class="hc-pos-results" style="position:absolute;top:100%;left:0;right:0;z-index:99;">
+                @for (p of patientResults; track p.id) {
+                  <div class="hc-pos-result-item" (click)="selectPatient(p)">
+                    <div>
+                      <div class="hc-pos-result-name">{{ p.name }}</div>
+                      <div class="hc-pos-result-sub">{{ p.patient_code }} · {{ p.phone }}</div>
+                    </div>
                   </div>
-                </div>
-              }
-            </div>
-          }
+                }
+              </div>
+            }
+          </div>
         }
       </div>
 
-      <!-- Bill Summary Panel -->
-      <div class="hc-pos-panel">
+      <!-- Financial Register -->
+      <div class="hc-pos-panel-card">
         <div class="hc-pos-panel-title">
-          <i-tabler name="receipt"></i-tabler>
-          Payment Register
+          <i-tabler name="receipt" class="icon"></i-tabler>
+          <span>Financial Register</span>
         </div>
+
         <div class="hc-pos-bill">
           <div class="hc-bill-row">
-            <span>Subtotal</span>
-            <span>{{ formatPrice(subtotal) }}</span>
+            <span class="lbl">Subtotal</span>
+            <span class="val">{{ formatPrice(subtotal()) }}</span>
           </div>
+
           <div class="hc-bill-row">
-            <span>Discount (₹)</span>
-            <input type="number" class="hc-bill-input" [(ngModel)]="discountAmount" (ngModelChange)="recalculate()" min="0" />
+            <span class="lbl">Discount (₹)</span>
+            <input type="number" class="hc-bill-input" [ngModel]="discountAmount()" (ngModelChange)="discountAmount.set($event)" min="0" />
           </div>
+
           <div class="hc-bill-row hc-bill-row--grand">
-            <strong>Grand Total</strong>
-            <strong class="hc-grand-total">{{ formatPrice(grandTotal) }}</strong>
+            <span class="lbl-grand">Grand Total</span>
+            <span class="val-grand">{{ formatPrice(grandTotal()) }}</span>
           </div>
+
           <div class="hc-bill-row hc-bill-row--paid">
-            <span>Paid Amount (₹)</span>
-            <input type="number" class="hc-bill-input hc-bill-input--paid" [(ngModel)]="paidAmount" (ngModelChange)="recalculate()" min="0" />
+            <span class="lbl">Paid Amount (₹)</span>
+            <input type="number" class="hc-bill-input hc-bill-input--paid" [ngModel]="paidAmount()" (ngModelChange)="paidAmount.set($event)" min="0" />
           </div>
-          <div class="hc-bill-row hc-bill-row--balance" [class.hc-bill-row--change]="balanceAmount < 0">
-            <span>{{ balanceAmount <= 0 ? 'Change Return' : 'Balance Due' }}</span>
-            <span [class.hc-balance-credit]="balanceAmount < 0">{{ formatPrice(Math.abs(balanceAmount)) }}</span>
+
+          <div class="hc-bill-row hc-bill-row--balance" [class.hc-bill-row--change]="balance() < 0">
+            <span class="lbl-bal">{{ balance() <= 0 ? 'Change Return' : 'Balance Due' }}</span>
+            <span class="val-bal" [class.hc-balance-credit]="balance() < 0">{{ formatPrice(Math.abs(balance())) }}</span>
           </div>
         </div>
 
-        <div class="hc-payment-methods">
-          @for (pm of paymentMethods; track pm) {
-            <button class="hc-payment-btn" [class.active]="selectedPaymentMethod === pm" (click)="selectedPaymentMethod = pm">
-              {{ pm }}
-            </button>
-          }
+        <!-- Payment Method Selection -->
+        <div class="m-t-16">
+          <label class="hc-field-label m-b-8">Select Payment Mode</label>
+          <div class="hc-payment-methods">
+            @for (pm of paymentMethods; track pm) {
+              <button class="hc-payment-btn" [class.active]="selectedPaymentMethod === pm" (click)="selectedPaymentMethod = pm">
+                {{ pm }}
+              </button>
+            }
+          </div>
         </div>
 
-        <button class="psh-btn psh-btn--primary hc-checkout-btn" [disabled]="cartEmpty || processing()" (click)="submitSale()">
+        <!-- Complete Sale Button -->
+        <button class="psh-btn psh-btn--primary hc-checkout-btn m-t-20" [disabled]="cartEmpty() || processing()" (click)="submitSale()">
           @if (processing()) {
-            <mat-spinner diameter="18" class="hc-btn-spinner"></mat-spinner>
+            <mat-spinner diameter="20" class="hc-btn-spinner"></mat-spinner>
           } @else {
-            <i-tabler name="circle-check" style="width:20px;height:20px;"></i-tabler>
-            Complete Sale & Dispense
+            <i-tabler name="circle-check" style="width:20px;height:20px;margin-right:6px;"></i-tabler>
+            <span>Complete Sale & Print Invoice</span>
           }
         </button>
       </div>
+
     </div>
+
   </div>
 
-  <!-- Batch Picker Modal -->
+  <!-- FEFO Batch Picker Modal -->
   @if (showBatchModal()) {
-    <div class="hc-modal-overlay" (click)="closeBatchModal()">
-      <div class="hc-modal" (click)="$event.stopPropagation()">
+    <div class="hc-drawer-backdrop" (click)="closeBatchModal()">
+      <div class="hc-batch-modal-panel" (click)="$event.stopPropagation()">
         <div class="hc-modal-header">
-          <h3 class="hc-modal-title">Select Batch for {{ selectedMedicineForBatch?.name }}</h3>
-          <button mat-icon-button (click)="closeBatchModal()"><i-tabler name="x"></i-tabler></button>
+          <div>
+            <h3 class="hc-modal-title">Select FEFO Batch for {{ selectedMedicineForBatch?.name }}</h3>
+            <p class="hc-modal-note">Batches are sorted strictly by First Expiry, First Out (FEFO) schedule.</p>
+          </div>
+          <button class="hc-drawer-close" (click)="closeBatchModal()"><i-tabler name="x"></i-tabler></button>
         </div>
+
         <div class="hc-modal-body">
-          <p class="hc-modal-note">Batches are sorted by FEFO (First Expiry, First Out) principle.</p>
           <table class="hc-batch-table">
             <thead>
               <tr>
                 <th>Batch No.</th>
-                <th>Expiry</th>
-                <th>Stock</th>
-                <th>Price</th>
-                <th>Action</th>
+                <th>Expiry Date</th>
+                <th>Stock Left</th>
+                <th>Selling Price</th>
+                <th style="text-align:right;">Action</th>
               </tr>
             </thead>
             <tbody>
               @for (b of availableBatches; track b.id) {
                 <tr class="hc-batch-row" (click)="addBatchToCart(b)">
                   <td><code>{{ b.batch_number }}</code></td>
-                  <td>{{ b.expiry_date }}</td>
-                  <td>{{ b.quantity }} units</td>
-                  <td>{{ formatPrice(b.selling_price) }}</td>
-                  <td>
-                    <button mat-flat-button color="primary" class="hc-batch-select-btn">Select</button>
+                  <td><span class="expiry">{{ b.expiry_date }}</span></td>
+                  <td><span class="stock">{{ b.quantity }} units</span></td>
+                  <td><span class="price">{{ formatPrice(b.selling_price) }}</span></td>
+                  <td style="text-align:right;">
+                    <button class="psh-btn psh-btn--primary btn-sm">Select Batch</button>
                   </td>
                 </tr>
               }
@@ -254,3 +280,4 @@
   }
 
 </div>
+

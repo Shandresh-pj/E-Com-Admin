@@ -10,267 +10,621 @@
 
   <!-- Page Hero Header -->
   <header class="psh-hero">
-    <div>
+    <div class="psh-hero__text">
       <div class="psh-eyebrow">
         <span class="psh-eyebrow__dot"></span>
         <span>HEALTHCARE ERP</span>
         <span class="psh-eyebrow__sep">·</span>
-        <span>{{ appointments().length }} APPOINTMENTS SCHEDULED</span>
+        <span>{{ appointments().length }} APPOINTMENTS REGISTERED</span>
       </div>
-      <h1 class="psh-title">Patient <span class="psh-title__accent">Appointments</span></h1>
-      <p class="psh-sub">Book consultations, manage doctor schedules, check-in patients, and track clinical status.</p>
+      <h1 class="psh-title">Clinical <span class="psh-title__accent">Appointments</span></h1>
+      <p class="psh-sub">Book consultations, track patient check-ins, manage doctor schedules, and update live clinical status.</p>
     </div>
     <div class="psh-actions">
       @if (!showForm() && perm.hasRoleAction('canCreate', '/appointments')) {
         <button class="psh-btn psh-btn--primary" (click)="openForm()">
           <span class="psh-btn__shine"></span>
           <i-tabler name="calendar-plus" style="width:20px;height:20px;"></i-tabler>
-          Book Appointment
+          <span>Book Appointment</span>
         </button>
       }
     </div>
   </header>
 
-  <!-- Stat Chips Row -->
+  <!-- Stat Chips Row (4 KPI Orbs) -->
   <div class="psh-chips">
-    <div class="psh-chip psh-chip--violet">
-      <div class="psh-chip__orb"><i-tabler name="calendar-check"></i-tabler></div>
+    <div class="psh-chip psh-chip--violet" (click)="selectStatusFilter('')" style="cursor:pointer;">
+      <div class="psh-chip__orb"><i-tabler name="calendar-event"></i-tabler></div>
       <div class="psh-chip__body">
         <span class="psh-chip__num">{{ appointments().length }}</span>
-        <span class="psh-chip__lbl">Total</span>
+        <span class="psh-chip__lbl">Total Scheduled</span>
       </div>
     </div>
-    <div class="psh-chip psh-chip--emerald">
+
+    <div class="psh-chip psh-chip--emerald" (click)="selectStatusFilter(ApptStatus.CONFIRMED)" style="cursor:pointer;">
       <div class="psh-chip__orb"><i-tabler name="check"></i-tabler></div>
       <div class="psh-chip__body">
-        <span class="psh-chip__num">{{ getKpiCount(ApptStatus.CONFIRMED) }}</span>
+        <span class="psh-chip__num">{{ confirmedCount() }}</span>
         <span class="psh-chip__lbl">Confirmed</span>
       </div>
     </div>
-    <div class="psh-chip psh-chip--sky">
+
+    <div class="psh-chip psh-chip--sky" (click)="selectStatusFilter(ApptStatus.CHECKED_IN)" style="cursor:pointer;">
       <div class="psh-chip__orb"><i-tabler name="user-check"></i-tabler></div>
       <div class="psh-chip__body">
-        <span class="psh-chip__num">{{ getKpiCount(ApptStatus.CHECKED_IN) }}</span>
+        <span class="psh-chip__num">{{ checkedInCount() }}</span>
         <span class="psh-chip__lbl">Checked In</span>
       </div>
     </div>
-    <div class="psh-chip psh-chip--amber">
-      <div class="psh-chip__orb"><i-tabler name="stretching"></i-tabler></div>
+
+    <div class="psh-chip psh-chip--amber" (click)="selectStatusFilter(ApptStatus.IN_CONSULTATION)" style="cursor:pointer;">
+      <div class="psh-chip__orb"><i-tabler name="activity"></i-tabler></div>
       <div class="psh-chip__body">
-        <span class="psh-chip__num">{{ getKpiCount(ApptStatus.IN_CONSULTATION) }}</span>
+        <span class="psh-chip__num">{{ inConsultCount() }}</span>
         <span class="psh-chip__lbl">In Consult</span>
       </div>
     </div>
   </div>
 
-  <!-- Content Container -->
+  <!-- Main Roster Section -->
   @if (!showForm()) {
-    <mat-card class="cardWithShadow theme-card">
-      <mat-card-header>
-        <div class="header-container" style="display:flex;align-items:center;justify-content:space-between;width:100%;">
-          <mat-card-title class="m-b-0">Appointments Board</mat-card-title>
-          <div class="hc-search-wrap">
-            <i-tabler name="search" class="hc-search-icon"></i-tabler>
-            <input class="hc-search-input" placeholder="Search patient or doctor..."
-                   [(ngModel)]="searchQuery" (ngModelChange)="cdr.markForCheck()" />
-          </div>
-        </div>
-      </mat-card-header>
+    <div class="hc-roster-container">
 
-      <mat-card-content class="b-t-1">
+      <!-- Controls & Filter Bar -->
+      <div class="hc-controls-bar">
+
+        <!-- Search Bar -->
+        <div class="hc-search-wrap">
+          <i-tabler name="search" class="hc-search-icon"></i-tabler>
+          <input class="hc-search-input"
+                 placeholder="Search patient, doctor, code, notes..."
+                 [ngModel]="searchQuery()"
+                 (ngModelChange)="setSearchQuery($event)" />
+          @if (searchQuery()) {
+            <button class="hc-search-clear" (click)="setSearchQuery('')" matTooltip="Clear search">
+              <i-tabler name="x" style="width:14px;height:14px;"></i-tabler>
+            </button>
+          }
+          <span class="hc-search-count">{{ filteredAppointments().length }} found</span>
+        </div>
+
         <!-- Status Filter Chips -->
-        <div class="psh-filter" style="margin-bottom:16px;">
-          <div class="psh-filter__chips">
-            <button class="psh-filter__chip" [class.active]="statusFilter === ''" (click)="statusFilter = ''; cdr.markForCheck()">All</button>
-            @for (s of statusOptions; track s) {
-              <button class="psh-filter__chip" [class.active]="statusFilter === s" (click)="statusFilter = s; cdr.markForCheck()">
-                {{ getStatusLabel(s) }} ({{ getKpiCount(s) }})
-              </button>
-            }
-          </div>
+        <div class="hc-filter-group">
+          <button class="hc-chip-btn"
+                  [class.active]="statusFilter() === ''"
+                  (click)="selectStatusFilter('')">
+            All ({{ appointments().length }})
+          </button>
+          @for (s of statusOptions; track s) {
+            <button class="hc-chip-btn"
+                    [class.active]="statusFilter() === s"
+                    (click)="selectStatusFilter(s)">
+              {{ getStatusLabel(s) }} ({{ getKpiCount(s) }})
+            </button>
+          }
         </div>
 
-        <!-- Loading -->
-        @if (loading()) {
-          <div class="hc-loading-wrap">
-            <mat-progress-spinner mode="indeterminate" diameter="40"></mat-progress-spinner>
-            <p>Loading appointments…</p>
+        <!-- View Mode Switcher -->
+        <div class="hc-view-toggle">
+          <button class="hc-view-btn"
+                  [class.active]="viewMode() === 'grid'"
+                  (click)="viewMode.set('grid')"
+                  matTooltip="Grid View">
+            <i-tabler name="layout-grid"></i-tabler>
+          </button>
+          <button class="hc-view-btn"
+                  [class.active]="viewMode() === 'list'"
+                  (click)="viewMode.set('list')"
+                  matTooltip="Table View">
+            <i-tabler name="list"></i-tabler>
+          </button>
+        </div>
+
+      </div>
+
+      <!-- Loading State -->
+      @if (loading()) {
+        <div class="hc-loading-wrap">
+          <mat-progress-spinner mode="indeterminate" diameter="48"></mat-progress-spinner>
+          <p class="hc-loading-text">Fetching clinical appointments...</p>
+        </div>
+      }
+
+      <!-- Empty State -->
+      @if (!loading() && filteredAppointments().length === 0) {
+        <div class="hc-empty-state">
+          <div class="hc-empty-icon-wrap">
+            <i-tabler name="calendar-off" class="hc-empty-icon"></i-tabler>
           </div>
-        }
+          <h3>No Appointments Match Your Search</h3>
+          <p>{{ searchQuery() || statusFilter() ? 'Try adjusting your search terms or status filters.' : 'Click "Book Appointment" above to schedule your first consultation.' }}</p>
+          @if (searchQuery() || statusFilter()) {
+            <button class="psh-btn psh-btn--secondary m-t-16" (click)="setSearchQuery(''); selectStatusFilter('')">
+              Reset Filters
+            </button>
+          }
+        </div>
+      }
 
-        <!-- Empty -->
-        @if (!loading() && filteredAppointments().length === 0) {
-          <div class="hc-empty-state">
-            <i-tabler name="calendar-x" class="hc-empty-icon"></i-tabler>
-            <h3>No appointments found</h3>
-            <p>{{ statusFilter ? 'No appointments match this filter.' : 'Book your first patient appointment.' }}</p>
-          </div>
-        }
+      <!-- GRID VIEW -->
+      @if (!loading() && filteredAppointments().length > 0 && viewMode() === 'grid') {
+        <div class="hc-appt-grid">
+          @for (appt of filteredAppointments(); track appt.id; let i = $index) {
+            <div class="hc-appt-card" [style.--delay]="(i % 12) * 60 + 'ms'">
 
-        <!-- Appointments List -->
-        @if (!loading() && filteredAppointments().length > 0) {
-          <div class="hc-appt-list">
-            @for (appt of filteredAppointments(); track appt.id) {
-              <div class="hc-appt-card hc-appt-card--{{ getStatusClass(appt.status) }}">
-                <div class="hc-appt-card__left">
-                  <div class="hc-appt-date">{{ appt.appointment_date | date:'EEE, dd MMM' }}</div>
-                  <div class="hc-appt-time">{{ appt.appointment_time }}</div>
+              <!-- Accent Top Line -->
+              <div class="hc-appt-card__accent hc-appt-card__accent--{{ getStatusClass(appt.status) }}"></div>
+
+              <!-- Header -->
+              <div class="hc-appt-card__header">
+                <div class="hc-pat-avatar">
+                  {{ getInitials(appt.patient_name || '') }}
                 </div>
-
-                <div class="hc-appt-card__center">
-                  <div class="hc-appt-patient-name">{{ appt.patient_name }}</div>
-                  <div class="hc-appt-doctor-name">
-                    <i-tabler name="stethoscope"></i-tabler>
-                    Dr. {{ appt.doctor_name }}
+                <div class="hc-appt-info">
+                  <h3 class="hc-pat-name" (click)="viewApptDetails(appt)">
+                    {{ appt.patient_name || 'Patient #' + appt.patient_id }}
+                  </h3>
+                  <div class="hc-appt-sub-bar">
+                    <span class="hc-appt-badge hc-appt-badge--{{ getStatusClass(appt.status) }}">
+                      <span class="hc-badge-dot"></span>
+                      {{ getStatusLabel(appt.status) }}
+                    </span>
+                    @if (appt.appointment_code) {
+                      <span class="hc-code-chip" (click)="copyApptCode(appt.appointment_code, $event)" matTooltip="Copy Appointment Code">
+                        <code>{{ appt.appointment_code }}</code>
+                        <i-tabler [name]="copiedCode() === appt.appointment_code ? 'check' : 'copy'" class="hc-copy-icon"></i-tabler>
+                      </span>
+                    }
                   </div>
-                  @if (appt.notes) {
-                    <div class="hc-appt-notes">{{ appt.notes }}</div>
-                  }
-                </div>
-
-                <div class="hc-appt-card__right">
-                  <span class="hc-badge hc-badge--{{ getStatusClass(appt.status) }}">
-                    {{ getStatusLabel(appt.status) }}
-                  </span>
-                  <div class="hc-appt-fee">{{ formatFee(appt.consultation_fee) }}</div>
-                  <div class="hc-appt-pay-status" [class.hc-appt-pay-status--paid]="appt.payment_status === 'PAID'">
-                    {{ appt.payment_status }}
-                  </div>
-                </div>
-
-                <div class="hc-appt-card__actions">
-                  @if (appt.status === ApptStatus.BOOKED && perm.hasRoleAction('canUpdate', '/appointments')) {
-                    <button mat-stroked-button class="hc-appt-action-btn hc-appt-action-btn--confirm"
-                            (click)="updateStatus(appt, ApptStatus.CONFIRMED)">
-                      Confirm
-                    </button>
-                  }
-                  @if (appt.status === ApptStatus.CONFIRMED && perm.hasRoleAction('canUpdate', '/appointments')) {
-                    <button mat-stroked-button class="hc-appt-action-btn hc-appt-action-btn--checkin"
-                            (click)="updateStatus(appt, ApptStatus.CHECKED_IN)">
-                      Check In
-                    </button>
-                  }
-                  @if (appt.status === ApptStatus.CHECKED_IN && perm.hasRoleAction('canUpdate', '/appointments')) {
-                    <button mat-stroked-button class="hc-appt-action-btn hc-appt-action-btn--consult"
-                            (click)="updateStatus(appt, ApptStatus.IN_CONSULTATION)">
-                      Start Consult
-                    </button>
-                  }
-                  @if (appt.status === ApptStatus.IN_CONSULTATION && perm.hasRoleAction('canUpdate', '/appointments')) {
-                    <button mat-flat-button color="primary" class="hc-appt-action-btn"
-                            (click)="updateStatus(appt, ApptStatus.COMPLETED)">
-                      Complete
-                    </button>
-                  }
-                  @if (perm.hasRoleAction('canUpdate', '/appointments')) {
-                    <button mat-icon-button (click)="openForm(appt)" matTooltip="Edit"><i-tabler name="edit"></i-tabler></button>
-                  }
-                  @if (appt.status !== ApptStatus.COMPLETED && appt.status !== ApptStatus.CANCELLED && perm.hasRoleAction('canDelete', '/appointments')) {
-                    <button mat-icon-button (click)="cancelAppointment(appt)" matTooltip="Cancel" style="color:#ef4444;">
-                      <i-tabler name="x"></i-tabler>
-                    </button>
-                  }
                 </div>
               </div>
-            }
-          </div>
-        }
-      </mat-card-content>
-    </mat-card>
-  } @else {
-    <!-- Form Card View (exact /admin form design) -->
-    <mat-card class="cardWithShadow theme-card">
-      <mat-card-header>
-        <div class="header-container" style="display:flex;align-items:center;justify-content:space-between;width:100%;">
-          <mat-card-title class="m-b-0">
-            {{ editingId() ? 'Edit Appointment' : 'Book Appointment' }}
-          </mat-card-title>
-          <button mat-stroked-button (click)="closeForm()">Back to Board</button>
+
+              <!-- Body Info Grid -->
+              <div class="hc-appt-card__body">
+                <!-- Doctor & Specialty -->
+                <div class="hc-doc-box">
+                  <i-tabler name="stethoscope" class="hc-doc-icon"></i-tabler>
+                  <div class="hc-doc-info">
+                    <span class="hc-doc-name">Dr. {{ appt.doctor_name || 'Assigned Specialist' }}</span>
+                    <span class="hc-doc-spec">{{ appt.specialty || 'General Practice' }}</span>
+                  </div>
+                </div>
+
+                <!-- Date, Time & Fee Meta Row -->
+                <div class="hc-appt-meta-row">
+                  <div class="hc-meta-cell">
+                    <i-tabler name="calendar" class="hc-meta-icon"></i-tabler>
+                    <div>
+                      <span class="hc-meta-val">{{ appt.appointment_date }}</span>
+                      <span class="hc-meta-lbl">Date</span>
+                    </div>
+                  </div>
+
+                  <div class="hc-meta-cell">
+                    <i-tabler name="clock" class="hc-meta-icon"></i-tabler>
+                    <div>
+                      <span class="hc-meta-val">{{ appt.appointment_time || '09:00 AM' }}</span>
+                      <span class="hc-meta-lbl">Time Slot</span>
+                    </div>
+                  </div>
+
+                  <div class="hc-meta-cell">
+                    <i-tabler name="currency-rupee" class="hc-meta-icon hc-meta-icon--fee"></i-tabler>
+                    <div>
+                      <span class="hc-meta-val hc-meta-val--fee">{{ formatFee(appt.consultation_fee) }}</span>
+                      <span class="hc-meta-lbl">Fee</span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Notes Snippet -->
+                @if (appt.notes) {
+                  <div class="hc-notes-box">
+                    <i-tabler name="notes" class="hc-notes-icon"></i-tabler>
+                    <span class="hc-notes-text">{{ appt.notes }}</span>
+                  </div>
+                }
+              </div>
+
+              <!-- Status Action Quick Toolbar -->
+              <div class="hc-appt-card__quick-bar">
+                @if (appt.status === ApptStatus.CONFIRMED) {
+                  <button class="hc-quick-btn hc-quick-btn--checkin" (click)="updateStatus(appt, ApptStatus.CHECKED_IN)">
+                    <i-tabler name="user-check" style="width:14px;height:14px;"></i-tabler>
+                    <span>Check-In</span>
+                  </button>
+                }
+                @if (appt.status === ApptStatus.CHECKED_IN) {
+                  <button class="hc-quick-btn hc-quick-btn--consult" (click)="updateStatus(appt, ApptStatus.IN_CONSULTATION)">
+                    <i-tabler name="stethoscope" style="width:14px;height:14px;"></i-tabler>
+                    <span>In Consult</span>
+                  </button>
+                }
+                @if (appt.status === ApptStatus.IN_CONSULTATION) {
+                  <button class="hc-quick-btn hc-quick-btn--complete" (click)="updateStatus(appt, ApptStatus.COMPLETED)">
+                    <i-tabler name="check" style="width:14px;height:14px;"></i-tabler>
+                    <span>Complete</span>
+                  </button>
+                }
+              </div>
+
+              <!-- Actions Footer -->
+              <div class="hc-appt-card__actions">
+                <button class="hc-act-btn hc-act-btn--view" (click)="viewApptDetails(appt, $event)">
+                  <i-tabler name="eye" style="width:15px;height:15px;"></i-tabler>
+                  <span>Details</span>
+                </button>
+
+                @if (perm.hasRoleAction('canUpdate', '/appointments')) {
+                  <button class="hc-act-btn hc-act-btn--edit" (click)="openForm(appt)">
+                    <i-tabler name="edit" style="width:15px;height:15px;"></i-tabler>
+                    <span>Edit</span>
+                  </button>
+                }
+
+                @if (appt.status !== ApptStatus.CANCELLED && appt.status !== ApptStatus.COMPLETED) {
+                  <button class="hc-act-btn hc-act-btn--cancel" (click)="cancelAppointment(appt)" matTooltip="Cancel Appointment">
+                    <i-tabler name="x" style="width:15px;height:15px;"></i-tabler>
+                  </button>
+                }
+              </div>
+
+            </div>
+          }
         </div>
-      </mat-card-header>
+      }
 
-      <mat-card-content class="b-t-1">
-        <form [formGroup]="form" (ngSubmit)="saveAppointment()" class="p-t-16" autocomplete="off">
-          <div class="row">
-            <div class="col-lg-6 m-b-16">
-              <mat-label class="f-w-600 m-b-8 d-block">Select Patient <span class="text-danger">*</span></mat-label>
-              <mat-form-field appearance="outline" class="w-100">
-                <mat-select formControlName="patient_id" placeholder="Select Registered Patient">
-                  @for (p of patients; track p.id) {
-                    <mat-option [value]="p.id">{{ p.name }} ({{ p.patient_code }})</mat-option>
-                  }
-                </mat-select>
-                @if (form.get('patient_id')?.hasError('required')) {
-                  <mat-error>Patient selection is required</mat-error>
+      <!-- LIST VIEW TABLE -->
+      @if (!loading() && filteredAppointments().length > 0 && viewMode() === 'list') {
+        <div class="hc-table-card">
+          <div class="hc-table-scroll">
+            <table class="hc-table">
+              <thead>
+                <tr>
+                  <th>Patient</th>
+                  <th>Appt Code</th>
+                  <th>Assigned Doctor</th>
+                  <th>Date & Time</th>
+                  <th>Status</th>
+                  <th>Fee</th>
+                  <th style="text-align:right;">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (appt of filteredAppointments(); track appt.id) {
+                  <tr (click)="viewApptDetails(appt)">
+                    <td>
+                      <div class="hc-cell-patient">
+                        <div class="hc-list-avatar">
+                          {{ getInitials(appt.patient_name || '') }}
+                        </div>
+                        <div>
+                          <div class="hc-cell-name">{{ appt.patient_name || 'Patient #' + appt.patient_id }}</div>
+                        </div>
+                      </div>
+                    </td>
+                    <td>
+                      <span class="hc-table-code" (click)="copyApptCode(appt.appointment_code, $event)">
+                        <code>{{ appt.appointment_code || '—' }}</code>
+                      </span>
+                    </td>
+                    <td>
+                      <div>
+                        <div class="hc-cell-name">Dr. {{ appt.doctor_name || 'Unassigned' }}</div>
+                        <div class="hc-cell-sub">{{ appt.specialty || 'General Practice' }}</div>
+                      </div>
+                    </td>
+                    <td>
+                      <div>
+                        <div class="hc-cell-name">{{ appt.appointment_date }}</div>
+                        <div class="hc-cell-sub">{{ appt.appointment_time || '09:00 AM' }}</div>
+                      </div>
+                    </td>
+                    <td>
+                      <span class="hc-appt-badge hc-appt-badge--{{ getStatusClass(appt.status) }}">
+                        <span class="hc-badge-dot"></span>
+                        {{ getStatusLabel(appt.status) }}
+                      </span>
+                    </td>
+                    <td><span class="hc-fee-pill">{{ formatFee(appt.consultation_fee) }}</span></td>
+                    <td>
+                      <div class="hc-row-actions" (click)="$event.stopPropagation()">
+                        <button class="hc-icon-btn" (click)="viewApptDetails(appt)" matTooltip="View Details">
+                          <i-tabler name="eye"></i-tabler>
+                        </button>
+                        @if (perm.hasRoleAction('canUpdate', '/appointments')) {
+                          <button class="hc-icon-btn" (click)="openForm(appt)" matTooltip="Edit Appointment">
+                            <i-tabler name="edit"></i-tabler>
+                          </button>
+                        }
+                      </div>
+                    </td>
+                  </tr>
                 }
-              </mat-form-field>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      }
+
+    </div>
+  }
+
+  <!-- FORM MODE (Split view with Live Card Preview) -->
+  @if (showForm()) {
+    <div class="hc-form-container">
+      <div class="hc-form-header">
+        <button class="psh-btn psh-btn--secondary" (click)="closeForm()">
+          <i-tabler name="arrow-left" style="width:18px;height:18px;"></i-tabler>
+          Back to Board
+        </button>
+        <h2 class="hc-form-title">
+          {{ editingId() ? 'Reschedule / Edit Appointment' : 'Book New Appointment' }}
+        </h2>
+      </div>
+
+      <div class="hc-form-grid-layout">
+        <!-- Form Controls Card -->
+        <div class="hc-form-card">
+          <form [formGroup]="form" (ngSubmit)="saveAppointment()" autocomplete="off">
+
+            <div class="hc-form-section">
+              <h3 class="hc-section-title">
+                <i-tabler name="user-check" class="hc-sec-icon"></i-tabler>
+                Patient & Doctor Selection
+              </h3>
+              <div class="row">
+                <div class="col-md-6 m-b-16">
+                  <label class="hc-field-label">Select Patient <span class="req">*</span></label>
+                  <mat-form-field appearance="outline" class="w-100">
+                    <mat-select formControlName="patient_id" placeholder="Choose registered patient">
+                      @for (p of patients; track p.id) {
+                        <mat-option [value]="p.id">{{ p.name }} ({{ p.patient_code }})</mat-option>
+                      }
+                    </mat-select>
+                    @if (form.get('patient_id')?.hasError('required')) {
+                      <mat-error>Patient is required</mat-error>
+                    }
+                  </mat-form-field>
+                </div>
+
+                <div class="col-md-6 m-b-16">
+                  <label class="hc-field-label">Assigned Doctor <span class="req">*</span></label>
+                  <mat-form-field appearance="outline" class="w-100">
+                    <mat-select formControlName="doctor_id" placeholder="Choose specialist doctor">
+                      @for (d of doctors; track d.id) {
+                        <mat-option [value]="d.id">Dr. {{ d.name }} ({{ d.specialty || 'General' }})</mat-option>
+                      }
+                    </mat-select>
+                    @if (form.get('doctor_id')?.hasError('required')) {
+                      <mat-error>Doctor is required</mat-error>
+                    }
+                  </mat-form-field>
+                </div>
+              </div>
             </div>
 
-            <div class="col-lg-6 m-b-16">
-              <mat-label class="f-w-600 m-b-8 d-block">Select Doctor <span class="text-danger">*</span></mat-label>
-              <mat-form-field appearance="outline" class="w-100">
-                <mat-select formControlName="doctor_id" placeholder="Select Attending Doctor">
-                  @for (d of doctors; track d.id) {
-                    <mat-option [value]="d.id">Dr. {{ d.name }} — {{ d.specialization }}</mat-option>
-                  }
-                </mat-select>
-                @if (form.get('doctor_id')?.hasError('required')) {
-                  <mat-error>Doctor selection is required</mat-error>
-                }
-              </mat-form-field>
+            <div class="hc-form-section">
+              <h3 class="hc-section-title">
+                <i-tabler name="clock" class="hc-sec-icon"></i-tabler>
+                Schedule & Fee Vitals
+              </h3>
+              <div class="row">
+                <div class="col-md-4 m-b-16">
+                  <label class="hc-field-label">Appointment Date <span class="req">*</span></label>
+                  <mat-form-field appearance="outline" class="w-100">
+                    <input matInput [matDatepicker]="apptPicker" formControlName="appointment_date" placeholder="DD-MM-YYYY">
+                    <mat-datepicker-toggle matIconSuffix [for]="apptPicker"></mat-datepicker-toggle>
+                    <mat-datepicker #apptPicker></mat-datepicker>
+                    @if (form.get('appointment_date')?.hasError('required')) {
+                      <mat-error>Date is required</mat-error>
+                    }
+                  </mat-form-field>
+                </div>
+
+                <div class="col-md-4 m-b-16">
+                  <label class="hc-field-label">Time Slot <span class="req">*</span></label>
+                  <mat-form-field appearance="outline" class="w-100">
+                    <input matInput type="time" formControlName="appointment_time">
+                    @if (form.get('appointment_time')?.hasError('required')) {
+                      <mat-error>Time slot is required</mat-error>
+                    }
+                  </mat-form-field>
+                </div>
+
+                <div class="col-md-4 m-b-16">
+                  <label class="hc-field-label">Consultation Fee (₹) <span class="req">*</span></label>
+                  <mat-form-field appearance="outline" class="w-100">
+                    <input matInput type="number" formControlName="consultation_fee" min="0">
+                  </mat-form-field>
+                </div>
+
+                <div class="col-md-12 m-b-16">
+                  <label class="hc-field-label">Clinical Symptoms / Reason for Visit</label>
+                  <mat-form-field appearance="outline" class="w-100">
+                    <textarea matInput formControlName="notes" rows="3" placeholder="Chief complaints, pre-existing conditions, or doctor instructions..."></textarea>
+                  </mat-form-field>
+                </div>
+              </div>
             </div>
 
-            <div class="col-lg-4 m-b-16">
-              <mat-label class="f-w-600 m-b-8 d-block">Appointment Date <span class="text-danger">*</span></mat-label>
-              <mat-form-field appearance="outline" class="w-100">
-                <input matInput type="date" formControlName="appointment_date">
-                @if (form.get('appointment_date')?.hasError('required')) {
-                  <mat-error>Date is required</mat-error>
+            <!-- Submit Controls -->
+            <div class="hc-form-actions">
+              <button type="button" class="psh-btn psh-btn--secondary" (click)="closeForm()">Cancel</button>
+              <button type="submit" class="psh-btn psh-btn--primary" [disabled]="saving()">
+                @if (saving()) {
+                  <mat-spinner diameter="18" style="margin-right:8px;display:inline-block;"></mat-spinner>
                 }
-              </mat-form-field>
+                <span>{{ saving() ? 'Saving...' : (editingId() ? 'Update Appointment' : 'Confirm Booking') }}</span>
+              </button>
             </div>
 
-            <div class="col-lg-4 m-b-16">
-              <mat-label class="f-w-600 m-b-8 d-block">Appointment Time <span class="text-danger">*</span></mat-label>
-              <mat-form-field appearance="outline" class="w-100">
-                <input matInput type="time" formControlName="appointment_time">
-                @if (form.get('appointment_time')?.hasError('required')) {
-                  <mat-error>Time is required</mat-error>
-                }
-              </mat-form-field>
+          </form>
+        </div>
+
+        <!-- Sticky Live Preview Column -->
+        <div class="hc-preview-col">
+          <div class="hc-preview-sticky">
+            <div class="hc-preview-header">
+              <i-tabler name="sparkles" class="hc-preview-icon"></i-tabler>
+              <span>Live Card Preview</span>
             </div>
 
-            <div class="col-lg-4 m-b-16">
-              <mat-label class="f-w-600 m-b-8 d-block">Consultation Fee (₹) <span class="text-danger">*</span></mat-label>
-              <mat-form-field appearance="outline" class="w-100">
-                <input matInput type="number" formControlName="consultation_fee" placeholder="Fee amount" min="0">
-                @if (form.get('consultation_fee')?.hasError('required')) {
-                  <mat-error>Fee is required</mat-error>
+            <div class="hc-appt-card hc-appt-card--preview">
+              <div class="hc-appt-card__accent hc-appt-card__accent--confirmed"></div>
+
+              <div class="hc-appt-card__header">
+                <div class="hc-pat-avatar">
+                  {{ getInitials(formValues().patient_name) }}
+                </div>
+                <div class="hc-appt-info">
+                  <h3 class="hc-pat-name">{{ formValues().patient_name || 'Patient Full Name' }}</h3>
+                  <div class="hc-appt-sub-bar">
+                    <span class="hc-appt-badge hc-appt-badge--confirmed">
+                      <span class="hc-badge-dot"></span>
+                      Confirmed
+                    </span>
+                    <span class="hc-code-chip">
+                      <code>APPT-PREVIEW</code>
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="hc-appt-card__body">
+                <div class="hc-doc-box">
+                  <i-tabler name="stethoscope" class="hc-doc-icon"></i-tabler>
+                  <div class="hc-doc-info">
+                    <span class="hc-doc-name">Dr. {{ formValues().doctor_name || 'Select Doctor' }}</span>
+                    <span class="hc-doc-spec">{{ formValues().specialty || 'Specialty' }}</span>
+                  </div>
+                </div>
+
+                <div class="hc-appt-meta-row">
+                  <div class="hc-meta-cell">
+                    <i-tabler name="calendar" class="hc-meta-icon"></i-tabler>
+                    <div>
+                      <span class="hc-meta-val">{{ formValues().appointment_date ? (formValues().appointment_date | date:'dd-MM-yyyy') : 'DD-MM-YYYY' }}</span>
+                      <span class="hc-meta-lbl">Date</span>
+                    </div>
+                  </div>
+                  <div class="hc-meta-cell">
+                    <i-tabler name="clock" class="hc-meta-icon"></i-tabler>
+                    <div>
+                      <span class="hc-meta-val">{{ formValues().appointment_time || '09:00 AM' }}</span>
+                      <span class="hc-meta-lbl">Time</span>
+                    </div>
+                  </div>
+                  <div class="hc-meta-cell">
+                    <i-tabler name="currency-rupee" class="hc-meta-icon hc-meta-icon--fee"></i-tabler>
+                    <div>
+                      <span class="hc-meta-val hc-meta-val--fee">{{ formatFee(formValues().consultation_fee) }}</span>
+                      <span class="hc-meta-lbl">Fee</span>
+                    </div>
+                  </div>
+                </div>
+
+                @if (formValues().notes) {
+                  <div class="hc-notes-box">
+                    <i-tabler name="notes" class="hc-notes-icon"></i-tabler>
+                    <span class="hc-notes-text">{{ formValues().notes }}</span>
+                  </div>
                 }
-              </mat-form-field>
+              </div>
             </div>
 
-            <div class="col-lg-12 m-b-16">
-              <mat-label class="f-w-600 m-b-8 d-block">Notes / Chief Complaint</mat-label>
-              <mat-form-field appearance="outline" class="w-100">
-                <textarea matInput formControlName="notes" rows="2" placeholder="Enter patient chief complaint or notes"></textarea>
-              </mat-form-field>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  }
+
+  <!-- APPOINTMENT DETAILS SIDE DRAWER -->
+  @if (selectedAppt(); as appt) {
+    <div class="hc-drawer-backdrop" (click)="closeApptDetails()">
+      <div class="hc-drawer-panel" (click)="$event.stopPropagation()">
+
+        <!-- Hero Header -->
+        <div class="hc-drawer-hero">
+          <button class="hc-drawer-close" (click)="closeApptDetails()" matTooltip="Close Details">
+            <i-tabler name="x"></i-tabler>
+          </button>
+          <div class="hc-drawer-avatar-box">
+            <div class="hc-drawer-avatar">{{ getInitials(appt.patient_name || '') }}</div>
+          </div>
+          <h2 class="hc-drawer-name">{{ appt.patient_name }}</h2>
+          <div class="hc-drawer-sub">
+            <span class="hc-appt-badge hc-appt-badge--{{ getStatusClass(appt.status) }}">
+              <span class="hc-badge-dot"></span>
+              {{ getStatusLabel(appt.status) }}
+            </span>
+            <span class="hc-drawer-dot">·</span>
+            <code>{{ appt.appointment_code }}</code>
+          </div>
+        </div>
+
+        <!-- Content Body -->
+        <div class="hc-drawer-body">
+
+          <!-- Doctor & Clinic Section -->
+          <div class="hc-drawer-section">
+            <h3 class="hc-drawer-sec-title">Attending Physician</h3>
+            <div class="hc-drawer-doc-card">
+              <i-tabler name="stethoscope" class="icon"></i-tabler>
+              <div>
+                <div class="name">Dr. {{ appt.doctor_name }}</div>
+                <div class="spec">{{ appt.specialty || 'General Medicine' }}</div>
+              </div>
             </div>
           </div>
 
-          <div class="m-t-12">
-            <button mat-stroked-button type="button" class="me-3 Cancel_Button" (click)="closeForm()">
-              Cancel
-            </button>
-            <button mat-flat-button color="primary" type="submit" [disabled]="saving()">
-              @if (saving()) { <mat-spinner diameter="18" style="margin-right:8px;display:inline-block;"></mat-spinner> }
-              {{ saving() ? 'Saving…' : (editingId() ? 'Update Appointment' : 'Submit') }}
-            </button>
+          <!-- Schedule & Fee Details -->
+          <div class="hc-drawer-section">
+            <h3 class="hc-drawer-sec-title">Appointment Schedule & Fee</h3>
+            <div class="hc-drawer-grid">
+              <div class="hc-drawer-item">
+                <span class="lbl">Date</span>
+                <span class="val">{{ appt.appointment_date }}</span>
+              </div>
+              <div class="hc-drawer-item">
+                <span class="lbl">Time Slot</span>
+                <span class="val">{{ appt.appointment_time || '09:00 AM' }}</span>
+              </div>
+              <div class="hc-drawer-item">
+                <span class="lbl">Consultation Fee</span>
+                <span class="val highlight-fee">{{ formatFee(appt.consultation_fee) }}</span>
+              </div>
+              <div class="hc-drawer-item">
+                <span class="lbl">Payment Status</span>
+                <span class="val">{{ appt.payment_status || 'UNPAID' }}</span>
+              </div>
+            </div>
           </div>
-        </form>
-      </mat-card-content>
-    </mat-card>
+
+          <!-- Notes -->
+          @if (appt.notes) {
+            <div class="hc-drawer-section">
+              <h3 class="hc-drawer-sec-title">Symptoms & Clinical Notes</h3>
+              <p class="hc-drawer-text">{{ appt.notes }}</p>
+            </div>
+          }
+
+        </div>
+
+        <!-- Drawer Footer -->
+        <div class="hc-drawer-footer">
+          <button class="psh-btn psh-btn--secondary" (click)="closeApptDetails()">Close</button>
+          @if (perm.hasRoleAction('canUpdate', '/appointments')) {
+            <button class="psh-btn psh-btn--primary" (click)="closeApptDetails(); openForm(appt)">
+              <i-tabler name="edit" style="width:16px;height:16px;margin-right:6px;"></i-tabler>
+              Edit Appointment
+            </button>
+          }
+        </div>
+
+      </div>
+    </div>
   }
 
 </div>

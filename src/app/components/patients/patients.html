@@ -1,0 +1,324 @@
+<div class="psh-root">
+
+  <!-- Ambient Background Orbs -->
+  <div class="psh-bg" aria-hidden="true">
+    <div class="psh-orb psh-orb--a"></div>
+    <div class="psh-orb psh-orb--b"></div>
+    <div class="psh-orb psh-orb--c"></div>
+    <div class="psh-grid"></div>
+  </div>
+
+  <!-- Page Hero Header -->
+  <header class="psh-hero">
+    <div>
+      <div class="psh-eyebrow">
+        <span class="psh-eyebrow__dot"></span>
+        <span>HEALTHCARE ERP</span>
+        <span class="psh-eyebrow__sep">·</span>
+        <span>{{ patients().length }} PATIENTS REGISTERED</span>
+      </div>
+      <h1 class="psh-title">Patient <span class="psh-title__accent">Registry</span></h1>
+      <p class="psh-sub">Register patients, manage medical records, allergy profiles, and view consultation histories.</p>
+    </div>
+    <div class="psh-actions">
+      @if (!showForm() && perm.hasRoleAction('canCreate', '/patients')) {
+        <button class="psh-btn psh-btn--primary" (click)="openForm()">
+          <span class="psh-btn__shine"></span>
+          <i-tabler name="user-plus" style="width:20px;height:20px;"></i-tabler>
+          Register Patient
+        </button>
+      }
+    </div>
+  </header>
+
+  <!-- Stat Chips Row -->
+  <div class="psh-chips">
+    <div class="psh-chip psh-chip--violet">
+      <div class="psh-chip__orb"><i-tabler name="users"></i-tabler></div>
+      <div class="psh-chip__body">
+        <span class="psh-chip__num">{{ patients().length }}</span>
+        <span class="psh-chip__lbl">Total Patients</span>
+      </div>
+    </div>
+    <div class="psh-chip psh-chip--emerald">
+      <div class="psh-chip__orb"><i-tabler name="gender-male"></i-tabler></div>
+      <div class="psh-chip__body">
+        <span class="psh-chip__num">{{ maleCount }}</span>
+        <span class="psh-chip__lbl">Male</span>
+      </div>
+    </div>
+    <div class="psh-chip psh-chip--pink">
+      <div class="psh-chip__orb"><i-tabler name="gender-female"></i-tabler></div>
+      <div class="psh-chip__body">
+        <span class="psh-chip__num">{{ femaleCount }}</span>
+        <span class="psh-chip__lbl">Female</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Content Container -->
+  @if (!showForm()) {
+    <mat-card class="cardWithShadow theme-card">
+      <mat-card-header>
+        <div class="header-container" style="display:flex;align-items:center;justify-content:space-between;width:100%;">
+          <mat-card-title class="m-b-0">Patient Directory</mat-card-title>
+          <div class="hc-search-wrap">
+            <i-tabler name="search" class="hc-search-icon"></i-tabler>
+            <input class="hc-search-input" placeholder="Search name, patient code, phone..."
+                   [(ngModel)]="searchQuery" (ngModelChange)="cdr.markForCheck()" />
+          </div>
+        </div>
+      </mat-card-header>
+
+      <mat-card-content class="b-t-1">
+        <!-- Loading -->
+        @if (loading()) {
+          <div class="hc-loading-wrap">
+            <mat-progress-spinner mode="indeterminate" diameter="40"></mat-progress-spinner>
+            <p>Loading patient records…</p>
+          </div>
+        }
+
+        <!-- Empty -->
+        @if (!loading() && filteredPatients().length === 0) {
+          <div class="hc-empty-state">
+            <i-tabler name="users" class="hc-empty-icon"></i-tabler>
+            <h3>No patients found</h3>
+            <p>{{ searchQuery ? 'Try adjusting your search query.' : 'Click Register Patient to create the first profile.' }}</p>
+          </div>
+        }
+
+        <!-- Patient Table -->
+        @if (!loading() && filteredPatients().length > 0) {
+          <div class="hc-table-scroll">
+            <table class="hc-table">
+              <thead>
+                <tr>
+                  <th>Patient</th>
+                  <th>Code</th>
+                  <th>Gender</th>
+                  <th>Age</th>
+                  <th>Phone</th>
+                  <th>Blood Group</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (patient of filteredPatients(); track patient.id) {
+                  <tr>
+                    <td>
+                      <div class="hc-cell-with-avatar">
+                        <div class="hc-patient-avatar">{{ getInitials(patient.name) }}</div>
+                        <div>
+                          <div class="hc-cell-primary">{{ patient.name }}</div>
+                          <div class="hc-cell-secondary">{{ patient.email || 'No email' }}</div>
+                        </div>
+                      </div>
+                    </td>
+                    <td><code>{{ patient.patient_code }}</code></td>
+                    <td>
+                      <span class="hc-gender-badge hc-gender-badge--{{ patient.gender }}">
+                        {{ patient.gender }}
+                      </span>
+                    </td>
+                    <td>{{ getAge(patient.date_of_birth) }}</td>
+                    <td>{{ patient.phone || '—' }}</td>
+                    <td>
+                      @if (patient.blood_group) {
+                        <span class="hc-blood-badge">{{ patient.blood_group }}</span>
+                      } @else {
+                        —
+                      }
+                    </td>
+                    <td>
+                      <div class="hc-row-actions">
+                        <button mat-icon-button (click)="viewPatient(patient)" matTooltip="View Profile">
+                          <i-tabler name="eye"></i-tabler>
+                        </button>
+                        @if (perm.hasRoleAction('canUpdate', '/patients')) {
+                          <button mat-icon-button (click)="openForm(patient)" matTooltip="Edit">
+                            <i-tabler name="edit"></i-tabler>
+                          </button>
+                        }
+                      </div>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+      </mat-card-content>
+    </mat-card>
+  } @else {
+    <!-- Form Card View (exact /admin form design) -->
+    <mat-card class="cardWithShadow theme-card">
+      <mat-card-header>
+        <div class="header-container" style="display:flex;align-items:center;justify-content:space-between;width:100%;">
+          <mat-card-title class="m-b-0">
+            {{ editingId() ? 'Edit Patient' : 'Register Patient' }}
+          </mat-card-title>
+          <button mat-stroked-button (click)="closeForm()">Back to List</button>
+        </div>
+      </mat-card-header>
+
+      <mat-card-content class="b-t-1">
+        <form [formGroup]="form" (ngSubmit)="savePatient()" class="p-t-16" autocomplete="off">
+          <div class="row">
+            <div class="col-lg-4 m-b-16">
+              <mat-label class="f-w-600 m-b-8 d-block">Full Name <span class="text-danger">*</span></mat-label>
+              <mat-form-field appearance="outline" class="w-100">
+                <input matInput formControlName="name" placeholder="Enter Full Name (e.g. John Doe)">
+                @if (form.get('name')?.hasError('required')) {
+                  <mat-error>Patient name is required</mat-error>
+                }
+              </mat-form-field>
+            </div>
+
+            <div class="col-lg-4 m-b-16">
+              <mat-label class="f-w-600 m-b-8 d-block">Gender <span class="text-danger">*</span></mat-label>
+              <mat-form-field appearance="outline" class="w-100">
+                <mat-select formControlName="gender" placeholder="Select Gender">
+                  @for (g of genderOptions; track g) {
+                    <mat-option [value]="g">{{ g }}</mat-option>
+                  }
+                </mat-select>
+                @if (form.get('gender')?.hasError('required')) {
+                  <mat-error>Gender is required</mat-error>
+                }
+              </mat-form-field>
+            </div>
+
+            <div class="col-lg-4 m-b-16">
+              <mat-label class="f-w-600 m-b-8 d-block">Date of Birth</mat-label>
+              <mat-form-field appearance="outline" class="w-100">
+                <input matInput type="date" formControlName="date_of_birth">
+              </mat-form-field>
+            </div>
+
+            <div class="col-lg-4 m-b-16">
+              <mat-label class="f-w-600 m-b-8 d-block">Mobile Number <span class="text-danger">*</span></mat-label>
+              <mat-form-field appearance="outline" class="w-100">
+                <input matInput formControlName="phone" type="tel" placeholder="Enter 10-digit Mobile Number">
+                @if (form.get('phone')?.hasError('required')) {
+                  <mat-error>Mobile number is required</mat-error>
+                }
+              </mat-form-field>
+            </div>
+
+            <div class="col-lg-4 m-b-16">
+              <mat-label class="f-w-600 m-b-8 d-block">Email</mat-label>
+              <mat-form-field appearance="outline" class="w-100">
+                <input matInput formControlName="email" type="email" placeholder="Enter Email Address">
+              </mat-form-field>
+            </div>
+
+            <div class="col-lg-4 m-b-16">
+              <mat-label class="f-w-600 m-b-8 d-block">Blood Group</mat-label>
+              <mat-form-field appearance="outline" class="w-100">
+                <mat-select formControlName="blood_group" placeholder="Select Blood Group">
+                  @for (bg of bloodGroups; track bg) {
+                    <mat-option [value]="bg">{{ bg }}</mat-option>
+                  }
+                </mat-select>
+              </mat-form-field>
+            </div>
+
+            <div class="col-lg-4 m-b-16">
+              <mat-label class="f-w-600 m-b-8 d-block">Known Allergies</mat-label>
+              <mat-form-field appearance="outline" class="w-100">
+                <input matInput formControlName="allergies" placeholder="e.g. Penicillin, Dust, Latex">
+              </mat-form-field>
+            </div>
+
+            <div class="col-lg-8 m-b-16">
+              <mat-label class="f-w-600 m-b-8 d-block">Address</mat-label>
+              <mat-form-field appearance="outline" class="w-100">
+                <input matInput formControlName="address" placeholder="Enter Residential Address">
+              </mat-form-field>
+            </div>
+
+            <div class="col-lg-12 m-b-16">
+              <mat-label class="f-w-600 m-b-8 d-block">Medical Notes / History</mat-label>
+              <mat-form-field appearance="outline" class="w-100">
+                <textarea matInput formControlName="notes" rows="2" placeholder="Enter medical history notes"></textarea>
+              </mat-form-field>
+            </div>
+          </div>
+
+          <div class="m-t-12">
+            <button mat-stroked-button type="button" class="me-3 Cancel_Button" (click)="closeForm()">
+              Cancel
+            </button>
+            <button mat-flat-button color="primary" type="submit" [disabled]="saving()">
+              @if (saving()) { <mat-spinner diameter="18" style="margin-right:8px;display:inline-block;"></mat-spinner> }
+              {{ saving() ? 'Saving…' : (editingId() ? 'Update Patient' : 'Submit') }}
+            </button>
+          </div>
+        </form>
+      </mat-card-content>
+    </mat-card>
+  }
+
+  <!-- View Profile Dialog Overlay -->
+  @if (viewingPatient()) {
+    <div class="hc-form-overlay" (click)="closeView()"></div>
+    <div class="hc-form-panel">
+      <div class="hc-form-panel__header">
+        <div class="hc-form-panel__header-left">
+          <div class="hc-patient-avatar" style="width:40px;height:40px;font-size:16px;">
+            {{ getInitials(viewingPatient()?.name || '') }}
+          </div>
+          <div>
+            <h2 class="hc-form-panel__title">{{ viewingPatient()?.name }}</h2>
+            <p class="hc-form-panel__subtitle">Patient Code: <code>{{ viewingPatient()?.patient_code }}</code></p>
+          </div>
+        </div>
+        <button mat-icon-button (click)="closeView()"><i-tabler name="x"></i-tabler></button>
+      </div>
+
+      <div class="hc-form-body">
+        <div class="hc-form-section">
+          <p class="hc-form-section__title">Vitals & Demographics</p>
+          <div class="hc-profile-grid">
+            <div class="hc-profile-item">
+              <span class="hc-profile-lbl">Gender</span>
+              <span class="hc-profile-val">{{ viewingPatient()?.gender }}</span>
+            </div>
+            <div class="hc-profile-item">
+              <span class="hc-profile-lbl">Blood Group</span>
+              <span class="hc-profile-val">{{ viewingPatient()?.blood_group || '—' }}</span>
+            </div>
+            <div class="hc-profile-item">
+              <span class="hc-profile-lbl">Age</span>
+              <span class="hc-profile-val">{{ getAge(viewingPatient()?.date_of_birth) }}</span>
+            </div>
+            <div class="hc-profile-item">
+              <span class="hc-profile-lbl">Phone</span>
+              <span class="hc-profile-val">{{ viewingPatient()?.phone }}</span>
+            </div>
+          </div>
+        </div>
+
+        @if (viewingPatient()?.allergies) {
+          <div class="hc-form-section">
+            <p class="hc-form-section__title" style="color:#ef4444;">Known Allergies</p>
+            <p class="hc-allergy-box"><i-tabler name="alert-triangle"></i-tabler> {{ viewingPatient()?.allergies }}</p>
+          </div>
+        }
+
+        @if (viewingPatient()?.notes) {
+          <div class="hc-form-section">
+            <p class="hc-form-section__title">Medical Notes</p>
+            <p class="hc-profile-val">{{ viewingPatient()?.notes }}</p>
+          </div>
+        }
+      </div>
+
+      <div class="hc-form-actions">
+        <button mat-stroked-button (click)="closeView()">Close</button>
+      </div>
+    </div>
+  }
+
+</div>

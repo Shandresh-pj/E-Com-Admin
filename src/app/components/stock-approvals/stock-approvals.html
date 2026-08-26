@@ -1,0 +1,258 @@
+<div class="psh-root">
+
+  <!-- Ambient Background Orbs -->
+  <div class="psh-bg" aria-hidden="true">
+    <div class="psh-orb psh-orb--a"></div>
+    <div class="psh-orb psh-orb--b"></div>
+    <div class="psh-orb psh-orb--c"></div>
+    <div class="psh-grid"></div>
+  </div>
+
+  <!-- Page Hero Header -->
+  <header class="psh-hero">
+    <div>
+      <div class="psh-eyebrow">
+        <span class="psh-eyebrow__dot"></span>
+        <span>HEALTHCARE ERP</span>
+        <span class="psh-eyebrow__sep">·</span>
+        <span>{{ approvals().length }} APPROVAL REQUESTS</span>
+      </div>
+      <h1 class="psh-title">Stock <span class="psh-title__accent">Approvals</span></h1>
+      <p class="psh-sub">6-stage inventory approval workflow (Draft → Submitted → Pending → Approved → Posted → Rejected).</p>
+    </div>
+    <div class="psh-actions">
+      @if (!showForm() && perm.hasRoleAction('canCreate', '/stock-approvals')) {
+        <button class="psh-btn psh-btn--primary" (click)="openForm()">
+          <span class="psh-btn__shine"></span>
+          <i-tabler name="plus" style="width:20px;height:20px;"></i-tabler>
+          New Stock Request
+        </button>
+      }
+    </div>
+  </header>
+
+  <!-- Stat Chips Row -->
+  <div class="psh-chips">
+    @for (status of statuses; track status) {
+      <div class="psh-chip psh-chip--violet" style="cursor:pointer;"
+           [class.active]="statusFilter === status"
+           (click)="statusFilter = (statusFilter === status ? '' : status); cdr.markForCheck()">
+        <div class="psh-chip__orb"><i-tabler name="checkup-list"></i-tabler></div>
+        <div class="psh-chip__body">
+          <span class="psh-chip__num">{{ getKpiCount(status) }}</span>
+          <span class="psh-chip__lbl">{{ status }}</span>
+        </div>
+      </div>
+    }
+  </div>
+
+  <!-- Content Container -->
+  @if (!showForm()) {
+    <mat-card class="cardWithShadow theme-card">
+      <mat-card-header>
+        <div class="header-container" style="display:flex;align-items:center;justify-content:space-between;width:100%;">
+          <mat-card-title class="m-b-0">Approval Register</mat-card-title>
+        </div>
+      </mat-card-header>
+
+      <mat-card-content class="b-t-1">
+        <!-- Filter Chips -->
+        <div class="psh-filter" style="margin-bottom:16px;">
+          <div class="psh-filter__chips">
+            <button class="psh-filter__chip" [class.active]="statusFilter === ''" (click)="statusFilter = ''; cdr.markForCheck()">All</button>
+            @for (status of statuses; track status) {
+              <button class="psh-filter__chip" [class.active]="statusFilter === status" (click)="statusFilter = status; cdr.markForCheck()">
+                {{ status }} ({{ getKpiCount(status) }})
+              </button>
+            }
+          </div>
+        </div>
+
+        <!-- Loading -->
+        @if (loading()) {
+          <div class="hc-loading-wrap">
+            <mat-progress-spinner mode="indeterminate" diameter="40"></mat-progress-spinner>
+            <p>Loading stock approval requests…</p>
+          </div>
+        }
+
+        <!-- Empty -->
+        @if (!loading() && filteredApprovals().length === 0) {
+          <div class="hc-empty-state">
+            <i-tabler name="clipboard-x" class="hc-empty-icon"></i-tabler>
+            <h3>No stock approvals found</h3>
+            <p>{{ statusFilter ? 'No approvals match this stage filter.' : 'Create a new stock inward request to begin.' }}</p>
+          </div>
+        }
+
+        <!-- Approval List Cards -->
+        @if (!loading() && filteredApprovals().length > 0) {
+          <div class="hc-approval-list">
+            @for (appr of filteredApprovals(); track appr.id) {
+              <div class="hc-approval-card hc-approval-card--{{ getStatusClass(appr.status) }}">
+                <div class="hc-approval-header">
+                  <div>
+                    <div class="hc-approval-ref">{{ appr.reference_number }}</div>
+                    @if (appr.supplier_name) { <div class="hc-approval-supplier">Supplier: {{ appr.supplier_name }}</div> }
+                  </div>
+                  <div class="hc-approval-header-right">
+                    <span class="hc-status-badge hc-status-badge--{{ getStatusClass(appr.status) }}">{{ appr.status }}</span>
+                    <div class="hc-approval-meta">{{ appr.created_at | date:'dd MMM yyyy' }} · {{ appr.submitted_by_name }}</div>
+                  </div>
+                </div>
+
+                <div class="hc-approval-items">
+                  @for (item of appr.items; track item.id) {
+                    <div class="hc-approval-item">
+                      <span style="font-weight:700;">{{ item.medicine_name }}</span>
+                      <span class="hc-approval-item-batch">Batch: <code>{{ item.batch_number }}</code></span>
+                      <span class="hc-approval-item-qty">Qty: {{ item.quantity }}</span>
+                      <span class="hc-approval-item-exp">Exp: {{ item.expiry_date }}</span>
+                      <span class="hc-approval-item-amt">{{ formatAmount(item.unit_cost * item.quantity) }}</span>
+                    </div>
+                  }
+                </div>
+
+                <div class="hc-approval-footer">
+                  <div class="hc-approval-total">Total Amount: <strong>{{ formatAmount(appr.total_amount) }}</strong></div>
+                  <div class="hc-approval-actions">
+                    @if (appr.status === StockApprovalStatus.DRAFT) {
+                      <button mat-stroked-button color="primary" (click)="updateStatus(appr, StockApprovalStatus.SUBMITTED)">Submit</button>
+                    }
+                    @if (appr.status === StockApprovalStatus.SUBMITTED) {
+                      <button mat-stroked-button color="accent" (click)="updateStatus(appr, StockApprovalStatus.PENDING)">Review</button>
+                    }
+                    @if (appr.status === StockApprovalStatus.PENDING) {
+                      <button mat-flat-button color="primary" (click)="updateStatus(appr, StockApprovalStatus.APPROVED)">Approve</button>
+                      <button mat-stroked-button color="warn" (click)="openRejectDialog(appr)">Reject</button>
+                    }
+                    @if (appr.status === StockApprovalStatus.APPROVED) {
+                      <button mat-flat-button color="accent" (click)="updateStatus(appr, StockApprovalStatus.POSTED)">Post to Inventory</button>
+                    }
+                  </div>
+                </div>
+
+                @if (appr.rejection_reason) {
+                  <div class="hc-rejection-reason" style="margin:0 20px 14px;">
+                    <i-tabler name="alert-triangle"></i-tabler> Rejection Reason: {{ appr.rejection_reason }}
+                  </div>
+                }
+              </div>
+            }
+          </div>
+        }
+      </mat-card-content>
+    </mat-card>
+  } @else {
+    <!-- Form Card View (exact /admin form design) -->
+    <mat-card class="cardWithShadow theme-card">
+      <mat-card-header>
+        <div class="header-container" style="display:flex;align-items:center;justify-content:space-between;width:100%;">
+          <mat-card-title class="m-b-0">
+            New Stock Inward Request
+          </mat-card-title>
+          <button mat-stroked-button (click)="closeForm()">Back to Register</button>
+        </div>
+      </mat-card-header>
+
+      <mat-card-content class="b-t-1">
+        <form [formGroup]="form" (ngSubmit)="save()" class="p-t-16" autocomplete="off">
+          <div class="row">
+            <div class="col-lg-6 m-b-16">
+              <mat-label class="f-w-600 m-b-8 d-block">Supplier Name</mat-label>
+              <mat-form-field appearance="outline" class="w-100">
+                <input matInput formControlName="supplier_name" placeholder="Enter Supplier Name (e.g. Medico Pharma Labs)">
+              </mat-form-field>
+            </div>
+
+            <div class="col-lg-6 m-b-16">
+              <mat-label class="f-w-600 m-b-8 d-block">Notes / Remarks</mat-label>
+              <mat-form-field appearance="outline" class="w-100">
+                <input matInput formControlName="notes" placeholder="Enter notes or reference comments">
+              </mat-form-field>
+            </div>
+          </div>
+
+          <!-- Stock Items Section -->
+          <div class="m-t-16 m-b-16" style="border-top:1px solid rgba(0,0,0,0.08);padding-top:16px;">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+              <h4 style="margin:0;font-weight:700;">Stock Items ({{ items.length }})</h4>
+              <button mat-stroked-button type="button" (click)="addItem()" style="font-size:12px;">
+                <i-tabler name="plus" style="width:14px;height:14px;margin-right:4px;"></i-tabler>
+                Add Item
+              </button>
+            </div>
+
+            <div formArrayName="items">
+              @for (_ of items.controls; track $index; let i = $index) {
+                <div class="row m-b-16" [formGroupName]="i" style="background:rgba(0,0,0,0.02);padding:16px 8px 0;border-radius:12px;border:1px solid rgba(0,0,0,0.06);">
+                  <div class="col-lg-3 m-b-16">
+                    <mat-label class="f-w-600 m-b-8 d-block">Medicine <span class="text-danger">*</span></mat-label>
+                    <mat-form-field appearance="outline" class="w-100">
+                      <mat-select formControlName="medicine_id" placeholder="Select Medicine">
+                        @for (m of medicines; track m.id) { <mat-option [value]="m.id">{{ m.name }}</mat-option> }
+                      </mat-select>
+                    </mat-form-field>
+                  </div>
+
+                  <div class="col-lg-2 m-b-16">
+                    <mat-label class="f-w-600 m-b-8 d-block">Batch No. <span class="text-danger">*</span></mat-label>
+                    <mat-form-field appearance="outline" class="w-100">
+                      <input matInput formControlName="batch_number" placeholder="Batch No.">
+                    </mat-form-field>
+                  </div>
+
+                  <div class="col-lg-2 m-b-16">
+                    <mat-label class="f-w-600 m-b-8 d-block">Mfg Date</mat-label>
+                    <mat-form-field appearance="outline" class="w-100">
+                      <input matInput type="date" formControlName="manufacture_date">
+                    </mat-form-field>
+                  </div>
+
+                  <div class="col-lg-2 m-b-16">
+                    <mat-label class="f-w-600 m-b-8 d-block">Expiry Date <span class="text-danger">*</span></mat-label>
+                    <mat-form-field appearance="outline" class="w-100">
+                      <input matInput type="date" formControlName="expiry_date">
+                    </mat-form-field>
+                  </div>
+
+                  <div class="col-lg-1 m-b-16">
+                    <mat-label class="f-w-600 m-b-8 d-block">Qty <span class="text-danger">*</span></mat-label>
+                    <mat-form-field appearance="outline" class="w-100">
+                      <input matInput type="number" formControlName="quantity" min="1">
+                    </mat-form-field>
+                  </div>
+
+                  <div class="col-lg-2 m-b-16" style="display:flex;align-items:center;gap:8px;">
+                    <div style="flex:1;">
+                      <mat-label class="f-w-600 m-b-8 d-block">Cost Price (₹)</mat-label>
+                      <mat-form-field appearance="outline" class="w-100">
+                        <input matInput type="number" formControlName="unit_cost" min="0">
+                      </mat-form-field>
+                    </div>
+                    @if (items.length > 1) {
+                      <button mat-icon-button type="button" (click)="removeItem(i)" style="color:#ef4444;margin-top:20px;">
+                        <i-tabler name="trash"></i-tabler>
+                      </button>
+                    }
+                  </div>
+                </div>
+              }
+            </div>
+          </div>
+
+          <div class="m-t-12">
+            <button mat-stroked-button type="button" class="me-3 Cancel_Button" (click)="closeForm()">
+              Cancel
+            </button>
+            <button mat-flat-button color="primary" type="submit" [disabled]="saving()">
+              @if (saving()) { <mat-spinner diameter="18" style="margin-right:8px;display:inline-block;"></mat-spinner> }
+              {{ saving() ? 'Saving…' : 'Submit Draft Request' }}
+            </button>
+          </div>
+        </form>
+      </mat-card-content>
+    </mat-card>
+  }
+
+</div>

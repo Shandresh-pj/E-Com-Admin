@@ -1,67 +1,88 @@
-<div class="row">
-  <div class="col-lg-12">
-    <mat-card class="cardWithShadow overflow-hidden">
-      <mat-card-header class="d-flex align-items-center justify-content-between p-24 bg-light-primary">
-        <mat-card-title class="m-b-0">Notification Center</mat-card-title>
-        @if (notifications.length > 0) {
+<div class="hc-module">
+
+  <!-- ── Page Header ───────────────────────────────────────────────────────── -->
+  <div class="hc-page-header">
+    <div class="hc-page-header__left">
+      <div class="hc-page-header__icon-wrap">
+        <i-tabler name="bell"></i-tabler>
+      </div>
+      <div class="hc-page-header__title-block">
+        <h1 class="hc-module-title">Notification Center</h1>
+        <p class="hc-module-subtitle">Healthcare system alerts & real-time notifications</p>
+      </div>
+    </div>
+    <div class="hc-page-header__right">
+      @if (notifications.length > 0) {
         <button mat-flat-button color="primary" (click)="markAllAsRead()">
-          <mat-icon>check_circle</mat-icon> Mark All as Read
+          <i-tabler name="checks" style="width:16px;height:16px;margin-right:6px;"></i-tabler>
+          Mark All Read
         </button>
-        }
-      </mat-card-header>
+      }
+    </div>
+  </div>
 
-      <mat-card-content class="p-24">
-        @if (loading) {
-        <div class="text-center p-y-24">
-          <p class="text-muted">Loading notifications...</p>
-        </div>
-        }
+  <!-- ── Category Filter Pills ──────────────────────────────────────────────── -->
+  <div class="hc-filter-pills">
+    @for (cat of categories; track cat.id) {
+      <button class="hc-pill" [class.active]="selectedCategory === cat.id" (click)="selectedCategory = cat.id; cdr.markForCheck()">
+        {{ cat.label }}
+      </button>
+    }
+  </div>
 
-        @if (!loading && notifications.length === 0) {
-        <div class="text-center p-y-48">
-          <mat-icon style="font-size: 48px; width: 48px; height: 48px;" class="text-muted">notifications_off</mat-icon>
-          <h4 class="m-t-16 text-muted">No notifications found</h4>
-          <p class="text-muted">You're all caught up!</p>
-        </div>
-        }
+  <!-- ── Loading ────────────────────────────────────────────────────────────── -->
+  @if (loading) {
+    <div class="hc-loading-wrap">
+      <mat-progress-spinner mode="indeterminate" diameter="40"></mat-progress-spinner>
+      <p>Loading notifications…</p>
+    </div>
+  }
 
-        @if (!loading && notifications.length > 0) {
-        <div class="notification-list">
-          @for (item of notifications; track item) {
-          <div [class.unread]="!item.is_read" (click)="markAsRead(item)"
-            class="notification-item d-flex align-items-center justify-content-between p-16 m-b-12 rounded border">
+  <!-- ── Empty State ────────────────────────────────────────────────────────── -->
+  @if (!loading && filteredNotifications.length === 0) {
+    <div class="hc-empty-state">
+      <i-tabler name="bell-off" class="hc-empty-icon"></i-tabler>
+      <h3>No notifications found</h3>
+      <p>You're all caught up! No active alerts in this category.</p>
+    </div>
+  }
 
-            <div class="d-flex align-items-center">
-              <div class="icon-wrapper m-r-16 rounded-circle d-flex align-items-center justify-content-center p-8"
-                [ngClass]="item.is_read ? 'bg-light' : 'bg-light-primary'">
-                <mat-icon [class]="getClassForType(item.type)">{{ getIconForType(item.type) }}</mat-icon>
-              </div>
-              <div>
-                <span class="d-block f-w-600 f-s-14" [ngClass]="item.is_read ? 'text-muted' : 'text-dark'">
-                  {{ item.message }}
-                </span>
-                <span class="d-block text-muted f-s-12 m-t-4">
-                  {{ item.created_at | date:'medium' }}
-                </span>
-              </div>
+  <!-- ── Notification List ──────────────────────────────────────────────────── -->
+  @if (!loading && filteredNotifications.length > 0) {
+    <div class="hc-table-card">
+      <div class="hc-notif-list">
+        @for (item of filteredNotifications; track item.id || $index) {
+          <div class="hc-notif-item" [class.hc-notif-item--unread]="!item.is_read" (click)="markAsRead(item)">
+
+            <div class="hc-notif-icon-wrap" [class.hc-notif-icon-wrap--unread]="!item.is_read">
+              <i-tabler [name]="getIconForCategory(item.category || item.type)"></i-tabler>
             </div>
 
-            <div class="actions">
+            <div class="hc-notif-body">
+              <div class="hc-notif-title-row">
+                <span class="hc-notif-title">{{ item.title || item.category || 'System Alert' }}</span>
+                <span class="hc-badge {{ getBadgeClass(item.category || item.type) }}">
+                  {{ item.category || item.type || 'Alert' }}
+                </span>
+              </div>
+              <p class="hc-notif-message">{{ item.message }}</p>
+              <span class="hc-notif-time">{{ item.created_at | date:'medium' }}</span>
+            </div>
+
+            <div class="hc-notif-actions">
               @if (!item.is_read) {
-              <button mat-icon-button (click)="markAsRead(item); $event.stopPropagation()" title="Mark as read">
-                <mat-icon color="primary">done</mat-icon>
-              </button>
-              }
-              @if (item.is_read) {
-              <mat-icon class="text-success" title="Read">done_all</mat-icon>
+                <button mat-icon-button (click)="markAsRead(item); $event.stopPropagation()" matTooltip="Mark as read">
+                  <i-tabler name="check" style="color:hsl(196,80%,32%);"></i-tabler>
+                </button>
+              } @else {
+                <i-tabler name="checks" style="color:hsl(142,71%,42%);width:18px;height:18px;"></i-tabler>
               }
             </div>
 
           </div>
-          }
-        </div>
         }
-      </mat-card-content>
-    </mat-card>
-  </div>
+      </div>
+    </div>
+  }
+
 </div>

@@ -122,7 +122,17 @@ export class MenuBar implements OnInit {
     { name: 'Fleet', path: '/fleet-management', icon: 'bi-radar', webIcon: 'bi-radar', appIcon: 'radar', isActive: true },
     { name: 'Transit', path: '/corporate-transport', icon: 'bi-building-fill-gear', webIcon: 'bi-building-fill-gear', appIcon: 'directions_bus', isActive: true },
     { name: 'Live Tracking', path: '/live-tracking', icon: 'bi-geo-alt-fill', webIcon: 'bi-geo-alt-fill', appIcon: 'location_searching', isActive: true },
-    { name: 'Driver Verification', path: '/vehicle-driver-verification', icon: 'bi-person-check-fill', webIcon: 'bi-person-check-fill', appIcon: 'verified_user', isActive: true }
+    { name: 'Driver Verification', path: '/vehicle-driver-verification', icon: 'bi-person-check-fill', webIcon: 'bi-person-check-fill', appIcon: 'verified_user', isActive: true },
+    // ── Healthcare ERP ────────────────────────────────────────────────────────
+    { name: 'Doctors', path: '/doctors', icon: 'bi-heart-pulse-fill', webIcon: 'bi-heart-pulse-fill', appIcon: 'medical_services', isActive: true },
+    { name: 'Patients', path: '/patients', icon: 'bi-person-heart', webIcon: 'bi-person-heart', appIcon: 'personal_injury', isActive: true },
+    { name: 'Appointments', path: '/appointments', icon: 'bi-calendar-check-fill', webIcon: 'bi-calendar-check-fill', appIcon: 'event_available', isActive: true },
+    { name: 'Consultations', path: '/consultations', icon: 'bi-clipboard2-pulse-fill', webIcon: 'bi-clipboard2-pulse-fill', appIcon: 'record_voice_over', isActive: true },
+    { name: 'Prescriptions', path: '/prescriptions', icon: 'bi-file-medical-fill', webIcon: 'bi-file-medical-fill', appIcon: 'medication', isActive: true },
+    { name: 'Medicine Master', path: '/medicines', icon: 'bi-capsule-pill', webIcon: 'bi-capsule-pill', appIcon: 'local_pharmacy', isActive: true },
+    { name: 'Pharmacy POS', path: '/pharmacy-pos', icon: 'bi-bag-plus-fill', webIcon: 'bi-bag-plus-fill', appIcon: 'point_of_sale', isActive: true },
+    { name: 'Stock Approvals', path: '/stock-approvals', icon: 'bi-patch-check-fill', webIcon: 'bi-patch-check-fill', appIcon: 'inventory', isActive: true },
+    { name: 'Medicine Expiry', path: '/medicine-expiry', icon: 'bi-hourglass-bottom', webIcon: 'bi-hourglass-bottom', appIcon: 'hourglass_bottom', isActive: true },
   ];
 
   constructor(

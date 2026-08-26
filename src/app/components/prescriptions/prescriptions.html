@@ -1,0 +1,325 @@
+<div class="psh-root">
+
+  <!-- Ambient Background Orbs -->
+  <div class="psh-bg" aria-hidden="true">
+    <div class="psh-orb psh-orb--a"></div>
+    <div class="psh-orb psh-orb--b"></div>
+    <div class="psh-orb psh-orb--c"></div>
+    <div class="psh-grid"></div>
+  </div>
+
+  <!-- Page Hero Header -->
+  <header class="psh-hero">
+    <div>
+      <div class="psh-eyebrow">
+        <span class="psh-eyebrow__dot"></span>
+        <span>HEALTHCARE ERP</span>
+        <span class="psh-eyebrow__sep">·</span>
+        <span>{{ prescriptions().length }} PRESCRIPTIONS ISSUED</span>
+      </div>
+      <h1 class="psh-title">Digital <span class="psh-title__accent">Prescriptions</span></h1>
+      <p class="psh-sub">Issue e-prescriptions with multi-slot medication schedules (Morning, Afternoon, Evening, Night) and food timing.</p>
+    </div>
+    <div class="psh-actions">
+      @if (!showForm() && perm.hasRoleAction('canCreate', '/prescriptions')) {
+        <button class="psh-btn psh-btn--primary" (click)="openForm()">
+          <span class="psh-btn__shine"></span>
+          <i-tabler name="notes-medical" style="width:20px;height:20px;"></i-tabler>
+          New Prescription
+        </button>
+      }
+    </div>
+  </header>
+
+  <!-- Stat Chips Row -->
+  <div class="psh-chips">
+    <div class="psh-chip psh-chip--violet">
+      <div class="psh-chip__orb"><i-tabler name="prescription"></i-tabler></div>
+      <div class="psh-chip__body">
+        <span class="psh-chip__num">{{ prescriptions().length }}</span>
+        <span class="psh-chip__lbl">Total Issued</span>
+      </div>
+    </div>
+    <div class="psh-chip psh-chip--emerald">
+      <div class="psh-chip__orb"><i-tabler name="circle-check"></i-tabler></div>
+      <div class="psh-chip__body">
+        <span class="psh-chip__num">{{ dispensedCount }}</span>
+        <span class="psh-chip__lbl">Dispensed</span>
+      </div>
+    </div>
+    <div class="psh-chip psh-chip--amber">
+      <div class="psh-chip__orb"><i-tabler name="clock-hour-4"></i-tabler></div>
+      <div class="psh-chip__body">
+        <span class="psh-chip__num">{{ pendingDispenseCount }}</span>
+        <span class="psh-chip__lbl">Pending POS</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Content Container -->
+  @if (!showForm()) {
+    <mat-card class="cardWithShadow theme-card">
+      <mat-card-header>
+        <div class="header-container" style="display:flex;align-items:center;justify-content:space-between;width:100%;">
+          <mat-card-title class="m-b-0">Prescription Archive</mat-card-title>
+          <div class="hc-search-wrap">
+            <i-tabler name="search" class="hc-search-icon"></i-tabler>
+            <input class="hc-search-input" placeholder="Search patient, doctor, Rx code..."
+                   [(ngModel)]="searchQuery" (ngModelChange)="cdr.markForCheck()" />
+          </div>
+        </div>
+      </mat-card-header>
+
+      <mat-card-content class="b-t-1">
+        <!-- Loading -->
+        @if (loading()) {
+          <div class="hc-loading-wrap">
+            <mat-progress-spinner mode="indeterminate" diameter="40"></mat-progress-spinner>
+            <p>Loading prescriptions…</p>
+          </div>
+        }
+
+        <!-- Empty -->
+        @if (!loading() && filteredPrescriptions().length === 0) {
+          <div class="hc-empty-state">
+            <i-tabler name="prescription" class="hc-empty-icon"></i-tabler>
+            <h3>No prescriptions found</h3>
+            <p>{{ searchQuery ? 'Try adjusting your search query.' : 'Issue the first e-prescription for a patient.' }}</p>
+          </div>
+        }
+
+        <!-- Prescription List -->
+        @if (!loading() && filteredPrescriptions().length > 0) {
+          <div class="hc-rx-list">
+            @for (rx of filteredPrescriptions(); track rx.id) {
+              <div class="hc-rx-card">
+                <div class="hc-rx-header">
+                  <div>
+                    <div class="hc-rx-code">{{ rx.prescription_code }}</div>
+                    <div class="hc-rx-patient">{{ rx.patient_name }}</div>
+                    <div class="hc-rx-doctor">Dr. {{ rx.doctor_name }} · {{ rx.prescription_date | date:'mediumDate' }}</div>
+                  </div>
+                  <div class="hc-rx-actions">
+                    <span class="hc-dispensed-badge" [class.hc-dispensed-badge--yes]="rx.is_dispensed">
+                      {{ rx.is_dispensed ? 'Dispensed' : 'Pending Dispense' }}
+                    </span>
+                    @if (perm.hasRoleAction('canUpdate', '/prescriptions')) {
+                      <button mat-icon-button (click)="openForm(rx)" matTooltip="Edit"><i-tabler name="edit"></i-tabler></button>
+                    }
+                  </div>
+                </div>
+
+                <div class="hc-rx-items">
+                  @for (item of rx.items; track item.medicine_id; let idx = $index) {
+                    <div class="hc-rx-item">
+                      <div class="hc-rx-item-header">
+                        <div class="hc-rx-item-name">{{ item.medicine_name || getMedicineName(item.medicine_id) }}</div>
+                        @if (item.generic_name) {
+                          <div class="hc-rx-item-generic">({{ item.generic_name }})</div>
+                        }
+                        <div class="hc-rx-item-meta">
+                          Qty: <strong>{{ item.quantity }}</strong> · {{ item.duration_days }} days · {{ item.frequency }}
+                        </div>
+                      </div>
+
+                      @if (getActiveSchedule(item).length > 0) {
+                        <div class="hc-rx-schedule">
+                          @for (slot of getActiveSchedule(item); track slot.time_of_day) {
+                            <div class="hc-rx-slot hc-rx-slot--{{ todMeta[slot.time_of_day].cssClass }}">
+                              <div class="hc-rx-slot-tod">
+                                <span class="hc-rx-slot-emoji">{{ todMeta[slot.time_of_day].emoji }}</span>
+                                <span class="hc-rx-slot-label">{{ todMeta[slot.time_of_day].label }}</span>
+                              </div>
+                              <div class="hc-rx-slot-qty">{{ slot.quantity }} × {{ slot.unit }}</div>
+                              <div class="hc-rx-slot-food">{{ slot.before_food ? 'Before food' : 'After food' }}</div>
+                            </div>
+                          }
+                        </div>
+                      }
+
+                      @if (item.instructions) {
+                        <div class="hc-rx-item-instructions">
+                          <i-tabler name="info-circle"></i-tabler>
+                          {{ item.instructions }}
+                        </div>
+                      }
+                    </div>
+                    @if (!$last) { <div class="hc-rx-item-divider"></div> }
+                  }
+                </div>
+
+                @if (rx.notes) {
+                  <div class="hc-rx-footer-notes">Special Instructions: {{ rx.notes }}</div>
+                }
+              </div>
+            }
+          </div>
+        }
+      </mat-card-content>
+    </mat-card>
+  } @else {
+    <!-- Form Card View (exact /admin form design) -->
+    <mat-card class="cardWithShadow theme-card">
+      <mat-card-header>
+        <div class="header-container" style="display:flex;align-items:center;justify-content:space-between;width:100%;">
+          <mat-card-title class="m-b-0">
+            {{ editingId() ? 'Edit Prescription' : 'New Prescription' }}
+          </mat-card-title>
+          <button mat-stroked-button (click)="closeForm()">Back to Archive</button>
+        </div>
+      </mat-card-header>
+
+      <mat-card-content class="b-t-1">
+        <form [formGroup]="form" (ngSubmit)="save()" class="p-t-16" autocomplete="off">
+          <div class="row">
+            <div class="col-lg-4 m-b-16">
+              <mat-label class="f-w-600 m-b-8 d-block">Select Patient <span class="text-danger">*</span></mat-label>
+              <mat-form-field appearance="outline" class="w-100">
+                <mat-select formControlName="patient_id" placeholder="Select Patient">
+                  @for (p of patients; track p.id) { <mat-option [value]="p.id">{{ p.name }} ({{ p.patient_code }})</mat-option> }
+                </mat-select>
+                @if (form.get('patient_id')?.hasError('required')) {
+                  <mat-error>Patient is required</mat-error>
+                }
+              </mat-form-field>
+            </div>
+
+            <div class="col-lg-4 m-b-16">
+              <mat-label class="f-w-600 m-b-8 d-block">Select Doctor <span class="text-danger">*</span></mat-label>
+              <mat-form-field appearance="outline" class="w-100">
+                <mat-select formControlName="doctor_id" placeholder="Select Doctor">
+                  @for (d of doctors; track d.id) { <mat-option [value]="d.id">Dr. {{ d.name }}</mat-option> }
+                </mat-select>
+                @if (form.get('doctor_id')?.hasError('required')) {
+                  <mat-error>Doctor is required</mat-error>
+                }
+              </mat-form-field>
+            </div>
+
+            <div class="col-lg-4 m-b-16">
+              <mat-label class="f-w-600 m-b-8 d-block">Prescription Date <span class="text-danger">*</span></mat-label>
+              <mat-form-field appearance="outline" class="w-100">
+                <input matInput type="date" formControlName="prescription_date">
+                @if (form.get('prescription_date')?.hasError('required')) {
+                  <mat-error>Date is required</mat-error>
+                }
+              </mat-form-field>
+            </div>
+          </div>
+
+          <!-- Prescribed Medicines Section -->
+          <div class="m-t-16 m-b-16" style="border-top:1px solid rgba(0,0,0,0.08);padding-top:16px;">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+              <h4 style="margin:0;font-weight:700;">Prescribed Medicines ({{ items.length }})</h4>
+              <button mat-stroked-button type="button" (click)="addItem()" style="font-size:12px;">
+                <i-tabler name="plus" style="width:14px;height:14px;margin-right:4px;"></i-tabler>
+                Add Medicine
+              </button>
+            </div>
+
+            <div formArrayName="items">
+              @for (_ of items.controls; track $index; let i = $index) {
+                <div class="hc-rx-form-item" [formGroupName]="i" style="background:rgba(0,0,0,0.02);padding:16px;border-radius:12px;margin-bottom:16px;border:1px solid rgba(0,0,0,0.06);">
+                  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+                    <span style="font-size:12px;font-weight:700;color:hsl(196,80%,32%);">MEDICINE #{{ i + 1 }}</span>
+                    @if (items.length > 1) {
+                      <button mat-icon-button type="button" (click)="removeItem(i)" style="color:#ef4444;">
+                        <i-tabler name="trash"></i-tabler>
+                      </button>
+                    }
+                  </div>
+
+                  <div class="row">
+                    <div class="col-lg-6 m-b-16">
+                      <mat-label class="f-w-600 m-b-8 d-block">Medicine Name <span class="text-danger">*</span></mat-label>
+                      <mat-form-field appearance="outline" class="w-100">
+                        <mat-select formControlName="medicine_id" placeholder="Select Medicine">
+                          @for (m of medicines; track m.id) { <mat-option [value]="m.id">{{ m.name }} — {{ m.strength }}</mat-option> }
+                        </mat-select>
+                      </mat-form-field>
+                    </div>
+
+                    <div class="col-lg-2 m-b-16">
+                      <mat-label class="f-w-600 m-b-8 d-block">Quantity <span class="text-danger">*</span></mat-label>
+                      <mat-form-field appearance="outline" class="w-100">
+                        <input matInput type="number" formControlName="quantity" min="1">
+                      </mat-form-field>
+                    </div>
+
+                    <div class="col-lg-2 m-b-16">
+                      <mat-label class="f-w-600 m-b-8 d-block">Duration (Days) <span class="text-danger">*</span></mat-label>
+                      <mat-form-field appearance="outline" class="w-100">
+                        <input matInput type="number" formControlName="duration_days" min="1">
+                      </mat-form-field>
+                    </div>
+
+                    <div class="col-lg-2 m-b-16">
+                      <mat-label class="f-w-600 m-b-8 d-block">Frequency</mat-label>
+                      <mat-form-field appearance="outline" class="w-100">
+                        <input matInput formControlName="frequency" placeholder="3x a day">
+                      </mat-form-field>
+                    </div>
+                  </div>
+
+                  <div style="margin-bottom:12px;">
+                    <mat-label class="f-w-600 m-b-8 d-block">Dosage Schedule</mat-label>
+                    <div class="hc-schedule-grid" [formArrayName]="'schedule'">
+                      @for (_ of getScheduleArray(i).controls; track $index; let si = $index) {
+                        <div class="hc-schedule-slot" [formGroupName]="si"
+                             [class.hc-schedule-slot--active]="getScheduleArray(i).at(si).get('selected')?.value">
+                          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+                            <span style="font-size:12px;font-weight:700;">
+                              {{ todMeta[timeOfDayList[si]].emoji }} {{ todMeta[timeOfDayList[si]].label }}
+                            </span>
+                            <mat-slide-toggle formControlName="selected" color="primary"></mat-slide-toggle>
+                          </div>
+
+                          @if (getScheduleArray(i).at(si).get('selected')?.value) {
+                            <div style="display:flex;flex-direction:column;gap:6px;margin-top:6px;">
+                              <mat-form-field appearance="outline" style="width:100%;">
+                                <mat-label>Dose Qty</mat-label>
+                                <input matInput type="number" formControlName="quantity" min="1" />
+                              </mat-form-field>
+                              <mat-slide-toggle formControlName="before_food" color="accent" style="font-size:11px;">
+                                {{ getScheduleArray(i).at(si).get('before_food')?.value ? 'Before food' : 'After food' }}
+                              </mat-slide-toggle>
+                            </div>
+                          }
+                        </div>
+                      }
+                    </div>
+                  </div>
+
+                  <div class="m-b-8">
+                    <mat-label class="f-w-600 m-b-8 d-block">Special Instructions</mat-label>
+                    <mat-form-field appearance="outline" class="w-100">
+                      <input matInput formControlName="instructions" placeholder="e.g. Take after meal with warm water">
+                    </mat-form-field>
+                  </div>
+                </div>
+              }
+            </div>
+          </div>
+
+          <div class="col-lg-12 m-b-16">
+            <mat-label class="f-w-600 m-b-8 d-block">General Notes / Instructions</mat-label>
+            <mat-form-field appearance="outline" class="w-100">
+              <textarea matInput formControlName="notes" rows="2" placeholder="Enter general dietary or lifestyle notes"></textarea>
+            </mat-form-field>
+          </div>
+
+          <div class="m-t-12">
+            <button mat-stroked-button type="button" class="me-3 Cancel_Button" (click)="closeForm()">
+              Cancel
+            </button>
+            <button mat-flat-button color="primary" type="submit" [disabled]="saving()">
+              @if (saving()) { <mat-spinner diameter="18" style="margin-right:8px;display:inline-block;"></mat-spinner> }
+              {{ saving() ? 'Saving…' : 'Submit' }}
+            </button>
+          </div>
+        </form>
+      </mat-card-content>
+    </mat-card>
+  }
+
+</div>

@@ -541,4 +541,87 @@ export const ComponentsRoutes: Routes = [
       urls: [{ title: 'Driver Verification', url: '/vehicle-driver-verification' }]
     }
   },
+
+  // ─── Healthcare ERP ───────────────────────────────────────────────────────
+  {
+    path: 'doctors',
+    loadComponent: () => import('./doctors/doctors').then(m => m.DoctorsComponent),
+    canActivate: [RoleGuard],
+    data: {
+      title: 'Doctor Management',
+      urls: [{ title: 'Healthcare', url: '/doctors' }, { title: 'Doctors', url: '/doctors' }]
+    }
+  },
+  {
+    path: 'patients',
+    loadComponent: () => import('./patients/patients').then(m => m.PatientsComponent),
+    canActivate: [RoleGuard],
+    data: {
+      title: 'Patient Management',
+      urls: [{ title: 'Healthcare', url: '/patients' }, { title: 'Patients', url: '/patients' }]
+    }
+  },
+  {
+    path: 'appointments',
+    loadComponent: () => import('./appointments/appointments').then(m => m.AppointmentsComponent),
+    canActivate: [RoleGuard],
+    data: {
+      title: 'Appointments',
+      urls: [{ title: 'Healthcare', url: '/appointments' }, { title: 'Appointments', url: '/appointments' }]
+    }
+  },
+  {
+    path: 'consultations',
+    loadComponent: () => import('./consultations/consultations').then(m => m.ConsultationsComponent),
+    canActivate: [RoleGuard],
+    data: {
+      title: 'Consultations',
+      urls: [{ title: 'Healthcare', url: '/consultations' }, { title: 'Consultations', url: '/consultations' }]
+    }
+  },
+  {
+    path: 'prescriptions',
+    loadComponent: () => import('./prescriptions/prescriptions').then(m => m.PrescriptionsComponent),
+    canActivate: [RoleGuard],
+    data: {
+      title: 'Prescriptions',
+      urls: [{ title: 'Healthcare', url: '/prescriptions' }, { title: 'Prescriptions', url: '/prescriptions' }]
+    }
+  },
+  {
+    path: 'medicines',
+    loadComponent: () => import('./medicines/medicines').then(m => m.MedicinesComponent),
+    canActivate: [RoleGuard],
+    data: {
+      title: 'Medicine Master',
+      urls: [{ title: 'Pharmacy', url: '/medicines' }, { title: 'Medicines', url: '/medicines' }]
+    }
+  },
+  {
+    path: 'pharmacy-pos',
+    loadComponent: () => import('./pharmacy-pos/pharmacy-pos').then(m => m.PharmacyPosComponent),
+    canActivate: [RoleGuard],
+    data: {
+      title: 'Pharmacy POS',
+      urls: [{ title: 'Pharmacy', url: '/pharmacy-pos' }, { title: 'POS Terminal', url: '/pharmacy-pos' }]
+    }
+  },
+  {
+    path: 'stock-approvals',
+    loadComponent: () => import('./stock-approvals/stock-approvals').then(m => m.StockApprovalsComponent),
+    canActivate: [RoleGuard],
+    data: {
+      title: 'Stock Approvals',
+      urls: [{ title: 'Pharmacy', url: '/stock-approvals' }, { title: 'Stock Approvals', url: '/stock-approvals' }]
+    }
+  },
+  {
+    path: 'medicine-expiry',
+    loadComponent: () => import('./medicine-expiry/medicine-expiry').then(m => m.MedicineExpiryComponent),
+    canActivate: [RoleGuard],
+    data: {
+      title: 'Medicine Expiry',
+      urls: [{ title: 'Pharmacy', url: '/medicine-expiry' }, { title: 'Expiry Management', url: '/medicine-expiry' }]
+    }
+  },
 ];

@@ -1,0 +1,131 @@
+// pharmacy-pos.scss — local styles; global HC classes from healthcare-shared.scss
+
+.hc-pos {
+  display: grid;
+  grid-template-columns: 1fr 360px;
+  gap: 20px;
+  padding: 24px;
+  min-height: calc(100vh - 80px);
+  align-items: start;
+
+  @media (max-width: 1024px) { grid-template-columns: 1fr; }
+}
+
+.hc-pos-left { display: flex; flex-direction: column; gap: 16px; }
+
+.hc-pos-header {
+  display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;
+  &__title { display: flex; align-items: center; gap: 12px; }
+}
+
+.hc-pos-search-section { position: relative; }
+
+.hc-pos-search-wrap {
+  display: flex; align-items: center; position: relative;
+  background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(12px);
+  border: 2px solid hsl(196, 80%, 45%); border-radius: 14px; padding: 0 16px;
+  box-shadow: 0 4px 16px rgba(196, 80%, 32%, 0.1);
+  transition: border-color 200ms, box-shadow 200ms;
+
+  &:focus-within {
+    border-color: hsl(196, 80%, 32%);
+    box-shadow: 0 4px 20px rgba(196, 80%, 32%, 0.2);
+  }
+}
+
+.hc-pos-search-icon, .hc-pos-search-spinner {
+  flex-shrink: 0; width: 20px; height: 20px; color: hsl(196, 80%, 32%); margin-right: 10px;
+}
+
+.hc-pos-search-input {
+  flex: 1; border: none; outline: none; padding: 14px 0; font-size: 15px; background: transparent;
+  font-weight: 500; color: hsl(220, 13%, 15%);
+  &::placeholder { color: hsl(220, 9%, 60%); font-weight: 400; }
+}
+
+.hc-pos-results {
+  position: absolute; left: 0; right: 0; top: calc(100% + 6px); z-index: 200;
+  background: rgba(255, 255, 255, 0.98); backdrop-filter: blur(20px);
+  border: 1px solid rgba(0, 0, 0, 0.1); border-radius: 14px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15); max-height: 340px; overflow-y: auto;
+}
+
+.hc-pos-result-item {
+  display: flex; align-items: center; justify-content: space-between; padding: 12px 18px; cursor: pointer;
+  transition: background 150ms; border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+  &:last-child { border-bottom: none; }
+  &:hover { background: rgba(196, 80%, 32%, 0.06); }
+}
+
+.hc-pos-result-name { font-size: 14px; font-weight: 700; color: hsl(220, 13%, 15%); }
+.hc-pos-result-sub  { font-size: 11px; color: hsl(220, 9%, 50%); margin-top: 2px; }
+
+.hc-pos-cart {
+  background: rgba(255, 255, 255, 0.88); backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.7); border-radius: 16px; overflow: hidden;
+  min-height: 220px; box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+}
+
+.hc-pos-cart-empty {
+  display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 56px 20px;
+  color: hsl(220, 9%, 55%); text-align: center;
+  p { font-size: 14px; margin: 0; }
+}
+
+.hc-pos-cart-table {
+  width: 100%; border-collapse: collapse; font-size: 13px;
+
+  thead tr { background: rgba(196, 80%, 32%, 0.04); }
+  th { padding: 12px 16px; text-align: left; font-weight: 700; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; color: hsl(220, 9%, 50%); border-bottom: 1px solid rgba(0, 0, 0, 0.06); }
+  td { padding: 12px 16px; border-bottom: 1px solid rgba(0, 0, 0, 0.04); vertical-align: middle; }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr:hover { background: rgba(196, 80%, 32%, 0.02); }
+}
+
+.hc-pos-right { display: flex; flex-direction: column; gap: 14px; position: sticky; top: 80px; }
+
+.hc-pos-panel {
+  background: rgba(255, 255, 255, 0.88); backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.7); border-radius: 16px; padding: 18px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+}
+
+.hc-pos-panel-title {
+  display: flex; align-items: center; gap: 8px; font-size: 11px; font-weight: 800;
+  text-transform: uppercase; letter-spacing: 0.7px; color: hsl(220, 9%, 45%); margin-bottom: 12px;
+  i-tabler { width: 15px; height: 15px; color: hsl(196, 80%, 32%); }
+}
+
+.hc-grand-total { font-size: 24px; font-weight: 800; color: hsl(196, 80%, 32%); }
+
+.hc-payment-methods { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin: 12px 0; }
+
+.hc-payment-btn {
+  padding: 8px 6px; border-radius: 10px; border: 1.5px solid rgba(0, 0, 0, 0.08); background: #fff;
+  font-size: 11px; font-weight: 700; cursor: pointer; text-transform: uppercase; letter-spacing: 0.5px;
+  transition: all 150ms; color: hsl(220, 9%, 50%);
+  &.active { border-color: hsl(196, 80%, 32%); background: rgba(196, 80%, 32%, 0.08); color: hsl(196, 80%, 30%); }
+}
+
+.hc-checkout-btn {
+  width: 100%; margin-top: 14px; padding: 14px !important; font-size: 14px !important; font-weight: 700 !important;
+  border-radius: 12px !important; letter-spacing: 0.5px;
+  display: flex !important; align-items: center; justify-content: center; gap: 8px;
+}
+
+html.dark {
+  .hc-pos-search-wrap {
+    background: rgba(15, 23, 42, 0.90);
+    border-color: rgba(56, 189, 248, 0.5);
+  }
+  .hc-pos-search-input { color: #f1f5f9; }
+  .hc-pos-results,
+  .hc-pos-cart,
+  .hc-pos-panel {
+    background: rgba(15, 23, 42, 0.85);
+    border-color: rgba(255, 255, 255, 0.08);
+  }
+  .hc-pos-result-name { color: #f1f5f9; }
+  .hc-payment-btn { background: rgba(255, 255, 255, 0.04); border-color: rgba(255, 255, 255, 0.08); color: #94a3b8; }
+  .hc-grand-total { color: #38bdf8; }
+}

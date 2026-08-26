@@ -1,0 +1,318 @@
+<div class="psh-root">
+
+  <!-- Ambient Background Orbs -->
+  <div class="psh-bg" aria-hidden="true">
+    <div class="psh-orb psh-orb--a"></div>
+    <div class="psh-orb psh-orb--b"></div>
+    <div class="psh-orb psh-orb--c"></div>
+    <div class="psh-grid"></div>
+  </div>
+
+  <!-- Page Hero Header -->
+  <header class="psh-hero">
+    <div>
+      <div class="psh-eyebrow">
+        <span class="psh-eyebrow__dot"></span>
+        <span>HEALTHCARE ERP</span>
+        <span class="psh-eyebrow__sep">·</span>
+        <span>{{ medicines().length }} DRUGS IN FORMULARY</span>
+      </div>
+      <h1 class="psh-title">Medicine <span class="psh-title__accent">Master</span></h1>
+      <p class="psh-sub">Formulary catalog, generic drug compositions, pricing, prescription control, and reorder levels.</p>
+    </div>
+    <div class="psh-actions">
+      @if (!showForm() && perm.hasRoleAction('canCreate', '/medicines')) {
+        <button class="psh-btn psh-btn--primary" (click)="openForm()">
+          <span class="psh-btn__shine"></span>
+          <i-tabler name="plus" style="width:20px;height:20px;"></i-tabler>
+          Add Medicine
+        </button>
+      }
+    </div>
+  </header>
+
+  <!-- Stat Chips Row -->
+  <div class="psh-chips">
+    <div class="psh-chip psh-chip--violet" style="cursor:pointer;" (click)="stockFilter = ''; cdr.markForCheck()">
+      <div class="psh-chip__orb"><i-tabler name="pill"></i-tabler></div>
+      <div class="psh-chip__body">
+        <span class="psh-chip__num">{{ medicines().length }}</span>
+        <span class="psh-chip__lbl">All Drugs</span>
+      </div>
+    </div>
+    <div class="psh-chip psh-chip--emerald" style="cursor:pointer;" (click)="stockFilter = 'NORMAL'; cdr.markForCheck()">
+      <div class="psh-chip__orb"><i-tabler name="check-circle"></i-tabler></div>
+      <div class="psh-chip__body">
+        <span class="psh-chip__num">{{ getKpiCountByStatus('NORMAL') }}</span>
+        <span class="psh-chip__lbl">In Stock</span>
+      </div>
+    </div>
+    <div class="psh-chip psh-chip--amber" style="cursor:pointer;" (click)="stockFilter = 'LOW_STOCK'; cdr.markForCheck()">
+      <div class="psh-chip__orb"><i-tabler name="alert-triangle"></i-tabler></div>
+      <div class="psh-chip__body">
+        <span class="psh-chip__num">{{ getKpiCountByStatus('LOW_STOCK') }}</span>
+        <span class="psh-chip__lbl">Low Stock</span>
+      </div>
+    </div>
+    <div class="psh-chip psh-chip--sky" style="cursor:pointer;" (click)="stockFilter = 'CRITICAL_STOCK'; cdr.markForCheck()">
+      <div class="psh-chip__orb"><i-tabler name="alert-circle"></i-tabler></div>
+      <div class="psh-chip__body">
+        <span class="psh-chip__num">{{ getKpiCountByStatus('CRITICAL_STOCK') }}</span>
+        <span class="psh-chip__lbl">Critical</span>
+      </div>
+    </div>
+    <div class="psh-chip psh-chip--rose" style="cursor:pointer;" (click)="stockFilter = 'OUT_OF_STOCK'; cdr.markForCheck()">
+      <div class="psh-chip__orb"><i-tabler name="x-circle"></i-tabler></div>
+      <div class="psh-chip__body">
+        <span class="psh-chip__num">{{ getKpiCountByStatus('OUT_OF_STOCK') }}</span>
+        <span class="psh-chip__lbl">Out of Stock</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Content Container -->
+  @if (!showForm()) {
+    <mat-card class="cardWithShadow theme-card">
+      <mat-card-header>
+        <div class="header-container" style="display:flex;align-items:center;justify-content:space-between;width:100%;">
+          <mat-card-title class="m-b-0">Formulary Catalog</mat-card-title>
+          <div class="hc-search-wrap">
+            <i-tabler name="search" class="hc-search-icon"></i-tabler>
+            <input class="hc-search-input" placeholder="Search name, generic, brand..."
+                   [(ngModel)]="searchQuery" (ngModelChange)="cdr.markForCheck()" />
+          </div>
+        </div>
+      </mat-card-header>
+
+      <mat-card-content class="b-t-1">
+        <!-- Stock Filter Chips -->
+        <div class="psh-filter" style="margin-bottom:16px;">
+          <div class="psh-filter__chips">
+            <button class="psh-filter__chip" [class.active]="stockFilter === ''" (click)="stockFilter = ''; cdr.markForCheck()">All</button>
+            <button class="psh-filter__chip" [class.active]="stockFilter === 'NORMAL'" (click)="stockFilter = 'NORMAL'; cdr.markForCheck()">In Stock</button>
+            <button class="psh-filter__chip" [class.active]="stockFilter === 'LOW_STOCK'" (click)="stockFilter = 'LOW_STOCK'; cdr.markForCheck()">Low Stock</button>
+            <button class="psh-filter__chip" [class.active]="stockFilter === 'CRITICAL_STOCK'" (click)="stockFilter = 'CRITICAL_STOCK'; cdr.markForCheck()">Critical</button>
+            <button class="psh-filter__chip" [class.active]="stockFilter === 'OUT_OF_STOCK'" (click)="stockFilter = 'OUT_OF_STOCK'; cdr.markForCheck()">Out of Stock</button>
+          </div>
+        </div>
+
+        <!-- Loading -->
+        @if (loading()) {
+          <div class="hc-loading-wrap">
+            <mat-progress-spinner mode="indeterminate" diameter="40"></mat-progress-spinner>
+            <p>Loading formulary catalog…</p>
+          </div>
+        }
+
+        <!-- Empty -->
+        @if (!loading() && filteredMedicines().length === 0) {
+          <div class="hc-empty-state">
+            <i-tabler name="pill" class="hc-empty-icon"></i-tabler>
+            <h3>No medicines found</h3>
+            <p>{{ searchQuery || stockFilter ? 'Try adjusting your search or filter.' : 'Add the first drug to your formulary.' }}</p>
+          </div>
+        }
+
+        <!-- Table -->
+        @if (!loading() && filteredMedicines().length > 0) {
+          <div class="hc-table-scroll">
+            <table class="hc-table">
+              <thead>
+                <tr>
+                  <th>Medicine</th>
+                  <th>Form / Strength</th>
+                  <th>Stock</th>
+                  <th>Status</th>
+                  <th>MRP</th>
+                  <th>Selling Price</th>
+                  <th>Reorder At</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (med of filteredMedicines(); track med.id) {
+                  <tr>
+                    <td>
+                      <div class="hc-cell-primary">{{ med.name }}</div>
+                      @if (med.generic_name) { <div class="hc-cell-secondary">{{ med.generic_name }}</div> }
+                      @if (med.brand) { <div class="hc-cell-secondary" style="color:hsl(196,80%,38%)">{{ med.brand }}</div> }
+                    </td>
+                    <td>
+                      <div class="hc-cell-primary">{{ med.dosage_form || '—' }}</div>
+                      <div class="hc-cell-secondary">{{ med.strength || '—' }}</div>
+                    </td>
+                    <td>
+                      <span class="hc-stock-count"
+                        [class.hc-stock-count--out]="med.current_stock <= 0"
+                        [class.hc-stock-count--critical]="med.current_stock > 0 && med.current_stock <= med.reorder_level * 0.5"
+                        [class.hc-stock-count--low]="med.current_stock > med.reorder_level * 0.5 && med.current_stock <= med.reorder_level"
+                        [class.hc-stock-count--normal]="med.current_stock > med.reorder_level">
+                        {{ med.current_stock }}
+                      </span>
+                      <span class="hc-cell-secondary"> {{ med.unit || 'units' }}</span>
+                    </td>
+                    <td>
+                      <span class="hc-stock-badge hc-stock-badge--{{ getComputedStockStatus(med) }}">
+                        <span class="stock-dot"></span>
+                        {{ getStockLabel(med) }}
+                      </span>
+                    </td>
+                    <td class="hc-price">{{ formatPrice(med.mrp) }}</td>
+                    <td class="hc-price">{{ formatPrice(med.selling_price) }}</td>
+                    <td class="hc-cell-secondary">{{ med.reorder_level }} {{ med.unit || 'units' }}</td>
+                    <td>
+                      <div class="hc-row-actions">
+                        @if (perm.hasRoleAction('canUpdate', '/medicines')) {
+                          <button mat-icon-button (click)="openForm(med)" matTooltip="Edit"><i-tabler name="edit"></i-tabler></button>
+                        }
+                        @if (perm.hasRoleAction('canDelete', '/medicines')) {
+                          <button mat-icon-button (click)="deleteMedicine(med)" matTooltip="Deactivate" style="color:#ef4444;">
+                            <i-tabler name="trash"></i-tabler>
+                          </button>
+                        }
+                      </div>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+      </mat-card-content>
+    </mat-card>
+  } @else {
+    <!-- Form Card View (exact /admin form design) -->
+    <mat-card class="cardWithShadow theme-card">
+      <mat-card-header>
+        <div class="header-container" style="display:flex;align-items:center;justify-content:space-between;width:100%;">
+          <mat-card-title class="m-b-0">
+            {{ editingId() ? 'Edit Medicine' : 'Add New Medicine' }}
+          </mat-card-title>
+          <button mat-stroked-button (click)="closeForm()">Back to Catalog</button>
+        </div>
+      </mat-card-header>
+
+      <mat-card-content class="b-t-1">
+        <form [formGroup]="form" (ngSubmit)="save()" class="p-t-16" autocomplete="off">
+          <div class="row">
+            <div class="col-lg-4 m-b-16">
+              <mat-label class="f-w-600 m-b-8 d-block">Brand / Trade Name <span class="text-danger">*</span></mat-label>
+              <mat-form-field appearance="outline" class="w-100">
+                <input matInput formControlName="name" placeholder="Enter Brand Name (e.g. Calpol)">
+                @if (form.get('name')?.hasError('required')) {
+                  <mat-error>Medicine name is required</mat-error>
+                }
+              </mat-form-field>
+            </div>
+
+            <div class="col-lg-4 m-b-16">
+              <mat-label class="f-w-600 m-b-8 d-block">Generic Name <span class="text-danger">*</span></mat-label>
+              <mat-form-field appearance="outline" class="w-100">
+                <input matInput formControlName="generic_name" placeholder="Enter Generic Name (e.g. Paracetamol)">
+                @if (form.get('generic_name')?.hasError('required')) {
+                  <mat-error>Generic name is required</mat-error>
+                }
+              </mat-form-field>
+            </div>
+
+            <div class="col-lg-4 m-b-16">
+              <mat-label class="f-w-600 m-b-8 d-block">Dosage Form <span class="text-danger">*</span></mat-label>
+              <mat-form-field appearance="outline" class="w-100">
+                <mat-select formControlName="dosage_form" placeholder="Select Dosage Form">
+                  @for (f of dosageForms; track f) { <mat-option [value]="f">{{ f }}</mat-option> }
+                </mat-select>
+                @if (form.get('dosage_form')?.hasError('required')) {
+                  <mat-error>Dosage form is required</mat-error>
+                }
+              </mat-form-field>
+            </div>
+
+            <div class="col-lg-4 m-b-16">
+              <mat-label class="f-w-600 m-b-8 d-block">Strength <span class="text-danger">*</span></mat-label>
+              <mat-form-field appearance="outline" class="w-100">
+                <input matInput formControlName="strength" placeholder="e.g. 500mg, 10mg/ml">
+                @if (form.get('strength')?.hasError('required')) {
+                  <mat-error>Strength is required</mat-error>
+                }
+              </mat-form-field>
+            </div>
+
+            <div class="col-lg-4 m-b-16">
+              <mat-label class="f-w-600 m-b-8 d-block">Unit <span class="text-danger">*</span></mat-label>
+              <mat-form-field appearance="outline" class="w-100">
+                <input matInput formControlName="unit" placeholder="strip, bottle, tablet...">
+                @if (form.get('unit')?.hasError('required')) {
+                  <mat-error>Unit is required</mat-error>
+                }
+              </mat-form-field>
+            </div>
+
+            <div class="col-lg-4 m-b-16">
+              <mat-label class="f-w-600 m-b-8 d-block">Manufacturer</mat-label>
+              <mat-form-field appearance="outline" class="w-100">
+                <input matInput formControlName="manufacturer" placeholder="Enter manufacturer name">
+              </mat-form-field>
+            </div>
+
+            <div class="col-lg-4 m-b-16">
+              <mat-label class="f-w-600 m-b-8 d-block">Purchase Price (₹) <span class="text-danger">*</span></mat-label>
+              <mat-form-field appearance="outline" class="w-100">
+                <input matInput type="number" formControlName="purchase_price" placeholder="Cost price" min="0">
+              </mat-form-field>
+            </div>
+
+            <div class="col-lg-4 m-b-16">
+              <mat-label class="f-w-600 m-b-8 d-block">MRP (₹) <span class="text-danger">*</span></mat-label>
+              <mat-form-field appearance="outline" class="w-100">
+                <input matInput type="number" formControlName="mrp" placeholder="Maximum Retail Price" min="0">
+              </mat-form-field>
+            </div>
+
+            <div class="col-lg-4 m-b-16">
+              <mat-label class="f-w-600 m-b-8 d-block">Selling Price (₹) <span class="text-danger">*</span></mat-label>
+              <mat-form-field appearance="outline" class="w-100">
+                <input matInput type="number" formControlName="selling_price" placeholder="Selling price" min="0">
+              </mat-form-field>
+            </div>
+
+            <div class="col-lg-4 m-b-16">
+              <mat-label class="f-w-600 m-b-8 d-block">Reorder Level</mat-label>
+              <mat-form-field appearance="outline" class="w-100">
+                <input matInput type="number" formControlName="reorder_level" placeholder="Minimum threshold" min="0">
+              </mat-form-field>
+            </div>
+
+            <div class="col-lg-4 m-b-16">
+              <mat-label class="f-w-600 m-b-8 d-block">Prescription Required</mat-label>
+              <div style="padding-top:8px;">
+                <mat-slide-toggle formControlName="is_prescription_required" color="warn">
+                  {{ form.get('is_prescription_required')?.value ? 'Yes — Rx Required' : 'No — OTC' }}
+                </mat-slide-toggle>
+              </div>
+            </div>
+
+            <div class="col-lg-4 m-b-16">
+              <mat-label class="f-w-600 m-b-8 d-block">Status</mat-label>
+              <div style="padding-top:8px;">
+                <mat-slide-toggle formControlName="is_active" color="primary">
+                  {{ form.get('is_active')?.value ? 'Active' : 'Inactive' }}
+                </mat-slide-toggle>
+              </div>
+            </div>
+          </div>
+
+          <div class="m-t-12">
+            <button mat-stroked-button type="button" class="me-3 Cancel_Button" (click)="closeForm()">
+              Cancel
+            </button>
+            <button mat-flat-button color="primary" type="submit" [disabled]="saving()">
+              @if (saving()) { <mat-spinner diameter="18" style="margin-right:8px;display:inline-block;"></mat-spinner> }
+              {{ saving() ? 'Saving…' : (editingId() ? 'Update Medicine' : 'Submit') }}
+            </button>
+          </div>
+        </form>
+      </mat-card-content>
+    </mat-card>
+  }
+
+</div>

@@ -1,0 +1,56 @@
+// medicine-expiry.scss — premium expiry tracking styles
+
+// ── Expiry summary cards ──────────────────────────────────────────────────────
+.hc-expiry-kpi-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 14px;
+
+  @media (max-width: 480px) { grid-template-columns: repeat(2, 1fr); }
+}
+
+// ── Days remaining progress bar ───────────────────────────────────────────────
+.hc-days-bar {
+  height: 4px;
+  border-radius: 4px;
+  background: rgba(0,0,0,0.06);
+  margin-top: 4px;
+  overflow: hidden;
+
+  &__fill {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 500ms cubic-bezier(0.4,0,0.2,1);
+
+    &--expired  { background: hsl(0,84%,58%); }
+    &--critical { background: hsl(25,95%,55%); }
+    &--expiring { background: hsl(38,92%,50%); }
+    &--safe     { background: hsl(142,71%,42%); }
+  }
+}
+
+// ── Expiry date cell ─────────────────────────────────────────────────────────
+.hc-expiry-date {
+  font-weight: 600; font-variant-numeric: tabular-nums;
+
+  &--expired  { color: hsl(0,84%,50%); }
+  &--critical { color: hsl(25,95%,42%); }
+  &--expiring { color: hsl(38,92%,38%); }
+  &--safe     { color: hsl(220,13%,25%); }
+}
+
+// ── Days label ───────────────────────────────────────────────────────────────
+.hc-days-label {
+  font-size: 11px; font-weight: 600; margin-top: 2px;
+
+  &--expired  { color: hsl(0,84%,50%); }
+  &--critical { color: hsl(25,95%,42%); }
+  &--expiring { color: hsl(38,92%,38%); }
+  &--safe     { color: hsl(142,71%,35%); }
+}
+
+// Dark mode
+html.dark {
+  .hc-days-bar { background: rgba(255,255,255,0.08); }
+  .hc-expiry-date--safe { color: #e2e8f0; }
+}

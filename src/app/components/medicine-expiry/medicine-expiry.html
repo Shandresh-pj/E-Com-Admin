@@ -1,0 +1,173 @@
+<div class="psh-root">
+
+  <!-- Ambient Background Orbs -->
+  <div class="psh-bg" aria-hidden="true">
+    <div class="psh-orb psh-orb--a"></div>
+    <div class="psh-orb psh-orb--b"></div>
+    <div class="psh-orb psh-orb--c"></div>
+    <div class="psh-grid"></div>
+  </div>
+
+  <!-- Page Hero Header -->
+  <header class="psh-hero">
+    <div>
+      <div class="psh-eyebrow">
+        <span class="psh-eyebrow__dot"></span>
+        <span>HEALTHCARE ERP</span>
+        <span class="psh-eyebrow__sep">·</span>
+        <span>ALERT WINDOW: {{ warningWindow }} DAYS</span>
+      </div>
+      <h1 class="psh-title">Medicine <span class="psh-title__accent">Expiry</span></h1>
+      <p class="psh-sub">Surveillance of medicine batches, days to expiration, risk classification, and FEFO clearance alerts.</p>
+    </div>
+    <div class="psh-actions">
+      <!-- Warning Window Pills -->
+      <div class="psh-filter__chips">
+        @for (w of warningWindows; track w) {
+          <button class="psh-filter__chip" [class.active]="warningWindow === w" (click)="changeWindow(w)">
+            {{ w }}d Window
+          </button>
+        }
+      </div>
+      <button class="psh-btn psh-btn--ghost" (click)="load()">
+        <i-tabler name="refresh"></i-tabler>
+        Refresh
+      </button>
+    </div>
+  </header>
+
+  <!-- Stat Chips Row -->
+  <div class="psh-chips">
+    <div class="psh-chip psh-chip--emerald" style="cursor:pointer;" (click)="statusFilter = statusFilter === 'SAFE' ? '' : 'SAFE'; cdr.markForCheck()">
+      <div class="psh-chip__orb"><i-tabler name="shield-check"></i-tabler></div>
+      <div class="psh-chip__body">
+        <span class="psh-chip__num">{{ kpis.safe }}</span>
+        <span class="psh-chip__lbl">Safe Batches</span>
+      </div>
+    </div>
+    <div class="psh-chip psh-chip--amber" style="cursor:pointer;" (click)="statusFilter = statusFilter === 'EXPIRING_SOON' ? '' : 'EXPIRING_SOON'; cdr.markForCheck()">
+      <div class="psh-chip__orb"><i-tabler name="alert-triangle"></i-tabler></div>
+      <div class="psh-chip__body">
+        <span class="psh-chip__num">{{ kpis.expiring }}</span>
+        <span class="psh-chip__lbl">Expiring Soon</span>
+      </div>
+    </div>
+    <div class="psh-chip psh-chip--sky" style="cursor:pointer;" (click)="statusFilter = statusFilter === 'CRITICAL' ? '' : 'CRITICAL'; cdr.markForCheck()">
+      <div class="psh-chip__orb"><i-tabler name="alert-octagon"></i-tabler></div>
+      <div class="psh-chip__body">
+        <span class="psh-chip__num">{{ kpis.critical }}</span>
+        <span class="psh-chip__lbl">Critical (&lt;30d)</span>
+      </div>
+    </div>
+    <div class="psh-chip psh-chip--rose" style="cursor:pointer;" (click)="statusFilter = statusFilter === 'EXPIRED' ? '' : 'EXPIRED'; cdr.markForCheck()">
+      <div class="psh-chip__orb"><i-tabler name="circle-x"></i-tabler></div>
+      <div class="psh-chip__body">
+        <span class="psh-chip__num">{{ kpis.expired }}</span>
+        <span class="psh-chip__lbl">Expired</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Content Card -->
+  <div class="psh-card">
+    <div class="psh-card-header">
+      <div class="psh-card-header__left">
+        <div class="psh-card-header__icon"><i-tabler name="clock-exclamation"></i-tabler></div>
+        <div>
+          <p class="psh-card-header__title">Batch Expiry Register</p>
+          <p class="psh-card-header__sub">Showing {{ filteredBatches().length }} batch(es)</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Status Filter Chips -->
+    <div class="psh-filter">
+      <div class="psh-filter__chips">
+        <button class="psh-filter__chip" [class.active]="statusFilter === ''" (click)="statusFilter = ''; cdr.markForCheck()">All</button>
+        @for (s of statusOptions; track s) {
+          <button class="psh-filter__chip" [class.active]="statusFilter === s" (click)="statusFilter = s; cdr.markForCheck()">
+            {{ getStatusLabel(s) }}
+          </button>
+        }
+      </div>
+    </div>
+
+    <!-- Loading -->
+    @if (loading()) {
+      <div class="hc-loading-wrap">
+        <mat-progress-spinner mode="indeterminate" diameter="40"></mat-progress-spinner>
+        <p>Loading batch expiry data…</p>
+      </div>
+    }
+
+    <!-- Empty -->
+    @if (!loading() && filteredBatches().length === 0) {
+      <div class="hc-empty-state">
+        <i-tabler name="shield-check" class="hc-empty-icon"></i-tabler>
+        <h3>{{ statusFilter ? 'No batches match this status' : 'All clear — no expiry alerts' }}</h3>
+        <p>{{ statusFilter ? 'Try clearing the status filter.' : 'All medicine batches are within safe expiry dates.' }}</p>
+      </div>
+    }
+
+    <!-- Batch Table -->
+    @if (!loading() && filteredBatches().length > 0) {
+      <div class="hc-table-scroll">
+        <table class="hc-table">
+          <thead>
+            <tr>
+              <th>Medicine</th>
+              <th>Batch No.</th>
+              <th>Mfg. Date</th>
+              <th>Expiry Date</th>
+              <th>Days Remaining</th>
+              <th>Qty</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (batch of filteredBatches(); track batch.id) {
+              <tr>
+                <td>
+                  <div class="hc-cell-primary">{{ batch.medicine_name }}</div>
+                </td>
+                <td>
+                  <code>{{ batch.batch_number }}</code>
+                </td>
+                <td class="hc-cell-secondary">{{ batch.manufacture_date | date:'MMM y' }}</td>
+                <td>
+                  <div class="hc-expiry-date hc-expiry-date--{{ getStatusClass(batch.expiry_status) }}">
+                    {{ batch.expiry_date | date:'dd MMM y' }}
+                  </div>
+                </td>
+                <td>
+                  <div class="hc-days-label hc-days-label--{{ getStatusClass(batch.expiry_status) }}">
+                    {{ getDaysLabel(batch.days_to_expiry) }}
+                  </div>
+                  <div class="hc-days-bar">
+                    <div class="hc-days-bar__fill hc-days-bar__fill--{{ getStatusClass(batch.expiry_status) }}"
+                         [style.width.%]="batch.expiry_status === 'EXPIRED' ? 100 : Math.max(0, Math.min(100, (batch.days_to_expiry / warningWindow) * 100))">
+                    </div>
+                  </div>
+                </td>
+                <td>
+                  <span class="hc-cell-primary">{{ batch.quantity }}</span>
+                  <span class="hc-cell-secondary"> units</span>
+                </td>
+                <td>
+                  <span class="hc-badge"
+                    [class.hc-badge--safe]="batch.expiry_status === 'SAFE'"
+                    [class.hc-badge--expiring]="batch.expiry_status === 'EXPIRING_SOON'"
+                    [class.hc-badge--orange]="batch.expiry_status === 'CRITICAL'"
+                    [class.hc-badge--danger]="batch.expiry_status === 'EXPIRED'">
+                    {{ getStatusLabel(batch.expiry_status) }}
+                  </span>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </div>
+
+</div>

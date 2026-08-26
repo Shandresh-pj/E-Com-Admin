@@ -1,0 +1,349 @@
+<div class="psh-root">
+
+  <!-- Ambient Background Orbs -->
+  <div class="psh-bg" aria-hidden="true">
+    <div class="psh-orb psh-orb--a"></div>
+    <div class="psh-orb psh-orb--b"></div>
+    <div class="psh-orb psh-orb--c"></div>
+    <div class="psh-grid"></div>
+  </div>
+
+  <!-- Page Hero Header -->
+  <header class="psh-hero">
+    <div>
+      <div class="psh-eyebrow">
+        <span class="psh-eyebrow__dot"></span>
+        <span>HEALTHCARE ERP</span>
+        <span class="psh-eyebrow__sep">·</span>
+        <span>{{ doctors().length }} DOCTORS REGISTERED</span>
+      </div>
+      <h1 class="psh-title">Doctor <span class="psh-title__accent">Directory</span></h1>
+      <p class="psh-sub">Manage clinical staff, medical specializations, consultation fees, and active doctor profiles.</p>
+    </div>
+    <div class="psh-actions">
+      @if (!showForm() && perm.hasRoleAction('canCreate', '/doctors')) {
+        <button class="psh-btn psh-btn--primary" (click)="openForm()">
+          <span class="psh-btn__shine"></span>
+          <i-tabler name="user-plus" style="width:20px;height:20px;"></i-tabler>
+          Add Doctor
+        </button>
+      }
+    </div>
+  </header>
+
+  <!-- Stat Chips Row -->
+  <div class="psh-chips">
+    <div class="psh-chip psh-chip--violet">
+      <div class="psh-chip__orb"><i-tabler name="stethoscope"></i-tabler></div>
+      <div class="psh-chip__body">
+        <span class="psh-chip__num">{{ doctors().length }}</span>
+        <span class="psh-chip__lbl">Total Staff</span>
+      </div>
+    </div>
+    <div class="psh-chip psh-chip--emerald">
+      <div class="psh-chip__orb"><i-tabler name="user-check"></i-tabler></div>
+      <div class="psh-chip__body">
+        <span class="psh-chip__num">{{ activeCount }}</span>
+        <span class="psh-chip__lbl">Active</span>
+      </div>
+    </div>
+    <div class="psh-chip psh-chip--sky">
+      <div class="psh-chip__orb"><i-tabler name="award"></i-tabler></div>
+      <div class="psh-chip__body">
+        <span class="psh-chip__num">{{ specializations.length }}</span>
+        <span class="psh-chip__lbl">Specialties</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Card Container -->
+  @if (!showForm()) {
+    <mat-card class="cardWithShadow theme-card">
+      <mat-card-header>
+        <div class="header-container" style="display:flex;align-items:center;justify-content:space-between;width:100%;">
+          <mat-card-title class="m-b-0">Doctor Roster</mat-card-title>
+          <div style="display:flex;align-items:center;gap:12px;">
+            <div class="hc-search-wrap">
+              <i-tabler name="search" class="hc-search-icon"></i-tabler>
+              <input class="hc-search-input" placeholder="Search doctor, specialty..."
+                     [(ngModel)]="searchQuery" (ngModelChange)="cdr.markForCheck()" />
+            </div>
+            <div class="hc-view-toggle">
+              <button class="hc-view-btn" [class.active]="viewMode() === 'grid'" (click)="viewMode.set('grid')">
+                <i-tabler name="layout-grid"></i-tabler>
+              </button>
+              <button class="hc-view-btn" [class.active]="viewMode() === 'list'" (click)="viewMode.set('list')">
+                <i-tabler name="list"></i-tabler>
+              </button>
+            </div>
+          </div>
+        </div>
+      </mat-card-header>
+
+      <mat-card-content class="b-t-1">
+        <!-- Loading -->
+        @if (loading()) {
+          <div class="hc-loading-wrap">
+            <mat-progress-spinner mode="indeterminate" diameter="40"></mat-progress-spinner>
+            <p>Loading doctor records…</p>
+          </div>
+        }
+
+        <!-- Empty -->
+        @if (!loading() && filteredDoctors().length === 0) {
+          <div class="hc-empty-state">
+            <i-tabler name="stethoscope-off" class="hc-empty-icon"></i-tabler>
+            <h3>No doctors found</h3>
+            <p>{{ searchQuery ? 'Try adjusting your search terms.' : 'Add your first doctor profile to get started.' }}</p>
+          </div>
+        }
+
+        <!-- Grid View -->
+        @if (!loading() && filteredDoctors().length > 0 && viewMode() === 'grid') {
+          <div class="hc-doctor-grid">
+            @for (doctor of filteredDoctors(); track doctor.id) {
+              <div class="hc-doc-card">
+                <div class="hc-doc-card__header">
+                  <div class="hc-doc-avatar">{{ getInitials(doctor.name) }}</div>
+                  <div class="hc-doc-info">
+                    <h3 class="hc-doc-name">Dr. {{ doctor.name }}</h3>
+                    <p class="hc-doc-spec">{{ doctor.specialization }}</p>
+                    <span class="hc-badge hc-badge--{{ doctor.is_active ? 'active' : 'inactive' }}">
+                      {{ doctor.is_active ? 'Active' : 'Inactive' }}
+                    </span>
+                  </div>
+                </div>
+
+                <div class="hc-doc-card__body">
+                  <div class="hc-doc-detail">
+                    <i-tabler name="certificate"></i-tabler>
+                    <span>{{ doctor.qualification }} ({{ doctor.experience_years }} yrs exp)</span>
+                  </div>
+                  <div class="hc-doc-detail">
+                    <i-tabler name="id"></i-tabler>
+                    <span>Reg: <code>{{ doctor.registration_number }}</code></span>
+                  </div>
+                  @if (doctor.phone) {
+                    <div class="hc-doc-detail">
+                      <i-tabler name="phone"></i-tabler>
+                      <span>{{ doctor.phone }}</span>
+                    </div>
+                  }
+                  <div class="hc-doc-detail hc-doc-detail--fee">
+                    <i-tabler name="currency-rupee"></i-tabler>
+                    <span>Fee: <strong>{{ formatFee(doctor.consultation_fee) }}</strong></span>
+                  </div>
+                </div>
+
+                <div class="hc-doc-card__actions">
+                  @if (perm.hasRoleAction('canUpdate', '/doctors')) {
+                    <button mat-stroked-button style="font-size:12px;" (click)="openForm(doctor)">
+                      <i-tabler name="edit" style="width:14px;height:14px;margin-right:4px;"></i-tabler> Edit
+                    </button>
+                  }
+                  @if (perm.hasRoleAction('canActivate', '/doctors') || perm.hasRoleAction('canDeactivate', '/doctors')) {
+                    <button mat-stroked-button style="font-size:12px;"
+                            [style.color]="doctor.is_active ? '#ef4444' : '#10b981'"
+                            [style.border-color]="doctor.is_active ? '#ef4444' : '#10b981'"
+                            (click)="toggleStatus(doctor)">
+                      <i-tabler [name]="doctor.is_active ? 'user-x' : 'user-check'" style="width:14px;height:14px;margin-right:4px;"></i-tabler>
+                      {{ doctor.is_active ? 'Deactivate' : 'Activate' }}
+                    </button>
+                  }
+                </div>
+              </div>
+            }
+          </div>
+        }
+
+        <!-- List Table View -->
+        @if (!loading() && filteredDoctors().length > 0 && viewMode() === 'list') {
+          <div class="hc-table-scroll">
+            <table class="hc-table">
+              <thead>
+                <tr>
+                  <th>Doctor</th>
+                  <th>Specialization</th>
+                  <th>Experience</th>
+                  <th>Reg. No.</th>
+                  <th>Fee</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (doctor of filteredDoctors(); track doctor.id) {
+                  <tr>
+                    <td>
+                      <div class="hc-cell-with-avatar">
+                        <div class="hc-list-avatar">{{ getInitials(doctor.name) }}</div>
+                        <div>
+                          <div class="hc-cell-primary">Dr. {{ doctor.name }}</div>
+                          <div class="hc-cell-secondary">{{ doctor.qualification }}</div>
+                        </div>
+                      </div>
+                    </td>
+                    <td><span class="hc-doc-card__spec">{{ doctor.specialization }}</span></td>
+                    <td>{{ doctor.experience_years }} yrs</td>
+                    <td><code>{{ doctor.registration_number }}</code></td>
+                    <td>{{ formatFee(doctor.consultation_fee) }}</td>
+                    <td>
+                      <span class="hc-badge hc-badge--{{ doctor.is_active ? 'active' : 'inactive' }}">
+                        {{ doctor.is_active ? 'Active' : 'Inactive' }}
+                      </span>
+                    </td>
+                    <td>
+                      <div class="hc-row-actions">
+                        @if (perm.hasRoleAction('canUpdate', '/doctors')) {
+                          <button mat-icon-button (click)="openForm(doctor)" matTooltip="Edit"><i-tabler name="edit"></i-tabler></button>
+                        }
+                        @if (perm.hasRoleAction('canActivate', '/doctors') || perm.hasRoleAction('canDeactivate', '/doctors')) {
+                          <button mat-icon-button (click)="toggleStatus(doctor)" [matTooltip]="doctor.is_active ? 'Deactivate' : 'Activate'">
+                            <i-tabler [name]="doctor.is_active ? 'user-x' : 'user-check'"></i-tabler>
+                          </button>
+                        }
+                      </div>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+      </mat-card-content>
+    </mat-card>
+  } @else {
+    <!-- Form Card View (exact /admin form design) -->
+    <mat-card class="cardWithShadow theme-card">
+      <mat-card-header>
+        <div class="header-container" style="display:flex;align-items:center;justify-content:space-between;width:100%;">
+          <mat-card-title class="m-b-0">
+            {{ editingId() ? 'Edit Doctor' : 'Add New Doctor' }}
+          </mat-card-title>
+          <button mat-stroked-button (click)="closeForm()">Back to Roster</button>
+        </div>
+      </mat-card-header>
+
+      <mat-card-content class="b-t-1">
+        <form [formGroup]="form" (ngSubmit)="saveDoctor()" class="p-t-16" autocomplete="off">
+          <div class="row">
+            <div class="col-lg-4 m-b-16">
+              <mat-label class="f-w-600 m-b-8 d-block">Full Name <span class="text-danger">*</span></mat-label>
+              <mat-form-field appearance="outline" class="w-100">
+                <input matInput formControlName="name" placeholder="Enter Doctor Name (e.g. Dr. Jane Smith)">
+                @if (form.get('name')?.hasError('required')) {
+                  <mat-error>Full name is required</mat-error>
+                }
+              </mat-form-field>
+            </div>
+
+            <div class="col-lg-4 m-b-16">
+              <mat-label class="f-w-600 m-b-8 d-block">Specialization <span class="text-danger">*</span></mat-label>
+              <mat-form-field appearance="outline" class="w-100">
+                <mat-select formControlName="specialization" placeholder="Select Specialization">
+                  @for (spec of specializations; track spec) {
+                    <mat-option [value]="spec">{{ spec }}</mat-option>
+                  }
+                </mat-select>
+                @if (form.get('specialization')?.hasError('required')) {
+                  <mat-error>Specialization is required</mat-error>
+                }
+              </mat-form-field>
+            </div>
+
+            <div class="col-lg-4 m-b-16">
+              <mat-label class="f-w-600 m-b-8 d-block">Qualification <span class="text-danger">*</span></mat-label>
+              <mat-form-field appearance="outline" class="w-100">
+                <input matInput formControlName="qualification" placeholder="e.g. MBBS, MD (General Medicine)">
+                @if (form.get('qualification')?.hasError('required')) {
+                  <mat-error>Qualification is required</mat-error>
+                }
+              </mat-form-field>
+            </div>
+
+            <div class="col-lg-4 m-b-16">
+              <mat-label class="f-w-600 m-b-8 d-block">Experience (Years) <span class="text-danger">*</span></mat-label>
+              <mat-form-field appearance="outline" class="w-100">
+                <input matInput type="number" formControlName="experience_years" placeholder="Enter years of experience" min="0">
+                @if (form.get('experience_years')?.hasError('required')) {
+                  <mat-error>Experience is required</mat-error>
+                }
+              </mat-form-field>
+            </div>
+
+            <div class="col-lg-4 m-b-16">
+              <mat-label class="f-w-600 m-b-8 d-block">Registration Number <span class="text-danger">*</span></mat-label>
+              <mat-form-field appearance="outline" class="w-100">
+                <input matInput formControlName="registration_number" placeholder="Enter Medical Council Reg. No.">
+                @if (form.get('registration_number')?.hasError('required')) {
+                  <mat-error>Registration number is required</mat-error>
+                }
+              </mat-form-field>
+            </div>
+
+            <div class="col-lg-4 m-b-16">
+              <mat-label class="f-w-600 m-b-8 d-block">Registration Body</mat-label>
+              <mat-form-field appearance="outline" class="w-100">
+                <input matInput formControlName="registration_body" placeholder="e.g. Medical Council of India (MCI)">
+              </mat-form-field>
+            </div>
+
+            <div class="col-lg-4 m-b-16">
+              <mat-label class="f-w-600 m-b-8 d-block">Mobile Number <span class="text-danger">*</span></mat-label>
+              <mat-form-field appearance="outline" class="w-100">
+                <input matInput formControlName="phone" placeholder="Enter 10-digit Mobile Number">
+                @if (form.get('phone')?.hasError('required')) {
+                  <mat-error>Mobile number is required</mat-error>
+                }
+              </mat-form-field>
+            </div>
+
+            <div class="col-lg-4 m-b-16">
+              <mat-label class="f-w-600 m-b-8 d-block">Email</mat-label>
+              <mat-form-field appearance="outline" class="w-100">
+                <input matInput formControlName="email" type="email" placeholder="Enter Email Address">
+              </mat-form-field>
+            </div>
+
+            <div class="col-lg-4 m-b-16">
+              <mat-label class="f-w-600 m-b-8 d-block">Consultation Fee (₹) <span class="text-danger">*</span></mat-label>
+              <mat-form-field appearance="outline" class="w-100">
+                <input matInput type="number" formControlName="consultation_fee" placeholder="Enter fee amount" min="0">
+                @if (form.get('consultation_fee')?.hasError('required')) {
+                  <mat-error>Consultation fee is required</mat-error>
+                }
+              </mat-form-field>
+            </div>
+
+            <div class="col-lg-8 m-b-16">
+              <mat-label class="f-w-600 m-b-8 d-block">Description / Bio Notes</mat-label>
+              <mat-form-field appearance="outline" class="w-100">
+                <textarea matInput formControlName="description" rows="2" placeholder="Brief doctor profile & availability notes"></textarea>
+              </mat-form-field>
+            </div>
+
+            <div class="col-lg-4 m-b-16">
+              <mat-label class="f-w-600 m-b-8 d-block">Status</mat-label>
+              <div style="padding-top:8px;">
+                <mat-slide-toggle formControlName="is_active" color="primary">
+                  {{ form.get('is_active')?.value ? 'Active' : 'Inactive' }}
+                </mat-slide-toggle>
+              </div>
+            </div>
+          </div>
+
+          <div class="m-t-12">
+            <button mat-stroked-button type="button" class="me-3 Cancel_Button" (click)="closeForm()">
+              Cancel
+            </button>
+            <button mat-flat-button color="primary" type="submit" [disabled]="saving()">
+              @if (saving()) { <mat-spinner diameter="18" style="margin-right:8px;display:inline-block;"></mat-spinner> }
+              {{ saving() ? 'Saving…' : (editingId() ? 'Update Doctor' : 'Submit') }}
+            </button>
+          </div>
+        </form>
+      </mat-card-content>
+    </mat-card>
+  }
+
+</div>

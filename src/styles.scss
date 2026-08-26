@@ -5,6 +5,7 @@
 @use 'premium-design-system';
 @use 'enterprise-design-system';
 @use 'page-shell';
+@use 'healthcare-shared';  // Healthcare ERP shared component styles
 
 /* Clock Timepicker Dialog Overlay Override */
 .clock-picker-dialog-panel {

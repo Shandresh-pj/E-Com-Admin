@@ -1,12 +1,24 @@
 export enum UserType {
-  SUPER_ADMIN    = 'Super_Admin',
-  ADMIN          = 'Admin',
-  BRANCH         = 'Branch',
-  EMPLOYEE       = 'Employee',
-  BRANCH_MANAGER = 'Branch_Manager',
-  SHOPKEEPER     = 'Shopkeeper',
-  DELIVERY_BOY   = 'Delivery_Boy',
-  CUSTOMER       = 'Customer',
+  // ─── Legacy / General roles ──────────────────────────────────────────
+  SUPER_ADMIN       = 'Super_Admin',
+  ADMIN             = 'Admin',
+  BRANCH            = 'Branch',
+  EMPLOYEE          = 'Employee',
+  BRANCH_MANAGER    = 'Branch_Manager',
+  SHOPKEEPER        = 'Shopkeeper',
+  DELIVERY_BOY      = 'Delivery_Boy',
+  CUSTOMER          = 'Customer',
+
+  // ─── Healthcare roles ─────────────────────────────────────────────────
+  HOSPITAL_ADMIN    = 'Hospital_Admin',
+  CLINIC_ADMIN      = 'Clinic_Admin',
+  DOCTOR            = 'Doctor',
+  PHARMACIST        = 'Pharmacist',
+  RECEPTIONIST      = 'Receptionist',
+  ACCOUNTANT        = 'Accountant',
+  INVENTORY_MANAGER = 'Inventory_Manager',
+  CASHIER           = 'Cashier',
+  AUDITOR           = 'Auditor',
 }
 
 /**
@@ -101,6 +113,62 @@ export const ROLE_PERMISSIONS: Record<UserType, RolePermissions> = {
     canManage: false, canConfigure: false,
   },
   [UserType.CUSTOMER]: {
+    canCreate: false, canRead: false, canUpdate: false, canDelete: false,
+    canApprove: false, canExport: false, canImport: false, canAssign: false,
+    canRevoke: false, canActivate: false, canDeactivate: false, canRestore: false,
+    canManage: false, canConfigure: false,
+  },
+
+  // ─── Healthcare roles (DB-driven; all false as fallback) ──────────────
+  [UserType.HOSPITAL_ADMIN]: {
+    canCreate: false, canRead: false, canUpdate: false, canDelete: false,
+    canApprove: false, canExport: false, canImport: false, canAssign: false,
+    canRevoke: false, canActivate: false, canDeactivate: false, canRestore: false,
+    canManage: false, canConfigure: false,
+  },
+  [UserType.CLINIC_ADMIN]: {
+    canCreate: false, canRead: false, canUpdate: false, canDelete: false,
+    canApprove: false, canExport: false, canImport: false, canAssign: false,
+    canRevoke: false, canActivate: false, canDeactivate: false, canRestore: false,
+    canManage: false, canConfigure: false,
+  },
+  [UserType.DOCTOR]: {
+    canCreate: false, canRead: false, canUpdate: false, canDelete: false,
+    canApprove: false, canExport: false, canImport: false, canAssign: false,
+    canRevoke: false, canActivate: false, canDeactivate: false, canRestore: false,
+    canManage: false, canConfigure: false,
+  },
+  [UserType.PHARMACIST]: {
+    canCreate: false, canRead: false, canUpdate: false, canDelete: false,
+    canApprove: false, canExport: false, canImport: false, canAssign: false,
+    canRevoke: false, canActivate: false, canDeactivate: false, canRestore: false,
+    canManage: false, canConfigure: false,
+  },
+  [UserType.RECEPTIONIST]: {
+    canCreate: false, canRead: false, canUpdate: false, canDelete: false,
+    canApprove: false, canExport: false, canImport: false, canAssign: false,
+    canRevoke: false, canActivate: false, canDeactivate: false, canRestore: false,
+    canManage: false, canConfigure: false,
+  },
+  [UserType.ACCOUNTANT]: {
+    canCreate: false, canRead: false, canUpdate: false, canDelete: false,
+    canApprove: false, canExport: false, canImport: false, canAssign: false,
+    canRevoke: false, canActivate: false, canDeactivate: false, canRestore: false,
+    canManage: false, canConfigure: false,
+  },
+  [UserType.INVENTORY_MANAGER]: {
+    canCreate: false, canRead: false, canUpdate: false, canDelete: false,
+    canApprove: false, canExport: false, canImport: false, canAssign: false,
+    canRevoke: false, canActivate: false, canDeactivate: false, canRestore: false,
+    canManage: false, canConfigure: false,
+  },
+  [UserType.CASHIER]: {
+    canCreate: false, canRead: false, canUpdate: false, canDelete: false,
+    canApprove: false, canExport: false, canImport: false, canAssign: false,
+    canRevoke: false, canActivate: false, canDeactivate: false, canRestore: false,
+    canManage: false, canConfigure: false,
+  },
+  [UserType.AUDITOR]: {
     canCreate: false, canRead: false, canUpdate: false, canDelete: false,
     canApprove: false, canExport: false, canImport: false, canAssign: false,
     canRevoke: false, canActivate: false, canDeactivate: false, canRestore: false,

@@ -3,10 +3,13 @@ import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { TablerIconsModule } from 'angular-tabler-icons';
 import { NotificationService } from 'src/app/services/notification.service';
 import { SocketService } from 'src/app/Securities/Services/socket.service';
 import { AlertService } from 'src/app/Securities/Services/alert.service';
 import { Subscription } from 'rxjs';
+import { HcNotificationCategory } from 'src/app/models/healthcare.models';
 
 @Component({
   selector: 'app-notifications',
@@ -15,7 +18,9 @@ import { Subscription } from 'rxjs';
     CommonModule,
     MatCardModule,
     MatButtonModule,
-    MatIconModule
+    MatIconModule,
+    MatProgressSpinnerModule,
+    TablerIconsModule
   ],
   templateUrl: './notifications.html',
   styleUrl: './notifications.scss'
@@ -23,13 +28,23 @@ import { Subscription } from 'rxjs';
 export class Notifications implements OnInit, OnDestroy {
   notifications: any[] = [];
   loading = false;
+  selectedCategory: string = 'ALL';
   private socketSub = Subscription.EMPTY;
+
+  readonly categories = [
+    { id: 'ALL', label: 'All' },
+    { id: 'STOCK', label: 'Stock & Inventory' },
+    { id: 'EXPIRY', label: 'Expiry Alerts' },
+    { id: 'APPROVAL', label: 'Stock Approvals' },
+    { id: 'CLINICAL', label: 'Appointments & Rx' },
+    { id: 'SALES', label: 'Sales & Payments' }
+  ];
 
   constructor(
     private notificationService: NotificationService,
     private socketService: SocketService,
     private alert: AlertService,
-    private cdr: ChangeDetectorRef
+    public cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit() {
@@ -56,6 +71,22 @@ export class Notifications implements OnInit, OnDestroy {
       error: (err) => {
         console.error('Failed to load notifications:', err);
         this.loading = false;
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  get filteredNotifications(): any[] {
+    if (this.selectedCategory === 'ALL') return this.notifications;
+    return this.notifications.filter(n => {
+      const cat = (n.category || n.type || '').toUpperCase();
+      switch (this.selectedCategory) {
+        case 'STOCK': return cat.includes('STOCK');
+        case 'EXPIRY': return cat.includes('EXPIRY');
+        case 'APPROVAL': return cat.includes('APPROVAL');
+        case 'CLINICAL': return cat.includes('APPOINTMENT') || cat.includes('PRESCRIPTION');
+        case 'SALES': return cat.includes('SALE') || cat.includes('PAYMENT') || cat.includes('INVOICE');
+        default: return true;
       }
     });
   }
@@ -81,25 +112,24 @@ export class Notifications implements OnInit, OnDestroy {
     });
   }
 
-  getIconForType(type: string): string {
-    switch (type) {
-      case 'LOW_STOCK': return 'warning';
-      case 'CRITICAL_STOCK': return 'error';
-      case 'APPROVAL_REQUEST': return 'assignment_late';
-      case 'PUBLISHED': return 'check_circle';
-      case 'STOCK_UPDATE': return 'info';
-      case 'BRANCH_ALERT': return 'store';
-      default: return 'notifications';
-    }
+  getIconForCategory(type: string): string {
+    const t = (type || '').toUpperCase();
+    if (t.includes('EXPIRY')) return 'clock-exclamation';
+    if (t.includes('CRITICAL')) return 'alert-octagon';
+    if (t.includes('LOW_STOCK') || t.includes('OUT_OF_STOCK')) return 'alert-triangle';
+    if (t.includes('APPROVAL')) return 'checkup-list';
+    if (t.includes('APPOINTMENT')) return 'calendar-event';
+    if (t.includes('PRESCRIPTION')) return 'prescription';
+    if (t.includes('SALE') || t.includes('PAYMENT')) return 'receipt-tax';
+    return 'bell';
   }
 
-  getClassForType(type: string): string {
-    switch (type) {
-      case 'CRITICAL_STOCK': return 'text-error font-weight-bold';
-      case 'LOW_STOCK': return 'text-warning font-weight-bold';
-      case 'APPROVAL_REQUEST': return 'text-primary';
-      case 'PUBLISHED': return 'text-success';
-      default: return 'text-dark';
-    }
+  getBadgeClass(type: string): string {
+    const t = (type || '').toUpperCase();
+    if (t.includes('CRITICAL') || t.includes('OUT_OF_STOCK') || t.includes('FAILED')) return 'hc-badge--danger';
+    if (t.includes('EXPIRY') || t.includes('LOW_STOCK')) return 'hc-badge--warning';
+    if (t.includes('APPROVAL')) return 'hc-badge--info';
+    if (t.includes('SUCCESS') || t.includes('COMPLETED')) return 'hc-badge--success';
+    return 'hc-badge--neutral';
   }
 }

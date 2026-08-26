@@ -1,0 +1,627 @@
+/* ════════════════════════════════════════════════════════════════════════════
+   _healthcare-shared.scss
+   Healthcare ERP — Premium Theme Integration, Design System & Animations
+   Uses App CSS Custom Properties (--brand-primary, --glass-bg, --page-bg-gradient, etc.)
+   ════════════════════════════════════════════════════════════════════════════ */
+
+// ── App Theme Variables with Fallbacks ───────────────────────────────────────
+$hc-primary:         var(--brand-primary, #4f46e5);
+$hc-primary-light:   var(--brand-primary-light, rgba(79, 70, 229, 0.1));
+$hc-accent:          var(--brand-accent, #3b82f6);
+$hc-success:         var(--color-success, #10b981);
+$hc-success-bg:      var(--color-success-bg, rgba(16, 185, 129, 0.1));
+$hc-warning:         var(--color-warning, #f59e0b);
+$hc-warning-bg:      var(--color-warning-bg, rgba(245, 158, 11, 0.1));
+$hc-danger:          var(--color-error, #ef4444);
+$hc-danger-bg:       var(--color-error-bg, rgba(239, 68, 68, 0.1));
+
+// ── Text Tokens ──────────────────────────────────────────────────────────────
+$hc-text-1:  var(--text-primary, #0f172a);
+$hc-text-2:  var(--text-secondary, #334155);
+$hc-text-3:  var(--text-muted, #64748b);
+$hc-text-4:  var(--text-subtle, #94a3b8);
+
+// ── Glass / Surface Tokens ───────────────────────────────────────────────────
+$hc-glass-bg:      var(--glass-bg, rgba(255, 255, 255, 0.85));
+$hc-glass-border:  var(--glass-border, rgba(255, 255, 255, 0.6));
+$hc-surface:       #ffffff;
+$hc-surface-alt:   var(--glass-bg-hover, rgba(248, 250, 252, 0.9));
+$hc-border:        var(--glass-border-subtle, rgba(0, 0, 0, 0.08));
+
+// ── Shadows & Radius ─────────────────────────────────────────────────────────
+$hc-shadow-sm:  var(--glass-shadow, 0 4px 24px rgba(15, 23, 42, 0.06));
+$hc-shadow-md:  0 6px 28px rgba(15, 23, 42, 0.08);
+$hc-shadow-lg:  var(--glass-shadow-lg, 0 8px 40px rgba(15, 23, 42, 0.12));
+
+$hc-r-sm:   var(--radius-sm, 8px);
+$hc-r-md:   var(--radius-md, 12px);
+$hc-r-lg:   var(--radius-lg, 16px);
+$hc-r-xl:   var(--radius-xl, 20px);
+$hc-r-full: var(--radius-full, 9999px);
+
+$hc-ease:   var(--transition-base, 250ms cubic-bezier(0.4, 0, 0.2, 1));
+$hc-spring: var(--transition-spring, 400ms cubic-bezier(0.34, 1.56, 0.64, 1));
+
+// ═══════════════════════════════════════════════════════════════════════════
+// ANIMATION DEFINITIONS
+// ═══════════════════════════════════════════════════════════════════════════
+
+@keyframes hcFadeInUp {
+  0% {
+    opacity: 0;
+    transform: translateY(16px) scale(0.985);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes dotPulse {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.6);
+  }
+  70% {
+    transform: scale(1.05);
+    box-shadow: 0 0 0 8px rgba(16, 185, 129, 0);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+  }
+}
+
+@keyframes btnShimmerSweep {
+  0% { transform: translateX(-100%) rotate(25deg); }
+  100% { transform: translateX(250%) rotate(25deg); }
+}
+
+@keyframes glassGlowPulse {
+  0%, 100% { border-color: rgba(79, 70, 229, 0.15); box-shadow: 0 8px 32px rgba(79, 70, 229, 0.08); }
+  50% { border-color: rgba(79, 70, 229, 0.35); box-shadow: 0 12px 40px rgba(79, 70, 229, 0.16); }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// SHARED COMPONENT STYLES
+// ═══════════════════════════════════════════════════════════════════════════
+
+.hc-module {
+  padding: clamp(16px, 2.5vw, 28px);
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  min-height: 100%;
+  background: var(--page-bg-gradient, linear-gradient(135deg, #eef2fb 0%, #f0f4ff 50%, #f5f0ff 100%));
+  box-sizing: border-box;
+  animation: hcFadeInUp 350ms $hc-spring;
+}
+
+// ── Header Bar ───────────────────────────────────────────────────────────────
+.hc-page-header {
+  background: $hc-glass-bg;
+  backdrop-filter: var(--glass-blur, blur(20px) saturate(180%));
+  -webkit-backdrop-filter: var(--glass-blur, blur(20px) saturate(180%));
+  border: 1px solid $hc-glass-border;
+  border-radius: $hc-r-xl;
+  padding: 20px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  box-shadow: $hc-shadow-sm;
+  animation: hcFadeInUp 300ms $hc-ease;
+
+  &__left {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  &__icon-wrap {
+    width: 46px;
+    height: 46px;
+    border-radius: $hc-r-md;
+    background: linear-gradient(135deg, $hc-primary, $hc-accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #ffffff;
+    box-shadow: 0 4px 14px rgba(79, 70, 229, 0.25);
+    flex-shrink: 0;
+
+    i-tabler { width: 24px; height: 24px; color: #fff; }
+  }
+
+  &__title-block {
+    h1.hc-module-title {
+      font-family: var(--font-display, inherit);
+      font-size: clamp(18px, 2.5vw, 22px);
+      font-weight: 800;
+      color: $hc-text-1;
+      margin: 0;
+      line-height: 1.2;
+    }
+    .hc-module-subtitle {
+      font-size: 13px;
+      color: $hc-text-3;
+      margin: 3px 0 0;
+    }
+  }
+
+  &__right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+}
+
+// ── Eyebrow Active Pulsing Dot ────────────────────────────────────────────────
+.psh-eyebrow__dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #10b981;
+  display: inline-block;
+  animation: dotPulse 2s infinite ease-in-out;
+}
+
+// ── Shimmering Primary Button ────────────────────────────────────────────────
+.psh-btn--primary {
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
+
+  &:hover {
+    transform: translateY(-2px) scale(1.02);
+    box-shadow: 0 10px 25px -4px rgba(79, 70, 229, 0.45) !important;
+  }
+
+  .psh-btn__shine {
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(
+      60deg,
+      transparent 30%,
+      rgba(255, 255, 255, 0.3) 50%,
+      transparent 70%
+    );
+    transform: translateX(-100%) rotate(25deg);
+    animation: btnShimmerSweep 4s infinite cubic-bezier(0.4, 0, 0.2, 1);
+  }
+}
+
+// ── Interactive Stat Cards (psh-chip) ────────────────────────────────────────
+.psh-chip {
+  transition: transform 0.25s $hc-spring, box-shadow 0.25s $hc-ease, border-color 0.25s $hc-ease !important;
+
+  &:hover {
+    transform: translateY(-4px) scale(1.03) !important;
+    box-shadow: 0 12px 30px -6px rgba(15, 23, 42, 0.14) !important;
+    border-color: rgba(79, 70, 229, 0.3) !important;
+  }
+}
+
+// ── KPI Row ──────────────────────────────────────────────────────────────────
+.hc-kpi-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 14px;
+
+  @media (max-width: 576px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.hc-kpi-card {
+  background: $hc-glass-bg;
+  backdrop-filter: var(--glass-blur, blur(16px));
+  -webkit-backdrop-filter: var(--glass-blur, blur(16px));
+  border: 1px solid $hc-glass-border;
+  border-radius: $hc-r-lg;
+  padding: 18px 20px;
+  box-shadow: $hc-shadow-sm;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  transition: transform 250ms $hc-spring, box-shadow 250ms $hc-ease, border-color 250ms $hc-ease;
+
+  &:hover {
+    transform: translateY(-3px) scale(1.02);
+    box-shadow: $hc-shadow-lg;
+    border-color: rgba(79, 70, 229, 0.25);
+  }
+
+  &__icon {
+    width: 42px;
+    height: 42px;
+    border-radius: $hc-r-md;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    i-tabler { width: 22px; height: 22px; }
+  }
+
+  &__value {
+    font-family: var(--font-display, inherit);
+    font-size: 24px;
+    font-weight: 800;
+    color: $hc-text-1;
+    margin: 0;
+    line-height: 1;
+  }
+
+  &__label {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: $hc-text-3;
+    margin: 4px 0 0;
+  }
+
+  &--primary { .hc-kpi-card__icon { background: $hc-primary-light; i-tabler { color: $hc-primary; } } }
+  &--success { .hc-kpi-card__icon { background: $hc-success-bg; i-tabler { color: $hc-success; } } }
+  &--warning { .hc-kpi-card__icon { background: $hc-warning-bg; i-tabler { color: $hc-warning; } } }
+  &--danger  { .hc-kpi-card__icon { background: $hc-danger-bg;  i-tabler { color: $hc-danger;  } } }
+}
+
+// ── Search & Filter Controls ─────────────────────────────────────────────────
+.hc-search-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.hc-search-icon {
+  position: absolute;
+  left: 12px;
+  width: 16px;
+  height: 16px;
+  color: $hc-text-4;
+  pointer-events: none;
+}
+
+.hc-search-input {
+  padding: 9px 14px 9px 36px;
+  border: 1px solid $hc-border;
+  border-radius: $hc-r-sm;
+  font-size: 13px;
+  font-family: inherit;
+  outline: none;
+  width: clamp(180px, 22vw, 280px);
+  background: $hc-surface;
+  color: $hc-text-1;
+  transition: border-color 200ms $hc-ease, box-shadow 200ms $hc-ease;
+
+  &::placeholder { color: $hc-text-4; }
+  &:focus {
+    border-color: $hc-primary;
+    box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.14);
+  }
+}
+
+.hc-filter-pills {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.hc-pill {
+  padding: 6px 14px;
+  border: 1px solid $hc-border;
+  border-radius: $hc-r-full;
+  font-size: 12px;
+  font-weight: 600;
+  color: $hc-text-3;
+  background: $hc-surface;
+  cursor: pointer;
+  transition: all 180ms $hc-ease;
+  white-space: nowrap;
+
+  &:hover { border-color: $hc-primary; color: $hc-primary; transform: translateY(-1px); }
+  &.active {
+    background: $hc-primary;
+    border-color: $hc-primary;
+    color: #ffffff;
+    box-shadow: 0 3px 12px rgba(79, 70, 229, 0.35);
+  }
+}
+
+// ── Table Card & Smooth Row Animation ─────────────────────────────────────────
+.hc-table-card, .psh-card, .theme-card {
+  animation: hcFadeInUp 350ms cubic-bezier(0.16, 1, 0.3, 1);
+  transition: box-shadow 300ms $hc-ease;
+}
+
+.hc-table-scroll { overflow-x: auto; }
+
+.hc-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+
+  thead tr {
+    background: linear-gradient(90deg, rgba(79, 70, 229, 0.05), rgba(59, 130, 246, 0.03));
+    border-bottom: 1.5px solid rgba(79, 70, 229, 0.12);
+  }
+
+  th {
+    padding: 14px 16px;
+    text-align: left;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: $hc-text-3;
+    white-space: nowrap;
+  }
+
+  td {
+    padding: 14px 16px;
+    border-bottom: 1px solid $hc-border;
+    color: $hc-text-2;
+    vertical-align: middle;
+  }
+
+  tbody tr {
+    transition: background 150ms $hc-ease, transform 150ms $hc-ease;
+    &:hover {
+      background: rgba(79, 70, 229, 0.04);
+    }
+    &:last-child td { border-bottom: none; }
+  }
+}
+
+// ── Card Grids (Doctor, Consult, Rx) Micro-Animations ────────────────────────
+.hc-doc-card, .hc-consult-card, .hc-rx-card, .hc-approval-card {
+  transition: transform 0.25s $hc-spring, box-shadow 0.25s $hc-ease, border-color 0.25s $hc-ease !important;
+
+  &:hover {
+    transform: translateY(-4px) scale(1.01) !important;
+    box-shadow: 0 12px 32px -4px rgba(15, 23, 42, 0.12) !important;
+    border-color: rgba(79, 70, 229, 0.25) !important;
+  }
+}
+
+// ── Side Panel Form Overlay (Drawer) ──────────────────────────────────────────
+.hc-form-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.35);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+  z-index: 900;
+  animation: hcFadeIn 200ms $hc-ease;
+}
+
+.hc-form-panel {
+  position: fixed;
+  top: 0; right: 0; bottom: 0;
+  width: min(540px, 100vw);
+  background: rgba(255, 255, 255, 0.96);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  z-index: 901;
+  overflow-y: auto;
+  box-shadow: -8px 0 60px rgba(15, 23, 42, 0.15);
+  display: flex;
+  flex-direction: column;
+  animation: hcSlideIn 280ms $hc-spring;
+
+  &__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 24px;
+    border-bottom: 1px solid $hc-border;
+    position: sticky;
+    top: 0;
+    background: rgba(255, 255, 255, 0.96);
+    backdrop-filter: blur(12px);
+    z-index: 10;
+
+    &-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    &-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: $hc-r-md;
+      background: $hc-primary-light;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      i-tabler { color: $hc-primary; width: 20px; height: 20px; }
+    }
+  }
+
+  &__title {
+    font-family: var(--font-display, inherit);
+    font-size: 17px;
+    font-weight: 700;
+    color: $hc-text-1;
+    margin: 0;
+  }
+
+  &__subtitle {
+    font-size: 12px;
+    color: $hc-text-3;
+    margin: 2px 0 0;
+  }
+}
+
+.hc-form-body {
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  flex: 1;
+}
+
+.hc-form-section {
+  margin-bottom: 22px;
+
+  &__title {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    color: $hc-text-3;
+    margin: 0 0 14px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid $hc-border;
+  }
+}
+
+.hc-form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-bottom: 14px;
+
+  @media (max-width: 500px) { grid-template-columns: 1fr; }
+}
+
+.hc-field {
+  width: 100%;
+  &--full { grid-column: 1 / -1; }
+  &--toggle {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 6px;
+  }
+}
+
+.hc-toggle-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: $hc-text-3;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.hc-form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 16px;
+  padding: 16px 24px;
+  border-top: 1px solid $hc-border;
+  position: sticky;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.96);
+  backdrop-filter: blur(8px);
+  margin-left: -24px;
+  margin-right: -24px;
+}
+
+// ── Badges ───────────────────────────────────────────────────────────────────
+.hc-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border-radius: $hc-r-full;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  white-space: nowrap;
+  transition: transform 180ms $hc-ease;
+
+  &:hover { transform: scale(1.04); }
+
+  &--active, &--success, &--normal, &--completed { background: $hc-success-bg; color: $hc-success; }
+  &--warning, &--low, &--pending { background: $hc-warning-bg; color: $hc-warning; }
+  &--danger, &--out, &--expired, &--cancelled { background: $hc-danger-bg; color: $hc-danger; }
+  &--info, &--booked, &--confirmed { background: rgba(59, 130, 246, 0.1); color: $hc-accent; }
+  &--neutral, &--inactive { background: rgba(148, 163, 184, 0.15); color: $hc-text-3; }
+}
+
+// ── Keyframe Animations ──────────────────────────────────────────────────────
+@keyframes hcFadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes hcSlideIn {
+  from { transform: translateX(100%); opacity: 0; }
+  to   { transform: translateX(0);    opacity: 1; }
+}
+
+// ── Dark Mode Integration ────────────────────────────────────────────────────
+html.dark, body.dark, .dark-theme {
+  .hc-page-header,
+  .hc-kpi-card,
+  .hc-table-card,
+  .hc-form-panel {
+    background: var(--glass-bg, rgba(15, 23, 42, 0.82)) !important;
+    border-color: var(--glass-border, rgba(255, 255, 255, 0.10)) !important;
+  }
+
+  .hc-form-panel__header,
+  .hc-form-actions {
+    background: rgba(15, 23, 42, 0.95) !important;
+  }
+
+  .hc-search-input {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.12);
+    color: #f8fafc;
+  }
+
+  .hc-pill {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.12);
+    color: #94a3b8;
+  }
+
+  .hc-table {
+    thead tr { background: rgba(255, 255, 255, 0.04); }
+    th { color: #94a3b8; }
+    td { color: #e2e8f0; border-bottom-color: rgba(255, 255, 255, 0.06); }
+    tbody tr:hover { background: rgba(255, 255, 255, 0.03); }
+  }
+}
+
+// ── Angular Material Input Custom Styling for Healthcare Forms ────────────────
+.hc-form-body, form {
+  .mat-mdc-form-field {
+    .mdc-text-field--outlined:not(.mdc-text-field--disabled) {
+      .mdc-notched-outline__leading,
+      .mdc-notched-outline__notch,
+      .mdc-notched-outline__trailing {
+        border-color: var(--glass-border-subtle, rgba(0, 0, 0, 0.12)) !important;
+        transition: border-color 200ms ease, border-width 200ms ease;
+      }
+
+      &:hover {
+        .mdc-notched-outline__leading,
+        .mdc-notched-outline__notch,
+        .mdc-notched-outline__trailing {
+          border-color: $hc-primary !important;
+        }
+      }
+
+      &.mdc-text-field--focused {
+        .mdc-notched-outline__leading,
+        .mdc-notched-outline__notch,
+        .mdc-notched-outline__trailing {
+          border-color: $hc-primary !important;
+          border-width: 2px !important;
+        }
+      }
+    }
+  }
+}

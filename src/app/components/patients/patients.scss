@@ -1,0 +1,101 @@
+// patients.scss — local overrides; global HC classes from healthcare-shared.scss
+
+// ── Patient card in list view ─────────────────────────────────────────────────
+.hc-patient-avatar {
+  width: 40px; height: 40px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 15px; font-weight: 700; color: #fff; flex-shrink: 0;
+  background: linear-gradient(135deg, hsl(196,80%,32%), hsl(210,90%,52%));
+  border: 2px solid rgba(255,255,255,0.8);
+}
+
+// ── Gender badge ─────────────────────────────────────────────────────────────
+.hc-gender-badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 2px 10px; border-radius: 12px;
+  font-size: 11px; font-weight: 600;
+
+  &--Male   { background: rgba(59,130,246,0.1);  color: hsl(220,90%,45%); }
+  &--Female { background: rgba(236,72,153,0.1);  color: hsl(330,80%,45%); }
+  &--Other  { background: rgba(245,158,11,0.1);  color: hsl(38,90%,40%); }
+}
+
+// ── Blood group badge ────────────────────────────────────────────────────────
+.hc-blood-badge {
+  display: inline-flex; align-items: center;
+  padding: 2px 8px; border-radius: 8px;
+  font-size: 11px; font-weight: 800;
+  background: rgba(239,68,68,0.1); color: hsl(0,84%,45%);
+}
+
+// ── Patient history timeline ─────────────────────────────────────────────────
+.hc-history-empty {
+  text-align: center; padding: 40px; color: hsl(220,9%,60%);
+  font-size: 13px;
+}
+
+// ── Patient profile panel (side overlay) ─────────────────────────────────────
+.hc-patient-profile {
+  position: fixed;
+  top: 0; right: 0; bottom: 0;
+  width: min(500px, 100vw);
+  background: rgba(255,255,255,0.96);
+  backdrop-filter: blur(24px) saturate(180%);
+  z-index: 901;
+  overflow-y: auto;
+  box-shadow: -8px 0 60px rgba(0,0,0,0.14);
+  animation: hcSlideIn 280ms cubic-bezier(0.34,1.56,0.64,1);
+}
+
+@keyframes hcSlideIn {
+  from { transform: translateX(100%); opacity: 0; }
+  to   { transform: translateX(0);    opacity: 1; }
+}
+
+.hc-profile-hero {
+  background: linear-gradient(135deg, hsl(196,80%,32%), hsl(231,89%,55%));
+  padding: 32px 24px 24px;
+  text-align: center;
+  position: relative;
+}
+
+.hc-profile-hero-avatar {
+  width: 80px; height: 80px; border-radius: 50%;
+  background: rgba(255,255,255,0.2);
+  border: 3px solid rgba(255,255,255,0.8);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 28px; font-weight: 800; color: #fff;
+  margin: 0 auto 12px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+}
+
+.hc-profile-hero-name { font-size: 20px; font-weight: 800; color: #fff; margin: 0; }
+.hc-profile-hero-meta { font-size: 13px; color: rgba(255,255,255,0.85); margin: 4px 0 0; }
+
+.hc-profile-body { padding: 20px 24px; }
+
+.hc-profile-info-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
+  margin-bottom: 20px;
+}
+
+.hc-profile-info-cell {
+  background: hsl(210,40%,98%); border-radius: 10px;
+  padding: 12px 14px;
+
+  &__label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: hsl(220,9%,55%); margin: 0 0 4px; }
+  &__value { font-size: 13px; font-weight: 600; color: hsl(220,13%,15%); }
+}
+
+// Dark mode
+html.dark {
+  .hc-patient-profile {
+    background: rgba(15,23,42,0.96);
+    border-color: rgba(255,255,255,0.08);
+  }
+  .hc-profile-info-cell {
+    background: rgba(255,255,255,0.05);
+    &__value { color: #e2e8f0; }
+  }
+}

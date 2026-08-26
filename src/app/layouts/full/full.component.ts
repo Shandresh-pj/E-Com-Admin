@@ -366,7 +366,17 @@ export class FullComponent implements OnInit {
       { id: 48, name: 'Fleet', path: '/fleet-management', icon: 'bi-radar', webIcon: 'bi-radar', appIcon: 'radar', isActive: true },
       { id: 49, name: 'Transit', path: '/corporate-transport', icon: 'bi-building-fill-gear', webIcon: 'bi-building-fill-gear', appIcon: 'directions_bus', isActive: true },
       { id: 50, name: 'Live Tracking', path: '/live-tracking', icon: 'bi-geo-alt-fill', webIcon: 'bi-geo-alt-fill', appIcon: 'location_searching', isActive: true },
-      { id: 51, name: 'Driver Verification', path: '/vehicle-driver-verification', icon: 'bi-person-check-fill', webIcon: 'bi-person-check-fill', appIcon: 'verified_user', isActive: true }
+      { id: 51, name: 'Driver Verification', path: '/vehicle-driver-verification', icon: 'bi-person-check-fill', webIcon: 'bi-person-check-fill', appIcon: 'verified_user', isActive: true },
+      // ── Healthcare ERP ────────────────────────────────────────────────────
+      { id: 52, name: 'Doctors',          path: '/doctors',         icon: 'bi-heart-pulse-fill',       webIcon: 'bi-heart-pulse-fill',       appIcon: 'medical_services',  isActive: true },
+      { id: 54, name: 'Patients',         path: '/patients',        icon: 'bi-person-heart',           webIcon: 'bi-person-heart',           appIcon: 'personal_injury',   isActive: true },
+      { id: 55, name: 'Appointments',     path: '/appointments',    icon: 'bi-calendar-check-fill',    webIcon: 'bi-calendar-check-fill',    appIcon: 'event_available',   isActive: true },
+      { id: 56, name: 'Consultations',    path: '/consultations',   icon: 'bi-clipboard2-pulse-fill',  webIcon: 'bi-clipboard2-pulse-fill',  appIcon: 'record_voice_over', isActive: true },
+      { id: 57, name: 'Prescriptions',    path: '/prescriptions',   icon: 'bi-file-medical-fill',      webIcon: 'bi-file-medical-fill',      appIcon: 'medication',        isActive: true },
+      { id: 58, name: 'Medicine Master',  path: '/medicines',       icon: 'bi-capsule-pill',           webIcon: 'bi-capsule-pill',           appIcon: 'local_pharmacy',    isActive: true },
+      { id: 59, name: 'Pharmacy POS',     path: '/pharmacy-pos',    icon: 'bi-bag-plus-fill',          webIcon: 'bi-bag-plus-fill',          appIcon: 'point_of_sale',     isActive: true },
+      { id: 60, name: 'Stock Approvals',  path: '/stock-approvals', icon: 'bi-patch-check-fill',       webIcon: 'bi-patch-check-fill',       appIcon: 'inventory',         isActive: true },
+      { id: 61, name: 'Medicine Expiry',  path: '/medicine-expiry', icon: 'bi-hourglass-bottom',       webIcon: 'bi-hourglass-bottom',       appIcon: 'hourglass_bottom',  isActive: true },
     ];
 
     if (isSuperAdmin) {
@@ -444,6 +454,14 @@ export class FullComponent implements OnInit {
       {
         navCap: 'Communication & Collaboration',
         paths: ['/communication', '/communication/meetings']
+      },
+      {
+        navCap: 'Healthcare',
+        paths: ['/doctors', '/patients', '/appointments', '/consultations', '/prescriptions']
+      },
+      {
+        navCap: 'Pharmacy',
+        paths: ['/medicines', '/pharmacy-pos', '/stock-approvals', '/medicine-expiry']
       },
     ];
 
@@ -605,7 +623,17 @@ export class FullComponent implements OnInit {
     star: 'star-fill',
     receipt: 'receipt',
     language: 'translate',
-    'ruler-2': 'rulers'
+    'ruler-2': 'rulers',
+    // Healthcare icons (Tabler → Bootstrap Icons mapping)
+    stethoscope:          'heart-pulse-fill',
+    'heart-handshake':    'person-heart',
+    'calendar-check':     'calendar-check-fill',
+    'clipboard-heart':    'clipboard2-pulse-fill',
+    prescription:         'file-medical-fill',
+    pill:                 'capsule-pill',
+    'checkup-list':       'patch-check-fill',
+    'clock-exclamation':  'hourglass-bottom',
+    'building-warehouse': 'boxes',
   };
 
   private mapIcon(icon?: string): string {

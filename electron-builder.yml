@@ -1,0 +1,22 @@
+appId: com.svk.ecom.admin
+productName: SVK E-Com Desktop ERP
+npmRebuild: false
+directories:
+  output: dist-desktop
+files:
+  - "main.js"
+  - "dist/Spike/**/*"
+  - "!**/*.map"
+  - "!**/*.spec.ts"
+  - "!**/e2e/**/*"
+  - "!**/test-results/**/*"
+win:
+  target:
+    - nsis
+    - portable
+nsis:
+  oneClick: false
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: true
+  createStartMenuShortcut: true
+  shortcutName: "SVK E-Com Desktop ERP"

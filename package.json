@@ -1,15 +1,44 @@
 {
   "name": "spike",
-  "version": "0.0.0",
+  "version": "1.0.0",
+  "description": "SVK Enterprise ERP Desktop Application",
+  "author": "SVK Team",
+  "main": "main.js",
   "scripts": {
     "ng": "ng",
-    "clean": "rimraf dist",
+    "clean": "rimraf dist dist-desktop",
     "start": "ng serve",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
     "deploy": "npm run build && wrangler deploy",
-    "preview": "npm run build && wrangler dev"
+    "preview": "npm run build && wrangler dev",
+    "typecheck": "tsc --noEmit",
+    "electron:dev": "electron . --dev",
+    "electron:build": "npm run typecheck && ng build --base-href ./ && electron-builder",
+    "electron:rebuild": "npm run clean && npm run electron:build"
+  },
+  "electronBuilder": {
+    "appId": "com.svk.ecom.admin",
+    "productName": "SVK E-Com Desktop ERP",
+    "directories": {
+      "output": "dist-desktop"
+    },
+    "files": [
+      "main.js",
+      "dist/Spike/**/*",
+      "src/favicon.ico"
+    ],
+    "win": {
+      "target": [
+        "nsis",
+        "portable"
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true
+    }
   },
   "private": true,
   "dependencies": {
@@ -52,6 +81,8 @@
     "@types/chance": "^1.1.7",
     "@types/date-fns": "^2.6.3",
     "@types/jasmine": "^5.1.13",
+    "electron": "^44.0.0",
+    "electron-builder": "^26.15.3",
     "jasmine-core": "^5.13.0",
     "karma": "~6.4.4",
     "karma-chrome-launcher": "~3.2.0",

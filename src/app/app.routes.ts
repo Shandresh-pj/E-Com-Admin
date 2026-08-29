@@ -6,6 +6,7 @@ import { FullComponent } from './layouts/full/full.component';
 import { AuthGuard } from './Securities/Guard/auth.guard';
 import { NonAuthGuard } from './Securities/Guard/nonauth.guard';
 import { RoleGuard } from './Securities/Guard/role.guard';
+import { DesktopRouteGuard } from './Securities/Guard/desktop-route.guard';
 import { UnauthorizedComponent } from './pages/unauthorized/unauthorized.component';
 
 import { HomeComponent } from './pages/home/home.component';
@@ -13,21 +14,24 @@ import { ContactComponent } from './pages/contact/contact.component';
 
 export const routes: Routes = [
 
-  // ─── Public landing pages (no auth required) ──────────────────────────────
+  // ─── Public landing pages (Web only — blocked & redirected on Desktop) ──────
   {
     path: '',
     component: HomeComponent,
     title: 'Enterprise ERP & Mobility OS',
+    canActivate: [DesktopRouteGuard],
     pathMatch: 'full'
   },
   {
     path: 'home',
     component: HomeComponent,
+    canActivate: [DesktopRouteGuard],
     title: 'Enterprise ERP & Mobility OS'
   },
   {
     path: 'contact',
     component: ContactComponent,
+    canActivate: [DesktopRouteGuard],
     title: 'Workspace Access & Support'
   },
 

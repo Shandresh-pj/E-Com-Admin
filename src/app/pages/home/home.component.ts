@@ -16,28 +16,21 @@ import { RouterModule, Router } from '@angular/router';
 import { MaterialModule } from 'src/app/material.module';
 import { SubscriptionService, SubscriptionPlan } from 'src/app/services/subscription.service';
 
-export interface AiFeature {
-  icon: string;
-  title: string;
-  desc: string;
-  tag: string;
-}
-
-export interface Module {
-  icon: string;
-  title: string;
-  desc: string;
-  gradient: string;
-}
-
-export interface Testimonial {
+// ── Interfaces ──────────────────────────────────────────────────────────────
+export interface RoleApp {
+  id: string;
   name: string;
-  role: string;
-  company: string;
-  text: string;
-  rating: number;
-  initials: string;
+  subtitle: string;
+  platform: string;
+  status: 'live' | 'soon';
   color: string;
+  features: string[];
+}
+
+export interface DesktopScreen {
+  id: string;
+  name: string;
+  desc: string;
 }
 
 export interface FaqItem {
@@ -56,36 +49,27 @@ export interface FaqItem {
 export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
   Math = Math;
 
-  // ── Nav & UI State ─────────────────────────────────────────────────────────
+  // ── Nav & UI State ─────────────────────────────────────────────────────
   isScrolled     = signal(false);
   mobileMenuOpen = signal(false);
-  isDarkTheme    = signal(true);
 
-  // ── Live Clock (clockwise ring) ────────────────────────────────────────────
-  liveTime    = signal('');
-  liveDate    = signal('');
-  clockOffset = signal(0);              // SVG stroke-dashoffset (r=26 → C≈163.36)
-  private clockTimer: any = null;
-  readonly CIRCUMFERENCE = 2 * Math.PI * 26; // ~163.36 for compact 60px ring
-
-  // ── Animated Counters ─────────────────────────────────────────────────────
+  // ── Animated Counters ─────────────────────────────────────────────────
   usersCount    = signal(0);
   productsCount = signal(0);
   invoicesCount = signal(0);
   uptimeVal     = signal(0);
   countersStarted = false;
 
-  // ── FAQ ───────────────────────────────────────────────────────────────────
+  // ── FAQ ───────────────────────────────────────────────────────────────
   openFaqIndex = signal<number | null>(null);
 
-  // ── Billing ───────────────────────────────────────────────────────────────
+  // ── Billing ───────────────────────────────────────────────────────────
   billingCycle = signal<'Monthly' | 'Yearly'>('Monthly');
 
-  // ── ROI Calculator ────────────────────────────────────────────────────────
+  // ── ROI Calculator ────────────────────────────────────────────────────
   branchesCount = signal<number>(4);
   ordersCount   = signal<number>(1500);
 
-  // Bulletproof Indian Currency Formatter (avoids period-for-comma issues)
   formatIndianRupees(val: number): string {
     if (isNaN(val) || val === null || val === undefined) return '0';
     const rounded = Math.round(val);
@@ -119,7 +103,7 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
     this.billingCycle.set(this.billingCycle() === 'Monthly' ? 'Yearly' : 'Monthly');
   }
 
-  // ── Pricing Carousel ──────────────────────────────────────────────────────
+  // ── Pricing Carousel ──────────────────────────────────────────────────
   activePriceSlide = signal(1);
   pricingPlans     = signal<SubscriptionPlan[]>([]);
 
@@ -131,7 +115,18 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
     const len = this.pricingPlans().length || 4;
     this.activePriceSlide.set((this.activePriceSlide() - 1 + len) % len);
   }
-  goToPriceSlide(index: number) { this.activePriceSlide.set(index); }
+  goToPriceSlide(index: number) {
+    this.activePriceSlide.set(index);
+    if (isPlatformBrowser(this.platformId)) {
+      const grid = document.querySelector('.hm__pricing-grid');
+      if (grid) {
+        const cards = grid.querySelectorAll('.hm__price-card');
+        if (cards[index]) {
+          cards[index].scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+        }
+      }
+    }
+  }
 
   openSubscriptionModal(plan: SubscriptionPlan, mode: 'trial' | 'pay') {
     this.router.navigate(['/contact'], {
@@ -139,76 +134,7 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
     });
   }
 
-  // ── Hero Live Telemetry Console ───────────────────────────────────────────
-  activeHeroTab    = signal<'live' | 'branches' | 'ai' | 'nodes'>('live');
-  liveRevenue      = signal(428900);
-  liveOrders       = signal(1284);
-  liveNotification = signal<string | null>(null);
-
-  // Dynamic telemetry metrics
-  cpuLoad           = signal(32);
-  memoryUsage       = signal('1.4GB / 4GB');
-  socketConnections = signal(4820);
-  lastSyncTime      = signal('Just now');
-
-  liveTransactions = signal([
-    { id: '#INV-8941', branch: 'Mumbai HQ',  amount: '₹42,500', status: 'Paid',       time: 'Just now', icon: '💳', color: '#10b981' },
-    { id: '#ORD-3819', branch: 'Delhi Hub',  amount: '₹18,200', status: 'Processing', time: '2m ago',   icon: '📦', color: '#3b82f6' },
-    { id: '#STK-1049', branch: 'Bengaluru',  amount: '98.8% Stock', status: 'AI Audited', time: '4m ago', icon: '🤖', color: '#8b5cf6' },
-    { id: '#INV-8940', branch: 'Hyderabad',  amount: '₹64,000', status: 'Paid',       time: '7m ago',   icon: '✅', color: '#10b981' },
-  ]);
-
-  branchesData = [
-    { name: 'Mumbai HQ',          orders: '482', revenue: '₹1.84L', status: '99.9% SLA', healthy: true },
-    { name: 'Delhi NCR Hub',      orders: '310', revenue: '₹1.12L', status: '99.4% SLA', healthy: true },
-    { name: 'Bengaluru Tech Hub', orders: '240', revenue: '₹88.4K', status: '100% SLA',  healthy: true },
-    { name: 'Hyderabad Branch',   orders: '152', revenue: '₹44.1K', status: '98.9% SLA', healthy: true },
-    { name: 'Chennai Hub',        orders: '198', revenue: '₹62.3K', status: '99.7% SLA', healthy: true },
-    { name: 'Pune Regional',      orders: '116', revenue: '₹39.8K', status: '99.1% SLA', healthy: true },
-  ];
-
-  setHeroTab(tab: 'live' | 'branches' | 'ai' | 'nodes') { this.activeHeroTab.set(tab); }
-
-  simulateLiveOrder() {
-    const branches = ['Mumbai HQ', 'Delhi Hub', 'Bengaluru Hub', 'Pune Branch', 'Chennai Hub', 'Kolkata Branch'];
-    const branch   = branches[Math.floor(Math.random() * branches.length)];
-    const amt      = Math.floor(Math.random() * 45000) + 5000;
-    const newTx    = {
-      id: `#INV-${Math.floor(1000 + Math.random() * 9000)}`,
-      branch, amount: `₹${this.formatIndianRupees(amt)}`,
-      status: 'Paid Live', time: 'Just now', icon: '⚡', color: '#10b981'
-    };
-    this.liveRevenue.update(v => v + amt);
-    this.liveOrders.update(v => v + 1);
-    this.cpuLoad.set(Math.floor(Math.random() * 25) + 30);
-    this.socketConnections.update(s => s + Math.floor(Math.random() * 5) + 1);
-    this.liveTransactions.update(list => [newTx, ...list.slice(0, 3)]);
-    this.liveNotification.set(`Live Transaction Processed: ${newTx.id} (${newTx.amount})`);
-    setTimeout(() => this.liveNotification.set(null), 3500);
-  }
-
-  simulateBranchSync() {
-    this.lastSyncTime.set('Just now');
-    this.liveNotification.set('🔄 6 Branches Inventory & POS Billing Telemetry Synced Successfully.');
-    setTimeout(() => this.liveNotification.set(null), 3500);
-  }
-
-  triggerAiAudit() {
-    this.liveNotification.set('🤖 Gemini Autonomous Stock & Fraud Audit Complete — 0 Anomalies Found across 6 Branches.');
-    setTimeout(() => this.liveNotification.set(null), 4000);
-  }
-
-  // ── Tech Specs ────────────────────────────────────────────────────────────
-  techSpecs = [
-    { category: 'Frontend Architecture', icon: '⚡', tech: 'Angular 18 Standalone, TypeScript, RxJS',       detail: 'Sub-50ms render latency with OnPush CD & lazy routes' },
-    { category: 'Backend Engine',        icon: '⚙️', tech: 'Node.js, Express REST API, Prisma ORM',         detail: 'High-concurrency event loop supporting 10,000+ req/sec' },
-    { category: 'Database & Storage',    icon: '🗄️', tech: 'Neon Serverless PostgreSQL, Redis Cache',       detail: 'Multi-region failover & automated daily backups' },
-    { category: 'Real-Time Telemetry',   icon: '📡', tech: 'Socket.IO WebSockets Engine',                   detail: 'Instant stock velocity updates, order state & role sync' },
-    { category: 'Artificial Intelligence',icon: '🤖',tech: 'Google Gemini AI & GPT-4o NLP',                 detail: 'Semantic vector search, catalog enrichment & demand forecasting' },
-    { category: 'Security & Compliance', icon: '🛡️', tech: '256-Bit SSL, Granular RBAC, SOC2 & GDPR',      detail: 'Zero-trust auth, immutable audit logs, encrypted payloads' },
-  ];
-
-  // ── Typing Headline ───────────────────────────────────────────────────────
+  // ── Typing Headline ───────────────────────────────────────────────────
   typedText = signal('');
   private headlines    = ['Inventory', 'Invoices', 'Analytics', 'Workflows', 'Customers', 'AI Insights'];
   private headlineIndex = 0;
@@ -219,88 +145,193 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
   private intervals: any[] = [];
   private scrollListener!: () => void;
 
-  // ── AI Features ───────────────────────────────────────────────────────────
-  aiFeatures: AiFeature[] = [
-    { icon: '✍️',  title: 'Description Generator',  desc: 'Generate compelling product descriptions instantly',      tag: 'GPT-4o' },
-    { icon: '🏷️',  title: 'Smart Tag Engine',        desc: 'AI-suggested tags for maximum discoverability',           tag: 'NLP' },
-    { icon: '📦',  title: 'Category Classifier',     desc: 'Automatically classify products to correct categories',   tag: 'ML' },
-    { icon: '🧾',  title: 'Invoice Summarizer',      desc: 'Concise summaries for complex invoice documents',         tag: 'LLM' },
-    { icon: '📊',  title: 'Sales Forecasting',       desc: 'Predict revenue trends with neural-network models',       tag: 'Forecast' },
-    { icon: '💬',  title: 'Customer Reply AI',       desc: 'Draft professional responses in seconds',                 tag: 'GenAI' },
-    { icon: '📧',  title: 'Email Composer',          desc: 'Context-aware business email generation',                 tag: 'GPT' },
-    { icon: '🔍',  title: 'Smart Search',            desc: 'Semantic search across all your business data',           tag: 'Vector' },
-    { icon: '🔄',  title: 'Return Handler',          desc: 'Automated return approval recommendations',               tag: 'Rules AI' },
-    { icon: '📈',  title: 'Dashboard Insights',      desc: 'Natural-language KPI summaries every morning',            tag: 'Analytics AI' },
-    { icon: '🌐',  title: 'Auto Translator',         desc: 'Translate product listings to 40+ languages',             tag: 'Translate' },
-    { icon: '⭐',  title: 'Review Analyzer',         desc: 'Sentiment analysis on customer feedback at scale',        tag: 'Sentiment' },
-    { icon: '🛒',  title: 'Purchase Advisor',        desc: 'Reorder suggestions based on stock velocity',             tag: 'Optimizer' },
-    { icon: '🤖',  title: 'AI Chat Assistant',       desc: 'Embedded assistant for all internal queries',             tag: 'Chat' },
-    { icon: '🔔',  title: 'Anomaly Alerts',          desc: 'Real-time fraud and anomaly detection',                   tag: 'Detection' },
-    { icon: '📋',  title: 'Order Summarizer',        desc: 'Instant order status summaries for customers',            tag: 'Summary' },
-    { icon: '💡',  title: 'Inventory Advisor',       desc: 'Dead-stock and overstock prevention insights',            tag: 'Insight' },
-    { icon: '📝',  title: 'Grammar Corrector',       desc: 'Refine all business text automatically',                  tag: 'Polish' },
+  // ══════════════════════════════════════════════════════════════════════
+  // NEW: ROLE-BASED APPLICATION ECOSYSTEM
+  // ══════════════════════════════════════════════════════════════════════
+  activeRole = signal<string>('customer');
+
+  roleApps: RoleApp[] = [
+    {
+      id: 'customer',
+      name: 'Customer',
+      subtitle: 'Shopping Experience',
+      platform: 'iOS & Android',
+      status: 'soon',
+      color: '#6366f1',
+      features: [
+        'Browse & search products with AI recommendations',
+        'Seamless checkout with multiple payment options',
+        'Real-time order tracking & delivery updates',
+        'Loyalty rewards & personalized offers',
+        'In-app support & order history'
+      ]
+    },
+    {
+      id: 'admin',
+      name: 'Admin',
+      subtitle: 'Enterprise Management',
+      platform: 'Web & Desktop',
+      status: 'live',
+      color: '#8b5cf6',
+      features: [
+        'Role-based access control & audit logs',
+        'Full multi-branch control & analytics',
+        'Gemini AI sales forecasting & inventory insights',
+        'Global product catalog & pricing management',
+        'Multi-tenant enterprise configuration'
+      ]
+    },
+    {
+      id: 'branch',
+      name: 'Branch',
+      subtitle: 'Branch Operations',
+      platform: 'Web & Mobile',
+      status: 'live',
+      color: '#06b6d4',
+      features: [
+        'Branch-level dashboard & operations',
+        'Local inventory management & transfers',
+        'POS billing & invoice generation',
+        'Staff scheduling & attendance tracking',
+        'Branch performance reports'
+      ]
+    },
+    {
+      id: 'employee',
+      name: 'Employee',
+      subtitle: 'Workforce Tools',
+      platform: 'Mobile App',
+      status: 'soon',
+      color: '#10b981',
+      features: [
+        'View payslips & document center',
+        'Attendance check-in & shift tracking',
+        'Task assignment & workflow status',
+        'Leave management & request history',
+        'Internal team communication'
+      ]
+    },
+    {
+      id: 'delivery',
+      name: 'Delivery',
+      subtitle: 'Logistics & Routing',
+      platform: 'Mobile App',
+      status: 'soon',
+      color: '#f59e0b',
+      features: [
+        'Optimized delivery route navigation',
+        'Real-time order pickup & drop-off tracking',
+        'Digital proof of delivery with e-signature',
+        'Earnings dashboard & payout history',
+        'In-app communication with customers'
+      ]
+    },
+    {
+      id: 'doctor',
+      name: 'Doctor',
+      subtitle: 'Healthcare Portal',
+      platform: 'Web & Mobile',
+      status: 'soon',
+      color: '#f43f5e',
+      features: [
+        'Patient appointment management',
+        'Digital prescriptions & consultation notes',
+        'Medical history & patient records',
+        'Pharmacy integration & medicine ordering',
+        'Telemedicine & video consultation'
+      ]
+    }
   ];
 
-  // ── Modules ───────────────────────────────────────────────────────────────
-  modules: Module[] = [
-    { icon: '📦', title: 'Products',       desc: 'Manage catalog, variants, and attributes',      gradient: 'from-indigo-500 to-violet-500' },
-    { icon: '🛒', title: 'Orders',         desc: 'Track, process, and fulfill orders',            gradient: 'from-blue-500 to-cyan-500' },
-    { icon: '🏭', title: 'Inventory',      desc: 'Real-time stock across all branches',           gradient: 'from-emerald-500 to-teal-500' },
-    { icon: '🧾', title: 'Invoices',       desc: 'Generate, send, and track invoices',            gradient: 'from-amber-500 to-orange-500' },
-    { icon: '🤝', title: 'Suppliers',      desc: 'Vendor management and purchase orders',         gradient: 'from-rose-500 to-pink-500' },
-    { icon: '👥', title: 'Customers',      desc: 'CRM, history, and loyalty tracking',            gradient: 'from-violet-500 to-purple-500' },
-    { icon: '👔', title: 'Employees',      desc: 'HR, payroll, shifts, and attendance',           gradient: 'from-sky-500 to-blue-500' },
-    { icon: '🏢', title: 'Warehouse',      desc: 'Multi-branch stock and transfers',              gradient: 'from-teal-500 to-cyan-500' },
-    { icon: '📊', title: 'Analytics',      desc: 'Deep business intelligence dashboards',         gradient: 'from-indigo-500 to-blue-500' },
-    { icon: '💳', title: 'Payments',       desc: 'Payment tracking and reconciliation',           gradient: 'from-green-500 to-emerald-500' },
-    { icon: '📈', title: 'Sales',          desc: 'Pipeline, targets, and commissions',            gradient: 'from-orange-500 to-red-500' },
-    { icon: '📉', title: 'Purchases',      desc: 'Purchase order and receiving workflow',         gradient: 'from-purple-500 to-indigo-500' },
-    { icon: '📋', title: 'Reports',        desc: 'Scheduled and on-demand PDF reports',           gradient: 'from-cyan-500 to-teal-500' },
-    { icon: '🔔', title: 'Notifications',  desc: 'Real-time alerts and push notifications',       gradient: 'from-yellow-500 to-amber-500' },
-    { icon: '✅', title: 'Approvals',      desc: 'Multi-level approval workflows',                gradient: 'from-lime-500 to-green-500' },
-    { icon: '🛡️', title: 'Roles & Access', desc: 'Granular RBAC for all users',                  gradient: 'from-red-500 to-rose-500' },
-    { icon: '⚙️', title: 'Settings',       desc: 'Company, branch, and system config',            gradient: 'from-slate-400 to-slate-600' },
-    { icon: '📝', title: 'Audit Logs',     desc: 'Full audit trail for every action',             gradient: 'from-violet-500 to-pink-500' },
+  setActiveRole(roleId: string) {
+    this.activeRole.set(roleId);
+  }
+
+  getActiveRoleApp(): RoleApp {
+    return this.roleApps.find(r => r.id === this.activeRole()) || this.roleApps[0];
+  }
+
+  // ══════════════════════════════════════════════════════════════════════
+  // NEW: DESKTOP SOFTWARE SCREENS
+  // ══════════════════════════════════════════════════════════════════════
+  activeDesktopScreen = signal<string>('dashboard');
+
+  desktopScreens: DesktopScreen[] = [
+    { id: 'dashboard', name: 'Dashboard', desc: 'Real-time analytics & KPIs across all branches' },
+    { id: 'inventory', name: 'Inventory', desc: 'Multi-warehouse stock management & transfers' },
+    { id: 'billing',   name: 'Billing',   desc: 'GST-compliant invoicing & POS terminal' },
+    { id: 'reports',   name: 'Reports',   desc: 'Advanced business intelligence & exports' },
+    { id: 'workforce', name: 'Workforce', desc: 'HR, payroll, attendance & scheduling' },
   ];
 
-  // ── Testimonials ──────────────────────────────────────────────────────────
-  testimonials: Testimonial[] = [
-    { name: 'Arjun Mehta',    role: 'Head of Operations',  company: 'NovaTech Retail',        text: 'This platform completely transformed our inventory management. The AI-powered insights alone save us 30+ hours per week.', rating: 5, initials: 'AM', color: '#6366f1' },
-    { name: 'Priya Sharma',   role: 'CEO',                  company: 'Kiran Fashion House',    text: 'The invoice generation and approval workflow replaced 3 separate legacy systems. Outstanding product.',                    rating: 5, initials: 'PS', color: '#8b5cf6' },
-    { name: 'Rajan Rao',      role: 'IT Director',          company: 'GlobalMart Solutions',   text: 'Enterprise-grade security, beautiful UI, and the Gemini AI integration is next level. Our team adopted it in days.',       rating: 5, initials: 'RR', color: '#06b6d4' },
-    { name: 'Deepa Nair',     role: 'Product Manager',      company: 'Shopwise India',         text: 'Migrated from SAP to this platform. Saved 60% on licensing costs and the feature set is comparable.',                     rating: 5, initials: 'DN', color: '#10b981' },
-    { name: 'Vikram Singh',   role: 'Finance Controller',   company: 'Pinnacle Distributors',  text: 'Real-time analytics and AI invoice summaries have completely eliminated manual reporting. A game-changer.',               rating: 5, initials: 'VS', color: '#f59e0b' },
-    { name: 'Anita Kulkarni', role: 'Operations Manager',   company: 'BrightPath Commerce',    text: 'Best platform for managing multiple branches. The role-based access control is exactly what we needed.',                  rating: 5, initials: 'AK', color: '#ec4899' },
+  setDesktopScreen(id: string) {
+    this.activeDesktopScreen.set(id);
+  }
+
+  // ── Platform Capabilities ─────────────────────────────────────────────
+  capabilities = [
+    { title: 'AI-Powered Intelligence', desc: '18 embedded AI modules for descriptions, forecasting, anomaly detection, and automated insights — powered by Google Gemini.', items: ['Smart product descriptions', 'Demand forecasting', 'Anomaly detection'] },
+    { title: 'Multi-Branch Architecture', desc: 'Manage unlimited branches, warehouses, and regions from a single unified platform with consolidated reporting.', items: ['Unlimited branches', 'Inter-branch transfers', 'Consolidated reports'] },
+    { title: 'Real-Time Telemetry', desc: 'Live WebSocket-powered dashboards with instant stock updates, order processing, and role-synchronized state.', items: ['Socket.IO live sync', 'Real-time inventory', 'Live order tracking'] },
+    { title: 'Enterprise Security', desc: 'Zero-trust authentication with granular RBAC, immutable audit logs, and encrypted data at rest and in transit.', items: ['Role-based access', 'Full audit trail', 'AES-256 encryption'] },
+    { title: 'Workflow Automation', desc: 'Multi-level approval chains, configurable business rules, automated notifications, and trigger-based actions.', items: ['Approval workflows', 'Push notifications', 'Automated triggers'] },
+    { title: 'Deep Analytics', desc: 'Real-time dashboards with revenue tracking, inventory health, employee performance, and AI-generated insights.', items: ['Revenue analytics', 'Inventory health', 'PDF/Excel exports'] },
   ];
 
-  // ── FAQs ──────────────────────────────────────────────────────────────────
+  // ── How It Works ─────────────────────────────────────────────────────
+  workflowSteps = [
+    { num: '01', title: 'Set Up Your Company',  desc: 'Create your company profile, branches, and configure tax settings in minutes.' },
+    { num: '02', title: 'Import Your Products',  desc: 'Upload your catalog via CSV or add products manually with AI-assisted descriptions.' },
+    { num: '03', title: 'Onboard Your Team',     desc: 'Invite employees, assign roles, and configure granular access permissions.' },
+    { num: '04', title: 'Start Operations',      desc: 'Manage orders, track inventory, and generate invoices automatically.' },
+    { num: '05', title: 'Gain AI Insights',      desc: 'Let the AI analyze your business and surface actionable growth insights.' },
+    { num: '06', title: 'Scale Effortlessly',    desc: 'Add branches, integrate payment gateways, and grow without limits.' },
+  ];
+
+  // ── Testimonials ──────────────────────────────────────────────────────
+  testimonials = [
+    { name: 'Arjun Mehta',    role: 'Head of Operations',  company: 'NovaTech Retail',        text: 'This platform completely transformed our inventory management. The AI-powered insights alone save us 30+ hours per week.', initials: 'AM', color: '#6366f1' },
+    { name: 'Priya Sharma',   role: 'CEO',                  company: 'Kiran Fashion House',    text: 'The invoice generation and approval workflow replaced 3 separate legacy systems. Outstanding product.',                    initials: 'PS', color: '#8b5cf6' },
+    { name: 'Rajan Rao',      role: 'IT Director',          company: 'GlobalMart Solutions',   text: 'Enterprise-grade security, beautiful UI, and the Gemini AI integration is next level. Our team adopted it in days.',       initials: 'RR', color: '#06b6d4' },
+    { name: 'Deepa Nair',     role: 'Product Manager',      company: 'Shopwise India',         text: 'Migrated from SAP to this platform. Saved 60% on licensing costs and the feature set is comparable.',                     initials: 'DN', color: '#10b981' },
+    { name: 'Vikram Singh',   role: 'Finance Controller',   company: 'Pinnacle Distributors',  text: 'Real-time analytics and AI invoice summaries have completely eliminated manual reporting. A game-changer.',               initials: 'VS', color: '#f59e0b' },
+    { name: 'Anita Kulkarni', role: 'Operations Manager',   company: 'BrightPath Commerce',    text: 'Best platform for managing multiple branches. The role-based access control is exactly what we needed.',                  initials: 'AK', color: '#ec4899' },
+  ];
+
+  // ── FAQs ──────────────────────────────────────────────────────────────
   faqs: FaqItem[] = [
     { q: 'How does the AI product description generator work?', a: 'Our platform integrates with Google Gemini AI. Simply enter a product name and category, and the AI generates a professional, SEO-optimized description in seconds.' },
     { q: 'Is my business data secure?',                         a: 'All data is encrypted at rest and in transit using AES-256 and TLS 1.3. We use Neon Serverless PostgreSQL with enterprise-grade security and daily automated backups.' },
     { q: 'Can I manage multiple warehouses and branches?',      a: 'Yes. The platform supports unlimited branches. Stock, transfers, orders, and employees can be managed independently per branch with consolidated reporting.' },
-    { q: 'What roles and permissions does the platform support?', a: 'Full RBAC with Super Admin, Admin, Shopkeeper, Employee, and Customer roles. Custom permissions can be configured per module per user.' },
+    { q: 'What roles and permissions does the platform support?', a: 'Full RBAC with Super Admin, Admin, Branch Manager, Employee, and Customer roles. Custom permissions can be configured per module per user.' },
     { q: 'Does it support multi-currency and GST/tax invoicing?', a: 'Yes. Invoice settings support multiple tax configurations, discount types, and can be customized per company and branch.' },
     { q: 'Can I migrate from my existing ERP system?',          a: 'Our team provides a full data migration service. CSV import tools are available for products, customers, suppliers, and historical orders.' },
     { q: 'Is there a free trial?',                              a: 'Yes, all plans include a 14-day free trial with full feature access. No credit card required.' },
     { q: 'What kind of support is available?',                  a: 'We offer 24/7 email support, priority chat support on Professional and Enterprise plans, and dedicated account managers on Enterprise.' },
-    { q: 'Does the platform have a mobile app?',                a: 'A mobile-responsive web app is available now. Native iOS and Android apps are on our 2026 roadmap.' },
+    { q: 'Does the platform have a mobile app?',                a: 'Native mobile applications for Customer, Employee, and Delivery roles are launching soon. The admin panel is fully responsive for mobile use.' },
     { q: 'Can I use my own domain for the admin panel?',        a: 'Yes. Enterprise plan customers can configure custom domains with SSL certificates managed by our infrastructure team.' },
   ];
 
-  // ── Trusted Companies Marquee ─────────────────────────────────────────────
+  // ── Trusted Companies ─────────────────────────────────────────────────
   companies = [
     'NovaTech', 'Kiran Fashion', 'GlobalMart', 'Shopwise', 'Pinnacle', 'BrightPath',
     'IndiaMart Pro', 'UrbanRetail', 'SkyCommerce', 'PeakDistributors', 'QuickMart', 'ZenithSales',
   ];
 
-  // ── Workflow Steps ────────────────────────────────────────────────────────
-  workflowSteps = [
-    { num: '01', title: 'Set Up Your Company',     desc: 'Create your company profile, branches, and configure tax settings in minutes.' },
-    { num: '02', title: 'Import Your Products',    desc: 'Upload your catalog via CSV or add products manually with AI-assisted descriptions.' },
-    { num: '03', title: 'Onboard Your Team',       desc: 'Invite employees, assign roles, and configure granular access permissions.' },
-    { num: '04', title: 'Start Taking Orders',     desc: 'Manage orders, track inventory, and generate invoices automatically.' },
-    { num: '05', title: 'Gain AI Insights',        desc: 'Let the AI analyze your business and surface actionable growth insights.' },
-    { num: '06', title: 'Scale Effortlessly',      desc: 'Add branches, integrate payment gateways, and grow without technical limits.' },
+  // ── Platform Modules ──────────────────────────────────────────────────
+  modules = [
+    { title: 'Products',       desc: 'Manage catalog, variants, and SKUs',          color: '#6366f1', icon: 'M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4' },
+    { title: 'Orders',         desc: 'Track, process, and fulfill orders live',     color: '#06b6d4', icon: 'M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z' },
+    { title: 'Inventory',      desc: 'Real-time multi-branch stock levels',        color: '#10b981', icon: 'M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10' },
+    { title: 'Invoices',       desc: 'Generate, send, and track GST invoices',      color: '#8b5cf6', icon: 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z' },
+    { title: 'Customers',      desc: 'CRM, purchasing history, and loyalty',       color: '#f59e0b', icon: 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5 5 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z' },
+    { title: 'Employees',      desc: 'HR, payroll, shifts, and attendance',         color: '#ec4899', icon: 'M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z' },
+    { title: 'Analytics',      desc: 'Deep BI dashboards and sales forecasts',     color: '#3b82f6', icon: 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z' },
+    { title: 'Payments',       desc: 'Payment tracking and Razorpay sync',         color: '#14b8a6', icon: 'M3 10h18M7 15h1m4 0h1m-7 4h12a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z' },
+    { title: 'Approvals',      desc: 'Multi-level corporate approval chains',      color: '#a855f7', icon: 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z' },
+    { title: 'Notifications',  desc: 'Real-time WebSocket alerts & push messages', color: '#f43f5e', icon: 'M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9' },
+    { title: 'Roles & Access', desc: 'Granular RBAC for security & compliance',    color: '#6366f1', icon: 'M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z' },
+    { title: 'Audit Logs',     desc: 'Immutable logs for every system action',     color: '#64748b', icon: 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01' },
   ];
 
   constructor(
@@ -311,29 +342,73 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
     private router: Router
   ) {}
 
+  private fallbackPricingPlans: SubscriptionPlan[] = [
+    {
+      id: 'starter', name: 'Starter', badge: 'CORE ESSENTIALS',
+      monthlyPrice: 2999, yearlyPrice: 2399, description: 'Perfect for single-branch businesses getting started.',
+      features: [
+        { text: '1 Branch / Warehouse', highlight: false },
+        { text: 'Up to 5 Users', highlight: false },
+        { text: 'Products & Inventory', highlight: false },
+        { text: 'Invoice Generation (GST)', highlight: true },
+        { text: 'Basic Analytics', highlight: false },
+        { text: 'Email Support', highlight: false },
+      ],
+      hasFreeTrial: true, freeTrialDays: 14, recommended: false,
+      razorpayPlanIdMonthly: '', razorpayPlanIdYearly: ''
+    },
+    {
+      id: 'professional', name: 'Professional', badge: 'MOST POPULAR',
+      monthlyPrice: 7999, yearlyPrice: 6399, description: 'For growing businesses with multiple branches.',
+      features: [
+        { text: 'Up to 5 Branches', highlight: false },
+        { text: 'Up to 25 Users', highlight: false },
+        { text: 'Full ERP Suite (12 Modules)', highlight: true },
+        { text: 'AI Product Descriptions (Gemini)', highlight: true },
+        { text: 'Advanced Analytics & Reports', highlight: true },
+        { text: 'Razorpay Payment Integration', highlight: false },
+        { text: 'Priority Chat Support', highlight: false },
+      ],
+      hasFreeTrial: true, freeTrialDays: 14, recommended: true,
+      razorpayPlanIdMonthly: '', razorpayPlanIdYearly: ''
+    },
+    {
+      id: 'enterprise', name: 'Enterprise', badge: 'ENTERPRISE SCALE',
+      monthlyPrice: 0, yearlyPrice: 0, description: 'Custom pricing for large-scale multi-brand operations.',
+      features: [
+        { text: 'Unlimited Branches', highlight: true },
+        { text: 'Unlimited Users', highlight: true },
+        { text: 'All 18 AI & ERP Modules', highlight: true },
+        { text: 'White-label & Custom Domain', highlight: false },
+        { text: 'Dedicated Account Manager', highlight: false },
+        { text: 'SLA 99.99% Guarantee', highlight: false },
+        { text: '24/7 Premium Support', highlight: false },
+      ],
+      hasFreeTrial: false, freeTrialDays: 0, recommended: false,
+      razorpayPlanIdMonthly: '', razorpayPlanIdYearly: ''
+    }
+  ];
+
   ngOnInit() {
-    this.subscriptionService.getPlans().subscribe((plans) => {
-      this.pricingPlans.set(plans);
-      this.cdr.markForCheck();
+    this.pricingPlans.set(this.fallbackPricingPlans);
+
+    this.subscriptionService.getPlans().subscribe({
+      next: (plans) => {
+        if (plans && plans.length > 0) {
+          this.pricingPlans.set(plans);
+          this.cdr.markForCheck();
+        }
+      },
+      error: () => {
+        // Fallback plans already set
+      }
     });
 
     if (!isPlatformBrowser(this.platformId)) return;
 
-    // Theme init
-    const savedTheme = localStorage.getItem('svk_theme');
-    const isDark = savedTheme ? savedTheme === 'dark' : true;
-    this.isDarkTheme.set(isDark);
-    document.documentElement.classList.toggle('dark', isDark);
-    document.body.classList.toggle('dark-theme', isDark);
-    document.body.classList.toggle('light-theme', !isDark);
-
     // Scroll listener
     this.scrollListener = () => { this.isScrolled.set(window.scrollY > 60); };
     window.addEventListener('scroll', this.scrollListener, { passive: true });
-
-    // Live clock (clockwise ring)
-    this.tickClock();
-    this.clockTimer = setInterval(() => { this.tickClock(); }, 1000);
 
     // Typing animation
     this.startTyping();
@@ -352,39 +427,7 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
     this.initScrollReveal();
   }
 
-  // ── Live Clock ────────────────────────────────────────────────────────────
-  private tickClock() {
-    const now  = new Date();
-    const hh   = String(now.getHours()).padStart(2, '0');
-    const mm   = String(now.getMinutes()).padStart(2, '0');
-    const ss   = String(now.getSeconds()).padStart(2, '0');
-    this.liveTime.set(`${hh}:${mm}:${ss}`);
-
-    const days   = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
-    const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-    this.liveDate.set(`${days[now.getDay()]}, ${now.getDate()} ${months[now.getMonth()]}`);
-
-    // Clockwise progress offset for compact r=26 ring (C≈163.36)
-    const secsNow  = now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds();
-    const progress = secsNow / 86400;
-    this.clockOffset.set(this.CIRCUMFERENCE * (1 - progress));
-
-    this.cdr.detectChanges();
-  }
-
-  // ── Theme Toggle ──────────────────────────────────────────────────────────
-  toggleTheme() {
-    const next = !this.isDarkTheme();
-    this.isDarkTheme.set(next);
-    if (isPlatformBrowser(this.platformId)) {
-      document.documentElement.classList.toggle('dark', next);
-      document.body.classList.toggle('dark-theme', next);
-      document.body.classList.toggle('light-theme', !next);
-      localStorage.setItem('svk_theme', next ? 'dark' : 'light');
-    }
-  }
-
-  // ── Scroll Reveal ─────────────────────────────────────────────────────────
+  // ── Scroll Reveal ─────────────────────────────────────────────────────
   private initScrollReveal() {
     const targets = document.querySelectorAll('[data-reveal]');
     const obs = new IntersectionObserver(
@@ -418,7 +461,7 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
     this.observers.push(obs);
   }
 
-  // ── Counter Animations ────────────────────────────────────────────────────
+  // ── Counter Animations ────────────────────────────────────────────────
   private startCounters() {
     this.animateCounter(this.usersCount,    12000,    1800);
     this.animateCounter(this.productsCount, 850000,   2000);
@@ -456,7 +499,7 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
     });
   }
 
-  // ── Typing Animation ──────────────────────────────────────────────────────
+  // ── Typing Animation ──────────────────────────────────────────────────
   private startTyping() {
     this.ngZone.runOutsideAngular(() => {
       const typeStep = () => {
@@ -488,7 +531,7 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
     });
   }
 
-  // ── Mobile Menu ───────────────────────────────────────────────────────────
+  // ── Mobile Menu ───────────────────────────────────────────────────────
   toggleMobileMenu() {
     const next = !this.mobileMenuOpen();
     this.mobileMenuOpen.set(next);
@@ -506,11 +549,11 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
-  // ── FAQ ───────────────────────────────────────────────────────────────────
+  // ── FAQ ───────────────────────────────────────────────────────────────
   toggleFaq(i: number) { this.openFaqIndex.set(this.openFaqIndex() === i ? null : i); }
   isFaqOpen(i: number): boolean { return this.openFaqIndex() === i; }
 
-  // ── Helpers ───────────────────────────────────────────────────────────────
+  // ── Helpers ───────────────────────────────────────────────────────────
   formatNumber(n: number): string {
     if (n >= 1000000) return (n / 1000000).toFixed(1) + 'M+';
     if (n >= 1000)    return (n / 1000).toFixed(0) + 'K+';
@@ -520,7 +563,6 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
   trackByIndex(i: number) { return i; }
 
   ngOnDestroy() {
-    if (this.clockTimer) clearInterval(this.clockTimer);
     if (isPlatformBrowser(this.platformId)) {
       window.removeEventListener('scroll', this.scrollListener);
       document.body.style.overflow = '';

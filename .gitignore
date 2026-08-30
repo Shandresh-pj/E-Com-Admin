@@ -8,6 +8,13 @@
 /.angular/cache
 .sass-cache/
 
+# ─── Playwright & E2E Test Outputs ──────────────────────────────────────────
+/test-results/
+/playwright-report/
+/blob-report/
+/.pytest_cache/
+/.nyc_output/
+
 # ─── Desktop Executables & Installer Artifacts ─────────────────────────────
 *.exe
 *.msi
@@ -25,6 +32,10 @@ latest.yml
 *.pfx
 *.p12
 *.cer
+*.id_rsa
+secrets.*
+*.pfx
+*.jks
 
 # ─── Node & Package Logs ───────────────────────────────────────────────────
 /node_modules

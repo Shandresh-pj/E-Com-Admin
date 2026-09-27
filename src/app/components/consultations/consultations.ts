@@ -41,7 +41,8 @@ export class ConsultationsComponent implements OnInit {
   showForm             = signal(false);
   editingId            = signal<number | null>(null);
   searchQuery          = signal('');
-  viewMode             = signal<'grid' | 'list'>('grid');
+  statusFilter         = signal('');
+  viewMode             = signal<'grid' | 'list'>('list');   // Table-first
   selectedConsultation = signal<Consultation | null>(null);
   formValues           = signal<any>({});
 
@@ -51,12 +52,15 @@ export class ConsultationsComponent implements OnInit {
 
   filteredConsultations = computed(() => {
     const q = this.searchQuery().toLowerCase().trim();
+    const sf = this.statusFilter();
     return this.consultations().filter(c =>
-      !q ||
-      (c.patient_name || '').toLowerCase().includes(q) ||
-      (c.doctor_name  || '').toLowerCase().includes(q) ||
-      (c.diagnosis    || '').toLowerCase().includes(q) ||
-      (c.chief_complaint || '').toLowerCase().includes(q)
+      (!sf || c.status === sf) &&
+      (!q ||
+        (c.patient_name || '').toLowerCase().includes(q) ||
+        (c.doctor_name  || '').toLowerCase().includes(q) ||
+        (c.diagnosis    || '').toLowerCase().includes(q) ||
+        (c.chief_complaint || '').toLowerCase().includes(q)
+      )
     );
   });
 
@@ -89,6 +93,20 @@ export class ConsultationsComponent implements OnInit {
       diagnosis:       [''],
       notes:           [''],
       follow_up_date:  [''],
+    });
+
+    // Auto-fill patient_id & doctor_id when appointment is selected
+    this.form.get('appointment_id')?.valueChanges.subscribe(apptId => {
+      if (!apptId) return;
+      const appt = this.appointments.find((a: any) => String(a.id) === String(apptId));
+      if (appt) {
+        this.form.patchValue({
+          patient_id: appt.patient_id,
+          doctor_id:  appt.doctor_id,
+          chief_complaint: appt.notes || appt.chief_complaint || appt.reason || '',
+        }, { emitEvent: false });
+        this.cdr.markForCheck();
+      }
     });
 
     this.form.valueChanges.subscribe(val => {
@@ -143,7 +161,44 @@ export class ConsultationsComponent implements OnInit {
   private loadLookups(): void {
     this.common.getApi('doctors?is_active=true').subscribe({ next: (r: any) => { this.doctors = r?.data || []; this.cdr.markForCheck(); } });
     this.common.getApi('patients').subscribe({ next: (r: any) => { this.patients = r?.data || []; this.cdr.markForCheck(); } });
-    this.common.getApi('appointments?status=IN_CONSULTATION').subscribe({ next: (r: any) => { this.appointments = r?.data || []; this.cdr.markForCheck(); } });
+    // Load appointments ready for consultation (CHECKED_IN or IN_CONSULTATION)
+    this.common.getApi('appointments?status=CHECKED_IN').subscribe({ next: (r: any) => {
+      const checked = r?.data || [];
+      this.common.getApi('appointments?status=IN_CONSULTATION').subscribe({ next: (r2: any) => {
+        const inConsult = r2?.data || [];
+        this.appointments = [...checked, ...inConsult];
+        this.cdr.markForCheck();
+      }});
+    }});
+  }
+
+  selectStatusFilter(s: string): void {
+    this.statusFilter.set(s);
+    this.cdr.markForCheck();
+  }
+
+  /** Open form pre-filled from an appointment row (e.g. from Quick-Start button in appointments) */
+  openFromAppointment(appt: any): void {
+    this.editingId.set(null);
+    this.form.reset();
+    this.form.patchValue({
+      appointment_id:  appt.id,
+      patient_id:      appt.patient_id,
+      doctor_id:       appt.doctor_id,
+      chief_complaint: appt.notes || appt.chief_complaint || appt.reason || '',
+    });
+    this.showForm.set(true);
+    this.cdr.markForCheck();
+  }
+
+  completeConsultation(c: Consultation): void {
+    this.alert.confirm(`Mark consultation for ${c.patient_name} as Completed?`).then((r: any) => {
+      if (!r.isConfirmed) return;
+      this.common.patchApi(`consultations/${c.id}/complete`, {}).subscribe({
+        next:  () => { this.alert.success('Consultation completed'); this.load(); },
+        error: (e: any) => this.alert.error(e?.error?.message || 'Failed'),
+      });
+    });
   }
 
   openForm(c?: Consultation): void {

@@ -228,4 +228,32 @@ html.dark {
   .hc-table { th { background: rgba(30, 41, 59, 0.9); color: #94a3b8; } td { border-bottom-color: rgba(255, 255, 255, 0.06); color: #f8fafc; } tr:hover td { background: rgba(99, 102, 241, 0.1); } }
 }
 
+// ── Clock Time Picker Field ───────────────────────────────────────────────────
+.hc-clock-field {
+  width: 100%;
+}
+
+.hc-clock-display {
+  display: flex; align-items: center; gap: 10px;
+  padding: 13px 16px; border-radius: 8px; cursor: pointer;
+  border: 1px solid rgba(0,0,0,0.23); background: #fff;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  min-height: 56px;
+
+  &:hover { border-color: var(--psh-indigo, #6366f1); box-shadow: 0 0 0 1px var(--psh-indigo, #6366f1); }
+
+  .hc-clock-icon { color: var(--psh-indigo, #6366f1); width: 20px; height: 20px; flex-shrink: 0; }
+
+  .hc-clock-value {
+    font-size: 18px; font-weight: 700; color: #1e293b; letter-spacing: 0.5px; flex: 1;
+  }
+
+  .hc-clock-hint { font-size: 11px; color: #94a3b8; margin-left: auto; }
+}
+
+@media (prefers-color-scheme: dark) {
+  .hc-clock-display { background: rgba(30, 41, 59, 0.9); border-color: rgba(255,255,255,0.15);
+    .hc-clock-value { color: #f8fafc; }
+  }
+}
 

@@ -355,14 +355,40 @@
 
                   <div class="row">
                     <div class="col-md-6 m-b-16">
-                      <label class="hc-field-label">Select Formulary Drug <span class="req">*</span></label>
-                      <mat-form-field appearance="outline" class="w-100">
-                        <mat-select formControlName="medicine_id" placeholder="Choose drug">
-                          @for (m of medicines; track m.id) {
-                            <mat-option [value]="m.id">{{ m.name }} ({{ m.strength }})</mat-option>
-                          }
-                        </mat-select>
-                      </mat-form-field>
+                      <label class="hc-field-label">Search & Select Medicine <span class="req">*</span></label>
+                      <!-- Typeahead search input -->
+                      <div class="hc-med-search-wrap">
+                        <div class="hc-med-search-field">
+                          <i-tabler name="search" class="hc-med-search-icon"></i-tabler>
+                          <input
+                            class="hc-med-search-input"
+                            type="text"
+                            [value]="medicineSearchQueries[i] || getMedicineDisplayLabel(items.at(i).get('medicine_id')?.value)"
+                            (input)="onMedicineSearch(i, $any($event.target).value)"
+                            (blur)="closeMedicineDropdown(i)"
+                            placeholder="Type medicine name, generic..."
+                            autocomplete="off">
+                          <input type="hidden" formControlName="medicine_id">
+                        </div>
+                        <!-- Dropdown results -->
+                        @if (medicineShowDropdown[i] && medicineSearchResults[i]?.length) {
+                          <div class="hc-med-dropdown">
+                            @for (med of medicineSearchResults[i]; track med.id) {
+                              <div class="hc-med-option" (mousedown)="onMedicineSelect(i, med)">
+                                <div class="hc-med-option__name">{{ med.name }}</div>
+                                <div class="hc-med-option__sub">
+                                  {{ med.generic_name }} · {{ med.dosage_form }} · {{ med.strength }}
+                                </div>
+                              </div>
+                            }
+                          </div>
+                        }
+                        @if (medicineShowDropdown[i] && !medicineSearchResults[i]?.length && medicineSearchQueries[i]?.length >= 2) {
+                          <div class="hc-med-dropdown">
+                            <div class="hc-med-option hc-med-option--empty">No medicines found for "{{ medicineSearchQueries[i] }}"</div>
+                          </div>
+                        }
+                      </div>
                     </div>
 
                     <div class="col-md-3 m-b-16">

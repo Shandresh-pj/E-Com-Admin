@@ -49,7 +49,7 @@ export class CompanyCalendarComponent implements OnInit {
     'January','February','March','April','May','June',
     'July','August','September','October','November','December'
   ];
-  readonly DAY_LABELS = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  readonly DAY_LABELS = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
 
   get currentMonthName() { return this.MONTH_NAMES[this.currentDate().getMonth()]; }
   get currentYear()      { return this.currentDate().getFullYear(); }
@@ -138,46 +138,53 @@ export class CompanyCalendarComponent implements OnInit {
     const year  = d.getFullYear();
     const month = d.getMonth();
 
-    const firstDay = new Date(year, month, 1).getDay();
-    const daysInMonth    = new Date(year, month + 1, 0).getDate();
+    // getDay() → 0=Sun…6=Sat. Convert to Monday-first: Mon=0, Tue=1…Sun=6
+    const rawFirstDay   = new Date(year, month, 1).getDay();
+    const firstDayMon   = (rawFirstDay + 6) % 7;   // Sun→6, Mon→0, Tue→1…
+
+    const daysInMonth     = new Date(year, month + 1, 0).getDate();
     const daysInPrevMonth = new Date(year, month, 0).getDate();
 
-    const today = new Date(); today.setHours(0,0,0,0);
+    const today = new Date(); today.setHours(0, 0, 0, 0);
     const holidayMap = new Map<string, any>();
     this.holidaysList.forEach(h => holidayMap.set(h.holiday_date?.split('T')[0], h));
 
     const cells: HolidayDay[] = [];
 
-    // Leading days from prev month
-    for (let i = firstDay - 1; i >= 0; i--) {
+    // Leading days from prev month (Mon-first alignment)
+    for (let i = firstDayMon - 1; i >= 0; i--) {
       const date = new Date(year, month - 1, daysInPrevMonth - i);
       cells.push(this.makeDay(date, false, today, holidayMap));
     }
-    // Current month
+    // Current month days
     for (let day = 1; day <= daysInMonth; day++) {
       const date = new Date(year, month, day);
       cells.push(this.makeDay(date, true, today, holidayMap));
     }
-    // Trailing days from next month
+    // Trailing days from next month (fill to 42 = 6 weeks × 7)
     const remaining = 42 - cells.length;
     for (let day = 1; day <= remaining; day++) {
       const date = new Date(year, month + 1, day);
       cells.push(this.makeDay(date, false, today, holidayMap));
     }
 
-    // Split into weeks
+    // Split into weeks of 7
     const weeks: HolidayDay[][] = [];
     for (let i = 0; i < cells.length; i += 7) weeks.push(cells.slice(i, i + 7));
     this.calendarDays.set(weeks);
   }
 
   private makeDay(date: Date, isCurrentMonth: boolean, today: Date, map: Map<string, any>): HolidayDay {
-    const key = date.toISOString().split('T')[0];
+    // Build local date key (YYYY-MM-DD) — avoids UTC timezone shift from toISOString()
+    const y   = date.getFullYear();
+    const m   = String(date.getMonth() + 1).padStart(2, '0');
+    const dd  = String(date.getDate()).padStart(2, '0');
+    const key = `${y}-${m}-${dd}`;
     return {
       date, day: date.getDate(), isCurrentMonth,
-      isToday: date.getTime() === today.getTime(),
+      isToday:   date.getTime() === today.getTime(),
       isWeekend: date.getDay() === 0 || date.getDay() === 6,
-      holiday: map.get(key) || null
+      holiday:   map.get(key) || null
     };
   }
 

@@ -355,8 +355,14 @@ export class DeviceAutoDetectService {
   /**
    * Fetch stored devices dynamically from backend API (Database-backed for company/branch)
    */
-  fetchDevicesFromApi(): void {
-    this.http.get<any>(`${environment.apiUrl}/devices`)
+  /**
+   * Fetch CONNECTED devices from backend API by default.
+   * Pass ?connected=true to get only physically active devices.
+   * Pass ?connected=false to load ALL statuses (for admin view).
+   */
+  fetchDevicesFromApi(connectedOnly: boolean = true): void {
+    const url = `${environment.apiUrl}/devices${connectedOnly ? '?connected=true' : ''}`;
+    this.http.get<any>(url)
       .pipe(catchError(() => of(null)))
       .subscribe(res => {
         if (res && res.success) {

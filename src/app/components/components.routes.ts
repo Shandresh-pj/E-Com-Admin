@@ -23,8 +23,10 @@ export const ComponentsRoutes: Routes = [
     loadComponent: () => import('./devices/devices').then(m => m.DevicesComponent),
     canActivate: [RoleGuard],
     data: {
-      title: 'Devices',
-      urls: [{ title: 'Devices', url: '/devices' }]
+      title: 'Hardware & Devices',
+      description: 'POS Hardware Auto-Detection Console — Thermal Printers, Barcode Scanners, Scales, NFC & Biometric',
+      requiredPermission: 'canConfigure',
+      urls: [{ title: 'Hardware', url: '/devices' }, { title: 'Devices Console', url: '/devices' }]
     }
   },
 

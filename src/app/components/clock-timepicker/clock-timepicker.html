@@ -1,78 +1,141 @@
-<div class="clock-dialog-container">
+<div class="ctk-root">
 
-  <!-- Header Title -->
-  <div class="text-center m-b-20">
-    <h3 class="dialog-title">{{ title }}</h3>
+  <!-- ── Header ───────────────────────────────────────────────────────── -->
+  <div class="ctk-header">
+    <span class="ctk-title">{{ title }}</span>
+    <div class="ctk-view-toggle">
+      <button class="ctk-vbtn" [class.active]="clockView === 'hours'" (click)="switchClockView('hours')">HH</button>
+      <span class="ctk-vdiv">:</span>
+      <button class="ctk-vbtn" [class.active]="clockView === 'minutes'" (click)="switchClockView('minutes')">MM</button>
+    </div>
   </div>
 
-  <!-- Time Range Header Display -->
-  <div class="time-header-cards d-flex justify-content-between align-items-center m-b-24">
-    
-    <div class="time-box cursor-pointer" [class.active]="activeMode === 'start'" (click)="setMode('start')">
-      <span class="time-label">Start Time</span>
-      <h4 class="time-value">{{ formattedStartTime12 }}</h4>
+  <!-- ── Time Cards ────────────────────────────────────────────────────── -->
+  <div class="ctk-time-row">
+    <div class="ctk-time-card" [class.active]="activeMode === 'start'" (click)="setMode('start')">
+      <span class="ctk-tc-label">Start</span>
+      <div class="ctk-tc-display">
+        <span class="ctk-tc-h" [class.editing]="activeMode==='start' && clockView==='hours'">{{ ('0'+startHour).slice(-2) }}</span>
+        <span class="ctk-tc-colon">:</span>
+        <span class="ctk-tc-m" [class.editing]="activeMode==='start' && clockView==='minutes'">{{ ('0'+startMinute).slice(-2) }}</span>
+        <span class="ctk-tc-ampm" (click)="$event.stopPropagation(); activeMode='start'; toggleAmPm()">{{ startAmPm }}</span>
+      </div>
     </div>
 
     @if (isRange) {
-      <div class="time-box cursor-pointer" [class.active]="activeMode === 'end'" (click)="setMode('end')">
-        <span class="time-label">End Time</span>
-        <h4 class="time-value">{{ formattedEndTime12 }}</h4>
+      <div class="ctk-time-arrow">
+        <svg width="20" height="10" viewBox="0 0 20 10"><path d="M0 5h18M13 1l5 4-5 4" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg>
+      </div>
+
+      <div class="ctk-time-card" [class.active]="activeMode === 'end'" (click)="setMode('end')">
+        <span class="ctk-tc-label">End</span>
+        <div class="ctk-tc-display">
+          <span class="ctk-tc-h" [class.editing]="activeMode==='end' && clockView==='hours'">{{ ('0'+endHour).slice(-2) }}</span>
+          <span class="ctk-tc-colon">:</span>
+          <span class="ctk-tc-m" [class.editing]="activeMode==='end' && clockView==='minutes'">{{ ('0'+endMinute).slice(-2) }}</span>
+          <span class="ctk-tc-ampm" (click)="$event.stopPropagation(); activeMode='end'; toggleAmPm()">{{ endAmPm }}</span>
+        </div>
       </div>
     }
-
   </div>
 
-  <!-- Circular Dial Clock Interface -->
-  <div class="clock-dial-wrapper">
-    <div class="clock-circle">
+  <!-- ── Clock Dial ─────────────────────────────────────────────────────── -->
+  <div class="ctk-dial-wrap">
+    <div class="ctk-dial">
 
-      <!-- SVG Ring for Radial Arc Highlight -->
-      <svg class="clock-svg" width="260" height="260" viewBox="0 0 260 260">
-        <!-- Outer Track Ring -->
-        <circle cx="130" cy="130" r="100" class="track-ring"></circle>
-        
-        <!-- Animated Active Arc -->
-        @if (isRange) {
-          <path [attr.d]="ArcPath" class="arc-ring"></path>
+      <!-- SVG layers -->
+      <svg class="ctk-dial-svg" viewBox="0 0 260 260">
+        <!-- Outer track -->
+        <circle cx="130" cy="130" r="100" class="ctk-track"/>
+
+        <!-- Range arc (hours view only) -->
+        @if (isRange && clockView === 'hours') {
+          <path [attr.d]="ArcPath" class="ctk-arc"/>
         }
+
+        <!-- Clock hand -->
+        <line x1="130" y1="130"
+              [attr.x2]="handX2"
+              [attr.y2]="handY2"
+              class="ctk-hand"
+        />
+        <!-- Hand pivot -->
+        <circle cx="130" cy="130" r="5" class="ctk-pivot"/>
+        <!-- Hand tip dot -->
+        <circle
+          [attr.cx]="tipX"
+          [attr.cy]="tipY"
+          r="14" class="ctk-tip"
+        />
       </svg>
 
-      <!-- Center AM / PM Toggle Pill -->
-      <div class="center-badge" (click)="toggleAmPm()">
-        <span class="ampm-text" [class.active]="currentAmPm === 'AM'" (click)="$event.stopPropagation(); toggleAmPm('AM')">AM</span>
-        <span class="ampm-divider">/</span>
-        <span class="ampm-text" [class.active]="currentAmPm === 'PM'" (click)="$event.stopPropagation(); toggleAmPm('PM')">PM</span>
+      <!-- Center badge: AM/PM toggle -->
+      <div class="ctk-center" (click)="toggleAmPm()">
+        <span class="ctk-ampm-opt" [class.on]="currentAmPm==='AM'" (click)="$event.stopPropagation(); toggleAmPm('AM')">AM</span>
+        <span class="ctk-ampm-sep">|</span>
+        <span class="ctk-ampm-opt" [class.on]="currentAmPm==='PM'" (click)="$event.stopPropagation(); toggleAmPm('PM')">PM</span>
       </div>
 
-      <!-- Clock Hour Markers (12, 1, 2, 3, ..., 11) -->
-      @for (h of hoursList; track h) {
-        <div 
-          class="hour-node" 
-          [ngStyle]="getHourStyle(h)"
-          [class.selected]="h === currentHour"
-          [class.start-node]="isRange && h === startHour"
-          [class.end-node]="isRange && h === endHour"
-          (click)="selectHour(h)"
-        >
-          <span class="node-num">{{ h }}</span>
-        </div>
+      <!-- Hour nodes -->
+      @if (clockView === 'hours') {
+        @for (h of hoursList; track h) {
+          <div class="ctk-node ctk-node--hour"
+               [ngStyle]="getHourStyle(h)"
+               [class.selected]="h === currentHour"
+               [class.start-sel]="isRange && h === startHour"
+               [class.end-sel]="isRange && h === endHour && activeMode==='end'"
+               (click)="selectHour(h)">
+            {{ h }}
+          </div>
+        }
+      }
+
+      <!-- Minute nodes (every 5 min labelled, rest as ticks) -->
+      @if (clockView === 'minutes') {
+        @for (m of minuteMarkers; track m) {
+          <div class="ctk-node ctk-node--min"
+               [ngStyle]="getMinuteStyle(m)"
+               [class.selected]="m === currentMinute"
+               (click)="selectMinute(m)">
+            {{ m === 0 ? '00' : m }}
+          </div>
+        }
+        <!-- Fine-grain ticks for all 60 minutes -->
+        @for (m of minuteTicks; track m) {
+          @if (m % 5 !== 0) {
+            <div class="ctk-tick"
+                 [ngStyle]="getMinuteStyle(m)"
+                 [class.tick-sel]="m === currentMinute"
+                 (click)="selectMinute(m)">
+            </div>
+          }
+        }
       }
 
     </div>
   </div>
 
-  <!-- Duration Badge Footer -->
+  <!-- ── Duration badge ─────────────────────────────────────────────────── -->
   @if (isRange) {
-    <div class="text-center m-t-20 m-b-24">
-      <h2 class="duration-value m-b-2">{{ durationText }}</h2>
-      <p class="duration-label text-muted m-b-0">Calculated Shift Duration</p>
+    <div class="ctk-duration">
+      <span class="ctk-dur-num">{{ durationText }}</span>
+      <span class="ctk-dur-lbl">Duration</span>
     </div>
   }
 
-  <!-- Modal Action Buttons -->
-  <div class="dialog-actions d-flex justify-content-between gap-16 m-t-16">
-    <button mat-flat-button class="btn-cancel w-100" (click)="close()">Cancel</button>
-    <button mat-flat-button class="btn-done w-100" (click)="confirm()">Done</button>
+  <!-- ── Quick minute presets (only in minute mode) ──────────────────────── -->
+  @if (clockView === 'minutes') {
+    <div class="ctk-min-presets">
+      @for (v of [0, 15, 30, 45]; track v) {
+        <button class="ctk-preset" [class.active]="currentMinute === v" (click)="selectMinute(v)">:{{ v === 0 ? '00' : v }}</button>
+      }
+    </div>
+  }
+
+  <!-- ── Actions ────────────────────────────────────────────────────────── -->
+  <div class="ctk-actions">
+    <button class="ctk-btn ctk-btn--cancel" (click)="close()">Cancel</button>
+    <button class="ctk-btn ctk-btn--confirm" (click)="confirm()">Confirm</button>
   </div>
 
 </div>

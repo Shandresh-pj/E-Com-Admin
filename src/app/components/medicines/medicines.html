@@ -31,6 +31,19 @@
     </div>
   </header>
 
+  <!-- Page Tabs: Medicine Catalog | Stock Requisitions -->
+  <div class="hc-page-tabs">
+    <button class="hc-page-tab hc-page-tab--active">
+      <i-tabler name="pill" style="width:16px;height:16px;"></i-tabler>
+      Medicine Catalog
+    </button>
+    <a class="hc-page-tab" routerLink="/stock-approvals">
+      <i-tabler name="package" style="width:16px;height:16px;"></i-tabler>
+      Stock Requisitions
+      <span class="hc-page-tab__badge">↗</span>
+    </a>
+  </div>
+
   <!-- Stat Chips Row (5 KPI Orbs) -->
   <div class="psh-chips">
     <div class="psh-chip psh-chip--violet" (click)="selectStockFilter('')" style="cursor:pointer;">
@@ -343,16 +356,71 @@
               </div>
 
               <div class="col-md-4 m-b-16">
-                <label class="hc-field-label">Unit of Measure <span class="req">*</span></label>
+                <label class="hc-field-label">Unit of Measure (UoM) <span class="req">*</span></label>
                 <mat-form-field appearance="outline" class="w-100">
-                  <input matInput formControlName="unit" placeholder="strip, bottle, tablet...">
+                  <mat-select formControlName="unit" placeholder="Select unit">
+                    @for (u of unitOfMeasureOptions; track u) {
+                      <mat-option [value]="u">{{ u }}</mat-option>
+                    }
+                  </mat-select>
+                  @if (form.get('unit')?.invalid && form.get('unit')?.touched) {
+                    <mat-error>Unit is required</mat-error>
+                  }
                 </mat-form-field>
               </div>
 
               <div class="col-md-4 m-b-16">
-                <label class="hc-field-label">Manufacturer / Pharma Company</label>
+                <label class="hc-field-label">Manufacturer / Pharma Company <span class="req">*</span></label>
                 <mat-form-field appearance="outline" class="w-100">
                   <input matInput formControlName="manufacturer" placeholder="Pharma Brand Name">
+                  @if (form.get('manufacturer')?.invalid && form.get('manufacturer')?.touched) {
+                    <mat-error>Manufacturer is required</mat-error>
+                  }
+                </mat-form-field>
+              </div>
+
+              <div class="col-md-4 m-b-16">
+                <label class="hc-field-label">Batch Number <span class="req">*</span></label>
+                <mat-form-field appearance="outline" class="w-100">
+                  <input matInput formControlName="batch_no" placeholder="e.g. BT-2025-001">
+                  @if (form.get('batch_no')?.invalid && form.get('batch_no')?.touched) {
+                    <mat-error>Batch number is required</mat-error>
+                  }
+                </mat-form-field>
+              </div>
+
+              <div class="col-md-4 m-b-16">
+                <label class="hc-field-label">Manufacture Date <span class="req">*</span></label>
+                <mat-form-field appearance="outline" class="w-100">
+                  <input matInput [matDatepicker]="mfgPicker" formControlName="manufacture_date" placeholder="DD-MM-YYYY">
+                  <mat-datepicker-toggle matIconSuffix [for]="mfgPicker"></mat-datepicker-toggle>
+                  <mat-datepicker #mfgPicker></mat-datepicker>
+                  @if (form.get('manufacture_date')?.invalid && form.get('manufacture_date')?.touched) {
+                    <mat-error>Manufacture date is required</mat-error>
+                  }
+                </mat-form-field>
+              </div>
+
+              <div class="col-md-4 m-b-16">
+                <label class="hc-field-label">Expiry Date <span class="req">*</span></label>
+                <mat-form-field appearance="outline" class="w-100">
+                  <input matInput [matDatepicker]="expiryPicker" formControlName="expiry_date" placeholder="DD-MM-YYYY">
+                  <mat-datepicker-toggle matIconSuffix [for]="expiryPicker"></mat-datepicker-toggle>
+                  <mat-datepicker #expiryPicker></mat-datepicker>
+                  @if (form.get('expiry_date')?.invalid && form.get('expiry_date')?.touched) {
+                    <mat-error>Expiry date is required</mat-error>
+                  }
+                </mat-form-field>
+              </div>
+
+              <div class="col-md-4 m-b-16">
+                <label class="hc-field-label">Prescription Control</label>
+                <mat-form-field appearance="outline" class="w-100">
+                  <mat-select formControlName="prescription_control" placeholder="Select control type">
+                    @for (opt of prescriptionControlOptions; track opt) {
+                      <mat-option [value]="opt">{{ opt }}</mat-option>
+                    }
+                  </mat-select>
                 </mat-form-field>
               </div>
             </div>

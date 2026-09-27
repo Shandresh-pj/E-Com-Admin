@@ -1,5 +1,5 @@
 <!-- ╔══════════════════════════════════════════════════════════════════════════╗ -->
-<!-- ║  ENTERPRISE HOME DASHBOARD — Next-Gen Liquid Glass Experience           ║ -->
+<!-- ║  ENTERPRISE ROLE-BASED DASHBOARD v7.0 — Adaptive · Glassmorphic · Live ║ -->
 <!-- ╚══════════════════════════════════════════════════════════════════════════╝ -->
 <div class="dashboard-container p-t-16">
 
@@ -10,33 +10,51 @@
     <div class="dash-orb dash-orb-cyan"></div>
   </div>
 
-  <!-- ── WELCOME HERO BANNER ── -->
+  <!-- ═══════════════════════════════════════════════════════════════════════ -->
+  <!-- WELCOME HERO BANNER — Role-Adaptive Gradient Identity                  -->
+  <!-- ═══════════════════════════════════════════════════════════════════════ -->
   <div class="row m-b-24 animate-fade-in-up">
     <div class="col-12">
-      <div class="welcome-banner">
+      <div class="welcome-banner" [ngClass]="roleBannerClass">
         <div class="banner-shimmer"></div>
+
+        <!-- Decorative orbits -->
+        <div class="glass-bg-circle circle-1"></div>
+        <div class="glass-bg-circle circle-2"></div>
+
         <div class="banner-inner">
 
-          <!-- LEFT: role badge + title + subtitle + status -->
+          <!-- LEFT: Avatar + Greeting -->
           <div class="banner-left">
-            <div class="welcome-badge-strip">
-              <span class="badge-role-pill">
-                <mat-icon class="badge-mini-icon">verified_user</mat-icon>
-                {{ displayRole }}
-              </span>
-              <span class="live-clock-chip">
-                <span class="beacon-dot"></span> LIVE
-              </span>
+            <div class="banner-avatar-row">
+              <!-- Animated avatar bubble -->
+              <div class="user-avatar-bubble">
+                <span class="avatar-initials">{{ userInitials }}</span>
+                <span class="avatar-ring"></span>
+              </div>
+
+              <div class="avatar-meta">
+                <div class="welcome-badge-strip">
+                  <span class="badge-role-pill">
+                    <mat-icon class="badge-mini-icon">{{ roleIconName }}</mat-icon>
+                    {{ displayRole }}
+                  </span>
+                  @if (isPreviewMode) {
+                    <span class="preview-mode-badge animate-pulse">
+                      <mat-icon class="badge-mini-icon">visibility</mat-icon> PREVIEW MODE
+                    </span>
+                  }
+                  <span class="live-clock-chip">
+                    <span class="beacon-dot"></span> LIVE
+                  </span>
+                </div>
+                <h1 class="welcome-title">
+                  {{ greeting }} {{ greetingEmoji }}<br>
+                  <span class="text-gradient">{{ currentUser?.name || 'Enterprise Operator' }}</span>
+                </h1>
+                <p class="welcome-date">{{ currentDateStr }}</p>
+              </div>
             </div>
-
-            <h1 class="welcome-title">
-              Welcome back,<br>
-              <span class="text-gradient">{{ currentUser?.name || 'Enterprise Admin' }}</span>
-            </h1>
-
-            <p class="welcome-sub">
-              Real-time workspace — workforce intelligence, inventory &amp; branch operations.
-            </p>
 
             <div class="banner-status-row">
               <div class="status-pill status-pill--green">
@@ -44,28 +62,96 @@
                 All Systems Operational
               </div>
               <div class="status-pill status-pill--indigo">
-                <span>⚡</span> Real-time Sync
+                <mat-icon style="font-size:13px;width:13px;height:13px;line-height:1">bolt</mat-icon> Real-time Sync
               </div>
+              <div class="status-pill status-pill--context">
+                <mat-icon style="font-size:13px;width:13px;height:13px;line-height:1">apartment</mat-icon>
+                Company #{{ currentUser?.companyId || '1' }}
+              </div>
+              @if (isPreviewMode) {
+                <button class="reset-role-btn" (click)="resetRolePerspective()">
+                  <mat-icon style="font-size:13px;width:13px;height:13px;line-height:1">restart_alt</mat-icon>
+                  Reset to My Role
+                </button>
+              }
             </div>
           </div>
 
           <!-- RIGHT: Active Context card -->
           <div class="banner-right">
             <div class="scope-glass-card">
-              <div class="scope-icon-box">
-                <mat-icon>shield</mat-icon>
+              <div class="scope-icon-box" [ngClass]="'scope-' + roleBannerClass">
+                <mat-icon>{{ roleIconName }}</mat-icon>
                 <span class="scope-pulse"></span>
               </div>
               <div class="scope-details">
-                <span class="scope-lbl">ACTIVE CONTEXT</span>
-                <span class="scope-val">Company #{{ currentUser?.companyId || '1' }}</span>
+                <span class="scope-lbl">ACTIVE WORKSPACE</span>
+                <span class="scope-val">{{ displayRole }}</span>
+                <span class="scope-sub">{{ currentDateStr }}</span>
               </div>
             </div>
           </div>
 
         </div>
-        <div class="glass-bg-circle circle-1"></div>
-        <div class="glass-bg-circle circle-2"></div>
+
+        <!-- ── ROLE PERSPECTIVE SWITCHER CONSOLE (SUPER ADMIN ONLY) ── -->
+        @if (isActualSuperAdmin) {
+          <div class="role-switcher-console m-t-20">
+            
+            <div class="switcher-header">
+              <div class="switcher-title-group">
+                <div class="switcher-pulse-orb">
+                  <mat-icon class="switcher-icon">tune</mat-icon>
+                  <span class="orb-ring"></span>
+                </div>
+                <div>
+                  <h4 class="switcher-title">DASHBOARD PERSPECTIVE MATRIX</h4>
+                  <p class="switcher-subtitle">Simulate real-time workspace experience for any enterprise role</p>
+                </div>
+              </div>
+
+              <div class="switcher-status-badge">
+                <span class="matrix-dot"></span>
+                <span class="matrix-text">{{ availableRoles.length }} PERSPECTIVES READY</span>
+              </div>
+            </div>
+
+            <!-- Scrollable Premium Role Cards Rail -->
+            <div class="role-chips-scroll custom-scroll">
+              @for (roleOpt of availableRoles; track roleOpt.id; let i = $index) {
+                <button
+                  type="button"
+                  class="role-chip-card"
+                  [class.active]="activeRolePerspective === roleOpt.id"
+                  [ngClass]="'role-card--' + roleOpt.badgeColor"
+                  [style.animation-delay]="(i * 0.05) + 's'"
+                  (click)="setRolePerspective(roleOpt.id)">
+
+                  <div class="role-card-glow"></div>
+                  
+                  <div class="role-card-icon">
+                    <mat-icon>{{ roleOpt.icon }}</mat-icon>
+                  </div>
+
+                  <div class="role-card-meta">
+                    <span class="role-card-name">{{ roleOpt.name }}</span>
+                    @if (roleOpt.subtitle) {
+                      <span class="role-card-sub">{{ roleOpt.subtitle }}</span>
+                    }
+                  </div>
+
+                  @if (activeRolePerspective === roleOpt.id) {
+                    <div class="role-active-badge">
+                      <mat-icon class="active-check-icon">check</mat-icon>
+                    </div>
+                  }
+                </button>
+              }
+            </div>
+
+          </div>
+        }
+
       </div>
     </div>
   </div>
@@ -88,7 +174,7 @@
       <div class="col-12 col-lg-7 col-xl-8 animate-fade-in-up delay-1">
         <div class="liquid-kpi-grid kpi-grid-6 h-100">
 
-          <!-- 1. Company Size -->
+          <!-- 1. Total Staff -->
           <div class="glass-kpi-card glass-kpi-indigo" routerLink="/employees">
             <div class="kpi-card-shimmer"></div>
             <div class="kpi-content">
@@ -174,7 +260,7 @@
       </div>
     </div>
 
-    <!-- ── Smart Widgets: Live Audit Radar & Quick Launch ── -->
+    <!-- ── Smart Widgets: Live Audit Radar + Quick Launch ── -->
     <div class="row m-b-24">
 
       <!-- Live Audit Log -->
@@ -187,8 +273,8 @@
                   <mat-icon>radar</mat-icon>
                 </div>
                 <div>
-                  <mat-card-title class="m-b-0 f-w-800 f-s-15 text-dark">Live Audit Stream</mat-card-title>
-                  <p class="m-b-0 f-s-11 text-muted">Real-time system event telemetry</p>
+                  <mat-card-title class="m-b-0 f-w-800 f-s-15 text-dark">Live Audit Telemetry</mat-card-title>
+                  <p class="m-b-0 f-s-11 text-muted">Real-time system security logs</p>
                 </div>
               </div>
               <span class="live-ping-badge"><span class="ping-dot"></span> LIVE</span>
@@ -223,16 +309,16 @@
                 }
               </div>
             } @else {
-              <div class="h-100 d-flex flex-column align-items-center justify-content-center p-24 text-center" style="min-height:180px">
-                <mat-icon class="text-muted icon-32 mb-2 opacity-50">data_usage</mat-icon>
-                <p class="text-muted f-s-12 m-b-0 f-w-600">Awaiting real-time telemetry events...</p>
+              <div class="empty-state-box">
+                <mat-icon class="empty-icon">data_usage</mat-icon>
+                <p class="empty-text">Awaiting real-time telemetry events...</p>
               </div>
             }
           </mat-card-content>
         </mat-card>
       </div>
 
-      <!-- Quick Launch Modules -->
+      <!-- Permission-Gated Quick Launch Panel — Admin -->
       <div class="col-12 col-lg-6 animate-slide-in-right delay-5">
         <mat-card class="smart-widget-card h-100 d-flex flex-column">
           <mat-card-header class="widget-header">
@@ -241,99 +327,27 @@
                 <mat-icon>flash_on</mat-icon>
               </div>
               <div>
-                <mat-card-title class="m-b-0 f-w-800 f-s-15 text-dark">Quick Launch Center</mat-card-title>
-                <p class="m-b-0 f-s-11 text-muted">Direct access to core enterprise modules</p>
+                <mat-card-title class="m-b-0 f-w-800 f-s-15 text-dark">Executive Quick Launch</mat-card-title>
+                <p class="m-b-0 f-s-11 text-muted">Direct access to your permitted modules ({{ quickLaunchItems.length }} items)</p>
               </div>
             </div>
           </mat-card-header>
           <mat-card-content class="p-16 flex-grow-1">
-            <div class="smart-nav-grid">
-
-              @if (perm.hasPagePermission('/workforce')) {
-                <a routerLink="/workforce" class="smart-nav-pill animate-zoom-in delay-1">
-                  <div class="pill-icon q-violet"><mat-icon>manage_accounts</mat-icon></div>
-                  <span class="pill-text">Workforce</span>
-                </a>
-              }
-
-              @if (perm.hasPagePermission('/attendance')) {
-                <a routerLink="/attendance" class="smart-nav-pill animate-zoom-in delay-2">
-                  <div class="pill-icon q-indigo"><mat-icon>history</mat-icon></div>
-                  <span class="pill-text">Attendance</span>
-                </a>
-              }
-
-              @if (perm.hasPagePermission('/employees')) {
-                <a routerLink="/employees" class="smart-nav-pill animate-zoom-in delay-3">
-                  <div class="pill-icon q-emerald"><mat-icon>badge</mat-icon></div>
-                  <span class="pill-text">Employees</span>
-                </a>
-              }
-
-              @if (perm.hasPagePermission('/payroll')) {
-                <a routerLink="/payroll" class="smart-nav-pill animate-zoom-in delay-4">
-                  <div class="pill-icon q-amber"><mat-icon>payments</mat-icon></div>
-                  <span class="pill-text">Payrolls</span>
-                </a>
-              }
-
-              @if (perm.hasPagePermission('/pos-billing')) {
-                <a routerLink="/pos-billing" class="smart-nav-pill animate-zoom-in delay-5">
-                  <div class="pill-icon q-cyan"><mat-icon>point_of_sale</mat-icon></div>
-                  <span class="pill-text">POS Billing</span>
-                </a>
-              }
-
-              @if (perm.hasPagePermission('/product')) {
-                <a routerLink="/product" class="smart-nav-pill animate-zoom-in delay-6">
-                  <div class="pill-icon q-purple"><mat-icon>inventory_2</mat-icon></div>
-                  <span class="pill-text">Products</span>
-                </a>
-              }
-
-              @if (perm.hasPagePermission('/orders')) {
-                <a routerLink="/orders" class="smart-nav-pill animate-zoom-in delay-7">
-                  <div class="pill-icon q-rose"><mat-icon>shopping_cart</mat-icon></div>
-                  <span class="pill-text">Orders</span>
-                </a>
-              }
-
-              @if (perm.hasPagePermission('/branch')) {
-                <a routerLink="/branch" class="smart-nav-pill animate-zoom-in delay-8">
-                  <div class="pill-icon q-sky"><mat-icon>storefront</mat-icon></div>
-                  <span class="pill-text">Branches</span>
-                </a>
-              }
-
-              @if (perm.hasPagePermission('/subscription-plans')) {
-                <a routerLink="/subscription-plans" class="smart-nav-pill animate-zoom-in delay-8">
-                  <div class="pill-icon q-gold"><mat-icon>diamond</mat-icon></div>
-                  <span class="pill-text">Plans</span>
-                </a>
-              }
-
-              @if (perm.hasPagePermission('/devices')) {
-                <a routerLink="/devices" class="smart-nav-pill animate-zoom-in delay-8">
-                  <div class="pill-icon q-indigo"><mat-icon>cpu</mat-icon></div>
-                  <span class="pill-text">Devices</span>
-                </a>
-              }
-
-              @if (perm.hasPagePermission('/profile')) {
-                <a routerLink="/profile" class="smart-nav-pill animate-zoom-in delay-8">
-                  <div class="pill-icon q-emerald"><mat-icon>person</mat-icon></div>
-                  <span class="pill-text">Profile</span>
-                </a>
-              }
-
-              @if (perm.hasPagePermission('/change-password')) {
-                <a routerLink="/change-password" class="smart-nav-pill animate-zoom-in delay-8">
-                  <div class="pill-icon q-rose"><mat-icon>lock</mat-icon></div>
-                  <span class="pill-text">Security</span>
-                </a>
-              }
-
-            </div>
+            @if (quickLaunchItems.length > 0) {
+              <div class="smart-nav-grid">
+                @for (item of quickLaunchItems; track item.route; let i = $index) {
+                  <a [routerLink]="item.route" class="smart-nav-pill" [style.animation-delay]="(i * 0.04) + 's'">
+                    <div class="pill-icon" [ngClass]="item.colorClass"><mat-icon>{{ item.icon }}</mat-icon></div>
+                    <span class="pill-text">{{ item.label }}</span>
+                  </a>
+                }
+              </div>
+            } @else {
+              <div class="empty-state-box">
+                <mat-icon class="empty-icon">lock</mat-icon>
+                <p class="empty-text">No accessible modules configured for your role.</p>
+              </div>
+            }
           </mat-card-content>
         </mat-card>
       </div>
@@ -347,53 +361,70 @@
     </div>
   }
 
+
   <!-- ════════════════════════════════════════════════════════════════════════ -->
   <!-- 2. BRANCH MANAGER DASHBOARD PANEL                                       -->
   <!-- ════════════════════════════════════════════════════════════════════════ -->
   @if (isBranchDashboard) {
-    <div class="liquid-kpi-grid m-b-24">
-      <div class="glass-kpi-card glass-kpi-indigo animate-fade-in-up delay-1">
+    <!-- Branch KPI Strip -->
+    <div class="liquid-kpi-grid kpi-grid-4 m-b-24">
+      <div class="glass-kpi-card glass-kpi-sky animate-fade-in-up delay-1" routerLink="/employees">
+        <div class="kpi-card-shimmer"></div>
         <div class="kpi-content">
           <p class="kpi-label">BRANCH STAFF</p>
           <h3 class="kpi-value">{{ totalEmployees }} <span class="kpi-unit">Staff</span></h3>
         </div>
-        <div class="kpi-icon-3d icon-indigo"><mat-icon>badge</mat-icon></div>
+        <div class="kpi-icon-3d icon-sky"><mat-icon>badge</mat-icon></div>
       </div>
-      <div class="glass-kpi-card glass-kpi-emerald animate-fade-in-up delay-2">
+      <div class="glass-kpi-card glass-kpi-emerald animate-fade-in-up delay-2" routerLink="/attendance">
+        <div class="kpi-card-shimmer"></div>
         <div class="kpi-content">
           <p class="kpi-label">PRESENT TODAY</p>
           <h3 class="kpi-value">{{ presentTodayCount }} <span class="kpi-unit">Active</span></h3>
         </div>
         <div class="kpi-icon-3d icon-emerald"><mat-icon>done_all</mat-icon></div>
       </div>
-      <div class="glass-kpi-card glass-kpi-amber animate-fade-in-up delay-3">
+      <div class="glass-kpi-card glass-kpi-amber animate-fade-in-up delay-3" routerLink="/leave">
+        <div class="kpi-card-shimmer"></div>
         <div class="kpi-content">
           <p class="kpi-label">LEAVE QUEUE</p>
           <h3 class="kpi-value">{{ pendingLeaves.length }} <span class="kpi-unit">Pending</span></h3>
         </div>
         <div class="kpi-icon-3d icon-amber"><mat-icon>time_to_leave</mat-icon></div>
       </div>
-      <div class="glass-kpi-card glass-kpi-sky animate-fade-in-up delay-4">
+      <div class="glass-kpi-card glass-kpi-sky animate-fade-in-up delay-4" routerLink="/branch">
+        <div class="kpi-card-shimmer"></div>
         <div class="kpi-content">
           <p class="kpi-label">LOCATION SCOPE</p>
-          <h3 class="kpi-value text-truncate">{{ branchName || 'Loading...' }}</h3>
+          <h3 class="kpi-value text-truncate" style="font-size:clamp(13px,3vw,18px)">{{ branchName || 'Central Branch' }}</h3>
         </div>
         <div class="kpi-icon-3d icon-sky"><mat-icon>store</mat-icon></div>
       </div>
     </div>
 
-    <!-- Manager: Leave approvals & quick controls -->
+    <!-- Branch: Leave approvals + Quick Launch -->
     <div class="row m-b-24 animate-fade-in-up delay-5">
 
       <!-- Leave Approvals Table -->
-      <div class="col-12 col-lg-8">
-        <mat-card class="cardWithShadow theme-card h-100">
-          <mat-card-header class="p-x-20 p-y-16">
-            <mat-card-title class="m-b-0 f-w-800 f-s-15">Pending Leave Approvals Queue</mat-card-title>
+      <div class="col-12 col-lg-8 m-b-16-mobile">
+        <mat-card class="smart-widget-card h-100">
+          <mat-card-header class="widget-header">
+            <div class="d-flex align-items-center justify-content-between w-100">
+              <div class="d-flex align-items-center gap-10">
+                <div class="widget-icon-bg bg-sky">
+                  <mat-icon>event_busy</mat-icon>
+                </div>
+                <div>
+                  <mat-card-title class="m-b-0 f-w-800 f-s-15 text-dark">Pending Branch Leave Approvals</mat-card-title>
+                  <p class="m-b-0 f-s-11 text-muted">{{ pendingLeaves.length }} requests awaiting your review</p>
+                </div>
+              </div>
+              <a routerLink="/leave" class="view-all-link">View All</a>
+            </div>
           </mat-card-header>
           <mat-card-content class="p-20 b-t-1">
             @if (pendingLeaves.length > 0) {
-              <div class="leave-table-wrapper">
+              <div class="leave-table-wrapper custom-scroll">
                 <table class="table align-middle m-b-0">
                   <thead>
                     <tr>
@@ -408,147 +439,629 @@
                   <tbody>
                     @for(l of pendingLeaves; track l.id) {
                       <tr>
-                        <td class="f-s-12 f-w-700">#{{ l.employee_id }}</td>
+                        <td class="f-s-12 f-w-700 text-dark">{{ l.employee_id }}</td>
                         <td><span class="badge-role-pill f-s-11">{{ l.leave_type }}</span></td>
-                        <td class="f-s-12">{{ l.from_date }}</td>
-                        <td class="f-s-12">{{ l.to_date }}</td>
+                        <td class="f-s-12 text-muted">{{ l.from_date }}</td>
+                        <td class="f-s-12 text-muted">{{ l.to_date }}</td>
                         <td class="f-w-800 f-s-12 text-primary">{{ l.total_days }}d</td>
-                        <td class="f-s-12 text-muted text-truncate" style="max-width:120px">{{ l.reason }}</td>
+                        <td class="f-s-12 text-muted text-truncate" style="max-width:140px">{{ l.reason }}</td>
                       </tr>
                     }
                   </tbody>
                 </table>
               </div>
             } @else {
-              <div class="p-24 text-center">
-                <mat-icon class="text-success icon-40">done_all</mat-icon>
-                <p class="text-muted m-t-8 m-b-0 f-s-13 f-w-600">All pending leave requests resolved.</p>
+              <div class="empty-state-box">
+                <mat-icon class="empty-icon text-success">done_all</mat-icon>
+                <p class="empty-text">All pending leave requests resolved!</p>
               </div>
             }
           </mat-card-content>
         </mat-card>
       </div>
 
-      <!-- Quick Controls for Manager -->
+      <!-- Branch Permission-Gated Quick Launch -->
       <div class="col-12 col-lg-4">
-        <mat-card class="cardWithShadow theme-card h-100">
-          <mat-card-header class="p-x-20 p-y-16">
-            <mat-card-title class="m-b-0 f-w-800 f-s-15">Branch Quick Terminal</mat-card-title>
-          </mat-card-header>
-          <mat-card-content class="p-20 b-t-1">
-            <div class="branch-controls d-flex flex-column gap-12">
-              <a routerLink="/attendance" mat-flat-button color="primary" class="text-center py-10 rounded-14">
-                <mat-icon class="m-r-8">schedule</mat-icon> Attendance Terminal
-              </a>
-              <a routerLink="/branch-stocks" mat-flat-button color="accent" class="text-center py-10 rounded-14">
-                <mat-icon class="m-r-8">inventory</mat-icon> Manage Branch Stock
-              </a>
-              <a routerLink="/leave" mat-stroked-button class="text-center py-10 rounded-14">
-                <mat-icon class="m-r-8">time_to_leave</mat-icon> Go To Leave Center
-              </a>
+        <mat-card class="smart-widget-card h-100 d-flex flex-column">
+          <mat-card-header class="widget-header">
+            <div class="d-flex align-items-center gap-10">
+              <div class="widget-icon-bg bg-sky">
+                <mat-icon>flash_on</mat-icon>
+              </div>
+              <div>
+                <mat-card-title class="m-b-0 f-w-800 f-s-15 text-dark">Branch Quick Terminal</mat-card-title>
+                <p class="m-b-0 f-s-11 text-muted">{{ quickLaunchItems.length }} accessible modules</p>
+              </div>
             </div>
+          </mat-card-header>
+          <mat-card-content class="p-16 flex-grow-1">
+            @if (quickLaunchItems.length > 0) {
+              <div class="smart-nav-grid smart-nav-grid--compact">
+                @for (item of quickLaunchItems; track item.route; let i = $index) {
+                  <a [routerLink]="item.route" class="smart-nav-pill" [style.animation-delay]="(i * 0.05) + 's'">
+                    <div class="pill-icon" [ngClass]="item.colorClass"><mat-icon>{{ item.icon }}</mat-icon></div>
+                    <span class="pill-text">{{ item.label }}</span>
+                  </a>
+                }
+              </div>
+            } @else {
+              <div class="empty-state-box">
+                <mat-icon class="empty-icon">lock</mat-icon>
+                <p class="empty-text">No accessible modules.</p>
+              </div>
+            }
           </mat-card-content>
         </mat-card>
       </div>
     </div>
   }
 
-  <!-- ════════════════════════════════════════════════════════════════════════ -->
-  <!-- 3. EMPLOYEE PERSONAL DASHBOARD PANEL                                    -->
-  <!-- ════════════════════════════════════════════════════════════════════════ -->
-  @if (isEmployeeDashboard) {
-    <div class="row m-b-24">
 
-      <!-- Active Shift Box -->
-      <div class="col-12 col-sm-6 animate-fade-in-up delay-1">
-        <mat-card class="cardWithShadow theme-card h-100">
-          <mat-card-header class="p-x-20 p-y-16">
-            <mat-card-title class="m-b-0 f-w-800 f-s-15">Your Active Duty Shift</mat-card-title>
-          </mat-card-header>
-          <mat-card-content class="p-20 b-t-1">
-            @if (employeeShift) {
-              <div class="d-flex flex-column gap-12">
-                <div class="d-flex justify-content-between align-items-start gap-8">
-                  <span class="text-muted f-s-12 flex-shrink-0">Shift Plan:</span>
-                  <span class="f-w-800 text-primary f-s-13 text-end">{{ employeeShift.name }} ({{ employeeShift.type }})</span>
+  <!-- ════════════════════════════════════════════════════════════════════════ -->
+  <!-- 3. DOCTOR / CLINICAL PRACTITIONER PANEL                                  -->
+  <!-- ════════════════════════════════════════════════════════════════════════ -->
+  @if (isDoctorDashboard) {
+    <!-- Clinical KPI Strip -->
+    <div class="liquid-kpi-grid kpi-grid-4 m-b-24">
+      <div class="glass-kpi-card glass-kpi-emerald animate-fade-in-up delay-1" routerLink="/appointments">
+        <div class="kpi-card-shimmer"></div>
+        <div class="kpi-content">
+          <p class="kpi-label">TODAY'S APPOINTMENTS</p>
+          <h3 class="kpi-value">{{ todayAppointmentsCount }} <span class="kpi-unit">Patients</span></h3>
+        </div>
+        <div class="kpi-icon-3d icon-emerald"><mat-icon>calendar_today</mat-icon></div>
+      </div>
+      <div class="glass-kpi-card glass-kpi-amber animate-fade-in-up delay-2" routerLink="/appointments">
+        <div class="kpi-card-shimmer"></div>
+        <div class="kpi-content">
+          <p class="kpi-label">PATIENTS WAITING</p>
+          <h3 class="kpi-value">{{ waitingPatientsCount }} <span class="kpi-unit">In Queue</span></h3>
+        </div>
+        <div class="kpi-icon-3d icon-amber"><mat-icon>hourglass_top</mat-icon></div>
+      </div>
+      <div class="glass-kpi-card glass-kpi-indigo animate-fade-in-up delay-3" routerLink="/prescriptions">
+        <div class="kpi-card-shimmer"></div>
+        <div class="kpi-content">
+          <p class="kpi-label">PRESCRIPTIONS ISSUED</p>
+          <h3 class="kpi-value">{{ pendingPrescriptionsCount }} <span class="kpi-unit">Rx Today</span></h3>
+        </div>
+        <div class="kpi-icon-3d icon-indigo"><mat-icon>note_add</mat-icon></div>
+      </div>
+      <div class="glass-kpi-card glass-kpi-purple animate-fade-in-up delay-4" routerLink="/consultations">
+        <div class="kpi-card-shimmer"></div>
+        <div class="kpi-content">
+          <p class="kpi-label">COMPLETED TODAY</p>
+          <h3 class="kpi-value">{{ completedConsultationsCount }} <span class="kpi-unit">Done</span></h3>
+        </div>
+        <div class="kpi-icon-3d icon-purple"><mat-icon>check_circle_outline</mat-icon></div>
+      </div>
+    </div>
+
+    <!-- Doctor: Appointments Schedule + Clinical Quick Launch -->
+    <div class="row m-b-24 animate-fade-in-up delay-5">
+      <div class="col-12 col-lg-8 m-b-16-mobile">
+        <mat-card class="smart-widget-card h-100">
+          <mat-card-header class="widget-header">
+            <div class="d-flex align-items-center justify-content-between w-100">
+              <div class="d-flex align-items-center gap-10">
+                <div class="widget-icon-bg bg-emerald">
+                  <mat-icon>event_note</mat-icon>
                 </div>
-                <div class="d-flex justify-content-between align-items-start gap-8">
-                  <span class="text-muted f-s-12 flex-shrink-0">Timings:</span>
-                  <span class="f-w-800 text-dark f-s-13 text-end">{{ employeeShift.start_time }} – {{ employeeShift.end_time }}</span>
-                </div>
-                <div class="d-flex justify-content-between align-items-center gap-8">
-                  <span class="text-muted f-s-12 flex-shrink-0">Grace Period:</span>
-                  <span class="badge-role-pill f-s-12">{{ employeeShift.grace_period_minutes }} min</span>
+                <div>
+                  <mat-card-title class="m-b-0 f-w-800 f-s-15 text-dark">Today's Patient Schedule</mat-card-title>
+                  <p class="m-b-0 f-s-11 text-muted">{{ todayAppointmentsCount }} consultations on queue</p>
                 </div>
               </div>
+              <a routerLink="/appointments" class="view-all-link">View All</a>
+            </div>
+          </mat-card-header>
+          <mat-card-content class="p-20 b-t-1">
+            @if (doctorAppointmentsList.length > 0) {
+              <div class="leave-table-wrapper custom-scroll">
+                <table class="table align-middle m-b-0">
+                  <thead>
+                    <tr>
+                      <th class="f-w-700 f-s-12 text-muted">Token</th>
+                      <th class="f-w-700 f-s-12 text-muted">Patient Name</th>
+                      <th class="f-w-700 f-s-12 text-muted">Time</th>
+                      <th class="f-w-700 f-s-12 text-muted">Type</th>
+                      <th class="f-w-700 f-s-12 text-muted">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for(apt of doctorAppointmentsList; track apt.id) {
+                      <tr>
+                        <td class="f-s-12 f-w-800 text-primary">{{ apt.token }}</td>
+                        <td class="f-s-13 f-w-700 text-dark">
+                          {{ apt.patientName }} <span class="f-s-11 text-muted">({{ apt.gender }}, {{ apt.age }}y)</span>
+                        </td>
+                        <td class="f-s-12 text-muted f-w-600">{{ apt.appointmentTime }}</td>
+                        <td class="f-s-12 text-dark">{{ apt.type }}</td>
+                        <td>
+                          <span class="apt-status-badge" [ngClass]="{
+                            'status--inprogress': apt.status === 'IN_PROGRESS',
+                            'status--waiting':    apt.status === 'WAITING',
+                            'status--confirmed':  apt.status === 'CONFIRMED'
+                          }">{{ apt.status }}</span>
+                        </td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
             } @else {
-              <div class="p-16 text-center">
-                <mat-icon class="text-muted">alarm_off</mat-icon>
-                <p class="text-muted m-t-8 m-b-0 f-s-12 f-w-600">No active shift assigned today.</p>
+              <div class="empty-state-box">
+                <mat-icon class="empty-icon">medical_services</mat-icon>
+                <p class="empty-text">No patient appointments scheduled for today.</p>
               </div>
             }
           </mat-card-content>
         </mat-card>
       </div>
 
-      <!-- Today's Session Status -->
-      <div class="col-12 col-sm-6 animate-fade-in-up delay-2">
-        <mat-card class="cardWithShadow theme-card h-100">
-          <mat-card-header class="p-x-20 p-y-16">
-            <mat-card-title class="m-b-0 f-w-800 f-s-15">Today's Session State</mat-card-title>
+      <!-- Clinical Quick Launch (permission-gated) -->
+      <div class="col-12 col-lg-4">
+        <mat-card class="smart-widget-card h-100 d-flex flex-column">
+          <mat-card-header class="widget-header">
+            <div class="d-flex align-items-center gap-10">
+              <div class="widget-icon-bg bg-emerald">
+                <mat-icon>flash_on</mat-icon>
+              </div>
+              <div>
+                <mat-card-title class="m-b-0 f-w-800 f-s-15 text-dark">Clinical Quick Launch</mat-card-title>
+                <p class="m-b-0 f-s-11 text-muted">{{ quickLaunchItems.length }} accessible clinical modules</p>
+              </div>
+            </div>
           </mat-card-header>
-          <mat-card-content class="p-20 b-t-1">
-            <div class="d-flex flex-column flex-sm-row align-items-start align-items-sm-center justify-content-between gap-12">
-              <div class="flex-grow-1 min-w-0">
-                <p class="f-s-11 text-muted m-b-2 f-w-800">CURRENT STATUS</p>
-                <h3 class="f-w-900 f-s-18 m-b-0 text-truncate" [ngClass]="attendanceToday ? 'text-success' : 'text-danger'">
-                  {{ attendanceToday ? 'PRESENT (' + attendanceToday.status + ')' : 'NOT CHECKED IN' }}
-                </h3>
-                @if (attendanceToday) {
-                  <p class="f-s-12 text-muted m-b-0 m-t-4 f-w-600">Check-in: {{ attendanceToday.check_in }}</p>
+          <mat-card-content class="p-16 flex-grow-1">
+            @if (quickLaunchItems.length > 0) {
+              <div class="smart-nav-grid smart-nav-grid--compact">
+                @for (item of quickLaunchItems; track item.route; let i = $index) {
+                  <a [routerLink]="item.route" class="smart-nav-pill" [style.animation-delay]="(i * 0.05) + 's'">
+                    <div class="pill-icon" [ngClass]="item.colorClass"><mat-icon>{{ item.icon }}</mat-icon></div>
+                    <span class="pill-text">{{ item.label }}</span>
+                  </a>
                 }
               </div>
-              <a routerLink="/attendance" mat-flat-button color="primary" class="flex-shrink-0 rounded-12">
-                Terminal
-              </a>
-            </div>
+            } @else {
+              <div class="empty-state-box">
+                <mat-icon class="empty-icon">lock</mat-icon>
+                <p class="empty-text">No accessible clinical modules.</p>
+              </div>
+            }
           </mat-card-content>
         </mat-card>
       </div>
     </div>
+  }
 
-    <!-- Employee Attendance Logs -->
-    <div class="row m-b-24 animate-fade-in-up delay-3">
-      <div class="col-12">
-        <mat-card class="cardWithShadow theme-card">
-          <mat-card-header class="p-x-20 p-y-16">
-            <mat-card-title class="m-b-0 f-w-800 f-s-15">Recent Attendance Logs</mat-card-title>
+
+  <!-- ════════════════════════════════════════════════════════════════════════ -->
+  <!-- 4. HEALTHCARE / HOSPITAL ADMIN PANEL                                    -->
+  <!-- ════════════════════════════════════════════════════════════════════════ -->
+  @if (isHealthcareAdminDashboard) {
+    <!-- Healthcare KPI Strip -->
+    <div class="liquid-kpi-grid kpi-grid-4 m-b-24">
+      <div class="glass-kpi-card glass-kpi-indigo animate-fade-in-up delay-1" routerLink="/doctors">
+        <div class="kpi-card-shimmer"></div>
+        <div class="kpi-content">
+          <p class="kpi-label">DOCTORS ON DUTY</p>
+          <h3 class="kpi-value">{{ activeDoctorsCount }} <span class="kpi-unit">Active</span></h3>
+        </div>
+        <div class="kpi-icon-3d icon-indigo"><mat-icon>medical_services</mat-icon></div>
+      </div>
+      <div class="glass-kpi-card glass-kpi-emerald animate-fade-in-up delay-2" routerLink="/patients">
+        <div class="kpi-card-shimmer"></div>
+        <div class="kpi-content">
+          <p class="kpi-label">PATIENTS TREATED</p>
+          <h3 class="kpi-value">{{ todayTotalPatientsCount }} <span class="kpi-unit">Today</span></h3>
+        </div>
+        <div class="kpi-icon-3d icon-emerald"><mat-icon>personal_injury</mat-icon></div>
+      </div>
+      <div class="glass-kpi-card glass-kpi-purple animate-fade-in-up delay-3" routerLink="/pharmacy-pos">
+        <div class="kpi-card-shimmer"></div>
+        <div class="kpi-content">
+          <p class="kpi-label">PHARMACY REVENUE</p>
+          <h3 class="kpi-value" style="font-size:clamp(15px,3vw,22px)">₹{{ pharmacyDailyRevenue | number }}</h3>
+        </div>
+        <div class="kpi-icon-3d icon-purple"><mat-icon>local_pharmacy</mat-icon></div>
+      </div>
+      <div class="glass-kpi-card glass-kpi-rose animate-fade-in-up delay-4" routerLink="/appointments">
+        <div class="kpi-card-shimmer"></div>
+        <div class="kpi-content">
+          <p class="kpi-label">CLINIC OCCUPANCY</p>
+          <h3 class="kpi-value">{{ bedOccupancyRate }}% <span class="kpi-unit">Capacity</span></h3>
+        </div>
+        <div class="kpi-icon-3d icon-rose"><mat-icon>hotel</mat-icon></div>
+      </div>
+    </div>
+
+    <!-- Active Doctors Roster + Hospital Quick Launch -->
+    <div class="row m-b-24 animate-fade-in-up delay-5">
+      <div class="col-12 col-lg-8 m-b-16-mobile">
+        <mat-card class="smart-widget-card h-100">
+          <mat-card-header class="widget-header">
+            <div class="d-flex align-items-center justify-content-between w-100">
+              <div class="d-flex align-items-center gap-10">
+                <div class="widget-icon-bg bg-fuchsia">
+                  <mat-icon>group</mat-icon>
+                </div>
+                <div>
+                  <mat-card-title class="m-b-0 f-w-800 f-s-15 text-dark">Active Medical Staff Roster</mat-card-title>
+                  <p class="m-b-0 f-s-11 text-muted">{{ activeDoctorsCount }} doctors currently on premises</p>
+                </div>
+              </div>
+              <a routerLink="/doctors" class="view-all-link">View All</a>
+            </div>
+          </mat-card-header>
+          <mat-card-content class="p-20 b-t-1">
+            @if (activeDoctorsList.length > 0) {
+              <div class="leave-table-wrapper custom-scroll">
+                <table class="table align-middle m-b-0">
+                  <thead>
+                    <tr>
+                      <th class="f-w-700 f-s-12 text-muted">Doctor Name</th>
+                      <th class="f-w-700 f-s-12 text-muted">Specialty</th>
+                      <th class="f-w-700 f-s-12 text-muted">Department</th>
+                      <th class="f-w-700 f-s-12 text-muted">Patients</th>
+                      <th class="f-w-700 f-s-12 text-muted">Duty Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for(doc of activeDoctorsList; track doc.id) {
+                      <tr>
+                        <td class="f-s-13 f-w-700 text-dark">{{ doc.name }}</td>
+                        <td class="f-s-12 text-muted">{{ doc.specialty }}</td>
+                        <td class="f-s-12 text-muted">{{ doc.department }}</td>
+                        <td class="f-w-800 f-s-12 text-primary">{{ doc.activePatients }} Active</td>
+                        <td>
+                          <span class="apt-status-badge" [ngClass]="{
+                            'status--confirmed': doc.status === 'ON_DUTY',
+                            'status--inprogress': doc.status === 'IN_SURGERY'
+                          }">{{ doc.status }}</span>
+                        </td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+            } @else {
+              <div class="empty-state-box">
+                <mat-icon class="empty-icon">local_hospital</mat-icon>
+                <p class="empty-text">No active doctor records found.</p>
+              </div>
+            }
+          </mat-card-content>
+        </mat-card>
+      </div>
+
+      <!-- Hospital Operations Quick Launch (permission-gated) -->
+      <div class="col-12 col-lg-4">
+        <mat-card class="smart-widget-card h-100 d-flex flex-column">
+          <mat-card-header class="widget-header">
+            <div class="d-flex align-items-center gap-10">
+              <div class="widget-icon-bg bg-fuchsia">
+                <mat-icon>flash_on</mat-icon>
+              </div>
+              <div>
+                <mat-card-title class="m-b-0 f-w-800 f-s-15 text-dark">Hospital Operations</mat-card-title>
+                <p class="m-b-0 f-s-11 text-muted">{{ quickLaunchItems.length }} accessible modules</p>
+              </div>
+            </div>
+          </mat-card-header>
+          <mat-card-content class="p-16 flex-grow-1">
+            @if (quickLaunchItems.length > 0) {
+              <div class="smart-nav-grid smart-nav-grid--compact">
+                @for (item of quickLaunchItems; track item.route; let i = $index) {
+                  <a [routerLink]="item.route" class="smart-nav-pill" [style.animation-delay]="(i * 0.05) + 's'">
+                    <div class="pill-icon" [ngClass]="item.colorClass"><mat-icon>{{ item.icon }}</mat-icon></div>
+                    <span class="pill-text">{{ item.label }}</span>
+                  </a>
+                }
+              </div>
+            } @else {
+              <div class="empty-state-box">
+                <mat-icon class="empty-icon">lock</mat-icon>
+                <p class="empty-text">No accessible modules.</p>
+              </div>
+            }
+          </mat-card-content>
+        </mat-card>
+      </div>
+    </div>
+  }
+
+
+  <!-- ════════════════════════════════════════════════════════════════════════ -->
+  <!-- 5. PHARMACY & RETAIL OPERATIONS PANEL                                    -->
+  <!-- ════════════════════════════════════════════════════════════════════════ -->
+  @if (isPharmacyDashboard) {
+    <!-- Pharmacy KPI Strip -->
+    <div class="liquid-kpi-grid kpi-grid-4 m-b-24">
+      <div class="glass-kpi-card glass-kpi-amber animate-fade-in-up delay-1" routerLink="/pharmacy-pos">
+        <div class="kpi-card-shimmer"></div>
+        <div class="kpi-content">
+          <p class="kpi-label">PENDING DISPENSE</p>
+          <h3 class="kpi-value">{{ pendingDispenseCount }} <span class="kpi-unit">Rx</span></h3>
+        </div>
+        <div class="kpi-icon-3d icon-amber"><mat-icon>medication</mat-icon></div>
+      </div>
+      <div class="glass-kpi-card glass-kpi-rose animate-fade-in-up delay-2" routerLink="/medicines">
+        <div class="kpi-card-shimmer"></div>
+        <div class="kpi-content">
+          <p class="kpi-label">LOW STOCK MEDICINES</p>
+          <h3 class="kpi-value">{{ lowStockMedicinesCount }} <span class="kpi-unit">Items</span></h3>
+        </div>
+        <div class="kpi-icon-3d icon-rose"><mat-icon>warning</mat-icon></div>
+      </div>
+      <div class="glass-kpi-card glass-kpi-indigo animate-fade-in-up delay-3" routerLink="/medicine-expiry">
+        <div class="kpi-card-shimmer"></div>
+        <div class="kpi-content">
+          <p class="kpi-label">EXPIRING BATCHES</p>
+          <h3 class="kpi-value">{{ expiringMedicinesCount }} <span class="kpi-unit">Batches</span></h3>
+        </div>
+        <div class="kpi-icon-3d icon-indigo"><mat-icon>event_busy</mat-icon></div>
+      </div>
+      <div class="glass-kpi-card glass-kpi-emerald animate-fade-in-up delay-4" routerLink="/pharmacy-pos">
+        <div class="kpi-card-shimmer"></div>
+        <div class="kpi-content">
+          <p class="kpi-label">TODAY'S POS SALES</p>
+          <h3 class="kpi-value">{{ todayPosSalesCount }} <span class="kpi-unit">Bills</span></h3>
+        </div>
+        <div class="kpi-icon-3d icon-emerald"><mat-icon>point_of_sale</mat-icon></div>
+      </div>
+    </div>
+
+    <!-- Prescription Dispense Queue + Expiry Alerts + Quick Launch -->
+    <div class="row m-b-24 animate-fade-in-up delay-5">
+      <div class="col-12 col-lg-5 m-b-16-mobile">
+        <mat-card class="smart-widget-card h-100">
+          <mat-card-header class="widget-header">
+            <div class="d-flex align-items-center justify-content-between w-100">
+              <div class="d-flex align-items-center gap-10">
+                <div class="widget-icon-bg bg-amber">
+                  <mat-icon>medication</mat-icon>
+                </div>
+                <div>
+                  <mat-card-title class="m-b-0 f-w-800 f-s-15 text-dark">Prescription Dispense Queue</mat-card-title>
+                  <p class="m-b-0 f-s-11 text-muted">{{ pendingDispenseCount }} pending prescriptions</p>
+                </div>
+              </div>
+              <a routerLink="/prescriptions" class="view-all-link">View All</a>
+            </div>
+          </mat-card-header>
+          <mat-card-content class="p-20 b-t-1">
+            @if (pendingPrescriptionsList.length > 0) {
+              <div class="leave-table-wrapper custom-scroll">
+                <table class="table align-middle m-b-0">
+                  <thead>
+                    <tr>
+                      <th class="f-w-700 f-s-12 text-muted">Rx No</th>
+                      <th class="f-w-700 f-s-12 text-muted">Patient</th>
+                      <th class="f-w-700 f-s-12 text-muted">Items</th>
+                      <th class="f-w-700 f-s-12 text-muted">Priority</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for(rx of pendingPrescriptionsList; track rx.id) {
+                      <tr>
+                        <td class="f-s-12 f-w-800 text-primary">{{ rx.rxNo }}</td>
+                        <td class="f-s-13 f-w-700 text-dark">{{ rx.patientName }}</td>
+                        <td class="f-s-12 f-w-700 text-dark">{{ rx.itemsCount }} Items</td>
+                        <td>
+                          <span class="apt-status-badge" [ngClass]="{
+                            'status--waiting': rx.priority === 'HIGH',
+                            'status--confirmed': rx.priority === 'NORMAL'
+                          }">{{ rx.priority }}</span>
+                        </td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+            } @else {
+              <div class="empty-state-box">
+                <mat-icon class="empty-icon text-success">done_all</mat-icon>
+                <p class="empty-text">All dispense queues cleared!</p>
+              </div>
+            }
+          </mat-card-content>
+        </mat-card>
+      </div>
+
+      <div class="col-12 col-lg-3 m-b-16-mobile">
+        <mat-card class="smart-widget-card h-100">
+          <mat-card-header class="widget-header">
+            <div class="d-flex align-items-center justify-content-between w-100">
+              <div class="d-flex align-items-center gap-10">
+                <div class="widget-icon-bg bg-rose">
+                  <mat-icon>hourglass_bottom</mat-icon>
+                </div>
+                <div>
+                  <mat-card-title class="m-b-0 f-w-800 f-s-15 text-dark">Batch Expiry Alerts</mat-card-title>
+                </div>
+              </div>
+              <a routerLink="/medicine-expiry" class="view-all-link view-all-link--danger">Manage</a>
+            </div>
+          </mat-card-header>
+          <mat-card-content class="p-20 b-t-1">
+            @if (expiringMedicinesList.length > 0) {
+              <div class="d-flex flex-column gap-10">
+                @for(exp of expiringMedicinesList; track exp.id) {
+                  <div class="expiry-row">
+                    <div class="expiry-dot" [ngClass]="exp.status === 'CRITICAL' ? 'expiry-dot--critical' : 'expiry-dot--warning'"></div>
+                    <div class="expiry-info">
+                      <span class="expiry-name">{{ exp.name }}</span>
+                      <span class="expiry-date">Exp: {{ exp.expiryDate }} · {{ exp.stock }} Units</span>
+                    </div>
+                  </div>
+                }
+              </div>
+            } @else {
+              <div class="empty-state-box">
+                <mat-icon class="empty-icon text-success">verified</mat-icon>
+                <p class="empty-text">No expiring batches.</p>
+              </div>
+            }
+          </mat-card-content>
+        </mat-card>
+      </div>
+
+      <!-- Pharmacy Quick Launch (permission-gated) -->
+      <div class="col-12 col-lg-4">
+        <mat-card class="smart-widget-card h-100 d-flex flex-column">
+          <mat-card-header class="widget-header">
+            <div class="d-flex align-items-center gap-10">
+              <div class="widget-icon-bg bg-amber">
+                <mat-icon>flash_on</mat-icon>
+              </div>
+              <div>
+                <mat-card-title class="m-b-0 f-w-800 f-s-15 text-dark">Pharmacy Quick Launch</mat-card-title>
+                <p class="m-b-0 f-s-11 text-muted">{{ quickLaunchItems.length }} accessible modules</p>
+              </div>
+            </div>
+          </mat-card-header>
+          <mat-card-content class="p-16 flex-grow-1">
+            @if (quickLaunchItems.length > 0) {
+              <div class="smart-nav-grid smart-nav-grid--compact">
+                @for (item of quickLaunchItems; track item.route; let i = $index) {
+                  <a [routerLink]="item.route" class="smart-nav-pill" [style.animation-delay]="(i * 0.05) + 's'">
+                    <div class="pill-icon" [ngClass]="item.colorClass"><mat-icon>{{ item.icon }}</mat-icon></div>
+                    <span class="pill-text">{{ item.label }}</span>
+                  </a>
+                }
+              </div>
+            } @else {
+              <div class="empty-state-box">
+                <mat-icon class="empty-icon">lock</mat-icon>
+                <p class="empty-text">No accessible modules.</p>
+              </div>
+            }
+          </mat-card-content>
+        </mat-card>
+      </div>
+    </div>
+  }
+
+
+  <!-- ════════════════════════════════════════════════════════════════════════ -->
+  <!-- 6. EMPLOYEE PERSONAL DASHBOARD PANEL                                    -->
+  <!-- ════════════════════════════════════════════════════════════════════════ -->
+  @if (isEmployeeDashboard) {
+    <!-- Employee KPI Strip -->
+    <div class="liquid-kpi-grid kpi-grid-3 m-b-24">
+      <div class="glass-kpi-card glass-kpi-teal animate-fade-in-up delay-1" routerLink="/attendance">
+        <div class="kpi-card-shimmer"></div>
+        <div class="kpi-content">
+          <p class="kpi-label">TODAY STATUS</p>
+          <h3 class="kpi-value" [ngClass]="attendanceToday ? 'kpi-val-teal' : 'kpi-val-rose'">
+            {{ attendanceToday ? 'PRESENT' : 'NOT CHECKED IN' }}
+          </h3>
+        </div>
+        <div class="kpi-icon-3d icon-teal"><mat-icon>fingerprint</mat-icon></div>
+      </div>
+      <div class="glass-kpi-card glass-kpi-indigo animate-fade-in-up delay-2" routerLink="/attendance">
+        <div class="kpi-card-shimmer"></div>
+        <div class="kpi-content">
+          <p class="kpi-label">CHECK-IN TIME</p>
+          <h3 class="kpi-value">{{ attendanceToday?.check_in || '--:--' }}</h3>
+        </div>
+        <div class="kpi-icon-3d icon-indigo"><mat-icon>login</mat-icon></div>
+      </div>
+      <div class="glass-kpi-card glass-kpi-amber animate-fade-in-up delay-3" routerLink="/leave">
+        <div class="kpi-card-shimmer"></div>
+        <div class="kpi-content">
+          <p class="kpi-label">ACTIVE SHIFT</p>
+          <h3 class="kpi-value" style="font-size:clamp(13px,2.5vw,18px)">{{ employeeShift?.name || 'Not Assigned' }}</h3>
+        </div>
+        <div class="kpi-icon-3d icon-amber"><mat-icon>schedule</mat-icon></div>
+      </div>
+    </div>
+
+    <!-- Employee: Shift Card + Logs + Quick Launch -->
+    <div class="row m-b-24 animate-fade-in-up delay-4">
+
+      <!-- Active Shift Details -->
+      <div class="col-12 col-md-4 m-b-16-mobile">
+        <mat-card class="smart-widget-card h-100">
+          <mat-card-header class="widget-header">
+            <div class="d-flex align-items-center gap-10">
+              <div class="widget-icon-bg bg-teal">
+                <mat-icon>work_history</mat-icon>
+              </div>
+              <mat-card-title class="m-b-0 f-w-800 f-s-15 text-dark">Your Active Duty Shift</mat-card-title>
+            </div>
+          </mat-card-header>
+          <mat-card-content class="p-20 b-t-1">
+            @if (employeeShift) {
+              <div class="shift-detail-list">
+                <div class="shift-detail-row">
+                  <span class="sd-label">Shift Plan</span>
+                  <span class="sd-value text-primary">{{ employeeShift.name }}</span>
+                </div>
+                <div class="shift-detail-row">
+                  <span class="sd-label">Type</span>
+                  <span class="sd-value">{{ employeeShift.type }}</span>
+                </div>
+                <div class="shift-detail-row">
+                  <span class="sd-label">Timings</span>
+                  <span class="sd-value f-w-700">{{ employeeShift.start_time }} – {{ employeeShift.end_time }}</span>
+                </div>
+                <div class="shift-detail-row">
+                  <span class="sd-label">Grace Period</span>
+                  <span class="badge-role-pill f-s-12">{{ employeeShift.grace_period_minutes }} min</span>
+                </div>
+              </div>
+              <a routerLink="/attendance" class="attendance-cta-btn m-t-16">
+                <mat-icon>fingerprint</mat-icon> Attendance Terminal
+              </a>
+            } @else {
+              <div class="empty-state-box">
+                <mat-icon class="empty-icon">alarm_off</mat-icon>
+                <p class="empty-text">No active shift assigned today.</p>
+              </div>
+            }
+          </mat-card-content>
+        </mat-card>
+      </div>
+
+      <!-- Recent Attendance Logs -->
+      <div class="col-12 col-md-5 m-b-16-mobile">
+        <mat-card class="smart-widget-card h-100">
+          <mat-card-header class="widget-header">
+            <div class="d-flex align-items-center justify-content-between w-100">
+              <div class="d-flex align-items-center gap-10">
+                <div class="widget-icon-bg bg-indigo">
+                  <mat-icon>history</mat-icon>
+                </div>
+                <mat-card-title class="m-b-0 f-w-800 f-s-15 text-dark">Recent Attendance Logs</mat-card-title>
+              </div>
+              <a routerLink="/attendance" class="view-all-link">View All</a>
+            </div>
           </mat-card-header>
           <mat-card-content class="p-20 b-t-1">
             @if (recentLogs.length > 0) {
-              <div class="attendance-table-wrapper">
+              <div class="attendance-table-wrapper custom-scroll">
                 <table class="table align-middle m-b-0">
                   <thead>
                     <tr>
                       <th class="f-w-700 f-s-12 text-muted">Date</th>
                       <th class="f-w-700 f-s-12 text-muted">In</th>
                       <th class="f-w-700 f-s-12 text-muted">Out</th>
-                      <th class="f-w-700 f-s-12 text-muted">Breaks</th>
                       <th class="f-w-700 f-s-12 text-muted">Status</th>
                     </tr>
                   </thead>
                   <tbody>
                     @for(log of recentLogs; track log.id) {
                       <tr>
-                        <td class="f-s-12 f-w-700">{{ log.attendance_date }}</td>
+                        <td class="f-s-12 f-w-700 text-dark">{{ log.attendance_date }}</td>
                         <td class="f-s-12 text-success f-w-700">{{ log.check_in || '--:--' }}</td>
                         <td class="f-s-12 text-danger f-w-700">{{ log.check_out || '--:--' }}</td>
-                        <td class="f-s-12 f-w-600">{{ log.break_minutes || 0 }}m</td>
                         <td>
-                          <span class="badge-role-pill f-s-11" [ngClass]="{
-                            'bg-light-success text-success': log.status === 'PRESENT',
-                            'bg-light-warning text-warning': log.status === 'LATE',
-                            'bg-light-danger text-danger':  log.status === 'ABSENT'
+                          <span class="apt-status-badge" [ngClass]="{
+                            'status--confirmed': log.status === 'PRESENT',
+                            'status--waiting':   log.status === 'LATE',
+                            'status--absent':    log.status === 'ABSENT'
                           }">{{ log.status }}</span>
                         </td>
                       </tr>
@@ -557,9 +1070,43 @@
                 </table>
               </div>
             } @else {
-              <div class="p-24 text-center">
-                <mat-icon class="text-muted icon-40">calendar_today</mat-icon>
-                <p class="text-muted m-t-8 m-b-0 f-s-13 f-w-600">No attendance logs recorded.</p>
+              <div class="empty-state-box">
+                <mat-icon class="empty-icon">calendar_today</mat-icon>
+                <p class="empty-text">No attendance logs recorded.</p>
+              </div>
+            }
+          </mat-card-content>
+        </mat-card>
+      </div>
+
+      <!-- Employee Quick Launch (permission-gated) -->
+      <div class="col-12 col-md-3">
+        <mat-card class="smart-widget-card h-100 d-flex flex-column">
+          <mat-card-header class="widget-header">
+            <div class="d-flex align-items-center gap-10">
+              <div class="widget-icon-bg bg-teal">
+                <mat-icon>flash_on</mat-icon>
+              </div>
+              <div>
+                <mat-card-title class="m-b-0 f-w-800 f-s-15 text-dark">My Quick Links</mat-card-title>
+                <p class="m-b-0 f-s-11 text-muted">{{ quickLaunchItems.length }} accessible</p>
+              </div>
+            </div>
+          </mat-card-header>
+          <mat-card-content class="p-16 flex-grow-1">
+            @if (quickLaunchItems.length > 0) {
+              <div class="smart-nav-grid smart-nav-grid--2col">
+                @for (item of quickLaunchItems; track item.route; let i = $index) {
+                  <a [routerLink]="item.route" class="smart-nav-pill" [style.animation-delay]="(i * 0.05) + 's'">
+                    <div class="pill-icon" [ngClass]="item.colorClass"><mat-icon>{{ item.icon }}</mat-icon></div>
+                    <span class="pill-text">{{ item.label }}</span>
+                  </a>
+                }
+              </div>
+            } @else {
+              <div class="empty-state-box">
+                <mat-icon class="empty-icon">lock</mat-icon>
+                <p class="empty-text">No accessible modules.</p>
               </div>
             }
           </mat-card-content>
@@ -568,26 +1115,30 @@
     </div>
   }
 
+
   <!-- ════════════════════════════════════════════════════════════════════════ -->
-  <!-- 4. CUSTOMER VIEW                                                         -->
+  <!-- 7. CUSTOMER VIEW                                                         -->
   <!-- ════════════════════════════════════════════════════════════════════════ -->
   @if (isCustomerDashboard) {
-    <div class="liquid-kpi-grid m-b-24">
-      <div class="glass-kpi-card glass-kpi-indigo">
+    <div class="liquid-kpi-grid kpi-grid-3 m-b-24">
+      <div class="glass-kpi-card glass-kpi-indigo animate-fade-in-up delay-1" routerLink="/orders">
+        <div class="kpi-card-shimmer"></div>
         <div class="kpi-content">
           <p class="kpi-label">YOUR ORDERS</p>
           <h3 class="kpi-value">{{ customerOrders.length }} <span class="kpi-unit">Orders</span></h3>
         </div>
         <div class="kpi-icon-3d icon-indigo"><mat-icon>local_shipping</mat-icon></div>
       </div>
-      <div class="glass-kpi-card glass-kpi-amber">
+      <div class="glass-kpi-card glass-kpi-amber animate-fade-in-up delay-2">
+        <div class="kpi-card-shimmer"></div>
         <div class="kpi-content">
           <p class="kpi-label">REWARD POINTS</p>
           <h3 class="kpi-value">{{ loyaltyPoints }} <span class="kpi-unit">Pts</span></h3>
         </div>
         <div class="kpi-icon-3d icon-amber"><mat-icon>stars</mat-icon></div>
       </div>
-      <div class="glass-kpi-card glass-kpi-emerald">
+      <div class="glass-kpi-card glass-kpi-emerald animate-fade-in-up delay-3" routerLink="/product">
+        <div class="kpi-card-shimmer"></div>
         <div class="kpi-content">
           <p class="kpi-label">STORE STATUS</p>
           <h3 class="kpi-value">Active</h3>
@@ -599,17 +1150,27 @@
     <!-- Customer Orders -->
     <div class="row m-b-24">
       <div class="col-12">
-        <mat-card class="cardWithShadow theme-card">
-          <mat-card-header class="p-x-20 p-y-16">
-            <mat-card-title class="m-b-0 f-w-800 f-s-15">Purchase History</mat-card-title>
+        <mat-card class="smart-widget-card">
+          <mat-card-header class="widget-header">
+            <div class="d-flex align-items-center gap-10">
+              <div class="widget-icon-bg bg-indigo">
+                <mat-icon>receipt_long</mat-icon>
+              </div>
+              <div>
+                <mat-card-title class="m-b-0 f-w-800 f-s-15 text-dark">Recent Purchase History</mat-card-title>
+                <p class="m-b-0 f-s-11 text-muted">{{ customerOrders.length }} orders placed</p>
+              </div>
+            </div>
           </mat-card-header>
           <mat-card-content class="p-20 b-t-1">
             @if (customerOrders.length > 0) {
-              <div class="orders-table-wrapper">
+              <div class="orders-table-wrapper custom-scroll">
                 <table class="table align-middle m-b-0">
                   <thead>
                     <tr>
                       <th class="f-w-700 f-s-12 text-muted">Order ID</th>
+                      <th class="f-w-700 f-s-12 text-muted">Date</th>
+                      <th class="f-w-700 f-s-12 text-muted">Items</th>
                       <th class="f-w-700 f-s-12 text-muted">Total</th>
                       <th class="f-w-700 f-s-12 text-muted">Status</th>
                     </tr>
@@ -617,18 +1178,25 @@
                   <tbody>
                     @for(o of customerOrders; track o.id) {
                       <tr>
-                        <td class="f-s-13 f-w-700">#{{ o.id }}</td>
-                        <td class="f-s-13 text-primary f-w-800">₹{{ o.total_price }}</td>
-                        <td><span class="badge-role-pill f-s-11">{{ o.status }}</span></td>
+                        <td class="f-s-13 f-w-800 text-primary">#{{ o.id }}</td>
+                        <td class="f-s-12 text-muted">{{ o.date || '30-08-2026' }}</td>
+                        <td class="f-s-12 f-w-600 text-dark">{{ o.items || 2 }} Items</td>
+                        <td class="f-s-13 text-success f-w-800">₹{{ o.total_price }}</td>
+                        <td>
+                          <span class="apt-status-badge" [ngClass]="{
+                            'status--inprogress': o.status === 'Out for Delivery',
+                            'status--confirmed': o.status === 'Delivered'
+                          }">{{ o.status }}</span>
+                        </td>
                       </tr>
                     }
                   </tbody>
                 </table>
               </div>
             } @else {
-              <div class="p-24 text-center">
-                <mat-icon class="text-muted icon-40">shopping_cart</mat-icon>
-                <p class="text-muted m-t-8 m-b-0 f-s-13 f-w-600">No purchases yet. Explore our product catalog!</p>
+              <div class="empty-state-box">
+                <mat-icon class="empty-icon">shopping_cart</mat-icon>
+                <p class="empty-text">No purchases yet. Explore our product catalog!</p>
               </div>
             }
           </mat-card-content>

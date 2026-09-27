@@ -379,10 +379,10 @@
                   <mat-form-field appearance="outline" class="w-100">
                     <mat-select formControlName="patient_id" placeholder="Choose registered patient">
                       @for (p of patients; track p.id) {
-                        <mat-option [value]="p.id">{{ p.name }} ({{ p.patient_code }})</mat-option>
+                        <mat-option [value]="p.id">{{ getPatientLabel(p) }}</mat-option>
                       }
                     </mat-select>
-                    @if (form.get('patient_id')?.hasError('required')) {
+                    @if (form.get('patient_id')?.hasError('required') && form.get('patient_id')?.touched) {
                       <mat-error>Patient is required</mat-error>
                     }
                   </mat-form-field>
@@ -393,10 +393,10 @@
                   <mat-form-field appearance="outline" class="w-100">
                     <mat-select formControlName="doctor_id" placeholder="Choose specialist doctor">
                       @for (d of doctors; track d.id) {
-                        <mat-option [value]="d.id">Dr. {{ d.name }} ({{ d.specialty || 'General' }})</mat-option>
+                        <mat-option [value]="d.id">{{ getDoctorLabel(d) }}</mat-option>
                       }
                     </mat-select>
-                    @if (form.get('doctor_id')?.hasError('required')) {
+                    @if (form.get('doctor_id')?.hasError('required') && form.get('doctor_id')?.touched) {
                       <mat-error>Doctor is required</mat-error>
                     }
                   </mat-form-field>
@@ -416,7 +416,7 @@
                     <input matInput [matDatepicker]="apptPicker" formControlName="appointment_date" placeholder="DD-MM-YYYY">
                     <mat-datepicker-toggle matIconSuffix [for]="apptPicker"></mat-datepicker-toggle>
                     <mat-datepicker #apptPicker></mat-datepicker>
-                    @if (form.get('appointment_date')?.hasError('required')) {
+                    @if (form.get('appointment_date')?.hasError('required') && form.get('appointment_date')?.touched) {
                       <mat-error>Date is required</mat-error>
                     }
                   </mat-form-field>
@@ -424,12 +424,18 @@
 
                 <div class="col-md-4 m-b-16">
                   <label class="hc-field-label">Time Slot <span class="req">*</span></label>
-                  <mat-form-field appearance="outline" class="w-100">
-                    <input matInput type="time" formControlName="appointment_time">
-                    @if (form.get('appointment_time')?.hasError('required')) {
-                      <mat-error>Time slot is required</mat-error>
-                    }
-                  </mat-form-field>
+                  <div class="hc-clock-field">
+                    <div class="hc-clock-display" (click)="openClockPicker()">
+                      <i-tabler name="clock" class="hc-clock-icon"></i-tabler>
+                      <span class="hc-clock-value">{{ form.get('appointment_time')?.value || '09:00' }}</span>
+                      <span class="hc-clock-hint">Click to change</span>
+                    </div>
+                    <!-- Hidden input to keep form value -->
+                    <input type="hidden" formControlName="appointment_time">
+                  </div>
+                  @if (form.get('appointment_time')?.hasError('required') && form.get('appointment_time')?.touched) {
+                    <small class="text-danger">Time slot is required</small>
+                  }
                 </div>
 
                 <div class="col-md-4 m-b-16">
@@ -439,10 +445,17 @@
                   </mat-form-field>
                 </div>
 
-                <div class="col-md-12 m-b-16">
-                  <label class="hc-field-label">Clinical Symptoms / Reason for Visit</label>
+                <div class="col-md-6 m-b-16">
+                  <label class="hc-field-label">Chief Complaint / Reason for Visit</label>
                   <mat-form-field appearance="outline" class="w-100">
-                    <textarea matInput formControlName="notes" rows="3" placeholder="Chief complaints, pre-existing conditions, or doctor instructions..."></textarea>
+                    <input matInput formControlName="chief_complaint" placeholder="e.g. Fever, Headache, Follow-up">
+                  </mat-form-field>
+                </div>
+
+                <div class="col-md-6 m-b-16">
+                  <label class="hc-field-label">Clinical Notes</label>
+                  <mat-form-field appearance="outline" class="w-100">
+                    <textarea matInput formControlName="notes" rows="2" placeholder="Pre-existing conditions, doctor instructions..."></textarea>
                   </mat-form-field>
                 </div>
               </div>

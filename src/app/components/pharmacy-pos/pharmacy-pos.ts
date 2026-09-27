@@ -332,4 +332,9 @@ export class PharmacyPosComponent implements OnInit, OnDestroy {
   formatPrice(n: number): string {
     return '₹' + (n || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   }
+
+  /** Converts enum display label: 'CASH' → 'Cash', 'LOW_STOCK' → 'Low Stock' */
+  paymentLabel(pm: PaymentMethod): string {
+    return pm.charAt(0) + pm.slice(1).toLowerCase().replace(/_/g, ' ');
+  }
 }

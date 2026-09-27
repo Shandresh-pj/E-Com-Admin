@@ -1,6 +1,6 @@
 <div class="psh-root">
 
-  <!-- Ambient Background Orbs -->
+  <!-- Ambient Background Orbs & Glowing Grid -->
   <div class="psh-bg" aria-hidden="true">
     <div class="psh-orb psh-orb--a"></div>
     <div class="psh-orb psh-orb--b"></div>
@@ -15,10 +15,10 @@
         <span class="psh-eyebrow__dot"></span>
         <span>HEALTHCARE ERP</span>
         <span class="psh-eyebrow__sep">·</span>
-        <span>{{ patients().length }} PATIENTS REGISTERED</span>
+        <span>CLINICAL PATIENT DIRECTORY</span>
       </div>
       <h1 class="psh-title">Patient <span class="psh-title__accent">Registry</span></h1>
-      <p class="psh-sub">Manage patient medical records, vitals, allergy profiles, blood group indexing, and consultation histories.</p>
+      <p class="psh-sub">Manage patient medical records, clinical timelines, allergy watchlists, blood group indexing, and consultation histories.</p>
     </div>
     <div class="psh-actions">
       @if (!showForm() && perm.hasRoleAction('canCreate', '/patients')) {
@@ -31,53 +31,74 @@
     </div>
   </header>
 
-  <!-- Stat Chips Row (4 KPI Orbs) -->
+  <!-- KPI Metrics Bar (4 High-Tech Glass Orbs) -->
   <div class="psh-chips">
+    
+    <!-- KPI 1: Total Patients & Gender Ratio -->
     <div class="psh-chip psh-chip--violet">
       <div class="psh-chip__orb"><i-tabler name="users"></i-tabler></div>
       <div class="psh-chip__body">
-        <span class="psh-chip__num">{{ patients().length }}</span>
-        <span class="psh-chip__lbl">Total Patients</span>
+        <div class="psh-chip__header-row">
+          <span class="psh-chip__num">{{ patients().length }}</span>
+          <span class="psh-chip__badge">Active Database</span>
+        </div>
+        <span class="psh-chip__lbl">Total Registered Patients</span>
+        <!-- Gender Ratio Mini Bar -->
+        @if (patients().length > 0) {
+          <div class="hc-kpi-ratio-bar" matTooltip="Male: {{ malePercent() }}% | Female: {{ femalePercent() }}%">
+            <div class="hc-kpi-ratio-fill hc-kpi-ratio-fill--male" [style.width.%]="malePercent()"></div>
+            <div class="hc-kpi-ratio-fill hc-kpi-ratio-fill--female" [style.width.%]="femalePercent()"></div>
+          </div>
+        }
       </div>
     </div>
 
+    <!-- KPI 2: Male Patients -->
     <div class="psh-chip psh-chip--sky">
       <div class="psh-chip__orb"><i-tabler name="gender-male"></i-tabler></div>
       <div class="psh-chip__body">
         <span class="psh-chip__num">{{ maleCount() }}</span>
-        <span class="psh-chip__lbl">Male Patients</span>
+        <span class="psh-chip__lbl">Male Patients ({{ malePercent() }}%)</span>
       </div>
     </div>
 
+    <!-- KPI 3: Female Patients -->
     <div class="psh-chip psh-chip--pink">
       <div class="psh-chip__orb"><i-tabler name="gender-female"></i-tabler></div>
       <div class="psh-chip__body">
         <span class="psh-chip__num">{{ femaleCount() }}</span>
-        <span class="psh-chip__lbl">Female Patients</span>
+        <span class="psh-chip__lbl">Female Patients ({{ femalePercent() }}%)</span>
       </div>
     </div>
 
-    <div class="psh-chip psh-chip--rose">
+    <!-- KPI 4: Allergy Alerts Watchlist -->
+    <div class="psh-chip psh-chip--rose" [class.psh-chip--alert]="patientsWithAllergiesCount() > 0">
       <div class="psh-chip__orb"><i-tabler name="alert-triangle"></i-tabler></div>
       <div class="psh-chip__body">
-        <span class="psh-chip__num">{{ patientsWithAllergiesCount() }}</span>
-        <span class="psh-chip__lbl">Allergy Alerts</span>
+        <div class="psh-chip__header-row">
+          <span class="psh-chip__num">{{ patientsWithAllergiesCount() }}</span>
+          @if (patientsWithAllergiesCount() > 0) {
+            <span class="psh-chip__pulse-tag">High Priority</span>
+          }
+        </div>
+        <span class="psh-chip__lbl">Allergy Watchlist Profiles</span>
       </div>
     </div>
+
   </div>
 
-  <!-- Main Patient Roster Section -->
+  <!-- Main Roster Section -->
   @if (!showForm()) {
     <div class="hc-roster-container">
 
-      <!-- Controls & Filter Bar -->
+      <!-- Enhanced Controls & Filter Bar -->
       <div class="hc-controls-bar">
 
-        <!-- Search Bar -->
+        <!-- Search Input Wrap -->
         <div class="hc-search-wrap">
           <i-tabler name="search" class="hc-search-icon"></i-tabler>
           <input class="hc-search-input"
-                 placeholder="Search patient name, code, phone, blood group..."
+                 placeholder="Search patient name, PAT code, phone, email, blood group..."
                  [ngModel]="searchQuery()"
                  (ngModelChange)="setSearchQuery($event)" />
           @if (searchQuery()) {
@@ -85,7 +106,7 @@
               <i-tabler name="x" style="width:14px;height:14px;"></i-tabler>
             </button>
           }
-          <span class="hc-search-count">{{ filteredPatients().length }} found</span>
+          <span class="hc-search-count">{{ filteredPatients().length }} match{{ filteredPatients().length === 1 ? '' : 'es' }}</span>
         </div>
 
         <!-- Gender Filter Chips -->
@@ -109,7 +130,7 @@
           </button>
         </div>
 
-        <!-- Blood Group Horizontal Pill Bar -->
+        <!-- Blood Group Scroll Bar -->
         <div class="hc-bg-scroll">
           <button class="hc-bg-pill"
                   [class.active]="selectedBloodGroup() === 'ALL'"
@@ -129,20 +150,42 @@
           }
         </div>
 
-        <!-- View Mode Switcher -->
-        <div class="hc-view-toggle">
-          <button class="hc-view-btn"
-                  [class.active]="viewMode() === 'grid'"
-                  (click)="viewMode.set('grid')"
-                  matTooltip="Grid View">
-            <i-tabler name="layout-grid"></i-tabler>
+        <!-- Quick Filters & Sort Bar -->
+        <div class="hc-quick-toolbar">
+          <!-- Allergy Filter Toggle -->
+          <button class="hc-toggle-pill"
+                  [class.active]="allergiesOnly()"
+                  (click)="allergiesOnly.set(!allergiesOnly())"
+                  matTooltip="Show only patients with recorded allergies">
+            <i-tabler name="alert-triangle" style="width:14px;height:14px;"></i-tabler>
+            <span>Allergies Only</span>
           </button>
-          <button class="hc-view-btn"
-                  [class.active]="viewMode() === 'list'"
-                  (click)="viewMode.set('list')"
-                  matTooltip="Table View">
-            <i-tabler name="list"></i-tabler>
-          </button>
+
+          <!-- Sort Selection Dropdown -->
+          <div class="hc-sort-wrap">
+            <i-tabler name="arrows-sort" class="hc-sort-icon"></i-tabler>
+            <select class="hc-sort-select" [ngModel]="sortBy()" (ngModelChange)="sortBy.set($event)">
+              <option value="name">Sort: Name A-Z</option>
+              <option value="newest">Sort: Recently Added</option>
+              <option value="age">Sort: Age (Youngest)</option>
+            </select>
+          </div>
+
+          <!-- View Mode Switcher -->
+          <div class="hc-view-toggle">
+            <button class="hc-view-btn"
+                    [class.active]="viewMode() === 'grid'"
+                    (click)="viewMode.set('grid')"
+                    matTooltip="Grid Card View">
+              <i-tabler name="layout-grid"></i-tabler>
+            </button>
+            <button class="hc-view-btn"
+                    [class.active]="viewMode() === 'list'"
+                    (click)="viewMode.set('list')"
+                    matTooltip="Table Roster View">
+              <i-tabler name="list"></i-tabler>
+            </button>
+          </div>
         </div>
 
       </div>
@@ -150,8 +193,10 @@
       <!-- Loading State -->
       @if (loading()) {
         <div class="hc-loading-wrap">
-          <mat-progress-spinner mode="indeterminate" diameter="48"></mat-progress-spinner>
-          <p class="hc-loading-text">Fetching patient medical records...</p>
+          <div class="hc-loading-orb">
+            <mat-progress-spinner mode="indeterminate" diameter="48"></mat-progress-spinner>
+          </div>
+          <p class="hc-loading-text">Retrieving patient clinical profiles...</p>
         </div>
       }
 
@@ -162,10 +207,10 @@
             <i-tabler name="users" class="hc-empty-icon"></i-tabler>
           </div>
           <h3>No Patients Match Your Filters</h3>
-          <p>{{ searchQuery() || selectedGender() !== 'ALL' || selectedBloodGroup() !== 'ALL' ? 'Try adjusting your search terms or filters.' : 'Click "Register New Patient" above to add your first patient.' }}</p>
-          @if (searchQuery() || selectedGender() !== 'ALL' || selectedBloodGroup() !== 'ALL') {
-            <button class="psh-btn psh-btn--secondary m-t-16" (click)="setSearchQuery(''); selectGenderFilter('ALL'); selectBloodGroupFilter('ALL')">
-              Reset Filters
+          <p>{{ searchQuery() || selectedGender() !== 'ALL' || selectedBloodGroup() !== 'ALL' || allergiesOnly() ? 'Try adjusting your search terms, allergy toggle, or blood group filters.' : 'Click "Register New Patient" above to register your first patient.' }}</p>
+          @if (searchQuery() || selectedGender() !== 'ALL' || selectedBloodGroup() !== 'ALL' || allergiesOnly()) {
+            <button class="psh-btn psh-btn--secondary m-t-16" (click)="setSearchQuery(''); selectGenderFilter('ALL'); selectBloodGroupFilter('ALL'); allergiesOnly.set(false)">
+              Reset All Filters
             </button>
           }
         </div>
@@ -175,16 +220,20 @@
       @if (!loading() && filteredPatients().length > 0 && viewMode() === 'grid') {
         <div class="hc-patient-grid">
           @for (patient of filteredPatients(); track patient.id; let i = $index) {
-            <div class="hc-pat-card" [style.--delay]="(i % 12) * 60 + 'ms'">
+            <div class="hc-pat-card" [style.--delay]="(i % 12) * 50 + 'ms'">
 
               <!-- Accent Top Bar -->
               <div class="hc-pat-card__accent" [style.background]="getGenderGradient(patient.gender)"></div>
 
               <!-- Header -->
               <div class="hc-pat-card__header">
-                <div class="hc-pat-avatar" [style.background]="getGenderGradient(patient.gender)">
-                  {{ getInitials(patient.name) }}
+                <div class="hc-pat-avatar-wrap">
+                  <div class="hc-pat-avatar" [style.background]="getGenderGradient(patient.gender)">
+                    {{ getInitials(patient.name) }}
+                  </div>
+                  <span class="hc-avatar-pulse"></span>
                 </div>
+
                 <div class="hc-pat-info">
                   <h3 class="hc-pat-name" (click)="viewPatient(patient)">
                     {{ patient.name }}
@@ -193,7 +242,7 @@
                     <span class="hc-gender-badge {{ getGenderBadgeClass(patient.gender) }}">
                       {{ patient.gender }}
                     </span>
-                    <span class="hc-code-chip" (click)="copyPatientCode(patient.patient_code, $event)" matTooltip="Copy Patient Code">
+                    <span class="hc-code-chip" (click)="copyPatientCode(patient.patient_code, $event)" matTooltip="Click to Copy Patient Code">
                       <code>{{ patient.patient_code }}</code>
                       <i-tabler [name]="copiedCode() === patient.patient_code ? 'check' : 'copy'" class="hc-copy-icon"></i-tabler>
                     </span>
@@ -221,17 +270,17 @@
                   </div>
                 </div>
 
-                <!-- Phone & Email -->
+                <!-- Phone & Email Contact Chips -->
                 @if (patient.phone || patient.email) {
                   <div class="hc-pat-contacts">
                     @if (patient.phone) {
-                      <a [href]="'tel:' + patient.phone" class="hc-contact-chip" (click)="$event.stopPropagation()">
+                      <a [href]="'tel:' + patient.phone" class="hc-contact-chip" (click)="$event.stopPropagation()" matTooltip="Call Patient">
                         <i-tabler name="phone" style="width:13px;height:13px;"></i-tabler>
                         <span>{{ patient.phone }}</span>
                       </a>
                     }
                     @if (patient.email) {
-                      <a [href]="'mailto:' + patient.email" class="hc-contact-chip" (click)="$event.stopPropagation()">
+                      <a [href]="'mailto:' + patient.email" class="hc-contact-chip" (click)="$event.stopPropagation()" matTooltip="Email Patient">
                         <i-tabler name="mail" style="width:13px;height:13px;"></i-tabler>
                         <span>{{ patient.email }}</span>
                       </a>
@@ -239,16 +288,16 @@
                   </div>
                 }
 
-                <!-- Allergy Alert Highlight -->
+                <!-- Allergy Warning Banner -->
                 @if (patient.allergies) {
                   <div class="hc-allergy-alert">
                     <i-tabler name="alert-triangle" class="hc-allergy-icon"></i-tabler>
-                    <span class="hc-allergy-text"><strong>Allergies:</strong> {{ patient.allergies }}</span>
+                    <span class="hc-allergy-text"><strong>Allergy Alert:</strong> {{ patient.allergies }}</span>
                   </div>
                 }
               </div>
 
-              <!-- Actions Bar -->
+              <!-- Actions Footer -->
               <div class="hc-pat-card__actions">
                 <button class="hc-act-btn hc-act-btn--view" (click)="viewPatient(patient, $event)">
                   <i-tabler name="eye" style="width:15px;height:15px;"></i-tabler>
@@ -274,13 +323,13 @@
             <table class="hc-table">
               <thead>
                 <tr>
-                  <th>Patient Profile</th>
+                  <th>Patient Identity</th>
                   <th>Patient Code</th>
                   <th>Gender</th>
                   <th>Age</th>
-                  <th>Contact Phone</th>
+                  <th>Mobile Phone</th>
                   <th>Blood Group</th>
-                  <th>Allergies</th>
+                  <th>Allergy Watchlist</th>
                   <th style="text-align:right;">Actions</th>
                 </tr>
               </thead>
@@ -299,7 +348,7 @@
                       </div>
                     </td>
                     <td>
-                      <span class="hc-table-code" (click)="copyPatientCode(patient.patient_code, $event)" matTooltip="Copy Patient Code">
+                      <span class="hc-table-code" (click)="copyPatientCode(patient.patient_code, $event)" matTooltip="Click to Copy Code">
                         <code>{{ patient.patient_code }}</code>
                       </span>
                     </td>
@@ -309,7 +358,13 @@
                       </span>
                     </td>
                     <td><span class="hc-age-text">{{ getAge(patient.date_of_birth) }}</span></td>
-                    <td>{{ patient.phone || '—' }}</td>
+                    <td>
+                      @if (patient.phone) {
+                        <a [href]="'tel:' + patient.phone" class="hc-table-link" (click)="$event.stopPropagation()">{{ patient.phone }}</a>
+                      } @else {
+                        —
+                      }
+                    </td>
                     <td>
                       @if (patient.blood_group) {
                         <span class="hc-blood-pill">{{ patient.blood_group }}</span>
@@ -324,16 +379,16 @@
                           {{ patient.allergies }}
                         </span>
                       } @else {
-                        <span class="text-muted" style="font-size:12px;">None</span>
+                        <span class="text-muted" style="font-size:12px;">Clear</span>
                       }
                     </td>
                     <td>
                       <div class="hc-row-actions" (click)="$event.stopPropagation()">
-                        <button class="hc-icon-btn" (click)="viewPatient(patient)" matTooltip="View Medical Record">
+                        <button class="hc-icon-btn" (click)="viewPatient(patient)" matTooltip="View Medical Passport">
                           <i-tabler name="eye"></i-tabler>
                         </button>
                         @if (perm.hasRoleAction('canUpdate', '/patients')) {
-                          <button class="hc-icon-btn" (click)="openForm(patient)" matTooltip="Edit Patient">
+                          <button class="hc-icon-btn" (click)="openForm(patient)" matTooltip="Edit Patient Record">
                             <i-tabler name="edit"></i-tabler>
                           </button>
                         }
@@ -350,7 +405,7 @@
     </div>
   }
 
-  <!-- FORM MODE (Split view with Live Card Preview) -->
+  <!-- FORM MODE (Split View with Live Medical Passport Preview) -->
   @if (showForm()) {
     <div class="hc-form-container">
       <div class="hc-form-header">
@@ -359,12 +414,13 @@
           Back to Registry
         </button>
         <h2 class="hc-form-title">
-          {{ editingId() ? 'Edit Patient File' : 'Register New Patient' }}
+          {{ editingId() ? 'Edit Clinical Patient Record' : 'Register New Patient' }}
         </h2>
       </div>
 
       <div class="hc-form-grid-layout">
-        <!-- Left: Form Controls -->
+        
+        <!-- Left Column: Form Controls -->
         <div class="hc-form-card">
           <form [formGroup]="form" (ngSubmit)="savePatient()" autocomplete="off">
 
@@ -378,7 +434,7 @@
                 <div class="col-md-6 m-b-16">
                   <label class="hc-field-label">Full Patient Name <span class="req">*</span></label>
                   <mat-form-field appearance="outline" class="w-100">
-                    <input matInput formControlName="name" placeholder="e.g. John Doe">
+                    <input matInput formControlName="name" placeholder="e.g. Eleanor Vance">
                     @if (form.get('name')?.hasError('required')) {
                       <mat-error>Patient name is required</mat-error>
                     }
@@ -386,7 +442,7 @@
                 </div>
 
                 <div class="col-md-6 m-b-16">
-                  <label class="hc-field-label">Gender <span class="req">*</span></label>
+                  <label class="hc-field-label">Gender Identity <span class="req">*</span></label>
                   <mat-form-field appearance="outline" class="w-100">
                     <mat-select formControlName="gender" placeholder="Select Gender">
                       @for (g of genderOptions; track g) {
@@ -394,7 +450,7 @@
                       }
                     </mat-select>
                     @if (form.get('gender')?.hasError('required')) {
-                      <mat-error>Gender is required</mat-error>
+                      <mat-error>Gender selection is required</mat-error>
                     }
                   </mat-form-field>
                 </div>
@@ -425,13 +481,13 @@
             <div class="hc-form-section">
               <h3 class="hc-section-title">
                 <i-tabler name="phone" class="hc-sec-icon"></i-tabler>
-                Contact & Residence
+                Contact & Residence Details
               </h3>
               <div class="row">
                 <div class="col-md-6 m-b-16">
                   <label class="hc-field-label">Mobile Phone <span class="req">*</span></label>
                   <mat-form-field appearance="outline" class="w-100">
-                    <input matInput formControlName="phone" type="tel" placeholder="10-digit mobile number">
+                    <input matInput formControlName="phone" type="tel" placeholder="10-digit mobile phone number">
                     @if (form.get('phone')?.hasError('required')) {
                       <mat-error>Mobile number is required</mat-error>
                     }
@@ -448,36 +504,36 @@
                 <div class="col-md-12 m-b-16">
                   <label class="hc-field-label">Residential Address</label>
                   <mat-form-field appearance="outline" class="w-100">
-                    <input matInput formControlName="address" placeholder="Full residential street address">
+                    <input matInput formControlName="address" placeholder="Street address, city, postal code">
                   </mat-form-field>
                 </div>
               </div>
             </div>
 
-            <!-- Section 3: Medical Vitals & History -->
+            <!-- Section 3: Clinical Alerts & History -->
             <div class="hc-form-section">
               <h3 class="hc-section-title">
                 <i-tabler name="activity" class="hc-sec-icon"></i-tabler>
-                Medical Alerts & History
+                Clinical Alerts & Medical Notes
               </h3>
               <div class="row">
                 <div class="col-md-12 m-b-16">
-                  <label class="hc-field-label">Known Allergies (Food / Drug / Chemical)</label>
+                  <label class="hc-field-label">Known Allergies (Food / Medication / Environmental)</label>
                   <mat-form-field appearance="outline" class="w-100">
-                    <input matInput formControlName="allergies" placeholder="e.g. Penicillin, Dust, Peanuts">
+                    <input matInput formControlName="allergies" placeholder="e.g. Penicillin, Peanuts, Latex, Aspirin">
                   </mat-form-field>
                 </div>
 
                 <div class="col-md-12 m-b-16">
-                  <label class="hc-field-label">Medical History / Clinical Notes</label>
+                  <label class="hc-field-label">Pre-existing Conditions / Clinical Notes</label>
                   <mat-form-field appearance="outline" class="w-100">
-                    <textarea matInput formControlName="notes" rows="3" placeholder="Brief medical history, pre-existing conditions, chronic illnesses..."></textarea>
+                    <textarea matInput formControlName="notes" rows="3" placeholder="Chronic conditions, surgical history, ongoing treatments..."></textarea>
                   </mat-form-field>
                 </div>
               </div>
             </div>
 
-            <!-- Submit Controls -->
+            <!-- Action Controls -->
             <div class="hc-form-actions">
               <button type="button" class="psh-btn psh-btn--secondary" (click)="closeForm()">Cancel</button>
               <button type="submit" class="psh-btn psh-btn--primary" [disabled]="saving()">
@@ -491,20 +547,22 @@
           </form>
         </div>
 
-        <!-- Right: Live Card Preview -->
+        <!-- Right Column: Live Medical Passport Preview -->
         <div class="hc-preview-col">
           <div class="hc-preview-sticky">
             <div class="hc-preview-header">
               <i-tabler name="sparkles" class="hc-preview-icon"></i-tabler>
-              <span>Live Card Preview</span>
+              <span>Live Patient Card Preview</span>
             </div>
 
             <div class="hc-pat-card hc-pat-card--preview">
               <div class="hc-pat-card__accent" [style.background]="getGenderGradient(formValues().gender)"></div>
 
               <div class="hc-pat-card__header">
-                <div class="hc-pat-avatar" [style.background]="getGenderGradient(formValues().gender)">
-                  {{ getInitials(formValues().name) }}
+                <div class="hc-pat-avatar-wrap">
+                  <div class="hc-pat-avatar" [style.background]="getGenderGradient(formValues().gender)">
+                    {{ getInitials(formValues().name) }}
+                  </div>
                 </div>
                 <div class="hc-pat-info">
                   <h3 class="hc-pat-name">{{ formValues().name || 'Patient Full Name' }}</h3>
@@ -557,7 +615,7 @@
                 @if (formValues().allergies) {
                   <div class="hc-allergy-alert">
                     <i-tabler name="alert-triangle" class="hc-allergy-icon"></i-tabler>
-                    <span class="hc-allergy-text"><strong>Allergies:</strong> {{ formValues().allergies }}</span>
+                    <span class="hc-allergy-text"><strong>Allergy Alert:</strong> {{ formValues().allergies }}</span>
                   </div>
                 }
               </div>
@@ -570,117 +628,148 @@
     </div>
   }
 
-  <!-- PATIENT PROFILE & MEDICAL HISTORY SIDE DRAWER -->
+  <!-- PATIENT CLINICAL PASSPORT SIDE DRAWER -->
   @if (selectedPatient(); as pat) {
     <div class="hc-drawer-backdrop" (click)="closeProfile()">
       <div class="hc-drawer-panel" (click)="$event.stopPropagation()">
 
         <!-- Hero Header -->
         <div class="hc-drawer-hero" [style.background]="getGenderGradient(pat.gender)">
-          <button class="hc-drawer-close" (click)="closeProfile()" matTooltip="Close Profile">
+          <button class="hc-drawer-close" (click)="closeProfile()" matTooltip="Close Passport">
             <i-tabler name="x"></i-tabler>
           </button>
+          
           <div class="hc-drawer-avatar-box">
             <div class="hc-drawer-avatar">{{ getInitials(pat.name) }}</div>
           </div>
+          
           <h2 class="hc-drawer-name">{{ pat.name }}</h2>
+          
           <div class="hc-drawer-sub">
-            <span class="hc-drawer-code" (click)="copyPatientCode(pat.patient_code, $event)" matTooltip="Copy Patient Code">
+            <span class="hc-drawer-code" (click)="copyPatientCode(pat.patient_code, $event)" matTooltip="Click to Copy Code">
               <code>{{ pat.patient_code }}</code>
             </span>
             <span class="hc-drawer-dot">·</span>
             <span>{{ getAge(pat.date_of_birth) }}</span>
             <span class="hc-drawer-dot">·</span>
-            <span>{{ pat.gender }}</span>
+            <span class="hc-gender-badge {{ getGenderBadgeClass(pat.gender) }}" style="background:rgba(255,255,255,0.2);color:#fff;border-color:rgba(255,255,255,0.3);">
+              {{ pat.gender }}
+            </span>
           </div>
+        </div>
+
+        <!-- Navigation Tabs inside Drawer -->
+        <div class="hc-drawer-tabs">
+          <button class="hc-drawer-tab-btn"
+                  [class.active]="activeDrawerTab() === 'overview'"
+                  (click)="activeDrawerTab.set('overview')">
+            <i-tabler name="user" style="width:15px;height:15px;"></i-tabler>
+            <span>Overview & Vitals</span>
+          </button>
+          <button class="hc-drawer-tab-btn"
+                  [class.active]="activeDrawerTab() === 'appointments'"
+                  (click)="activeDrawerTab.set('appointments')">
+            <i-tabler name="calendar" style="width:15px;height:15px;"></i-tabler>
+            <span>History Timeline</span>
+          </button>
         </div>
 
         <!-- Drawer Content Body -->
         <div class="hc-drawer-body">
 
-          <!-- Demographics Grid -->
-          <div class="hc-drawer-section">
-            <h3 class="hc-drawer-sec-title">Vitals & Demographics</h3>
-            <div class="hc-drawer-grid">
-              <div class="hc-drawer-item">
-                <span class="lbl">Blood Group</span>
-                <span class="val highlight-blood">{{ pat.blood_group || 'Not Recorded' }}</span>
-              </div>
-              <div class="hc-drawer-item">
-                <span class="lbl">Phone Number</span>
-                <a [href]="'tel:' + pat.phone" class="val link">{{ pat.phone }}</a>
-              </div>
-              <div class="hc-drawer-item">
-                <span class="lbl">Email Address</span>
-                <a [href]="'mailto:' + pat.email" class="val link">{{ pat.email || '—' }}</a>
-              </div>
-              <div class="hc-drawer-item">
-                <span class="lbl">Date of Birth</span>
-                <span class="val">{{ pat.date_of_birth || '—' }}</span>
-              </div>
-            </div>
-          </div>
-
-          <!-- Allergy Box -->
-          @if (pat.allergies) {
+          <!-- TAB 1: OVERVIEW & VITALS -->
+          @if (activeDrawerTab() === 'overview') {
+            
+            <!-- Vitals Grid -->
             <div class="hc-drawer-section">
-              <h3 class="hc-drawer-sec-title text-danger">Known Allergies</h3>
-              <div class="hc-drawer-allergy-alert">
-                <i-tabler name="alert-triangle"></i-tabler>
-                <p>{{ pat.allergies }}</p>
+              <h3 class="hc-drawer-sec-title">Clinical Vitals & Demographics</h3>
+              <div class="hc-drawer-grid">
+                <div class="hc-drawer-item">
+                  <span class="lbl">Blood Group</span>
+                  <span class="val highlight-blood">{{ pat.blood_group || 'Not Recorded' }}</span>
+                </div>
+                <div class="hc-drawer-item">
+                  <span class="lbl">Mobile Phone</span>
+                  <a [href]="'tel:' + pat.phone" class="val link">{{ pat.phone }}</a>
+                </div>
+                <div class="hc-drawer-item">
+                  <span class="lbl">Email Address</span>
+                  <a [href]="'mailto:' + pat.email" class="val link">{{ pat.email || '—' }}</a>
+                </div>
+                <div class="hc-drawer-item">
+                  <span class="lbl">Date of Birth</span>
+                  <span class="val">{{ pat.date_of_birth || '—' }}</span>
+                </div>
               </div>
             </div>
-          }
 
-          <!-- Address -->
-          @if (pat.address) {
-            <div class="hc-drawer-section">
-              <h3 class="hc-drawer-sec-title">Residential Address</h3>
-              <p class="hc-drawer-text">{{ pat.address }}</p>
-            </div>
-          }
-
-          <!-- Medical History Notes -->
-          @if (pat.notes) {
-            <div class="hc-drawer-section">
-              <h3 class="hc-drawer-sec-title">Medical History Notes</h3>
-              <p class="hc-drawer-text">{{ pat.notes }}</p>
-            </div>
-          }
-
-          <!-- History Timeline -->
-          <div class="hc-drawer-section">
-            <h3 class="hc-drawer-sec-title">Clinical History Timeline</h3>
-
-            @if (historyLoading()) {
-              <div class="p-t-16 text-center">
-                <mat-progress-spinner mode="indeterminate" diameter="28" style="margin:0 auto;"></mat-progress-spinner>
-                <span style="font-size:12px;color:var(--psh-tx-muted);">Loading history timeline...</span>
-              </div>
-            }
-
-            @if (!historyLoading() && appointmentHistory.length === 0) {
-              <div class="hc-drawer-empty-history">
-                <i-tabler name="notes" style="width:24px;height:24px;margin-bottom:6px;"></i-tabler>
-                <p>No past consultation records found for this patient.</p>
-              </div>
-            }
-
-            @if (!historyLoading() && appointmentHistory.length > 0) {
-              <div class="hc-timeline">
-                @for (item of appointmentHistory; track item.id) {
-                  <div class="hc-timeline-item">
-                    <div class="hc-tl-dot"></div>
-                    <div class="hc-tl-content">
-                      <div class="hc-tl-date">{{ item.appointment_date }}</div>
-                      <div class="hc-tl-title">Consultation with Dr. {{ item.doctor_name || 'Specialist' }}</div>
-                      <div class="hc-tl-status">{{ item.status }}</div>
-                    </div>
+            <!-- Allergy Alert Banner -->
+            @if (pat.allergies) {
+              <div class="hc-drawer-section">
+                <h3 class="hc-drawer-sec-title text-danger">High Priority Allergy Watchlist</h3>
+                <div class="hc-drawer-allergy-alert">
+                  <i-tabler name="alert-triangle"></i-tabler>
+                  <div>
+                    <strong>Known Allergies:</strong>
+                    <p>{{ pat.allergies }}</p>
                   </div>
-                }
+                </div>
               </div>
             }
-          </div>
+
+            <!-- Residential Address -->
+            @if (pat.address) {
+              <div class="hc-drawer-section">
+                <h3 class="hc-drawer-sec-title">Residential Address</h3>
+                <p class="hc-drawer-text">{{ pat.address }}</p>
+              </div>
+            }
+
+            <!-- Clinical History Notes -->
+            @if (pat.notes) {
+              <div class="hc-drawer-section">
+                <h3 class="hc-drawer-sec-title">Clinical Notes & Pre-existing Conditions</h3>
+                <p class="hc-drawer-text">{{ pat.notes }}</p>
+              </div>
+            }
+
+          }
+
+          <!-- TAB 2: CONSULTATION HISTORY TIMELINE -->
+          @if (activeDrawerTab() === 'appointments') {
+            <div class="hc-drawer-section">
+              <h3 class="hc-drawer-sec-title">Consultation History & Timeline</h3>
+
+              @if (historyLoading()) {
+                <div class="p-t-24 text-center">
+                  <mat-progress-spinner mode="indeterminate" diameter="32" style="margin:0 auto;"></mat-progress-spinner>
+                  <p style="font-size:13px;color:var(--psh-tx-muted);margin-top:8px;">Fetching consultation history...</p>
+                </div>
+              }
+
+              @if (!historyLoading() && appointmentHistory.length === 0) {
+                <div class="hc-drawer-empty-history">
+                  <i-tabler name="notes" style="width:28px;height:28px;margin-bottom:8px;color:var(--psh-tx-muted);"></i-tabler>
+                  <p>No past consultation records on file for this patient.</p>
+                </div>
+              }
+
+              @if (!historyLoading() && appointmentHistory.length > 0) {
+                <div class="hc-timeline">
+                  @for (item of appointmentHistory; track item.id) {
+                    <div class="hc-timeline-item">
+                      <div class="hc-tl-dot"></div>
+                      <div class="hc-tl-content">
+                        <div class="hc-tl-date">{{ item.appointment_date }}</div>
+                        <div class="hc-tl-title">Consultation with Dr. {{ item.doctor_name || 'Specialist' }}</div>
+                        <div class="hc-tl-status">{{ item.status }}</div>
+                      </div>
+                    </div>
+                  }
+                </div>
+              }
+            </div>
+          }
 
         </div>
 
@@ -690,7 +779,7 @@
           @if (perm.hasRoleAction('canUpdate', '/patients')) {
             <button class="psh-btn psh-btn--primary" (click)="closeProfile(); openForm(pat)">
               <i-tabler name="edit" style="width:16px;height:16px;margin-right:6px;"></i-tabler>
-              Edit Patient File
+              Edit Patient Record
             </button>
           }
         </div>
@@ -700,4 +789,3 @@
   }
 
 </div>
-

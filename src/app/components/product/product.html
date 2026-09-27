@@ -14,11 +14,11 @@
       <div class="psh-eyebrow">
         <span class="psh-eyebrow__dot"></span>
         <span>PRODUCT MANAGEMENT</span>
-        <span class="psh-eyebrow__sep">Â·</span>
+        <span class="psh-eyebrow__sep">·</span>
         <span>{{ Products.length }} PRODUCTS</span>
       </div>
       <h1 class="psh-title">Product <span class="psh-title__accent">Catalogue</span></h1>
-      <p class="psh-sub">Manage your full product library â€” drafts, approvals, publishing and inventory in one place.</p>
+      <p class="psh-sub">Manage your full product library — drafts, approvals, publishing and inventory in one place.</p>
     </div>
     @if (!Product_Forms && perm.hasRoleAction('canCreate')) {
       <div class="psh-actions">
@@ -89,6 +89,34 @@
           <button class="psh-filter__chip" [class.active]="selectedStatusFilter === 'Published'" (click)="filterByStatus('Published')">Published</button>
           <button class="psh-filter__chip" [class.active]="selectedStatusFilter === 'Rejected'" (click)="filterByStatus('Rejected')">Rejected</button>
           <button class="psh-filter__chip" [class.active]="selectedStatusFilter === 'deleted'" (click)="filterByStatus('deleted')">Trash</button>
+        </div>
+
+        <!-- Sale Channel Filter Row -->
+        <div class="channel-filter-row">
+          <span class="channel-label">
+            <mat-icon>store</mat-icon> Channel:
+          </span>
+          <button class="psh-filter__chip"
+              [class.active]="selectedChannelFilter === 'all'"
+              (click)="filterByChannel('all')">All Channels</button>
+          <button class="psh-filter__chip"
+              [class.active]="selectedChannelFilter === 'online'"
+              (click)="filterByChannel('online')"
+              style="--chip-accent:#6366f1">
+            <mat-icon>language</mat-icon> Online
+          </button>
+          <button class="psh-filter__chip"
+              [class.active]="selectedChannelFilter === 'offline'"
+              (click)="filterByChannel('offline')"
+              style="--chip-accent:#f59e0b">
+            <mat-icon>store_mall_directory</mat-icon> Offline
+          </button>
+          <button class="psh-filter__chip"
+              [class.active]="selectedChannelFilter === 'both'"
+              (click)="filterByChannel('both')"
+              style="--chip-accent:#10b981">
+            <mat-icon>swap_horiz</mat-icon> Both
+          </button>
         </div>
       </div>
       <app-mat-table [columns]="tableColumns" [tableData]="Products" [showAction]="true" [showView]="perm.hasRoleAction('canRead')"
@@ -180,6 +208,20 @@
                 </div>
 
                 <div class="field-container">
+                    <mat-label class="f-w-600 m-b-8 d-block">Sale Channel <span class="text-danger">*</span></mat-label>
+                    <mat-form-field appearance="outline" class="w-100">
+                        <mat-select formControlName="sale_channel" placeholder="Select Sale Channel">
+                            <mat-option value="online">🌐 Online Only</mat-option>
+                            <mat-option value="offline">🏪 Offline Only</mat-option>
+                            <mat-option value="both">↔ Both (Online &amp; Offline)</mat-option>
+                        </mat-select>
+                        @if (ProductForm.get('sale_channel')?.hasError('required')) {
+                            <mat-error>Sale channel is required</mat-error>
+                        }
+                    </mat-form-field>
+                </div>
+
+                <div class="field-container">
                     <mat-label class="f-w-600 m-b-8 d-block">Selling Price <span class="text-danger">*</span></mat-label>
                     <mat-form-field appearance="outline" class="w-100">
                         <mat-icon matPrefix style="color:var(--brand-primary);margin-right:6px">currency_rupee</mat-icon>
@@ -237,11 +279,11 @@
                 </div>
             </div>
 
-            <!-- Ã¢â€â‚¬Ã¢â€â‚¬ Admin-only: Purchase Cost & Tiered Pricing Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ -->
+            <!-- Admin-only: Purchase Cost & Tiered Pricing -->
             @if (perm.canViewPurchaseCost()) {
-            <div class="purchase-cost-banner m-b-12">
-                <mat-icon style="color:#f59e0b;font-size:16px;vertical-align:middle;margin-right:6px">admin_panel_settings</mat-icon>
-                <span style="font-size:12px;color:var(--text-secondary);">Admin-only pricing fields Ã¢â‚¬â€ hidden from Branch / Employee roles</span>
+            <div class="purchase-cost-banner">
+                <mat-icon>admin_panel_settings</mat-icon>
+                <span>Admin-only pricing fields — hidden from Branch / Employee roles</span>
             </div>
             <div class="form-row">
                 <div class="field-container">
@@ -283,7 +325,7 @@
             </div>
             } <!-- end canViewPurchaseCost -->
 
-            <div class="form-row">
+            <div class="form-row two-col">
                 <div class="field-container">
                     <mat-label class="f-w-600 m-b-8 d-block">Stock <span class="text-danger">*</span></mat-label>
                     <mat-form-field appearance="outline" class="w-100">
@@ -301,10 +343,8 @@
                     <mat-label class="f-w-600 m-b-8 d-block">Barcode</mat-label>
                     <mat-form-field appearance="outline" class="w-100">
                         <mat-icon matPrefix style="color:var(--brand-primary);margin-right:6px">qr_code_scanner</mat-icon>
-                        <input matInput formControlName="barcode" placeholder="Enter or Scan Barcode (8-14 digits)">
-                        <button type="button" mat-icon-button matSuffix color="primary" (click)="generateRandomBarcode()" matTooltip="Auto-Generate Barcode">
-                            <mat-icon>autorenew</mat-icon>
-                        </button>
+                        <input matInput formControlName="barcode" placeholder="Enter or Scan Barcode (8–14 digits)">
+                        <!-- Auto-generate barcode button REMOVED (hidden as requested) -->
                         <button type="button" mat-icon-button matSuffix color="accent" (click)="openBarcodeScannerModal('main')" matTooltip="Open Camera & Scanner">
                             <mat-icon>center_focus_strong</mat-icon>
                         </button>
@@ -775,7 +815,7 @@
             </div>
             }
 
-            <div class="flex m-t-24" style="justify-content: flex-end; gap: 16px;">
+            <div class="form-actions">
                 <button mat-stroked-button class="btn-rounded Cancel_Button" type="button" (click)="cancelProduct()">
                     <mat-icon>close</mat-icon> Cancel
                 </button>

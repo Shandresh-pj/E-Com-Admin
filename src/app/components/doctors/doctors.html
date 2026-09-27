@@ -189,30 +189,40 @@
                 </div>
               </div>
 
-              <!-- Card Key Stats Grid -->
+              <!-- Card Key Stats (Side-by-Side 2-Column Grid) -->
               <div class="hc-doc-card__body">
-                <div class="hc-doc-meta-item">
-                  <i-tabler name="award" class="hc-meta-icon"></i-tabler>
-                  <div class="hc-meta-content">
-                    <span class="hc-meta-val">{{ doctor.experience_years }} Years</span>
-                    <span class="hc-meta-lbl">Experience</span>
+                <div class="hc-doc-stats-grid">
+                  <div class="hc-doc-stat-pill">
+                    <div class="hc-stat-icon-box hc-stat-icon-box--exp">
+                      <i-tabler name="award"></i-tabler>
+                    </div>
+                    <div class="hc-stat-content">
+                      <span class="hc-stat-val">{{ doctor.experience_years }} Yrs</span>
+                      <span class="hc-stat-lbl">Experience</span>
+                    </div>
+                  </div>
+
+                  <div class="hc-doc-stat-pill hc-doc-stat-pill--fee">
+                    <div class="hc-stat-icon-box hc-stat-icon-box--fee">
+                      <i-tabler name="currency-rupee"></i-tabler>
+                    </div>
+                    <div class="hc-stat-content">
+                      <span class="hc-stat-val hc-stat-val--fee">{{ formatFee(doctor.consultation_fee) }}</span>
+                      <span class="hc-stat-lbl">Consult Fee</span>
+                    </div>
                   </div>
                 </div>
 
-                <div class="hc-doc-meta-item hc-doc-meta-item--fee">
-                  <i-tabler name="currency-rupee" class="hc-meta-icon"></i-tabler>
-                  <div class="hc-meta-content">
-                    <span class="hc-meta-val hc-meta-val--fee">{{ formatFee(doctor.consultation_fee) }}</span>
-                    <span class="hc-meta-lbl">Consult Fee</span>
+                <!-- Registration Bar with Copy Action -->
+                @if (doctor.registration_number) {
+                  <div class="hc-doc-reg-bar" (click)="copyRegNo(doctor.registration_number, $event)" matTooltip="Click to copy Registration No.">
+                    <div class="hc-reg-left">
+                      <i-tabler name="certificate" class="hc-reg-icon"></i-tabler>
+                      <span class="hc-reg-text">Reg: <code>{{ doctor.registration_number }}</code></span>
+                    </div>
+                    <i-tabler [name]="copiedRegId() === doctor.registration_number ? 'check' : 'copy'" class="hc-copy-icon"></i-tabler>
                   </div>
-                </div>
-
-                <!-- Reg Number with Copy Action -->
-                <div class="hc-doc-reg-bar" (click)="copyRegNo(doctor.registration_number, $event)" matTooltip="Click to copy Reg. Number">
-                  <i-tabler name="certificate" style="width:14px;height:14px;color:var(--psh-indigo);"></i-tabler>
-                  <span class="hc-reg-text">Reg: <code>{{ doctor.registration_number }}</code></span>
-                  <i-tabler [name]="copiedRegId() === doctor.registration_number ? 'check' : 'copy'" class="hc-copy-icon"></i-tabler>
-                </div>
+                }
 
                 <!-- Contact Snippet -->
                 @if (doctor.phone || doctor.email) {
@@ -255,6 +265,12 @@
                           [matTooltip]="doctor.is_active ? 'Deactivate Doctor' : 'Activate Doctor'">
                     <i-tabler [name]="doctor.is_active ? 'user-x' : 'user-check'" style="width:15px;height:15px;"></i-tabler>
                     <span>{{ doctor.is_active ? 'Off' : 'On' }}</span>
+                  </button>
+                }
+
+                @if (perm.hasRoleAction('canDelete', '/doctors')) {
+                  <button class="hc-act-btn hc-act-btn--deactivate" (click)="deleteDoctor(doctor, $event)" matTooltip="Delete Doctor">
+                    <i-tabler name="trash" style="width:15px;height:15px;"></i-tabler>
                   </button>
                 }
               </div>
@@ -323,8 +339,13 @@
                           </button>
                         }
                         @if (perm.hasRoleAction('canActivate', '/doctors') || perm.hasRoleAction('canDeactivate', '/doctors')) {
-                          <button class="hc-icon-btn" [class.danger]="doctor.is_active" (click)="toggleStatus(doctor)" [matTooltip]="doctor.is_active ? 'Deactivate' : 'Activate'">
+                          <button class="hc-icon-btn" [class.danger]="doctor.is_active" (click)="toggleStatus(doctor, $event)" [matTooltip]="doctor.is_active ? 'Deactivate' : 'Activate'">
                             <i-tabler [name]="doctor.is_active ? 'user-x' : 'user-check'"></i-tabler>
+                          </button>
+                        }
+                        @if (perm.hasRoleAction('canDelete', '/doctors')) {
+                          <button class="hc-icon-btn danger" (click)="deleteDoctor(doctor, $event)" matTooltip="Delete Doctor">
+                            <i-tabler name="trash"></i-tabler>
                           </button>
                         }
                       </div>
@@ -421,12 +442,9 @@
               </h3>
               <div class="row">
                 <div class="col-md-6 m-b-16">
-                  <label class="hc-field-label">Registration Number <span class="req">*</span></label>
+                  <label class="hc-field-label">Registration Number</label>
                   <mat-form-field appearance="outline" class="w-100">
-                    <input matInput formControlName="registration_number" placeholder="e.g. MCI-2023-88910">
-                    @if (form.get('registration_number')?.hasError('required')) {
-                      <mat-error>Reg number is required</mat-error>
-                    }
+                    <input matInput formControlName="registration_number" placeholder="e.g. MCI-2023-88910 (Optional)">
                   </mat-form-field>
                 </div>
 
@@ -448,13 +466,51 @@
                 </div>
 
                 <div class="col-md-6 m-b-16">
-                  <label class="hc-field-label">Email Address</label>
+                  <label class="hc-field-label">Email Address (Login Username)</label>
                   <mat-form-field appearance="outline" class="w-100">
                     <input matInput formControlName="email" type="email" placeholder="doctor@hospital.org">
                   </mat-form-field>
                 </div>
               </div>
             </div>
+
+            <!-- Doctor Login Credentials & Temporary Password Setup -->
+            @if (!editingId()) {
+              <div class="hc-form-section hc-credentials-section">
+                <h3 class="hc-section-title text-indigo">
+                  <i-tabler name="key" class="hc-sec-icon"></i-tabler>
+                  Doctor Login Account &amp; Temporary Password
+                </h3>
+                <div class="row align-items-center">
+                  <div class="col-md-7 m-b-16">
+                    <label class="hc-field-label">Temporary Password <span class="req">*</span></label>
+                    <mat-form-field appearance="outline" class="w-100">
+                      <input matInput [type]="showPassword() ? 'text' : 'password'" formControlName="temporary_password" placeholder="Temporary password for login">
+                      <button type="button" matSuffix mat-icon-button (click)="showPassword.set(!showPassword())" matTooltip="Toggle password visibility">
+                        <i-tabler [name]="showPassword() ? 'eye-off' : 'eye'"></i-tabler>
+                      </button>
+                    </mat-form-field>
+                    <div class="m-t-4">
+                      <button type="button" class="psh-btn psh-btn--sm psh-btn--secondary" (click)="autoGenerateTempPassword()">
+                        <i-tabler name="refresh" style="width:14px;height:14px;margin-right:4px;"></i-tabler>
+                        Auto-Generate New Password
+                      </button>
+                    </div>
+                  </div>
+
+                  <div class="col-md-5 m-b-16">
+                    <div class="hc-credentials-box">
+                      <mat-slide-toggle formControlName="send_email_credentials" color="primary">
+                        <span class="f-w-700 f-s-13 text-dark">Send Email Notification</span>
+                      </mat-slide-toggle>
+                      <p class="f-s-11 text-muted m-b-0 m-t-4">
+                        Sends automated email with portal link, login username (email) &amp; temporary password.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            }
 
             <!-- Section 3: Consultation Pricing & Bio -->
             <div class="hc-form-section">
@@ -470,6 +526,18 @@
                     @if (form.get('consultation_fee')?.hasError('required')) {
                       <mat-error>Consultation fee is required</mat-error>
                     }
+                  </mat-form-field>
+                </div>
+
+                <div class="col-md-6 m-b-16">
+                  <label class="hc-field-label">Assigned Hospital Branch / Location</label>
+                  <mat-form-field appearance="outline" class="w-100">
+                    <mat-select formControlName="branch_id" placeholder="Select Branch (Optional)">
+                      <mat-option [value]="null">All Branches / Main Hospital</mat-option>
+                      @for (b of branches(); track b.id) {
+                        <mat-option [value]="b.id">{{ b.name || b.branch_name }}</mat-option>
+                      }
+                    </mat-select>
                   </mat-form-field>
                 </div>
 
@@ -538,25 +606,33 @@
               </div>
 
               <div class="hc-doc-card__body">
-                <div class="hc-doc-meta-item">
-                  <i-tabler name="award" class="hc-meta-icon"></i-tabler>
-                  <div class="hc-meta-content">
-                    <span class="hc-meta-val">{{ formValues().experience_years || 0 }} Years</span>
-                    <span class="hc-meta-lbl">Experience</span>
+                <div class="hc-doc-stats-grid">
+                  <div class="hc-doc-stat-pill">
+                    <div class="hc-stat-icon-box hc-stat-icon-box--exp">
+                      <i-tabler name="award"></i-tabler>
+                    </div>
+                    <div class="hc-stat-content">
+                      <span class="hc-stat-val">{{ formValues().experience_years || 0 }} Yrs</span>
+                      <span class="hc-stat-lbl">Experience</span>
+                    </div>
                   </div>
-                </div>
 
-                <div class="hc-doc-meta-item hc-doc-meta-item--fee">
-                  <i-tabler name="currency-rupee" class="hc-meta-icon"></i-tabler>
-                  <div class="hc-meta-content">
-                    <span class="hc-meta-val hc-meta-val--fee">{{ formatFee(formValues().consultation_fee) }}</span>
-                    <span class="hc-meta-lbl">Consult Fee</span>
+                  <div class="hc-doc-stat-pill hc-doc-stat-pill--fee">
+                    <div class="hc-stat-icon-box hc-stat-icon-box--fee">
+                      <i-tabler name="currency-rupee"></i-tabler>
+                    </div>
+                    <div class="hc-stat-content">
+                      <span class="hc-stat-val hc-stat-val--fee">{{ formatFee(formValues().consultation_fee) }}</span>
+                      <span class="hc-stat-lbl">Consult Fee</span>
+                    </div>
                   </div>
                 </div>
 
                 <div class="hc-doc-reg-bar">
-                  <i-tabler name="certificate" style="width:14px;height:14px;color:var(--psh-indigo);"></i-tabler>
-                  <span class="hc-reg-text">Reg: <code>{{ formValues().registration_number || 'REG-NUMBER' }}</code></span>
+                  <div class="hc-reg-left">
+                    <i-tabler name="certificate" class="hc-reg-icon"></i-tabler>
+                    <span class="hc-reg-text">Reg: <code>{{ formValues().registration_number || 'REG-NUMBER' }}</code></span>
+                  </div>
                 </div>
 
                 @if (formValues().phone || formValues().email) {
@@ -628,6 +704,15 @@
 
           <!-- Contact & Credentials List -->
           <div class="hc-modal-details-list">
+            @if (doc.branch_id && getBranchName(doc.branch_id)) {
+              <div class="hc-modal-row">
+                <i-tabler name="map-pin"></i-tabler>
+                <div>
+                  <label>Assigned Branch</label>
+                  <span>{{ getBranchName(doc.branch_id) }}</span>
+                </div>
+              </div>
+            }
             @if (doc.registration_body) {
               <div class="hc-modal-row">
                 <i-tabler name="building-hospital"></i-tabler>

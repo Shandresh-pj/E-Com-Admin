@@ -102,6 +102,23 @@
 
             <div class="row">
 
+                <!-- Admin Type -->
+                <div class="col-lg-4">
+                    <mat-label class="f-w-600 m-b-8 d-block">Admin Type <span class="text-danger">*</span></mat-label>
+                    <mat-form-field appearance="outline" class="w-100">
+                        <mat-select formControlName="adminType" placeholder="Select Admin Type">
+                            @for (type of adminTypes; track type.value) {
+                                <mat-option [value]="type.value">{{ type.label }}</mat-option>
+                            }
+                        </mat-select>
+                    </mat-form-field>
+                    @if (isHospitalAdmin) {
+                      <div class="badge bg-light-info text-info d-block m-t-4" style="font-size:11px;padding:6px 10px;border-radius:6px;">
+                        🏥 This admin will have access to the Healthcare ERP dashboard (Doctors, Patients, Pharmacy, Appointments).
+                      </div>
+                    }
+                </div>
+
                 <div class="col-lg-4">
                     <mat-label class="f-w-600 m-b-8 d-block">Company Name <span class="text-danger">*</span></mat-label>
                     <mat-form-field appearance="outline" class="w-100">

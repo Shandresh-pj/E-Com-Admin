@@ -39,6 +39,7 @@ import { Doctor } from 'src/app/models/healthcare.models';
 })
 export class DoctorsComponent implements OnInit, OnDestroy {
   doctors               = signal<Doctor[]>([]);
+  branches              = signal<{ id: number; name?: string; branch_name?: string }[]>([]);
   loading               = signal(false);
   saving                = signal(false);
   showForm              = signal(false);
@@ -47,8 +48,9 @@ export class DoctorsComponent implements OnInit, OnDestroy {
   selectedSpecialty     = signal<string>('ALL');
   viewMode              = signal<'grid' | 'list'>('grid');
   selectedDoctorModal   = signal<Doctor | null>(null);
-  formValues            = signal<Partial<Doctor>>({});
+  formValues            = signal<Partial<Doctor & { temporary_password?: string; send_email_credentials?: boolean }>>({});
   copiedRegId           = signal<string | null>(null);
+  showPassword          = signal(false);
 
   form!: FormGroup;
   private subs = new Subscription();
@@ -61,16 +63,21 @@ export class DoctorsComponent implements OnInit, OnDestroy {
     'Rheumatology', 'Dental', 'Physiotherapy', 'Anesthesiology', 'Pathology',
   ];
 
-  // Computed state for active doctor filters
+  // Computed state for active doctor filters with strict null-safety
   filteredDoctors = computed(() => {
-    const q = this.searchQuery().toLowerCase().trim();
+    const q = (this.searchQuery() || '').toLowerCase().trim();
     const spec = this.selectedSpecialty();
     return this.doctors().filter(d => {
+      const nameStr = (d.name || '').toLowerCase();
+      const specStr = (d.specialization || '').toLowerCase();
+      const regStr  = (d.registration_number || (d as any).license_no || '').toLowerCase();
+      const qualStr = (d.qualification || '').toLowerCase();
+
       const matchesSearch = !q ||
-        d.name.toLowerCase().includes(q) ||
-        d.specialization.toLowerCase().includes(q) ||
-        d.registration_number.toLowerCase().includes(q) ||
-        (d.qualification && d.qualification.toLowerCase().includes(q));
+        nameStr.includes(q) ||
+        specStr.includes(q) ||
+        regStr.includes(q) ||
+        qualStr.includes(q);
 
       const matchesSpec = spec === 'ALL' || d.specialization === spec;
 
@@ -82,7 +89,9 @@ export class DoctorsComponent implements OnInit, OnDestroy {
   specialtyCounts = computed(() => {
     const counts: Record<string, number> = {};
     for (const d of this.doctors()) {
-      counts[d.specialization] = (counts[d.specialization] || 0) + 1;
+      if (d.specialization) {
+        counts[d.specialization] = (counts[d.specialization] || 0) + 1;
+      }
     }
     return counts;
   });
@@ -124,25 +133,44 @@ export class DoctorsComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.buildForm();
     this.loadDoctors();
+    this.loadBranches();
+    this.setupSocketListeners();
   }
 
   ngOnDestroy(): void {
     this.subs.unsubscribe();
   }
 
+  private setupSocketListeners(): void {
+    if (!this.socket) return;
+    this.subs.add(
+      this.socket.on('DOCTOR_CREATED').subscribe(() => this.loadDoctors())
+    );
+    this.subs.add(
+      this.socket.on('DOCTOR_UPDATED').subscribe(() => this.loadDoctors())
+    );
+    this.subs.add(
+      this.socket.on('DOCTOR_DELETED').subscribe(() => this.loadDoctors())
+    );
+  }
+
   private buildForm(): void {
     this.form = this.fb.group({
-      name:                ['', [Validators.required, Validators.minLength(2)]],
-      specialization:      ['', Validators.required],
-      qualification:       ['', Validators.required],
-      experience_years:    [0,  [Validators.required, Validators.min(0), Validators.max(60)]],
-      registration_number: ['', Validators.required],
-      registration_body:   [''],
-      phone:               ['', [Validators.required, Validators.pattern(/^[0-9+\-\s]{7,15}$/)]],
-      email:               ['', [Validators.email]],
-      consultation_fee:    [0,  [Validators.required, Validators.min(0)]],
-      description:         [''],
-      is_active:           [true],
+      name:                   ['', [Validators.required, Validators.minLength(2)]],
+      specialization:         ['', Validators.required],
+      qualification:          ['', Validators.required],
+      experience_years:       [0,  [Validators.required, Validators.min(0), Validators.max(60)]],
+      registration_number:    [''],
+      registration_body:      [''],
+      phone:                  ['', [Validators.required, Validators.pattern(/^[0-9+\-\s]{7,15}$/)]],
+      email:                  ['', [Validators.email]],
+      consultation_fee:       [0,  [Validators.required, Validators.min(0)]],
+      description:            [''],
+      is_active:              [true],
+      branch_id:              [null],
+      company_id:             [null],
+      temporary_password:     [''],
+      send_email_credentials: [true],
     });
 
     // Real-time listener for live card preview in form mode
@@ -154,15 +182,60 @@ export class DoctorsComponent implements OnInit, OnDestroy {
     );
   }
 
+  loadBranches(): void {
+    this.common.getApi('branches').subscribe({
+      next: (res: any) => {
+        this.branches.set(res?.data || []);
+        this.cdr.markForCheck();
+      },
+      error: (err: any) => console.error('[DoctorsComponent] Load branches error:', err)
+    });
+  }
+
+  getBranchName(branchId?: number): string {
+    if (!branchId) return '';
+    const b = this.branches().find(item => item.id === Number(branchId));
+    return b?.name || b?.branch_name || `Branch #${branchId}`;
+  }
+
+  // Generates a secure random temporary password for doctor login
+  generateTempPassword(): string {
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789!@#$';
+    let pass = 'Doc#';
+    for (let i = 0; i < 6; i++) {
+      pass += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return pass;
+  }
+
+  autoGenerateTempPassword(): void {
+    const newPass = this.generateTempPassword();
+    this.form.patchValue({ temporary_password: newPass });
+    this.alert.success(`Generated temporary password: ${newPass}`);
+    this.cdr.markForCheck();
+  }
+
   loadDoctors(): void {
     this.loading.set(true);
     this.common.getApi('doctors').subscribe({
       next: (res: any) => {
-        this.doctors.set(res?.data || []);
+        const rawList = res?.data || [];
+        const normalized: Doctor[] = rawList.map((d: any) => ({
+          ...d,
+          registration_number: d.registration_number || d.license_no || '',
+          license_no: d.license_no || d.registration_number || '',
+          description: d.description || d.bio || '',
+          bio: d.bio || d.description || '',
+          consultation_fee: d.consultation_fee != null ? Number(d.consultation_fee) : 0,
+          experience_years: d.experience_years != null ? Number(d.experience_years) : 0,
+          is_active: d.is_active !== false,
+        }));
+        this.doctors.set(normalized);
         this.loading.set(false);
         this.cdr.markForCheck();
       },
-      error: () => {
+      error: (err: any) => {
+        console.error('[DoctorsComponent] Load doctors error:', err);
         this.loading.set(false);
         this.cdr.markForCheck();
       },
@@ -182,11 +255,36 @@ export class DoctorsComponent implements OnInit, OnDestroy {
   openForm(doctor?: Doctor): void {
     if (doctor) {
       this.editingId.set(doctor.id);
-      this.form.patchValue(doctor);
-      this.formValues.set(doctor);
+      const cleanName = doctor.name ? doctor.name.replace(/^Dr\.?\s*/i, '') : '';
+      const formPatch = {
+        ...doctor,
+        name: cleanName,
+        registration_number: doctor.registration_number || (doctor as any).license_no || '',
+        description: doctor.description || (doctor as any).bio || '',
+        temporary_password: '',
+        send_email_credentials: false
+      };
+      this.form.patchValue(formPatch);
+      this.formValues.set(formPatch);
     } else {
       this.editingId.set(null);
-      const defaultVal = { is_active: true, experience_years: 0, consultation_fee: 0 };
+      const defaultVal = {
+        name: '',
+        specialization: '',
+        qualification: '',
+        experience_years: 0,
+        registration_number: '',
+        registration_body: '',
+        phone: '',
+        email: '',
+        consultation_fee: 0,
+        description: '',
+        is_active: true,
+        branch_id: null,
+        company_id: null,
+        temporary_password: this.generateTempPassword(),
+        send_email_credentials: true
+      };
       this.form.reset(defaultVal);
       this.formValues.set(defaultVal);
     }
@@ -216,15 +314,53 @@ export class DoctorsComponent implements OnInit, OnDestroy {
       return;
     }
     this.saving.set(true);
-    const payload = this.form.value;
+    const formVal = this.form.value;
     const id = this.editingId();
+
+    const payload: any = {
+      ...formVal,
+      license_no: formVal.registration_number || '',
+      registration_number: formVal.registration_number || '',
+      bio: formVal.description || '',
+      description: formVal.description || '',
+      userType: 'Doctor',
+      role: 'Doctor',
+      password: formVal.temporary_password,
+      temporary_password: formVal.temporary_password,
+      send_email_credentials: formVal.send_email_credentials
+    };
+
+    if (!id && !payload.temporary_password) {
+      const genPass = this.generateTempPassword();
+      payload.password = genPass;
+      payload.temporary_password = genPass;
+    }
+
     const req$ = id
       ? this.common.putApi(`doctors/${id}`, payload)
       : this.common.postApi('doctors', payload);
 
     req$.subscribe({
-      next: () => {
-        this.alert.success(id ? 'Doctor details updated' : 'Doctor registered successfully');
+      next: (res: any) => {
+        const isNew = !id;
+        const doctorEmail = payload.email;
+        const emailSent = payload.send_email_credentials && doctorEmail;
+
+        if (isNew && res?.data) {
+          const newDoc = res.data;
+          this.doctors.update(list => [newDoc, ...list.filter(d => d.id !== newDoc.id)]);
+        }
+
+        if (isNew) {
+          let msg = res?.message || `Doctor Dr. ${payload.name} registered successfully.`;
+          if (emailSent) {
+            msg = `Doctor Dr. ${payload.name} registered successfully. Login credentials sent to ${doctorEmail}.`;
+          }
+          this.alert.success(msg, 'Doctor Registered!');
+        } else {
+          this.alert.success('Doctor details updated');
+        }
+
         this.saving.set(false);
         this.closeForm();
         this.loadDoctors();
@@ -263,6 +399,20 @@ export class DoctorsComponent implements OnInit, OnDestroy {
     });
   }
 
+  deleteDoctor(doctor: Doctor, event?: Event): void {
+    if (event) event.stopPropagation();
+    this.alert.deleteConfirm(`Are you sure you want to permanently delete Dr. ${doctor.name}? This will also remove their user account.`).then((r: any) => {
+      if (!r.isConfirmed) return;
+      this.common.deleteApi(`doctors/${doctor.id}?permanent=true`).subscribe({
+        next: () => {
+          this.alert.success(`Doctor Dr. ${doctor.name} permanently deleted`);
+          this.loadDoctors();
+        },
+        error: (err: any) => this.alert.error(err?.error?.message || 'Failed to delete doctor'),
+      });
+    });
+  }
+
   copyRegNo(regNo: string, event?: Event): void {
     if (event) event.stopPropagation();
     if (!regNo) return;
@@ -298,16 +448,16 @@ export class DoctorsComponent implements OnInit, OnDestroy {
     if (!specialty) return 'linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)';
     const spec = specialty.toLowerCase();
 
-    if (spec.includes('cardio')) return 'linear-gradient(135deg, #e11d48 0%, #be123c 100%)'; // Crimson / Red
-    if (spec.includes('neuro')) return 'linear-gradient(135deg, #7c3aed 0%, #4c1d95 100%)'; // Deep Violet
-    if (spec.includes('derma')) return 'linear-gradient(135deg, #ec4899 0%, #be185d 100%)'; // Pink / Rose
-    if (spec.includes('pedia')) return 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)'; // Warm Amber
-    if (spec.includes('ortho')) return 'linear-gradient(135deg, #0284c7 0%, #0369a1 100%)'; // Ocean Blue
-    if (spec.includes('gastro') || spec.includes('surg')) return 'linear-gradient(135deg, #0d9488 0%, #115e59 100%)'; // Teal
-    if (spec.includes('ent') || spec.includes('ophthal')) return 'linear-gradient(135deg, #059669 0%, #047857 100%)'; // Emerald
-    if (spec.includes('psych') || spec.includes('oncology')) return 'linear-gradient(135deg, #9333ea 0%, #6b21a8 100%)'; // Purple
+    if (spec.includes('cardio')) return 'linear-gradient(135deg, #e11d48 0%, #be123c 100%)';
+    if (spec.includes('neuro')) return 'linear-gradient(135deg, #7c3aed 0%, #4c1d95 100%)';
+    if (spec.includes('derma')) return 'linear-gradient(135deg, #ec4899 0%, #be185d 100%)';
+    if (spec.includes('pedia')) return 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)';
+    if (spec.includes('ortho')) return 'linear-gradient(135deg, #0284c7 0%, #0369a1 100%)';
+    if (spec.includes('gastro') || spec.includes('surg')) return 'linear-gradient(135deg, #0d9488 0%, #115e59 100%)';
+    if (spec.includes('ent') || spec.includes('ophthal')) return 'linear-gradient(135deg, #059669 0%, #047857 100%)';
+    if (spec.includes('psych') || spec.includes('oncology')) return 'linear-gradient(135deg, #9333ea 0%, #6b21a8 100%)';
 
-    return 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)'; // Sapphire default
+    return 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)';
   }
 
   getSpecialtyBadgeClass(specialty?: string): string {
@@ -325,4 +475,3 @@ export class DoctorsComponent implements OnInit, OnDestroy {
     return 'badge-indigo';
   }
 }
-

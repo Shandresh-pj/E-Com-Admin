@@ -56,6 +56,7 @@ export class Product {
     { columnDef: 'price', header: 'Price' },
     { columnDef: 'stock_in_hand', header: 'Stock' },
     { columnDef: 'product_type', header: 'Type' },
+    { columnDef: 'sale_channel', header: 'Channel', type: 'badge' },
     { columnDef: 'manufacture_date', header: 'Mfg. Date' },
     { columnDef: 'expiry_date', header: 'Expiry Date' },
     { columnDef: 'approval_status', header: 'Approval State', type: 'badge' },
@@ -94,6 +95,7 @@ export class Product {
   existingVideoUrl: string | null = null;
 
   selectedStatusFilter: string = 'all';
+  selectedChannelFilter: string = 'all';
   aiLoading: boolean = false;
   private socketSub = new Subscription();
 
@@ -142,6 +144,7 @@ export class Product {
       stock_in_hand: ['', [Validators.required, Validators.min(0)]],
       barcode: ['', Validators.pattern(/^\d{8,14}$/)],
       product_type: ['single', Validators.required],
+      sale_channel: ['both', Validators.required],
       status: ['Draft', Validators.required],
       variants: this.fb.array([]),
       attributeValues: this.fb.array([]),
@@ -456,6 +459,10 @@ export class Product {
       }
       params.is_deleted = 'false';
     }
+    // Sale channel filter — sends to backend for DB-level filtering
+    if (this.selectedChannelFilter && this.selectedChannelFilter !== 'all') {
+      params.sale_channel = this.selectedChannelFilter;
+    }
     this.commonService.getApi(`products`, params).subscribe({
       next: (res: any) => {
         const rawList = res?.data?.data ?? res?.data ?? res;
@@ -474,6 +481,11 @@ export class Product {
 
   filterByStatus(status: string) {
     this.selectedStatusFilter = status;
+    this.getProducts();
+  }
+
+  filterByChannel(channel: string) {
+    this.selectedChannelFilter = channel;
     this.getProducts();
   }
 
@@ -848,6 +860,7 @@ export class Product {
       stock_in_hand: product?.stock_in_hand,
       barcode: product?.barcode,
       product_type: product?.product_type,
+      sale_channel: product?.sale_channel || 'both',
       status: product?.status || 'Draft',
       low_stock_threshold: product?.low_stock_threshold || 5,
       critical_stock_threshold: product?.critical_stock_threshold || 2,
@@ -1155,7 +1168,7 @@ export class Product {
     this.VideoFile = null;
     this.videoPreviewUrl = null;
     this.existingVideoUrl = null;
-    this.ProductForm.reset({ product_type: 'single', base_unit: 'Piece' });
+    this.ProductForm.reset({ product_type: 'single', sale_channel: 'both', base_unit: 'Piece' });
   }
 
   submit(form: FormGroup) {
@@ -1195,6 +1208,7 @@ export class Product {
     formData.append('stock_in_hand', value.stock_in_hand);
     formData.append('barcode', value.barcode || '');
     formData.append('product_type', value.product_type);
+    formData.append('sale_channel', value.sale_channel || 'both');
     // Branch/below users always submit as Draft and require admin approval
     const effectiveStatus = this.perm.isBranchOrBelow() ? 'Draft' : value.status;
     formData.append('status', effectiveStatus);

@@ -37,28 +37,17 @@ export class AppAdmin {
   Users: any;
 
   tableColumns = [
-    {
-      columnDef: 'id',
-      header: 'No'
-    },
-    {
-      columnDef: 'name',
-      header: 'Name'
-    },
-    {
-      columnDef: 'email',
-      header: 'Email'
-    },
-    {
-      columnDef: 'phone',
-      header: 'Mobile Number'
-    },
-    {
-      columnDef: 'gst_number',
-      header: 'GST Number'
-    },
-    
-   
+    { columnDef: 'id',         header: 'No'            },
+    { columnDef: 'name',       header: 'Name'          },
+    { columnDef: 'email',      header: 'Email'         },
+    { columnDef: 'phone',      header: 'Mobile Number' },
+    { columnDef: 'gst_number', header: 'GST Number'    },
+    { columnDef: 'userType',   header: 'Admin Type', type: 'badge' },
+  ];
+
+  readonly adminTypes = [
+    { value: 'Admin',          label: 'Admin (Standard)' },
+    { value: 'Hospital_Admin', label: 'Hospital Admin (Healthcare ERP)' },
   ];
 
   Companies_Form : boolean = false;
@@ -79,16 +68,21 @@ constructor(private fb: FormBuilder,
   public perm: PermissionService
 ){
   const user = this.authService.getUser();
-  console.log("aaaa-1.1",user)
   this.CompanyForm = fb.group({
-    name : ['', Validators.required],
-    email : ['', [Validators.required, Validators.email]],
-    phone : ['', Validators.required],
-    address : [''],
-    gst_number : [''],
-    role_id: [{value:'', disabled:true}, Validators.required],
-    razorpay_key_id: [''],
-    razorpay_key_secret: ['']
+    adminType:          ['Admin', Validators.required],
+    name:               ['', Validators.required],
+    email:              ['', [Validators.required, Validators.email]],
+    phone:              ['', Validators.required],
+    address:            [''],
+    gst_number:         [''],
+    role_id:            [{value: '', disabled: true}, Validators.required],
+    razorpay_key_id:    [''],
+    razorpay_key_secret:['']
+  });
+
+  // When admin type changes -> auto-set role
+  this.CompanyForm.get('adminType')?.valueChanges.subscribe((type: string) => {
+    this.applyAdminRoleLock(type);
   });
 }
 
@@ -96,6 +90,21 @@ ngOnInit() {
   this.getUser();
   this.getRoles();
 }
+
+/** Auto-set role_id to match Admin Type */
+applyAdminRoleLock(type: string): void {
+  const roleControl = this.CompanyForm.get('role_id');
+  if (!roleControl || !this.Roles) return;
+  const targetName = type === 'Hospital_Admin' ? 'Hospital_Admin' : 'Admin';
+  const match = this.Roles.find((r: any) => r.name === targetName || r.name?.toLowerCase() === targetName.toLowerCase());
+  if (match) roleControl.setValue(match.id);
+  this.cdr.detectChanges();
+}
+
+get isHospitalAdmin(): boolean {
+  return this.CompanyForm.get('adminType')?.value === 'Hospital_Admin';
+}
+
 
 AddNewUser(){
   this.getRoles();
@@ -117,9 +126,10 @@ closeView() {
 
 
 cancelAdd(){
-  this.getUser();
   this.Companies_Form = false;
-  this.CompanyForm.reset();
+  this.CompanyForm.reset({ adminType: 'Admin' });
+  this.applyAdminRoleLock('Admin');
+  this.getUser();
 }
 
 cancelComapny(){
@@ -139,16 +149,11 @@ getUser(){
 
 getRoles(){
   this.commonService.getApi(`roles`).subscribe({
-    next:(res:any)=> {
+    next:(res:any)=>{
       this.Roles = res?.data
-      const defaultRole = this.Roles.find(
-        (x:any)=>x.name==="Admin"
-      );
-      if(defaultRole && !this.CompanyForm.get('role_id')?.value){
-        this.CompanyForm.patchValue({
-          role_id: defaultRole.id
-        });
-      }
+      // Apply lock based on current admin type
+      const currentType = this.CompanyForm.get('adminType')?.value || 'Admin';
+      this.applyAdminRoleLock(currentType);
     }
   })
 }
@@ -156,10 +161,16 @@ getRoles(){
 
 editUser(user: any) {
   this.Companies_Form = true;
+  this.View_Mode = false;
   this.Update_Button = true;
-  this.Roleid = user?.userRoles[0]?.role?.id
-console.log("user",user)
+  this.Roleid = user?.userRoles[0]?.role?.id;
+
+  // Detect adminType from stored userType
+  const storedType = user?.userType || 'Admin';
+  const adminType = storedType === 'Hospital_Admin' ? 'Hospital_Admin' : 'Admin';
+
   this.CompanyForm.patchValue({
+    adminType,
     name: user?.name,
     email: user?.email,
     phone: user?.phone,
@@ -170,13 +181,10 @@ console.log("user",user)
     razorpay_key_secret: user?.razorpay_key_secret || ''
   });
 
-  this.SelectedComapanyId = user?.id
-  console.log("id",this.SelectedComapanyId )
-
+  this.SelectedComapanyId = user?.id;
 }
 
 deleteUser(user: any) {
-  console.log('Delete User', user);
   const id = user?.id || this.SelectedComapanyId;
   this.alert.confirm("Are you sure you want to delete this admin/company?").then((result) => {
     if (result.isConfirmed) {

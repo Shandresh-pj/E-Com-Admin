@@ -14,6 +14,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
+import { MatDialogModule, MatDialog } from '@angular/material/dialog';
 import { TablerIconsModule } from 'angular-tabler-icons';
 import { Subscription } from 'rxjs';
 
@@ -26,6 +27,7 @@ import {
   APPOINTMENT_STATUS_META, HcEventType
 } from 'src/app/models/healthcare.models';
 import { formatDateDDMMYYYY, parseDateFromDDMMYYYY } from 'src/app/utils/date-utils';
+import { ClockTimepickerComponent } from '../clock-timepicker/clock-timepicker';
 
 @Component({
   selector: 'app-appointments',
@@ -35,7 +37,7 @@ import { formatDateDDMMYYYY, parseDateFromDDMMYYYY } from 'src/app/utils/date-ut
     CommonModule, ReactiveFormsModule, FormsModule, RouterModule,
     MatCardModule, MatButtonModule, MatFormFieldModule, MatInputModule,
     MatSelectModule, MatIconModule, MatTooltipModule, MatProgressSpinnerModule,
-    MatDatepickerModule, MatNativeDateModule, TablerIconsModule
+    MatDatepickerModule, MatNativeDateModule, MatDialogModule, TablerIconsModule
   ],
   templateUrl: './appointments.html',
   styleUrl: './appointments.scss',
@@ -91,6 +93,7 @@ export class AppointmentsComponent implements OnInit, OnDestroy {
     public  perm:   PermissionService,
     private socket: SocketService,
     public  cdr:    ChangeDetectorRef,
+    private dialog: MatDialog,
   ) {}
 
   ngOnInit(): void {
@@ -112,18 +115,36 @@ export class AppointmentsComponent implements OnInit, OnDestroy {
       appointment_date: [new Date(), Validators.required],
       appointment_time: ['09:00', Validators.required],
       chief_complaint:  [''],
-      consultation_fee: [500, [Validators.required, Validators.min(0)]],
-      status:           [AppointmentStatus.CONFIRMED, Validators.required],
+      consultation_fee: [0, [Validators.required, Validators.min(0)]],
       notes:            [''],
     });
 
-    this.form.valueChanges.subscribe(val => {
-      this.formValues.set({
-        ...val,
-        patient_name: this.getPatientName(val.patient_id),
-        doctor_name: this.getDoctorName(val.doctor_id)
-      });
-      this.cdr.markForCheck();
+    // Auto-fill doctor's consultation_fee when doctor is selected
+    this.subs.add(
+      this.form.get('doctor_id')!.valueChanges.subscribe(docId => {
+        const doc = this.doctors.find((d: any) => String(d.id) === String(docId));
+        if (doc && doc.consultation_fee != null) {
+          this.form.patchValue({ consultation_fee: doc.consultation_fee }, { emitEvent: false });
+        }
+        this.updateFormValues();
+        this.cdr.markForCheck();
+      })
+    );
+
+    this.subs.add(
+      this.form.valueChanges.subscribe(() => {
+        this.updateFormValues();
+        this.cdr.markForCheck();
+      })
+    );
+  }
+
+  private updateFormValues(): void {
+    const val = this.form.getRawValue();
+    this.formValues.set({
+      ...val,
+      patient_name: this.getPatientName(val.patient_id),
+      doctor_name:  this.getDoctorName(val.doctor_id)
     });
   }
 
@@ -135,6 +156,18 @@ export class AppointmentsComponent implements OnInit, OnDestroy {
   getDoctorName(id: any): string {
     const d = this.doctors.find(x => String(x.id) === String(id));
     return d ? d.name : '';
+  }
+
+  /** Returns patient label for dropdown: "Name (phone)" or "Name (#id)" */
+  getPatientLabel(p: any): string {
+    const contact = p.phone || p.email || `#${p.id}`;
+    return `${p.name} (${contact})`;
+  }
+
+  /** Returns doctor label for dropdown: "Dr. Name - Specialization" */
+  getDoctorLabel(d: any): string {
+    const spec = d.specialization || d.specialty || 'General';
+    return `Dr. ${d.name} — ${spec}`;
   }
 
   getInitials(name: string): string {
@@ -181,6 +214,7 @@ export class AppointmentsComponent implements OnInit, OnDestroy {
   }
 
   private loadDoctors(): void {
+    // Load active doctors — Doctor entity has is_active field so this is valid
     this.common.getApi('doctors?is_active=true').subscribe({
       next: (r: any) => { this.doctors = r?.data || []; this.cdr.markForCheck(); },
       error: () => {}
@@ -188,7 +222,8 @@ export class AppointmentsComponent implements OnInit, OnDestroy {
   }
 
   private loadPatients(): void {
-    this.common.getApi('patients?is_active=true').subscribe({
+    // Patient entity has no is_active — load all patients
+    this.common.getApi('patients').subscribe({
       next: (r: any) => { this.patients = r?.data || []; this.cdr.markForCheck(); },
       error: () => {}
     });
@@ -198,25 +233,68 @@ export class AppointmentsComponent implements OnInit, OnDestroy {
     if (appt) {
       this.editingId.set(appt.id);
       this.form.patchValue({
-        ...appt,
-        appointment_date: parseDateFromDDMMYYYY(appt.appointment_date)
+        patient_id:       appt.patient_id,
+        doctor_id:        appt.doctor_id,
+        appointment_date: parseDateFromDDMMYYYY(appt.appointment_date),
+        appointment_time: appt.appointment_time || '09:00',
+        chief_complaint:  (appt as any).chief_complaint || '',
+        consultation_fee: appt.consultation_fee || 0,
+        notes:            appt.notes || '',
       });
     } else {
       this.editingId.set(null);
-      this.form.reset({ consultation_fee: 0, appointment_date: new Date() });
+      this.form.reset({
+        consultation_fee: 0,
+        appointment_date: new Date(),
+        appointment_time: '09:00',
+      });
     }
     this.showForm.set(true);
+    this.updateFormValues();
+    this.cdr.markForCheck();
   }
 
-  closeForm(): void { this.showForm.set(false); }
+  closeForm(): void {
+    this.showForm.set(false);
+    this.cdr.markForCheck();
+  }
+
+  /** Open clock picker dialog and patch appointment_time from result */
+  openClockPicker(): void {
+    const currentTime = this.form.get('appointment_time')?.value || '09:00';
+    const ref = this.dialog.open(ClockTimepickerComponent, {
+      width: '320px',
+      panelClass: 'clock-dialog',
+      data: { title: 'Select Appointment Time', startTime: currentTime, isRange: false }
+    });
+    ref.afterClosed().subscribe(result => {
+      if (result?.startTime24) {
+        this.form.patchValue({ appointment_time: result.startTime24 });
+        this.updateFormValues();
+        this.cdr.markForCheck();
+      }
+    });
+  }
 
   saveAppointment(): void {
     if (this.form.invalid) { this.form.markAllAsTouched(); return; }
     this.saving.set(true);
+
+    const raw = this.form.getRawValue();
+
+    // Format date as DD-MM-YYYY for backend (which parses it in buildScheduledAt)
+    const appointmentDateFormatted = formatDateDDMMYYYY(raw.appointment_date);
+
     const payload = {
-      ...this.form.value,
-      appointment_date: formatDateDDMMYYYY(this.form.value.appointment_date)
+      patient_id:       raw.patient_id,
+      doctor_id:        raw.doctor_id,
+      appointment_date: appointmentDateFormatted,   // Backend builds scheduled_at from this
+      appointment_time: raw.appointment_time,
+      chief_complaint:  raw.chief_complaint,
+      consultation_fee: raw.consultation_fee,
+      notes:            raw.notes,
     };
+
     const id = this.editingId();
     const req$ = id
       ? this.common.putApi(`appointments/${id}`, payload)
@@ -249,7 +327,6 @@ export class AppointmentsComponent implements OnInit, OnDestroy {
       if (r.isConfirmed) this.updateStatus(appt, AppointmentStatus.CANCELLED);
     });
   }
-
 
   getStatusClass(status: string): string {
     return this.statusMeta[status as AppointmentStatus]?.cssClass || '';

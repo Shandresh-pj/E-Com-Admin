@@ -1,4 +1,4 @@
-﻿<div class="psh-root">
+<div class="psh-root">
 
   <!-- Ambient Background -->
   <div class="psh-bg" aria-hidden="true">
@@ -181,7 +181,14 @@
 
                 <!-- Role -->
                 <div class="col-lg-4 col-md-6">
-                    <mat-label class="f-w-600 m-b-8 d-block">{{ 'common.role' | translate }} <span class="text-danger">*</span></mat-label>
+                    <mat-label class="f-w-600 m-b-8 d-block">
+                      {{ 'common.role' | translate }} <span class="text-danger">*</span>
+                      @if (isRoleLocked) {
+                        <span class="badge bg-light-warning text-warning ms-2" style="font-size:10px;vertical-align:middle;">
+                          <mat-icon style="font-size:11px;height:11px;width:11px;vertical-align:middle;">lock</mat-icon> Auto-assigned
+                        </span>
+                      }
+                    </mat-label>
                     <mat-form-field appearance="outline" class="w-100">
                         <mat-select formControlName="role_id" [placeholder]="'common.select_role' | translate">
                             @for (option of Roles; track option.id) {
@@ -192,6 +199,11 @@
                             <mat-error>{{ 'error.role.required' | translate }}</mat-error>
                         }
                     </mat-form-field>
+                    @if (isRoleLocked) {
+                      <small class="text-muted" style="font-size:11px;">
+                        Role is automatically assigned based on Employee Type.
+                      </small>
+                    }
                 </div>
 
                 <!-- Employee Name -->
@@ -270,6 +282,14 @@
                     <mat-form-field appearance="outline" class="w-100">
                         <input matInput type="number" formControlName="salary" placeholder="50000">
                     </mat-form-field>
+                    @if (EmployeeForm.get('salary')?.value) {
+                      <div class="d-flex align-items-center gap-8 m-t-4">
+                        <span class="badge bg-light-success text-success f-w-700" style="font-size:13px;padding:6px 12px;border-radius:20px;">
+                          ₹{{ (EmployeeForm.get('salary')?.value || 0) | number:'1.0-0' }} / month
+                        </span>
+                        <small class="text-muted">Annual: ₹{{ ((EmployeeForm.get('salary')?.value || 0) * 12) | number:'1.0-0' }}</small>
+                      </div>
+                    }
                 </div>
 
             </div>

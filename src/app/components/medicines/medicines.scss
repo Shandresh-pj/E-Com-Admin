@@ -3,6 +3,24 @@
 // SVK Healthcare ERP — Responsive & Animated Theme
 // ═════════════════════════════════════════════════════════════════════════════
 
+// ─── Page Tab Bar ─────────────────────────────────────────────────────────────
+.hc-page-tabs {
+  display: flex; gap: 4px; margin-bottom: 4px;
+  background: rgba(255,255,255,0.7); backdrop-filter: blur(12px);
+  border: 1px solid var(--psh-border); border-radius: 12px; padding: 4px;
+}
+
+.hc-page-tab {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 8px 20px; border-radius: 8px; border: none; cursor: pointer;
+  font-size: 13px; font-weight: 600; color: var(--psh-tx-muted);
+  background: transparent; text-decoration: none;
+  transition: all 0.2s ease;
+  &:hover { background: rgba(99,102,241,0.08); color: var(--psh-indigo); }
+  &--active { background: var(--psh-indigo, #6366f1); color: #fff !important; box-shadow: 0 2px 8px rgba(99,102,241,0.3); }
+  .hc-page-tab__badge { font-size: 10px; opacity: 0.6; }
+}
+
 .hc-roster-container { display: flex; flex-direction: column; gap: 24px; }
 
 .hc-controls-bar {

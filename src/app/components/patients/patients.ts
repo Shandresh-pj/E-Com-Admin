@@ -47,7 +47,10 @@ export class PatientsComponent implements OnInit, OnDestroy {
   searchQuery          = signal<string>('');
   selectedGender       = signal<string>('ALL');
   selectedBloodGroup   = signal<string>('ALL');
-  viewMode             = signal<'grid' | 'list'>('grid');
+  sortBy               = signal<'name' | 'newest' | 'age'>('name');
+  allergiesOnly        = signal<boolean>(false);
+  activeDrawerTab      = signal<'overview' | 'appointments' | 'vitals'>('overview');
+  viewMode             = signal<'grid' | 'list'>('list');
   selectedPatient      = signal<Patient | null>(null);
   formValues           = signal<Partial<Patient>>({});
   copiedCode           = signal<string | null>(null);
@@ -69,8 +72,10 @@ export class PatientsComponent implements OnInit, OnDestroy {
     const q = this.searchQuery().toLowerCase().trim();
     const gender = this.selectedGender();
     const bg = this.selectedBloodGroup();
+    const allergyFilter = this.allergiesOnly();
+    const sort = this.sortBy();
 
-    return this.patients().filter(p => {
+    let list = this.patients().filter(p => {
       const matchesSearch = !q ||
         p.name.toLowerCase().includes(q) ||
         p.patient_code.toLowerCase().includes(q) ||
@@ -80,15 +85,40 @@ export class PatientsComponent implements OnInit, OnDestroy {
 
       const matchesGender = gender === 'ALL' || p.gender === gender;
       const matchesBG = bg === 'ALL' || p.blood_group === bg;
+      const matchesAllergy = !allergyFilter || (!!p.allergies && p.allergies.trim().length > 0);
 
-      return matchesSearch && matchesGender && matchesBG;
+      return matchesSearch && matchesGender && matchesBG && matchesAllergy;
     });
+
+    if (sort === 'name') {
+      list = [...list].sort((a, b) => a.name.localeCompare(b.name));
+    } else if (sort === 'newest') {
+      list = [...list].sort((a, b) => (b.id || 0) - (a.id || 0));
+    } else if (sort === 'age') {
+      list = [...list].sort((a, b) => {
+        const tA = a.date_of_birth ? new Date(a.date_of_birth).getTime() : 0;
+        const tB = b.date_of_birth ? new Date(b.date_of_birth).getTime() : 0;
+        return tA - tB;
+      });
+    }
+
+    return list;
   });
 
   // Computed metrics
   maleCount = computed(() => this.patients().filter(p => p.gender === 'Male').length);
   femaleCount = computed(() => this.patients().filter(p => p.gender === 'Female').length);
   otherGenderCount = computed(() => this.patients().filter(p => p.gender === 'Other').length);
+
+  malePercent = computed(() => {
+    const total = this.patients().length;
+    return total ? Math.round((this.maleCount() / total) * 100) : 0;
+  });
+
+  femalePercent = computed(() => {
+    const total = this.patients().length;
+    return total ? Math.round((this.femaleCount() / total) * 100) : 0;
+  });
 
   patientsWithAllergiesCount = computed(() => {
     return this.patients().filter(p => p.allergies && p.allergies.trim().length > 0).length;

@@ -48,13 +48,18 @@ export class PrescriptionsComponent implements OnInit, OnDestroy {
   showForm             = signal(false);
   editingId            = signal<number | null>(null);
   searchQuery          = signal('');
-  viewMode             = signal<'grid' | 'list'>('grid');
+  viewMode             = signal<'grid' | 'list'>('list');   // Table-first
   selectedPrescription = signal<Prescription | null>(null);
   formValues           = signal<any>({});
 
   doctors:    any[] = [];
   patients:   any[] = [];
   medicines:  any[] = [];
+
+  // Per-item medicine typeahead (indexed by FormArray index)
+  medicineSearchQueries: Record<number, string>  = {};
+  medicineSearchResults: Record<number, any[]>   = {};
+  medicineShowDropdown:  Record<number, boolean>  = {};
 
   filteredPrescriptions = computed(() => {
     const q = this.searchQuery().toLowerCase().trim();
@@ -193,7 +198,56 @@ export class PrescriptionsComponent implements OnInit, OnDestroy {
   private loadLookups(): void {
     this.common.getApi('doctors?is_active=true').subscribe({ next: (r: any) => { this.doctors = r?.data || []; this.cdr.markForCheck(); } });
     this.common.getApi('patients').subscribe({ next: (r: any) => { this.patients = r?.data || []; this.cdr.markForCheck(); } });
-    this.common.getApi('medicines?is_active=true').subscribe({ next: (r: any) => { this.medicines = r?.data || []; this.cdr.markForCheck(); } });
+    this.common.getApi('medicines?is_active=true').subscribe({
+      next: (r: any) => {
+        this.medicines = r?.data || [];
+        this.cdr.markForCheck();
+      }
+    });
+  }
+
+  /** Called when user types in medicine search input for a given item row */
+  onMedicineSearch(itemIdx: number, query: string): void {
+    this.medicineSearchQueries[itemIdx] = query;
+    if (!query || query.length < 2) {
+      this.medicineSearchResults[itemIdx] = [];
+      this.medicineShowDropdown[itemIdx]  = false;
+      this.cdr.markForCheck();
+      return;
+    }
+    const q = query.toLowerCase();
+    this.medicineSearchResults[itemIdx] = this.medicines
+      .filter(m =>
+        (m.name          || '').toLowerCase().includes(q) ||
+        (m.generic_name  || '').toLowerCase().includes(q) ||
+        (m.brand         || '').toLowerCase().includes(q)
+      )
+      .slice(0, 10);
+    this.medicineShowDropdown[itemIdx] = true;
+    this.cdr.markForCheck();
+  }
+
+  /** Called when user selects a medicine from the typeahead dropdown */
+  onMedicineSelect(itemIdx: number, med: any): void {
+    const itemGroup = this.items.at(itemIdx);
+    if (!itemGroup) return;
+    itemGroup.patchValue({ medicine_id: med.id });
+    this.medicineSearchQueries[itemIdx]  = `${med.name} (${med.generic_name || med.dosage_form || ''})`.trim();
+    this.medicineSearchResults[itemIdx]  = [];
+    this.medicineShowDropdown[itemIdx]   = false;
+    this.cdr.markForCheck();
+  }
+
+  closeMedicineDropdown(itemIdx: number): void {
+    setTimeout(() => {
+      this.medicineShowDropdown[itemIdx] = false;
+      this.cdr.markForCheck();
+    }, 200);
+  }
+
+  getMedicineDisplayLabel(medicine_id: any): string {
+    const m = this.medicines.find(x => String(x.id) === String(medicine_id));
+    return m ? `${m.name} (${m.generic_name || m.dosage_form || ''})` : '';
   }
 
   openForm(rx?: Prescription): void {

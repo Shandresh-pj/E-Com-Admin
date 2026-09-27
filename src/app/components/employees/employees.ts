@@ -1,4 +1,4 @@
-﻿import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { ReactiveFormsModule, FormsModule, FormGroup, FormBuilder, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
@@ -49,7 +49,14 @@ export class Employees implements OnInit {
     { value: 'Branch_Manager', label: 'Branch Manager'  },
     { value: 'Shopkeeper',     label: 'Shopkeeper'      },
     { value: 'Delivery_Boy',   label: 'Delivery Boy'    },
+    // ── Healthcare ERP roles ───────────────────────────
+    { value: 'Pharmacist',     label: 'Pharmacist (HC)' },
+    { value: 'Receptionist',   label: 'Receptionist (HC)' },
+    { value: 'Doctor',         label: 'Doctor (HC)'     },
   ];
+
+  /** Roles that auto-select + lock the role_id field */
+  private readonly HC_ROLES = ['Pharmacist', 'Receptionist', 'Doctor', 'Hospital_Admin'];
 
   EmployeeForm: FormGroup;
   Roles:     any[] = [];
@@ -101,6 +108,36 @@ export class Employees implements OnInit {
         }
       }
     );
+
+    // Auto-select and lock role based on userType
+    this.EmployeeForm.get('userType')?.valueChanges.subscribe((type: string) => {
+      this.applyRoleLock(type);
+    });
+  }
+
+  /** Auto-selects the matching role and toggles disable state based on userType */
+  applyRoleLock(type: string): void {
+    const roleControl = this.EmployeeForm.get('role_id');
+    if (!roleControl) return;
+
+    if (this.HC_ROLES.includes(type)) {
+      // Find matching role by name (case-insensitive)
+      const matchRole = this.Roles.find(
+        (r: any) => r.name?.toLowerCase() === type.toLowerCase()
+      );
+      if (matchRole) {
+        roleControl.setValue(matchRole.id);
+      }
+      roleControl.disable();
+    } else {
+      roleControl.enable();
+    }
+    this.cdr.detectChanges();
+  }
+
+  /** Computed: is role field locked because of userType? */
+  get isRoleLocked(): boolean {
+    return this.HC_ROLES.includes(this.EmployeeForm.get('userType')?.value);
   }
 
   AddNewUser() {
@@ -200,9 +237,15 @@ export class Employees implements OnInit {
     this.commonService.getApi(`roles`).subscribe({
       next: (res: any) => {
         this.Roles = res?.data || [];
-        const defaultRole = this.Roles.find((x: any) => x.name === 'Employee' || x.name === 'Staff');
-        if (defaultRole && !this.EmployeeForm.value.role_id) {
-          this.EmployeeForm.patchValue({ role_id: defaultRole.id });
+        const currentType = this.EmployeeForm.get('userType')?.value;
+        if (currentType && this.HC_ROLES.includes(currentType)) {
+          // Re-apply lock after roles loaded
+          this.applyRoleLock(currentType);
+        } else {
+          const defaultRole = this.Roles.find((x: any) => x.name === 'Employee' || x.name === 'Staff');
+          if (defaultRole && !this.EmployeeForm.value.role_id) {
+            this.EmployeeForm.patchValue({ role_id: defaultRole.id });
+          }
         }
         this.cdr.detectChanges();
       },

@@ -101,6 +101,13 @@ export enum DosageForm {
   OTHER          = 'Other',
 }
 
+export enum ConsultationStatus {
+  PENDING        = 'PENDING',
+  IN_PROGRESS    = 'IN_PROGRESS',
+  COMPLETED      = 'COMPLETED',
+  CANCELLED      = 'CANCELLED',
+}
+
 export enum HcEventType {
   STOCK_UPDATED       = 'STOCK_UPDATED',
   STOCK_APPROVED      = 'STOCK_APPROVED',
@@ -158,7 +165,7 @@ export interface Doctor {
   consultation_fee:    number;
   description?:        string;
   is_active:           boolean;
-  branch_id?:          number;
+  branch_id?:          number | null;
   branch_name?:        string;
   created_at:          string;
   updated_at:          string;
@@ -235,6 +242,7 @@ export interface Consultation {
   chief_complaint:  string;
   diagnosis?:       string;
   notes?:           string;
+  status:           ConsultationStatus | string;
   prescription_id?: number;
   follow_up_date?:  string;
   created_at:       string;
@@ -301,7 +309,11 @@ export interface Medicine {
   dosage_form:          DosageForm;
   manufacturer?:        string;
   description?:         string;
-  unit:                 string;      // e.g. "strip", "bottle"
+  unit:                 string;      // e.g. "Strip", "Bottle"
+  batch_no?:            string;      // Batch number
+  manufacture_date?:    string;      // DD-MM-YYYY
+  expiry_date?:         string;      // DD-MM-YYYY
+  prescription_control?: string;     // OTC, Prescription Only, Schedule H, etc.
   supplier_id?:         number;
   supplier_name?:       string;
   current_stock:        number;
@@ -310,9 +322,9 @@ export interface Medicine {
   maximum_stock:        number;
   stock_status:         StockStatus;
   is_prescription_required: boolean;
-  purchase_price:       number;      // internal only — never expose to customers
-  mrp:                  number;      // internal
-  selling_price:        number;      // customer sees only the Amount column
+  purchase_price:       number;      // internal only
+  mrp:                  number;
+  selling_price:        number;
   tax_percent:          number;
   is_active:            boolean;
   created_at:           string;

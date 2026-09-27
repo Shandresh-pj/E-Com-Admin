@@ -444,33 +444,67 @@
     padding: 0 20px 16px;
     display: flex;
     flex-direction: column;
+    gap: 12px;
+  }
+
+  // 2-Column Side-by-Side Key Stats Grid
+  .hc-doc-stats-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
     gap: 10px;
   }
 
-  .hc-doc-meta-item {
+  .hc-doc-stat-pill {
     display: flex;
     align-items: center;
     gap: 10px;
-    padding: 8px 12px;
-    border-radius: 12px;
-    background: rgba(248, 250, 252, 0.8);
-    border: 1px solid rgba(0, 0, 0, 0.03);
+    padding: 10px 12px;
+    border-radius: 14px;
+    background: rgba(248, 250, 252, 0.95);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    transition: all 0.2s ease;
 
-    .hc-meta-icon {
-      width: 18px;
-      height: 18px;
-      color: var(--psh-indigo);
+    &:hover {
+      background: #ffffff;
+      border-color: rgba(99, 102, 241, 0.2);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
     }
 
-    .hc-meta-content {
+    .hc-stat-icon-box {
+      width: 32px;
+      height: 32px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      background: rgba(99, 102, 241, 0.12);
+      color: #4f46e5;
+
+      i-tabler {
+        width: 17px;
+        height: 17px;
+      }
+
+      &--fee {
+        background: rgba(16, 185, 129, 0.12);
+        color: #059669;
+      }
+    }
+
+    .hc-stat-content {
       display: flex;
       flex-direction: column;
+      min-width: 0;
     }
 
-    .hc-meta-val {
+    .hc-stat-val {
       font-size: 13px;
       font-weight: 700;
       color: var(--psh-tx);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
 
       &--fee {
         color: #059669;
@@ -478,7 +512,7 @@
       }
     }
 
-    .hc-meta-lbl {
+    .hc-stat-lbl {
       font-size: 10px;
       font-weight: 600;
       color: var(--psh-tx-muted);
@@ -494,19 +528,33 @@
     justify-content: space-between;
     padding: 8px 12px;
     border-radius: 12px;
-    background: rgba(99, 102, 241, 0.05);
-    border: 1px dashed rgba(99, 102, 241, 0.25);
+    background: rgba(99, 102, 241, 0.04);
+    border: 1px dashed rgba(99, 102, 241, 0.22);
     cursor: pointer;
     transition: all 0.2s ease;
 
     &:hover {
-      background: rgba(99, 102, 241, 0.12);
+      background: rgba(99, 102, 241, 0.1);
       border-color: var(--psh-indigo);
 
       .hc-copy-icon {
         color: var(--psh-indigo);
         transform: scale(1.15);
       }
+    }
+
+    .hc-reg-left {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      min-width: 0;
+    }
+
+    .hc-reg-icon {
+      width: 14px;
+      height: 14px;
+      color: var(--psh-indigo);
+      flex-shrink: 0;
     }
 
     .hc-reg-text {
@@ -517,9 +565,10 @@
         font-family: 'Fira Code', 'Roboto Mono', monospace;
         font-weight: 700;
         color: var(--psh-tx);
-        background: rgba(255,255,255,0.7);
+        background: rgba(255,255,255,0.85);
         padding: 2px 6px;
         border-radius: 4px;
+        border: 1px solid rgba(0,0,0,0.06);
       }
     }
 
@@ -527,6 +576,7 @@
       width: 16px;
       height: 16px;
       color: var(--psh-tx-muted);
+      flex-shrink: 0;
       transition: all 0.2s ease;
     }
   }
@@ -1269,5 +1319,89 @@ html.dark {
     tr:hover td {
       background: rgba(99, 102, 241, 0.1);
     }
+  }
+}
+
+// ── Doctor Credentials Section ──────────────────────────────────────────────
+.hc-credentials-section {
+  background: rgba(99, 102, 241, 0.04);
+  border: 1px dashed rgba(99, 102, 241, 0.28);
+  border-radius: 16px;
+  padding: 16px 18px;
+  margin-bottom: 20px;
+  animation: hcFadeSlideIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.hc-credentials-box {
+  padding: 14px 16px;
+  background: rgba(255, 255, 255, 0.85);
+  border: 1px solid rgba(99, 102, 241, 0.2);
+  border-radius: 14px;
+  box-shadow: 0 4px 14px rgba(99, 102, 241, 0.06);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(99, 102, 241, 0.14);
+  }
+}
+
+// ── Ultra Premium Micro-Animations & Glow Effects ───────────────────────────
+.hc-doc-card {
+  animation: hcCardEntry 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
+
+  &:hover {
+    transform: translateY(-6px) scale(1.015);
+    box-shadow: 0 20px 40px -12px rgba(99, 102, 241, 0.22), 0 0 0 1px rgba(99, 102, 241, 0.3);
+
+    .hc-doc-card__avatar {
+      transform: scale(1.08) rotate(2deg);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.25);
+    }
+  }
+
+  &__avatar {
+    transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.35s ease;
+  }
+}
+
+.psh-chip {
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease;
+
+  &:hover {
+    transform: translateY(-4px) scale(1.02);
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.08);
+  }
+}
+
+.hc-spec-pill {
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.18);
+  }
+}
+
+// Keyframes for Card Entrance Cascade
+@keyframes hcCardEntry {
+  0% {
+    opacity: 0;
+    transform: translateY(24px) scale(0.95);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes hcFadeSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }

@@ -47,7 +47,6 @@ const DB_ACTION_MAP: Record<string, PermissionAction[]> = {
  */
 const UNIVERSAL_PATHS = [
   '/dashboard',
-  '/profile',
   '/change-password',
   '/notifications',
   '/unauthorized',

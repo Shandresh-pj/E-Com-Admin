@@ -128,32 +128,57 @@ $c-mint    : #34d399;
 .loader-card {
   position: relative;
   z-index: 10;
-  width: clamp(240px, 80vw, 300px);
-  padding: clamp(20px, 4vw, 28px) clamp(18px, 3.5vw, 24px);
+  width: clamp(250px, 82vw, 320px);
+  padding: clamp(24px, 4.5vw, 32px) clamp(20px, 4vw, 28px);
   border-radius: 28px;
-  background: linear-gradient(145deg,
-    rgba(255,255,255,0.09) 0%,
-    rgba(255,255,255,0.03) 60%,
-    rgba(99,102,241,0.04) 100%);
-  border: 1px solid rgba(255,255,255,0.14);
+  background: linear-gradient(165deg,
+    rgba(15, 20, 42, 0.96) 0%,
+    rgba(8, 11, 24, 0.98) 60%,
+    rgba(14, 18, 38, 0.95) 100%);
+  border: 1px solid rgba(99, 102, 241, 0.35);
   box-shadow:
-    0 30px 60px -12px rgba(0,0,0,0.55),
-    0 0 0 1px rgba(99,102,241,0.08),
-    0 0 40px rgba(99,102,241,0.15),
-    inset 0 1px 0 rgba(255,255,255,0.18),
-    inset 0 -1px 0 rgba(0,0,0,0.1);
-  backdrop-filter: blur(24px);
+    0 35px 80px -15px rgba(0, 0, 0, 0.8),
+    0 0 0 1px rgba(255, 255, 255, 0.06) inset,
+    0 0 50px rgba(99, 102, 241, 0.22),
+    0 0 90px rgba(6, 182, 212, 0.12),
+    inset 0 1px 1px rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(32px) saturate(190%);
+  -webkit-backdrop-filter: blur(32px) saturate(190%);
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: clamp(14px, 3vw, 20px);
+  gap: clamp(16px, 3.2vw, 22px);
   animation: cardUp 0.65s cubic-bezier(0.16, 1, 0.3, 1) both;
   will-change: transform;
 }
 
 @keyframes cardUp {
-  from { opacity: 0; transform: translateY(20px) scale(0.94); }
+  from { opacity: 0; transform: translateY(24px) scale(0.92); }
   to   { opacity: 1; transform: translateY(0)    scale(1);    }
+}
+
+// ── Corner Accent Lines ──────────────────────────────────────────────────────
+.loader-card::before,
+.loader-card::after {
+  content: '';
+  position: absolute;
+  pointer-events: none;
+}
+.loader-card::before {
+  top: -2px; left: -2px;
+  width: 24px; height: 24px;
+  border-top: 3px solid #06b6d4;
+  border-left: 3px solid #06b6d4;
+  border-top-left-radius: 28px;
+  box-shadow: -2px -2px 14px rgba(6, 182, 212, 0.7);
+}
+.loader-card::after {
+  bottom: -2px; right: -2px;
+  width: 24px; height: 24px;
+  border-bottom: 3px solid #8b5cf6;
+  border-right: 3px solid #8b5cf6;
+  border-bottom-right-radius: 28px;
+  box-shadow: 2px 2px 14px rgba(139, 92, 246, 0.7);
 }
 
 // ── Brand Row ────────────────────────────────────────────────────────────────
@@ -415,26 +440,6 @@ $c-mint    : #34d399;
 @keyframes shimmerSlide {
   0%   { transform: translateX(-100%); }
   100% { transform: translateX(200%); }
-}
-
-// ── Corner Accent Lines ──────────────────────────────────────────────────────
-.loader-card::before,
-.loader-card::after {
-  content: '';
-  position: absolute;
-  border-radius: 2px;
-}
-.loader-card::before {
-  top: 12px; left: 12px;
-  width: 20px; height: 20px;
-  border-top: 2px solid rgba(99,102,241,0.5);
-  border-left: 2px solid rgba(99,102,241,0.5);
-}
-.loader-card::after {
-  bottom: 12px; right: 12px;
-  width: 20px; height: 20px;
-  border-bottom: 2px solid rgba(6,182,212,0.5);
-  border-right: 2px solid rgba(6,182,212,0.5);
 }
 
 // ── Full Responsive ──────────────────────────────────────────────────────────

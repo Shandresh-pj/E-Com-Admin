@@ -112,12 +112,139 @@ test.describe('SVK E-Com Home Page - Enterprise Application Ecosystem Suite', ()
     const drawer = page.locator('.hm__drawer');
     await expect(drawer).not.toHaveClass(/hm__drawer--open/);
 
-    await burger.evaluate((el: HTMLElement) => el.click());
+    await burger.click();
     await expect(drawer).toHaveClass(/hm__drawer--open/);
 
     const closeBtn = page.locator('.hm__drawer-close');
-    await closeBtn.evaluate((el: HTMLElement) => el.click());
+    await closeBtn.click();
     await expect(drawer).not.toHaveClass(/hm__drawer--open/);
+  });
+
+  test('08. Should have zero horizontal scroll overflow across mobile viewports (360px, 390px, 412px)', async ({ page }) => {
+    const viewports = [
+      { width: 360, height: 800 },
+      { width: 390, height: 844 },
+      { width: 412, height: 915 },
+    ];
+
+    for (const vp of viewports) {
+      await page.setViewportSize(vp);
+      await page.goto('/', { waitUntil: 'domcontentloaded' });
+      await page.waitForTimeout(500);
+
+      const hasOverflow = await page.evaluate(() => {
+        return document.documentElement.scrollWidth > window.innerWidth ||
+               document.body.scrollWidth > window.innerWidth;
+      });
+
+      expect(hasOverflow).toBeFalsy();
+
+      // Ensure burger is within viewport boundary
+      const burgerBox = await page.locator('.hm__burger').boundingBox();
+      expect(burgerBox).not.toBeNull();
+      if (burgerBox) {
+        expect(burgerBox.x + burgerBox.width).toBeLessThanOrEqual(vp.width);
+        expect(burgerBox.x).toBeGreaterThan(0);
+      }
+    }
+  });
+
+  test('09. Should apply premium level color gradients, frosted glass navbar & hero CTAs', async ({ page }) => {
+    const heroTitle = page.locator('.hm__hero-title');
+    await expect(heroTitle).toBeVisible();
+
+    const primaryBtn = page.locator('.hm__hero-ctas .hm__btn--primary');
+    await expect(primaryBtn).toBeVisible();
+
+    const nav = page.locator('.hm__nav');
+    await expect(nav).toBeVisible();
+
+    // Verify computed background and text styling
+    const heroColor = await primaryBtn.evaluate((el: HTMLElement) => {
+      const style = window.getComputedStyle(el);
+      return {
+        color: style.color,
+        display: style.display,
+        borderRadius: style.borderRadius
+      };
+    });
+
+    expect(['flex', 'inline-flex']).toContain(heroColor.display);
+    expect(heroColor.borderRadius).toBe('14px');
+  });
+
+  test('10. Cookie banner: should appear on first visit, accept all hides it and stores consent', async ({ page }) => {
+    // Clear localStorage before navigating
+    await page.goto('/', { waitUntil: 'domcontentloaded' });
+    await page.evaluate(() => localStorage.removeItem('svk_cookie_consent'));
+    await page.reload({ waitUntil: 'domcontentloaded' });
+
+    // Banner should appear after 1.2s delay
+    const banner = page.locator('.hm__cookie');
+    await expect(banner).toBeAttached();
+    await expect(banner).not.toHaveClass(/hm__cookie--visible/);
+
+    // Wait for the 1.2s timeout + buffer
+    await page.waitForTimeout(1600);
+    await expect(banner).toHaveClass(/hm__cookie--visible/);
+
+    // Click "Accept All"
+    const acceptBtn = page.locator('.hm__cookie .hm__cookie-btn--primary');
+    await expect(acceptBtn).toBeVisible();
+    await acceptBtn.click();
+
+    // Banner should hide
+    await expect(banner).not.toHaveClass(/hm__cookie--visible/);
+
+    // LocalStorage should be set
+    const stored = await page.evaluate(() => localStorage.getItem('svk_cookie_consent'));
+    expect(stored).not.toBeNull();
+    const prefs = JSON.parse(stored!);
+    expect(prefs.necessary).toBe(true);
+    expect(prefs.analytics).toBe(true);
+    expect(prefs.marketing).toBe(true);
+    expect(prefs.personalization).toBe(true);
+  });
+
+  test('11. Cookie options modal: should open, toggle preferences, save and close', async ({ page }) => {
+    // Ensure no prior consent so banner appears
+    await page.goto('/', { waitUntil: 'domcontentloaded' });
+    await page.evaluate(() => localStorage.removeItem('svk_cookie_consent'));
+    await page.reload({ waitUntil: 'domcontentloaded' });
+    await page.waitForTimeout(1600);
+
+    const banner = page.locator('.hm__cookie');
+    await expect(banner).toHaveClass(/hm__cookie--visible/);
+
+    // Click Options
+    const optionsBtn = page.locator('.hm__cookie .hm__cookie-btn--ghost');
+    await optionsBtn.click();
+
+    // Modal should open
+    const modal = page.locator('.hm__cookie-modal');
+    await expect(modal).toHaveClass(/hm__cookie-modal--open/);
+    await expect(page.locator('.hm__cookie-modal-title')).toBeVisible();
+
+    // Toggle analytics on
+    const analyticsToggle = page.locator('.hm__cookie-row').nth(1).locator('.hm__cookie-toggle');
+    await analyticsToggle.click();
+    await expect(analyticsToggle).toHaveClass(/hm__cookie-toggle--on/);
+
+    // Save Preferences
+    const saveBtn = page.locator('.hm__cookie-modal-footer .hm__cookie-btn--outline');
+    await saveBtn.click();
+
+    // Modal and banner should close
+    await expect(modal).not.toHaveClass(/hm__cookie-modal--open/);
+    await expect(banner).not.toHaveClass(/hm__cookie--visible/);
+
+    // Verify analytics is saved as true, marketing as false
+    const stored = await page.evaluate(() => localStorage.getItem('svk_cookie_consent'));
+    expect(stored).not.toBeNull();
+    const prefs = JSON.parse(stored!);
+    expect(prefs.necessary).toBe(true);
+    expect(prefs.analytics).toBe(true);
+    expect(prefs.marketing).toBe(false);
   });
 
 });

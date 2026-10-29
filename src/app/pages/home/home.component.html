@@ -49,9 +49,9 @@
 
       <!-- Actions -->
       <div class="hm__nav-actions">
-        <a routerLink="/authentication/login" class="hm__btn hm__btn--ghost">Sign In</a>
-        <a routerLink="/contact" class="hm__btn hm__btn--primary">
-          Get Started
+        <a routerLink="/authentication/login" class="hm__btn hm__btn--ghost hm__nav-signin">Sign In</a>
+        <a routerLink="/contact" class="hm__btn hm__btn--primary hm__nav-cta">
+          <span class="hm__nav-cta-text">Get Started</span>
           <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </a>
         <button class="hm__burger" [class.hm__burger--open]="mobileMenuOpen()" (click)="toggleMobileMenu()" aria-label="Toggle menu">
@@ -138,6 +138,11 @@
       <!-- Right: Dashboard Preview -->
       <div class="hm__hero-visual" data-reveal="hero-visual">
         <div class="hm__dashboard-preview">
+          <!-- Sci-fi Corner Brackets & Ambient Scan Light -->
+          <div class="hm__hud-bracket hm__hud-bracket--tl" aria-hidden="true"></div>
+          <div class="hm__hud-bracket hm__hud-bracket--br" aria-hidden="true"></div>
+          <div class="hm__preview-scan" aria-hidden="true"></div>
+
           <!-- Integrated Header Badges -->
           <div class="hm__preview-chrome">
             <div class="hm__chrome-dots"><span></span><span></span><span></span></div>
@@ -176,18 +181,32 @@
               <svg viewBox="0 0 400 90" preserveAspectRatio="none">
                 <defs>
                   <linearGradient id="chartArea" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stop-color="#6366f1" stop-opacity="0.4"/>
+                    <stop offset="0%" stop-color="#6366f1" stop-opacity="0.45"/>
+                    <stop offset="50%" stop-color="#06b6d4" stop-opacity="0.15"/>
                     <stop offset="100%" stop-color="#6366f1" stop-opacity="0"/>
                   </linearGradient>
                   <linearGradient id="chartLine" x1="0" y1="0" x2="1" y2="0">
                     <stop offset="0%" stop-color="#06b6d4"/>
-                    <stop offset="50%" stop-color="#6366f1"/>
+                    <stop offset="50%" stop-color="#818cf8"/>
                     <stop offset="100%" stop-color="#10b981"/>
                   </linearGradient>
+                  <filter id="neonGlow" x="-20%" y="-20%" width="140%" height="140%">
+                    <feGaussianBlur stdDeviation="2.5" result="blur"/>
+                    <feMerge>
+                      <feMergeNode in="blur"/>
+                      <feMergeNode in="SourceGraphic"/>
+                    </feMerge>
+                  </filter>
                 </defs>
+                <!-- Subtle grid background lines -->
+                <line x1="0" y1="25" x2="400" y2="25" stroke="rgba(255,255,255,0.05)" stroke-dasharray="4 4" stroke-width="1"/>
+                <line x1="0" y1="55" x2="400" y2="55" stroke="rgba(255,255,255,0.05)" stroke-dasharray="4 4" stroke-width="1"/>
                 <path d="M0 75 Q50 55 100 60 T200 35 T300 25 T400 8 L400 90 L0 90Z" fill="url(#chartArea)"/>
-                <path d="M0 75 Q50 55 100 60 T200 35 T300 25 T400 8" fill="none" stroke="url(#chartLine)" stroke-width="3" stroke-linecap="round" class="hm__chart-line"/>
-                <circle cx="400" cy="8" r="5" fill="#10b981" class="hm__chart-node"/>
+                <path d="M0 75 Q50 55 100 60 T200 35 T300 25 T400 8" fill="none" stroke="url(#chartLine)" stroke-width="3" stroke-linecap="round" class="hm__chart-line" filter="url(#neonGlow)"/>
+                <!-- Radar ripple beacon node -->
+                <circle cx="400" cy="8" r="14" class="hm__chart-ripple"/>
+                <circle cx="400" cy="8" r="8" class="hm__chart-pulse"/>
+                <circle cx="400" cy="8" r="4.5" fill="#10b981" class="hm__chart-node"/>
               </svg>
             </div>
             <!-- Live Stream Activity Feed -->
@@ -494,6 +513,8 @@
       <div class="hm__desktop" data-reveal="desktop">
         <!-- Desktop Window Frame Mockup -->
         <div class="hm__desktop-window">
+          <div class="hm__hud-bracket hm__hud-bracket--tl" aria-hidden="true"></div>
+          <div class="hm__hud-bracket hm__hud-bracket--br" aria-hidden="true"></div>
           <div class="hm__window-chrome">
             <div class="hm__chrome-dots"><span></span><span></span><span></span></div>
             <span class="hm__window-title">SVK E-Com Desktop ERP Suite v2026.4</span>
@@ -749,6 +770,8 @@
       </div>
 
       <div class="hm__roi-card" data-reveal="roi">
+        <div class="hm__hud-bracket hm__hud-bracket--tl" aria-hidden="true"></div>
+        <div class="hm__hud-bracket hm__hud-bracket--br" aria-hidden="true"></div>
         <div class="hm__roi-layout">
           <div class="hm__roi-controls">
             <div class="hm__roi-group">
@@ -769,6 +792,7 @@
             </div>
           </div>
           <div class="hm__roi-result">
+            <div class="hm__roi-glow" aria-hidden="true"></div>
             <span class="hm__roi-result-label">ESTIMATED ANNUAL SAVINGS</span>
             <span class="hm__roi-savings hm__gradient-text">₹{{ formattedEstimatedSavings() }}</span>
             <p class="hm__roi-note">Based on 35% labor reduction, zero stockouts, and AI auto-invoicing.</p>
@@ -991,5 +1015,124 @@
       </div>
     </div>
   </footer>
+
+  <!-- ═══════════════════════════════════════════════════════════════════ -->
+  <!-- COOKIE CONSENT BANNER                                               -->
+  <!-- ═══════════════════════════════════════════════════════════════════ -->
+  <div class="hm__cookie" [class.hm__cookie--visible]="showCookieBanner()"
+       role="alertdialog" aria-live="polite" aria-label="Cookie consent">
+    <div class="hm__cookie-inner">
+      <div class="hm__cookie-icon" aria-hidden="true">🍪</div>
+      <div class="hm__cookie-content">
+        <p class="hm__cookie-title">We use cookies</p>
+        <p class="hm__cookie-desc">
+          We use cookies to enhance your experience, analyse traffic, and personalise content.
+          By clicking <strong>"Accept All"</strong>, you consent to our use of cookies.
+          <a href="#" class="hm__cookie-link" (click)="$event.preventDefault()">Privacy Policy</a>
+        </p>
+      </div>
+      <div class="hm__cookie-actions">
+        <button class="hm__cookie-btn hm__cookie-btn--ghost" (click)="openCookieOptions()" type="button">
+          Options
+        </button>
+        <button class="hm__cookie-btn hm__cookie-btn--primary" (click)="acceptAllCookies()" type="button">
+          Accept All
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════════════ -->
+  <!-- COOKIE OPTIONS MODAL                                                -->
+  <!-- ═══════════════════════════════════════════════════════════════════ -->
+  <div class="hm__cookie-modal" [class.hm__cookie-modal--open]="showCookieModal()"
+       role="dialog" aria-label="Cookie preferences" aria-modal="true">
+    <!-- Backdrop -->
+    <div class="hm__cookie-modal-backdrop" (click)="closeCookieModal()"></div>
+    <!-- Panel -->
+    <div class="hm__cookie-modal-panel">
+      <!-- Header -->
+      <div class="hm__cookie-modal-header">
+        <div class="hm__cookie-modal-title-wrap">
+          <span class="hm__cookie-modal-icon" aria-hidden="true">🍪</span>
+          <h3 class="hm__cookie-modal-title">Cookie Preferences</h3>
+        </div>
+        <button class="hm__cookie-modal-close" (click)="closeCookieModal()" type="button" aria-label="Close">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M18 6L6 18M6 6L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        </button>
+      </div>
+
+      <!-- Body -->
+      <div class="hm__cookie-modal-body">
+        <p class="hm__cookie-modal-intro">
+          Manage your cookie preferences below. Necessary cookies are always active as they are
+          required for the platform to function correctly.
+        </p>
+
+        <!-- Necessary (always on) -->
+        <div class="hm__cookie-row hm__cookie-row--disabled">
+          <div class="hm__cookie-row-info">
+            <span class="hm__cookie-row-name">Necessary</span>
+            <span class="hm__cookie-row-desc">Essential for core platform functionality. Cannot be disabled.</span>
+          </div>
+          <div class="hm__cookie-toggle hm__cookie-toggle--on" aria-checked="true" role="switch">
+            <span class="hm__cookie-toggle-knob"></span>
+          </div>
+        </div>
+
+        <!-- Analytics -->
+        <div class="hm__cookie-row">
+          <div class="hm__cookie-row-info">
+            <span class="hm__cookie-row-name">Analytics</span>
+            <span class="hm__cookie-row-desc">Helps us understand how visitors interact with the platform.</span>
+          </div>
+          <button class="hm__cookie-toggle" [class.hm__cookie-toggle--on]="cookiePrefs().analytics"
+                  (click)="toggleCookiePref('analytics')" type="button"
+                  [attr.aria-checked]="cookiePrefs().analytics" role="switch" aria-label="Analytics cookies">
+            <span class="hm__cookie-toggle-knob"></span>
+          </button>
+        </div>
+
+        <!-- Marketing -->
+        <div class="hm__cookie-row">
+          <div class="hm__cookie-row-info">
+            <span class="hm__cookie-row-name">Marketing</span>
+            <span class="hm__cookie-row-desc">Used to deliver relevant ads and track campaign effectiveness.</span>
+          </div>
+          <button class="hm__cookie-toggle" [class.hm__cookie-toggle--on]="cookiePrefs().marketing"
+                  (click)="toggleCookiePref('marketing')" type="button"
+                  [attr.aria-checked]="cookiePrefs().marketing" role="switch" aria-label="Marketing cookies">
+            <span class="hm__cookie-toggle-knob"></span>
+          </button>
+        </div>
+
+        <!-- Personalization -->
+        <div class="hm__cookie-row">
+          <div class="hm__cookie-row-info">
+            <span class="hm__cookie-row-name">Personalization</span>
+            <span class="hm__cookie-row-desc">Enables tailored content and UI preferences for your account.</span>
+          </div>
+          <button class="hm__cookie-toggle" [class.hm__cookie-toggle--on]="cookiePrefs().personalization"
+                  (click)="toggleCookiePref('personalization')" type="button"
+                  [attr.aria-checked]="cookiePrefs().personalization" role="switch" aria-label="Personalization cookies">
+            <span class="hm__cookie-toggle-knob"></span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Footer Actions -->
+      <div class="hm__cookie-modal-footer">
+        <button class="hm__cookie-btn hm__cookie-btn--ghost" (click)="rejectOptionalCookies()" type="button">
+          Reject Optional
+        </button>
+        <button class="hm__cookie-btn hm__cookie-btn--outline" (click)="saveCookiePreferences()" type="button">
+          Save Preferences
+        </button>
+        <button class="hm__cookie-btn hm__cookie-btn--primary" (click)="acceptAllCookies()" type="button">
+          Accept All
+        </button>
+      </div>
+    </div>
+  </div>
 
 </div>

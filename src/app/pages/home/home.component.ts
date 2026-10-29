@@ -53,6 +53,16 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
   isScrolled     = signal(false);
   mobileMenuOpen = signal(false);
 
+  // ── Cookie Consent ─────────────────────────────────────────────────────
+  showCookieBanner = signal(false);
+  showCookieModal  = signal(false);
+  cookiePrefs = signal({
+    necessary:       true,
+    analytics:       false,
+    marketing:       false,
+    personalization: false,
+  });
+
   // ── Animated Counters ─────────────────────────────────────────────────
   usersCount    = signal(0);
   productsCount = signal(0);
@@ -406,6 +416,12 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
 
     if (!isPlatformBrowser(this.platformId)) return;
 
+    // ── Cookie Consent: show banner if not yet consented ─────────────────
+    const consent = localStorage.getItem('svk_cookie_consent');
+    if (!consent) {
+      setTimeout(() => this.showCookieBanner.set(true), 1200);
+    }
+
     // Scroll listener
     this.scrollListener = () => { this.isScrolled.set(window.scrollY > 60); };
     window.addEventListener('scroll', this.scrollListener, { passive: true });
@@ -561,6 +577,48 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   trackByIndex(i: number) { return i; }
+
+  // ── Cookie Consent Methods ────────────────────────────────────────────
+  acceptAllCookies() {
+    const prefs = { necessary: true, analytics: true, marketing: true, personalization: true };
+    if (isPlatformBrowser(this.platformId)) {
+      localStorage.setItem('svk_cookie_consent', JSON.stringify(prefs));
+    }
+    this.cookiePrefs.set(prefs);
+    this.showCookieBanner.set(false);
+    this.showCookieModal.set(false);
+  }
+
+  openCookieOptions() {
+    this.showCookieModal.set(true);
+  }
+
+  closeCookieModal() {
+    this.showCookieModal.set(false);
+  }
+
+  rejectOptionalCookies() {
+    const prefs = { necessary: true, analytics: false, marketing: false, personalization: false };
+    if (isPlatformBrowser(this.platformId)) {
+      localStorage.setItem('svk_cookie_consent', JSON.stringify(prefs));
+    }
+    this.cookiePrefs.set(prefs);
+    this.showCookieBanner.set(false);
+    this.showCookieModal.set(false);
+  }
+
+  saveCookiePreferences() {
+    if (isPlatformBrowser(this.platformId)) {
+      localStorage.setItem('svk_cookie_consent', JSON.stringify(this.cookiePrefs()));
+    }
+    this.showCookieBanner.set(false);
+    this.showCookieModal.set(false);
+  }
+
+  toggleCookiePref(key: 'analytics' | 'marketing' | 'personalization') {
+    const current = this.cookiePrefs();
+    this.cookiePrefs.set({ ...current, [key]: !current[key] });
+  }
 
   ngOnDestroy() {
     if (isPlatformBrowser(this.platformId)) {
